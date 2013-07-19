@@ -59,31 +59,19 @@
 \author{DANIEL SAGENSCHNEIDER \affil{OfficeFloor, daniel@officefloor.net}}
 
 \begin{abstract}
-Inverting control to enable the lower-level layer components control over their
-thread of execution, required state and required collaboration allows bottom-up
-development of applications that better suits modern development methodologies,
-such as Agile, that evolve application architectures upwards.  While
-\textsc{dependency injection} allows inverting the control of structuring a
-component, the executing thread of control for a component and the collaboration
-of components remains in a top-down coupled hierarchy requiring the top-down
-development of applications.  The \textsc{thread injection},
-\textsc{continuation injection} and \textsc{inversion of control} patterns
-presented in this paper invert this top-down hierarchy control to allow
-bottom-up control in developing applications.  The \textsc{thread injection}
-pattern decouples the executing thread of control for a component.  The
-\textsc{continuation injection} pattern decouples the collaboration of
-components.  Using the \textsc{thread injection} and \textsc{continuation
-injection} patterns together with the \textsc{dependency injection} pattern
-provides the necessary decoupling for an \textsc{inversion of control} pattern.
-The resulting \textsc{inversion of control} pattern enables building
-applications bottom-up to better align to modern development methodologies that
-evolve application architectures upwards.
+OfficeFloor is a middleware framework that is architected from the patterns
+occuring within an Office.  Using the proven patterns from the Office has provided
+improved performance tuning and reduced coupling over existing software design
+patterns for middleware frameworks.  Furthermore, the patterns have
+provided inversion of control to build applications bottom-up.  This bottom-up
+approach to building applications better suits modern development methodologies,
+such Agile, that evolve the application's architecture upwards.
 \end{abstract}
 
 \category{}{}{}[]
 
 \terms{Design, Performance, Standardization}
-\keywords{Component Orchestration, Continuation Injection, Implicit Thread, Thread Injection}
+\keywords{Implicit Thread, Inversion of Control, Task Orchestration}
 
 \acmformat{Sagenschneider, D. 2013.Software Design based on patterns within an Office.}
 
@@ -104,7 +92,7 @@ evolve application architectures upwards.
 
 \begin{bottomstuff}
 This work is the result of the author's development of OfficeFloor.\\
-Author's address: D. Sagenschneider; email: daniel@officefloor.net\\
+Author: D. Sagenschneider; email: daniel@officefloor.net\\
 
 Permission to make digital or hard copies of all or part of this work for
 personal or classroom use is granted without fee provided that copies are not
@@ -123,7 +111,7 @@ workshop at the 18th European Conference on Pattern Languages of Programs
 \section{Introduction}
 
 OfficeFloor~\cite{officefloor} is a middleware framework that models its
-architecture on interactions occuring in offices.
+architecture on patterns occuring in offices.
 
 The premise of this modelling is that business processes occurred manually
 within an office before technology systems began automating tasks.  The manual
@@ -147,13 +135,13 @@ following analogies are made:
 The patterns presented in this paper are discussed in three sections.  The first
 section presents the patterns for execution of tasks.  The second section
 presents patterns for co-ordination of tasks.  The third section presents
-patterns for re-use of tasks.  Each section is written in two parts.  The first
-part will list the office patterns and how they influence change in the software
-design.  The second part of each section provides notes on implementation.  This
-paper assumes knowledge of existing software design patterns only for the
-implementation notes within each section.  The implementation notes may be
-skipped by those readers only interested in the influence of the office patterns
-on software design.
+patterns for building processes from tasks.  Each section is written in two
+parts.  The first part will list the office patterns and how they influence
+change in the software design.  The second part of each section provides notes
+on implementation.  This paper assumes knowledge of existing software design
+patterns only for the implementation notes within each section.  The
+implementation notes may be skipped by those readers only interested in the
+influence of the office patterns on software design.
 
 
 
@@ -282,22 +270,32 @@ responsible categories of tasks to execute.
 
 \subsubsection*{Alternate name} Adaptive Resource Management \cite{seda}. 
 
-\subsubsection*{Context} 
+\subsubsection*{Context} As the number of tasks for a responsible team grows or
+shrinks, the size of team is altered to obtain optimal throughput.  For example,
+near the end of the financial year the finance team may be increased in size for
+the additional number of financial year end tasks.  The software development
+team, however, would not be changed in size as the development tasks would stay
+the same in number.
 
-For example, near the end of the financial year the finance
-team may be increased in size for the additional load of financial year end
-tasks.  The software development team, however, would not be changed in size as
-the development tasks would stay the same in number.
+\subsubsection*{Problem} Obtain optimal throughput execution of methods by a
+thread pool.
 
-\subsubsection*{Problem}
+\subsubsection*{Forces} Having too few threads will under utilize the hardware
+and not provide optimal throughput.  Having too many threads will cause
+excessive thread context-switching and exhaustion of available resources (e.g.
+memory) which will decrease throughput.
 
-\subsubsection*{Forces} 
+\subsubsection*{Solution} As each thread pool is responsible for particular
+dependency (resource), use adaptive resource management~\cite{seda} to manage
+the number of threads within each thread pool.
 
-\subsubsection*{Solution}
+Adaptive resource management (from the Staged Event Driven Achitecture
+\cite{seda}) monitors the number of tasks and their execution time and
+adds/removes threads to achieve optimal throughput.
 
-\subsubsection*{Consequences}
-
-\subsubsection*{Related Patterns}
+\subsubsection*{Consequences} The thread pool size will dynamically grow/shrink
+based on its load of responsible methods to execute.  This, however, does
+require a small overhead in monitoring the execution of methods.
 
 
 
@@ -417,11 +415,11 @@ it is the database that is overloaded).
 
 The task is the object that wraps the method to provide a standard interface for
 execution of the method.  This enables for a single \texttt{TaskExecutor}
-(Listing \ref{lst:ThreadInjectionInterfaces}) implementation to execute
+(Listing \ref{lst:TaskExecutionInterfaces}) implementation to execute
 differing methods.
 
 To invoke a method, the client code invokes \texttt{executeTask(\ldots)}
-(Listing \ref{lst:ThreadInjectionInterfaces}) with the identifier of the desired
+(Listing \ref{lst:TaskExecutionInterfaces}) with the identifier of the desired
 task along with an argument for a parameter of the task.  Figure
 \ref{fig:ExecuteComponentSequenceDiagram} provides a sequence diagram of
 executing a task.  The \texttt{TaskExecutor} uses the
@@ -430,7 +428,7 @@ and then assigns it for execution by one of the many developer configured thread
 pools (\textsc{team}).
 
 \lstset{caption=\textsc{thread injection} pattern interfaces\protect\footnotemark.}
-\begin{lstlisting}[float,label=lst:ThreadInjectionInterfaces]
+\begin{lstlisting}[float,label=lst:TaskExecutionInterfaces]
 
     interface Task {
         void execute(Object parameter); 
@@ -475,7 +473,7 @@ matched by its required dependency types (\textsc{categorise task}) to a thread
 pool responsible for one or more of its dependency types (\textsc{responsible
 team})\footnote{The \texttt{taskId} may also be used for very fine grained
 mapping.}.  The \texttt{execute(\ldots)} method (Listing
-\ref{lst:ThreadInjectionInterfaces}) is then invoked by a thread from the
+\ref{lst:TaskExecutionInterfaces}) is then invoked by a thread from the
 matching thread pool to execute the task (and its contained method). This
 provides the necessary isolation of differing tasks for improved tuning of the
 server.
@@ -494,7 +492,7 @@ thread for serial execution of tasks (\textbf{TODO design pattern for this}), or
 no threads and execute components by borrowing the thread to reduce
 thread-context switching (\textsc{do it yourself}).
 
-The \texttt{cancel(\ldots)} method (Listing \ref{lst:ThreadInjectionInterfaces})
+The \texttt{cancel(\ldots)} method (Listing \ref{lst:TaskExecutionInterfaces})
 provides means for the \texttt{TaskExecutor} to cancel the task.
 The \texttt{TaskExecutor} will cancel new tasks for a particular thread pool
 when queuing the task for a thread will result in exceeding a particular
@@ -794,37 +792,62 @@ method.
 
 \subsection{\textsc{\textbf{complete the form}}}
 
-\subsubsection*{Alternate name} Parameter passing.
+\subsubsection*{Alternate name} Message passing.
 
-\subsubsection*{Context}
+\subsubsection*{Context} When handing-off to another team, the receiving team
+will require certain information to carry on the next task in the process.  To
+ensure the receiving team has all the information it requires, it requires the
+handing-off team to complete a form.
 
-\subsubsection*{Problem}
+For example, for the financial team to raise an issue with the software
+development team to fix, the software development team requires the financial
+team to fill in a ticket (form) with the details regarding the issue.
 
-\subsubsection*{Forces}
+\subsubsection*{Problem} Pass data to the handling method in the hand-off when
+the hand-off has a standard interface.
 
-\subsubsection*{Solution}
+\subsubsection*{Forces} The handling method to a hand-off retrieves its data via
+\textsc{record information}.
 
-\subsubsection*{Consequences}
+\subsubsection*{Solution} Allow a single argument to be passed with the hand-off
+that encapsulates the data to be passed.  The argument is made available to the
+handling method as a dependency via \textsc{record information}.
 
-\subsubsection*{Related Patterns}
+\subsubsection*{Consequences} The handling method need not differentiate between
+the hand-off passed argument and the dependencies obtained from \textsc{record
+information}.
+
+\subsubsection*{Related Patterns} Is sequence on \textsc{record information} to
+enable passing information by the caller with the hand-off.
 
 
 
-\subsection{\textsc{\textbf{postal address}}}
+\subsection{\textsc{\textbf{contact us}}}
 
 \subsubsection*{Alternate name} URL continuation~\cite{url-continuation}.
 
-\subsubsection*{Context}
+\subsubsection*{Context} It is inefficient in an Office for all customers to
+have to go through the front desk to interact with the business.  Teams within
+the Office create contact us details to allow engaging their processes
+externally to the Office.
 
-\subsubsection*{Problem}
+\subsubsection*{Problem} Triggering the first method when not provided a
+hand-off interface (as outside the office).
 
-\subsubsection*{Forces}
+\subsubsection*{Forces} The interface to hand-off is only provided to methods
+being executed by responsible thread pools within the office.
 
-\subsubsection*{Solution}
+\subsubsection*{Solution} Provide a unique address (e.g. URL) that directly maps
+to the initial method of the process.  Sending a request to this address
+constructs a new instance of the addressed process and triggers the first task
+in that process.
 
-\subsubsection*{Consequences}
+\subsubsection*{Consequences} Processes may be triggered from outside the
+application. Responses are achieved by \textsc{record information} providing the
+information for a response.
 
-\subsubsection*{Related Patterns}
+\subsubsection*{Related Patterns} Is a sequence on \textsc{hand-off} to enable
+external applications to hand-off to this application.
 
 
 
@@ -858,10 +881,10 @@ a resulting exception and this should be delegated to another task.
 The task collaboration patterns implementation builds on the task execution
 pattern implementation.  On executing a task (object wrapping the method), the
 task is provided a \texttt{TaskContext} (Listing
-\ref{lst:ContinuationInjectionInterfaces}).
+\ref{lst:TaskCollaborationInterfaces}).
 
-\lstset{caption=\textsc{continuation injection} pattern interfaces\protect\footnotemark.}
-\begin{lstlisting}[float,label=lst:ContinuationInjectionInterfaces]
+\lstset{caption=Task collaboration pattern interfaces\protect\footnotemark.}
+\begin{lstlisting}[float,label=lst:TaskCollaborationInterfaces]
 
     interface Process {
         Future executeProcess(String initialTaskId
@@ -893,7 +916,7 @@ task is provided a \texttt{TaskContext} (Listing
         Object getState(String stateId);
         Future doHandOff(String handOffId, Object parameter);
         void handleException(Exception exception);
-        void continueTask();
+        void pickUpTaskAgain();
     }
 
     interface Task {
@@ -911,7 +934,7 @@ method.  A more functional example implementation would utilise Spring's
 context for the components and their dependencies.}
 
 The \texttt{doHandOff(\ldots)} method (Listing
-\ref{lst:ContinuationInjectionInterfaces}) invokes another task.  The proxy
+\ref{lst:TaskCollaborationInterfaces}) invokes another task.  The proxy
 implementation of the hand-off interface passed to the method invokes
 \texttt{doHandOff(\ldots)} with its method name (\textsc{hand-off}).  As the
 \texttt{handOffId}s are static for each task, developer configuration provides
@@ -929,7 +952,7 @@ triggered, should no other hand-off be invoked, to enable configuring a sequence
 of tasks.  The \texttt{TaskContextFactory}, which constructs each
 \texttt{TaskContext}, centrally manages the hand-off mapping to target task. 
 This is similar to the \texttt{DependencyInjectionFactory} (Listing
-\ref{lst:ContinuationInjectionInterfaces}) containing centrally managed
+\ref{lst:TaskCollaborationInterfaces}) containing centrally managed
 configuration to create dependencies.  Figure
 \ref{fig:DoContinuationSequenceDiagram} provides a sequence diagram of invoking
 a task via the \texttt{doHandOff(\ldots)} method.
@@ -948,11 +971,11 @@ the Task, the \texttt{TaskExecutor} is also notified of completion of the Task.
 This allows the \texttt{TaskExecutor} to re-register any Tasks waiting on the
 Future (\textsc{pick up task again}).  Tasks register for being picked up again
 by the \texttt{continueTask()} method (Listing
-\ref{lst:ContinuationInjectionInterfaces}).
+\ref{lst:TaskCollaborationInterfaces}).
 
 The tasks are constructed via the \textsc{dependency injection} pattern
 \cite{ioc}.  The \texttt{Dependency\-InjectionFactory} (Listing
-\ref{lst:ContinuationInjectionInterfaces}) centrally manages the dependency
+\ref{lst:TaskCollaborationInterfaces}) centrally manages the dependency
 configuration and creates a \texttt{Depend\-ency\-Context} that constructs and
 caches dependency instances for the tasks.  The \texttt{Dependency\-Context},
 that manages the life-cycle of dependencies, is aligned to the
@@ -967,7 +990,7 @@ development by associating the invocation with passing state.  If multiple
 arguments are required, they should be encapsulated into an object for passing.
 To maintain loose coupling, the invoked task obtains the argument as state (i.e.
 \texttt{getState(\ldots)} method in listing
-\ref{lst:ContinuationInjectionInterfaces}) so the invoked task need not
+\ref{lst:TaskCollaborationInterfaces}) so the invoked task need not
 differentiate between dependencies and parameters (\textsc{record information}).
 The invoked task may also ignore the hand-off argument should it not depend on
 it.
@@ -988,14 +1011,22 @@ will also configure ''catch all'' hand-offs for the application to handle
 exceptions from any task to ensure all exceptions are handled (e.g. handling of
 the runtime non-checked exceptions).
 
-\textbf{TODO: URL continuation for} \textsc{postal address}
+\textbf{TODO: URL continuation for} \textsc{postal address} Integrating with
+code not contained in tasks does not allow access to the \texttt{TaskContext} to
+invoke the hand-off for the first task.  The \texttt{Process} (Listing
+\ref{lst:TaskCollaborationInterfaces}) provides an interface that allows code
+not contained in a task to invoke the first task.  The returned \texttt{Future},
+from the \texttt{TaskExecutor} tracking of tasks, indicates when all tasks of
+the process are complete.  To retrieve results, the \texttt{parameter} would be
+used as a visitor (\textsc{visitor} pattern \cite{gof}) and be loaded with
+results by the invoked tasks.
 
 
 
 \subsubsection*{Example}
 
-Listing \ref{lst:Example_Method_Operation} shows example method for retrieving
-data from a cache.  The task for the \texttt{retrieveData(\ldots)} method will:
+Listing \ref{lst:Example_Method_Task} shows example method for retrieving
+data from a cache.  The task for the \texttt{retrieve\-Data(\ldots)} method will:
 \begin{enumerate}
   \item Obtain an instance of the \texttt{CacheOperation} via the \texttt{getState(\ldots)} method.
   \item Obtain both the \texttt{key}\footnote{\texttt{key} is a hand-off argument from the previous task.} and \texttt{cache} again via the \texttt{getState(\ldots)} method.
@@ -1004,7 +1035,7 @@ data from a cache.  The task for the \texttt{retrieveData(\ldots)} method will:
 \end{enumerate}
 
 \lstset{caption=Example developer code of a task for retrieving data from a cache\protect\footnotemark}
-\begin{lstlisting}[float,label=lst:Example_Method_Operation]
+\begin{lstlisting}[float,label=lst:Example_Method_Task]
 
   interface CacheHandOffs {
     void cacheMiss(String key);
@@ -1047,37 +1078,20 @@ imposed by the \textsc{thread-per-request} pattern.
 
 Understanding the collaboration of tasks would become difficult due to the
 indirection involved.  The \textsc{define process flows} configuration, however,
-provides graphical tools to manage the configuration to reduce this difficulty.
-The tools graphically represent the tasks as nodes with the hand-off mappings
-being directed lines between these nodes.  Due to the similarity of this
-configuration with service orchestration, this graphical configuration is
-identified as Task Orchestration.
+provides means for graphical tools to manage the configuration to reduce this
+difficulty.  The tools graphically represent the tasks as nodes with the
+hand-off mappings being directed lines between these nodes.  Due to the
+similarity of this configuration with service orchestration, this graphical
+configuration is identified as Task Orchestration.
 
 Furthermore, as components are potentially executed by different threads of
 control, the stack trace automatically provided by the
 \textsc{thread-per-request} pattern no longer reflects the call hierarchy for
 servicing a request.  This can make it more difficult to debug issues.  However,
-the \texttt{TaskExecutor} may be flagged to record the tree of components
-invoked so that the tree can be traversed back to the root to identify the
-sequence of hand-offs to the task throwing the exception.  The whole tree can
-also be reported to aid the developer in debugging the cause of the issue.
-
-Integrating with code not contained in tasks does not allow access to the
-\texttt{TaskContext} to invoke the hand-off for the first task.  Listing
-\ref{lst:ContinuationInjectionInterface} provides an interface that allows code
-not contained in a task to invoke the first task.  The returned \texttt{Future},
-from the \texttt{TaskExecutor} tracking of tasks, indicates when all tasks are
-complete.  To retrieve results, the \texttt{parameter} would be used as a
-visitor (\textsc{visitor} pattern \cite{gof}) and be loaded with results by the
-invoked tasks.
-
-\lstset{caption=Interface for code not within a task to invoke a hand-off.  The task for the hand-off is directly identified with the \texttt{initialTaskId}.}
-\begin{lstlisting}[float,label=lst:ContinuationInjectionInterface]
-
-    interface Process {
-        Future doProcess(String initialTaskId, Object parameter);
-    }
-\end{lstlisting}
+the \texttt{TaskExecutor} records the tree of components invoked so that the
+tree can be traversed back to the root to identify the sequence of hand-offs to
+the task throwing the exception.  The whole tree can also be reported to aid the
+developer in debugging the cause of the issue.
 
 Functions may also be used in place of methods.  When implementing tasks with
 functions, the functions will not be pure.  As state is shared between tasks by
@@ -1088,16 +1102,16 @@ mutable state within dependencies, functions will need to cause side effects
 
 \subsubsection*{Related implementations}
 
-This provides an implementation of the Actor Model \cite{actors} as it adheres
+This is an implementation of the Actor Model \cite{actors} as it adheres
 to the principles of the Actor Model.  The task is the actor.  The asynchronous
 communication between tasks decouples the hand-off argument (message) from the
 sending task (actor).  The \texttt{taskId} provides an address for a task
 (actor).  The provided \texttt{handOffId}s restricts the tasks (actors) that may
 be used.
 
-The implementation can also be considered a form of continuation-passing style
+The implementation is also a form of continuation-passing style
 \cite{continuations}.  The hand-off can be considered a continuation, as it is a
-''goto'' for executing another task with a different thread stack.  The benefit
+''goto'' for executing another task with a different thread (stack).  The benefit
 of providing hand-offs through a context object is that the task is free to
 depend on as many hand-offs as necessary, and not what the caller provides.  It
 also means that as the application evolves the task encapsulates potential
@@ -1122,25 +1136,7 @@ execute them within a single thread pool.
 
 \subsection{\textsc{\textbf{task defines itself}}}
 
-\subsubsection*{Alternate name}
-
-\subsubsection*{Context}
-
-\subsubsection*{Problem}
-
-\subsubsection*{Forces}
-
-\subsubsection*{Solution}
-
-\subsubsection*{Consequences}
-
-\subsubsection*{Related Patterns}
-
-
-
-\subsection{\textsc{\textbf{use proven tasks}}}
-
-\subsubsection*{Alternate name}
+\subsubsection*{Alternate name} \textsc{method inversion of control}.
 
 \subsubsection*{Context}
 
@@ -1182,19 +1178,11 @@ Applications built with \textsc{layers} typically impose a top-down approach to
 design.  ``The \textsc{layers} require and provide \textsc{explicit interfaces}
 from and to each other, in a top-down manner, from the higher to the lower
 \textsc{layers}'' \cite[p. 11]{ioc}.  The higher-level layer components (object
-that wraps a method) define the variation points that are ``predefined points in
-the control and data flow which allow for modifying and extending a component's
-behaviour'' \cite[p. 5]{ioc}.  A top-down approach is required, as the
-higher-level layers control what variation points may be implemented by the
-lower-level layer components.
-
-Inverting the control by allowing the lower-level layer components to control the
-variation points to be implemented by the higher-level layer components provides
-inversion of control.  Inversion of control occurs by inverting the top-down
-control in designing applications to be bottom-up control.  This bottom-up
-control allows the application architecture to be evolved upwards. Therefore,
-\textsc{method inversion of control} better suits development methodologies, such as
-Agile, that evolve application architectures upwards.
+that wraps a method, i.e. Task) define the variation points that are
+``predefined points in the control and data flow which allow for modifying and
+extending a component's behaviour'' \cite[p. 5]{ioc}.  A top-down approach is
+required, as the higher-level layers control what variation points may be
+implemented by the lower-level layer components.
 
 The components need to be composed within an architecture that is dictated by
 the framework.  The framework ``will define the overall structure, its
@@ -1216,14 +1204,13 @@ requirements:
   \item exceptions from components need to be handled.
 \end{itemize}
 
-Within frameworks, the method/function signature is the interface between
-components.  ``The set of all [method] signatures defined by an object \ldots
-characterizes the complete set of requests that can be sent to the object''
-\cite[p. 13]{gof}.  As frameworks are composed of objects (and possibly
-functions), the method/function signature defines the interface between
-objects/functions and subsequently components.
+Within frameworks, the method signature is the interface between components. 
+``The set of all [method] signatures defined by an object \ldots characterizes
+the complete set of requests that can be sent to the object'' \cite[p. 13]{gof}.
+ As frameworks are composed of objects (and possibly functions), the method
+signature defines the interface between objects and subsequently components.
 
-The method/function signature meets the requirements as it:
+The method signature meets the requirements as it:
 \begin{itemize}
   \item has a key responsibility identified by its name;
   \item may invoke other methods/functions;
@@ -1232,17 +1219,17 @@ The method/function signature meets the requirements as it:
   \item can be executed by the thread of control\footnote{For a stateless component interface, thread local variables are to be avoided to not incur affinity to a thread.}.
 \end{itemize}
 
-The method/function interface is, however, subject to tight coupling.  The tight
+The method interface is, however, subject to tight coupling.  The tight
 coupling occurs from the invoking higher-level layer component having to:
 \begin{itemize}
-  \item define the method/function name;
+  \item define the method name;
   \item provide the necessary arguments;
   \item possibly use the return value;
   \item handle potential exceptions; and
-  \item provide the thread of control to execute the method/function.
+  \item provide the thread of control to execute the method.
 \end{itemize}
 
-This tight coupling imposed by the method/function results in the hierarchical
+This tight coupling imposed by the method results in the hierarchical
 \textsc{layers} architecture where variation points (\textsc{explicit
 interfaces}) are controlled by the higher-level layers.  The higher-level layer
 component provides a \textsc{template method} \cite{gof} which is the variation
@@ -1255,128 +1242,89 @@ variability ``requires adapting the \textsc{explicit interfaces} between the
 \textsc{layers} to stipulate the types of variation parameters'' \cite[p.
 5]{ioc} to allow control over the lower-level layers by the higher-level layers.
 
-Instead of attempting to define variation points at the higher-level layers to cover
-all possible variations of the lower-level layers, control should be inverted and
-given to the lower-level layers to define the variation points.  However, given
-that \textsc{template methods} impose a top-down control over variation points,
-another form of \textsc{explicit interface} is necessary for lower-level layer
-components to provide bottom-up control over defining variation points for the
-application.
+Instead of attempting to define variation points at the higher-level layers to
+cover all possible variations of the lower-level layers, control should be
+inverted and given to the lower-level layers to define the variation points. 
+However, given that \textsc{template methods} impose a top-down control over
+variation points, another form of \textsc{explicit interface} is necessary for
+lower-level layer components to provide bottom-up control over defining
+variation points for the application.
+
 
 
 \subsubsection*{Implementation}
 
-Use \textsc{dependency injection}, \textsc{thread injection} and
-\textsc{continuation injection} to have the lower-level layer component control
-its required variation points.
+\textsc{record information} \cite{ioc} enables the lower-level layer component
+to specify the state (objects) it requires.  The lower-level layer component
+specifies its required state (objects) via \texttt{stateId}s.  As the
+lower-level layer retrieves its state via \textsc{dependency injection}, the
+invoking higher-level layer components need only provide the single optionally
+used argument.  This allows the lower-level layer component to specify as many
+dependencies as is necessary.  It, therefore, gives the lower-level layer
+component control over what state (objects/dependencies) it may depend on.
 
-\textsc{dependency injection} \cite{ioc} (used within \textsc{continuation
-injection}) enables the lower-level layer component to specify the state
-(objects) it requires.  When \textsc{dependency injection} is used within
-\textsc{continuation injection}, the lower-level layer component specifies its
-required state (objects) via \texttt{stateId}s.  As the lower-level layer
-retrieves its state from \textsc{dependency injection}, the invoking
-higher-level layer components need only provide the single optionally used
-argument.  This allows the lower-level layer component to specify as many
-dependencies as is necessary.  It, therefore, gives the lower-level layer component
-control over what state (objects/dependencies) it may depend on.
-
-\textsc{thread injection} enables the lower-level layer component to specify its
+\textsc{categorise task} enables the lower-level layer component to specify its
 thread of control.  By the the lower-level layer component having control over
 specifying its required dependency types, the lower-level layer component may
 specify additional dependencies to control which thread pool will be used to
 execute it.
 
-\textsc{continuation injection} enables the lower-level layer component to
-specify its required collaboration by \texttt{componentId}s.  The mapping of
-\texttt{continuationId} to \texttt{componentId} enables configuring the
-higher-level layer components for handling each required continuation by the
-lower-level layer component.  As the invoking higher level-layer component does
-not need to provide references to these handling components on invoking the
-lower-level layer component, the lower-level layer component may specify as many
-continuations as are necessary for its required collaboration variation points. 
-This gives the lower-level layer component control over its collaboration
-variation points.
+\textsc{hand-off} enables the lower-level layer component to specify its
+required collaboration by \texttt{handOffId}s.  The mapping of
+\texttt{handOffId} to \texttt{taskId} (\textsc{define process flows}) enables
+configuring the higher-level layer components for handling each required
+hand-off by the lower-level layer component.  As the invoking higher level-layer
+component does not need to provide references to these handling components on
+invoking the lower-level layer component, the lower-level layer component may
+specify as many hand-offs as are necessary for its required collaboration
+variation points.  This gives the lower-level layer component control over its
+collaboration variation points.
 
-Exceptions from components are handled by \textsc{continuation injection}.  The
-exception is mapped to a \texttt{continuationId} and subsequently mapped to a
-handling component.  As the  invoking higher-level layer component is decoupled
+Exceptions from components are handled by \textsc{escalation}.  The
+exception is mapped to a \texttt{handOffId} and subsequently mapped to a
+handling component.  As the invoking higher-level layer component is decoupled
 from having to handle the exceptions, the lower-level layer component is free to
 control throwing as many exceptions as is warranted.
 
-Using the \textsc{dependency injection}, \textsc{thread injection} and
-\textsc{continuation injection} patterns together provides the necessary inversion
+Using the Office patterns provides the necessary inversion
 of control over variation points as the lower-level layer component controls:
 \begin{itemize}
-  \item its name (\texttt{componentId}) which is decoupled from the invoking higher-level layer component invocation (\texttt{contin\-uationId}) by \textsc{continuation injection};
-  \item which invocations (\texttt{continuationId}s) are necessary via \textsc{continuation injection};
-  \item what state (\texttt{stateId}s) is required by \textsc{dependency injection};
-  \item the types of exceptions that may be thrown by \textsc{continuation injection}; and
-  \item the thread of control by \textsc{thread injection}.
+  \item its name (\texttt{taskId}) which is decoupled from the invoking higher-level layer component invocation (\texttt{handOffId}) by \textsc{define process flows};
+  \item which invocations (\texttt{handOffId}s) are necessary via \textsc{hand-off};
+  \item what state (\texttt{stateId}s) is required by \textsc{record information};
+  \item the types of exceptions that may be thrown by \textsc{escalation}; and
+  \item the thread of control by \textsc{categorise task}.
 \end{itemize}
 
-Therefore, the \texttt{Component} interface (Listing
-\ref{lst:IocInjectionInterfaces}) is the \textsc{explicit interface} for
-lower-level layer components to control the variation points of the application.
- The component is executed by the \textsc{thread injection} pattern's
-\texttt{ComponentExecutor} after creation by the \textsc{continuation injection}
-pattern's \texttt{ComponentContext}.  As \textsc{continuation injection} and
-\textsc{thread injection} share the same \texttt{DependencyInjectionFactory},
-the \textsc{thread injection}'s \texttt{ComponentExecutor} trusts the
-\textsc{continuation injection} pattern to pass the component within the
-\texttt{Runnable} for execution.  The \texttt{Runnable} is constructed by the
-\textsc{continuation injection} pattern and contains the Asynchronous Operation
-to execute the component and the Completion Handler/Dispatcher to flag the
-\texttt{Future} complete.  The cancellation exceptions of the \textsc{thread
-injection} pattern (i.e. \texttt{cancel(\ldots)} method of listing
-\ref{lst:ThreadInjectionInterfaces}) are handled by the
-\texttt{handleException(\ldots)} method to enable application level handling of
-overload conditions.  The \texttt{ComponentContext} (constructed by the
-\texttt{ComponentContextFactory}) provides means to retrieve state via the
-\textsc{dependency injection} \texttt{Dependency\-Context} and to invoke other
-components via \textsc{continuation injection}.
+Therefore, the \texttt{Task} interface (Listing
+\ref{lst:TaskCollaborationInterfaces}) is the \textsc{explicit interface} that
+provides inversion of control to the method signature (\textsc{task defines
+itself}).
 
 
-\subsubsection*{Implicit Thread}
+\textsc{use proven tasks}
+\textsc{process defines itself}
 
-Implicit threads may be used to reduce the thread-context switching of the
-\textsc{inversion of control} pattern.
-
-The continuation may borrow the thread of the invoking component if it results
-in being executed by the same thread pool.  The \textsc{proactor} pattern
-stipulates that Asynchronous Operations (components) ``must be performed without
-borrowing the application's thread of control'' \cite[p. 8]{proactor}.  The
-borrowing of the thread is the focus of the \textsc{reactor} pattern
-\cite{reactor}.  Rather than dispatching back to the same thread pool, the
-continued component may borrow the thread to avoid the overhead of a
-thread-context switch.
-
-Borrowing the thread of control can also be extended to the default thread pool
-for the \textsc{thread injection} pattern.  Components mapped to the default
-thread pool do not have dependencies requiring isolation.  As these components
-do not require isolation, they are more efficiently executed by borrowing the
-thread rather than incurring the cost of a thread-context switch.
-
-The borrowed thread is the implicit thread.  Like an implicit continuation that
-executes the next operation \cite{continuations}, the implicit thread executes
-the next component unless an explicit thread is required.  This can result in
-a server servicing the entire request without a thread-context switch
-should all the components involved not require an explicit thread
-(e.g. web page content obtained from cache).
-
-An implicit thread has similarities to a monadic thread \cite{monadic-thread}.
-The components can be considered nodes in the lazy trace of the monadic thread.
-The advantage of an implicit thread\footnote{Beyond Component Orchestration
-being easier for the developer to understand than monad programming.} is that
-\textsc{thread injection} pattern allows the execution of blocking I/O nodes
-(components) to be prioritised by using explicit threads.  Monadic threads can
-not prioritise blocking I/O nodes as they know little about them and
-subsequently execute them within a single thread pool.
 
 
 \subsubsection*{Consequences}
 
-Using \textsc{inversion of control} allows bottom-up control over the design of
+Within \textsc{task defines itself}, object-orientation provides the implicit
+state (dependencies) to a component.  Explicit dependencies are injected as
+arguments into the method (\textsc{record information}).  Object-orientation
+implicitly provides the instance/class references to the method.  Having
+implicit references tightly couples the components and should be avoided in
+implementing components.
+
+Furthermore, within \textsc{task defines itself} the use of object-orientation
+can focus objects on modelling the state within dependencies.  The objects'
+methods, therefore, focus on constraining changes in the state.  This is similar
+to databases storing data and constraining the changes in the data.  As
+application behaviour is implemented in components via methods, the
+application need not be constructed only as a graph of collaborating
+hierarchical objects.
+
+Using \textsc{process defines itself} allows bottom-up control over the design of
 the application.  As the variation points are controlled by the lower-level
 layer components, developers may start by building the lower-level layer
 components first.  As the lower-level layer components are less abstract, the
@@ -1386,86 +1334,26 @@ engineering the design of the application.  Furthermore, as the higher-level
 layer components are built last, there is less need for large initial top-down
 designs.
 
-\textsc{method inversion of control} also enables bottom-up evolution of the
+\textsc{process defines itself} also enables bottom-up evolution of the
 application.  Within applications imposing top-down design, the
 \textsc{explicit interface} (\textsc{template method}) between \textsc{layers}
 needs to be refactored to account for required changes to increase the
 variability of the lower-level layer components as the application evolves
-\cite{ioc}.  Within bottom-up \textsc{inversion of control}, the lower-level
+\cite{ioc}.  Within bottom-up \textsc{process defines itself}, the lower-level
 layer component may introduce new variation points that are implemented by
 higher-level layer dependencies and components.  As the \textsc{explicit
 interface} to invoke the lower-level layer component does not change, the
 invoking higher-level layer components do not require refactoring to evolve the
 application.
 
-Within \textsc{method inversion of control}, object-orientation provides the
-implicit state (dependencies) to a component.  When a method is used as the
-implementation of a component, explicit dependencies are injected as arguments
-into the method.  Object-orientation implicitly provides the instance/class
-references to the method.  Having implicit references tightly couples the
-components and should be avoided in implementing components.  Therefore,
-functional programming can provide improved component implementations via
-functions, as functional programming can be considered programming without
-implicit dependencies.
-
-Furthermore, within \textsc{method inversion of control} the use of
-object-orientation can focus objects on modelling the state within dependencies
-and have objects' methods constrain changes in the state.  This is similar to
-databases storing data and constraining the changes in the data.  As application
-behaviour is implemented in components via functions, the application need not
-be constructed only as a graph of collaborating hierarchical objects.
-
-As the \textsc{thread injection} and \textsc{continuation injection} patterns
-provide implementing algorithms of the \textsc{proactor} pattern participants,
-the \textsc{inversion of control} pattern has provided limited improvement
-regarding the \textsc{proactor} pattern being ``hard to debug'' \cite[p.
-7]{proactor}.  While the patterns have not directly addressed the
-\textsc{proactor} issue of being hard to debug, they do follow the trend of
-\textsc{thread-per-request} web servers \cite{thread-per-request} by
-encapsulating developer code within sequentially executed components (segmented
-request handlers formed by chaining components with implicit continuations).
-However, the introduction of dependencies maintaining state between components
-executed by different threads leaves the possibility for dependencies to be
-non-thread safe.  This can cause difficult to identify thread synchronisation
-bugs.  The risk of these synchronisation bugs is, however, mitigated by the
-increased quality of the dependencies due to their increased re-use by
-components containing the application logic.
-
-Furthermore, the indirection of the \textsc{method inversion of control} pattern
-makes debugging more difficult.  Components are all of the same type which means
-call hierarchies can not be identified based on matching method/function
-signatures.  The Component Orchestration from \textsc{continuation injection}
-pattern, however, provides visual cues to aid developer understanding of the
-application to resolve these bugs.
-
-Within the \textsc{method inversion of control} pattern, control has been
-inverted for all interfacing aspects of the component\footnote{The Inversion of
-Control pattern can be described as: Inversion of Control = Dependency Injection
-+ Thread Injection + Continuation Injection (or its shorter form: IoC = DI + TI
-+ CI).}.  The inversion of control over all \textsc{explicit interface} aspects
-of the component has made the component the software equivalent of a
-\textit{brick}\footnote{Objects/methods/functions do not define the dimensions
-of execution and asynchronous collaboration providing only part of the
-ingredients to a building block (brick).}.  The components have a standard
-interface to decouple all their dimensions (state, execution and collaboration)
-that provides a standard mechanism for developers to weave the \textit{bricks}
-(components) together to create the equivalent of \textit{walls},
-\textit{buildings} and further complex structures\footnote{Discussion on the
-patterns that OfficeFloor \cite{officefloor} uses to weave components into
-re-usable composite components will be left to further work.}.
 
 
 
-\section{Future work}
+\section{Conclusion}
 
-The \textsc{thread injection}, \textsc{continuation injection} and
-\textsc{inversion of control} patterns presented in this paper describe how
-OfficeFloor \cite{officefloor} provides an \textsc{inversion of control}
-implementation.  Future work will describe the patterns used by OfficeFloor to
-weave components (Tasks) together into re-usable composite components
-(Sections).  Patterns will also be presented on how OfficeFloor weaves these
-composite components into greater composite components (Offices and
-OfficeFloors) to manage the complexity of an application.
+\textbf{TODO} Improved performance tuning of the design, removed coupling of
+existing design patterns used in middleware frameworks and provide inversion of
+control to allow building applications bottom-up.
 
 \textbf{TODO} write about user patterns (as this is implementation patterns)
 
