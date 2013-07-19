@@ -1,46 +1,40 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram>
-<source><![CDATA[invoker:Invoker[a]
+<source><![CDATA[invoker:Invoker
 componentContext:ComponentContext
+executor:TaskExecutor
 dependencyContext:DependencyContext
-/component:Component[x]
-cif:ComponentContextFactory[a]
+/task:Task[x]
+tcf:TaskContextFactory[a]
 /invokedContext:ComponentContext[x]
-/future:Future
-p:ProactorInitiator[a]
-/operation:AsynchronousOperation[x]
-/handler:CompletionDispatcherHandler[x]
-aop:AsynchronousOperationProcessor[a]
+dif:DependencyInjectionFactory[a]
+/runnable:Runnable extends Future
+threadPool:ThreadPool
 
-invoker:future=componentContext.doContinuation("contId", "ARG")
-componentContext:>componentContext.lookupDependencyId(\\n            "contId")&
+invoker:future=componentContext.doHandOff(\\n   "handOffId", "ARG")
+componentContext:>componentContext.lookupTaskId(\\n    "handOffId")&
 componentContext:
-componentContext:component=dependencyContext.getDependency(\\n            "dependencyId")
-dependencyContext:>component.new()\\nor use cached&
-componentContext:
-componentContext:invokedContext=cif.createComponentContext(\\n            "compId", "ARG",\\n            dependencyContext)
-cif:>invokedContext.new(continuationMappings,\\n            exceptionMappings,\\n            stateMappings,\\n            dependencyContext)&
-componentContext:
-componentContext:future=p.initiate(component,\\n            invokedContext)
-p:>future.new()&
-p:>operation.new(component,\\n    invokedContext)&
-p:>handler.new(future)&
-p:>p.registerFuture(future)&
-p:
-p:>aop[,0].register(operation,handler)
-invoker:stop
-aop:operation.execute()
-operation:component.execute(invokedContext)
-component:dependency=invokedContext.getState(stateId)
+componentContext:future (runnable)=executor.executeTask(\\n   "taskId", "ARG",\\n   dependencyContext)
+executor:task=dependencyContext.getDependency(\\n   "taskId")
+dependencyContext:>task.new()\\nor use cached&
+executor:invokedContext=tcf.createTaskContext(\\n   "taskId", "ARG",\\n   dependencyContext)
+tcf:>invokedContext.new(continuationMappings,\\n            exceptionMappings,\\n            stateMappings,\\n            dependencyContext)&
+executor:types=dif.getRequiredDependencyTypes(\\n   "taskId")
+executor:>executor.lookupThreadPool(types)&
+executor:>runnable.new(task, invokedContext)&
+executor:>executor.registerFuture(runnable)&
+executor:>threadPool.register(runnable)
+executor:stop
+threadPool:runnable.execute()
+runnable:task.execute(invokedContext)
+task:dependency=invokedContext.getState(stateId)
 invokedContext:>invokedContext.lookupDependencyId(stateId)&
 invokedContext:dependency=dependencyContext.getDependency(dependencyId)
-component:
-component:invokedContext.(invoke further\\ncontinuations)
-aop:handler.complete()
-handler:p.notifyComplete(future)
-p:future.flagComplete()
-p:>p.Complete request\\nif all registered\\nFutures complete&
-aop:stop]]></source>
+task:
+task:invokedContext.(invoke further\\nhand offs)
+runnable:executor.flagComplete(runnable)
+executor:>executor.Complete request\\nif all registered\\nFutures complete&
+threadPool:stop]]></source>
 <configuration>
 <property name="activationBarBorderThickness" value="1"/>
 <property name="actorWidth" value="25"/>

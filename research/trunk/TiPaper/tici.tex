@@ -157,7 +157,7 @@ on software design.
 
 
 
-\section{Patterns for executing Tasks}
+\section{Patterns for execution of tasks}
 
 The following patterns model the execution of methods after the way tasks are
 undertaken within an office.  The implementation notes at the end provide
@@ -239,11 +239,8 @@ responsible for differing tasks in the process.  For example, the financial team
 will do the finance tasks and the software development team will do the coding
 tasks.
 
-Having this split in responsibility over the categorised tasks allows managing
-the team sizes.  For example, near the end of the financial year the finance
-team may be increased in size for the additional load of financial year end
-tasks.  The software development team, however, would not be changed in size as
-the development tasks would stay the same in number.
+Having this split in responsibility over the categorised tasks allows
+specialising the team to their tasks.
 
 \subsubsection*{Problem} Making the \textsc{thread pool} responsible for a
 particular category of methods.
@@ -272,12 +269,35 @@ there is a significant increase in the number of tasks in one category all
 threads do not become focused on these tasks to the detriment of the other
 categories of tasks.
 
-Threads may also be finer tuned (e.g. change in nice value, affinity to CPU)
-based on the responsibilities of their thread pool.  Threads may, however, be
-idle if no tasks occur for their responsible task category.
+Threads of the thread pool may be specialised (e.g. change in nice value,
+affinity to CPU) based on the responsibilities of their thread pool.  Threads
+may, however, be idle if no tasks occur for their responsible task category.
 
 \subsubsection*{Related Patterns} Is a sequence on the \textsc{team} to identify
 responsible categories of tasks to execute.
+
+
+
+\subsection{\textsc{\textbf{manage team size}}}
+
+\subsubsection*{Alternate name} Adaptive Resource Management \cite{seda}. 
+
+\subsubsection*{Context} 
+
+For example, near the end of the financial year the finance
+team may be increased in size for the additional load of financial year end
+tasks.  The software development team, however, would not be changed in size as
+the development tasks would stay the same in number.
+
+\subsubsection*{Problem}
+
+\subsubsection*{Forces} 
+
+\subsubsection*{Solution}
+
+\subsubsection*{Consequences}
+
+\subsubsection*{Related Patterns}
 
 
 
@@ -316,7 +336,7 @@ to reduce thread context-switching.
 
 
 
-\subsection{\textsc{\textbf{too busy}}}
+\subsection{\textsc{\textbf{team too busy}}}
 
 \subsubsection*{Alternate name} Admission Control \cite{seda}. 
 
@@ -330,7 +350,7 @@ exhausted.  At a certain point the queue becomes too long that new methods added
 to the queue will not be executed within a reasonable period of time.
 
 \subsubsection*{Problem} Stop the thread pool taking on new methods so it may
-cope with the current excessive load of methods.
+cope with the current load of methods.
 
 \subsubsection*{Forces} The thread pool will sequentially execute all methods
 added to its queue.  When the number of methods registered for execution is
@@ -412,6 +432,11 @@ pools (\textsc{team}).
 \lstset{caption=\textsc{thread injection} pattern interfaces\protect\footnotemark.}
 \begin{lstlisting}[float,label=lst:ThreadInjectionInterfaces]
 
+    interface Task {
+        void execute(Object parameter); 
+        void cancel(Object parameter, Exception cause);
+    }
+
     interface TaskExecutor {
         void executeTask(String taskId, Object parameter);
     }
@@ -419,11 +444,6 @@ pools (\textsc{team}).
     interface DependencyInjectionFactory {
         Task createTask(String taskId);
         Type[] getRequiredDependencyTypes(String taskId);
-    }
-
-    interface Task {
-        void execute(Object parameter); 
-        void cancel(Object parameter, Exception cause);
     }
 \end{lstlisting}
 \footnotetext{An example implementation of the
@@ -453,8 +473,8 @@ responsible for tasks with a particular type of dependency\footnote{Thread pools
 may be associated with more than one dependency type.}.  The task is then
 matched by its required dependency types (\textsc{categorise task}) to a thread
 pool responsible for one or more of its dependency types (\textsc{responsible
-team})\footnote{The \texttt{componentId} may also be used for very fine grained
-mapping.}.  \texttt{execute(\ldots)} (Listing
+team})\footnote{The \texttt{taskId} may also be used for very fine grained
+mapping.}.  The \texttt{execute(\ldots)} method (Listing
 \ref{lst:ThreadInjectionInterfaces}) is then invoked by a thread from the
 matching thread pool to execute the task (and its contained method). This
 provides the necessary isolation of differing tasks for improved tuning of the
@@ -464,24 +484,26 @@ For tasks not having dependencies (nor dependencies of any performance
 significance), a default thread pool is configured by the developer for their
 execution.  This ensures all components are mapped to a thread pool.  It also
 means that thread pools need only be configured for dependencies requiring
-isolation.
+isolation. \textbf{TODO: pattern for this paragraph}
 
 To achieve further efficiencies the implementation of each thread pool may be
 specific to its responsible dependency type.  For example, the thread pool may
-contain multiple threads for concurrent execution of tasks, a single thread for
-serial execution of tasks, or no threads and execute components by borrowing the
-thread to reduce thread-context switching (\textsc{do it yourself}).
+contain multiple threads for concurrent execution of tasks with threads
+added/removing based on the load of tasks (\textsc{manage team sizes}), a single
+thread for serial execution of tasks (\textbf{TODO design pattern for this}), or
+no threads and execute components by borrowing the thread to reduce
+thread-context switching (\textsc{do it yourself}).
 
-\texttt{cancel(\ldots)} (Listing \ref{lst:ThreadInjectionInterfaces}) provides
-means for the \texttt{TaskExecutor} to cancel the task.
+The \texttt{cancel(\ldots)} method (Listing \ref{lst:ThreadInjectionInterfaces})
+provides means for the \texttt{TaskExecutor} to cancel the task.
 The \texttt{TaskExecutor} will cancel new tasks for a particular thread pool
 when queuing the task for a thread will result in exceeding a particular
 threshold\footnote{A sufficient threshold would be ensuring the wait time,
 determined by a running average of execution time multiplied against the number
-of components currently in the queue, is below a certain time.} (\textsc{too
-busy}).  Each thread pool may have its own thresholds particular to its
-responsible dependency types.  As tasks are mapped to particular thread
-pools, this ensures only the appropriate tasks are cancelled.
+of components currently in the queue, is below a certain time.} (\textsc{team
+too busy}).  Each thread pool may have its own thresholds particular to its
+responsible dependency types.  As tasks are mapped to particular thread pools,
+this ensures only the appropriate tasks are cancelled.
 
 Once cancelled, the \texttt{TaskExecutor} may discard the task.  The
 implementation of the \texttt{can\-cel(\ldots)} method is covered in the
@@ -530,7 +552,7 @@ because the request handler (task) will depend on the database connection to
 retrieve the data if the data is not cached.  Request handling will, therefore,
 need to be segmented into smaller tasks to reduce the occurrences of sets of
 common dependencies between tasks, which results in grouping components all onto
-the same thread pool.  This is the focus of the collaborating task patterns.
+the same thread pool.  This is the focus of the task collaboration patterns.
 
 
 \subsubsection*{Related implementations}
@@ -556,7 +578,7 @@ without dependencies.
 
 
 
-\section{Patterns for collaborating tasks}
+\section{Patterns for collaboration of tasks}
 
 The following patterns model the collaboration of methods after the way tasks
 collaborate within an office.  The implementation notes at the end provide
@@ -572,9 +594,11 @@ hand-off to the software development team to build the application.
 Method invocations tightly couple the thread of control and disallow changing
 the thread of control in invoking another method.
 
-\subsubsection*{Problem} Enable changing the thread of control when invoking another method.
+\subsubsection*{Problem} Enable changing the thread of control when invoking
+another method.
 
-\subsubsection*{Forces} The invoking of a method should still be intuitive for the developer.
+\subsubsection*{Forces} The invoking of a method should still be intuitive for
+the developer.
 
 \subsubsection*{Solution}  Provide an interface as a parameter to method.  The
 interface will have a proxy implementation that has its methods asynchronously
@@ -647,6 +671,7 @@ indirection for configuration mapping of hand-offs and to handling methods.
 
 
 
+
 \subsection{\textsc{\textbf{do your work}}}
 
 \subsubsection*{Context} Within the process flow a team may be assigned to
@@ -672,20 +697,29 @@ thread context switching.
 
 
 
-\subsection{\textsc{\textbf{wait to proceed}}}
+\subsection{\textsc{\textbf{task complete}}}
 
 \subsubsection*{Alternate name} Future \textbf{TODO: find reference}.
 
-\subsubsection*{Context} Need to know when the hand-off task (and further
+\subsubsection*{Context} Within the office a person may need to know when their
+handed-off tasks to other teams are complete.  For example a sales person will
+need to get back to the customer when the finance team has the invoice ready.
+
+\subsubsection*{Problem} Know when the hand-off task (and further subsequent
 handed-off tasks by that task) is complete.
 
-\subsubsection*{Problem}
+\subsubsection*{Forces} Hand-off methods are asynchronously executed by other
+threads and there is no synchronous return from them to the calling method.
 
-\subsubsection*{Forces}
+\subsubsection*{Solution} Provide a Future from the hand-off invocation to
+indicate when the handed-off methods are complete.
 
-\subsubsection*{Solution}
+\subsubsection*{Consequences} The Future provides a polling mechanism to check
+when the handed-off mechanism is complete.  Subquently a thread is required to
+poll the Future to determine when complete.
 
-\subsubsection*{Consequences}
+On handing-off many tasks able to distinguish which handed-off tasks are
+complete.
 
 \subsubsection*{Related Patterns}
 
@@ -695,18 +729,34 @@ handed-off tasks by that task) is complete.
 
 \subsubsection*{Alternate name}
 
-\subsubsection*{Context} Trigger a hand-off and come back to current task again
-when the hand-off tasks complete.
+\subsubsection*{Context} Notifying of when handed-off tasks is complete allows
+the calling team to get on with other work and return to the task when its
+dependent handed-off tasks are complete.  For example, the sales team can seek
+out other customers and only get back in contact with a customer when the
+financial team notifices them that an invoice is ready.
 
-\subsubsection*{Problem}
+\subsubsection*{Problem} Re-execute the current task when a handed-off task (and
+futher subsquent handed-off tasks) is completed.
 
-\subsubsection*{Forces}
+\subsubsection*{Forces} The handed-off task is asynchronously invoked and there is
+no synchronous return to indicate when it is complete.
 
-\subsubsection*{Solution}
+\subsubsection*{Solution} Provide callback to re-register the method for
+execution when the handed-off tasks are complete.
 
-\subsubsection*{Consequences}
+To simplify multi-threading issues, the method is only registered once.  This is
+so there may be multiple callbacks that result in only one re-execution of the
+method. After execution of the method, the method may again be registered for
+execution again by further callbacks.
 
-\subsubsection*{Related Patterns}
+\subsubsection*{Consequences} There is no need to poll the Future of the
+hand-off invocation.  On waiting on many handed-off methods, the method may be
+registered many times as each hand-off task completes.  The \textsc{task
+complete} pattern may be used as a guard condition for executing the
+functionality to only execute once all handed-off tasks are complete.
+
+\subsubsection*{Related Patterns} \textsc{task complete} used to indicate which
+handed-off task is complete.
 
 
 
@@ -742,9 +792,27 @@ method.
 
 
 
-\subsection{\textsc{\textbf{inbox}}}
+\subsection{\textsc{\textbf{complete the form}}}
 
-\subsubsection*{Alternate name} Future \textbf{TODO: find reference}.
+\subsubsection*{Alternate name} Parameter passing.
+
+\subsubsection*{Context}
+
+\subsubsection*{Problem}
+
+\subsubsection*{Forces}
+
+\subsubsection*{Solution}
+
+\subsubsection*{Consequences}
+
+\subsubsection*{Related Patterns}
+
+
+
+\subsection{\textsc{\textbf{postal address}}}
+
+\subsubsection*{Alternate name} URL continuation~\cite{url-continuation}.
 
 \subsubsection*{Context}
 
@@ -769,112 +837,69 @@ many mainstream web servers\footnote{For popular web servers (Netcraft November
 2012 survey) dynamic web content is serviced by CGI/FastCGI with for example PHP
 scripts, Microsoft's HTTP.sys/WAS, and JEE Servlets.}) and the \textsc{proactor}
 pattern \cite{proactor} (basis of event-driven web servers) impose tight
-coupling on the collaboration of components (objects wrapping the execution of a
-method).  The \textsc{thread-per-request} pattern enables invoking components by
-synchronous methods, which is intuitive for developers \cite[p. 2]{proactor}. 
+coupling on the collaboration of tasks (objects wrapping the execution of a
+method).  The \textsc{thread-per-request} pattern enables invoking tasks by
+synchronous methods, which is intuitive for developers \cite[p. 2]{proactor}.
 In contrast, the \textsc{proactor} pattern enables asynchronously invoking a
-constructed component by registering it for execution by another thread of
-control (allowing to execute components concurrently).  In both patterns, they
-tightly couple the collaboration of components as the
-\textsc{thread-per-request} pattern must have the invoker provide the thread of
-control and the \textsc{proactor} pattern must have the invoker construct the
-invoked component.
-
-The \textsc{thread-per-request} pattern imposes a synchronous interface that
-prevents asynchronous use of components.  As the number of downstream systems
-increases from a typical single database to a variety of services (e.g.
-reverse 10K problem \cite{reverse-ten-k-problem}), the
-\textsc{thread-per-request} pattern requires the developer to manually handle
-the multi-threading issues involved in the concurrent communication to
-downstream systems to efficiently service a request.  It is, therefore, better
-to use the \textsc{proactor} pattern in this circumstance.
-
-The \textsc{proactor} pattern requires increased coding by the developer to
-invoke a component.  To invoke a component, the developer must construct the
-component, register it for execution, and then handle completion of the
-component.  Furthermore, handling completion of multiple concurrently executing
-components may not be intuitive for many developers.  When concurrency is not
-necessary, using methods to synchronously invoke components via the
-\textsc{thread-per-request} pattern can produce less code that will likely be
-more intuitive for developers.  Therefore, invoking components should be via a
-method invocation for potentially less code and easier understanding of the
-code.
-
-The synchronous nature of the \textsc{thread-per-request} pattern also imposes
-constraints on the order in which the components are executed.  Within the
-\textsc{thread-per-request} pattern, the sequence in which the components are
-executed is dictated by synchronous direct method calls.  As a result, the
-\textsc{thread-per-request} pattern provides little indirection to invert the
-control over the order components are executed unless components match on method
-signatures.
-
-The \textsc{proactor} pattern also imposes hard-coded order over the components
-invoked (albeit they may end up being executed concurrently).  The invoker must
-construct the component to be asynchronously invoked and therefore this does not
-provide the indirection to control invoking a different component.
+constructed task by registering it for execution by another thread of control
+(allowing to execute tasks concurrently).  In both patterns, they tightly couple
+the collaboration of tasks as the \textsc{thread-per-request} pattern must have
+the invoker provide the thread of control and the \textsc{proactor} pattern must
+have the invoker construct the invoked task.
 
 The \textsc{thread-per-request} pattern and \textsc{proactor} pattern further
 tightly couple invoking a component by the invoker being required to handle
 possible exceptions.  The invoker may not be appropriately responsible to handle
-a resulting exception and this should be delegated to another component.
-
-Loosely coupling the invocation of components leads to better re-use of
-components.  ``Tight coupling leads to monolithic systems, where you can't
-change or remove a \ldots [component] without understanding and changing other
-\ldots [components]'' \cite[p. 24-25]{gof}.  Having to change components to
-invoke them restricts the ability to re-use the components.
-
-For a framework (e.g. web server) to extend itself by invoking components, the
-framework pre-defines the component's interface to enable invoking it.  However,
-components should be able to invoke other components for re-use of the
-component.  To enable re-use of these components the interface to invoke
-components should be standardised.
+a resulting exception and this should be delegated to another task.
 
 
 \subsubsection*{Implementation}
 
-On executing a component, provide the \texttt{ComponentContext} (Listing
-\ref{lst:ContinuationInjectionInterfaces}) to the component.  The
-\texttt{ComponentContext} contains a mapping of \texttt{continuationId} to a
-handling component.  As each mapping is a continuation (''goto'' for executing a
-component), this allows injecting the necessary continuations into the
-component.
-
-The \texttt{ComponentContext} for a component is constructed via a
-\texttt{ComponentContextFactory} (Listing \ref{lst:ContinuationInjectionInterfaces})
-to keep the continuation mapping configuration centrally managed.  This is
-similar to the \texttt{DependencyInjectionFactory} (Listing
-\ref{lst:ContinuationInjectionInterfaces}) containing centrally managed
-configuration to create dependencies.
+The task collaboration patterns implementation builds on the task execution
+pattern implementation.  On executing a task (object wrapping the method), the
+task is provided a \texttt{TaskContext} (Listing
+\ref{lst:ContinuationInjectionInterfaces}).
 
 \lstset{caption=\textsc{continuation injection} pattern interfaces\protect\footnotemark.}
 \begin{lstlisting}[float,label=lst:ContinuationInjectionInterfaces]
 
-    interface Component {
-        void execute(ComponentContext context);
-        String[] getContinuationIds();
-        String[] getStateIds();
+    interface Process {
+        Future executeProcess(String initialTaskId
+                             , Object initialTaskParameter);
     }
 
-    interface ComponentContext {
-        Object getState(String stateId);
-        Future doContinuation(String continuationId, Object parameter);
-        void handleException(Exception exception);
-        void continueComponent();
-    }
-    
-    interface ContinuationInjectionFactory {
-        ComponentContext createComponentContext(String componentId
-                                               , Object parameter
-                                               , DependencyContext context);
-    }
-    
     interface DependencyInjectionFactory {
+        Type[] getRequiredDependencyTypes(String dependencyId);
         DependencyContext createDependencyContext();
     }
     
     interface DependencyContext {
         Object getDependency(String dependencyId);
+    }
+
+    interface TaskExecutor {
+        Future executeTask(String taskId 
+                        , Object parameter
+                        , DependencyContext context);
+    }
+
+    interface TaskContextFactory {
+        TaskContext createTaskContext(String taskId
+                                     , Object parameter
+                                     , DependencyContext context);
+    }
+
+    interface TaskContext {
+        Object getState(String stateId);
+        Future doHandOff(String handOffId, Object parameter);
+        void handleException(Exception exception);
+        void continueTask();
+    }
+
+    interface Task {
+        void execute(TaskContext context);
+        String[] getHandOffIds();
+        String[] getStateIds();
     }
 \end{lstlisting}
 \footnotetext{A rudimentary example implementation of the
@@ -885,204 +910,113 @@ method.  A more functional example implementation would utilise Spring's
 \texttt{ApplicationContext} as the \texttt{DependencyContext} to manage the
 context for the components and their dependencies.}
 
-The \textsc{continuation injection} pattern provides algorithms which implement the
-\textsc{proactor} pattern's Proactor Initiator, Asynchronous Operation and
-Completion Dispatcher/Handler participants.  The continuation triggers the
-Proactor Initiator to register an Asynchronous Operation containing the desired
-component for execution.  The Completion Dispatcher/Handler is also registered
-and notifies the Proactor Initiator when the Asynchronous Operation completes.
-Using a Proactor Initiator per request to track completion of Asynchronous
-Operations (components) allows a response to be provided once all components for
-the request are completed.
+The \texttt{doHandOff(\ldots)} method (Listing
+\ref{lst:ContinuationInjectionInterfaces}) invokes another task.  The proxy
+implementation of the hand-off interface passed to the method invokes
+\texttt{doHandOff(\ldots)} with its method name (\textsc{hand-off}).  As the
+\texttt{handOffId}s are static for each task, developer configuration provides
+the hand-off mapping to the respective handling task (\textsc{define process
+flows})\footnote{The \texttt{getHandOffIds()} method may be enhanced to also
+return the argument types that the task will provide on each of the hand-offs.
+The \texttt{getStateIds()} may also be enhanced to provide the expected type the
+task requires for each \texttt{stateId}.  Providing this type information allows
+the hand-off argument to be type validated against the handling task's required
+parameter state type to reduce runtime errors and therefore may restrict some
+mapping changes.  However, an adapting task may be mapped in between to remove
+this restriction by transforming the argument to the necessary type for the
+handling task.}.  Also each task has an optional implicit hand-off that is
+triggered, should no other hand-off be invoked, to enable configuring a sequence
+of tasks.  The \texttt{TaskContextFactory}, which constructs each
+\texttt{TaskContext}, centrally manages the hand-off mapping to target task. 
+This is similar to the \texttt{DependencyInjectionFactory} (Listing
+\ref{lst:ContinuationInjectionInterfaces}) containing centrally managed
+configuration to create dependencies.  Figure
+\ref{fig:DoContinuationSequenceDiagram} provides a sequence diagram of invoking
+a task via the \texttt{doHandOff(\ldots)} method.
 
-The components are constructed via the \textsc{dependency injection} pattern
+\begin{figure}[!t]
+\centering
+\includegraphics[width=6in]{DoContinuationSequenceDiagram}
+\caption{Sequence diagram of invoking \texttt{doHandOff(\ldots)}.}
+\label{fig:DoContinuationSequenceDiagram}
+\end{figure}
+
+The hand-off triggers the \texttt{TaskExecutor} to register a Task with a thread
+pool for asynchronous execution.  A Future is returned from this registration to
+notify when the Task is completed (\textsc{task complete}).  On completion of
+the Task, the \texttt{TaskExecutor} is also notified of completion of the Task.
+This allows the \texttt{TaskExecutor} to re-register any Tasks waiting on the
+Future (\textsc{pick up task again}).  Tasks register for being picked up again
+by the \texttt{continueTask()} method (Listing
+\ref{lst:ContinuationInjectionInterfaces}).
+
+The tasks are constructed via the \textsc{dependency injection} pattern
 \cite{ioc}.  The \texttt{Dependency\-InjectionFactory} (Listing
 \ref{lst:ContinuationInjectionInterfaces}) centrally manages the dependency
 configuration and creates a \texttt{Depend\-ency\-Context} that constructs and
-caches dependency instances for the components.  The
-\texttt{Dependency\-Context}, that manages the life-cycle of dependencies, is
-aligned to the Proactor Initiator life-cycle.  This allows for both the
-dependencies of the components and the components themselves to be specific to
-the request being serviced.  It also allows the state/resources within these
-dependencies to be managed within the life-cycle of servicing the request.
+caches dependency instances for the tasks.  The \texttt{Dependency\-Context},
+that manages the life-cycle of dependencies, is aligned to the
+\texttt{TaskExecutor} life-cycle.  This allows for both the dependencies of the
+tasks and the tasks themselves to be specific to the request being serviced.
+As the dependencies are re-used across tasks, this allows tasks to share state
+(\textsc{record information}).
 
-Re-using dependencies between components allows sharing state between the
-components.  For the \textsc{thread-per-request} pattern, the method signature
-tightly couples sharing state by requiring particular parameters and by only
-providing a single return value.  For the \textsc{proactor} pattern, the invoker
-must have all state available to construct the Asynchronous Operation and
-Completion Dispatcher/Handler which tightly couples the invocation.  Providing
-mutable state within dependencies that are re-used across components allows
-components to share state.  This is similar to a \textsc{thread-per-request} web
-server that shares state between components by attributes (dependencies) within
-request, session and application scopes.  To further decouple the component from
-global dependency identifiers the \texttt{ComponentContext} contains a mapping
-of \texttt{stateId} to \texttt{dependencyId} to allow the component to obtain
-the extrinsically defined \textsc{dependency injection} dependencies via the
-\texttt{getState(\ldots)} method (Listing
-\ref{lst:ContinuationInjectionInterfaces}).  The invoking component only needs
-the dependencies (state) it requires and is not coupled to the invoked component
-by having to provide the entire set of dependencies (state) for the invoked
-component.
+The \texttt{doHandOff(\ldots)} does allow one argument to be passed to the
+invoked component (\textsc{complete the form}).  This is for more intuitive
+development by associating the invocation with passing state.  If multiple
+arguments are required, they should be encapsulated into an object for passing.
+To maintain loose coupling, the invoked task obtains the argument as state (i.e.
+\texttt{getState(\ldots)} method in listing
+\ref{lst:ContinuationInjectionInterfaces}) so the invoked task need not
+differentiate between dependencies and parameters (\textsc{record information}).
+The invoked task may also ignore the hand-off argument should it not depend on
+it.
 
-The \texttt{doContinuation(\ldots)} method (Listing
-\ref{lst:ContinuationInjectionInterfaces}) allows a component to invoke another
-component.  As the \texttt{continu\-ationId}s are static for each component,
-developer configuration provides the continuation mapping to the respective handling
-component.  The method does allow one argument to be passed to the invoked
-component.  This is for more intuitive development by associating the invocation
-with passing state.  If multiple arguments are required, they should be
-encapsulated into an object for passing.  To maintain loose coupling, the
-invoked component obtains the argument as state (i.e. \texttt{getState(\ldots)}
-method in listing \ref{lst:ContinuationInjectionInterfaces}) so the invoked
-component need not differentiate between dependencies and parameters.  The
-invoked component may also ignore the continuation argument should it not depend
-on it.  Figure \ref{fig:DoContinuationSequenceDiagram} provides a sequence
-diagram of invoking a component via the \texttt{doContinuation(\ldots)} method.
-  
-\begin{figure}[!t]
-\centering
-\includegraphics[height=7.4in]{DoContinuationSequenceDiagram}
-\caption{Sequence diagram of invoking \texttt{doContinuation(\ldots)}.}
-\label{fig:DoContinuationSequenceDiagram}
-\end{figure}
- 
-As the \texttt{doContinuation(\ldots)} method asynchronously invokes the
-component, the returned \texttt{Future} is used to determine when the potential
-tree of invoked components has completed.  The \texttt{Future} utilises the
-Proactor Initiator's tracking of Asynchronous Operation completion to determine
-when the tree of Asynchronous Operations realising the continuation has
-completed.  This enables process continuations \cite{process-continuation} to be
-spawned by repeatedly calling \texttt{doContinuation(\ldots)}.  The process
-continuations aid in resolving the reverse 10K problem
-\cite{reverse-ten-k-problem} by executing multiple components concurrently.
-Also, as state is shared by dependencies, the \texttt{Future} does not provide a
-return value.  This further decouples the invocation as the invoking component
-is not tightly coupling the expected return type for the invocation.
+The hand-off may borrow the thread of the invoking task if it results in being
+executed by the same thread pool.  Rather than dispatching the task back to the
+same thread pool, the \texttt{TaskExecutor} may borrow the thread to avoid the
+overhead of a thread-context switch (\textsc{do your work}).
 
-Exceptions from the methods are handled by being mapped to a
-\texttt{continuationId}.  The component invokes the
-\texttt{handle\-Excep\-tion(\ldots)} method with the exception\footnote{For
-easier development of components, the component's \texttt{execute(\ldots)}
-method signature may allow throwing the exception which is caught by a wrapping
-executor that calls the \texttt{handleException(\ldots)} method with the caught
-exception.}.  The \texttt{handleException(\ldots)} method is implemented by
-mapping the exception type to a \texttt{continuationId} and invoking the
-\texttt{doContinuation(\ldots)} method with the exception as the argument. 
-Continuations for specific exception types of the component may be configured by
-the developer.  The developer will also configure ''catch all'' continuations
-for the application to handle exceptions from any component to ensure all
-exceptions are handled (e.g. handling of the runtime non-checked exceptions). 
-This allows default handling of exceptions within the application and gives the
-component the ability to override only as necessary.  This is similar to
-\texttt{catch} blocks for handling exceptions at different levels of the method
-call hierarchy.  It also reduces the configuration for developers by only having
-to provide the overriding exception handling configuration for components.  The
-invoking component is, therefore, decoupled from handling the invoked
-component's exceptions, as the exceptions are handled by other components.
+Exceptions from the methods are handled by being mapped to a \texttt{handOffId}.
+ The task invokes the \texttt{handle\-Excep\-tion(\ldots)} method with the
+exception.  The \texttt{handleException(\ldots)} method is implemented by
+mapping the exception type to a \texttt{handOffId} and invoking the
+\texttt{doHandOff(\ldots)} method with the exception as the argument
+(\textsc{escalation}).  Hand-offs for specific exception types of the task may
+be configured by the developer (\textsc{define process flows}).  The developer
+will also configure ''catch all'' hand-offs for the application to handle
+exceptions from any task to ensure all exceptions are handled (e.g. handling of
+the runtime non-checked exceptions).
 
-The \texttt{continueComponent()} method (Listing
-\ref{lst:ContinuationInjectionInterfaces}) enables re-executing the current
-component.  The Proactor Initiator may be implemented to defer the execution of
-a component again until invoked continuations by the component are completed. 
-The Proactor Initiator uses the same tracking of completion as the
-\texttt{Future} to determine the completion of the last Asynchronous Operation
-(component) for the invoked continuations.  On completion of the last
-Asynchronous Operation, the Proactor Initiator registers the component within an
-Asynchronous Operation for execution again.  This, for example, allows deferring
-the execution of the component until an invoked Operating System asynchronous
-I/O operation completes - a key aspect of the \textsc{Proactor} pattern for
-improved concurrency.
+\textbf{TODO: URL continuation for} \textsc{postal address}
 
-The execution of a continuation may also be deferred until all other
-continuations from the component are complete.  Each continuation mapping
-contains a configurable attribute to delay invoking the handling component
-until all other invoked continuations for the component are complete.  This
-avoids the developer having to provide additional code to check the completion
-of the \texttt{Future}s for all concurrently executed continuations (i.e.
-continuations not flagged to wait) before proceeding with the desired
-continuation.  Should the component invoke multiple continuations configured to
-wait, these continuations will be executed one after the other as each is
-completed.  This further decouples the invocation as deciding on whether to wait
-on the completion of a continuation can be undertaken by configuration outside
-the component.
-
-The intuitiveness of sequential programming is maintained by using implicit
-continuations \cite{continuations} to sequentially chain components.  Each
-\texttt{ComponentContext} also maintains an optional implicit continuation. 
-Should no continuation be invoked (i.e. \texttt{doContination(\ldots)} method
-invoked or an exception thrown) the implicit continuation is invoked on
-completion of the component.  This allows chaining together components to be
-executed sequentially.
-
-While the \textsc{proactor} pattern focuses on asynchronous interaction between
-Asynchronous Operations, the \texttt{ComponentContext} does not restrict the
-servicing of the continuation invocation from being synchronous.  In cases where
-it is more efficient to synchronously invoke the component and avoid the
-thread-context switching overheads, this can be controlled by the developer with
-a flag in the continuation mapping configuration.  When the continuation is
-flagged for synchronous execution, the Proactor Initiator synchronously executes
-the component within the thread of control invoking the
-\texttt{doContinuation(\ldots)} method.  In this case, the Proactor Initiator
-does not wrap the component in an Asynchronous Operation for asynchronously
-execution.  Having the configuration option for developers to control borrowing the
-thread of control further loosely couples invocation of components, as invoked
-components may be more efficiently executed by the same thread of control (e.g.
-when retrieving data from an in memory cache).
-
-To ease developer understanding of the collaboration between components, the
-mapping configuration of \texttt{continuationId}  to \texttt{componentId} may be
-graphical.  Developer tools will use the \texttt{getContinuationIds()} method
-(Listing \ref{lst:ContinuationInjectionInterfaces}) to obtain the list of possible
-continuations for a component.  The tools then graphically represent the
-components as nodes with the continuation mappings being directed lines between
-these nodes.  Due to the similarity of this configuration with service
-orchestration, this graphical configuration is identified as Component
-Orchestration\footnote{Component orchestration may also be identified as
-function, procedure, method or operation orchestration depending on the
-implementing language.}.  The \texttt{stateId} to \texttt{dependencyId} mapping
-for a component may also be included in this configuration by dependencies
-represented as further nodes to be linked to \texttt{stateId} anchors on the
-components.  The developer tools use the \texttt{getStateIds()} method (Listing
-\ref{lst:ContinuationInjectionInterfaces}) to obtain the list of possible state
-objects required for the component\footnote{The \texttt{getContinuationIds()}
-method may be enhanced to also return the argument types that the component will
-provide on each of the continuations.  The \texttt{getStateIds()} may also be
-enhanced to provide the expected type the component requires for each
-\texttt{stateId}.  Providing this type information allows the continuation
-argument to be type validated against the handling component's required
-parameter state type to reduce runtime errors and therefore may restrict some
-mapping changes.  However, an adapting component may be mapped in between to
-remove this restriction by transforming the argument to the necessary type for
-the handling component.}.
 
 
 \subsubsection*{Example}
 
-Listing \ref{lst:Example_Method_Operation} shows the example developer
-implementation code.  A generic component implementation is used to reflectively
-invoke the \texttt{retrieveData(\ldots)} method. It will:
+Listing \ref{lst:Example_Method_Operation} shows example method for retrieving
+data from a cache.  The task for the \texttt{retrieveData(\ldots)} method will:
 \begin{enumerate}
   \item Obtain an instance of the \texttt{CacheOperation} via the \texttt{getState(\ldots)} method.
-  \item Obtain both the \texttt{key}\footnote{\texttt{key} is a continuation argument from the previous component.} and \texttt{cache} again via the \texttt{getState(\ldots)} method.
-  \item Instantiate a proxy implementation of the \texttt{CacheContinuation} interface that implements the \texttt{cacheMiss(\ldots)} method by invoking the \texttt{doContinuation(\ldots)} method. 
+  \item Obtain both the \texttt{key}\footnote{\texttt{key} is a hand-off argument from the previous task.} and \texttt{cache} again via the \texttt{getState(\ldots)} method.
+  \item Instantiate a proxy implementation of the \texttt{CacheHandOffs} interface that implements the \texttt{cacheMiss(\ldots)} method by invoking the \texttt{doHandOff(\ldots)} method. 
   \item Reflectively invokes the \texttt{retrieveData(\ldots)} method with the above arguments.
 \end{enumerate}
 
-\lstset{caption=Example developer implementation code for a component\protect\footnotemark}
+\lstset{caption=Example developer code of a task for retrieving data from a cache\protect\footnotemark}
 \begin{lstlisting}[float,label=lst:Example_Method_Operation]
 
-  interface CacheContinuations {
+  interface CacheHandOffs {
     void cacheMiss(String key);
   }
 
   class CacheOperation {    
     public Data retrieveData(String key, Cache cache
-                            , CacheContinuations continuations
+                            , CacheHandOffs handOffs
                             ) throws IOException {
         Data data = cache.get(key);
         if (data == null) {
-            continuations.cacheMiss(key);
+            handOffs.cacheMiss(key);
             return null; // finish operation
         }
         return data;
@@ -1091,106 +1025,99 @@ invoke the \texttt{retrieveData(\ldots)} method. It will:
 \end{lstlisting}
 \footnotetext{\texttt{retrieveData} may also be a function should the implementing programming language support functions.}
 
-Continuations from the \texttt{retrieveData(\ldots)} method are:
+Hand-offs from the \texttt{retrieveData(\ldots)} method are:
 \begin{itemize}
-  \item \texttt{cacheMiss(\ldots)} which is mapped to \texttt{Retrieve data from database}.
-  \item Implicit continuation which is mapped to the \texttt{Render HTTP response}\footnote{The return value from the method is used as the continuation argument.}.
-  \item \texttt{IOException} which is mapped to a component providing an error message page.  It may also be mapped to \texttt{Retrieve data from database} to attempt to continue servicing the request.
+  \item \texttt{cacheMiss(\ldots)} which is mapped to task to retrieve data from the database.
+  \item Implicit hand-off which is mapped to the next task in the process\footnote{The return value from the method is used as the hand-off argument.}.
+  \item \texttt{IOException} which is mapped to a task providing an error message page.  It may also be mapped to a task to retrieve the data from a database to attempt to continue servicing the request.
 \end{itemize}
 
 
 \subsubsection*{Consequences}
 
-The mapping of \texttt{continuationId} to \texttt{componentId} (component) is
-contained within configuration.  This enables changing the handling component
-without changing the code of the components.  Changing the handling component
-enables re-ordering the chained sequence of components that are executed to
-service a request.
+The mapping of \texttt{handOffId} to \texttt{taskId} (task) is contained within
+configuration.  This enables changing the handling task without changing the
+code of the methods.  Changing the handling task enables re-ordering the chained
+sequence of tasks that are executed to service a request.  It also enables
+configuring which method is invoked for each hand-off.  This removes the
+hard-coding by the \textsc{proactor} pattern.   Furthermore, each invoked method
+is undertaken by a thread from its responsible thread pool (i.e.
+potentially different thread).  This removes the thread of control constraint
+imposed by the \textsc{thread-per-request} pattern.
 
-Using the \texttt{doContinuation(\ldots)} method to invoke components, with the
-invoked component using implicit continuations to further invoke other
-components, is similar to spawning threads.  The continuations result in the
-concurrent execution of sequential chains of components.  This allows for the
-intuitiveness of the \textsc{synchronous multi-threaded} pattern \cite{proactor}
-for handling concurrency.
-
-Without the graphical configuration of Component Orchestration, understanding
-the collaboration of components would become difficult due to the indirection
-involved.  This is especially relevant when components are implemented as
-methods, which can result in a large number of components needing to
-be configured together\footnote{Future work will present the patterns
-OfficeFloor \cite{officefloor} uses to encapsulate Component Orchestration
-configuration for re-use to avoid its graphical representation from becoming
-unwieldy.}.
-
-As components are being executed asynchronously (potentially by different
-threads of control), using debugging developer tools to step through the
-execution of servicing a request will involve stepping through the implementing
-code of the \texttt{ComponentContext}.  This can distract developers and can
-make it difficult to trace the execution as it switches between threads. 
-However, debugging tools can be enhanced/configured to automatically skip over any
-instructions of the \texttt{ComponentContext} implementation to avoid this
-distraction.
+Understanding the collaboration of tasks would become difficult due to the
+indirection involved.  The \textsc{define process flows} configuration, however,
+provides graphical tools to manage the configuration to reduce this difficulty.
+The tools graphically represent the tasks as nodes with the hand-off mappings
+being directed lines between these nodes.  Due to the similarity of this
+configuration with service orchestration, this graphical configuration is
+identified as Task Orchestration.
 
 Furthermore, as components are potentially executed by different threads of
 control, the stack trace automatically provided by the
 \textsc{thread-per-request} pattern no longer reflects the call hierarchy for
 servicing a request.  This can make it more difficult to debug issues.  However,
-the Proactor Initiator may be flagged to record the tree of components invoked
-so that the tree can be traversed back to the root to identify the sequence of
-continuations to the component throwing the exception.  The whole tree can also
-be reported to aid the developer in debugging the cause of the issue.
+the \texttt{TaskExecutor} may be flagged to record the tree of components
+invoked so that the tree can be traversed back to the root to identify the
+sequence of hand-offs to the task throwing the exception.  The whole tree can
+also be reported to aid the developer in debugging the cause of the issue.
 
-Integrating the \textsc{continuation injection} pattern with code not contained
-in components does not allow access to the \texttt{ComponentContext} to invoke
-the continuation for the first component.  Listing
+Integrating with code not contained in tasks does not allow access to the
+\texttt{TaskContext} to invoke the hand-off for the first task.  Listing
 \ref{lst:ContinuationInjectionInterface} provides an interface that allows code
-not contained in a component to invoke the first continuation.  The returned
-\texttt{Future}, from the Proactor Initiator tracking of Asynchronous
-Operations, indicates when all components are complete.  To retrieve results,
-the \texttt{parameter} would be used as a visitor (\textsc{visitor} pattern
-\cite{gof}) and be loaded with results by the invoked components.
+not contained in a task to invoke the first task.  The returned \texttt{Future},
+from the \texttt{TaskExecutor} tracking of tasks, indicates when all tasks are
+complete.  To retrieve results, the \texttt{parameter} would be used as a
+visitor (\textsc{visitor} pattern \cite{gof}) and be loaded with results by the
+invoked tasks.
 
-\lstset{caption=Interface for code not within a component to invoke a continuation.  The component for the continuation is identified with the \texttt{componentId} parameter.}
+\lstset{caption=Interface for code not within a task to invoke a hand-off.  The task for the hand-off is directly identified with the \texttt{initialTaskId}.}
 \begin{lstlisting}[float,label=lst:ContinuationInjectionInterface]
 
-    interface ContinuationInjection {
-        Future doContinuation(String componentId, Object parameter);
+    interface Process {
+        Future doProcess(String initialTaskId, Object parameter);
     }
 \end{lstlisting}
 
-When implementing components with functions, the functions will not be pure.  As
-state is shared between components by mutable state within dependencies,
-functions will need to cause side effects (mutate state) to share state with
-other components (functions).  Therefore, caution is required in developing a
-component to ensure it is not coupled to other components by expectations of
-particular mutations in state.  This is necessary to avoid invalid side effects
-due to changes in configuration that results in re-ordering the execution of the
-components.
+Functions may also be used in place of methods.  When implementing tasks with
+functions, the functions will not be pure.  As state is shared between tasks by
+mutable state within dependencies, functions will need to cause side effects
+(mutate state) to share state with other tasks (functions).
+
 
 
 \subsubsection*{Related implementations}
 
 This provides an implementation of the Actor Model \cite{actors} as it adheres
-to the principles of the Actor Model.  The component is the actor.  The
-asynchronous communication between components decouples the continuation
-argument (message) from the sending component (actor).  The \texttt{componentId}
-provides an address for a component (actor).  The provided
-\texttt{continuationId}s restricts the components (actors) that may be used.
+to the principles of the Actor Model.  The task is the actor.  The asynchronous
+communication between tasks decouples the hand-off argument (message) from the
+sending task (actor).  The \texttt{taskId} provides an address for a task
+(actor).  The provided \texttt{handOffId}s restricts the tasks (actors) that may
+be used.
 
 The implementation can also be considered a form of continuation-passing style
-\cite{continuations} except that the continuation is injected rather than passed
-as a parameter.  The added benefit of injecting the continuation is that the
-component is free to depend on as many continuations as necessary.  It also
-means that as the application evolves the component encapsulates potential
-changes requiring different continuations.  The indirection allows managing
-these changes as configuration changes rather than code changes.
+\cite{continuations}.  The hand-off can be considered a continuation, as it is a
+''goto'' for executing another task with a different thread stack.  The benefit
+of providing hand-offs through a context object is that the task is free to
+depend on as many hand-offs as necessary, and not what the caller provides.  It
+also means that as the application evolves the task encapsulates potential
+changes requiring different hand-offs.  The indirection allows managing these
+changes as configuration changes rather than code changes.
+
+An \textsc{do it yourself} pattern has similarities to a monadic thread
+\cite{monadic-thread}.  The tasks can be considered nodes in the lazy trace of
+the monadic thread.  The advantage of an this implementation\footnote{Beyond
+Task Orchestration being easier for the developer to understand than monad
+programming.} is that the \textsc{responsible team} pattern allows the execution
+of blocking I/O nodes (tasks) to be prioritised.  Monadic threads can not
+prioritise blocking I/O nodes as they know little about them and subsequently
+execute them within a single thread pool.
 
 \textbf{TODO:} see preious paper for further related implementations.
 
 
 
-\section{Patterns for re-use of Tasks (\textsc{method inversion of control})}
+\section{Patterns for building processes}
 
 
 \subsection{\textsc{\textbf{task defines itself}}}
@@ -1247,7 +1174,7 @@ these changes as configuration changes rather than code changes.
 
 
 
-\subsection{Implementation of task re-use patterns}
+\subsection{Implementation of process building patterns}
 
 \subsubsection*{Background}
 
@@ -1319,8 +1246,7 @@ This tight coupling imposed by the method/function results in the hierarchical
 \textsc{layers} architecture where variation points (\textsc{explicit
 interfaces}) are controlled by the higher-level layers.  The higher-level layer
 component provides a \textsc{template method} \cite{gof} which is the variation
-point that lower-level layer components may extend through inheritance
-(\textit{abstract classes}) or collaboration (\textit{interfaces}).
+point that lower-level layer components may extend.
 
 Within a \textsc{layers} architecture having variation points defined by
 \textsc{template method}s requires refactoring of the \textsc{template method}
@@ -1409,50 +1335,6 @@ overload conditions.  The \texttt{ComponentContext} (constructed by the
 \texttt{ComponentContextFactory}) provides means to retrieve state via the
 \textsc{dependency injection} \texttt{Dependency\-Context} and to invoke other
 components via \textsc{continuation injection}.
-
-\lstset{caption={Combined \textsc{thread injection}, \textsc{continuation injection} and \textsc{dependency injection} pattern interfaces\protect\footnotemark.}}
-\begin{lstlisting}[float,label=lst:IocInjectionInterfaces]
-
-    interface Component {
-        void execute(ComponentContext context);
-        String[] getContinuationIds();
-        String[] getStateIds();
-    }
-
-    interface ComponentContext {
-        Object getState(String stateId);
-        Future doContinuation(String continuationId, Object parameter);
-        void handleException(Exception exception);
-        void continueComponent();
-    }
-    
-    interface ContinuationInjectionFactory {
-        ComponentContext createComponentContext(String componentId
-                                               , Object parameter
-                                               , DependencyContext context);
-    }
-    
-    interface DependencyInjectionFactory {
-        Type[] getRequiredDependencyTypes(String dependencyId);
-        DependencyContext createDependencyContext();
-    }
-    
-    interface DependencyContext {
-        Object getDependency(String dependencyId);
-    }
-    
-    interface Runnable {
-        void run();
-        Component getComponent();
-        ComponentContext getComponentContext();
-    }
-
-    interface ComponentExecutor {
-        void executeComponent(String componentId 
-                             , Runnable runnable);
-    }
-\end{lstlisting}
-\footnotetext{Integer identifiers may be used for fast array look ups rather than strings.}
 
 
 \subsubsection*{Implicit Thread}
@@ -1598,65 +1480,7 @@ OfficeFloor.  I also thank my good friend Matthew Brown for being a sounding
 board to many of my ideas.
 
 I am also grateful for the wise shepherding by Veli-Pekka Eloranta and the
-participants of EuroPlop 2013 to ensure this paper succinctly presents the
-Thread Injection, Continuation Injection and Method Inversion of Control
-patterns.
-
-
-
-\section{Limitation of existing Software Design Patterns for web servers}
-
-The \textsc{thread-per-request} pattern \cite{thread-per-request} (that can be
-considered a refinement of the \textsc{synchronous multi-threaded} pattern
-\cite{proactor}) is used as the basis of popular modern web
-servers\footnote{Apache, Microsoft IIS, Nginx and JEE implementations identified
-from the Netcraft November 2012 survey.  Google Web Server is also identified as
-popular.} to service requests concurrently.
-
-Many modern web servers improve their concurrency of servicing high loads of
-static web content by using the \textsc{proactor} pattern \cite{proactor} to
-enable use of asynchronous I/O operations.  The \textsc{thread-per-request}
-pattern requires a thread to be allocated to each request to sequentially and
-synchronously execute all operations for servicing a request.  This includes I/O
-operations that tie up thread resources on the web server which necessitates
-more threads and subsequently reduces the concurrency of the web server.  The
-\textsc{procator} pattern overcomes this issue by executing operations
-asynchronously which does not result in the web server threads blocking (e.g.
-use of Operating System asynchronous I/O operations).
-
-However, web servers continue to use the \textsc{thread-per-request} pattern for
-servicing dynamic web content\footnote{CGI/FastCGI with for example PHP scripts,
-Microsoft's HTTP.sys/WAS, and JEE Servlets.}.  Using the
-\textsc{thread-per-request} pattern allows for more intuitive developer
-implementations of dynamic web content servicing at the cost of decreased
-concurrency for the web server.
-
-Due to high concurrency demands on web servers to resolve such issues as the
-reverse 10K problem \cite{reverse-ten-k-problem}, the
-\textsc{thread-per-request} pattern is requiring developers to manually manage
-the threading issues involved with increased concurrency.  Should the developer
-want to use asynchronous I/O operations for increased concurrency, the developer
-is required to block the request's thread of control, undertake the concurrent
-operations and continue the request's thread of control when all concurrent
-operations are complete\footnote{JEE Servlet 3.x AsyncContext is allowing
-asynchronous operations but requires the developer to still be involved in
-thread synchronisation complexities.}.
-
-Before using the \textsc{proactor} pattern to service dynamic web content, its
-drawback of scheduling and controlling outstanding operations \cite[p.
-8]{proactor} must be resolved.  Servicing static web content follows a standard
-sequence of operations that enables providing a bespoke solution to schedule and
-control outstanding operations.  In contrast, servicing dynamic web content does
-not follow a standard sequence of operations and therefore requires a more
-generic solution that is ``designed carefully to support prioritization and
-cancellation'' \cite[p. 8]{proactor} of the operations.
-
-The patterns presented in this paper address the constraints and limitations
-identified by modelling themselves after patterns occurring within an Office.
-
-All patterns are also given an analogy name with the Office to keep all pattern
-names similar.  In some cases patterns will also have an alternate Software
-Design based name.
+feedback from the participants of EuroPlop 2013.
 
 
 \bibliographystyle{style/acmlarge}
