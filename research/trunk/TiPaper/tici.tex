@@ -52,17 +52,17 @@
 \renewcommand{\algorithmcfname}{ALGORITHM}
 
 % Page heads
-\markboth{D. Sagenschneider}{Software Design based on patterns within an Office}
+\markboth{D. Sagenschneider}{Software Design based on Patterns within an Office}
 
 
-\title{Software Design based on patterns within an Office}
+\title{Software Design based on Patterns within an Office}
 \author{DANIEL SAGENSCHNEIDER \affil{OfficeFloor, daniel@officefloor.net}}
 
 \begin{abstract}
 OfficeFloor is a middleware framework that is architected from the patterns
-occuring within an Office.  Using the proven patterns from the Office has provided
-improved performance tuning and reduced coupling over existing software design
-patterns for middleware frameworks.  Furthermore, the patterns have
+occuring within an office.  Using the proven patterns from the office has
+provided improved performance tuning and reduced coupling over existing software
+design patterns for middleware frameworks.  Furthermore, the patterns have
 provided inversion of control to build applications bottom-up.  This bottom-up
 approach to building applications better suits modern development methodologies,
 such Agile, that evolve the application's architecture upwards.
@@ -107,6 +107,9 @@ workshop at the 18th European Conference on Pattern Languages of Programs
 \maketitle
 
 
+%% TODO before final draft:
+%%   - confirm SEDA adds/removes threads
+%%   - go through GOF to confirm any alternate names
 
 \section{Introduction}
 
@@ -1011,15 +1014,16 @@ will also configure ''catch all'' hand-offs for the application to handle
 exceptions from any task to ensure all exceptions are handled (e.g. handling of
 the runtime non-checked exceptions).
 
-\textbf{TODO: URL continuation for} \textsc{postal address} Integrating with
-code not contained in tasks does not allow access to the \texttt{TaskContext} to
-invoke the hand-off for the first task.  The \texttt{Process} (Listing
-\ref{lst:TaskCollaborationInterfaces}) provides an interface that allows code
-not contained in a task to invoke the first task.  The returned \texttt{Future},
-from the \texttt{TaskExecutor} tracking of tasks, indicates when all tasks of
-the process are complete.  To retrieve results, the \texttt{parameter} would be
-used as a visitor (\textsc{visitor} pattern \cite{gof}) and be loaded with
-results by the invoked tasks.
+Integrating with code not contained in tasks does not allow access to the
+\texttt{TaskContext} to invoke the hand-off for the first task.  The
+\texttt{Process} (Listing \ref{lst:TaskCollaborationInterfaces}) provides an
+interface that allows code not contained in a task to invoke the first task.
+The returned \texttt{Future}, from the \texttt{TaskExecutor} tracking of tasks,
+indicates when all tasks of the process are complete.  To retrieve results, the
+\texttt{parameter} would be used as a visitor (\textsc{visitor} pattern
+\cite{gof}) and be loaded with results by the invoked tasks.  The
+\texttt{initialTaskId} may be mapped to a unique URL for external triggering of
+the process (\textsc{contact us}).
 
 
 
@@ -1138,15 +1142,50 @@ execute them within a single thread pool.
 
 \subsubsection*{Alternate name} \textsc{method inversion of control}.
 
-\subsubsection*{Context}
+\subsubsection*{Context} Within an Office the task itself will define its
+dependencies and when aspects are no longer its responsibility.  Providing a
+fixed set of dependencies and fixed set of hand-offs to a person to achieve a
+task will, unless a very simple task, likely result in the task being
+unsuccessful.  To be successful, the person executing the task will seek out the
+required dependencies and other people necessary to complete the task
+successfully.
 
-\subsubsection*{Problem}
+Furthermore, when conditions change the task may require new dependencies and
+new hand-offs.  Introducing these new dependencies and hand-offs should be
+encapsulated by the task and not significantly impact its containing process.
 
-\subsubsection*{Forces}
+The method signature is fixed by the caller of the method and not the
+implementation of the method.  The caller provides all arguments (dependencies)
+and indicates that the method must be completed by the caller's thread of
+control\footnote{The invoked method may create new threads but unless the caller
+provides reference to existing thread pools, the method will not be able to use
+them).}.
 
-\subsubsection*{Solution}
+\subsubsection*{Problem} Let the method implementation define the method
+signature and continue to enable the caller to invoke the method as the method
+signature changes.
 
-\subsubsection*{Consequences}
+\subsubsection*{Forces} The caller must:
+\begin{itemize}
+  \item identify the method by name,
+  \item provide all arguments to the method,
+  \item handle all exceptions from the method,
+  \item execute the method with its thread of control.
+\end{itemize}
+
+\subsubsection*{Solution} Use \textsc{hand-off} and \textsc{complete the form}
+to relieve the caller from coupling the method signature and \textsc{define
+process flows}, \textsc{record information}, \textsc{escalation} and
+\textsc{responsible team} (via \textsc{categorise task}) to allow the method
+implementation to define the method signature.
+
+\subsubsection*{Consequences} The caller is no longer coupled to the method
+signature.  This allows the method signature to change without impacting the
+caller.
+
+\textsc{define process flows} is necessary to understand the flow of the
+application code, as the call hierarchies can no longer be determined by method
+signatures.
 
 \subsubsection*{Related Patterns}
 
@@ -1154,17 +1193,135 @@ execute them within a single thread pool.
 
 \subsection{\textsc{\textbf{process defines itself}}}
 
-\subsubsection*{Alternate name}
+\subsubsection*{Alternate name} \textsc{inversion of control}.
 
-\subsubsection*{Context}
+\subsubsection*{Context} The process is constructed from tasks.  As the tasks
+define themselves, the process is subject to the necessitities of its containing
+tasks.  The process, therefore, becomes the sum of all the dependencies and
+hand-offs of its containing tasks.
 
-\subsubsection*{Problem}
+Furthermore, determining whether it is a task or whether it is a process involving
+multiple tasks executed by differing responsible teams is typically not
+initially known.  Initially this may be determined correctly.  However, over
+time conditions may change that cause a task to become more complex requiring
+it to be transformed into a process involving many tasks and many responsible
+teams (or vice-versa being transformed from a complex process to a simpler task).
 
-\subsubsection*{Forces}
+Triggering a process within in an office is no different to triggering a task.
+Like the task, the caller of the process is decoupled from the process.  The
+\textsc{complete the form} is undertaken and provided to the first task of the
+process.  Similar to the task, the process will \textsc{escalate} issues and
+will \textsc{hand-off} to other processes/tasks as necessary.
 
-\subsubsection*{Solution}
+Therefore, within an office the process defines itself to achieve its
+requirements.  The process is also interchangeable with a task depending on the
+complexity of the functionality.
 
-\subsubsection*{Consequences}
+\subsubsection*{Problem} Let a process define itself and in defining itself
+the process is to have a similar interface to a task to be interchangeable with
+a task.
+
+\subsubsection*{Forces} Adding new tasks to a process is similar to adding new
+functionality to a method.  Adding new functionality to a method involves:
+\begin{itemize}
+  \item new dependencies for the method that need to be referenceable from the functionality,
+  \item new exceptions that may occur from the functionality, and
+  \item a different threading model to efficiently undertake the functionality. 
+\end{itemize}
+
+\subsubsection*{Solution} Represent the process as a task in the \textsc{define
+process flows}.  The process is given its own \texttt{taskId} that maps to the
+initial task of the process\footnote{The process may expose multiple
+\texttt{taskId} to enable starting at different tasks within it.}.  All
+hand-offs not mapped to a task within the process become the set of hand-offs
+for the process (this includes \textsc{escalation}).  All dependencies of the
+contained tasks (from \textsc{record information}) becomes the set of
+dependencies for the process.
+
+To reduce the set of dependencies for the process, the process defines objects
+to fulfill dependencies for its contained tasks.  These fulfilled dependencies
+would then not be included in the interface set of dependencies for the process.
+
+Similarly to reduce the hand-offs for the interface to the process, hand-offs
+from multiple contained tasks are mapped to a single hand-off exposed from the
+process.
+
+\subsubsection*{Consequences} As the process is interchangeable with a task,
+composite processes are built from other processes.  The interface of a
+composite process is created in the same way as if it contained tasks.
+
+Having composite processes constructed from other composite processes requires
+the graphical representation of the \textsc{define process flows} pattern (Task
+Orchestration) for the developer to understand the flows within the application.
+ Adding composite processes adds further indirection that requires visual
+representation to comprehend.
+
+The \textsc{categorise task} pattern of each contained task within the process
+(and composite processes) is still followed.  As the process is constructed from
+only tasks, the process focuses only on functionality and allows all its tasks
+to be executed by the \textsc{responsible team} pattern.  Therefore, if the
+responsible thread pools are changed for the application the execution of the
+tasks within the processes follow the new threading model without requiring code
+changes.  This enables the threading model of the application to be tuned to the
+hardware it is running on (e.g. single person team for a low powered single CPU
+device or multiple specialised teams for high-performance multicore
+hardware\footnote{Using increasingly better hardware follows the analogy of
+growing the workforce of a business.  The business starts out only as a small
+number of people doing many categories of tasks to becoming a large number of
+people doing very specific categories of tasks.}).
+
+\subsubsection*{Related Patterns}
+
+
+
+\subsection{\textsc{\textbf{automate only where appropriate}}}
+
+\subsubsection*{Alternate name} \textsc{evolve architecture}.
+
+\subsubsection*{Context} Automating all processes is costly to a business.  In
+many cases, using manual processes is cheaper than the cost of automating them.
+ Furthermore, all processes may not be mature enough to be automated.
+ 
+Automating a process requires standardising the process, ensuring the
+dependencies of the process are available and accessible, and catering to all the
+exceptions that may occur within the process.
+
+Designing a business top down forces all processes to be of at least
+standardised maturity to understand their interrelationships within the whole of
+the business.  Having to mature all processes to be standardised increases cost
+and forces less mature processes to be standardised before they have been
+proven.  As the processes inevitably mature within the business, they become
+different to their forced up front standardisation.
+
+Businesses, therefore, standardise their processes by re-use of proven
+processes/tasks (bottom-up approach) and only automate where appropriate.
+
+Designing technology systems top-down is, therefore, not in alignment to how
+businesses evolve.
+
+\subsubsection*{Problem} Design technology systems bottom-up.
+
+\subsubsection*{Forces} The method puts the control at the higher-level layers
+of the system design.  The higher-level layer caller tightly couples the method
+signature that the lower-level layer components may implement.  The lower-level
+layers may not change the method signature without refactoring the higher-level
+layers due to this tight coupling.
+
+\subsubsection*{Solution} Use \textsc{task defines itself} to only build proven
+tasks and build only the standardised processes through \textsc{process defines
+itself}.
+
+\subsubsection*{Consequences} The design of technology systems automate only the
+mature processes within the business.  The less mature processes are left
+undefined until they mature in the business.
+
+This bottom-up approach to designing systems aligns both to the business
+maturing and also modern development methodologies.  Modern development
+methodologies, such as Agile, evolve the architecture upwards based on providing
+value back to the business.  Therefore, only the processes that provide value
+back to the business are built leaving the remaining processes manual (except
+where there is necessary information capture for the processes of value, i.e.
+\textsc{record information}).
 
 \subsubsection*{Related Patterns}
 
@@ -1204,17 +1361,17 @@ requirements:
   \item exceptions from components need to be handled.
 \end{itemize}
 
-Within frameworks, the method signature is the interface between components. 
+Within frameworks, the method signature is the interface between components.
 ``The set of all [method] signatures defined by an object \ldots characterizes
 the complete set of requests that can be sent to the object'' \cite[p. 13]{gof}.
- As frameworks are composed of objects (and possibly functions), the method
-signature defines the interface between objects and subsequently components.
+As frameworks are composed of objects, the method signature defines the
+interface between objects and subsequently components.
 
 The method signature meets the requirements as it:
 \begin{itemize}
   \item has a key responsibility identified by its name;
-  \item may invoke other methods/functions;
-  \item shares state with other methods/functions by arguments and return values;
+  \item may invoke other methods;
+  \item shares state with other methods by arguments and return values;
   \item provides declaration of exceptions for handling; and
   \item can be executed by the thread of control\footnote{For a stateless component interface, thread local variables are to be avoided to not incur affinity to a thread.}.
 \end{itemize}
@@ -1254,12 +1411,12 @@ variation points for the application.
 
 \subsubsection*{Implementation}
 
-\textsc{record information} \cite{ioc} enables the lower-level layer component
-to specify the state (objects) it requires.  The lower-level layer component
-specifies its required state (objects) via \texttt{stateId}s.  As the
-lower-level layer retrieves its state via \textsc{dependency injection}, the
-invoking higher-level layer components need only provide the single optionally
-used argument.  This allows the lower-level layer component to specify as many
+\textsc{record information} enables the lower-level layer component to specify
+the state (objects) it requires.  The lower-level layer component specifies its
+required state (objects) via \texttt{stateId}s.  As the lower-level layer
+retrieves its state via \textsc{dependency injection}~\cite{ioc}, the invoking
+higher-level layer components need only provide the single optionally used
+argument.  This allows the lower-level layer component to specify as many
 dependencies as is necessary.  It, therefore, gives the lower-level layer
 component control over what state (objects/dependencies) it may depend on.
 
@@ -1286,76 +1443,83 @@ handling component.  As the invoking higher-level layer component is decoupled
 from having to handle the exceptions, the lower-level layer component is free to
 control throwing as many exceptions as is warranted.
 
-Using the Office patterns provides the necessary inversion
-of control over variation points as the lower-level layer component controls:
+Using the Office patterns provides the necessary inversion of control over
+variation points as the lower-level layer component (Task) controls:
 \begin{itemize}
   \item its name (\texttt{taskId}) which is decoupled from the invoking higher-level layer component invocation (\texttt{handOffId}) by \textsc{define process flows};
   \item which invocations (\texttt{handOffId}s) are necessary via \textsc{hand-off};
   \item what state (\texttt{stateId}s) is required by \textsc{record information};
   \item the types of exceptions that may be thrown by \textsc{escalation}; and
-  \item the thread of control by \textsc{categorise task}.
+  \item the thread of control by \textsc{categorise task} specifying the \textsc{responsible team}.
 \end{itemize}
 
 Therefore, the \texttt{Task} interface (Listing
-\ref{lst:TaskCollaborationInterfaces}) is the \textsc{explicit interface} that
-provides inversion of control to the method signature (\textsc{task defines
-itself}).
+\ref{lst:TaskCollaborationInterfaces}) is the \textsc{explicit interface} of a
+component that provides inversion of control to the method signature
+(\textsc{task defines itself}).
 
+To manage the complexity of the application's functionality, composite
+components encapsulate complexity to enable more abstract management of the
+application's functionality.  The \textsc{process defines itself} encapsulates
+the complexity of composing tasks into more composite components (processes).
 
-\textsc{use proven tasks}
-\textsc{process defines itself}
-
+Futhermore, the top-down approach to designing an application requires a divide
+and conquer approach over the entire scope of the application requirements.
+Without understanding all the complexities, the design may not adequately meet
+the business needs and require significant refactoring to align to business
+needs.  Building only the mature processes (\textsc{automate only where
+appropriate}) removes the need to understand all complexities as only
+understanding of the scope of each process is required.
 
 
 \subsubsection*{Consequences}
 
 Within \textsc{task defines itself}, object-orientation provides the implicit
-state (dependencies) to a component.  Explicit dependencies are injected as
-arguments into the method (\textsc{record information}).  Object-orientation
-implicitly provides the instance/class references to the method.  Having
-implicit references tightly couples the components and should be avoided in
-implementing components.
+state (dependencies) to a task.  Explicit dependencies are injected as arguments
+into the method (\textsc{record information}).  Object-orientation implicitly
+provides the instance/class references to the method.  Having implicit
+references tightly couples the tasks and should be avoided in implementing
+tasks.  Furthermore, as the application behaviour is implemented in tasks via
+methods, the application is no longer constructed only as a graph of
+collaborating hierarchical objects.
 
-Furthermore, within \textsc{task defines itself} the use of object-orientation
-can focus objects on modelling the state within dependencies.  The objects'
-methods, therefore, focus on constraining changes in the state.  This is similar
-to databases storing data and constraining the changes in the data.  As
-application behaviour is implemented in components via methods, the
-application need not be constructed only as a graph of collaborating
-hierarchical objects.
-
-Using \textsc{process defines itself} allows bottom-up control over the design of
-the application.  As the variation points are controlled by the lower-level
-layer components, developers may start by building the lower-level layer
-components first.  As the lower-level layer components are less abstract, the
-developer is able to focus on more concrete problems and provide only the
-necessary variation points to solve the particular problem.  This avoids over
-engineering the design of the application.  Furthermore, as the higher-level
-layer components are built last, there is less need for large initial top-down
-designs.
+Using \textsc{process defines itself} enables bottom-up control over the design
+of the application.  As the variation points are controlled by the tasks,
+developers may start by building the tasks first.  As the tasks are less
+abstract, the developer is able to focus on more concrete problems and provide
+only the necessary variation points to solve the particular problem.  This
+avoids over engineering the design of the application.  Furthermore, as the
+processes are built last, there is less need for large initial top-down designs.
 
 \textsc{process defines itself} also enables bottom-up evolution of the
 application.  Within applications imposing top-down design, the
 \textsc{explicit interface} (\textsc{template method}) between \textsc{layers}
 needs to be refactored to account for required changes to increase the
 variability of the lower-level layer components as the application evolves
-\cite{ioc}.  Within bottom-up \textsc{process defines itself}, the lower-level
-layer component may introduce new variation points that are implemented by
-higher-level layer dependencies and components.  As the \textsc{explicit
-interface} to invoke the lower-level layer component does not change, the
-invoking higher-level layer components do not require refactoring to evolve the
-application.
+\cite{ioc}.  Within bottom-up \textsc{process defines itself}, the tasks may
+introduce new variation points that are implemented by \textsc{define process
+flows} and \textsc{record information} of the higher-level processes and
+composite processes.  As the \textsc{explicit interface} to invoke the
+task/process does not change, the higher-level layer calling code does not
+require refactoring to evolve the application.
 
 
 
 
 \section{Conclusion}
 
-\textbf{TODO} Improved performance tuning of the design, removed coupling of
-existing design patterns used in middleware frameworks and provide inversion of
-control to allow building applications bottom-up.
+The use of proven patterns occurring within an office has highlighted and
+resolved limitations in existing middleware framework patterns.  The
+\textsc{responsible team} pattern and its related task execution patterns
+provides improved performance tuning of the application.  The \textsc{define
+process flows} pattern and its related patterns decreases the coupling between
+methods to enable more flexible change.  Finally, using these patterns together
+for the \textsc{task defines itself} pattern and its related patterns provides
+inversion of control to enable building application's bottom-up.
 
-\textbf{TODO} write about user patterns (as this is implementation patterns)
+As this paper covers the implementation patterns of OfficeFloor, future work
+will describe the usage patterns for developers to build applications with
+OfficeFloor.
 
 
 
