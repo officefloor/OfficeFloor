@@ -872,28 +872,53 @@ In contrast, the \textsc{proactor} pattern enables asynchronously invoking a
 constructed task by registering it for execution by another thread of control
 (allowing to execute tasks concurrently).  In both patterns, they tightly couple
 the collaboration of tasks as the \textsc{thread-per-request} pattern must have
-the invoker provide the thread of control and the \textsc{proactor} pattern must
-have the invoker construct the invoked task.
+the caller provide the thread of control and the \textsc{proactor} pattern must
+have the caller construct the invoked task.
 
 The \textsc{thread-per-request} pattern and \textsc{proactor} pattern further
-tightly couple invoking a task by the invoker being required to handle
-exceptions.  The invoker may not be appropriately responsible to handle a
-resulting exception and this should be delegated to another task.
+tightly couple collaboration of tasks by the caller being required to handle
+exceptions.  The caller may not be appropriately responsible to handle a
+resulting exception and this should be handled by another task.
 
 
 \subsubsection*{Implementation}
 
 The task collaboration implementation builds on the task execution
-implementation.  On executing a \texttt{Task} (object wrapping the method) by
-the \texttt{TaskExecutor}, the \texttt{Task} is provided a \texttt{TaskContext}
-(Listing \ref{lst:TaskCollaborationInterfaces}).
+implementation.  On executing a \texttt{Task} (object wrapping the method) the
+\texttt{Task} is provided a \texttt{TaskContext} (Listing
+\ref{lst:TaskCollaborationInterfaces}).
 
-\lstset{caption=Task collaboration pattern interfaces\protect\footnotemark.}
+\lstset{caption=Task collaboration pattern interfaces.}
 \begin{lstlisting}[float,label=lst:TaskCollaborationInterfaces]
 
-    interface Process {
-        Future executeProcess(String initialTaskId
+    interface Office {
+        Future executeProcess( String initialTaskId
                              , Object initialTaskParameter);
+    }
+
+    interface Task {
+        void execute(TaskContext context);
+        String[] getHandOffIds();
+        String[] getStateIds();
+    }
+
+    interface TaskExecutor {
+        Future executeTask( String taskId 
+                          , Object parameter
+                          , DependencyContext context);
+    }
+
+    interface TaskContextFactory {
+        TaskContext createTaskContext( String taskId
+                                     , Object parameter
+                                     , DependencyContext context);
+    }
+
+    interface TaskContext {
+        Object getState(String stateId);
+        Future doHandOff(String handOffId, Object parameter);
+        void handleException(Exception exception);
+        void setComplete(boolean isComplete);
     }
 
     interface DependencyInjectionFactory {
@@ -904,61 +929,28 @@ the \texttt{TaskExecutor}, the \texttt{Task} is provided a \texttt{TaskContext}
     interface DependencyContext {
         Object getDependency(String dependencyId);
     }
-
-    interface TaskExecutor {
-        Future executeTask(String taskId 
-                        , Object parameter
-                        , DependencyContext context);
-    }
-
-    interface TaskContextFactory {
-        TaskContext createTaskContext(String taskId
-                                     , Object parameter
-                                     , DependencyContext context);
-    }
-
-    interface TaskContext {
-        Object getState(String stateId);
-        Future doHandOff(String handOffId, Object parameter);
-        void handleException(Exception exception);
-        void pickUpTaskAgain();
-    }
-
-    interface Task {
-        void execute(TaskContext context);
-        String[] getHandOffIds();
-        String[] getStateIds();
-    }
 \end{lstlisting}
-\footnotetext{A rudimentary example implementation of the
-\texttt{DependencyInjectionFactory} is wrapping Spring's \cite{spring}
-\texttt{BeanFactory} to create an implementation of \texttt{DependencyContext}
-by it obtaining (and caching) the calling of Spring's \texttt{getBean(\ldots)}
-method.  A more functional example implementation would utilise Spring's
-\texttt{ApplicationContext} as the \texttt{DependencyContext} to manage the
-context for the components and their dependencies.}
 
-The \texttt{doHandOff(\ldots)} method of the \texttt{TaskContext} (Listing
-\ref{lst:TaskCollaborationInterfaces}) invokes another \texttt{Task}.  The proxy
-implementation of the hand-off interface wraps the \texttt{TaskContext} and
-invokes \texttt{doHandOff(\ldots)} with the respective invoked method name as
-the \texttt{handOffId} (\textsc{hand-off}).  As the \texttt{handOffId}s are
-static for each \texttt{Task}, developer configuration provides the hand-off
-mapping to the respective handling \texttt{Task}\footnote{The
-\texttt{getHandOffIds()} method may be enhanced to also return the argument
-types that the task will provide on each of the hand-offs.  The
-\texttt{getStateIds()} may also be enhanced to provide the expected type the
-task requires for each \texttt{stateId}.  Providing this type information allows
-the hand-off argument to be type validated against the handling task's required
-parameter state type to reduce runtime errors and therefore may restrict some
-mapping changes.
-However, an adapting task may be mapped in between to remove this restriction by
-transforming the argument to the necessary type for the handling task.}
-(\textsc{define process flows}).  Also each \texttt{Task} has an optional
-implicit hand-off that is triggered should no other hand-off be invoked.  This
-enables configuring a sequence of \texttt{Task}s.  Figure
+For the method within the \texttt{Task} to collaborate with other methods it
+defines a hand-off interface (Listing \ref{lst:Example_Method_Task} provides an
+example hand-off interface).  The \texttt{Task} wrapping the method creates a
+proxy implementation of the hand-off interface.  The proxy implementation wraps
+the \texttt{TaskContext} (Listing \ref{lst:TaskCollaborationInterfaces}) and
+invokes \texttt{doHandOff(\ldots)} with the invoked interface method name as the
+\texttt{handOffId} (\textsc{hand-off}).  As the \texttt{handOffId}s are static
+for each \texttt{Task}, developer configuration provides the hand-off mapping to
+the respective handling \texttt{Task}\footnote{The \texttt{getHandOffIds()}
+method may be enhanced to also return the argument types that the \texttt{Task}
+will provide on each of the hand-offs.  The \texttt{getStateIds()} may also be
+enhanced to provide the expected type the \texttt{Task} requires for each
+\texttt{stateId}. Providing this type information allows the hand-off argument
+to be type validated against the handling \texttt{Task}'s required parameter
+state type to reduce runtime errors and therefore may restrict some mapping
+changes.  However, an adapting \texttt{Task} mapped in between will remove this
+restriction by transforming the argument to the necessary type for the invoked
+\texttt{Task}.} (\textsc{define process flows}).  Figure
 \ref{fig:DoContinuationSequenceDiagram} provides a sequence diagram of invoking
-a \texttt{Task} via the \texttt{doHandOff(\ldots)} method.  
+a \texttt{Task} via the \texttt{doHandOff(\ldots)} method.
 
 \begin{figure}[!t]
 \centering
@@ -967,80 +959,96 @@ a \texttt{Task} via the \texttt{doHandOff(\ldots)} method.
 \label{fig:DoContinuationSequenceDiagram}
 \end{figure}
 
-The \texttt{TaskContextFactory}, which constructs each \texttt{TaskContext},
-centrally manages the hand-off mapping to target \texttt{Task}. This is similar
-to the \texttt{DependencyInjectionFactory} (Listing
-\ref{lst:TaskCollaborationInterfaces}) containing centrally managed
-configuration to create dependencies.
+The \texttt{TaskContextFactory} (Listing \ref{lst:TaskCollaborationInterfaces})
+constructs the \texttt{TaskContext}.  The \texttt{TaskContextFactory} centrally
+manages the hand-off (\texttt{handOffId}) mapping to target \texttt{Task}
+(\texttt{taskId}).
 
-The hand-off triggers the \texttt{TaskExecutor} to register a task with a thread
-pool for asynchronous execution.  A \texttt{Future} is returned from this
-registration to notify when the \texttt{Task} is completed (\textsc{task
-complete}).  On completion of the \texttt{Task}, the \texttt{TaskExecutor} is
-also notified of completion of the \texttt{Task}.
-This enables the \texttt{TaskExecutor} to re-register any \texttt{Task}s waiting
-on the \texttt{Future} (\textsc{pick up task again}).  \texttt{Task}s register
-for being picked up again by the \texttt{pickUpTaskAgain()} method (Listing
-\ref{lst:TaskCollaborationInterfaces}).
+To avoid relying on \texttt{Task}s to define hand-offs, each \texttt{Task} has
+an implicit hand-off.  The implicit hand-off is triggered on completion of the
+\texttt{Task} should no other hand-offs be invoked.  This enables configuring a
+sequence of \texttt{Task}s as sequential steps of a process.
+
+The hand-off triggers the \texttt{TaskExecutor} to register a \texttt{Task} with
+its responsible thread pool for asynchronous execution.  A \texttt{Future} is
+returned from this registration to indicate when the handed-off \texttt{Task} is
+completed (\textsc{task complete}).  The \texttt{TaskExecutor} is also notified
+of completion of the \texttt{Task}.  This enables the \texttt{TaskExecutor} to
+re-register any \texttt{Task}s waiting on the \texttt{Future} (\textsc{pick up
+task again}).  \texttt{Task}s flag they need re-registering by calling
+\texttt{setComplete(\ldots)} (Listing \ref{lst:TaskCollaborationInterfaces})
+indicating the \texttt{Task} is not complete.
+
+A \texttt{TaskExecutor} instance is created per process instance.  This enables
+the life-cycle of \texttt{Task}s to be aligned with the process\footnote{The
+\texttt{TaskExecutor} implementation within OfficeFloor also models the software
+concept of a thread.  The hand-off configuration mapping has an attribute
+indicating whether the hand-off spawns a thread (new \texttt{TaskExecutor}).}.
+It also enables the \texttt{TaskExecutor} to register \texttt{Task}s that are
+executed on completion of the process.  For example, registering a \texttt{Task}
+to send the response at the end of the process.
 
 Each \texttt{Task} is constructed via the \textsc{dependency injection} pattern
 \cite{ioc}.  The \texttt{Dependency\-InjectionFactory} (Listing
 \ref{lst:TaskCollaborationInterfaces}) centrally manages the dependency
-configuration and creates a \texttt{Depend\-ency\-Context} that constructs and
-caches dependency instances for the \texttt{Task}s.  The
-\texttt{Dependency\-Context}, that manages the life-cycle of dependencies, is
-aligned to the \texttt{TaskExecutor} life-cycle.  This enables both the
-dependencies of the \texttt{Task}s and the \texttt{Task}s themselves to be
-specific to the request being serviced.  As the dependencies are re-used across
-\texttt{Task}s, this shares state between the \texttt{Task}s (\textsc{record
-information}).
+configuration for all \texttt{Task}s.  To enable sharing state between
+\texttt{Task}s, the \texttt{Dependency\-InjectionFactory} creates a
+\texttt{Depend\-ency\-Context} that caches the dependency instances for the
+\texttt{Task}s.  As the dependency instances are re-used across \texttt{Task}s,
+this shares state between the \texttt{Task}s (\textsc{record information}).
+Furthermore, as the \texttt{Dependency\-Context} manages the life-cycle of
+dependencies, it is aligned to the \texttt{TaskExecutor} life-cycle.
+This enables both the dependencies of the \texttt{Task}s and the \texttt{Task}s
+themselves to be specific to the instance of the process.
 
 The \texttt{doHandOff(\ldots)} does allow one argument to be passed to the
-invoked component (\textsc{complete the form}).  This is for more intuitive
-development by associating the invocation with passing state.  If multiple
-arguments are required, they are encapsulated into an object for passing.
-To maintain loose coupling, the invoked task obtains the argument as state (i.e.
-\texttt{getState(\ldots)} method in listing
-\ref{lst:TaskCollaborationInterfaces}) so the invoked task need not
-differentiate between dependencies and parameters (\textsc{record information}).
-The invoked task may also ignore the hand-off argument should it not depend on
-it.
+invoked \texttt{Task} (\textsc{complete the form}).  This is for more intuitive
+development by passed state with the hand-off.  If multiple arguments are
+required they are encapsulated into an object for passing.
+To maintain loose coupling the invoked \texttt{Task} obtains the argument as
+state (i.e. \texttt{getState(\ldots)} method in listing
+\ref{lst:TaskCollaborationInterfaces}).  This is so the invoked \texttt{Task}
+need not differentiate between dependencies and parameters (\textsc{record
+information}).  The invoked \texttt{Task} may also ignore the handed-off
+argument should it not depend on it.
 
-The hand-off may borrow the thread of the invoking task if it results in being
-executed by the same thread pool.  Rather than dispatching the task back to the
-same thread pool, the \texttt{TaskExecutor} borrows the thread to avoid the
-overhead of a thread-context switch (\textsc{do your work}).
+The hand-off will borrow the thread of control of the calling \texttt{Task} if
+it results in being executed by the same thread pool.  Rather than dispatching
+the \texttt{Task} back to the same thread pool, the \texttt{TaskExecutor}
+borrows the thread to avoid the overhead of a thread-context switch (\textsc{do
+your work}).
 
 Exceptions from the methods are handled by being mapped to a \texttt{handOffId}.
- The task invokes the \texttt{handle\-Excep\-tion(\ldots)} method with the
-exception.  The \texttt{handleException(\ldots)} method is implemented by
-mapping the exception type to a \texttt{handOffId} and invoking the
-\texttt{doHandOff(\ldots)} method with the exception as the argument
-(\textsc{escalation}).  Hand-offs for specific exception types of the task may
-be configured by the developer (\textsc{define process flows}).  The developer
-will also configure ''catch all'' hand-offs for the application to handle
-exceptions from any task to ensure all exceptions are handled (e.g. handling of
-the runtime non-checked exceptions).
+The \texttt{Task} invokes \texttt{handle\-Excep\-tion(\ldots)} with the
+exception from the method.  The \texttt{handleException(\ldots)} method is
+implemented by mapping the exception type to a \texttt{handOffId} and invoking
+the \texttt{doHandOff(\ldots)} method with the exception as the argument
+(\textsc{escalation}).  The developer configures hand-offs for specific
+exception types (\textsc{define process flows}).  The developer will also
+configure ''catch all'' hand-offs to handle exceptions from any \texttt{Task} to
+ensure all exceptions are handled (e.g. handling of the runtime non-checked
+exceptions).
 
-Integrating with code not contained in tasks does not allow access to the
-\texttt{TaskContext} to invoke the hand-off for the first task.  The
-\texttt{Process} (Listing \ref{lst:TaskCollaborationInterfaces}) provides an
-interface that allows code not contained in a task to invoke the first task.
-The returned \texttt{Future} indicates when all tasks of the process are
+Integrating with code not contained in \texttt{Task}s does not allow access to
+the \texttt{TaskContext}.  The \texttt{Office} (Listing
+\ref{lst:TaskCollaborationInterfaces}) provides an interface that allows code
+not contained in a \texttt{Task} to invoke a hand-off to start a process.  The
+returned \texttt{Future} indicates when all \texttt{Task}s of the process are
 complete.  To retrieve results the \texttt{parameter} is used as a visitor
 (\textsc{visitor} pattern \cite{gof}) and loaded with results by the invoked
-tasks.  The \texttt{initialTaskId} may be mapped to a unique URL for external
-triggering of the process (\textsc{contact us}).
+\texttt{Task}s (\textsc{record information}).  The \texttt{initialTaskId} is
+mapped to a unique URL for external triggering of the process (\textsc{contact
+us}).
 
 
 
 \subsubsection*{Example}
 
 Listing \ref{lst:Example_Method_Task} shows an example method for retrieving
-data from a cache.  The task for the \texttt{retrieve\-Data(\ldots)} method will:
+data from a cache.  The \texttt{Task} for the \texttt{retrieve\-Data(\ldots)} method will:
 \begin{enumerate}
   \item Obtain an instance of the \texttt{CacheOperation} via the \texttt{getState(\ldots)} method.
-  \item Obtain both the \texttt{key}\footnote{\texttt{key} is a hand-off argument from the previous task.} and \texttt{cache} again via the \texttt{getState(\ldots)} method.
+  \item Obtain both the \texttt{key}\footnote{\texttt{key} is a hand-off argument from the previous \texttt{Task}.} and \texttt{cache} again via the \texttt{getState(\ldots)} method.
   \item Instantiate a proxy implementation of the \texttt{CacheHandOffs} interface that implements the \texttt{cacheMiss(\ldots)} method by invoking the \texttt{doHandOff(\ldots)} method. 
   \item Reflectively invokes the \texttt{retrieveData(\ldots)} method with the above arguments.
 \end{enumerate}
@@ -1069,72 +1077,75 @@ data from a cache.  The task for the \texttt{retrieve\-Data(\ldots)} method will
 
 Hand-offs from the \texttt{retrieveData(\ldots)} method are:
 \begin{itemize}
-  \item \texttt{cacheMiss(\ldots)} which is mapped to task to retrieve data from the database.
-  \item Implicit hand-off which is mapped to the next task in the process\footnote{The return value from the method is used as the hand-off argument.}.
-  \item \texttt{IOException} which is mapped to a task providing an error message page.  It may also be mapped to a task to retrieve the data from a database to attempt to continue servicing the request.
+  \item \texttt{cacheMiss(\ldots)} which is mapped to a \texttt{Task} to retrieve data from the database.
+  \item Implicit hand-off which is mapped to the next \texttt{Task} in the process\footnote{The return value from the method is used as the hand-off argument.}.
+  \item \texttt{IOException} which is mapped to a \texttt{Task} providing an error response.  It may also be mapped to a \texttt{Task} to retrieve the data from a database to attempt to continue the process.
 \end{itemize}
 
 
 \subsubsection*{Consequences}
 
-The mapping of \texttt{handOffId} to \texttt{taskId} (task) is contained within
-configuration.  This enables changing the handling task without changing the
-code of the methods.  Changing the handling task enables re-ordering the chained
-sequence of tasks that are executed to service a request.  Furthermore, each
-invoked method is undertaken by a thread from its responsible thread pool (i.e.
-potentially different thread).  This removes the thread of control constraint
-imposed by the \textsc{thread-per-request} pattern.
+The mapping of hand-off (\texttt{handOffId}) to \texttt{Task} (\texttt{taskId})
+is contained within configuration.  This enables changing the invoked method
+(\texttt{Task}) without changing the code of the methods.  Changing the handling
+\texttt{Task} enables re-ordering the chained sequence of \texttt{Task}s that
+are executed for the process.  This removes the invocation coupling of the
+\textsc{proactor} pattern.  Furthermore, each \texttt{Task} is executed by a
+thread from its responsible thread pool (i.e. potentially different thread). 
+This removes the thread of control constraint imposed by the
+\textsc{thread-per-request} pattern.
 
-Understanding the collaboration of tasks would become difficult due to the
-indirection involved.  The \textsc{define process flows} configuration, however,
-provides means for graphical tools to manage the configuration to reduce this
-difficulty.  The tools graphically represent the tasks as nodes with the
-hand-off mappings being directed lines between these nodes.  Due to the
-similarity of this configuration with service orchestration this graphical
-configuration is identified as Task Orchestration.
+Understanding the collaboration of \texttt{Task}s would become difficult due to
+the indirection involved.  However, the \textsc{define process flows}
+configuration provides means for graphical tools to manage the configuration to
+reduce this difficulty.  The tools graphically represent the \texttt{Task}s as
+nodes with the hand-off mappings being directed lines between these nodes.  Due
+to the similarity of this configuration with Service Orchestration this
+graphical configuration is identified as Task Orchestration.
 
-Furthermore, as components are potentially executed by different threads of
+Furthermore, as \texttt{Task} are potentially executed by different threads of
 control, the stack trace automatically provided by the
 \textsc{thread-per-request} pattern no longer reflects the call hierarchy for
-servicing a request.  This can make it more difficult to debug issues.  However,
-the \texttt{TaskExecutor} records the tree of components invoked so that the
+the process.  This can make it more difficult to debug issues.  However, the
+\texttt{TaskExecutor} records the tree of \texttt{Task}s invoked so that the
 tree can be traversed back to the root to identify the sequence of hand-offs to
-the task throwing the exception.  The whole tree can also be reported to aid the
-developer in debugging the cause of the issue.
+the \texttt{Task} throwing the exception.  The whole tree can also be reported
+to aid the developer in debugging the cause of the issue.
 
-Functions can also be used in place of methods.  When implementing tasks with
-functions, the functions will not be pure.  As state is shared between tasks by
-mutable state within dependencies, functions will need to cause side effects
-(mutate state) to share state with other tasks (functions).
+Functions can also be used in place of methods.  When implementing
+\texttt{Task}s with functions, the functions will not be pure.  As state is
+shared between \texttt{Task}s by mutable state within dependencies, functions
+will need to cause side effects (mutate state) to share state with other
+\texttt{Task}s.
 
 
 
 \subsubsection*{Related implementations}
 
 OfficeFloor is an implementation of the Actor Model \cite{actors} as it adheres
-to the principles of the Actor Model.  The task is the actor.  The asynchronous
-communication between tasks decouples the hand-off argument (message) from the
-sending task (actor).  The \texttt{taskId} provides an address for a task
-(actor).  The provided \texttt{handOffId}s restricts the tasks (actors) that may
-be used.
+to the principles of the Actor Model.  The \texttt{Task} is the actor.  The
+asynchronous communication between \texttt{Task}s decouples the hand-off
+argument (message) from the sending \texttt{Task} (actor).  The \texttt{taskId}
+provides an address for a \texttt{Task} (actor).  The provided
+\texttt{handOffId}s restricts the \texttt{Task}s (actors) that may be used.
 
-OfficeFloor is also a form of continuation-passing style \cite{continuations}. 
+OfficeFloor is also a form of continuation-passing style \cite{continuations}.
 The hand-off can be considered a continuation, as it is a ''goto'' for executing
-another task with a different thread (stack).  The benefit of providing
-hand-offs through a context object is that the task is free to depend on as many
+another \texttt{Task} with a different thread (stack).  The benefit of providing
+hand-offs through a \texttt{TaskContext} is that the \texttt{Task} is free to depend on as many
 hand-offs as necessary, and not what the caller provides.  It also means that as
-the application evolves the task encapsulates potential changes requiring
+the application evolves the \texttt{Task} encapsulates potential changes requiring
 different hand-offs.  The indirection allows managing these changes as
 configuration changes rather than code changes.
 
 The \textsc{do it yourself} pattern of OfficeFloor has similarities to a monadic
-thread \cite{monadic-thread}.  The tasks can be considered nodes in the lazy
-trace of the monadic thread.  The advantage of OfficeFloor\footnote{Beyond Task
-Orchestration being easier for the developer to understand than monad
+thread \cite{monadic-thread}.  The \texttt{Task}s can be considered nodes in the
+lazy trace of the monadic thread.  The advantage of OfficeFloor\footnote{Beyond
+Task Orchestration being easier for the developer to understand than monad
 programming.} is that the \textsc{responsible team} pattern allows the execution
-of blocking I/O nodes (tasks) to be prioritised.  Monadic threads can not
-prioritise blocking I/O nodes as they know little about them and subsequently
-execute them within a single thread pool.
+of blocking I/O nodes (\texttt{Task}s) to be prioritised.  Monadic threads can
+not prioritise blocking I/O nodes as they know little about them and
+subsequently execute them within a single thread pool.
 
 
 
@@ -1152,10 +1163,9 @@ patterns.
 \subsubsection*{Context} Within an office the task itself will define its
 dependencies and when aspects are no longer its responsibility.  Providing a
 fixed set of dependencies and fixed set of hand-offs to a person to achieve a
-task will, unless a very simple task, likely result in the task being
-unsuccessful.  To be successful, the person executing the task will seek out the
-required dependencies and other people necessary to complete the task
-successfully.
+task will, unless a very simple task, result in the task being unsuccessful.  To
+be successful the person executing the task will seek out the required
+dependencies and other people necessary to complete the task.
 
 Furthermore, when conditions change the task may require new dependencies and
 new hand-offs.  Introducing these new dependencies and hand-offs should be
@@ -1166,7 +1176,7 @@ implementation of the method.  The caller provides all arguments (dependencies)
 and indicates that the method must be completed by the caller's thread of
 control\footnote{The invoked method may create new threads but unless the caller
 provides reference to existing thread pools, the method will not be able to use
-them).}.
+them.}.
 
 \subsubsection*{Problem} Let the method implementation define the method
 signature and continue to enable the caller to invoke the method as the method
@@ -1181,10 +1191,14 @@ signature changes.
 \end{itemize}
 
 \subsubsection*{Solution} Use \textsc{hand-off} and \textsc{complete the form}
-to decouple the caller from the method signature.  Use \textsc{define
-process flows}, \textsc{record information}, \textsc{escalation} and
-\textsc{responsible team} (via \textsc{categorise task}) to enable the method
-implementation to define the method signature.
+to decouple the caller from the method signature.  To enable the method
+implementation to define the method signature, use:
+\begin{itemize}
+  \item \textsc{define process flows} to have method define its name (\texttt{taskId}),
+  \item \textsc{record information} to provide the arguments,
+  \item \textsc{escalation} to handle exceptions, and
+  \item \textsc{responsible team} (via \textsc{categorise task}) to specify the thread of control.    
+\end{itemize}
 
 \subsubsection*{Consequences} The caller is no longer coupled to the method
 signature.  This allows the method signature to change without impacting the
@@ -1197,10 +1211,6 @@ hierarchies can no longer be determined by method signatures.
 
 
 \subsection{\textsc{\textbf{process defines itself}}}
-
-The following patterns model the collaboration of methods after the way tasks
-collaborate within an office.  The implementation notes at the end provide
-details on how to implement the patterns.
 
 \subsubsection*{Context} The process is constructed from tasks.  As the tasks
 define themselves, the process is subject to the necessitities of its containing
@@ -1223,11 +1233,11 @@ necessary.
 
 Therefore, within an office the process defines itself to achieve its
 requirements.  The process is also interchangeable with a task depending on the
-complexity of the functionality.
+required complexity.
 
 \subsubsection*{Problem} Enable the a process to define itself.  Furthermore, in
-defining itself the process is to have a similar interface to a task to be
-interchangeable with a task.
+defining itself the process is to have a similar interface to a \texttt{Task} to
+be interchangeable with a \texttt{Task}.
 
 \subsubsection*{Forces} Adding new tasks to a process is similar to adding new
 functionality to a method.  Adding new functionality to a method involves:
@@ -1237,26 +1247,28 @@ functionality to a method.  Adding new functionality to a method involves:
   \item a different threading model to efficiently undertake the functionality. 
 \end{itemize}
 
-\subsubsection*{Solution} Represent the process as a task in the \textsc{define
-process flows}.  The process is given its own \texttt{taskId} that maps to the
-initial task of the process\footnote{The process may expose multiple
-\texttt{taskId} to enable starting at different tasks within it.}.  All
-hand-offs not mapped to a task within the process become the set of hand-offs
-for the process (this includes \textsc{escalation}).  All dependencies of the
-contained tasks (from \textsc{record information}) becomes the set of
-dependencies for the process.
+\subsubsection*{Solution} Represent the process as a \texttt{Task} in the
+\textsc{define process flows}.  The process is given its own \texttt{taskId}
+that maps to the initial \texttt{Task} of the process\footnote{The process may
+expose multiple \texttt{taskId}s to enable starting at different \texttt{Task}s
+within it.}.  All hand-offs not mapped to a \texttt{Task} within the process
+become the set of hand-offs for the process (this includes \textsc{escalation}).
+All dependencies of the contained \texttt{Task}s (from \textsc{record
+information}) becomes the set of dependencies for the process.
 
-To reduce the set of dependencies for the process, the process defines objects
-to fulfill dependencies for its contained tasks.  These fulfilled dependencies
-would not be included in the interface set of dependencies for the process.
+To reduce the set of dependencies for the interface to the process, the process
+defines objects to fulfill dependencies for its contained \texttt{Task}s.  These
+fulfilled dependencies are not included in the interface set of dependencies for
+the process.
 
-Similarly to reduce the hand-offs for the interface to the process, hand-offs
-from multiple contained tasks are mapped to a single hand-off exposed from the
-process.
+Also, to reduce the hand-offs for the interface to the process, hand-offs
+from multiple contained \texttt{Task}s are mapped to a single hand-off exposed
+from the process.
 
-\subsubsection*{Consequences} As the process is interchangeable with a task,
-composite processes are built from other processes.  The interface of a
-composite process is created in the same way as if it contained tasks.
+\subsubsection*{Consequences} As the process is interchangeable with a
+\texttt{Task}, composite processes are built from other processes.  The
+interface of a composite process is created in the same way as if it contained
+\texttt{Task}s.
 
 Having composite processes constructed from other composite processes requires
 the graphical representation of the \textsc{define process flows} pattern (Task
@@ -1264,19 +1276,20 @@ Orchestration).  This is necessary for the developer to understand the flows
 within the application, as adding composite processes is further indirection
 that requires visual representation to comprehend.
 
-The \textsc{categorise task} pattern of each contained task within the process
-(and composite processes) is still followed.  As the process is constructed from
-only tasks, the process focuses only on functionality and allows all its tasks
-to be executed by the \textsc{responsible team} pattern.  Therefore, if the
-responsible thread pools are changed for the application the execution of the
-tasks within the processes follow the new threading model without requiring code
-nor configuration changes.  This enables the threading model of the application
-to be tuned to the hardware it is running on (e.g. single person team for a low
-powered single CPU device or multiple specialised teams for high-performance
-multicore hardware\footnote{Using increasingly better hardware follows the
-analogy of growing the workforce of a business.  The business starts out only as
-a small number of people doing many categories of tasks to becoming a large
-number of people doing very specific categories of tasks.}).
+The \textsc{categorise task} pattern of each contained \texttt{Task} within the
+process (and composite processes) is still followed.  As the process is
+constructed from only \texttt{Task}s, the process focuses only on functionality
+and allows all its \texttt{Task}s to be executed by the \textsc{responsible
+team} pattern.  Therefore, if the responsible thread pools are changed for the
+application the execution of the \texttt{Task}s within the processes follow the new
+threading model without requiring code nor configuration changes.  This enables
+the threading model of the application to be tuned to the hardware it is running
+on (e.g. single thread pool for a low powered single CPU device or multiple
+specialised thread pools for high-performance multi-core hardware\footnote{Using
+increasingly better hardware follows the analogy of growing the workforce of a
+business.  The business starts out only as a small number of people doing many
+categories of tasks to becoming a large number of people doing very specific
+categories of tasks.}).
 
 
 
@@ -1298,9 +1311,9 @@ proven.  As the processes inevitably mature within the business, they become
 different to their forced up front standardisation.
 
 Businesses, therefore, standardise their processes by re-use of proven
-processes/tasks (bottom-up approach) and only automate where appropriate.
+processes/tasks and only automate where appropriate (bottom-up approach).
 
-Designing technology systems top-down is, therefore, not in alignment to how
+Designing technology systems top-down is subsequently not in alignment to how
 businesses evolve.
 
 \subsubsection*{Problem} Design technology systems bottom-up.
@@ -1337,11 +1350,11 @@ Applications built with \textsc{layers} typically impose a top-down approach to
 design.  ``The \textsc{layers} require and provide \textsc{explicit interfaces}
 from and to each other, in a top-down manner, from the higher to the lower
 \textsc{layers}'' \cite[p. 11]{ioc}.  The higher-level layer components (object
-that wraps a method, i.e. Task) define the variation points that are
+that wraps a method) define the variation points that are
 ``predefined points in the control and data flow which allow for modifying and
 extending a component's behaviour'' \cite[p. 5]{ioc}.  A top-down approach is
 required, as the higher-level layers control what variation points may be
-implemented by the lower-level layer components.
+implemented by the lower-level layers.
 
 The components need to be composed within an architecture that is dictated by
 the framework.  The framework ``will define the overall structure, its
@@ -1417,10 +1430,11 @@ variation points for the application.
 the state (objects) it requires.  The lower-level layer component specifies its
 required state (objects) via \texttt{stateId}s.  As the lower-level layer
 retrieves its state via \textsc{record information}, the invoking higher-level
-layer components need only provide the single optionally used argument.  This
-allows the lower-level layer component to specify as many dependencies as is
-necessary.  It, therefore, gives the lower-level layer component control over
-what state (objects/dependencies) it may depend on.
+layer components need only provide the single optionally used argument
+(\textsc{complete the form}).  This allows the lower-level layer component to
+specify as many dependencies as is necessary.  It, therefore, gives the
+lower-level layer component control over what state (dependencies) it
+may depend on.
 
 \textsc{categorise task} enables the lower-level layer component to specify its
 thread of control.  By the the lower-level layer component having control over
@@ -1446,7 +1460,7 @@ from having to handle the exceptions, the lower-level layer component is free to
 control throwing as many exceptions as is warranted.
 
 Using the office patterns provides the necessary inversion of control over
-variation points as the lower-level layer component (Task) controls:
+variation points as the lower-level layer component controls:
 \begin{itemize}
   \item its name (\texttt{taskId}) which is decoupled from the invoking higher-level layer component invocation (\texttt{handOffId}) by \textsc{define process flows};
   \item which invocations (\texttt{handOffId}s) are necessary via \textsc{hand-off};
@@ -1460,10 +1474,20 @@ Therefore, the \texttt{Task} interface (Listing
 component that provides inversion of control to the method signature
 (\textsc{task defines itself}).
 
-To manage the complexity of the application's functionality, composite
-components encapsulate complexity to enable more abstract management of the
-application's functionality.  The \textsc{process defines itself} encapsulates
-the complexity of composing tasks into more composite components (processes).
+To manage the complexity of the application's functionality, OfficeFloor
+modularises the Task Orchestration into sections.  Each section provides
+hand-off mapping configuration between \texttt{Task}s and other contained
+sections (\textsc{process defines itself}).  As sections may contain other
+sections, it creates a bottom-up approach to configuration.  The lower-level
+layer sections are configured first and then the higher-level layer sections
+configure these lower-level layer sections together\footnote{At the top level,
+OfficeFloor configures the sections within an office.  The office configuration
+enables weaving \texttt{Task}s as aspects into the contained sections
+(identified as the \textsc{admistration} pattern).  The office configuration
+also provides additional management over dependencies, such as demarcating
+transactions (identified as the \textsc{governance} pattern).  These patterns
+will be discussed in the future work of usage patterns of OfficeFloor to build
+applications.}.
 
 Futhermore, the top-down approach to designing an application requires a divide
 and conquer approach over the entire scope of the application requirements.
@@ -1477,31 +1501,32 @@ understanding of the scope of each process is required.
 \subsubsection*{Consequences}
 
 Within \textsc{task defines itself}, object-orientation provides the implicit
-state (dependencies) to a task.  Explicit dependencies are injected as arguments
-into the method (\textsc{record information}).  Having implicit references from
-object-orientation tightly couples the methods and should be avoided in
-implementing tasks.  Furthermore, as the application behaviour is implemented in
-tasks via methods, the application is no longer constructed only as a graph of
-collaborating hierarchical objects.
+state (dependencies) to the method within the \texttt{Task}.  Explicit
+dependencies are injected as arguments into the method (\textsc{record
+information}).  Having implicit references from object-orientation tightly
+couples the methods and should be avoided in implementing methods for
+\texttt{Task}s.  Furthermore, as the application behaviour is implemented in
+\texttt{Task}s via methods, the application is no longer constructed only as a
+graph of collaborating hierarchical objects.
 
 Using \textsc{process defines itself} enables bottom-up control over the design
-of the application.  As the variation points are controlled by the tasks,
-developers may start by building the tasks first.  As the tasks are less
-abstract, the developer is able to focus on more concrete problems and provide
-only the necessary variation points to solve the particular problem.  This
-avoids over engineering the design of the application.  Furthermore, as the
-processes are built last, there is less need for large initial top-down designs
-(\textsc{automate only where necessary}).
+of the application.  As the variation points are controlled by the
+\texttt{Task}s, developers may start by building the \texttt{Task}s first.  As
+the \texttt{Task}s are less abstract, the developer is able to focus on more
+concrete problems and provide only the necessary variation points to solve the
+particular problem.  This avoids over engineering the design of the application.
+ Furthermore, as the processes are built last, there is less need for large
+initial top-down designs (\textsc{automate only where necessary}).
 
 \textsc{process defines itself} also enables bottom-up evolution of the
 application.  Within applications imposing top-down design, the
 \textsc{explicit interface} (\textsc{template method}) between \textsc{layers}
 needs to be refactored to account for required changes to increase the
-variability of the lower-level layer components as the application evolves
-\cite{ioc}.  Within bottom-up \textsc{process defines itself}, the tasks may
+variability of the lower-level layer as the application evolves \cite{ioc}. 
+Within bottom-up \textsc{process defines itself}, the \texttt{Task}s may
 introduce new variation points through \textsc{define process flows} and
 \textsc{record information}.  As the \textsc{explicit interface} to invoke the
-task/process does not change, the higher-level layer calling code does not
+\texttt{Task} does not change, the higher-level layer calling code does not
 require refactoring to evolve the application.
 
 
@@ -1509,8 +1534,8 @@ require refactoring to evolve the application.
 
 \section{Conclusion}
 
-The use of proven patterns occurring within an office has highlighted and
-resolved limitations in existing middleware framework patterns.  The
+The use of proven patterns occurring within the office has highlighted and
+resolved limitations in existing design patterns for middleware frameworks.  The
 \textsc{responsible team} pattern and its related task execution patterns
 provides improved performance tuning of the application.  The \textsc{define
 process flows} pattern and its related patterns decreases the coupling between
@@ -1526,11 +1551,10 @@ OfficeFloor.
 
 \section*{Acknowledgment} 
 
-I thank my wife Melanie for her patience and support
-of me developing OfficeFloor on top of my day job.  If she was anyone else
-OfficeFloor would not have been built and this work would not have resulted from
-OfficeFloor.  I also thank my good friend Matthew Brown for being a sounding
-board to many of my ideas.
+I thank my wife Melanie for her patience and support of me developing
+OfficeFloor.  If she was anyone else OfficeFloor would not have been built and
+this work would not have resulted from OfficeFloor.  I also thank my good friend
+Matthew Brown for being a sounding board to many of my ideas.
 
 I am also grateful for the wise shepherding by Veli-Pekka Eloranta and the
 feedback from the participants of EuroPlop 2013.
