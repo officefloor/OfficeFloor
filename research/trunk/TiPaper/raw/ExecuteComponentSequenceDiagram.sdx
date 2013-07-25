@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram>
 <source><![CDATA[invoker:Invoker[a]
-executor:ComponentExecutor[a]
+executor:TaskExecutor[a]
 dif:DependencyInjectionFactory[a]
-/component:Component[x]
+/task:Task[x]
 /runnable:Runnable[x]
 one:ThreadPool
 two:ThreadPool
 n:ThreadPool
 
-invoker:executor.executeComponent(\\n            "compId", "ARG")
-executor:component=dif.createComponent("compId")
-dif:>component.new(dependencies)&
+invoker:executor.executeTask(\\n   "taskId")
+executor:task=dif.createTask("taskId")
+dif:>task.new(dependencies)&
 executor:
-executor:types=dif.getRequiredDependencyTypes(\\n            "compId")
+executor:>runnable.new(task)&
+executor:types=dif.getRequiredDependencyTypes(\\n   "taskId")
 executor:
 executor:>executor.selectThreadPool(types)&
 executor:
-executor:>runnable.new(component, "ARG")&
 executor:two.register(runnable)
 two[,0]:>two.queue(runnable)
 invoker:stop
 two:runnable.run()
-runnable:component.execute("ARG")
+runnable:task.execute()
 runnable:stop
 ]]></source>
 <configuration>
