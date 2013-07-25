@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram>
-<source><![CDATA[invoker:Invoker
-componentContext:ComponentContext
+<source><![CDATA[invoker:Task
+taskContext:TaskContext
 executor:TaskExecutor
 dependencyContext:DependencyContext
 /task:Task[x]
 tcf:TaskContextFactory[a]
-/invokedContext:ComponentContext[x]
+/invokedContext:TaskContext[x]
 dif:DependencyInjectionFactory[a]
 /runnable:Runnable extends Future
 threadPool:ThreadPool
 
-invoker:future=componentContext.doHandOff(\\n   "handOffId", "ARG")
-componentContext:>componentContext.lookupTaskId(\\n    "handOffId")&
-componentContext:
-componentContext:future (runnable)=executor.executeTask(\\n   "taskId", "ARG",\\n   dependencyContext)
+invoker:future=taskContext.doHandOff(\\n   "handOffId", "ARG")
+taskContext:>taskContext.lookupTaskId(\\n    "handOffId")&
+taskContext:
+taskContext:future (runnable)=executor.executeTask(\\n   "taskId", "ARG",\\n   dependencyContext)
 executor:task=dependencyContext.getDependency(\\n   "taskId")
 dependencyContext:>task.new()\\nor use cached&
 executor:invokedContext=tcf.createTaskContext(\\n   "taskId", "ARG",\\n   dependencyContext)
-tcf:>invokedContext.new(continuationMappings,\\n            exceptionMappings,\\n            stateMappings,\\n            dependencyContext)&
+tcf:>invokedContext.new(handOfftMappings,\\n   exceptionMappings,\\n   stateMappings,\\n   dependencyContext)&
 executor:types=dif.getRequiredDependencyTypes(\\n   "taskId")
 executor:>executor.lookupThreadPool(types)&
 executor:>runnable.new(task, invokedContext)&
