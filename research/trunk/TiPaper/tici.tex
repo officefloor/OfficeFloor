@@ -312,7 +312,7 @@ of the office.  Therefore, within an office many tasks are undertaken by the
 current person involved in the process.
 
 Assigning a method to a thread pool requires a thread-context switch to execute
-the method.  Having to thread context-switch for execution of each method is
+the method.  Having to thread-context switch for execution of each method is
 inefficient and will degrade performance of the application.
 
 \subsubsection*{Problem} Avoid thread-context switching to execute each method.
@@ -428,7 +428,7 @@ provides a sequence diagram of executing a \texttt{Task}.  The
 the appropriate \texttt{Task} and then assigns it for execution by one of the
 many developer configured thread pools (\textsc{team}).
 
-\lstset{caption=\textsc{thread injection} pattern interfaces\protect\footnotemark.}
+\lstset{caption=\textsc{thread injection} pattern interfaces.}
 \begin{lstlisting}[float,label=lst:TaskExecutionInterfaces]
 
     interface Task {
@@ -445,13 +445,6 @@ many developer configured thread pools (\textsc{team}).
         Type[] getRequiredDependencyTypes(String taskId);
     }
 \end{lstlisting}
-\footnotetext{An example implementation of the
-\texttt{DependencyInjectionFactory} is wrapping Spring's \cite{spring}
-\texttt{DefaultListableBeanFactory} to implement
-\texttt{createComponent(\ldots)} by calling \texttt{getBean(\ldots)} and
-implement \texttt{getRequiredDependencyTypes(\ldots)} by recursively calling
-\texttt{getBeanDefinition(\ldots)}/\texttt{getDependsOn()} to create the 
-list of types.}
 
 
 \begin{figure}[!t]
@@ -465,12 +458,11 @@ The \texttt{getRequiredDependencyTypes(\ldots)} (Listing
 \ref{lst:TaskExecutionInterfaces}) method provides the categorisation of the
 \texttt{Task}.  As the arguments to the method are supplied to its wrapping
 \texttt{Task} by \textsc{dependency injection}~\cite{ioc}, the
-\texttt{getRequiredDependencyTypes(\ldots)} method uses the
-\textsc{dependency injection} configuration\footnote{\textsc{dependency injection}
-frameworks using qualification to identify dependencies of the same type may
-return a type object containing both class and qualifier rather than just a
-class.  The thread pool matching then incorporates the qualifier.} to identify
-the required parameter types of the method within the \texttt{Task}
+\texttt{getRequiredDependencyTypes(\ldots)} method uses the \textsc{dependency
+injection} configuration\footnote{OfficeFloor uses qualification to distinguish
+dependencies of the same type and returns a type object containing both class
+and qualifier.  The thread pool matching then incorporates the qualifier.} to
+identify the required parameter types of the method within the \texttt{Task}
 (\textsc{categorise task}).
 
 The prioritisation tuning is achieved by use of responsible thread pools.  The
@@ -481,12 +473,12 @@ with more than one dependency type.}.  To execute the \texttt{Task}, the
 for the dependency type\footnote{The \texttt{taskId} may also be used for very
 fine grained responsibility.} (\textsc{responsible team}).  The
 \texttt{execute()} method (Listing \ref{lst:TaskExecutionInterfaces}) is then
-invoked by a thread from the matching thread pool to execute the \texttt{Task}. 
+invoked by a thread from the matching thread pool to execute the \texttt{Task}.
 This provides the necessary isolation of differing \texttt{Task}s for improved
 tuning of the server\footnote{The task execution patterns are collectively
 identified as the software pattern \textsc{thread injection}.  This is because
-of the thread being chosen to execute the method is undertaken in a similar way
-to selection of dependencies by the \textsc{dependency injection}~\cite{ioc}
+the thread being chosen to execute the method is undertaken in a similar way to
+the selection of dependencies by the \textsc{dependency injection}~\cite{ioc}
 pattern.}.
 
 For \texttt{Task}s not having dependencies (nor dependencies of any performance
@@ -509,16 +501,16 @@ specific to its responsible dependency type.  For example, the thread pool may
 contain multiple threads for concurrent execution of \texttt{Task}s with threads
 added/removing based on the load of \texttt{Task}s (\textsc{manage team sizes}),
 a single thread for serial execution of \texttt{Task}s, or no threads and
-execute components by borrowing the thread of control to reduce thread-context
-switching (\textsc{do it yourself}).
+execute \texttt{Task}s by borrowing the thread of control to reduce
+thread-context switching (\textsc{do it yourself}).
 
 The \texttt{cancel(\ldots)} method (Listing \ref{lst:TaskExecutionInterfaces})
 enables the \texttt{TaskExecutor} to cancel the \texttt{Task}. The
 \texttt{Task\-Executor} will cancel new \texttt{Task}s for a particular thread
 pool when queuing the \texttt{Task} for a thread will result in exceeding a
-particular threshold\footnote{A sufficient threshold would be ensuring the wait
+particular threshold\footnote{A sufficient threshold is ensuring the wait
 time, determined by a running average of execution time multiplied against the
-number of components currently in the queue, is below a certain time.}
+number of \texttt{Task}s currently in the queue, is below a certain time.}
 (\textsc{team too busy}).  Each thread pool has its own thresholds particular to
 its responsible dependency type.  As \texttt{Task}s are mapped to particular
 thread pools, this ensures only the appropriate \texttt{Task}s are cancelled.
@@ -704,7 +696,7 @@ of control).
 methods of the same responsible thread pool.
 
 \subsubsection*{Related Patterns} Is a sequence on \textsc{hand-off} to reduce
-thread context switching.
+thread-context switching.
 
 
 
@@ -721,7 +713,7 @@ threads and there is no synchronous return from them to the calling method.
 
 \subsubsection*{Solution} Provide a Future from the hand-off invocation to
 indicate when the handed-off method is complete\footnote{As the handed-off
-method may invoke further hand-offs, the Future will indicate when the resulting
+method may invoke further hand-offs, the Future indicates when the resulting
 tree of hand-offs is complete.}.
 
 \subsubsection*{Consequences} The Future provides a polling mechanism to check
@@ -851,7 +843,7 @@ in that process.
 
 \subsubsection*{Consequences} Processes are triggered from outside the
 application. Responses are achieved by \textsc{record information} providing the
-data for a response\footnote{\textsc{record information} would also provide
+data for a response\footnote{\textsc{record information} also provides
 access to the client connection to send the response.}.
 
 \subsubsection*{Related Patterns} Is a sequence on \textsc{hand-off} to enable
@@ -932,6 +924,14 @@ implementation.  On executing a \texttt{Task} (object wrapping the method) the
     }
 \end{lstlisting}
 
+\begin{figure}[!t]
+\centering
+\includegraphics[height=7.4in]{DoContinuationSequenceDiagram}
+\caption{Sequence diagram of invoking \texttt{doHandOff(\ldots)}.}
+\label{fig:DoContinuationSequenceDiagram}
+\end{figure}
+
+
 For the method within the \texttt{Task} to collaborate with other methods it
 defines a hand-off interface (Listing \ref{lst:Example_Method_Task} provides an
 example hand-off interface).  The \texttt{Task} wrapping the method creates a
@@ -940,25 +940,16 @@ the \texttt{TaskContext} (Listing \ref{lst:TaskCollaborationInterfaces}) and
 invokes \texttt{doHandOff(\ldots)} with the invoked interface method name as the
 \texttt{handOffId} (\textsc{hand-off}).  As the \texttt{handOffId}s are static
 for each \texttt{Task}, developer configuration provides the hand-off mapping to
-the respective handling \texttt{Task}\footnote{The \texttt{getHandOffIds()}
-method may be enhanced to also return the argument types that the \texttt{Task}
-will provide on each of the hand-offs.  The \texttt{getStateIds()} may also be
-enhanced to provide the expected type the \texttt{Task} requires for each
+the respective handling \texttt{Task}\footnote{OfficeFloor enhances the
+\texttt{getHandOffIds()} method to also return the argument types that the
+\texttt{Task} will provide on each of the hand-offs.  The \texttt{getStateIds()}
+is enhanced to provide the expected type the \texttt{Task} requires for each
 \texttt{stateId}. Providing this type information allows the hand-off argument
 to be type validated against the handling \texttt{Task}'s required parameter
-state type to reduce runtime errors and therefore may restrict some mapping
-changes.  However, an adapting \texttt{Task} mapped in between will remove this
-restriction by transforming the argument to the necessary type for the invoked
-\texttt{Task}.} (\textsc{define process flows}).  Figure
-\ref{fig:DoContinuationSequenceDiagram} provides a sequence diagram of invoking
-a \texttt{Task} via the \texttt{doHandOff(\ldots)} method.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[height=7.4in]{DoContinuationSequenceDiagram}
-\caption{Sequence diagram of invoking \texttt{doHandOff(\ldots)}.}
-\label{fig:DoContinuationSequenceDiagram}
-\end{figure}
+type.  This reduces runtime errors by enabling validation of the \textsc{define
+process flows} configuration.}.  Figure \ref{fig:DoContinuationSequenceDiagram}
+provides a sequence diagram of invoking a \texttt{Task} via the
+\texttt{doHandOff(\ldots)} method.
 
 The \texttt{TaskContextFactory} (Listing \ref{lst:TaskCollaborationInterfaces})
 constructs the \texttt{TaskContext}.  The \texttt{TaskContextFactory} centrally
@@ -1177,10 +1168,9 @@ encapsulated by the task and not significantly impact its containing process.
 
 The method signature is fixed by the caller of the method and not the
 implementation of the method.  The caller provides all arguments (dependencies)
-and the method must be completed by the caller's thread of
-control\footnote{The invoked method may create new threads but unless the caller
-provides reference to existing thread pools, the method will not be able to use
-them.}.
+to the method and the thread of control to execute the method\footnote{The
+invoked method may spawn new threads but unless the caller provides reference to
+existing thread pools, the method will not be able to use them.}.
 
 \subsubsection*{Problem} Let the method implementation define the method
 signature and continue to enable the caller to invoke the method as the method
@@ -1260,12 +1250,12 @@ become the set of hand-offs for the process (this includes \textsc{escalation}).
 All dependencies of the contained \texttt{Task}s (from \textsc{record
 information}) becomes the set of dependencies for the process.
 
-To reduce the set of dependencies for the interface to the process, the process
-defines objects to fulfill dependencies for its contained \texttt{Task}s.  These
+To reduce the set of dependencies for the interface of the process, the process
+may define objects to fulfill dependencies for its contained \texttt{Task}s.  These
 fulfilled dependencies are not included in the interface set of dependencies for
 the process.
 
-Also, to reduce the hand-offs for the interface to the process, hand-offs
+Also, to reduce the hand-offs for the interface of the process, hand-offs
 from multiple contained \texttt{Task}s are mapped to a single hand-off exposed
 from the process.
 
@@ -1301,11 +1291,10 @@ categories of tasks.}).
 
 \subsubsection*{Context} Automating all processes is costly to a business.  In
 many cases, using manual processes is cheaper than the cost of automating them.
- Furthermore, all processes may not be mature enough to be automated.
- 
-Automating a process requires standardising the process, ensuring the
-dependencies of the process are available and accessible, and catering to all the
-exceptions that may occur within the process.
+Furthermore, all processes may not be mature enough to be automated.  Automating
+a process requires standardising the process, ensuring the dependencies of the
+process are available and accessible, and catering to all the exceptions that
+may occur within the process.
 
 Designing a business top down forces all processes to be of at least
 standardised maturity to understand their interrelationships within the whole of
@@ -1315,7 +1304,7 @@ proven.  As the processes inevitably mature within the business, they become
 different to their forced up front standardisation.
 
 Businesses, therefore, standardise their processes by re-use of proven
-processes/tasks and only automate where appropriate (bottom-up approach).
+tasks/processes and only automate where appropriate (bottom-up approach).
 
 Designing technology systems top-down is subsequently not in alignment to how
 businesses evolve.
@@ -1324,17 +1313,18 @@ businesses evolve.
 
 \subsubsection*{Forces} The method puts the control at the higher-level layers
 of the system design.  The higher-level layer caller tightly couples the method
-signature that the lower-level layer components may implement.  The lower-level
-layers may not change the method signature without refactoring the higher-level
-layers due to this tight coupling.
+signature that the lower-level layers must implement.  The lower-level layers
+may not change the method signature without refactoring the higher-level layers
+due to this tight coupling.
 
 \subsubsection*{Solution} Use \textsc{task defines itself} to only build proven
 tasks.  Then build only the standardised processes through \textsc{process
 defines itself}.
 
-\subsubsection*{Consequences} The design of technology systems automate only the
-mature processes within the business.  The less mature processes are left
-undefined until they mature in the business.
+\subsubsection*{Consequences} Using \textsc{task defines itself} and
+\textsc{process defines itself} enables the design of technology systems to
+automate only the mature processes within the business.  The less mature
+processes are left undefined until they mature in the business.
 
 This bottom-up approach to designing systems aligns both to the business
 maturing and also modern development methodologies.  Modern development
@@ -1392,7 +1382,7 @@ The method signature meets the requirements as it:
   \item may invoke other methods;
   \item shares state with other methods by arguments and return values;
   \item provides declaration of exceptions for handling; and
-  \item can be executed by the thread of control\footnote{For a stateless component interface, thread local variables are to be avoided to not incur affinity to a thread.}.
+  \item can be executed by the thread of control.
 \end{itemize}
 
 The method interface is, however, subject to tight coupling.  The tight
@@ -1475,32 +1465,36 @@ variation points as the lower-level layer component controls:
 
 Therefore, the \texttt{Task} interface (Listing
 \ref{lst:TaskCollaborationInterfaces}) is the \textsc{explicit interface} of a
-component that provides inversion of control for the the method signature
-(\textsc{task defines itself}).
+component that provides inversion of control for the the method signature. 
+Rather than the caller defining the method signature, the implemention of the
+method controls defining the method signature (\textsc{task defines itself}).
 
 To manage the complexity of the application's functionality, OfficeFloor
 modularises the \textsc{define process flows} configuration (Task Orchestration)
 into sections.  Each section provides hand-off mapping configuration between
 \texttt{Task}s and other contained sections (\textsc{process defines itself}).
-As sections may contain other sections, it creates a bottom-up approach to
-building the application.  The lower-level layer sections configure the
-\texttt{Task}s.  The higher-level layer sections then configure these
-lower-level layer sections together\footnote{At the top level, OfficeFloor
-configures the sections within an office.  The office configuration enables
-weaving \texttt{Task}s as aspects into the contained sections (identified as the
+The lower-level layer sections configure the \texttt{Task}s together.  The
+higher-level layer sections configure these lower-level layer sections together.
+As sections are configured from other existing sections, it creates a bottom-up
+approach to building the application\footnote{OfficeFloor configures the
+top-level sections within an office.  The office configuration enables weaving
+\texttt{Task}s as aspects into the contained sections (identified as the
 \textsc{admistration} pattern).  The office configuration also provides
 additional management over dependencies, such as demarcating transactions
-(identified as the \textsc{governance} pattern).  These patterns will be
-discussed in the future work of usage patterns of OfficeFloor to build
-applications.}.
+(identified as the \textsc{governance} pattern). OfficeFloor then configures
+these offices onto the office floor where the dependencies and responsible
+thread pools are configured.  The office building (agent running on each server)
+hosts each office floor as a separate operating system process.  These patterns
+will be included in the future work of usage patterns to build applications with
+OfficeFloor.}.
 
 Futhermore, the top-down approach to designing an application requires a divide
 and conquer approach over the entire scope of the application requirements.
 Without understanding all the complexities, the design may not adequately meet
 the business needs and require significant refactoring to align to business
-needs.  Building only the mature processes (\textsc{automate only where
-appropriate}) removes the need to understand all complexities as only
-understanding of the scope of each process is required.
+needs.  OfficeFloor enables building only the mature processes (\textsc{automate
+only where appropriate}) and removes the need to understand all complexities as
+only understanding of the scope of each process is required.
 
 
 \subsubsection*{Consequences}
@@ -1509,7 +1503,7 @@ Within \textsc{task defines itself}, object-orientation provides the implicit
 state (dependencies) to the method within the \texttt{Task}.  Explicit
 dependencies are injected as arguments into the method (\textsc{record
 information}).  Having implicit references from object-orientation tightly
-couples the methods and should be avoided in implementing methods for
+couples the methods and should be avoided in the implementing methods for
 \texttt{Task}s.  Furthermore, as the application behaviour is implemented in
 \texttt{Task}s via methods, the application is no longer constructed only as a
 graph of collaborating hierarchical objects.
@@ -1527,11 +1521,10 @@ initial top-down designs (\textsc{automate only where necessary}).
 application.  Within applications imposing top-down design, the
 \textsc{explicit interface} (\textsc{template method}) between \textsc{layers}
 needs to be refactored to account for required changes to increase the
-variability of the lower-level layer as the application evolves \cite{ioc}. 
+variability of the lower-level layer as the application evolves \cite{ioc}.
 Within bottom-up \textsc{process defines itself}, the \texttt{Task}s may
-introduce new variation points through \textsc{define process flows} and
-\textsc{record information}.  As the \textsc{explicit interface} to invoke the
-\texttt{Task} does not change, the higher-level layer calling code does not
+introduce new variation points.  As the \textsc{explicit interface} to invoke
+the \texttt{Task} does not change, the higher-level layer calling code does not
 require refactoring to evolve the application.
 
 
