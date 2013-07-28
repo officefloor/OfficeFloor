@@ -127,9 +127,9 @@ within offices before technology systems began automating tasks.  The manual
 office processes are accepted by people and the patterns proven within many
 business organisations.
 
-This paper discusses these office patterns and how they remove constraints
-within existing software design patterns.  The patterns presented are the
-patterns used by OfficeFloor in its implementatation as a middleware framework.
+This paper discusses these office patterns and how they provide improvement over
+existing software design patterns.  The patterns presented are the patterns used
+by OfficeFloor in its implementatation as a middleware framework.
 Usage patterns for developers to build applications with OfficeFloor is left to
 future work.
 
@@ -273,11 +273,11 @@ the responsible categories of methods to execute.
 \subsection{\textsc{\textbf{manage team size}}}
 
 \subsubsection*{Context} As the number of tasks for a responsible team grows or
-shrinks, the size of the team is altered to obtain optimal throughput.  For example,
-near the end of the financial year the finance team will be increased in size for
-the additional number of financial year end tasks.  The software development
-team, however, would not be changed in size as the development tasks would stay
-the same in number.
+shrinks, the size of the team is altered to obtain optimal throughput.  For
+example, near the end of the financial year the finance team will be increased
+in size for the additional number of financial year end tasks.  The software
+development team, however, would not be changed in size as the development tasks
+stay the same in number.
 
 \subsubsection*{Problem} Obtain optimal throughput execution of methods by a
 thread pool.
@@ -367,7 +367,7 @@ methods from being registered.
 \subsubsection*{Consequences} The thread pool will execute all methods that are
 registered.  For methods not registered, \textsc{escalation} enables alternate
 methods to be undertaken by another less busy thread pool (e.g. for a web server
-this would be responding with a server temporarily busy page).
+this could be responding with a server temporarily busy page).
 
 \subsubsection*{Related Patterns} Uses \textsc{escalation} to handle cancelled
 (not registered) methods.
@@ -474,12 +474,12 @@ for the dependency type\footnote{The \texttt{taskId} may also be used for very
 fine grained responsibility.} (\textsc{responsible team}).  The
 \texttt{execute()} method (Listing \ref{lst:TaskExecutionInterfaces}) is then
 invoked by a thread from the matching thread pool to execute the \texttt{Task}.
-This provides the necessary isolation of differing \texttt{Task}s for improved
-tuning of the server\footnote{The task execution patterns are collectively
-identified as the software pattern \textsc{thread injection}.  This is because
-the thread being chosen to execute the method is undertaken in a similar way to
-the selection of dependencies by the \textsc{dependency injection}~\cite{ioc}
-pattern.}.
+This provides isolation of differing \texttt{Task}s to their respective
+responsible thread pool for improved tuning of the server\footnote{The task
+execution patterns are collectively identified as the software pattern
+\textsc{thread injection}.  This is because the thread being chosen to execute
+the method is undertaken in a similar way to the selection of dependencies by
+the \textsc{dependency injection}~\cite{ioc} pattern.}.
 
 For \texttt{Task}s not having dependencies (nor dependencies of any performance
 significance), a default thread pool is configured by the developer for their
@@ -508,15 +508,15 @@ The \texttt{cancel(\ldots)} method (Listing \ref{lst:TaskExecutionInterfaces})
 enables the \texttt{TaskExecutor} to cancel the \texttt{Task}. The
 \texttt{Task\-Executor} will cancel new \texttt{Task}s for a particular thread
 pool when queuing the \texttt{Task} for a thread will result in exceeding a
-particular threshold\footnote{A sufficient threshold is ensuring the wait
-time, determined by a running average of execution time multiplied against the
-number of \texttt{Task}s currently in the queue, is below a certain time.}
-(\textsc{team too busy}).  Each thread pool has its own thresholds particular to
-its responsible dependency type.  As \texttt{Task}s are mapped to particular
-thread pools, this ensures only the appropriate \texttt{Task}s are cancelled.
-Once cancelled the \texttt{TaskExecutor} may discard the \texttt{Task}.  The
-implementation of the \texttt{can\-cel(\ldots)} method is covered by the
-\textsc{escalation} pattern.
+particular threshold (\textsc{team too busy}).  Each thread pool has its own
+thresholds particular to its responsible dependency type\footnote{A sufficient
+threshold is ensuring the wait time, determined by a running average of the
+\texttt{Task} execution time multiplied against the number of \texttt{Task}s
+currently in the queue, is below a certain time.}.  As \texttt{Task}s are mapped
+to particular thread pools, this ensures only the appropriate \texttt{Task}s are
+cancelled.  Once cancelled the \texttt{TaskExecutor} may discard the
+\texttt{Task}.  The implementation of the \texttt{can\-cel(\ldots)} method is
+covered by the \textsc{escalation} pattern.
 
 
 \subsubsection*{Consequences}
@@ -530,9 +530,11 @@ Furthermore, for systems requiring to integrate with many downstream systems
 (e.g. the reverse 10K problem~\cite{reverse-ten-k-problem}), each downstream
 system's performance impacts are isolated by assigning the downsteam system's
 communication dependency its own responsible thread pool.  This has requests
-that require the slow downstream system to be queued on this responsible thread
+that require a slow downstream system to be queued on its responsible thread
 pool, allowing other requests to be serviced by other thread pools.  Use of a
-single thread pool would result in thread starvation for the other requests.
+single thread pool, as per the \textsc{thread-per-request}
+pattern~\cite{thread-per-request}, would result in thread starvation for the
+other requests.
 
 For low load servers where a single thread pool is sufficient, having multiple
 thread pools causes increased complexity for developer configuration.  While
@@ -540,7 +542,11 @@ this provides the flexibility to focus the tuning of isolated categories of
 tasks by tuning their mapped thread pool, it does put the burden on the
 developer to understand thread related performance issues (e.g. costs related to
 thread stack memory and thread-context switching) and the performance of the
-dependencies (along with their related tasks).
+dependencies (along with their related tasks).  In this case, a single
+responsible thread pool is utilised.  Then as conditions of the application
+change requiring improved performance tuning, additional responsible thread
+pools are introduced to enable the required performance tuning of the
+application.
 
 OfficeFloor looses its ability to effectively prioritise and cancel tasks if the
 task dependencies are too similar.  For example, all request handling for
@@ -556,11 +562,6 @@ onto the same thread pool.  The task collaboration patterns resolve this issue.
 
 \subsubsection*{Related implementations}
 
-OfficeFloor can be considered a style of cohort scheduling \cite{cohort}
-that groups tasks with similar dependencies and infers from that similar
-functionality.  However, OfficeFloor works at the application scheduling
-level and allows the use of any Operating System thread scheduling algorithms.
-
 The Staged Event-Driven Architecture (SEDA) \cite{seda} provides a similar
 implementation without the use of the \textsc{categorise task} pattern.
 SEDA directly maps tasks to a stage and subsequently a thread pool.
@@ -568,10 +569,28 @@ However, the SEDA pipeline has increased thread-context switching as the stage
 boundaries are hard, which disallows threads to be borrowed (i.e. not able to
 use \textsc{do it yourself}).
 
+OfficeFloor can be considered a style of cohort scheduling \cite{cohort}
+that groups tasks with similar dependencies and infers from that similar
+functionality.  However, OfficeFloor works at the application scheduling
+level and allows the use of any Operating System thread scheduling algorithms.
+
+Capriccio~\cite{capriccio} utilises resource-aware scheduling of operating
+system level resources.  To undertake this, Capriccio uses information based on
+similar techniques to \textsc{categorise task}.  This results in better release
+of resources to undertake new tasks.  However, Capriccio is still subject to
+thread starvation for tasks by using only a single thread pool.
+
 Dependency capsules \cite{dependency-capsules} follows the idea of isolating
-tasks that require dependencies to specific thread pools.  However, it
-requires a thread-context switch back to a main thread for executing tasks
-without dependencies.
+tasks that require dependencies to specific thread pools.  This is similar to
+\textsc{responsible team}.  However, the dependency capsules require a
+thread-context switch back to a main thread for executing tasks without
+dependencies (i.e. can not use \textsc{do it yourself}).
+
+Hop~\cite{hop} enables developers to provide code to dynamically decide the
+concurrency model for tasks at runtime.  Having the developer provide this code
+involves the developer significantly with the concurrency issues of the
+application.  This required awareness of concurrency by the developer that is
+avoided by the performance tuning provided by responsible thread pools.
 
 
 
@@ -585,8 +604,8 @@ details on how to implement the patterns.
 \subsection{\textsc{\textbf{hand-off}}}
 
 \subsubsection*{Context} Teams hand-off to each other based on the category of
-the next task.  For example, after financing a project the finance team would
-hand-off to the software development team to build the application.
+the next task.  For example, after financing a project the finance team hand-off
+to the software development team to build the application.
 
 Method invocations tightly couple the thread of control and disallow changing
 the thread of control in invoking another method.
@@ -607,8 +626,8 @@ invocation of the respective target method.
 
 \subsubsection*{Consequences} The target method is asynchronously invoked by
 another thread of control.  However, due to the asynchronous invocation no
-return value will be available from the invoked method.  Furthermore, each
-hand-off will incur the cost of a thread-context switch.
+return value is available from the invoked method.  Furthermore, each hand-off
+incurs the cost of a thread-context switch.
 
 \subsubsection*{Related Patterns} \textsc{record information} to provide return
 values.
@@ -618,13 +637,14 @@ values.
 \subsection{\textsc{\textbf{escalation}}}
 
 \subsubsection*{Context} Within an office a person will escalate issues to their
-manager.  However, for a method the exception is thrown to the calling method.
+manager rather than the person handing-off to them.  However, the exception for
+a method is thrown to the calling method.
 
 \subsubsection*{Problem} Escalate an exception to a handling method rather than
 the calling method.
 
 \subsubsection*{Forces} Method exceptions follow the method calls back to an
-appropriate \texttt{try~\ldots~catch} block for handling the exception.
+appropriate \texttt{try\ldots catch} block for handling the exception.
 
 \subsubsection*{Solution} Intercept the exception and \textsc{hand-off} the
 exception to a handling method.
@@ -649,8 +669,8 @@ task.
 Method invocation prevents this flexibility as the code must be altered to
 change the sequence that the methods are executed.
 
-\subsubsection*{Problem} Change the execution order of methods without requiring
-to change the code.
+\subsubsection*{Problem} Change the execution order of methods without changing
+code.
 
 \subsubsection*{Forces} Method invocation is tighlty coupled at the code level.
 
@@ -663,7 +683,7 @@ hand-offs).
 \subsubsection*{Consequences} Configuration maps the flow of methods rather than
 being hard-coded within the method.  However, the resulting indirection will
 make it difficult to follow the flow of the process.  Representing the
-configuration graphically will make it easier and more intuitive to follow.  The
+configuration graphically makes it easier and more intuitive to follow.  The
 graphical configuration has tasks as nodes with hand-offs anchors on the task. 
 The hand-off mapping configuration is directed lines from the hand-offs to their
 respective handling task.
@@ -678,8 +698,8 @@ indirection for configuration mapping of hand-offs to handling methods.
 
 \subsubsection*{Context} Within the process flow a team is assigned to execute a
 sequence of tasks. Rather than passing the tasks around to different people in
-the team, it is more efficient for one person to complete the tasks without the
-cost of hand-offs.
+the team, it is more efficient for one person to complete the sequence of tasks
+without the cost of hand-offs.
 
 \subsubsection*{Problem} Avoid the thread-context switch when the hand-off
 results in a method being executed by the same responsible thread pool.
@@ -693,7 +713,11 @@ execute the invoked method synchronously (i.e. with the current method's thread
 of control).
 
 \subsubsection*{Consequences} Thread-context switching is reduced for sequential
-methods of the same responsible thread pool.
+methods of the same responsible thread pool\footnote{Combining \textsc{do your
+work} with \textsc{do it yourself} provides the implicit thread of control.  The
+implicit thread of control avoids thread-context switching in executing the
+sequence of methods until an explicit thread (another responsible thread pool
+containing threads) is required.}.
 
 \subsubsection*{Related Patterns} Is a sequence on \textsc{hand-off} to reduce
 thread-context switching.
@@ -742,16 +766,17 @@ completed.
 \subsubsection*{Forces} The handed-off method is asynchronously invoked and there is
 no synchronous return to indicate when it is complete.
 
-\subsubsection*{Solution} Re-register the method for execution when the
-handed-off method is complete\footnote{As the handed-off method may invoke
-further hand-offs, the re-register only occurs when the resulting tree of
+\subsubsection*{Solution} Re-register the current method for execution again
+when the handed-off method is complete\footnote{As the handed-off method may
+invoke further hand-offs, the re-register only occurs when the resulting tree of
 hand-offs is complete.}.
 
-To simplify multi-threading issues the method is only re-registered once for
-execution.  There may be multiple hand-offs that will result in multiple
-re-registering.  Having the method only registered once for execution reduces
-multi-threading issues.  After execution of the method, the method may again be
-registered for execution by further handed-off method completions.
+To simplify multi-threading issues the method is only re-registered once with
+its responsible thread pool for re-execution.  There may be multiple hand-offs
+that will result in multiple re-registering.  Having the method only registered
+once for execution reduces multi-threading issues.  After execution of the
+method, the method may again be registered for execution by further handed-off
+method completions.
 
 \subsubsection*{Consequences} There is no need to poll the Future of the
 hand-off invocation.  On waiting on many handed-off methods, the method may be
@@ -818,7 +843,7 @@ handling method as a dependency via \textsc{record information}.
 the hand-off passed argument and the dependencies obtained from \textsc{record
 information}.
 
-\subsubsection*{Related Patterns} Is sequence on \textsc{hand-off} and
+\subsubsection*{Related Patterns} Is a sequence on \textsc{hand-off} and
 \textsc{record information} to enable the caller to pass data with the hand-off.
 
 
@@ -833,7 +858,7 @@ external to the office.
 \subsubsection*{Problem} Handing-off to the first method in the process when not
 provided a hand-off interface (as outside the office/application).
 
-\subsubsection*{Forces} The interface to hand-off is only provided to methods
+\subsubsection*{Forces} The interface to invoke a hand-off is only provided to methods
 being executed within a task.
 
 \subsubsection*{Solution} Provide a unique address (e.g. URL) that directly maps
@@ -883,12 +908,6 @@ implementation.  On executing a \texttt{Task} (object wrapping the method) the
 
 \lstset{caption=Task collaboration pattern interfaces.}
 \begin{lstlisting}[float,label=lst:TaskCollaborationInterfaces]
-
-    interface Office {
-        Future executeProcess( String initialTaskId
-                             , Object initialTaskParameter);
-    }
-
     interface Task {
         void execute(TaskContext context);
         String[] getHandOffIds();
@@ -922,6 +941,11 @@ implementation.  On executing a \texttt{Task} (object wrapping the method) the
     interface DependencyContext {
         Object getDependency(String dependencyId);
     }
+
+    interface Office {
+        Future executeProcess( String initialTaskId
+                             , Object initialTaskParameter);
+    }
 \end{lstlisting}
 
 \begin{figure}[!t]
@@ -942,14 +966,14 @@ invokes \texttt{doHandOff(\ldots)} with the invoked interface method name as the
 for each \texttt{Task}, developer configuration provides the hand-off mapping to
 the respective handling \texttt{Task}\footnote{OfficeFloor enhances the
 \texttt{getHandOffIds()} method to also return the argument types that the
-\texttt{Task} will provide on each of the hand-offs.  The \texttt{getStateIds()}
-is enhanced to provide the expected type the \texttt{Task} requires for each
-\texttt{stateId}. Providing this type information allows the hand-off argument
-to be type validated against the handling \texttt{Task}'s required parameter
-type.  This reduces runtime errors by enabling validation of the \textsc{define
-process flows} configuration.}.  Figure \ref{fig:DoContinuationSequenceDiagram}
-provides a sequence diagram of invoking a \texttt{Task} via the
-\texttt{doHandOff(\ldots)} method.
+\texttt{Task} will provide on each of the hand-offs.  OfficeFloor also enhances
+\texttt{getStateIds()} to provide the expected type the \texttt{Task} requires
+for each \texttt{stateId}. Providing this type information enables the hand-off
+argument to be type validated against the handling \texttt{Task}'s required
+parameter type.  This reduces runtime errors by providing type validation of the
+\textsc{define process flows} configuration.}.  Figure
+\ref{fig:DoContinuationSequenceDiagram} provides a sequence diagram of invoking
+a \texttt{Task} via the \texttt{doHandOff(\ldots)} method.
 
 The \texttt{TaskContextFactory} (Listing \ref{lst:TaskCollaborationInterfaces})
 constructs the \texttt{TaskContext}.  The \texttt{TaskContextFactory} centrally
@@ -993,10 +1017,10 @@ dependencies, it is aligned to the \texttt{TaskExecutor} life-cycle.
 This enables both the dependencies of the \texttt{Task}s and the \texttt{Task}s
 themselves to be specific to the instance of the process.
 
-The \texttt{doHandOff(\ldots)} does allow one argument to be passed to the
-invoked \texttt{Task} (\textsc{complete the form}).  This is for more intuitive
-development by passed state with the hand-off.  If multiple arguments are
-required they are encapsulated into an object for passing.
+The \texttt{doHandOff(\ldots)} method does allow one argument to be passed to
+the invoked \texttt{Task} (\textsc{complete the form}).  This is for more
+intuitive development by passed state with the hand-off.  If multiple arguments
+are required they are encapsulated into an object for passing.
 To maintain loose coupling the invoked \texttt{Task} obtains the argument as
 state (i.e. \texttt{getState(\ldots)} method in listing
 \ref{lst:TaskCollaborationInterfaces}).  This is so the invoked \texttt{Task}
@@ -1007,8 +1031,8 @@ argument should it not depend on it.
 The hand-off will borrow the thread of control of the calling \texttt{Task} if
 it results in being executed by the same thread pool.  Rather than dispatching
 the \texttt{Task} back to the same thread pool, the \texttt{TaskExecutor}
-borrows the thread to avoid the overhead of a thread-context switch (\textsc{do
-your work}).
+borrows the thread to execute the next method (\textsc{do your work}). This
+avoids the overhead of a thread-context switch.
 
 Exceptions from the methods are handled by being mapped to a \texttt{handOffId}.
 The \texttt{Task} invokes \texttt{handle\-Excep\-tion(\ldots)} with the
@@ -1037,21 +1061,17 @@ us}).
 \subsubsection*{Example}
 
 Listing \ref{lst:Example_Method_Task} shows an example method for retrieving
-data from a cache.  The \texttt{Task} for the \texttt{retrieve\-Data(\ldots)} method will:
+data from a cache.  The \texttt{Task} for the \texttt{retrieve\-Data(\ldots)}
+method will:
 \begin{enumerate}
   \item Obtain an instance of the \texttt{CacheOperation} via the \texttt{getState(\ldots)} method.
   \item Obtain both the \texttt{key}\footnote{\texttt{key} is a hand-off argument from the previous \texttt{Task}.} and \texttt{cache} again via the \texttt{getState(\ldots)} method.
-  \item Instantiate a proxy implementation of the \texttt{CacheHandOffs} interface that implements the \texttt{cacheMiss(\ldots)} method by invoking the \texttt{doHandOff(\ldots)} method. 
-  \item Reflectively invokes the \texttt{retrieveData(\ldots)} method with the above arguments.
+  \item Instantiate a proxy implementation of the \texttt{CacheHandOffs} interface that wraps the \texttt{TaskContext}.  The proxy implements the \texttt{cacheMiss(\ldots)} method by invoking the \texttt{doHandOff(\ldots)} method. 
+  \item Reflectively invoke the \texttt{retrieveData(\ldots)} method with the above arguments.
 \end{enumerate}
 
 \lstset{caption=Example developer code of a task for retrieving data from a cache\protect\footnotemark}
 \begin{lstlisting}[float,label=lst:Example_Method_Task]
-
-  interface CacheHandOffs {
-    void cacheMiss(String key);
-  }
-
   class CacheOperation {
     public Data retrieveData(String key, Cache cache
                             , CacheHandOffs handOffs
@@ -1063,6 +1083,10 @@ data from a cache.  The \texttt{Task} for the \texttt{retrieve\-Data(\ldots)} me
         }
         return data;
     }
+  }
+
+  interface CacheHandOffs {
+    void cacheMiss(String key);
   }
 \end{lstlisting}
 \footnotetext{\texttt{retrieveData} may also be a function should the implementing programming language support functions.}
@@ -1114,34 +1138,35 @@ will need to cause side effects (mutate state) to share state with other
 
 \subsubsection*{Related implementations}
 
+OfficeFloor is a form of continuation-passing style \cite{continuations}.
+The hand-off can be considered a continuation, as it is a ''goto'' for executing
+another \texttt{Task} with a different thread (stack)\footnote{The task
+collaboration patterns are identified collectively as the software pattern
+\textsc{continuation injection}.  The name comes from the hand-offs
+(continuations) being injected into methods in a similar way to the dependencies
+of the \textsc{dependency injection}~\cite{ioc} pattern.}.  The benefit of
+providing hand-offs through a \texttt{TaskContext} is that the \texttt{Task} is
+free to depend on as many hand-offs as necessary, and not what the caller
+provides.  It also means that as the application evolves the \texttt{Task}
+encapsulates potential changes requiring different hand-offs.  The indirection
+allows managing these changes as configuration changes rather than code changes.
+
+The combined \textsc{do your work} pattern and \textsc{do it yourself} pattern
+of OfficeFloor has similarities to a monadic thread \cite{monadic-thread}.  The
+\texttt{Task}s can be considered nodes in the lazy trace of the monadic thread. 
+The trace ends when another thread of control is required.  The advantage of
+OfficeFloor\footnote{Beyond Task Orchestration being easier for the developer to
+understand than monad programming.} is that the \textsc{responsible team}
+pattern allows the execution of blocking I/O nodes (\texttt{Task}s) to be
+prioritised.  Monadic threads can not prioritise blocking I/O nodes as they know
+little about them and subsequently execute them within a single thread pool.
+
 OfficeFloor is an implementation of the Actor Model \cite{actors} as it adheres
 to the principles of the Actor Model.  The \texttt{Task} is the actor.  The
 asynchronous communication between \texttt{Task}s decouples the hand-off
 argument (message) from the sending \texttt{Task} (actor).  The \texttt{taskId}
 provides an address for a \texttt{Task} (actor).  The provided
 \texttt{handOffId}s restricts the \texttt{Task}s (actors) that may be used.
-
-OfficeFloor is also a form of continuation-passing style \cite{continuations}.
-The hand-off can be considered a continuation, as it is a ''goto'' for executing
-another \texttt{Task} with a different thread (stack)\footnote{The task
-collaboration patterns are identified collectively as the software pattern \textsc{continuation
-injection}.  The name comes from the hand-offs (continuations) being injected
-into methods in a similar way to the dependencies of the \textsc{dependency
-injection}~\cite{ioc} pattern.}.  The benefit of providing hand-offs through a
-\texttt{TaskContext} is that the \texttt{Task} is free to depend on as many
-hand-offs as necessary, and not what the caller provides.  It also means that as
-the application evolves the \texttt{Task} encapsulates potential changes
-requiring different hand-offs.  The indirection allows managing these changes as
-configuration changes rather than code changes.
-
-The \textsc{do it yourself} pattern of OfficeFloor has similarities to a monadic
-thread \cite{monadic-thread}.  The \texttt{Task}s can be considered nodes in the
-lazy trace of the monadic thread.  The advantage of OfficeFloor\footnote{Beyond
-Task Orchestration being easier for the developer to understand than monad
-programming.} is that the \textsc{responsible team} pattern allows the execution
-of blocking I/O nodes (\texttt{Task}s) to be prioritised.  Monadic threads can
-not prioritise blocking I/O nodes as they know little about them and
-subsequently execute them within a single thread pool.
 
 
 
@@ -1167,10 +1192,10 @@ new hand-offs.  Introducing these new dependencies and hand-offs should be
 encapsulated by the task and not significantly impact its containing process.
 
 The method signature is fixed by the caller of the method and not the
-implementation of the method.  The caller provides all arguments (dependencies)
-to the method and the thread of control to execute the method\footnote{The
-invoked method may spawn new threads but unless the caller provides reference to
-existing thread pools, the method will not be able to use them.}.
+implementation of the method.  The caller provides all arguments to the method
+and the thread of control to execute the method\footnote{The invoked method may
+spawn new threads but unless the caller provides reference to existing thread
+pools, the method will not be able to use them.}.
 
 \subsubsection*{Problem} Let the method implementation define the method
 signature and continue to enable the caller to invoke the method as the method
@@ -1440,9 +1465,9 @@ used to execute it.
 required collaboration by \texttt{handOffId}s.  The mapping of
 \texttt{handOffId} to \texttt{taskId} (\textsc{define process flows}) enables
 configuring the higher-level layer components for handling each required
-hand-off by the lower-level layer component.  As the invoking higher level-layer
+hand-off by the lower-level layer component.  As the higher level-layer
 component does not need to provide references to these handling components on
-invoking the lower-level layer component, the lower-level layer component may
+calling the lower-level layer component, the lower-level layer component may
 specify as many hand-offs as are necessary for its required collaboration
 variation points.  This gives the lower-level layer component control over its
 collaboration variation points.
@@ -1492,9 +1517,10 @@ Futhermore, the top-down approach to designing an application requires a divide
 and conquer approach over the entire scope of the application requirements.
 Without understanding all the complexities, the design may not adequately meet
 the business needs and require significant refactoring to align to business
-needs.  OfficeFloor enables building only the mature processes (\textsc{automate
-only where appropriate}) and removes the need to understand all complexities as
-only understanding of the scope of each process is required.
+needs.  OfficeFloor enables building only the mature processes bottom-up
+(\textsc{automate only where appropriate}).  This removes the need to understand
+all complexities as only understanding of the scope of each process to automate
+is required.
 
 
 \subsubsection*{Consequences}
@@ -1555,7 +1581,8 @@ this work would not have resulted from OfficeFloor.  I also thank my good friend
 Matthew Brown for being a sounding board to many of my ideas.
 
 I am also grateful for the wise shepherding by Veli-Pekka Eloranta and the
-feedback from the participants of EuroPlop 2013.
+feedback from the participants of EuroPlop 2013, especially the very informative
+feedback by the participants of the Design and Architecture writer's workshop.
 
 
 \bibliographystyle{style/acmlarge}
