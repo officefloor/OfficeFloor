@@ -60,7 +60,7 @@
 
 \begin{abstract}
 OfficeFloor is a middleware framework that bases its design on the patterns
-occuring within the office.  Using the proven patterns from the office has
+occurring within the office.  Using the proven patterns from the office has
 improved the performance tuning and reduced the coupling of existing middleware
 design patterns.  Furthermore, the patterns have provided inversion of control
 to build applications bottom-up.  This bottom-up approach to building
@@ -75,7 +75,7 @@ evolve application architectures upwards.
 \terms{Design, Performance, Standardization}
 \keywords{Inversion of Control, Responsible Thread Pool, Task Orchestration}
 
-\acmformat{Sagenschneider, D. 2013.Software Design based on patterns within the Office.}
+\acmformat{Sagenschneider, D. 2013.Software Design based on Patterns within the Office.}
 
 \copyr{Copyright 2013 is held by the author}
 
@@ -120,7 +120,7 @@ workshop at the 18th European Conference on Pattern Languages of Programs
 \section{Introduction}
 
 OfficeFloor~\cite{officefloor} is a middleware framework that models its
-architecture on patterns occuring in offices.
+architecture on patterns occurring in offices.
 
 The premise of this modelling is that business processes occurred manually
 within offices before technology systems began automating tasks.  The manual
@@ -129,7 +129,7 @@ business organisations.
 
 This paper discusses these office patterns and how they provide improvement over
 existing software design patterns.  The patterns presented are the patterns used
-by OfficeFloor in its implementatation as a middleware framework.
+by OfficeFloor in its implementation as a middleware framework.
 Usage patterns for developers to build applications with OfficeFloor is left to
 future work.
 
@@ -291,7 +291,7 @@ memory) which will decrease throughput.
 dependency (resource), use adaptive resource management~\cite{seda} to manage
 the number of threads within each thread pool.
 
-Adaptive resource management (from the Staged Event Driven Achitecture
+Adaptive resource management (from the Staged Event Driven Architecture
 \cite{seda}) monitors the number of tasks and their execution time and
 adds/removes threads and resources to achieve optimal throughput by the thread
 pool (stage).
@@ -422,13 +422,15 @@ enables for a single \texttt{TaskExecutor} implementation (Listing
 
 To execute a method the client code invokes \texttt{executeTask(\ldots)}
 (Listing \ref{lst:TaskExecutionInterfaces}) with the identifier of the desired
-\texttt{Task} (method).  Figure \ref{fig:ExecuteComponentSequenceDiagram}
-provides a sequence diagram of executing a \texttt{Task}.  The
-\texttt{TaskExecutor} uses the \texttt{DependencyInjectionFactory} to construct
-the appropriate \texttt{Task} and then assigns it for execution by one of the
-many developer configured thread pools (\textsc{team}).
+\texttt{Task} (method).  The \texttt{TaskExecutor} uses the
+\texttt{DependencyInjectionFactory} to construct the \texttt{Task}
+and the dependencies for the \texttt{Task} (i.e. the parameters for the method
+wrapped by the \texttt{Task}).  The \texttt{TaskExecutor} then assigns the
+\texttt{Task} for execution by one of the many developer configured thread pools
+(\textsc{team}).  Figure \ref{fig:ExecuteComponentSequenceDiagram} provides a
+sequence diagram of executing a \texttt{Task}.
 
-\lstset{caption=\textsc{thread injection} pattern interfaces.}
+\lstset{caption=Task execution pattern interfaces.  The task collaboration patterns in the next section build on these interfaces to enable collaboration of the \texttt{Task}s.}
 \begin{lstlisting}[float,label=lst:TaskExecutionInterfaces]
 
     interface Task {
@@ -482,11 +484,11 @@ the method is undertaken in a similar way to the selection of dependencies by
 the \textsc{dependency injection}~\cite{ioc} pattern.}.
 
 For \texttt{Task}s not having dependencies (nor dependencies of any performance
-significance), a default thread pool is configured by the developer for their
-execution.  This ensures all \texttt{Task}s are mapped to a thread pool.  It
-also means that thread pools need only be configured for dependencies requiring
-isolation (i.e. all \texttt{Task}s using the dependency are isolated to a
-particular thread pool for execution).
+significance), a default thread pool is used for their execution.  This ensures
+all \texttt{Task}s are mapped to a thread pool.  It also means that thread pools
+need only be configured for dependencies requiring isolation (i.e. all
+\texttt{Task}s using the dependency are isolated to a particular thread pool for
+execution).
 
 To improve performance of runtime decisions the mapping of \texttt{Task} to
 thread pool is cached.  As the dependencies for each \texttt{Task} is static, at
@@ -528,7 +530,7 @@ subsequently prioritising groups of related methods.
 
 Furthermore, for systems requiring to integrate with many downstream systems
 (e.g. the reverse 10K problem~\cite{reverse-ten-k-problem}), each downstream
-system's performance impacts are isolated by assigning the downsteam system's
+system's performance impacts are isolated by assigning the downstream system's
 communication dependency its own responsible thread pool.  This has requests
 that require a slow downstream system to be queued on its responsible thread
 pool, allowing other requests to be serviced by other thread pools.  Use of a
@@ -562,9 +564,15 @@ onto the same thread pool.  The task collaboration patterns resolve this issue.
 
 \subsubsection*{Related implementations}
 
+JAWS~\cite{jaws} identified limitations in using a single concurrency model for
+the application.  The JAWS framework enables multiple concurrency models to be
+used by an application.  However, the concurrency models provided by the JAWS
+framework are obtrusive to developer design requiring the developer to be
+significantly involved with concurrency of the application.
+
 The Staged Event-Driven Architecture (SEDA) \cite{seda} provides a similar
-implementation without the use of the \textsc{categorise task} pattern.
-SEDA directly maps tasks to a stage and subsequently a thread pool.
+implementation to OfficeFloor without the use of the \textsc{categorise task}
+pattern.  SEDA directly maps tasks to a stage and subsequently a thread pool.
 However, the SEDA pipeline has increased thread-context switching as the stage
 boundaries are hard, which disallows threads to be borrowed (i.e. not able to
 use \textsc{do it yourself}).
@@ -572,13 +580,14 @@ use \textsc{do it yourself}).
 OfficeFloor can be considered a style of cohort scheduling \cite{cohort}
 that groups tasks with similar dependencies and infers from that similar
 functionality.  However, OfficeFloor works at the application scheduling
-level and allows the use of any Operating System thread scheduling algorithms.
+level and allows the use of any operating system thread scheduling algorithms.
 
 Capriccio~\cite{capriccio} utilises resource-aware scheduling of operating
 system level resources.  To undertake this, Capriccio uses information based on
-similar techniques to \textsc{categorise task}.  This results in better release
-of resources to undertake new tasks.  However, Capriccio is still subject to
-thread starvation for tasks by using only a single thread pool.
+similar techniques to \textsc{categorise task}.  This results in improved
+scheduling to better release resources to undertake new tasks.  However,
+Capriccio is still subject to thread starvation for slow tasks by using only a
+single thread pool.
 
 Dependency capsules \cite{dependency-capsules} follows the idea of isolating
 tasks that require dependencies to specific thread pools.  This is similar to
@@ -589,7 +598,7 @@ dependencies (i.e. can not use \textsc{do it yourself}).
 Hop~\cite{hop} enables developers to provide code to dynamically decide the
 concurrency model for tasks at runtime.  Having the developer provide this code
 involves the developer significantly with the concurrency issues of the
-application.  This required awareness of concurrency by the developer that is
+application.  This required awareness of concurrency by the developer is
 avoided by the performance tuning provided by responsible thread pools.
 
 
@@ -672,7 +681,7 @@ change the sequence that the methods are executed.
 \subsubsection*{Problem} Change the execution order of methods without changing
 code.
 
-\subsubsection*{Forces} Method invocation is tighlty coupled at the code level.
+\subsubsection*{Forces} Method invocation is tightly coupled at the code level.
 
 \subsubsection*{Solution} Use \textsc{hand-off} and via configuration map the
 hand-off interface method to a handling method.  Furthermore, provide a hand-off
@@ -797,7 +806,7 @@ supplied from the calling method\footnote{The method may also access implicit
 references via its owning object.  However, this is to be avoided with the
 \textsc{record information} pattern.}.
 
-\subsubsection*{Problem} Enable the method to retreive information from previous
+\subsubsection*{Problem} Enable the method to retrieve information from previous
 methods other than its calling method.
 
 \subsubsection*{Forces} Method invocation requires the caller to provide all
@@ -943,8 +952,8 @@ implementation.  On executing a \texttt{Task} (object wrapping the method) the
     }
 
     interface Office {
-        Future executeProcess( String initialTaskId
-                             , Object initialTaskParameter);
+        Future doProcess( String initialTaskId
+                        , Object initialTaskParameter);
     }
 \end{lstlisting}
 
@@ -1232,7 +1241,7 @@ hierarchies can no longer be determined by method signatures.
 \subsection{\textsc{\textbf{process defines itself}}}
 
 \subsubsection*{Context} The process is constructed from tasks.  As the tasks
-define themselves, the process is subject to the necessitities of its containing
+define themselves, the process is subject to the necessities of its containing
 tasks.  The process, therefore, becomes the sum of all the dependencies and
 hand-offs of its containing tasks.
 
@@ -1261,7 +1270,7 @@ be interchangeable with a \texttt{Task}.
 \subsubsection*{Forces} Adding new tasks to a process is similar to adding new
 functionality to a method.  Adding new functionality to a method involves:
 \begin{itemize}
-  \item new dependencies for the method that need to be referenceable from the functionality,
+  \item new dependencies for the method that need to be referenced from the functionality,
   \item new exceptions that may occur from the functionality, and
   \item a different threading model to efficiently undertake the functionality. 
 \end{itemize}
@@ -1491,7 +1500,7 @@ variation points as the lower-level layer component controls:
 Therefore, the \texttt{Task} interface (Listing
 \ref{lst:TaskCollaborationInterfaces}) is the \textsc{explicit interface} of a
 component that provides inversion of control for the the method signature. 
-Rather than the caller defining the method signature, the implemention of the
+Rather than the caller defining the method signature, the implementation of the
 method controls defining the method signature (\textsc{task defines itself}).
 
 To manage the complexity of the application's functionality, OfficeFloor
@@ -1504,7 +1513,7 @@ As sections are configured from other existing sections, it creates a bottom-up
 approach to building the application\footnote{OfficeFloor configures the
 top-level sections within an office.  The office configuration enables weaving
 \texttt{Task}s as aspects into the contained sections (identified as the
-\textsc{admistration} pattern).  The office configuration also provides
+\textsc{administration} pattern).  The office configuration also provides
 additional management over dependencies, such as demarcating transactions
 (identified as the \textsc{governance} pattern). OfficeFloor then configures
 these offices onto the office floor where the dependencies and responsible
@@ -1513,7 +1522,7 @@ hosts each office floor as a separate operating system process.  These patterns
 will be included in the future work of usage patterns to build applications with
 OfficeFloor.}.
 
-Futhermore, the top-down approach to designing an application requires a divide
+Furthermore, the top-down approach to designing an application requires a divide
 and conquer approach over the entire scope of the application requirements.
 Without understanding all the complexities, the design may not adequately meet
 the business needs and require significant refactoring to align to business
