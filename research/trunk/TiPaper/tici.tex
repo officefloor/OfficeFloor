@@ -384,8 +384,8 @@ many mainstream middleware designs\footnote{Example middleware using
 survey) that serve dynamic web content by CGI/FastCGI with for example PHP scripts,
 Microsoft's HTTP.sys/WAS, and JEE Servlets.}) and the \textsc{proactor} pattern
 \cite{proactor} (basis of event-driven middleware designs) enable a different
-thread of control for the execution of a request/task.  These patterns
-allow for concurrent execution by utilising many threads.  For efficiencies the
+thread of control for the execution of a request/task.  These patterns allow for
+concurrent execution by utilising many threads.  For efficiencies the
 \textsc{thread pool} pattern \cite{thread-per-request} is commonly used to pool
 threads to reduce thread management overheads.
 
@@ -601,6 +601,18 @@ involves the developer significantly with the concurrency issues of the
 application.  This required awareness of concurrency by the developer is
 avoided by the performance tuning provided by responsible thread pools.
 
+Popular modern web servers (Netcraft November 2012 survey) serve dynamic web
+content by CGI/FastCGI with for example PHP scripts, Microsoft's HTTP.sys/WAS,
+and JEE Servlets. These servers use the \textsc{thread-per-request} pattern that
+is intuitive for developers to use but suffer from the thread starvation of a
+slow task by only using a single thread pool.
+
+Modern event-based frameworks based on the \textsc{proactor} pattern, such as
+Node.js~\cite{nodejs}, are enabling increased concurrency for applications.
+However, the use of the \textsc{proactor} pattern, forces interaction with
+downstream systems to be asynchronous non-blocking I/O.  The responsible thread
+pools of OfficeFloor enables prioritisation of blocking I/O for more intuitive
+development.
 
 
 \section{Patterns for collaboration of tasks}
@@ -638,7 +650,9 @@ another thread of control.  However, due to the asynchronous invocation no
 return value is available from the invoked method.  Furthermore, each hand-off
 incurs the cost of a thread-context switch.
 
-\subsubsection*{Related Patterns} \textsc{record information} to provide return
+\subsubsection*{Related Patterns} This pattern has similarities to the
+\textsc{mediator}~\cite{gof} pattern to keep methods from referring directly to
+each other.  The \textsc{record information} pattern is used to provide return
 values.
 
 
@@ -794,7 +808,9 @@ complete} pattern is used as a guard condition to only execute the functionality
 once all appropriate handed-off methods are complete.
 
 \subsubsection*{Related Patterns} \textsc{task complete} is used to indicate
-which handed-off methods are complete.
+which handed-off methods are complete.  The \textsc{record information} pattern
+providing the state for the picked up \texttt{Task} is similar to the
+\textsc{asynchronous completion token}~\cite{posa} pattern.
 
 
 
