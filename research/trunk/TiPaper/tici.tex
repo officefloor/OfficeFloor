@@ -122,29 +122,30 @@ OfficeFloor~\cite{officefloor} is a middleware framework that models its
 architecture on patterns occurring in offices.
 
 The premise of this modelling is that business processes occurred manually
-within offices before technology systems began automating tasks.  The manual
-office processes are accepted by people and the patterns proven within many
-business organisations.
+within offices before technology systems began automating tasks.  Rather than
+impose software models on the business
+\cite{enterprise-process-modelling,model-business-process}, this paper discusses
+the use of patterns occurring within a business office to improve designs
+within software.
 
-This paper discusses these office patterns and how they provide improvement over
-existing software design patterns for applications operating in complex
-environments.  Within complex environments, such as Service-Oriented
-Architecture (SOA), the application uses multiple downstream systems that each
-may cause issues for the application's performance.  Re-use of the patterns
-occuring in the office to handle similar complex environments enables improved
-performance tuning of the application to isolate performance impacts of each
-downstream system.
+This paper uses the author's observed patterns within an office to improve
+software design.  Patterns provide solutions to re-occuring problems
+\cite{pattern-language}.  Problems occuring in offices due to interaction with
+multiple external parties (e.g. customers, suppliers, service providers) and
+managing varying task loads is similar to problems arrising for applications
+operating in increasingly complex environments.  Applications within
+complex environments, such as Service-Oriented Architecture (SOA), use multiple
+services that each may cause issues for the application's performance
+\cite{reverse-ten-k-problem}.  Using the office solutions to these software
+problems improves software design to enable improved performance tuning of
+applications.
 
-Furthermore, the office patterns decouple the collaboration of methods to enable
-bottom-up development of applications.  Businesses evolve their processes and
-subsequently do not take a top-down approach \textbf{TODO: reference?}.  The
-office patterns reflect this upwards evolution of the business.  Re-using the
-office patterns within software enables a similar bottom-up approach to evolve
-the application.
-
-The patterns presented in this paper are the patterns used by OfficeFloor in its
-implementation as a middleware framework.  Usage patterns for developers to
-build applications with OfficeFloor is left to future work.
+Furthermore, the use of the office patterns decouples the collaboration of
+methods to enable bottom-up development of applications.  Businesses evolve
+their processes and subsequently take an upwards approach by maturing from
+ad-hoc processes to integrated mature processes \cite{process-maturity-global}. 
+Re-using the office patterns within software enables a similar upwards
+approach to evolve the application.
 
 \begin{figure}[!t]
 \centering
@@ -153,30 +154,34 @@ build applications with OfficeFloor is left to future work.
 \label{fig:PatternRelationships}
 \end{figure}
 
-To re-use the office patterns within software design, software concepts need to be
-mapped to office concepts.  The following analogies are made to enable
+To re-use the office patterns within software design, software concepts need to
+be mapped to office concepts.  The following analogies are made to enable
 re-using office patterns for software design:
 \begin{description}
   \item[Thread] is mapped to the concept of a Person (Worker),
-  \item[Method] is the functionality of a Task (particular step of a process),
-  \item[Object fields] is the structured information managed within an office (e.g. form).
+  \item[Method] is the functionality of a Task (particular activity/step of a process),
+  \item[Object fields] is the structured information managed within an office (e.g. form),
+  \item[Application] is the boundary similar to an Office. \textbf{TODO: clean up}
 \end{description}
 
-While there is extensive literature on effective organisational structure for
-businesses \cite{organisational-behaviour} \textbf{TODO: more references},
-many of the people aspects do not need consideration within software.  Within
-software the thread (person) will undertake all methods (tasks) exactly as
-specified.  Therefore, in following the above analogies, the grouping of threads
-into thread pools is similar to grouping people into functional
-teams\footnote{The use of the term team within this paper more closely aligns to
-staff of a functional department within the literature.  However, the auther
-finds the term department is perceived as more than just the staff.  The auther,
-therefore, uses the term team as a better analogy to focus the reader on a
-thread pool being a group of theads (people) with the goal of completing a set
-of related methods (tasks).  Also, the \textsc{do it yourself} pattern does
-enable a thread pool (team) to execute methods (tasks) outside its responsible
-category (functional departmentalisation).}.  Each team (thread pool) is
-responsible for undertaking a specific set of tasks (methods).
+While the organisation structure and behaviour within an office must account for
+people \cite{organisational-behaviour}, the people aspects do not need
+consideration within software.  Within software the thread (person) will
+undertake all methods (tasks) exactly as specified.  Therefore, in following the
+above analogies, the grouping of threads into thread pools is similar to
+grouping people into functional teams\footnote{The use of the term team within
+this paper more closely aligns to staff of a functional department.  However,
+the auther finds the term department is perceived as more than just the staff. 
+The auther, therefore, uses the term team as a better analogy to focus the
+reader on a thread pool being a group of theads (people) with the goal of
+completing a set of related methods (tasks).  Also, the \textsc{do it yourself}
+pattern does enable a thread pool (team) to execute methods (tasks) outside its
+responsible category (functional departmentalisation).}.  Each team (thread
+pool) is responsible for undertaking a specific set of tasks (methods).
+
+The patterns presented in this paper are the patterns used by OfficeFloor in its
+implementation as a middleware framework.  Usage patterns for developers to
+build applications with OfficeFloor is left to future work.
 
 The patterns presented in this paper are discussed in three sections.  The three
 sections respectively present the patterns for execution of tasks, collaboration
