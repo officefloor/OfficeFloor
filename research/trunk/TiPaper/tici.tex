@@ -60,14 +60,17 @@
 
 \begin{abstract}
 OfficeFloor is a middleware framework that bases its design on the patterns
-occurring within the office.  These patterns enable improved performance tuning
-of applications operating in complex environments, such as Service-Oriented
-Architecture (SOA), where multiple downstream systems can impact the
-application's performance.  Furthermore, the patterns have decoupled the
-collaboration of methods to enable inversion of control to build applications
-bottom-up.  This bottom-up approach to building applications better aligns to
-the evolution of a business and better suites modern development
-methodologies, such Agile, that evolve application architectures upwards.
+occurring within the office.  Re-using office patterns within software enables
+improved performance tuning of applications and enables earlier and continuous
+delivery of working code for Agile methodologies.  The improved performance
+tuning uses multiple thread pools to isolate the performance of the application
+in interacting with multiple downstream systems (e.g. an application operating
+in a Service-Oriented Architecture).  The earlier and continuous delivery of
+working code is enabled by inversion of control.  OfficeFloor is a middleware
+framework that provides inversion of control for methods to build applications
+bottom-up.  The bottom-up approach to building applications reduces the lead
+times and refactoring of top-down software designs to provide early and
+continuous delivery of working code for Agile methodologies.
 \end{abstract}
 
 \category{D.2.11}{Software Architectures}{Patterns}
@@ -121,8 +124,8 @@ workshop at the 18th European Conference on Pattern Languages of Programs
 OfficeFloor~\cite{officefloor} is a middleware framework that models its
 architecture on patterns occurring in offices.  The premise of this modelling is
 that business processes occurred manually within offices before technology
-systems began automating tasks.  Rather than impose software models on the
-business
+systems began automating tasks.  Rather than impose mechanical software models
+on the business
 \cite{enterprise-process-modelling,model-business-process,model-sociotechnical},
 this paper discusses OfficeFloor's use of office patterns to improve software
 design.
@@ -130,24 +133,17 @@ design.
 The patterns presented in this paper are the result of the author's translation
 of observed office patterns into software design to create the OfficeFloor
 middleware framework.  Patterns provide solutions to re-occuring problems
-\cite{pattern-language}.  Problems occuring in offices due to interaction with
-multiple external parties (e.g. customers, suppliers, service providers, other
-offices) is similar to problems arrising for applications operating in
-increasingly complex environments.  Applications within complex environments,
-such as Service-Oriented Architecture (SOA), use multiple services that each may
-cause issues for the application's performance \cite{reverse-ten-k-problem}.
+\cite{pattern-language}.  The problem of an office interacting with multiple
+external parties (e.g. customers, suppliers, service providers, other offices)
+is a similar problem to an application interacting with multiple external
+systems (e.g. Service-Oriented Architecture).
 
-The use of office solutions for software problems provides two key improvements
-in software design. The first improvement is the isolation of task execution to
-improve performance tuning of applications.  The improved performance turning
-enables the application to handle complex environments that requires interaction
-with many downstream systems.  The second improvement is to enable upwards
-evolution of the application.  Businesses evolve their processes and
-subsequently take an upwards approach by maturing from ad-hoc processes to
-integrated mature processes \cite{process-maturity-global}.  Re-using the office
-patterns within software enables a similar upwards approach to evolve the
-application.  This upwards approach enables more efficient return on value,
-which aligns with Agile development \textbf{TODO: reference}.
+The use of office solutions within this paper addresses two problems within
+software design.  The first software problem is to enable performance tuning of
+an application to operate in a complex environment that requires use of many
+downstream systems \cite{reverse-ten-k-problem}.  The second software problem is
+providing a technical framework that enables delivering working software faster
+and continuously \cite{agile-manefesto}.
 
 \begin{figure}[!t]
 \centering
@@ -156,8 +152,9 @@ which aligns with Agile development \textbf{TODO: reference}.
 \label{fig:PatternRelationships}
 \end{figure}
 
-To re-use the office patterns within software design, software concepts need to
-be mapped to office concepts.  The following analogies are made to enable
+To re-use the office solutions for software problems, software concepts need to
+be mapped to office concepts.  This enables the office patterns to be used in
+software design.  The following analogies are made by the author to enable
 re-using office patterns for software design:
 \begin{description}
   \item[Thread] is mapped to the concept of a Person (Worker),
@@ -166,40 +163,43 @@ re-using office patterns for software design:
   \item[Application] is similar to an Office (manages information and undertakes decisions).
 \end{description}
 
-While the organisation structure and behaviour within an office must account for
-people \cite{organisational-behaviour}, the people aspects do not need
-consideration within software.  Within software the thread (person) will
-undertake all methods (tasks) exactly as specified.  Therefore, in following the
-above analogies, the grouping of threads into thread pools is similar to
-grouping people into functional teams\footnote{The use of the term team within
-this paper more closely aligns to staff of a functional department.  However,
-the author finds the term department is perceived as more than just the staff. 
-The author, therefore, uses the term team as a better analogy to focus the
-reader on a thread pool being a group of theads (people) with the goal of
+In using the office patterns for software design, many of the offices issues do
+not occur in software.  The organisation structure and behaviour within an
+office must account for people \cite{organisational-behaviour}.  Within software
+the people aspects do not need consideration.  The thread (person) will
+mechanically undertake all methods (tasks) exactly as specified.  Therefore, in
+following the above analogies, the grouping of threads into thread pools is
+similar to grouping people into functional teams\footnote{The use of the term
+team within this paper more closely aligns to staff of a functional department.
+However, the author finds the term department is perceived as more than just the
+staff.  The author, therefore, uses the term team as a better analogy to focus
+the reader on a thread pool being a group of theads (people) with the goal of
 completing a set of related methods (tasks).  Also, the \textsc{do it yourself}
 pattern does enable a thread pool (team) to execute methods (tasks) outside its
 responsible category (functional departmentalisation).}.  Each team (thread
-pool) is responsible for undertaking a specific set of tasks (methods).
+pool) will undertake a specific set of tasks (methods) exactly as specified.
 
 The patterns presented in this paper are discussed in three sections.  The three
 sections respectively present the patterns for execution of tasks, collaboration
 of tasks, and building processes from tasks.  Figure
 \ref{fig:PatternRelationships} shows the relationships between the patterns
-presented in each section of this paper.  Each section is written in two parts. 
-The first part lists the office patterns and how they influence change in the
+presented in each section of this paper.  Each section is written in two parts.
+The first part lists the office patterns and how they influence change in
 software design.  The second part of each section provides notes on
 OfficeFloor's implementation of the patterns as a middleware framework.  This
-paper assumes in depth knowledge of existing software design only for the
-implementation notes.  The implementation notes may be skipped by those readers
-only interested in the influence of the office patterns on software design.
+paper assumes knowledge of existing software design only for the implementation
+notes.  The implementation notes may be skipped by those readers only interested
+in the influence of the office patterns on software design.
 
 
 
 \section{Patterns for execution of tasks}
 
 The following patterns model the execution of methods after the way tasks are
-undertaken within an office.  The implementation notes at the end provide
-details on how to implement the combined patterns.
+undertaken within an office.  These patterns address the first software problem
+addressed by this paper - performance tuning an application to operate within a
+complex environment.  The implementation notes at the end provide details on how
+to implement the combined patterns.
 
 
 \subsection{\textsc{\textbf{team}}}
@@ -584,19 +584,19 @@ covered by the \textsc{escalation} pattern.
 
 \subsubsection*{Consequences}
 
-OfficeFloor provides improved performance tuning of appliations requiring to
-integrate with many downstream systems (e.g. the reverse 10K
-problem~\cite{reverse-ten-k-problem} arrising in Service-Oriented
-Architectures).  Each downstream system's performance impacts are isolated by
-assigning the downstream system's communication dependency its own responsible
-thread pool.  This has requests that require a slow downstream system to be
-queued on its responsible thread pool, allowing other requests using different
-downstream systems to be serviced by other thread pools.
+OfficeFloor provides improved performance tuning of appliations operating in
+complex environments that require integration with many downstream systems (e.g.
+the reverse 10K problem~\cite{reverse-ten-k-problem} arrising in
+Service-Oriented Architectures).  Each downstream system's performance impacts
+are isolated by assigning the downstream system's communication dependency its
+own responsible thread pool.  This has requests that require a slow downstream
+system to be queued on its responsible thread pool, allowing other requests
+using different downstream systems to be serviced by other thread pools.
 
-The isolation provided by using multiple thread pools enables improved tuning of
-the server.  Tuning the thread pools (such as restricting the number of threads
-or changing the pool's thread nice values) allows prioritising threads and
-subsequently prioritising groups of related methods.
+Furthermore, the isolation provided by using multiple thread pools enables
+improved tuning of the server.  Tuning the thread pools (such as restricting the
+number of threads or changing the pool's thread nice values) allows prioritising
+threads and subsequently prioritising groups of related methods.
 
 For low load servers where a single thread pool is sufficient, having multiple
 thread pools causes increased complexity for developer configuration.  While
@@ -661,7 +661,7 @@ involves the developer significantly with the concurrency issues of the
 application.  This required awareness of concurrency by the developer is
 avoided by the performance tuning provided by responsible thread pools.
 
-Popular modern middleware servers use the \textsc{thread-per-request} pattern.
+Popular middleware servers use the \textsc{thread-per-request} pattern.
 For example, popular web servers (Netcraft November 2012 survey) serve dynamic
 web content by CGI/FastCGI with for example PHP scripts, Microsoft's
 HTTP.sys/WAS, and JEE Servlets. These servers use the
@@ -680,11 +680,18 @@ through responsible thread pools OfficeFloor enables prioritisation of blocking
 I/O for more intuitive development.
 
 
+
+
 \section{Patterns for collaboration of tasks}
 
 The following patterns model the collaboration of methods after the way tasks
-collaborate within an office.  The implementation notes at the end provide
-details on how to implement the patterns.
+collaborate within an office.  The result of these patterns is that they
+decouple the collaboration of methods.  The decoupling is necessary to overcome
+the isolation limitations in the task execution patterns by tasks having too
+similar dependencies.  Furthermore, these patterns provide the necessary
+decoupling for the build process patterns of the next section.  The
+implementation notes at the end provide details on how to implement the
+patterns.
 
 
 \subsection{\textsc{\textbf{hand-off}}}
@@ -1158,13 +1165,13 @@ themselves to be specific to the instance of the process.
 The \texttt{doHandOff(\ldots)} method does allow one argument to be passed to
 the invoked \texttt{Task} (\textsc{complete the form}).  This is for more
 intuitive development by passed state with the hand-off.  If multiple arguments
-are required they are encapsulated into an object for passing.
-To maintain loose coupling the invoked \texttt{Task} obtains the argument as
-state (i.e. \texttt{getState(\ldots)} method in listing
+are required they are encapsulated into an object for passing.  To maintain
+loose coupling the invoked \texttt{Task} obtains the argument as state (i.e.
+\texttt{getState(\ldots)} method in listing
 \ref{lst:TaskCollaborationInterfaces}).  This is so the invoked \texttt{Task}
-need not differentiate between dependencies and parameters (\textsc{record
-information}).  The invoked \texttt{Task} may also ignore the handed-off
-argument should it not depend on it.
+need not differentiate between dependencies and the passed argument
+(\textsc{record information}).  The invoked \texttt{Task} may also ignore the
+handed-off argument should it not depend on it.
 
 The hand-off will borrow the thread of control of the calling \texttt{Task} if
 it results in being executed by the same thread pool.  Rather than dispatching
@@ -1238,6 +1245,14 @@ Hand-offs from the \texttt{retrieveData(\ldots)} method are:
 
 
 \subsubsection*{Consequences}
+
+The task collaboration patterns enable decomposing the process into smaller
+tasks.  As methods within the \texttt{task}s collaborate through
+\textsc{hand-off}, the methods are decoupled from each other.  Furthermore, the
+decoupling through \textsc{record information} enables the methods to only
+require a subset of the dependencies of the process.  Requiring only a subset of
+the dependencies removes the task execution limitation of too many similar
+dependencies causing all \texttt{task}s to be executed by the same thread pool.
 
 The mapping of hand-off (\texttt{handOffId}) to \texttt{Task} (\texttt{taskId})
 is contained within configuration.  This enables changing the invoked method
@@ -1313,8 +1328,11 @@ hand-off argument (message) from the sending \texttt{Task} (actor).  The
 \section{Patterns for building processes}
 
 The following patterns compose methods into composite functionality after the
-way processes are constructed from tasks within an office.  The implementation
-notes at the end provide details on how to implement the patterns.
+way processes are constructed from tasks within an office.  These patterns
+address the second software problem addressed by this paper - creation of a
+techincal framework that enables delivery of software faster and continuously. 
+The implementation notes at the end provide details on how to implement the
+patterns.
 
 
 \subsection{\textsc{\textbf{task defines itself}}}
@@ -1322,7 +1340,7 @@ notes at the end provide details on how to implement the patterns.
 \subsubsection*{Context} Within an office, the task itself will define its
 dependencies and when aspects are no longer its responsibility.  Providing a
 fixed set of dependencies and fixed set of hand-offs to a person to achieve a
-task will, unless a very simple task, result in the task being unsuccessful.  To
+task will, unless a simple task, result in the task being unsuccessful.  To
 be successful the person executing the task will seek out the required
 dependencies and other people necessary to complete the task.
 
@@ -1374,9 +1392,11 @@ hierarchies can no longer be determined by method signatures.
 \subsection{\textsc{\textbf{process defines itself}}}
 
 \subsubsection*{Context} Within an office, the process is constructed from
-tasks.  As the tasks define themselves, the process is subject to the
-necessities of its containing tasks.  The process, therefore, becomes the sum of
-all the dependencies and hand-offs of its containing tasks.
+tasks.  The process encapsulates the collaboration of the tasks and becomes the
+sum of the functions within the tasks.  However, as the tasks define themselves,
+the process is also subject to the necessities of its containing tasks.  The
+process, therefore, also becomes the sum of all the dependencies and hand-offs
+of its containing tasks.
 
 Furthermore, determining whether it is a task or whether it is a process involving
 multiple tasks executed by differing responsible teams is typically not
@@ -1461,27 +1481,25 @@ categories of tasks.}).
 
 \subsection{\textsc{\textbf{automate only where appropriate}}}
 
-\subsubsection*{Context} Within an office, automating all processes is costly to
-a business.  In many cases, using manual processes is cheaper than the cost of
-automating them.  Furthermore, all processes may not be mature enough to be
-automated.  Automating a process requires standardising the process, ensuring
-the dependencies of the process are available and accessible, and catering to
-all the exceptions that may occur within the process.
+\subsubsection*{Context} Within an office, automation of a process requires
+maturing the process \cite{process-maturity-global}.  Maturing a process for
+automation requires the process to be identified and defined.  Defining the
+process requires specifying the sequence of tasks, the dependencies necessary
+for those tasks and catering to all the exceptions that may occur by those
+tasks.
 
-Designing a business top-down forces all processes to be of at least
-standardised maturity to understand their interrelationships within the whole of
-the business.  Having to mature all processes to be standardised increases cost
-and forces less mature processes to be standardised before they have been
-proven.  As the processes inevitably mature within the business, they become
-different to their forced up front standardisation.
+Within software, designing a system top-down forces all business processes to a
+higher maturity.  Higher maturity processes provide the necessary definitions
+(requirements) of what the software must automate.  Without these requirements
+the software designers are unclear on what to automate.  Furthermore, each
+process implementation must fit within the top-down design of the software
+system.  Withinout understanding each process it can not be determined whether
+the system's design adequately caters to each process.  Gaining this
+understanding of the business, therefore, forces higher maturity of the
+processes by requiring to identify and define each process.
 
-Businesses, therefore, standardise their processes by re-use of proven
-tasks/processes and only automate where appropriate (bottom-up approach).
-
-Within software, having to design applications top-down is subsequently
-not in alignment to how businesses evolve.
-
-\subsubsection*{\textbf{Problem}} Design applications bottom-up.
+\subsubsection*{\textbf{Problem}} Design applications bottom-up so that
+functionality (processes) may be incrementally added.
 
 \subsubsection*{Forces} The method puts the control at the higher-level layers
 of the application design.  The higher-level layer caller tightly couples the
@@ -1490,23 +1508,23 @@ layers can not change the method signature without refactoring the higher-level
 layers due to this tight coupling.  This forces a top-down approach to designing
 the application.
 
-\subsubsection*{\textbf{Solution}} Use \textsc{task defines itself} to only use proven
-tasks.  Then build only the standardised processes through \textsc{process
-defines itself}.
+\subsubsection*{\textbf{Solution}} Use \textsc{task defines itself} to only use
+proven tasks.  Then build only the identified and defined processes through
+\textsc{process defines itself}.
 
 \subsubsection*{Consequences} Using \textsc{task defines itself} and
 \textsc{process defines itself} enables the design of the application to
 automate only the mature processes within the business.  The less mature
 processes are left undefined until they mature in the business.
 
-This bottom-up approach to designing applications aligns both to the business
-maturing and also modern development methodologies.  Modern development
-methodologies, such as Agile, evolve the architecture upwards based on providing
-value back to the business.  Therefore, only the processes that provide value
-back to the business are built leaving the remaining processes manual (except
-where there is necessary information capture for the processes of value, i.e.
-\textsc{record information}).
-
+This approach to designing applications aligns both to the maturing of business
+processes and Agile development.  Agile focuses on early and continuous delivery
+of working software \cite{agile-manefesto}.  Through \textsc{process defines
+itself}, processes are built without requiring all other processes to be
+identified and defined.  Therefore, the mature processes that provide value back
+to the business are able to be built earlier.  Then as the other processes
+mature, they are incrementally built into the application for continuous
+delivery of new functionality.
 
 
 \subsection{Implementation notes for the process building patterns}
@@ -1673,25 +1691,17 @@ is required.
 
 \subsubsection*{Consequences}
 
-Within \textsc{task defines itself}, object-orientation provides the implicit
-state (dependencies) to the method within the \texttt{Task}.  Explicit
-dependencies are injected as arguments into the method (\textsc{record
-information}).  Having implicit references from object-orientation tightly
-couples the methods and should be avoided in the implementing methods for
-\texttt{Task}s.  Furthermore, as the application behaviour is implemented in
-\texttt{Task}s via methods, the application is no longer constructed only as a
-graph of collaborating hierarchical objects.
+Using \textsc{automate only where necessary} enables bottom-up control over the
+design of the application.  As the variation points of the application are
+controlled by the \texttt{Task}s (\textsc{task defines itself}), developers
+start by building the \texttt{Task}s first.  As the \texttt{Task}s are less
+abstract, the developer is able to focus on more concrete problems and provide
+only the necessary variation points to solve the particular problem.  This
+avoids over engineering the design of the application.  Furthermore, as the
+processes are built last (\textsc{process dfines itself}), there is less need
+for large initial top-down designs (\textsc{automate only where necessary}).
 
-Using \textsc{process defines itself} enables bottom-up control over the design
-of the application.  As the variation points are controlled by the
-\texttt{Task}s, developers start by building the \texttt{Task}s first.  As
-the \texttt{Task}s are less abstract, the developer is able to focus on more
-concrete problems and provide only the necessary variation points to solve the
-particular problem.  This avoids over engineering the design of the application.
- Furthermore, as the processes are built last, there is less need for large
-initial top-down designs (\textsc{automate only where necessary}).
-
-\textsc{process defines itself} also enables bottom-up evolution of the
+\textsc{automate only where necessary} also enables bottom-up evolution of the
 application.  Within applications imposing top-down design, the
 \textsc{explicit interface} (\textsc{template method}) between \textsc{layers}
 needs to be refactored to account for required changes to increase the
@@ -1701,27 +1711,45 @@ introduce new variation points.  As the \textsc{explicit interface} to invoke
 the \texttt{Task} does not change, the higher-level layer calling code does not
 require refactoring to evolve the application.
 
+There is less need for initial top-down designs that enable earlier delivery of
+working software.  Furthermore, there is ability to incrementally add further
+functionality without significant refactoring for more continuous delivery of
+working software.
+
+Within \textsc{task defines itself}, object-orientation provides the implicit
+state (dependencies) to the method within the \texttt{Task}.  Explicit
+dependencies are injected as arguments into the method (\textsc{record
+information}).  Having implicit references from object-orientation tightly
+couples the methods and should be avoided in the implementing methods for
+\texttt{Task}s.  Furthermore, as the application behaviour is implemented in
+\texttt{Task}s via methods, the application is no longer constructed only as a
+graph of collaborating hierarchical objects.
+
 
 
 
 \section{Conclusion}
 
-The use of proven patterns occurring within the office has highlighted and
-resolved limitations in existing software design patterns for middleware
-frameworks.  The task execution patterns provides improved performance tuning of
+The use of proven patterns occurring within the office has resolved limitations
+in existing software design patterns for middleware frameworks.
+
+The task execution patterns provides improved performance tuning of
 applications to handle performance issues of complex environments, such as
 Service-Oriented Architectures (SOA).  This occurs by using the
 \textsc{responsible team} pattern to provide a separate thread pool to isolate
 the performance impacts of each downstream system used by the application.
 
-Furthermore, using the task execution patterns together with the task
-collaboration patterns enables the \textsc{task defines itself} pattern to
-invert control over the method signature.  This inversion of control enables the
+Using the task execution patterns together with the task collaboration patterns
+enables a technical framework to aid Agile methodologies in earlier and
+continous delivery of working software.  The resulting \textsc{task defines
+itself} pattern from the task execution and collaboration patterns inverts
+control over the method signature.  This inversion of control enables the
 implementation of the method to defines its own method signature.  Enabling the
-implementations to define their own interfaces enables a bottom-up approach to
-designing the application.  This approach is in alignment to how businesses
-evolve and how modern development methodologies, such as Agile, evolve
-application architectures upwards.
+method implementations to define their own method signatures enables a bottom-up
+approach to designing the application.  This bottom-up approach provides Agile
+methodologies a technical framework that avoids long top-down software design
+lead times and significant refactoring of top-down software designs.  This
+results in delivering working software earlier and continuously.
 
 As this paper covers the implementation patterns of OfficeFloor, future work
 will describe the usage patterns for developers to build applications with
