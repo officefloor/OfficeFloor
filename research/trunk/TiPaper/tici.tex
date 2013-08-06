@@ -52,25 +52,26 @@
 \renewcommand{\algorithmcfname}{ALGORITHM}
 
 % Page heads
-\markboth{D. Sagenschneider}{OfficeFloor: using office patterns for software design}
+\markboth{D. Sagenschneider}{OfficeFloor: using office patterns to improve software design}
 
 
-\title{OfficeFloor: using office patterns for software design}
+\title{OfficeFloor: using office patterns to improve software design}
 \author{DANIEL SAGENSCHNEIDER \affil{OfficeFloor, daniel@officefloor.net}}
 
 \begin{abstract}
 OfficeFloor is a middleware framework that bases its design on the patterns
 occurring within the office.  Re-using office patterns within software enables
-improved performance tuning of applications and enables earlier and continuous
-delivery of working code for Agile methodologies.  The improved performance
-tuning uses multiple thread pools to isolate the performance of the application
-in interacting with multiple downstream systems (e.g. an application operating
-in a Service-Oriented Architecture).  The earlier and continuous delivery of
-working code is enabled by inversion of control.  OfficeFloor is a middleware
-framework that provides inversion of control for methods to build applications
-bottom-up.  The bottom-up approach to building applications reduces the lead
-times and refactoring of top-down software designs to provide early and
-continuous delivery of working code for Agile methodologies.
+improved performance tuning of applications for complex environments and enables
+earlier and continuous delivery of working code for Agile methodologies.  The
+improved performance tuning uses multiple thread pools to isolate the
+performance impacts of the application in interacting with multiple downstream systems
+(e.g. an application operating in a Service-Oriented Architecture).  The earlier
+and continuous delivery of working code is enabled by inversion of control. 
+OfficeFloor is a middleware framework that provides inversion of control for
+methods to build applications bottom-up.  The bottom-up approach to building
+applications reduces the lead times and refactoring of top-down software designs
+to provide early and continuous delivery of working code for Agile
+methodologies.
 \end{abstract}
 
 \category{D.2.11}{Software Architectures}{Patterns}
@@ -80,7 +81,7 @@ continuous delivery of working code for Agile methodologies.
 \terms{Design, Performance, Standardization}
 \keywords{Inversion of Control, Responsible Thread Pool, Task Orchestration}
 
-\acmformat{Sagenschneider, D. 2013. OfficeFloor: using office patterns for software design.}
+\acmformat{Sagenschneider, D. 2013. OfficeFloor: using office patterns to improve software design.}
 
 \copyr{Copyright 2013 is held by the author}
 
@@ -138,11 +139,11 @@ external parties (e.g. customers, suppliers, service providers, other offices)
 is a similar problem to an application interacting with multiple external
 systems (e.g. Service-Oriented Architecture).
 
-The use of office solutions within this paper addresses two problems within
+The use of the office solutions within this paper addresses two problems within
 software design.  The first software problem is to enable performance tuning of
 an application to operate in a complex environment that requires use of many
 downstream systems \cite{reverse-ten-k-problem}.  The second software problem is
-providing a technical framework that enables delivering working software faster
+providing a technical framework that enables delivering working software earlier
 and continuously \cite{agile-manifesto}.
 
 To re-use the office solutions for software problems, software concepts need to
@@ -456,9 +457,9 @@ the execution of tasks.  However, both the \textsc{thread-per-request} pattern a
 the \textsc{proactor} pattern do not define algorithms for
 prioritisation and cancellation of tasks and leaves this to the developer.
 
-Better isolation of tasks is necessary to reduce trade-offs in performance
-tuning.  Utilising a single pool of threads to service all requests results in
-tuning trade-offs that degrade performance of the server during particular load
+Isolation of tasks is necessary to reduce trade-offs in performance tuning. 
+Utilising a single pool of threads to service all requests results in tuning
+trade-offs that degrade performance of the server during particular load
 profiles (e.g. high load of requests blocked on database I/O that are starving
 requests for cached data of a thread).  This is further evident in the
 performance analysis of web servers which identifies the importance of tuning
@@ -524,7 +525,7 @@ The \texttt{getRequiredDependencyTypes(\ldots)} (Listing
 \texttt{getRequiredDependencyTypes(\ldots)} method uses the \textsc{dependency
 injection} configuration\footnote{OfficeFloor uses qualification to distinguish
 dependencies of the same type and returns a type object containing both class
-and qualifier.  The thread pool matching then incorporates the qualifier.} to
+and qualifier.  The thread pool matching incorporates the qualifier.} to
 identify the required parameter types of the method within the \texttt{Task}
 (\textsc{categorise task}).
 
@@ -584,7 +585,7 @@ covered by the \textsc{escalation} pattern.
 
 \subsubsection*{Consequences}
 
-OfficeFloor provides improved performance tuning of appliations operating in
+OfficeFloor provides improved performance tuning of applications operating in
 complex environments that require integration with many downstream systems (e.g.
 the reverse 10K problem~\cite{reverse-ten-k-problem} arrising in
 Service-Oriented Architectures).  Each downstream system's performance impacts
@@ -600,8 +601,8 @@ threads and subsequently prioritising groups of related methods.
 
 For low load servers where a single thread pool is sufficient, having multiple
 thread pools causes increased complexity for developer configuration.  While
-this provides the flexibility to focus the tuning of isolated categories of
-tasks by tuning their mapped thread pool, it does put the burden on the
+OfficeFloor provides the flexibility to focus the tuning of isolated categories
+of tasks by tuning their responsible thread pools, it does put the burden on the
 developer to understand thread related performance issues (e.g. costs related to
 thread stack memory and thread-context switching) and the performance of the
 dependencies (along with their related tasks).  In this case, a single
@@ -665,11 +666,11 @@ Popular middleware servers use the \textsc{thread-per-request} pattern.
 For example, popular web servers (Netcraft November 2012 survey) serve dynamic
 web content by CGI/FastCGI with for example PHP scripts, Microsoft's
 HTTP.sys/WAS, and JEE Servlets. These servers use the
-\textsc{thread-per-request} pattern that is intuitive for developers to use but
-suffer from the thread starvation of a slow task by only using a single thread
-pool.  By isolating the slow task to its own responsible thread pool,
-OfficeFloor overcomes a single slow task causing thread starvation across all
-requests.
+\textsc{thread-per-request} pattern that is intuitive for developers to use.
+However, these servers suffer from thread starvation within their single thread
+pool by a slow task.  By isolating the slow task to its own responsible thread
+pool, OfficeFloor overcomes a single slow task causing thread starvation across
+all requests.
 
 Modern event-based frameworks based on the \textsc{proactor} pattern, such as
 Node.js~\cite{nodejs}, are enabling increased concurrency for applications.
@@ -770,7 +771,7 @@ failures.
 
 \subsubsection*{Context} Within an office, the process is a sequence of tasks.
 The next task in the process depends on what occurs with the current task.  The
-process can be changed by altering the next task for each outcome of the current
+process can be changed by altering the next task for an outcome of the current
 task.
 
 Within software, the method directly specifies the next method (task) called. 
@@ -845,19 +846,19 @@ thread-context switching.
 handed-off tasks to other teams are complete.  For example a sales person will
 need to get back to the customer when the finance team has the invoice ready.
 
-Within software, the hand-off returns control the calling method (task) before
-the invoked method (task) is complete.  Therefore, the calling method is
+Within software, the hand-off returns control to the calling method (task)
+before the invoked method (task) is complete.  Therefore, the calling method is
 uncertain as to whether the handed-off method is complete.
 
 \subsubsection*{\textbf{Problem}} Know when the handed-off method is complete.
 
 \subsubsection*{Forces} Methods invoked by hand-offs are asynchronously executed
 by other threads.  There is no synchronous return from them to the calling
-method to indicate when the hand-off method is complete.
+method to indicate when the handed-off method is complete.
 
 \subsubsection*{\textbf{Solution}} Provide a Future from the hand-off invocation to
 indicate when the handed-off method is complete\footnote{As the handed-off
-method may invoke further hand-offs, the Future indicates when the resulting
+method can invoke further hand-offs, the Future indicates when the resulting
 tree of hand-offs is complete.}.  Furthermore, the checking of hand-off
 completion is non-blocking so it does not tie up a calling thread.
 
@@ -910,8 +911,8 @@ complete} pattern is used as a guard condition to only execute the functionality
 once all appropriate handed-off methods are complete.
 
 \subsubsection*{Related Patterns} \textsc{task complete} is used to indicate
-which handed-off methods are complete.  The \textsc{record information} pattern
-providing the state for the picked up again \texttt{Task} is similar to the
+which handed-off methods are complete.  The \textsc{record information} pattern,
+providing the state for the picked up again \texttt{Task}, is similar to the
 \textsc{asynchronous completion token}~\cite{posa} pattern.
 
 
@@ -1128,7 +1129,8 @@ manages the hand-off (\texttt{handOffId}) mapping to target \texttt{Task}
 To avoid relying on \texttt{Task}s to define hand-offs, each \texttt{Task} has
 an implicit hand-off.  The implicit hand-off is triggered on completion of the
 \texttt{Task} should no other hand-offs be invoked.  This enables configuring a
-sequence of \texttt{Task}s as sequential steps of a process.
+sequence of \texttt{Task}s as sequential steps of a process (\textsc{define
+process flows}).
 
 The hand-off triggers the \texttt{TaskExecutor} to register a \texttt{Task} with
 its responsible thread pool for asynchronous execution.  A \texttt{Future} is
@@ -1231,7 +1233,7 @@ method will:
   }
 
   interface CacheHandOffs {
-    void cacheMiss(String key);
+    Future cacheMiss(String key);
   }
 \end{lstlisting}
 \footnotetext{\texttt{retrieveData} may also be a function should the implementing programming language support functions.}
@@ -1239,7 +1241,7 @@ method will:
 Hand-offs from the \texttt{retrieveData(\ldots)} method are:
 \begin{itemize}
   \item \texttt{cacheMiss(\ldots)} which is mapped to a \texttt{Task} to retrieve data from the database.
-  \item Implicit hand-off which is mapped to the next \texttt{Task} in the process\footnote{The return value from the method is used as the hand-off argument.}.
+  \item Implicit hand-off which is mapped to the next \texttt{Task} in the process\footnote{The return value from the method is used as the implicit hand-off argument.}.
   \item \texttt{IOException} which is mapped to a \texttt{Task} providing an error response.  It may also be mapped to a \texttt{Task} to retrieve the data from a database to attempt to continue the process.
 \end{itemize}
 
@@ -1330,9 +1332,9 @@ hand-off argument (message) from the sending \texttt{Task} (actor).  The
 The following patterns compose methods into composite functionality after the
 way processes are constructed from tasks within an office.  These patterns
 address the second software problem addressed by this paper - creation of a
-techincal framework that enables delivery of software faster and continuously. 
-The implementation notes at the end provide details on how to implement the
-patterns.
+techincal framework that enables delivery of working code earlier and
+continuously.  The implementation notes at the end provide details on how to
+implement the patterns.
 
 
 \subsection{\textsc{\textbf{task defines itself}}}
@@ -1482,18 +1484,18 @@ categories of tasks.}).
 \subsection{\textsc{\textbf{automate only where appropriate}}}
 
 \subsubsection*{Context} Within an office, automation of a process requires
-maturing the process \cite{process-maturity-global}.  Maturing a process for
-automation requires the process to be identified and defined.  Defining the
-process requires specifying the sequence of tasks, the dependencies necessary
-for those tasks and catering to all the exceptions that may occur by those
-tasks.
+maturing the process \cite{process-maturity-global,bpm-tools}.  Maturing a
+process for automation requires the process to be identified and defined. 
+Defining the process requires specifying the sequence of tasks, the dependencies
+necessary for those tasks and catering to all the exceptions that may occur by
+those tasks.
 
 Within software, designing a system top-down forces all business processes to a
 higher maturity.  Higher maturity processes provide the necessary definitions
 (requirements) of what the software must automate.  Without these requirements
 the software designers are unclear on what to automate.  Furthermore, each
 process implementation must fit within the top-down design of the software
-system.  Withinout understanding each process it can not be determined whether
+system.  Without understanding each process it can not be determined whether
 the system's design adequately caters to each process.  Gaining this
 understanding of the business, therefore, forces higher maturity of the
 processes by requiring to identify and define each process.
