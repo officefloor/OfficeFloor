@@ -4,7 +4,6 @@
 executor:TaskExecutor[a]
 dif:DependencyInjectionFactory[a]
 /task:Task[x]
-/runnable:Runnable[x]
 one:ThreadPool
 two:ThreadPool
 n:ThreadPool
@@ -13,17 +12,15 @@ invoker:executor.executeTask(\\n   "taskId")
 executor:task=dif.createTask("taskId")
 dif:>task.new(dependencies)&
 executor:
-executor:>runnable.new(task)&
 executor:types=dif.getRequiredDependencyTypes(\\n   "taskId")
 executor:
 executor:>executor.selectThreadPool(types)&
 executor:
-executor:two.register(runnable)
-two[,0]:>two.queue(runnable)
+executor:two.register(task)
+two[,0]:>two.queue(task)
 invoker:stop
-two:runnable.run()
-runnable:task.execute()
-runnable:stop
+two:task.execute()
+two:stop
 ]]></source>
 <configuration>
 <property name="activationBarBorderThickness" value="1"/>
