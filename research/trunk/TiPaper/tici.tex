@@ -723,13 +723,13 @@ pool.
 \subsubsection*{Implementation note} A proxy implementation of the interface is
 created by OfficeFloor and provided to the method by \textsc{dependency
 injection}~\cite{ioc}.  The proxy implementation undertakes the asynchronous
-invocation of the respective target method.
+invocation of the respective target handling method.
 
-\subsubsection*{Consequences} The invoked handling method is asynchronously
-invoked by another thread of control.  However, due to the asynchronous
-invocation no return value is available from the invoked method.  Furthermore,
-each hand-off incurs threading overheads (e.g. thread synchronisation and
-thread-context switching).
+\subsubsection*{Consequences} The handling method is asynchronously invoked by
+another thread of control.  However, due to the asynchronous invocation no
+return value is available from the invoked method.  Furthermore, each hand-off
+incurs threading overheads (e.g. thread synchronisation and thread-context
+switching).
 
 \subsubsection*{Related Patterns} Is a sequence on \textsc{responsible team} to
 hand-off methods to a responsible team.  This pattern has similarities to the
@@ -888,8 +888,9 @@ poll the Future to determine completion.  However, when handing-off many methods
 this enables distinguishing which are complete.
 
 \subsubsection*{Related Patterns} This is similar to the \textsc{future} pattern
-\cite{concurrent-java}.  The \textsc{pick up task again} pattern avoids polling
-the Future.
+\cite{concurrent-java} except \textsc{record information} provides the return
+values rather than the Future.  The \textsc{pick up task again} pattern avoids
+polling the Future.
 
 
 
@@ -899,7 +900,7 @@ the Future.
 are complete allows the calling team to get on with other work and return to the
 task when the handed-off tasks are complete.  For example, the sales team can
 seek out other customers and only get back in contact with a customer when the
-financial team notifies them that an invoice is ready.
+financial team notifies them that a quote is ready.
 
 Within software, asynchronous invocations of methods (tasks) do not provide
 notification back of the method's completion.
@@ -1147,7 +1148,8 @@ To avoid relying on \texttt{Task}s to define hand-offs, each \texttt{Task} has
 an implicit hand-off.  The implicit hand-off is triggered on completion of the
 \texttt{Task} should no other hand-offs be invoked.  This enables configuring a
 sequence of \texttt{Task}s as sequential steps of a process (\textsc{define
-process flows}).
+process flows}).  The sequential execution of the methods enables intuitive
+coding by the developer.
 
 The hand-off triggers the \texttt{TaskExecutor} to register a \texttt{Task} with
 its responsible thread pool for asynchronous execution.  A \texttt{Future} is
@@ -1231,15 +1233,15 @@ method will:
 \begin{enumerate}
   \item Obtain an instance of the \texttt{CacheOperation} via the \texttt{getState(\ldots)} method.
   \item Obtain both the \texttt{key}\footnote{\texttt{key} is a hand-off argument from the previous \texttt{Task}.} and \texttt{cache} again via the \texttt{getState(\ldots)} method.
-  \item Instantiate a proxy implementation of the \texttt{CacheHandOffs} interface that wraps the \texttt{TaskContext}.  The proxy implements the \texttt{cacheMiss(\ldots)} method by invoking \texttt{doHandOff(``cacheMiss'',key)}. 
+  \item Instantiate a proxy implementation of the \texttt{RetrieveDataHandOffs} interface that wraps the \texttt{TaskContext}.  The proxy implements the \texttt{cacheMiss(\ldots)} method by invoking \texttt{doHandOff(``cacheMiss'',key)}. 
   \item Reflectively invoke the \texttt{retrieveData(\ldots)} method with the above arguments.
 \end{enumerate}
 
-\lstset{caption=Example developer code of a method within a task for retrieving data from a cache.  \texttt{CacheHandOffs} is the hand-off interface for the \texttt{retrieveData(\ldots)} method.}
+\lstset{caption=Example developer code of a method within a task for retrieving data from a cache.  \texttt{RetrieveDataHandOffs} is the hand-off interface for the \texttt{retrieveData(\ldots)} method.}
 \begin{lstlisting}[float,label=lst:Example_Method_Task]
   class CacheOperation {
     public Data retrieveData(String key, Cache cache
-                            , CacheHandOffs handOffs
+                            , RetrieveDataHandOffs handOffs
                             ) throws IOException {
         Data data = cache.get(key);
         if (data == null) {
@@ -1250,7 +1252,7 @@ method will:
     }
   }
 
-  interface CacheHandOffs {
+  interface RetrieveDataHandOffs {
     Future cacheMiss(String key);
   }
 \end{lstlisting}
@@ -1290,15 +1292,6 @@ manage the configuration.  The tools graphically represent the \texttt{Task}s as
 nodes and the hand-off mappings as directed lines between these nodes.  Due to
 the similarity of this configuration with Service Orchestration this graphical
 configuration is identified as Task Orchestration.
-
-Furthermore, as the \texttt{Task}s are executed by different threads of control,
-the stack trace automatically provided by the \textsc{thread-per-request}
-pattern no longer reflects the call hierarchy.  This can make it difficult to
-debug issues.  However, the \texttt{TaskExecutor} records the tree of
-\texttt{Task}s invoked so that the tree can be traversed back to the root.
-Hence, this identifies the sequence of hand-offs to the \texttt{Task} throwing
-the exception.  The whole tree can also be reported to aid the developer in
-debugging the cause of the issue.
 
 Functions can also be used in place of methods.  When implementing
 \texttt{Task}s with functions, the functions will not be pure.  As state is
@@ -1348,10 +1341,9 @@ hand-off argument (message) from the sending \texttt{Task} (actor).  The
 
 The following patterns compose methods into composite functionality in a similar
 way to processes within an office being constructed from tasks.  These patterns
-address the second software problem addressed by this paper - creation of a
-middleware framework that enables delivery of working code early and
-continuously.  The implementation notes at the end provide details on how to
-implement the patterns.
+address the second software problem - creation of a middleware framework that
+enables delivery of working code early and continuously.  The implementation
+notes at the end provide details on how to implement the patterns.
 
 
 \subsection{\textsc{\textbf{task defines itself}}}
@@ -1440,52 +1432,50 @@ component (process).  Like the method signature, the interface to the component
 is controlled by the caller.  Therefore, the component does not have control
 over defining itself.
 
-\subsubsection*{\textbf{Problem}} Enable each process (composition of tasks,
-i.e. component) to define itself.  Furthermore, in defining itself the process
-must have a similar interface to a task in order to be interchangeable with a
-task.
+\subsubsection*{\textbf{Problem}} Enable each component (process) to define
+itself.  Furthermore, in defining itself the component must have a similar
+interface to a method (task) in order to be interchangeable with a method.
 
-\subsubsection*{Forces} Adding new tasks to a process is similar to adding new
-functionality to a component.  Adding new functionality involves:
+\subsubsection*{Forces} Adding new functionality involves:
 \begin{itemize}
   \item new dependencies that need to be referenced from the functionality,
   \item new exceptions that may occur from the functionality, and
   \item a potentially different threading model to efficiently undertake the functionality. 
 \end{itemize}
 
-\subsubsection*{\textbf{Solution}} Represent the process as a task in the
-\textsc{define process flows}.  The process is given its own identifier that
-maps to the initial task of the process\footnote{The process may expose multiple
-\texttt{taskId}s to enable starting at different \texttt{Task}s within it.}.
-All hand-offs not mapped to a task within the process become the set of
-hand-offs for the process (this includes \textsc{escalation}).  All dependencies
-of the contained tasks (from \textsc{record information}) becomes the set of
-dependencies for the process.
+\subsubsection*{\textbf{Solution}} Represent the component as a task in the
+\textsc{define process flows}.  The component is given its own identifier that
+maps to the initial task of the component\footnote{The component may expose
+multiple \texttt{taskId}s to enable starting at different tasks within it.}. All
+hand-offs not mapped to a task within the component become the set of hand-offs
+for the component (this includes \textsc{escalation}).  All dependencies of the
+contained tasks (from \textsc{record information}) becomes the set of
+dependencies for the component.
 
-To reduce the set of dependencies for the interface of the process, the same
+To reduce the set of dependencies for the interface of the component, the same
 dependency used by many of its contained tasks is represented as single
-dependency of the process.
+dependency of the component.
 
-Also, to reduce the hand-offs for the interface of the process, hand-offs from
+Also, to reduce the hand-offs for the interface of the component, hand-offs from
 multiple contained tasks are mapped to a single hand-off exposed from the
-process.
+component.
 
-\subsubsection*{Consequences} As the process is interchangeable with a task,
-composite processes are built from other processes.  The interface of a
-composite process is created in the same way as if it contained tasks.
+\subsubsection*{Consequences} As the component is interchangeable with a task,
+composite components are built from other components.  The interface of a
+composite component is created in the same way as if it contained tasks.
 
-Having composite processes constructed from other composite processes requires
+Having composite components constructed from other composite components requires
 the graphical representation of the \textsc{define process flows} pattern (Task
 Orchestration).  This is necessary for the developer to understand the flows
-within the application, as adding composite processes is further indirection
+within the application, as adding composite components is further indirection
 that requires visual representation to comprehend.
 
-The \textsc{categorise task} pattern of each contained task within the process
-(and composite processes) is still followed.  As the process is constructed from
-only tasks, the process focuses only on functionality and allows all its tasks
+The \textsc{categorise task} pattern of each contained task within the component
+(and composite components) is still followed.  As the component is constructed from
+only tasks, the component focuses only on functionality and allows all its tasks
 to be executed by their respective \textsc{responsible team} pattern.
 Therefore, if the responsible thread pools are changed for the application the
-execution of the tasks within the processes follow the new threading model
+execution of the tasks within the components follow the new threading model
 without requiring code nor configuration changes\footnote{Changing the
 responsible thread pools follows the analogy of changing the functional (teams)
 departments within a business.  The functional departmentalisation to execute
@@ -1522,12 +1512,12 @@ required due to the need to identify and define each process.
 \subsubsection*{\textbf{Problem}} Design applications bottom-up so that
 functionality (processes) may be incrementally added.
 
-\subsubsection*{Forces} The method puts the control at the higher-level layers
-of the application design.  The higher-level layer caller tightly couples the
-method signature that the lower-level layers must implement.  The lower-level
-layers can not change the method signature without refactoring the higher-level
-layers due to this tight coupling.  This forces a top-down approach to designing
-the application.
+\subsubsection*{Forces} The method puts the control at the higher-level layer
+components of the application design.  The higher-level layer component caller
+tightly couples the method signature that the lower-level layer components must
+implement.  The lower-level layer components can not change the method signature
+without refactoring the higher-level layer components due to this tight
+coupling.  This forces a top-down approach to designing the application.
 
 \subsubsection*{\textbf{Solution}} Use \textsc{task defines itself} to only use
 proven tasks.  Then incrementally build only the identified and defined
@@ -1556,12 +1546,13 @@ delivery of new functionality.
 Applications built with \textsc{layers} typically impose a top-down approach to
 design.  ``The \textsc{layers} require and provide \textsc{explicit interfaces}
 from and to each other, in a top-down manner, from the higher to the lower
-\textsc{layers}'' \cite[p. 11]{ioc}.  The higher-level layer components (object
-that wraps a method) define the variation points that are ``predefined points in
-the control and data flow which allow for modifying and extending a component's
-behaviour'' \cite[p. 5]{ioc}.  A top-down approach is required, as the
-higher-level layer components control what variation points may be implemented
-by the lower-level layer components.
+\textsc{layers}'' \cite[p. 11]{ioc}.  The higher-level layer components
+(composite functionality that is comprised of objects and their methods) define
+the variation points that are ``predefined points in the control and data flow
+which allow for modifying and extending a component's behaviour'' \cite[p.
+5]{ioc}.  A top-down approach is required, as the higher-level layer components
+control what variation points may be implemented by the lower-level layer
+components.
 
 The components need to be composed within an architecture that is dictated by
 the framework.  The framework ``will define the overall structure, its
@@ -1705,12 +1696,12 @@ OfficeFloor.}.
 
 Furthermore, the top-down approach to designing an application requires
 understanding the entire scope of the application requirements.  Without
-understanding all the complexities, the design may not adequately meet the
-business needs and require significant refactoring to align with the business
-needs.  OfficeFloor enables building only the mature processes bottom-up
-(\textsc{automate only where appropriate}).  This removes the need to understand
-all complexities as only understanding of the scope of each process to automate
-is required.
+understanding all the complexities, the top-down design may not adequately meet
+the business needs and require significant refactoring to align with the
+business needs.  OfficeFloor enables building only the mature processes
+bottom-up (\textsc{automate only where appropriate}).  This removes the need to
+understand all complexities as only understanding of the scope of each process
+to automate is required.
 
 
 \subsubsection*{Consequences}
