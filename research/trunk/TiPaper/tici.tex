@@ -60,19 +60,23 @@
 
 \begin{abstract}
 OfficeFloor is a middleware framework that bases its design on the patterns
-occurring within the office.  Re-using office patterns within software enables
-improved performance tuning of applications operating within complex enterprise
-environments and enables earlier and continuous delivery of working code for
-Agile methodologies.  The improved performance tuning uses multiple thread pools
-to isolate the performance impacts of the application in interacting with
-multiple downstream systems (e.g. an application operating in a complex
-enterprise environment, such as Service-Oriented Architecture).  The earlier and
-continuous delivery of working code is enabled by inversion of control.
-OfficeFloor is a middleware framework that provides inversion of control for
-methods to build applications bottom-up.  The bottom-up approach to building
-applications reduces the lead times and reduces the refactoring of top-down
-software designs to enable early and continuous delivery of working code for
-Agile methodologies.
+occurring within the office.  Re-using office patterns within software provides
+two improvements to software design.  The first is improved performance tuning
+of applications operating within complex enterprise environments.  Complex
+enterprise environments, such as Service-Oriented Architecture, require
+applications to interact with multiple downstream systems.  Any one of these
+downstream systems may impact the application's performance.  The improved
+performance tuning is a result of the office patterns enabling the use of
+multiple thread pools to isolate the performance impacts of each of these downstream
+systems.  The second improvement is a middleware framework that enables early and
+continuous delivery of working code for Agile methodologies.  The early and
+continuous delivery of working code is a result of the office patterns enabling
+inversion of control for methods.  The inversion of control for methods enables
+building applications bottom-up.  This bottom-up approach to building
+applications reduces the lead times involved with top-down software designs and
+also reduces the refactoring due to top-down software designs.  The reduced lead
+times and reduced refactoring enables early and continuous delivery of working
+code for Agile methodologies.
 \end{abstract}
 
 \category{D.2.11}{Software Architectures}{Patterns}
@@ -116,10 +120,6 @@ workshop at the 18th European Conference on Pattern Languages of Programs
 \maketitle
 
 
-%% TODO before final draft:
-%%   - confirm SEDA adds/removes threads
-
-
 \section{Introduction}
 
 OfficeFloor~\cite{officefloor} is a middleware framework that models its
@@ -131,21 +131,6 @@ software models on the business
 this paper discusses OfficeFloor's use of office patterns occurring within
 businesses to improve software design.
 
-The patterns presented in this paper are the result of the author's translation
-of observed office patterns into software design to create the OfficeFloor
-middleware framework.  Patterns provide solutions to re-occurring problems
-\cite{pattern-language}.  The problem of an office interacting with multiple
-external parties (e.g. customers, suppliers, service providers, other offices)
-is a similar problem to an application interacting with multiple external
-systems (e.g. Service-Oriented Architecture).
-
-The use of the office solutions within this paper addresses two problems within
-software design.  The first software problem is to enable performance tuning of
-an application to operate in a complex enterprise environment that requires
-interaction with many downstream systems \cite{reverse-ten-k-problem}.  The
-second software problem is providing a technical framework that enables
-delivering working software earlier and continuously \cite{agile-manifesto}.
-
 \begin{figure}[!t]
 \centering
 \includegraphics[height=7.4in]{PatternRelationships}
@@ -153,19 +138,34 @@ delivering working software earlier and continuously \cite{agile-manifesto}.
 \label{fig:PatternRelationships}
 \end{figure}
 
+The patterns presented in this paper are the result of the author's translation
+of observed office patterns into software design to create the OfficeFloor
+middleware framework.  Patterns provide solutions to re-occurring problems
+\cite{pattern-language}.  The problem of an office interacting with multiple
+external parties (e.g. customers, suppliers, service providers, other offices)
+is a similar problem to an application interacting with multiple external
+systems (e.g. an application operating within a Service-Oriented Architecture).
+
+The use of the office solutions within this paper addresses two problems within
+software design.  The first software problem is to enable performance tuning of
+an application to operate in a complex enterprise environment that requires
+interaction with many downstream systems \cite{reverse-ten-k-problem}.  The
+second software problem is providing a middleware framework that enables
+delivering working software early and continuously \cite{agile-manifesto}.
+
 To re-use the office solutions for software problems, software concepts need to
 be mapped to office concepts.  This enables the office patterns to be used in
 software design.  The following analogies are made by the author to enable
 re-using office patterns for software design:
 \begin{description}
-  \item[Thread] is mapped to the concept of a Person (Worker),
+  \item[Thread] is mapped to the concept of a Person (worker),
   \item[Method] is the functionality of a Task (activity/step of a process),
   \item[Component] is similar to a Process (as both contain composite functionality),
-  \item[Object fields] is the structured information managed within an office (e.g. form),
+  \item[Object Fields] is the structured Information managed within an office (e.g. form),
   \item[Application] is similar to an Office (manages information and undertakes decisions).
 \end{description}
 
-In using the office patterns for software design, many of the offices issues do
+In using the office patterns for software design, many of the office issues do
 not occur in software.  The organisation structure and behaviour within an
 office must account for people \cite{organisational-behaviour}.  Within software
 the people aspects do not need consideration.  The thread (person) will
@@ -199,9 +199,9 @@ in the influence of the office patterns on software design.
 
 The following patterns model the execution of methods on the way tasks are
 undertaken within an office.  These patterns address the first software problem
-addressed by this paper - performance tuning an application to operate within a
-complex environment.  The implementation notes at the end provide details on how
-to implement the combined patterns.
+- performance tuning an application to operate within a complex enterprise
+environment.  The implementation notes at the end provide details on how to
+implement the combined patterns.
 
 
 \subsection{\textsc{\textbf{team}}}
@@ -227,12 +227,14 @@ The people in an office need to coordinate so the tasks get done correctly and
 efficiently.  This is similar to the concurrency issues occurring in executing
 methods concurrently.
 
-\subsubsection*{Related patterns} Also known as \textsc{thread pool}~\cite{thread-per-request}.
+\subsubsection*{Related patterns} Also known as \textsc{thread
+pool}~\cite{thread-per-request}.
 
 \subsubsection*{Notes} The \textsc{team} pattern is provided as an example to
 demonstrate how the analogies in the introduction enable re-use of the office
 patterns. See the \textsc{thread pool} pattern~\cite{thread-per-request} for a
-detailed explanation of this pattern.
+detailed explanation of this pattern.  The remaining patterns presented in this
+paper address the two software problems discussed in the introduction.
 
 
 
@@ -241,7 +243,7 @@ detailed explanation of this pattern.
 \subsubsection*{Context} Within an office, to assign a task to a particular team
 a description of the task is required to identify which team is responsible for
 undertaking the task.  This description allows categorising similar tasks
-together.  Each grouping of similar tasks are then undertaken by a particular
+together.  Each grouping of similar tasks is then undertaken by a particular
 team for improved efficiencies.  For example, a financial task is undertaken by
 the finance team.
 
@@ -292,23 +294,23 @@ task categories.  Furthermore, the developer should not have to provide code to
 make decisions over thread pool responsibilities.
 
 \subsubsection*{\textbf{Solution}} Configure each thread pool with an attribute
-containing the type that defines its responsible category of
-methods\footnote{The thread pool may be configured with more than one type to be
-responsible for multiple categories of methods.}. Methods are then executed by
-the thread pool whose responsibility type matches one of the method's parameter
-types (\textsc{categorise task} types).  A default thread pool is used if no
-match occurs.
+containing the type that defines its responsible category\footnote{The thread
+pool may be configured with more than one type to be responsible for multiple
+categories of methods.}.  Methods are then executed by the thread pool whose
+responsibility type matches one of the method's parameter types
+(\textsc{categorise task} types).  A default thread pool is used if no match
+occurs.
 
 For example, configure the thread pool responsible for all database interaction
 with the database connection type.  As each method is categorised by the
 \textsc{categorise task} pattern, all methods requiring a database connection
 are executed by this thread pool.
 
-\subsubsection*{Consequences} There will always be a thread available in each
-thread pool to execute their respective responsible category of methods. 
-Subsequently, if there is a significant increase in the number of methods in one
-category all threads do not become focused on these methods to the detriment of
-the other categories of methods.
+\subsubsection*{Consequences} The threads of each thread pool are dedicated to
+execute the thread pool's responsible category of methods.  Subsequently, if
+there is a significant increase in the number of methods in one category all
+threads do not become focused on these methods to the detriment of the other
+categories of methods.
 
 The threads in each thread pool are also specialised based on their responsible
 category of methods (e.g. change in nice value, affinity to CPU).  However,
@@ -336,18 +338,16 @@ thread pool.
 
 \subsubsection*{Forces} Having too few threads will under utilize the hardware
 and not provide optimal throughput.  Having too many threads will cause
-excessive thread-context switching and exhaustion of available resources (e.g.
-memory), which in turn will decrease throughput.
+excessive thread overheads (e.g. thread-context switching) and exhaustion of
+available resources (e.g. memory), which in turn will decrease throughput.
 
 \subsubsection*{\textbf{Solution}} As each \textsc{responsible team} thread pool
-is responsible for a particular dependency (resource), use adaptive resource
-management~\cite{seda} to manage the number of threads within each responsible
-thread pool.
-
-Adaptive resource management (from the Staged Event Driven Architecture
-\cite{seda}) monitors the number of tasks and their execution time and
-adds or removes threads and resources to achieve optimal throughput by the thread
-pool (stage).
+is responsible for a particular dependency (resource), use dynamic resource
+controllers~\cite{seda} to manage the number of threads within each responsible
+thread pool.  Dynamic resource controllers (from the Staged Event Driven
+Architecture \cite{seda}) monitors the number of tasks and their execution time
+and adds or removes threads and resources to achieve optimal throughput by the
+thread pool (stage).
 
 \subsubsection*{Consequences} The thread pool size will dynamically grow or
 shrink based on its load of responsible methods to execute.  However, this does
@@ -367,31 +367,31 @@ significant communication overheads, which would negatively impact the
 efficiency of the office.  Therefore, within an office many tasks are undertaken
 by the current person involved in the process.
 
-Within software, assigning a method (task) to a thread pool (team) requires an
-effective thread-context switch to execute the method.  Having to thread-context
-switch for execution of each method is inefficient and will degrade performance
-of the application.
+Within software, assigning a method (task) to a thread pool (team) requires
+threading overheads (e.g. thread synchronisation and thread-context switching)
+to execute the method.  Incurring the threading overheads for execution of each
+method is inefficient and will degrade performance of the application.
 
-\subsubsection*{\textbf{Problem}} Avoid thread-context switching to execute each method.
+\subsubsection*{\textbf{Problem}} Reduce the threading overheads in executing
+each method by its respective responsible thread pool.
 
 \subsubsection*{Forces} Each category of methods will be executed by a
 particular responsible thread pool.  Stepping between these categories results
-in the use of different responsible thread pools, which requires a
-thread-context switch.  However, it is cheaper to execute many methods in the
-process using the current thread of control than incur the cost of a
-thread-context switch (i.e. easier to do yourself).
+in the use of different responsible thread pools.  For some categories of
+methods, it is cheaper to execute the method using the current thread of control
+than incur the threading overheads (i.e. easier to do yourself).
 
 \subsubsection*{\textbf{Solution}} Use a responsible thread pool that has no threads.
 The method is executed immediately by the thread of control that registers the
 method with the thread pool (i.e. borrows the thread of control).
 
 \subsubsection*{Consequences} Categories of methods are executed by the calling
-thread of control and subsequently do not incur a thread-context switch.
+thread of control and subsequently do not incur the threading overheads. 
 However, this does enable incorrectly categorised methods to potentially cause
 thread starvation of the wrong thread pool.
 
 \subsubsection*{Related Patterns} Is a sequence on the \textsc{responsible team}
-to reduce thread-context switching.  It is also similar to the \textsc{reactor}
+to reduce threading overheads.  It is also similar to the \textsc{reactor}
 pattern~\cite{reactor} in reusing the thread of control.
 
 
@@ -420,9 +420,9 @@ method is so large that the resulting method execution is no longer relevant.
 Execution of these methods then results in wasted use of threads and a
 non-responsive application.
 
-\subsubsection*{\textbf{Solution}} Use admission control~\cite{seda} for each
-responsible thread pool.  At a certain queue size admission control will
-disallow further methods from being registered.
+\subsubsection*{\textbf{Solution}} Use adaptive load shedding~\cite{seda} for
+each responsible thread pool.  At a certain queue size adaptive load shedding
+will disallow further methods from being registered.
 
 The responsible thread pool will execute all methods that are registered.  For
 methods not registered, \textsc{escalation} enables alternate methods to be
@@ -448,13 +448,14 @@ is used to handle methods not registered for execution.
 Both the \textsc{thread-per-request} pattern \cite{thread-per-request} (basis of
 many mainstream middleware designs\footnote{Example middleware using
 \textsc{thread-per-request} is the popular web servers (Netcraft November 2012
-survey) that serve dynamic web content by CGI/FastCGI with for example PHP scripts,
-Microsoft's HTTP.sys/WAS, and JEE Servlets.}) and the \textsc{proactor} pattern
-\cite{proactor} (basis of event-driven middleware designs) enable a different
-thread of control for the execution of a request/task.  These patterns allow for
-concurrent execution by utilising many threads.  For efficiencies the
-\textsc{thread pool} pattern \cite{thread-per-request} is commonly used to pool
-threads to reduce thread management overheads.
+survey) that serve dynamic web content by CGI/FastCGI with for example PHP
+scripts, Microsoft's HTTP.sys/WAS, and JEE Servlets.}) and the \textsc{proactor}
+pattern \cite{proactor} (basis of event-driven middleware designs) enable a
+different thread of control for the execution of a request/task.  These patterns
+allow for concurrent execution by utilising many threads.  They are also
+arguably the duality of the two styles of concurrency \cite{duality-event-thread}. 
+For efficiencies the \textsc{thread pool} pattern \cite{thread-per-request} is
+commonly used to pool threads to reduce threading overheads.
 
 As identified by the \textsc{proactor} pattern, the threading ``must be designed
 carefully to support prioritization and cancellation'' \cite[p. 8]{proactor} of
@@ -467,7 +468,7 @@ Utilising a single pool of threads to service all requests results in tuning
 trade-offs, which degrades performance of the server during particular load
 profiles (e.g. high load of requests blocked on database I/O that are starving
 requests for cached data of a thread).  This is further evident in the
-performance analysis of web servers which identifies the importance of tuning
+performance analysis of web servers, which identifies the importance of tuning
 the server for a load profile
 \cite{tuning-important,low-server-footprint,tuning-os-important}.
 
@@ -539,16 +540,17 @@ developer configures thread pools that are each responsible for \texttt{Task}s
 with a particular type of dependency\footnote{Thread pools may be associated
 with more than one dependency type.}.  To execute the \texttt{Task}, the
 \texttt{Task} is matched by its dependency types to a thread pool responsible
-for the dependency type\footnote{The \texttt{taskId} may also be used for very
-fine grained responsibility.} (\textsc{responsible team}).  The
-\texttt{execute()} method (Listing \ref{lst:TaskExecutionInterfaces}) is then
-invoked by a thread from the matching thread pool to execute the \texttt{Task}.
-This provides isolation of differing \texttt{Task}s to their respective
-responsible thread pool for improved tuning of the server\footnote{The task
-execution patterns are collectively identified as the software pattern
-\textsc{thread injection}.  This is because the thread being chosen to execute
-the method is undertaken in a similar way to the selection of dependencies by
-the \textsc{dependency injection}~\cite{ioc} pattern.}.
+for the dependency type\footnote{OfficeFloor also enables the use of the
+\texttt{taskId} for very fine grained responsibility.} (\textsc{responsible
+team}).  The \texttt{execute()} method (Listing
+\ref{lst:TaskExecutionInterfaces}) is then invoked by a thread from the matching
+thread pool to execute the \texttt{Task}.  This provides isolation of differing
+\texttt{Task}s to their respective responsible thread pool for improved tuning
+of the server\footnote{The task execution patterns are collectively identified
+as the software pattern \textsc{thread injection}.  This is because the thread
+being chosen to execute the method is undertaken in a similar way to the
+selection of dependencies by the \textsc{dependency injection}~\cite{ioc}
+pattern.}.
 
 For \texttt{Task}s not having dependencies (nor dependencies of any performance
 significance), a default thread pool is used for their execution.  This ensures
@@ -568,22 +570,23 @@ based on first match.
 To achieve further efficiencies the implementation of each thread pool is
 specific to its responsible dependency type.  For example, the thread pool may
 contain multiple threads for concurrent execution of \texttt{Task}s with threads
-added or removed based on the load of \texttt{Task}s (\textsc{manage team sizes}),
-a single thread for serial execution of \texttt{Task}s, or no threads;
-executing \texttt{Task}s by borrowing the thread of control to reduce
-thread-context switching (\textsc{do it yourself}).
+added or removed based on the load of \texttt{Task}s (\textsc{manage team
+sizes}), a single thread for serial execution of \texttt{Task}s, or no threads;
+executing \texttt{Task}s by borrowing the thread of control to reduce threading
+overheads (\textsc{do it yourself}).
 
 The \texttt{cancel(\ldots)} method (Listing \ref{lst:TaskExecutionInterfaces})
 enables the \texttt{TaskExecutor} to cancel the \texttt{Task}. The
 \texttt{Task\-Executor} will cancel new \texttt{Task}s for a particular thread
 pool when queuing the \texttt{Task} will result in exceeding a particular
 threshold (\textsc{team too busy}).  Each thread pool has its own thresholds
-particular to its responsible dependency type.  An example threshold is ensuring
-the running average wait time for the thread pool's queue is below a certain
-limit.  As \texttt{Task}s are mapped to particular thread pools, this ensures
-only the appropriate \texttt{Task}s are cancelled.  Once cancelled the
-\texttt{TaskExecutor} may discard the \texttt{Task}.  The implementation of the
-\texttt{can\-cel(\ldots)} method is covered by the \textsc{escalation} pattern.
+particular to its responsible dependency type.  An example threshold is
+rejecting new tasks to keep the running average wait time for the thread pool's
+queue below a certain limit.  As \texttt{Task}s are mapped to particular thread
+pools, this ensures only the appropriate \texttt{Task}s are cancelled.
+Once cancelled the \texttt{TaskExecutor} may discard the \texttt{Task}.  The
+implementation of the \texttt{can\-cel(\ldots)} method is covered by the
+\textsc{escalation} pattern.
 
 
 \subsubsection*{Consequences}
@@ -616,7 +619,7 @@ application.
 
 OfficeFloor loses its ability to effectively prioritise and cancel tasks if the
 task dependencies are too similar.  For example, all request handling for
-dynamic content by a web server is likely to reequire a database connection.
+dynamic content by a web server is likely to require a database connection.
 Whilst this will allow isolation of requests for static content, it will not
 isolate requests for dynamic content serviced from cached data rather than
 database data.  This is because the request handler (task) will depend on the
@@ -629,18 +632,17 @@ collaboration patterns resolve this issue.
 
 \subsubsection*{Related implementations}
 
-JAWS~\cite{jaws} identified limitations in using a single concurrency model for
-an application.  The JAWS framework enables multiple concurrency models to be
-used by an application.  However, the concurrency models provided by the JAWS
-framework are obtrusive to developer design requiring the developer to be
-significantly involved with concurrency of the application.
+The JAWS~\cite{jaws} framework enables the use of multiple concurrency models by
+an application.  However, the concurrency models provided by the JAWS framework
+are obtrusive to developer design requiring the developer to be significantly
+involved with concurrency of the application.
 
 The Staged Event-Driven Architecture (SEDA) \cite{seda} provides a similar
 implementation to OfficeFloor without the use of the \textsc{categorise task}
 pattern.  SEDA directly maps tasks to a stage and subsequently a thread pool.
-However, the SEDA pipeline exhibits increased thread-context switching as a
-result of hard stage boundaries, which prohibits threads to be borrowed (i.e.
-not able to use \textsc{do it yourself}).
+However, the SEDA pipeline exhibits increased threading overheads as a result of
+explicit control boundaries, which prohibits threads to be borrowed (i.e. not
+able to use \textsc{do it yourself}).
 
 OfficeFloor can be considered a style of cohort scheduling \cite{cohort}, which
 groups tasks with similar dependencies and infers from that similar
@@ -648,16 +650,16 @@ functionality.  However, OfficeFloor works at the application scheduling level
 and allows the use of any operating system thread scheduling algorithms.
 
 Capriccio~\cite{capriccio} utilises resource-aware scheduling of threads.  For
-Capriccio to be resource-awareness, it uses information based on similar
-techniques to \textsc{categorise task}.  This results in improved scheduling to
-better release resources to undertake new tasks.  However, Capriccio is still
-subject to thread starvation for slow tasks by using only a single thread pool.
+Capriccio to be resource-aware, it uses information based on similar techniques
+to \textsc{categorise task}.  This results in improved scheduling to better
+release resources to undertake new tasks.  However, Capriccio is still subject
+to thread starvation for slow tasks by using only a single thread pool.
 
 Dependency capsules \cite{dependency-capsules} isolates the execution of tasks
 by their dependencies to an alternate thread pool.  This is similar to
-\textsc{responsible team}.  However, the dependency capsules require a
-thread-context switch back to a main thread for executing tasks without
-dependencies (i.e. can not use \textsc{do it yourself} to complete the request).
+\textsc{responsible team}.  However, the dependency capsules require switching
+back to a main thread for executing tasks without dependencies (i.e. can not use
+\textsc{do it yourself} to complete the request).
 
 Hop~\cite{hop} enables developers to provide code to dynamically decide the
 concurrency model for tasks at runtime.  Having the developer provide this code
@@ -723,10 +725,11 @@ created by OfficeFloor and provided to the method by \textsc{dependency
 injection}~\cite{ioc}.  The proxy implementation undertakes the asynchronous
 invocation of the respective target method.
 
-\subsubsection*{Consequences} The target method is asynchronously invoked by
-another thread of control.  However, due to the asynchronous invocation no
-return value is available from the invoked method.  Furthermore, each hand-off
-incurs the cost of a thread-context switch.
+\subsubsection*{Consequences} The invoked handling method is asynchronously
+invoked by another thread of control.  However, due to the asynchronous
+invocation no return value is available from the invoked method.  Furthermore,
+each hand-off incurs threading overheads (e.g. thread synchronisation and
+thread-context switching).
 
 \subsubsection*{Related Patterns} Is a sequence on \textsc{responsible team} to
 hand-off methods to a responsible team.  This pattern has similarities to the
@@ -824,16 +827,16 @@ without the overheads of hand-offs.
 
 Within software, registering a method (task) for execution by a thread pool
 (team) effectively has a different thread (person) execute the method.  Using a
-different thread incurs thread-context switching that reduces the efficiency of
-the application.
+different thread incurs threading overheads (e.g. thread synchronisation and
+thread-context switching) that reduces the efficiency of the application.
 
-\subsubsection*{\textbf{Problem}} Avoid the thread-context switch when the hand-off
-results in a method being executed by the same responsible thread pool.
+\subsubsection*{\textbf{Problem}} Avoid the threading overheads when the
+hand-off results in a method being executed by the same responsible thread pool.
 
 \subsubsection*{Forces} The hand-off results in registering a method with a
 thread pool for execution.  The next thread of the thread pool executes the
-method.  Using the next thread will typically incur a thread-context switch to
-execute the registered method.
+method.  Using the next thread will incur threading overheads to execute the
+registered method.
 
 \subsubsection*{\textbf{Solution}} Before registering the invoked method with its
 responsible thread pool, check if the thread pool is the same responsible thread
@@ -841,17 +844,17 @@ pool of the current method.  If they are the same responsible thread pool
 execute the invoked method synchronously (i.e. with the current method's thread
 of control).
 
-\subsubsection*{Consequences} Thread-context switching is reduced for sequential
+\subsubsection*{Consequences} Threading overheads are reduced for sequential
 methods of the same responsible thread pool\footnote{Combining \textsc{do your
 work} with \textsc{do it yourself} provides the implicit thread of control.  The
-implicit thread of control avoids thread-context switching in executing the
+implicit thread of control avoids threading overheads in executing the
 sequence of methods until an explicit thread (another responsible thread pool
 containing threads) is required.}.  This also avoids queuing each task during
 overload of the server that will result in \textsc{team too busy} cancelling
 tasks for a greater number of existing processes.
 
 \subsubsection*{Related Patterns} Is a sequence on \textsc{hand-off} to reduce
-thread-context switching.
+threading overheads.
 
 
 
@@ -872,19 +875,21 @@ uncertain as to whether the handed-off method is complete.
 by other threads.  There is no synchronous return from them to the calling
 method to indicate when the handed-off method is complete.
 
-\subsubsection*{\textbf{Solution}} Provide a Future from the hand-off invocation to
-indicate when the handed-off method is complete\footnote{As the handed-off
-method can invoke further hand-offs, the Future indicates when the resulting
-tree of hand-offs is complete.}.  Furthermore, the checking of hand-off
-completion is non-blocking so it does not tie up a calling thread.
+\subsubsection*{\textbf{Solution}} Provide a Future \cite{concurrent-java} from
+the hand-off invocation to indicate when the handed-off method is
+complete\footnote{As the handed-off method can invoke further hand-offs, the
+Future indicates when the resulting tree of hand-offs is complete.}. 
+Furthermore, the checking of hand-off completion is non-blocking so it does not
+tie up a calling thread.
 
 \subsubsection*{Consequences} The Future provides a polling mechanism to check
 when the handed-off method is complete.  Subsequently a thread is required to
 poll the Future to determine completion.  However, when handing-off many methods
 this enables distinguishing which are complete.
 
-\subsubsection*{Related Patterns} The \textsc{pick up task again} pattern avoids
-polling the Future.
+\subsubsection*{Related Patterns} This is similar to the \textsc{future} pattern
+\cite{concurrent-java}.  The \textsc{pick up task again} pattern avoids polling
+the Future.
 
 
 
@@ -959,7 +964,7 @@ in state when executed again via \textsc{pick up task again}.
 
 \subsubsection*{Related Patterns} Is a sequence on \textsc{dependency
 injection}~\cite{ioc} to cache dependencies and inject them as arguments to the
-method.  The pattern has many similarities to \textsc{flyweight}~\cite{gof}.
+method.  The pattern has similarities to \textsc{flyweight}~\cite{gof}.
 
 
 
@@ -1191,7 +1196,8 @@ The hand-off will borrow the thread of control of the calling \texttt{Task} if
 it results in being executed by the same thread pool.  Rather than dispatching
 the \texttt{Task} back to the same thread pool, the \texttt{TaskExecutor}
 borrows the thread to execute the next method (\textsc{do your work}). This
-avoids the overhead of a thread-context switch.
+avoids the threading overheads when requiring a thread of the same thread pool
+to execute the next \texttt{Task}.
 
 Exceptions from the methods are handled by being mapped to a \texttt{handOffId}.
 The \texttt{Task} invokes \texttt{handle\-Excep\-tion(\ldots)} with the
@@ -1343,7 +1349,7 @@ hand-off argument (message) from the sending \texttt{Task} (actor).  The
 The following patterns compose methods into composite functionality in a similar
 way to processes within an office being constructed from tasks.  These patterns
 address the second software problem addressed by this paper - creation of a
-technical framework that enables delivery of working code earlier and
+middleware framework that enables delivery of working code early and
 continuously.  The implementation notes at the end provide details on how to
 implement the patterns.
 
@@ -1729,7 +1735,7 @@ introduce new variation points.  As the \textsc{explicit interface} to invoke
 the \texttt{Task} does not change, the higher-level layer calling code does not
 require refactoring to evolve the application.
 
-Therefore, \textsc{automate only where necessary} enables earlier and continuous
+Therefore, \textsc{automate only where necessary} enables early and continuous
 delivery of working code.  As there is less need for initial top-down designs of
 the whole application, there is lower lead times in designing the application
 and subsequently earlier delivery of working code.  Furthermore, additional
@@ -1772,17 +1778,17 @@ environments, such as Service-Oriented Architectures.  This occurs by using the
 \textsc{responsible team} pattern to provide a separate thread pool to isolate
 the performance impacts of each downstream system used by the application.
 
-OfficeFloor is also a technical framework that enables Agile methodologies to
-deliver working code earlier and continuously.  The resulting \textsc{task
+OfficeFloor is also a middleware framework that enables Agile methodologies to
+deliver working code early and continuously.  The resulting \textsc{task
 defines itself} pattern from the task execution and collaboration patterns
 inverts control over the method signature.  This inversion of control enables
 the implementation of the method to define its own method signature.  Enabling
 the method implementations to define their own method signatures enables a
 bottom-up approach to designing the application.  This bottom-up approach
-provides Agile methodologies a technical framework that avoids long top-down
+provides Agile methodologies a middleware framework that avoids long top-down
 software design lead times and avoids significant refactoring of top-down
-software designs.  This results in OfficeFloor being a technical framework that
-enables delivering working code earlier and continuously.
+software designs.  This results in OfficeFloor being a middleware framework that
+enables delivering working code early and continuously.
 
 As this paper covers the implementation patterns of OfficeFloor, future work
 will describe the usage patterns for developers to build applications with
