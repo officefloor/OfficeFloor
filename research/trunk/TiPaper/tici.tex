@@ -498,6 +498,7 @@ wrapped by the \texttt{Task}).  The \texttt{TaskExecutor} then assigns the
 (\textsc{team}).  Figure \ref{fig:ExecuteComponentSequenceDiagram} provides a
 sequence diagram of executing a \texttt{Task}.
 
+
 \lstset{caption=Task execution pattern interfaces.  The task collaboration patterns in the next section build on these interfaces to enable collaboration of the \texttt{Task}s.}
 \begin{lstlisting}[float,label=lst:TaskExecutionInterfaces]
 
@@ -516,13 +517,6 @@ sequence diagram of executing a \texttt{Task}.
     }
 \end{lstlisting}
 
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=6in]{ExecuteComponentSequenceDiagram}
-\caption{Sequence diagram of invoking \texttt{executeTask(\ldots)} (Listing \ref{lst:TaskExecutionInterfaces}).  The \texttt{Task} is executed by one of the responsible thread pools configured by the developer.}
-\label{fig:ExecuteComponentSequenceDiagram}
-\end{figure}
 
 The \texttt{getRequiredDependencyTypes(\ldots)} (Listing
 \ref{lst:TaskExecutionInterfaces}) method provides the categorisation of the
@@ -587,6 +581,13 @@ pools, this ensures only the appropriate \texttt{Task}s are cancelled.
 Once cancelled the \texttt{TaskExecutor} may discard the \texttt{Task}.  The
 implementation of the \texttt{can\-cel(\ldots)} method is covered by the
 \textsc{escalation} pattern.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=6in]{ExecuteComponentSequenceDiagram}
+\caption{Sequence diagram of invoking \texttt{executeTask(\ldots)} (Listing \ref{lst:TaskExecutionInterfaces}).  The \texttt{Task} is executed by one of the responsible thread pools configured by the developer.}
+\label{fig:ExecuteComponentSequenceDiagram}
+\end{figure}
 
 
 \subsubsection*{Consequences}
