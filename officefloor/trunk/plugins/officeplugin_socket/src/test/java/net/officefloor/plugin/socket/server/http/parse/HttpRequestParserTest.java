@@ -139,15 +139,6 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to parse header name with escaped length.
-	 */
-	public void testToHeaderNameContainsEscapedColon() {
-		this.doMethodTest(
-				"GET /path HTTP/1.1\nbefore%20%3A%20after : colon \n", false,
-				-1, "GET", "/path", "HTTP/1.1", null, "before : after", "colon");
-	}
-
-	/**
 	 * Ensure able to delimit header name via CR.
 	 */
 	public void testToHeaderNameNoValue() {
@@ -596,30 +587,32 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure <code>%HH</code> results in respective byte value.
+	 * Ensure <code>%HH</code> is not translated. This is left to later
+	 * translation as need to distinguish '&amp;' characters appropriately.
 	 */
 	public void testPercentageEscape() {
 		this.doMethodTest("GET /space%20byte HTTP/1.1\n\n", true, -1, "GET",
-				"/space byte", "HTTP/1.1", "");
+				"/space%20byte", "HTTP/1.1", "");
 	}
 
 	/**
-	 * Ensure bad parse with invalid value for <code>%HH</code>.
+	 * Allow invalid value for <code>%HH</code>. This is left to later
+	 * translation as need to distinguish '&amp;' characters appropriately. Plus
+	 * if not using URL then do not raise issue unnecessarily.
 	 */
 	public void testPercentageInvalidValue() {
-		this.doInvalidMethodTest("GET /invalid%WRONG",
-				HttpStatus.SC_BAD_REQUEST,
-				"Invalid escaped hexidecimal character 'W'");
+		this.doMethodTest("GET /invalid%WRONG HTTP/1.1\n\n", true, -1, "GET",
+				"/invalid%WRONG", "HTTP/1.1", "");
 	}
 
 	/**
-	 * Validate possible values for <code>%HH</code> values.
+	 * Validate possible values for <code>%HH</code> values are not translated.
+	 * Necessary as '&amp;' should not yet be translated as causes issues in
+	 * parsing out parameter values.
 	 */
-	public void testAllPercentageValues() {
+	public void testAllEscapedValues() {
 
 		// Validate transforms
-		assertEquals("Ensure transform to HTTP", " ",
-				this.getCharacterValue((byte) 2, (byte) 0));
 		assertEquals("Ensure 1 transforms", "1", this.getCharacterValue(1));
 		assertEquals("Ensure B transforms", "B", this.getCharacterValue(0xB));
 
@@ -630,8 +623,7 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 				// Obtain the characters
 				String high = this.getCharacterValue(highBits);
 				String low = this.getCharacterValue(lowBits);
-				String character = this.getCharacterValue((byte) highBits,
-						(byte) lowBits);
+				String escapedCharacter = "%" + high + low;
 
 				// Do not run for control characters
 				byte value = (byte) ((highBits << 4) | lowBits);
@@ -639,26 +631,12 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 					continue; // control character
 				}
 
-				// Validate the percentage value
-				this.doMethodTest("GET /%" + high + low + " HTTP/1.1\n\n",
-						true, -1, "GET", "/" + character, "HTTP/1.1", "");
+				// Validate not parse escaped character
+				this.doMethodTest("GET /" + escapedCharacter + " HTTP/1.1\n\n",
+						true, -1, "GET", "/" + escapedCharacter, "HTTP/1.1", "");
 				this.httpRequestParser.reset();
 			}
 		}
-	}
-
-	/**
-	 * Transforms the high and low bits to the corresponding character value.
-	 * 
-	 * @param highBits
-	 *            High bits.
-	 * @param lowBits
-	 *            Low bits
-	 * @return Character value.
-	 */
-	private String getCharacterValue(byte highBits, byte lowBits) {
-		byte byteValue = (byte) ((highBits << 4) + lowBits);
-		return UsAsciiUtil.convertToString(new byte[] { byteValue });
 	}
 
 	/**

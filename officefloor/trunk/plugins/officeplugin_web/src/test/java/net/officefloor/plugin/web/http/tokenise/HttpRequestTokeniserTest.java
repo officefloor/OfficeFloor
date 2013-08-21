@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.tokenise;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenHandler;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniser;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
@@ -139,6 +140,26 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure if invalid <code>%HH</code> escaping.
+	 */
+	public void testGetParameterWithInvalidEscape() throws Exception {
+		
+		// Only gets to path
+		this.handler.handlePath("/path");
+		
+		try {
+			this.doTest("GET", "/path?Invalid=%WRONG", null);
+			fail("Should not be successful");
+		} catch (HttpRequestTokeniseException ex) {
+			assertEquals("Incorrect cause",
+					"Invalid character for escaping: W", ex.getMessage());
+		}
+
+		// Verify (as exception did not trigger)
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure can load POST request with no parameters.
 	 */
 	public void testPostNoParameter() throws Exception {
@@ -174,6 +195,115 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 		this.handler.handleQueryString("FirstName=Daniel");
 		this.handler.handleHttpParameter("LastName", "Sagenschneider");
 		this.doTest("POST", "/path?FirstName=Daniel", "LastName=Sagenschneider");
+	}
+
+	/**
+	 * Validate possible values for <code>%HH</code> values.
+	 */
+	public void testPostWithAllEscapedValues() throws Exception {
+
+		// Validate transforms
+		assertEquals("Ensure transform to HTTP", " ",
+				this.getCharacterValue((byte) 2, (byte) 0));
+		assertEquals("Ensure 1 transforms", "1", this.getCharacterValue(1));
+		assertEquals("Ensure B transforms", "B", this.getCharacterValue(0xB));
+
+		// Record the range of percentage values
+		for (int highBits = 0; highBits <= 0xF; highBits++) {
+			for (int lowBits = 0; lowBits <= 0xF; lowBits++) {
+
+				// Obtain the characters
+				String high = this.getCharacterValue(highBits);
+				String low = this.getCharacterValue(lowBits);
+				String character = this.getCharacterValue((byte) highBits,
+						(byte) lowBits);
+
+				// Do not run for control characters
+				byte value = (byte) ((highBits << 4) | lowBits);
+				if ((value <= 31) || (value == 127)) {
+					continue; // control character
+				}
+
+				// Record handling
+				this.handler.handlePath("/path" + character);
+				this.handler.handleHttpParameter(character, character);
+				this.handler.handleHttpParameter("other", "value");
+				this.handler.handleQueryString("%" + high + low + "=%" + high
+						+ low + "&other=value");
+				this.handler.handleFragment("fragment" + character);
+				this.handler.handleHttpParameter(character, character);
+				this.handler.handleHttpParameter("another", "value");
+			}
+		}
+
+		// Test
+		this.replayMockObjects();
+
+		// Validate the range of percentage values
+		for (int highBits = 0; highBits <= 0xF; highBits++) {
+			for (int lowBits = 0; lowBits <= 0xF; lowBits++) {
+
+				// Obtain the characters
+				String high = this.getCharacterValue(highBits);
+				String low = this.getCharacterValue(lowBits);
+				String escapedCharacter = "%" + high + low;
+
+				// Do not run for control characters
+				byte value = (byte) ((highBits << 4) | lowBits);
+				if ((value <= 31) || (value == 127)) {
+					continue; // control character
+				}
+
+				// Validate the percentage value
+				String path = "/path" + escapedCharacter;
+				String queryString = escapedCharacter + "=" + escapedCharacter
+						+ "&other=value";
+				String fragment = "fragment" + escapedCharacter;
+				String entity = escapedCharacter + "=" + escapedCharacter
+						+ ";another=value";
+				HttpRequest request = HttpTestUtil.createHttpRequest("POST",
+						path + "?" + queryString + "#" + fragment, entity);
+				HttpRequestTokeniser tokeniser = new HttpRequestTokeniserImpl();
+				tokeniser.tokeniseHttpRequest(request, this.handler);
+			}
+		}
+
+		// Validate
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Transforms the high and low bits to the corresponding character value.
+	 * 
+	 * @param highBits
+	 *            High bits.
+	 * @param lowBits
+	 *            Low bits
+	 * @return Character value.
+	 */
+	private String getCharacterValue(byte highBits, byte lowBits) {
+		byte byteValue = (byte) ((highBits << 4) + lowBits);
+		return UsAsciiUtil.convertToString(new byte[] { byteValue });
+	}
+
+	/**
+	 * Obtains the character value for the hexidecimal value.
+	 * 
+	 * @param hexidecimal
+	 *            Hexidecimal value.
+	 * @return Character value.
+	 */
+	private String getCharacterValue(int hexidecimal) {
+		int charValue;
+		if ((0 <= hexidecimal) && (hexidecimal <= 9)) {
+			charValue = '0' + hexidecimal;
+		} else if ((0xA <= hexidecimal) && (hexidecimal <= 0xF)) {
+			charValue = 'A' + (hexidecimal - 0xA);
+		} else {
+			throw new IllegalArgumentException("Invalid hexidecimal value "
+					+ hexidecimal);
+		}
+		return String.valueOf((char) charValue);
 	}
 
 	/**
