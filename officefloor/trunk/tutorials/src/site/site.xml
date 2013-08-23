@@ -26,7 +26,8 @@
 			<item name="GWT" href="./GwtApp/tutorials.html" />
 		</menu>
 		<menu name="Inversion of Control">
-			<item name="Dependency Injection" href="./DatabaseHttpServer/index.html" />
+			<item name="DI (POJO)" href="./DiPojoHttpServer/index.html" />
+			<item name="DI (Managed Object)" href="./DatabaseHttpServer/index.html" />
 			<item name="Governance" href="./TransactionHttpServer/index.html" />
 			<item name="Thread Injection" href="./TeamHttpServer/index.html" />
 		</menu>
