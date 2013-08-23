@@ -24,4 +24,6 @@
 
 	<supplier source="net.example.ExampleSupplierSourceB" />
 
+	<managed-object class="net.example.ExampleClass" />
+
 </objects>

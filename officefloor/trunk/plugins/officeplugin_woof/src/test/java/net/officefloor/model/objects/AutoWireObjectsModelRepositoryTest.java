@@ -62,19 +62,21 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		List<AutoWireObjectSourceModel> objectSources = objects
 				.getAutoWireObjectSources();
-		assertEquals("Incorrect number of auto-wire object sources", 4,
+		assertEquals("Incorrect number of auto-wire object sources", 5,
 				objectSources.size());
 
 		final String[] MANAGED_OBJECT_METHODS = new String[] {
-				"getManagedObjectSourceClassName", "getTimeout",
+				"getManagedObjectSourceClassName",
+				"getClassManagedObjectSourceClass", "getTimeout",
 				"getQualifier", "getType" };
 
 		// Validate the first object source (managed object)
 		AutoWireManagedObjectModel moOne = assertType(
 				AutoWireManagedObjectModel.class, objectSources.get(0));
-		assertProperties(new AutoWireManagedObjectModel(
-				"net.example.ExampleManagedObjectSourceA", 10, null, null),
-				moOne, MANAGED_OBJECT_METHODS);
+		assertProperties(
+				new AutoWireManagedObjectModel(
+						"net.example.ExampleManagedObjectSourceA", null, 10,
+						null, null), moOne, MANAGED_OBJECT_METHODS);
 		assertProperties(new PropertyModel("MO_ONE", "VALUE_ONE"),
 				new PropertyFileModel("example/object.properties"),
 				new PropertyModel("MO_TWO", "VALUE_TWO"),
@@ -104,10 +106,10 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 				new PropertyModel("SUPPLIER_B", "VALUE_B"),
 				supplierOne.getPropertySources());
 
-		// Validate the third object source (managed object short-cut entry)
+		// Validate the third object source (managed object shortcut entry)
 		assertProperties(
 				new AutoWireManagedObjectModel(
-						"net.example.ExampleManagedObjectSourceB", 0,
+						"net.example.ExampleManagedObjectSourceB", null, 0,
 						"QUALIFIER", "net.example.Type"),
 				assertType(AutoWireManagedObjectModel.class,
 						objectSources.get(2)), MANAGED_OBJECT_METHODS);
@@ -117,6 +119,13 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 				"net.example.ExampleSupplierSourceB"),
 				assertType(AutoWireSupplierModel.class, objectSources.get(3)),
 				"getSupplierSourceClassName");
+
+		// Validate the fifth object source (managed object class/POJO shortcut)
+		assertProperties(
+				new AutoWireManagedObjectModel(null,
+						"net.example.ExampleClass", 0, null, null),
+				assertType(AutoWireManagedObjectModel.class,
+						objectSources.get(4)), MANAGED_OBJECT_METHODS);
 	}
 
 	/**

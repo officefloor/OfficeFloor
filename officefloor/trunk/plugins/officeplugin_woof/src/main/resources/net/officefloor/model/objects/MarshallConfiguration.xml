@@ -11,6 +11,8 @@
 			<attributes>
 				<attribute method="getManagedObjectSourceClassName"
 					attribute="source" />
+				<attribute method="getClassManagedObjectSourceClass"
+					attribute="class" />
 				<attribute method="getTimeout" attribute="timeout" />
 				<attribute method="getQualifier" attribute="qualifier" />
 				<attribute method="getType" attribute="type" />

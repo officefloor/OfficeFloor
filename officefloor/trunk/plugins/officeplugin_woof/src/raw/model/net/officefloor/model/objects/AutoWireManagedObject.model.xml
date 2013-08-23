@@ -2,6 +2,7 @@
 <model>
 	<interface>AutoWireObjectSourceModel</interface>
 	<field type="String" name="managed object source class name" />
+	<field type="String" name="class managed object source class" />
 	<field type="long" name="timeout" />
 	<field type="String" name="qualifier" />
 	<field type="String" name="type" />

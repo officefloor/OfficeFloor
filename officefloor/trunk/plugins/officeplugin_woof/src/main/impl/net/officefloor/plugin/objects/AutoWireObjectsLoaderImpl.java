@@ -42,6 +42,7 @@ import net.officefloor.model.objects.PropertyFileModel;
 import net.officefloor.model.objects.PropertyModel;
 import net.officefloor.model.objects.PropertySourceModel;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
  * {@link AutoWireObjectsLoader} implementation.
@@ -116,9 +117,22 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 			final AutoWireManagedObjectModel managedObject,
 			AutoWireApplication application) throws IOException {
 
-		// Obtain the managed object details
+		// Obtain the managed object source
 		String managedObjectSourceClassName = managedObject
 				.getManagedObjectSourceClassName();
+		String classManagedObjectSourceClass = null;
+		if (managedObjectSourceClassName == null) {
+			// No managed object source, so try for class
+			classManagedObjectSourceClass = managedObject
+					.getClassManagedObjectSourceClass();
+			if (classManagedObjectSourceClass != null) {
+				// Have class, so use class managed object
+				managedObjectSourceClassName = ClassManagedObjectSource.class
+						.getName();
+			}
+		}
+
+		// Obtain the timeout
 		long timeout = managedObject.getTimeout();
 
 		// Obtain the auto-wiring
@@ -126,12 +140,17 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 		String qualifier = managedObject.getQualifier();
 		String type = managedObject.getType();
 		if (!(CompileUtil.isBlank(type))) {
-			// Short-cut auto-wire provided
+			// Shortcut auto-wire provided
 			autoWiring.add(new AutoWire(qualifier, type));
 		}
 		for (AutoWireModel autoWire : managedObject.getAutoWiring()) {
 			autoWiring.add(new AutoWire(autoWire.getQualifier(), autoWire
 					.getType()));
+		}
+		if ((classManagedObjectSourceClass != null) && (autoWiring.size() == 0)) {
+			// No auto-wiring for class, so default from class
+			autoWiring.add(new AutoWire(qualifier,
+					classManagedObjectSourceClass));
 		}
 
 		// Create the wirer
@@ -171,6 +190,12 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 		}
 
 		// Load the properties
+		if (classManagedObjectSourceClass != null) {
+			// Class managed object source class name property always first
+			object.addProperty(
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+					classManagedObjectSourceClass);
+		}
 		for (PropertySourceModel propertySource : managedObject
 				.getPropertySources()) {
 

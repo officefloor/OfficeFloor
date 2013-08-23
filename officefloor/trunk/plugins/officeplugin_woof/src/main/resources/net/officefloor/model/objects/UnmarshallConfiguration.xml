@@ -6,6 +6,7 @@
 	<object method="addAutoWireObjectSource" node="managed-object"
 		class="net.officefloor.model.objects.AutoWireManagedObjectModel">
 		<value method="setManagedObjectSourceClassName" node="managed-object@source" />
+		<value method="setClassManagedObjectSourceClass" node="managed-object@class" />
 		<value method="setTimeout" node="managed-object@timeout" />
 		<value method="setQualifier" node="managed-object@qualifier" />
 		<value method="setType" node="managed-object@type" />
