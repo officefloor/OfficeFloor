@@ -24,12 +24,14 @@ import net.officefloor.autowire.AutoWireSupplier;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.objects.AutoWireObjectsRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 import org.easymock.AbstractMatcher;
 
@@ -59,12 +61,45 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 			.createMock(AutoWireApplication.class);
 
 	/**
+	 * {@link ManagedObjectSourceWirerContext}.
+	 */
+	private final ManagedObjectSourceWirerContext wireContext = this
+			.createMock(ManagedObjectSourceWirerContext.class);
+
+	/**
+	 * {@link AbstractMatcher} for matching the addition of the
+	 * {@link ManagedObjectSource}.
+	 */
+	private final AbstractMatcher addManagedObjectMatcher = new AbstractMatcher() {
+		@Override
+		public boolean matches(Object[] expected, Object[] actual) {
+
+			// Validate source and auto-wiring matches
+			boolean isMatch = (expected[0].equals(actual[0]));
+			AutoWire[] eAutoWiring = (AutoWire[]) expected[2];
+			AutoWire[] aAutoWiring = (AutoWire[]) actual[2];
+			isMatch = isMatch && (eAutoWiring.length == aAutoWiring.length);
+			if (isMatch) {
+				for (int i = 0; i < eAutoWiring.length; i++) {
+					isMatch = isMatch
+							&& (eAutoWiring[i].equals(aAutoWiring[i]));
+				}
+			}
+
+			// Trigger the wiring (if match)
+			if (isMatch) {
+				ManagedObjectSourceWirer wirer = (ManagedObjectSourceWirer) actual[1];
+				wirer.wire(AutoWireObjectsLoaderTest.this.wireContext);
+			}
+
+			return isMatch;
+		}
+	};
+
+	/**
 	 * Ensure can load configuration to {@link AutoWireApplication}.
 	 */
 	public void testLoading() throws Exception {
-
-		final ManagedObjectSourceWirerContext wireContext = this
-				.createMock(ManagedObjectSourceWirerContext.class);
 
 		// Record first managed object
 		final AutoWireObject objectOne = this.createMock(AutoWireObject.class);
@@ -72,37 +107,13 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 				"net.example.ExampleManagedObjectSourceA", null, new AutoWire(
 						"QUALIFIED", "net.orm.Session"), new AutoWire(
 						"net.orm.SessionLocal")), objectOne,
-				new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-
-						// Validate source and auto-wiring matches
-						boolean isMatch = (expected[0].equals(actual[0]));
-						AutoWire[] eAutoWiring = (AutoWire[]) expected[2];
-						AutoWire[] aAutoWiring = (AutoWire[]) actual[2];
-						isMatch = isMatch
-								&& (eAutoWiring.length == aAutoWiring.length);
-						if (isMatch) {
-							for (int i = 0; i < eAutoWiring.length; i++) {
-								isMatch = isMatch
-										&& (eAutoWiring[i]
-												.equals(aAutoWiring[i]));
-							}
-						}
-
-						// Trigger the wiring
-						ManagedObjectSourceWirer wirer = (ManagedObjectSourceWirer) actual[1];
-						wirer.wire(wireContext);
-
-						return isMatch;
-					}
-				});
+				this.addManagedObjectMatcher);
 
 		// Record wiring
-		wireContext.mapFlow("FLOW", "SECTION", "INPUT");
-		wireContext.mapTeam("TEAM", new AutoWire("QUALIFIER",
+		this.wireContext.mapFlow("FLOW", "SECTION", "INPUT");
+		this.wireContext.mapTeam("TEAM", new AutoWire("QUALIFIER",
 				"net.example.Type"));
-		wireContext.mapDependency("DEPENDENCY", new AutoWire("QUALIFIER",
+		this.wireContext.mapDependency("DEPENDENCY", new AutoWire("QUALIFIER",
 				"net.example.Dependency"));
 
 		// Record remaining of object
@@ -138,6 +149,84 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.loader.loadAutoWireObjectsConfiguration(
 				this.getConfiguration("application.objects"), this.app);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can load {@link ClassManagedObjectSource} shortcut configuration.
+	 */
+	public void testClassShortcuts() throws Exception {
+
+		// Record class A
+		final AutoWireObject objectA = this.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				ClassManagedObjectSource.class.getName(), null, new AutoWire(
+						"net.example.ExampleClassA")), objectA,
+				this.addManagedObjectMatcher);
+		objectA.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				"net.example.ExampleClassA");
+
+		// Record class B
+		final AutoWireObject objectB = this.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				ClassManagedObjectSource.class.getName(), null, new AutoWire(
+						"QUALIFIER", "net.example.ExampleClassB")), objectB);
+		objectB.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				"net.example.ExampleClassB");
+
+		// Record class C
+		final AutoWireObject objectC = this.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				ClassManagedObjectSource.class.getName(), null, new AutoWire(
+						"net.example.Type")), objectC);
+		objectC.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				"net.example.ExampleClassC");
+
+		// Record class D
+		final AutoWireObject objectD = this.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				ClassManagedObjectSource.class.getName(), null, new AutoWire(
+						"QUALIFIER", "net.example.Type")), objectD);
+		objectD.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				"net.example.ExampleClassD");
+
+		// Record class E
+		final AutoWireObject objectE = this.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				ClassManagedObjectSource.class.getName(), null, new AutoWire(
+						"net.example.Type")), objectE);
+		objectE.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				"net.example.ExampleClassE");
+
+		// Record object F
+		final AutoWireObject objectF = this.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				ClassManagedObjectSource.class.getName(), null, new AutoWire(
+						"QUALIFIED", "net.orm.Session"), new AutoWire(
+						"net.orm.SessionLocal")), objectF);
+		this.wireContext.mapFlow("FLOW", "SECTION", "INPUT");
+		this.wireContext.mapTeam("TEAM", new AutoWire("QUALIFIER",
+				"net.example.Type"));
+		this.wireContext.mapDependency("DEPENDENCY", new AutoWire("QUALIFIER",
+				"net.example.Dependency"));
+		objectF.setTimeout(10);
+		objectF.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				"net.example.ExampleClassF");
+		objectF.addProperty("MO_ONE", "VALUE_ONE");
+		objectF.loadProperties("example/object.properties");
+		objectF.addProperty("MO_TWO", "VALUE_TWO");
+
+		// Record source (ignores class)
+		final AutoWireObject objectSource = this
+				.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				"net.example.ExampleManagedObjectSource", null, new AutoWire(
+						"net.example.Type")), objectSource);
+
+		// Test
+		this.replayMockObjects();
+		this.loader.loadAutoWireObjectsConfiguration(
+				this.getConfiguration("class.objects.xml"), this.app);
 		this.verifyMockObjects();
 	}
 
