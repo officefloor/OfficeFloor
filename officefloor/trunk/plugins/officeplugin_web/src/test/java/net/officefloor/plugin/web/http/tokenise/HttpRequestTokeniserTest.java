@@ -143,10 +143,10 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 * Ensure if invalid <code>%HH</code> escaping.
 	 */
 	public void testGetParameterWithInvalidEscape() throws Exception {
-		
+
 		// Only gets to path
 		this.handler.handlePath("/path");
-		
+
 		try {
 			this.doTest("GET", "/path?Invalid=%WRONG", null);
 			fail("Should not be successful");
@@ -204,25 +204,24 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 
 		// Validate transforms
 		assertEquals("Ensure transform to HTTP", " ",
-				this.getCharacterValue((byte) 2, (byte) 0));
-		assertEquals("Ensure 1 transforms", "1", this.getCharacterValue(1));
-		assertEquals("Ensure B transforms", "B", this.getCharacterValue(0xB));
+				getCharacterValue((byte) 2, (byte) 0));
+		assertEquals("Ensure 1 transforms", "1", getCharacterValue(1));
+		assertEquals("Ensure B transforms", "B", getCharacterValue(0xB));
 
 		// Record the range of percentage values
 		for (int highBits = 0; highBits <= 0xF; highBits++) {
 			for (int lowBits = 0; lowBits <= 0xF; lowBits++) {
 
-				// Obtain the characters
-				String high = this.getCharacterValue(highBits);
-				String low = this.getCharacterValue(lowBits);
-				String character = this.getCharacterValue((byte) highBits,
-						(byte) lowBits);
-
-				// Do not run for control characters
-				byte value = (byte) ((highBits << 4) | lowBits);
-				if ((value <= 31) || (value == 127)) {
-					continue; // control character
+				// Do not test control characters
+				if (isControlCharacter(highBits, lowBits)) {
+					continue;
 				}
+
+				// Obtain the characters
+				String high = getCharacterValue(highBits);
+				String low = getCharacterValue(lowBits);
+				String character = getCharacterValue((byte) highBits,
+						(byte) lowBits);
 
 				// Record handling
 				this.handler.handlePath("/path" + character);
@@ -243,16 +242,15 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 		for (int highBits = 0; highBits <= 0xF; highBits++) {
 			for (int lowBits = 0; lowBits <= 0xF; lowBits++) {
 
-				// Obtain the characters
-				String high = this.getCharacterValue(highBits);
-				String low = this.getCharacterValue(lowBits);
-				String escapedCharacter = "%" + high + low;
-
-				// Do not run for control characters
-				byte value = (byte) ((highBits << 4) | lowBits);
-				if ((value <= 31) || (value == 127)) {
-					continue; // control character
+				// Do not test control characters
+				if (isControlCharacter(highBits, lowBits)) {
+					continue;
 				}
+
+				// Obtain the characters
+				String high = getCharacterValue(highBits);
+				String low = getCharacterValue(lowBits);
+				String escapedCharacter = "%" + high + low;
 
 				// Validate the percentage value
 				String path = "/path" + escapedCharacter;
@@ -273,6 +271,20 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Indicates if the high and low bits result in a control character.
+	 * 
+	 * @param highBits
+	 *            High bits.
+	 * @param lowBits
+	 *            Low bits.
+	 * @return <code>true</code> if control character.
+	 */
+	public static boolean isControlCharacter(int highBits, int lowBits) {
+		byte value = (byte) ((highBits << 4) | lowBits);
+		return ((value <= 31) || (value == 127));
+	}
+
+	/**
 	 * Transforms the high and low bits to the corresponding character value.
 	 * 
 	 * @param highBits
@@ -281,7 +293,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 *            Low bits
 	 * @return Character value.
 	 */
-	private String getCharacterValue(byte highBits, byte lowBits) {
+	public static String getCharacterValue(int highBits, int lowBits) {
 		byte byteValue = (byte) ((highBits << 4) + lowBits);
 		return UsAsciiUtil.convertToString(new byte[] { byteValue });
 	}
@@ -293,7 +305,7 @@ public class HttpRequestTokeniserTest extends OfficeFrameTestCase {
 	 *            Hexidecimal value.
 	 * @return Character value.
 	 */
-	private String getCharacterValue(int hexidecimal) {
+	public static String getCharacterValue(int hexidecimal) {
 		int charValue;
 		if ((0 <= hexidecimal) && (hexidecimal <= 9)) {
 			charValue = '0' + hexidecimal;
