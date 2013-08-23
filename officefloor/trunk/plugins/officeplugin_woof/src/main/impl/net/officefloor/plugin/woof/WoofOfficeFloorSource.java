@@ -421,8 +421,9 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 			throws Exception {
 
 		// Load the optional objects configuration to the application
-		ConfigurationItem objectsConfiguration = configurationContext
-				.getConfigurationItem(objectsLocation);
+		ConfigurationItem objectsConfiguration = retrieveOptionalConfiguration(
+				objectsLocation, configurationContext,
+				DEFAULT_OBJECTS_CONFIGURATION_LOCATION);
 		if (objectsConfiguration != null) {
 			// Load the objects configuration
 			AutoWireObjectsLoader objectsLoader = new AutoWireObjectsLoaderImpl(
@@ -432,8 +433,9 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 		}
 
 		// Load the optional teams configuration to the application
-		ConfigurationItem teamsConfiguration = configurationContext
-				.getConfigurationItem(teamsLocation);
+		ConfigurationItem teamsConfiguration = retrieveOptionalConfiguration(
+				teamsLocation, configurationContext,
+				DEFAULT_TEAMS_CONFIGURATION_LOCATION);
 		if (teamsConfiguration != null) {
 			// Load the teams configuration
 			AutoWireTeamsLoader teamsLoader = new AutoWireTeamsLoaderImpl(
@@ -441,6 +443,40 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 			teamsLoader.loadAutoWireTeamsConfiguration(teamsConfiguration,
 					application);
 		}
+	}
+
+	/**
+	 * Retrieves the optional {@link ConfigurationItem}.
+	 * 
+	 * @param configurationLocation
+	 *            Location of the {@link ConfigurationItem}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
+	 * @param defaultLocation
+	 *            Default location of the {@link ConfigurationItem}.
+	 * @return {@link ConfigurationItem} or <code>null</code> if not able to
+	 *         find.
+	 * @throws Exception
+	 *             If fails to retrieve the {@link ConfigurationItem}.
+	 */
+	private static ConfigurationItem retrieveOptionalConfiguration(
+			String configurationLocation,
+			ConfigurationContext configurationContext, String defaultLocation)
+			throws Exception {
+
+		// Retrieve the configuration
+		ConfigurationItem configuration = configurationContext
+				.getConfigurationItem(configurationLocation);
+		if (configuration == null) {
+			// Attempt to load via '.xml' suffix if default location
+			if (defaultLocation.equals(configurationLocation)) {
+				configuration = configurationContext
+						.getConfigurationItem(defaultLocation + ".xml");
+			}
+		}
+
+		// Return the configuration
+		return configuration;
 	}
 
 	/**
