@@ -65,14 +65,16 @@ WoOF
 
 Inversion of Control
 
-  The previous tutorials have covered the built in dependency objects for WoOF.  They have also covered Continuation Injection and Component Orchestration.
+  The previous tutorials have covered the built in dependency objects for WoOF.  They have also covered Continuation Injection and Task Orchestration.
   
   The following tutorials focus on extending the web application's functionality by using further inversion of control features of OfficeFloor.
   
 *----------------------------------------------------------+-----------------------------------------------------------+
 || Tutorial                                                || Description                                             
 *----------------------------------------------------------+-----------------------------------------------------------+
-| {{{./DatabaseHttpServer/index.html}Dependency Injection}}  | Dependency injecting customised objects.
+| {{{./DiPojoHttpServer/index.html}Dependency Injection (POJO)}}  | Dependency injecting a plain old java object (POJO).
+*----------------------------------------------------------+-----------------------------------------------------------+
+| {{{./DatabaseHttpServer/index.html}Dependency Injection (Managed Object)}}  | Dependency injecting a customised managed object.
 *----------------------------------------------------------+-----------------------------------------------------------+
 | {{{./TransactionHttpServer/index.html}Governance}}  | Managing transactions with Governance.
 *----------------------------------------------------------+-----------------------------------------------------------+
@@ -110,5 +112,4 @@ WoOF and a JEE Servlet Container
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
 | {{{./WoofServletMigration/migrate.html}Migrate JEE Servlet application to run in OfficeFloor}}  | Migrating an existing JEE Servlet application to run within OfficeFloor as a WoOF application. |
 *----------------------------------------------------------+-----------------------------------------------------------+------------------------------+
-
 
