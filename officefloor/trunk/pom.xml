@@ -138,7 +138,7 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.plugin</groupId>
-				<artifactId>officeplugin_cometd</artifactId>
+				<artifactId>officeplugin_bayeux</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
