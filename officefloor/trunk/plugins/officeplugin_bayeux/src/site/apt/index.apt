@@ -6,4 +6,4 @@
 
   <<Bayeux Plug-in>>
 
-  This module provides integration of Bayeux protocol ({{{http://cometd.org}}cometd}) into WoOF.
+  This module provides integration of Bayeux protocol ({{{http://cometd.org}cometd}}) into WoOF.

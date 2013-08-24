@@ -18,7 +18,7 @@ Setup
   
    [[1]] Install {{{http://www.eclipse.org/downloads/}Eclipse}}
    
-   [[1]] Install the {{{http://marketplace.eclipse.org/content/maven-integration-eclipse}Maven plug-in}} into Eclipse
+   [[1]] Install the {{{http://marketplace.eclipse.org/content/maven-integration-eclipse-juno-and-newer}Maven plug-in}} into Eclipse
    
    [[1]] Install the {{{http://marketplace.eclipse.org/content/officefloor}OfficeFloor plug-in}} into Eclipse
 
