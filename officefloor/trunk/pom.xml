@@ -1285,6 +1285,8 @@
 									<!-- Common links not to check -->
 									<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
 									<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
+									<!-- Woopra (avoid SSL issues when logged in) -->
+									<excludedLink>http://woopra.com</excludedLink>
 									<!-- TODO remove after 2.14.0 release when images available -->
 									<excludedLink>http://officefloor.net/images/</excludedLink>
 								</excludedLinks>

@@ -1,34 +1,20 @@
                                                -----------------------
-                                      Dependency Injection HTTP Server Tutorial 
+                                    Dependency Injection of Managed Object Tutorial 
                                                -----------------------
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Dependency Injection HTTP Server Tutorial>>
+  <<Dependency Injection of Managed Object Tutorial>>
 
-  This tutorial demonstrates the dependency injection of a <<<DataSource>>>.
+  This tutorial demonstrates the dependency injection of a <<<DataSource>>>.   The <<<DataSource>>> is provided by a {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation (i.e. {{{/apidocs/net/officefloor/plugin/jdbc/datasource/DataSourceManagedObjectSource.html}DataSourceManagedObjectSource}}).
+
+  A {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} enables injection of customised objects.  The customised objects have greater access to OfficeFloor/WoOF functionality than plain old java objects (POJOs).  OfficeFloor/WoOF, however, supports both as POJOs are simpler to implement.
   
   The example used in this tutorial is the following simple application to manage rows within a database table.
   
 [./images/DatabaseHttpServer-screenshot.png] DatabaseHttpServer screen shot.
   
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DatabaseHttpServer/${projectVersion}/DatabaseHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
-
-
-
-Setup the database
-
-  The following is the <<<application.woof>>> configuration for the application.
-
-[./images/database-woof.png] application.woof configuration.
-
-  The configuration identifies to trigger the setup of the database on start-up of the application.  The following is the code triggered which creates the table and inserts a row.
-
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/databasehttpserver/Setup.java}
-
-  The dependencies to inject by OfficeFloor is defined by the method's parameters.  OfficeFloor will reflectively interrogate the method and inject the necessary dependencies on invoking it.
-  
-  The above method is invoked on start-up of the application.  Covered later in this tutorial is dependency injecting the <<<DataSource>>> to service a request.
 
 
 
@@ -53,6 +39,23 @@ Configuring Objects
   Objects to be dependency injected within OfficeFloor are made available by {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations.  Many dependency injection frameworks are based solely on the object's <<<Class>>> and its necessary dependency injection configuration.  OfficeFloor goes beyond this by providing more capabilities to the object such as invoking {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectExecuteContext.html}processes}}.  For example the socket listener within a stand-alone WoOF HTTP Server is actually a {{{/apidocs/net/officefloor/plugin/socket/server/http/source/HttpServerSocketManagedObjectSource.html}HttpServerSocketManagedObjectSource}} that invokes a task to service the HTTP request.
   
   The {{{/apidocs/net/officefloor/plugin/managedobject/clazz/ClassManagedObjectSource.html}ClassManagedObjectSource}} is available to provide the typical POJO dependency injection.
+
+
+
+Setup the database
+
+  The following is the <<<application.woof>>> configuration for the application.
+
+[./images/database-woof.png] application.woof configuration.
+
+  The configuration identifies to trigger the setup of the database on start-up of the application.  The following is the code triggered which creates the table and inserts a row.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/databasehttpserver/Setup.java}
+
+  The dependencies to inject by OfficeFloor is defined by the method's parameters.  OfficeFloor will reflectively interrogate the method and inject the necessary dependencies on invoking it.
+  
+  The above method is invoked on start-up of the application.  Covered later in this tutorial is dependency injecting the <<<DataSource>>> to service a request.
+
 
 
 
