@@ -54,7 +54,11 @@ Parent
 
 Child
 
-  The child template of this tutorial demonstrates overriding a section, introducing a section and ignoring sections.
+  The child template of this tutorial demonstrates overriding a section, introducing a section and ignoring sections.  
+  
+  The configuration of the child is as follows (note the extension of the template):
+  
+[./images/InheritWizard-screenshot.png] InheritHttpServer child wizard screenshot.
 
   The HTML for the child page is as follows:
 
