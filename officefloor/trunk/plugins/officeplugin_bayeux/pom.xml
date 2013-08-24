@@ -7,9 +7,9 @@
 		<artifactId>plugins</artifactId>
 		<version>2.14.0</version>
 	</parent>
-	<artifactId>officeplugin_cometd</artifactId>
-	<name>Cometd Plug-in</name>
-	<description>OfficeFloor plug-in for Cometd</description>
+	<artifactId>officeplugin_bayeux</artifactId>
+	<name>Bayeux Plug-in</name>
+	<description>OfficeFloor plug-in for the Bayeux protocol</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -51,25 +51,6 @@
             <version>2.6.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-        	<!-- TODO remove -->
-            <groupId>org.cometd.java</groupId>
-            <artifactId>cometd-java-server</artifactId>
-            <version>2.6.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-        	<!-- TODO remove -->
-            <groupId>org.atmosphere</groupId>
-            <artifactId>atmosphere-cometd</artifactId>
-            <version>1.1.0.RC3</version>
-            <scope>test</scope>
-        </dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
