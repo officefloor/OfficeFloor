@@ -1,0 +1,9 @@
+                                       ---------------------------
+                                             GWT Plug-in
+                                       ---------------------------
+                                          Daniel Sagenschneider
+                                       ---------------------------
+
+  <<GWT Plug-in>>
+
+  This module provides integration of GWT into WoOF to enable enhancing pages with JavaScript.  In other words, providing the capability of Rich Internet Applications (RIA).

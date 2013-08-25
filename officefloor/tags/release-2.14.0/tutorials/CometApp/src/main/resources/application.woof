@@ -1,0 +1,16 @@
+<woof>
+  <templates>
+    <template name="comet" uri="comet" path="Template.woof.html" class="net.officefloor.tutorial.cometapp.TemplateLogic" x="75" y="49">
+      <extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
+        <property name="gwt.entry.point.class.name" value="net.officefloor.tutorial.cometapp.client.CometAppEntryPoint"/>
+        <property name="gwt.comet.enable" value="true"/>
+      </extension>
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+</woof>

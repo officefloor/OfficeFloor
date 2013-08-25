@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="office governance name" />
+	<field type="OfficeTaskModel" name="office task" end-list="office governance" />
+	<field type="OfficeGovernanceModel" name="office governance"
+		end-list="office task" />
+</model>

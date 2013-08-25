@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+    <field type="ExistingModel" name="existing model" />
+    <field type="TargetModel" name="target model" />
+</model>

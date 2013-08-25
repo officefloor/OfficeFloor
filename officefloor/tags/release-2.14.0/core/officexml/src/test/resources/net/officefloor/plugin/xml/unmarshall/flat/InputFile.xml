@@ -1,0 +1,18 @@
+<xml-message>
+	<string-value>A string value</string-value>
+	<boolean-true>TRUE</boolean-true>
+	<boolean-false>false</boolean-false>
+	<char-value>A</char-value>
+	<charactor>&amp;</charactor>
+	<byte-value>1</byte-value>
+	<Byte>0</Byte>
+	<int-value>1</int-value>
+	<Integer>-1</Integer>
+	<long-value>2</long-value>
+	<Long>-2</Long>
+	<float-value>3.0</float-value>
+	<Float>-3.0</Float>
+	<double-value>4.0</double-value>
+	<Double>-4.0</Double>
+	<Date>5 Jan 2006</Date>
+</xml-message>

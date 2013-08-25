@@ -1,0 +1,52 @@
+                                        ---------------------
+                                              Install
+                                        ---------------------
+                                        Daniel Sagenschneider
+                                        ---------------------
+
+Quick install      
+
+---------------
+
+
+
+                            Drag the install icon in the left menu to your Eclipse IDE  
+                            
+                            
+                            
+                              (typically to a free space in the tool bar at the top)
+
+              
+              
+---------------
+
+  A dialog will appear in Eclipse with the OfficeFloor features to install.  Step through with next and then click finish to install the OfficeFloor Eclipse plug-ins.
+
+  Congratulations you have all the tools necessary to start building applications with OfficeFloor.  Please now see the {{{./tutorials/index.html}tutorials}} for how simple, fast and agile it is to develop with OfficeFloor.
+
+
+Manual install
+
+  OfficeFloor is an extremely light weight and very versatile plugin application framework that runs directly in your unit tests, on your development machine, within your test environments and all the way up to the cloud - all without having to change your application.  OfficeFloor achieves this by not requiring heavy weight application installs.  It just runs and does the job you need it to.
+
+  The only tools you need to start developing with OfficeFloor is {{{http://eclipse.org}Eclipse}} and the OfficeFloor plug-ins available at the update site:
+  
+---------------
+
+              http://www.officefloor.net/update
+
+---------------
+
+  Note that the OfficeFloor Eclipse plug-ins will also require {{{http://www.eclipse.org/gef}GEF}} to be installed in Eclipse for the graphical editors.  Typically GEF should already be available in your Eclipse install, however should it not be installed please follow the {{{http://help.eclipse.org/juno/topic/org.eclipse.platform.doc.user/tasks/tasks-124.htm}Eclipse plug-in installation guide}} to install. 
+
+  To save you time, the easiest way to install the OfficeFloor plug-ins is to drag the install icon in the left menu to your Eclipse IDE.  Typically you need to drag it to a free space in the tool bar at the top of Eclipse for the triggering of the auto install.
+  
+  Once you have Eclipse running with the OfficeFloor plug-ins installed, the next step is to work through the {{{./tutorials/index.html}tutorials}}.  These contain all that you will need to know to build simpler, faster and more agile applications with OfficeFloor.
+
+  OfficeFloor also provides plugins for {{{http://maven.apache.org}Maven}} to simplify automating the testing and building of your application.  Details of these can also be found in the {{{./tutorials/index.html}tutorials}}.
+
+  
+Help
+
+  If you have any troubles please see {{{./getting-help.html}getting help}}.
+

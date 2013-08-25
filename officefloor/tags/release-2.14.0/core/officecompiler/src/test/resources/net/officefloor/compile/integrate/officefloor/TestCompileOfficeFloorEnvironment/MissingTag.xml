@@ -1,0 +1,12 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<properties>
+					<property name="property" value="${missing.tag}" />
+				</properties>
+			</office>
+		</offices>
+	</office-floor>
+	<office />
+</context>

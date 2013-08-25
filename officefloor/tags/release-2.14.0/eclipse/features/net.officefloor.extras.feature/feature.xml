@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      label="WoOF Extras"
+      id="net.officefloor.extras.feature"
+      version="2.14.0"
+      provider-name="OfficeFloor">
+
+   <description url="http://www.officefloor.net/">
+      Plug-ins provide additional functionality for OfficeFloor.
+   </description>
+
+   <copyright>
+      Copyright (C) 2005-2013 Daniel Sagenschneider
+   </copyright>
+
+   <license url="http://www.gnu.org/licenses/gpl.html">
+      OfficeFloor Plugins are licensed under GPL (http://www.gnu.org/licenses/gpl.html)
+   </license>
+
+   <url>
+      <update label="OfficeFloor" url="http://www.officefloor.net/update"/>
+   </url>
+
+   <requires>
+      <import feature="net.officefloor.feature" version="2.14.0"/>
+      <import feature="net.officefloor.woof.feature" version="2.14.0"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.core.jobs"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.ui.ide"/>
+   </requires>
+
+   <plugin
+         id="net.officefloor.extras"
+         version="2.14.0"
+         download-size="0"
+         install-size="0" />
+
+</feature>

@@ -1,0 +1,14 @@
+<section>
+	<sub-sections>
+		<sub-section name="SUB_SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION">
+			<input name="INPUT_A" parameter-type="java.lang.Double" />
+			<input name="INPUT_B" parameter-type="java.lang.Integer" />
+			<output name="OUTPUT_A" argument-type="java.lang.Exception"
+				escalation-only="true" />
+			<output name="OUTPUT_B" argument-type="java.lang.String" />
+			<object name="OBJECT_A" object-type="java.sql.Connection" />
+			<object name="OBJECT_B" object-type="java.lang.Object" />
+		</sub-section>
+	</sub-sections>
+</section>

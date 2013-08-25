@@ -1,0 +1,52 @@
+<verifications>
+	<files>
+		<!-- Ensure using latest version -->
+		<file>
+			<location>${basedir}/../../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+
+		<!-- Ensure correct versions in Eclipse plugin -->
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+
+		<!-- Ensure correct versions on build class path -->
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeframe-@{officeframe_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officexml-@{officexml_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officecompiler-@{officecompiler_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-ClassPath:([^:]*)officebuilding-@{officebuilding_version}.jar]]></contains>
+		</file>
+		
+		<!-- Ensure correct versions included for build -->
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)officeframe-@{officeframe_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)officexml-@{officexml_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)officecompiler-@{officecompiler_version}.jar]]></contains>
+		</file>
+		<file>
+			<location>build.properties</location>
+			<contains><![CDATA[bin.includes =([^=]*)officebuilding-@{officebuilding_version}.jar]]></contains>
+		</file>
+				
+	</files>
+</verifications>
