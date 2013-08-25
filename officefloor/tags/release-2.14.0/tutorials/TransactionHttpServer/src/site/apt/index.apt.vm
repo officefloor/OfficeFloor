@@ -1,0 +1,99 @@
+                                               -----------------------
+                                           Transaction HTTP Server Tutorial
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Transaction HTTP Server Tutorial>>
+
+  This tutorial demonstrates providing transaction context to an OfficeFloor web application.  OfficeFloor refers to context as {{{/apidocs/net/officefloor/frame/spi/governance/Governance.html}Governance}}.
+  
+  The example used for this tutorial is a managing a list of users.  The user name and full name are stored in separate tables to require a transaction to safely create a user.
+
+[./images/TransactionHttpServer-screenshot.png] TransactionHttpServer screen shot.
+  
+  As the user name and full name are both required, the example application will not create the user unless both are supplied.
+   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/TeamHttpServer/${projectVersion}/TeamHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Configuration
+
+  The following is the <<<application.woof>>> configuration for the example application.
+
+[./images/transaction-woof.png] application.woof configuration.
+
+  The transaction governance is added via right clicking and adding a governance.  On selecting the JPA transaction the transaction governance is added.  For the governance to apply a governance area must be added.  All templates and sections within the governance area are then subject to the governance.  The above configuration shows the <<<CreateUser>>> section to be under transaction management (governance).
+
+  The exception handling configured above has the web page rendered again in the case of a persistence failure.  Should the user name or full name not be supplied the transaction is rolled back due to persistence failure.  The page is then rendered with only the contents committed to the database.
+  
+  
+* Remaining configuration
+
+  The remaining configuration is as follows and included for completeness of this tutorial.  See the {{{../index.html}other tutorials}} for more details.
+  
+** Database Setup
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/Setup.java}
+
+** application.objects
+  
+%{code-snippet|brush=xml|file=${basedir}/src/main/resources/application.objects}
+
+  The team is required for the <<<EntityManager>>> object as a <<<Task>>> is triggered to automatically close the <<<EntityManager>>>.  OfficeFloor enables {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} to clean up themselves so that this code need not be in the POJOs. 
+
+** datasource.properties
+
+%{code-snippet|brush=plain|file=${basedir}/src/main/resources/datasource.properties}
+
+
+
+Code
+
+  Governance provides context to the {{{/apidocs/net/officefloor/frame/spi/managedobject/ManagedObject.html}ManagedObject}} instances used by the <<<Task>>>.  In the example application it is providing a transaction (context) to the <<<EntityManager>>> for creating the user.  Governance interacts with the extension interfaces of the <<<ManagedObject>>>.
+  
+  As Governance only applies to the <<<ManagedObject>>> instances it is unobtrusive to the POJO methods.  Therefore see the {{{../index.html}other tutorials}} for explanation of the example application's code.
+  
+  The code is included for the completeness of this tutorial.
+
+* Template
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Users.woof.html}
+
+* Template Logic
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/UsersLogic.java}
+
+* Create User Service
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/UserService.java}
+
+* Entities
+
+  The example application uses the {{{http://projectlombok.org}Project Lombok}} to simplify the coding of the JPA entities.
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/User.java}
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/Person.java}
+
+  
+
+Unit Test
+
+  The following unit test makes requests to create users.
+
+%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/transactionhttpserver/TransactionHttpServerTest.java}
+
+  Two users are attempt to be created
+  
+   * first user is created
+   
+   * second user is not created due to missing data
+
+
+
+Next
+
+  The {{{../TeamHttpServer/index.html}next tutorial}} looks at Thread Injection.
+

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<persistence>
+
+	<persistence-unit name="test">
+		<provider>org.datanucleus.api.jpa.PersistenceProviderImpl</provider>
+		<class>net.officefloor.plugin.jpa.MockEntity</class>
+		<exclude-unlisted-classes />
+		<properties>
+			<!-- datanucleus.ConnectionDriverName provided via object properties -->
+			<property name="datanucleus.ConnectionURL" value="jdbc:hsqldb:mem:test" />
+			<property name="datanucleus.ConnectionUserName" value="sa" />
+			<property name="datanucleus.ConnectionPassword" value="" />
+		</properties>
+	</persistence-unit>
+
+</persistence>

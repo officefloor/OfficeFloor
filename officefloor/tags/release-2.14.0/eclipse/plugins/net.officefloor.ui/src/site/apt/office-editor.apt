@@ -1,0 +1,43 @@
+                                       ---------------------------
+                                             Office Editor
+                                       ---------------------------
+                                          Daniel Sagenschneider
+                                       ---------------------------
+
+  The Office Editor provides configuration to assemble an application.
+
+  The configuration elements that can be added to an Office are:
+
+   * Sections
+
+   * Team responsibilities within Sections
+
+   * External teams
+
+   * External objects
+
+   * Administrators
+
+  The resulting model configured by the Office Editor is for the OfficeModelOfficeSection, which is an OfficeSource and subsequently is added to an OfficeFloorSource to be deployed.
+
+
+
+Using the Office Editor
+
+  As the Office Editor is graphical in nature recorded demonstrations will be used to provide details on how to use the editor. This follows OfficeFloor's principle of performance in developer learning curves as watching short visual demonstrations is more effective and faster than long textual descriptions in gaining the necessary information to start using the editor.
+
+  <Future documentation to provide the following demonstrations:>
+
+   [[1]] Create a new office
+
+   [[1]] Add a section
+
+   [[1]] Link section output to section input
+
+   [[1]] Add external object and link section object to it
+
+   [[1]] Add external team and assign it responsibility for section
+
+   [[1]] Add additional responsibilities for section and assign to different external teams
+
+   [[1]] Add administrator and weave in its duties

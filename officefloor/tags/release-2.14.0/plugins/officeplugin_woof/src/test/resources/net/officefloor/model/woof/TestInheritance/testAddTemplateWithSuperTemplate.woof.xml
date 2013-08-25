@@ -1,0 +1,17 @@
+<woof>
+
+	<templates>
+		<template name="child" uri="/child" path="example/Child.ofp"
+			extends="PARENT">
+			<output name="OUTPUT_CHILD" />
+		</template>
+		<template name="GRAND_PARENT" uri="/grandparent" path="example/GrandParent.ofp">
+			<output name="OUTPUT_GRAND_PARENT" />
+		</template>
+		<template name="PARENT" uri="/parent" path="example/Parent.ofp"
+			extends="GRAND_PARENT">
+			<output name="OUTPUT_PARENT" />
+		</template>
+	</templates>
+
+</woof>

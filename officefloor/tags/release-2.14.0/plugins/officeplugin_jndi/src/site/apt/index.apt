@@ -1,0 +1,51 @@
+                                       ------------------
+				          JNDI Plug-in
+				       ------------------
+				      Daniel Sagenschneider
+				       ------------------
+
+  <<JNDI Plug-in>>
+  
+  The JNDI plug-in enables both:
+  
+   * access to OfficeFloor via JNDI (useful for embedding OfficeFloor into existing JEE applications)
+   
+   * OfficeFloor to access JNDI objects
+   
+'officefloor' JNDI Name Space
+
+  To enable embedding OfficeFloor into existing JEE applications, OfficeFloor instances are available under the <<<officefloor>>> name space of the form:
+  
+---------------------------------------------
+                            officefloor:<office floor location>
+---------------------------------------------
+
+  so that an OfficeFloor instance can be obtained via the following example code:
+  
++-------------------------------------------+
+    Context context = new InitialContext();
+    OfficeFloor officeFloor = (OfficeFloor) context.lookup("officefloor:net/example/OfficeFloor.officefloor");
++-------------------------------------------+
+
+Using JNDI within OfficeFloor
+
+  The following sources provide means to utilise JNDI objects from within OfficeFloor.
+  
+*------------------------------------------------------------------+------------------------------------+
+|| Source                                                          || Description                       |
+*------------------------------------------------------------------+------------------------------------+
+| {{{/apidocs/net/officefloor/plugin/jndi/object/JndiObjectManagedObjectSource.html}net.officefloor.plugin.jndi.object.JndiObjectManagedObjectSource}} | To retrieve a JNDI object.   |
+*------------------------------------------------------------------+------------------------------------+
+| {{{/apidocs/net/officefloor/plugin/jndi/work/JndiWorkSource.html}net.officefloor.plugin.jndi.work.JndiWorkSource}}                  | To utilise a JNDI object's method as a task to execute.  This is useful to call methods on an EJB. |
+*------------------------------------------------------------------+------------------------------------+
+| {{{/apidocs/net/officefloor/plugin/jndi/ldap/JndiLdapManagedObjectSource.html}net.officefloor.plugin.jndi.ldap.JndiLdapManagedObjectSource}}     | To retrieve an LDAP DirContext. |
+*------------------------------------------------------------------+------------------------------------+
+
+Thread context expectations of JNDI within JEE containers
+
+  Typically JEE implementations of JNDI rely on ThreadLocal which limits execution of JEE components to single threads.  See the following team source in overcoming this limitation when utilising OfficeFloor within a JEE container:
+  
+  {{{/apidocs/net/officefloor/frame/impl/spi/team/ProcessContextTeamSource.html}net.officefloor.frame.impl.spi.team.ProcessContextTeamSource}}
+
+  and in particular the <<<ProcessContextTeam.doWork(...)>>> method.
+

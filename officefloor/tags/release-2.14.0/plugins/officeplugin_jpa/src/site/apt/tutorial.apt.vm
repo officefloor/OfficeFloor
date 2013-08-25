@@ -1,0 +1,130 @@
+                                               -----------------------
+                                             Extend OfficeFloor Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Extend OfficeFloor Tutorial>>
+
+  This tutorial looks at an example extension of OfficeFloor to show the ease of adding your own extensions to OfficeFloor.
+  
+  The example used is the JPA plug-in.  The code in this tutorial is the complete code used for plugging JPA into OfficeFloor.  It also provides the code for graphically configuring JPA.
+  
+  This tutorial covers implementing a {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} to provide an <<<EntityManager>>> as an available dependency object.  It demonstrates some of the features of OfficeFloor dependencies and why they are not just a class object.  However, in many cases dependency objects are simple POJOs (Plain Old Java Objects) and an implementation already exists to configure these - {{{/apidocs/net/officefloor/plugin/managedobject/clazz/ClassManagedObjectSource.html}ClassManagedObjectSource}}.
+  
+
+  
+OfficeFloor Plug-in Architecture - Managing Complexity
+  
+  The {{{../../mission.html}OfficeFloor mission}} lists the available extensions for OfficeFloor.  To extend OfficeFloor requires writing an implementation of one or more of these extension interfaces.
+  
+  The OfficeFloor extension interfaces follow a recursive design pattern that allows building more complex extensions from simpler extensions.  The {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}} is a good example of the recursive complexity growth pattern of OfficeFloor.  The {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}} extension provides a means to connect together {{{/apidocs/net/officefloor/compile/spi/work/source/WorkSource.html}WorkSource}} and {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} extensions to provide a more complex extension.  The {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}} may itself also include other {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}} extensions to provide even more recursive complexity growth.
+  
+  This recursive complexity growth follows how businesses manage complexity.  Businesses typically take a top down approach to this problem by recursively splitting responsibility.  The business is broken down into functions.  The functions are broken down into departments.  The departments are broken down into teams.  Teams are made up of individual workers.  OfficeFloor follows this approach for managing complexity except that it takes a bottom up approach to enable more agility in building systems.  This recursive complexity growth pattern also serves as the basis of the architecture the OfficeFloor Team is using to build the {{{../../mission.html}open integration Platform-as-a-Service}}.
+  
+  The atomic extensions within OfficeFloor are the:
+  
+   * {{{/apidocs/net/officefloor/compile/spi/work/source/WorkSource.html}WorkSource}}
+
+   * {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}}
+   
+  These extensions provide the inversion of control fundamentals that allow the recursive complexity growth architecture of OfficeFloor.  See the {{{../../mission.html}OfficeFloor mission}} and the {{{../../core/officecompiler/architecture.html}OfficeFloor Architecture}} for more details.
+  
+
+OfficeFloor Extension Type
+
+  Each extension in OfficeFloor has the naming convention, <<<Extension>>>Source.  All Sources follow a design pattern of the following methods:
+  
+    * <<<PropertyList getSpecification()>>>
+    
+    * <<<void init(ExtensionSourceContext context)>>> and <<<ExtensionMetaData getMetaData()>>>
+    
+  On the instantiating the source by its default constructor, the <<<getSpecification()>>> provides the list of properties that must be provided to configure the Source.  This method is typically used by OfficeFloor graphical configuration to know what properties to configure to use the Source.
+  
+  The <<<init(...)>>> configures the Source from the properties specified in the OfficeFloor graphical configuration.
+  
+  The <<<getMetaData()>>> provides type information regarding the Source.  Each <<<Extension>>>Source has a corresponding <<<Extension>>>Type that is configured from the results of the <<<getMetaData()>>> method.  Note that the type information may use the property values and be different based on the property values configured.  Also for higher level Sources, the <<<init(...)>>> and <<<getMetaData()>>> methods are replaced by a <<<sourceExtension(...)>>> method to allow the recursive complexity growth.  The <<<Extension>>>Type has two key uses:
+  
+   * OfficeFloor graphical configuration to know the type information for the Source to graphically configure it with other Sources.
+   
+   * Allow higher level extensions to use the type information to dynamically configure them with other extensions to create more complex extensions (recursive complexity growth pattern explained above).
+   
+  To simplify creating extensions, each <<<Extension>>>Source interface has a corresponding Abstract<<<Extension>>>Source abstract class.  For JPA the following is the specification and meta-data methods.  Note that for simplicity the <<<init(...)>>> and <<<getMetaData()>>> methods are implemented by the one abstract method <<<loadMetaData(...)>>>.  The following code also contains the class signature and fields to have the code sequentially displayed through this tutorial.
+  
+%{code-snippet|brush-autodetect=1|id=type|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.java}
+
+  As the {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} are responsible for providing dependency objects, there are three aspects of type information provided:
+  
+   * The type of the object provided from this Source (i.e. <<<EntityManager>>>)
+   
+   * The recycle {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} that closes the <<<EntityManager>>> when no longer in scope (typically when the HTTP request has been serviced)
+   
+   * An Extension Interface for managing transactions on the <<<EntityManager>>>.  This is separate interface that is made available to other extensions, for example the {{{/apidocs/net/officefloor/plugin/jpa/JpaTransactionGovernanceSource.html}JpaTransactionGovernanceSource}} to allow managing transactions.  Application functionality dependent on the <<<EntityManager>>> can focus on business logic leaving transaction management to the {{{/apidocs/net/officefloor/plugin/jpa/JpaTransactionGovernanceSource.html}JpaTransactionGovernanceSource}}.  Note that application functionality is itself contained in extensions, {{{/apidocs/net/officefloor/compile/spi/work/source/WorkSource.html}WorkSource}}.
+  
+  
+
+ManagedObjectSource
+
+  The remaining methods are specific to the {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}}.
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.java}
+
+  Managed objects have four aspects to them:
+  
+   * {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} that is a instance singleton within the application.
+   
+   * The {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} provides {{{/apidocs/net/officefloor/frame/spi/managedobject/ManagedObject.html}ManagedObject}} instances which provide the management over the dependency object instance.
+   
+   * The dependency object instance which is provided from its managing {{{/apidocs/net/officefloor/frame/spi/managedobject/ManagedObject.html}ManagedObject}}.  This is the object used by the application code contained in {{{/apidocs/net/officefloor/compile/spi/work/source/WorkSource.html}WorkSource}} extensions.
+   
+   * Extension interfaces available from the {{{/apidocs/net/officefloor/frame/spi/managedobject/ManagedObject.html}ManagedObject}} that allow extensible management over the dependency object instance.  The {{{/apidocs/net/officefloor/frame/spi/managedobject/extension/ExtensionInterfaceFactory.html}ExtensionInterfaceFactory}} is configured in the meta-data and is used to extract the extension interfaces from the {{{/apidocs/net/officefloor/frame/spi/managedobject/ManagedObject.html}ManagedObject}} instance. 
+  
+  The JPA {{{/apidocs/net/officefloor/frame/spi/managedobject/ManagedObject.html}ManagedObject}} is as follows.
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObject.java}
+
+  
+    
+WorkSource
+
+  The application functionality is plugged into OfficeFloor by {{{/apidocs/net/officefloor/compile/spi/work/source/WorkSource.html}WorkSource}} extensions which provide {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} instances containing the application functionality operations.  For plugging in POJOs containing application functionality see the {{{/apidocs/net/officefloor/plugin/work/clazz/ClassWorkSource.html}ClassWorkSource}} (and the higher level more useful extension, {{{/apidocs/net/officefloor/plugin/section/clazz/ClassSectionSource.html}ClassSectionSource}}).
+  
+  As dependency objects are not always passive objects, {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations can register {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} instances to undertake particular functionality.  A particular {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} used by many {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations is registering a recycle {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}}.  The recycle {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} is triggered when the {{{/apidocs/net/officefloor/frame/spi/managedobject/ManagedObject.html}ManagedObject}} goes out of scope.
+  
+  The {{{/apidocs/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.html}JpaEntityManagerManagedObjectSource}} uses the recycle {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} to ensure the <<<EntityManager>>> is closed.  The following is the recycle {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} code to close the <<<EntityManager>>>.  It uses the {{{/apidocs/net/officefloor/frame/util/AbstractSingleTask.html}AbstractSingleTask}} to simplify the implementation. 
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/CloseEntityManagerTask.java}
+
+
+
+Unit Test
+
+  Each <<<Extension>>>Source has a corresponding <<<Extension>>>LoaderUtil that eases unit testing implementations.  The following unit tests show testing the specification and meta-data.
+
+%{code-snippet|brush-autodetect=1|id=type|file=${projectBasedir}/src/test/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSourceTest.java}
+
+  Once the type information is correct, the implementation may be utilised in running instances of OfficeFloor to test it.  The following unit tests demonstrate using the {{{/apidocs/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.html}JpaEntityManagerManagedObjectSource}} to read and write data from a database.
+  
+  Note that the OfficeFloor graphical configuration uses the same API to configure an application as used by the unit tests below.  This ensures consistency between use in the unit tests and in applications.
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/src/test/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSourceTest.java}
+
+
+
+Eclipse Extension
+
+  By default, OfficeFloor extensions are configured by a generic wizard that uses the properties specified by the <<<getSpecification()>>> method.  To provide more intuitive configuration of the <<<Extension>>>Source, an <<<Extension>>>SourceExtension may be used to provide a bespoke Wizard page for configuring the <<<Extension>>>Source.  This is optional as Source implementations can be configured by the OfficeFloor Eclipse plug-ins without this.  However, it is recommended by the OfficeFloor Team to provide these OfficeFloor Eclipse plug-in extensions for any Source implementations published for re-use to ensure using the published Source is easier and more intuitive.
+  
+  The code for the <<<Extension>>>SourceExtension of {{{/apidocs/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.html}JpaEntityManagerManagedObjectSource}} is as follows.
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/../../eclipse/plugins/net.officefloor.extras/src/main/java/net/officefloor/eclipse/jpa/JpaEntityManagerManagedObjectSourceExtension.java}
+ 
+  Making this available to the OfficeFloor Eclipse plug-ins is undertaken by wrapping the above in an Eclipse plug-in with the following extension configuration.  There are extension points following the below naming convention for all Sources within OfficeFloor.
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/../../eclipse/plugins/net.officefloor.extras/plugin.xml}
+
+
+Next
+
+  Please see the {{{../../tutorials/index.html}other tutorials}} for further features.
+

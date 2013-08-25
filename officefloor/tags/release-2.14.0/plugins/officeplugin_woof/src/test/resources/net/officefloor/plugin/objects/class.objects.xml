@@ -1,0 +1,35 @@
+<objects>
+
+	<managed-object class="net.example.ExampleClassA" />
+
+	<managed-object class="net.example.ExampleClassB"
+		qualifier="QUALIFIER" />
+
+	<managed-object class="net.example.ExampleClassC" type="net.example.Type" />
+
+	<managed-object class="net.example.ExampleClassD"
+		qualifier="QUALIFIER" type="net.example.Type" />
+
+	<managed-object class="net.example.ExampleClassE">
+		<auto-wire type="net.example.Type" />
+	</managed-object>
+
+	<managed-object class="net.example.ExampleClassF"
+		timeout="10">
+		<property name="MO_ONE" value="VALUE_ONE" />
+		<property-file path="example/object.properties" />
+		<property name="MO_TWO" value="VALUE_TWO" />
+		<auto-wire qualifier="QUALIFIED" type="net.orm.Session" />
+		<auto-wire type="net.orm.SessionLocal" />  
+		<flow name="FLOW" section="SECTION" input="INPUT" />
+		<team name="TEAM" qualifier="QUALIFIER" type="net.example.Type" />
+		<dependency name="DEPENDENCY" qualifier="QUALIFIER"
+			type="net.example.Dependency" />
+	</managed-object>
+
+	<managed-object source="net.example.ExampleManagedObjectSource"
+		class="net.example.IgnoredAsSourceSpecified" type="net.example.Type">
+	</managed-object>
+
+
+</objects>

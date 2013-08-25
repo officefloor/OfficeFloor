@@ -1,0 +1,37 @@
+<woof>
+
+	<templates>
+		<template name="TEMPLATE" uri="template" path="example/Template.ofp"
+			class="net.example.LogicClass">
+			<extension
+				class="net.officefloor.model.woof.MockNoChangeWoofTemplateExtensionSource" />
+			<extension
+				class="net.officefloor.model.woof.MockChangeWoofTemplateExtensionSource">
+				<property name="ONE" value="A" />
+				<property name="TWO" value="B" />
+			</extension>
+		</template>
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION" />
+	</sections>
+
+	<access source="net.example.HttpSecuritySource" />
+
+	<governances>
+		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
+	</governances>
+
+	<resources />
+
+	<exceptions>
+		<exception class="java.lang.Exception" />
+	</exceptions>
+
+	<starting>
+		<start />
+	</starting>
+
+</woof>

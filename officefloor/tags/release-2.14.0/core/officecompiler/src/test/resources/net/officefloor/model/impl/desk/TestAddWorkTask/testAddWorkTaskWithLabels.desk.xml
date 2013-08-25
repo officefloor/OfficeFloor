@@ -1,0 +1,10 @@
+<desk>
+	<works>
+		<work name="WORK" source="net.example.ExampleWorkSource">
+			<work-task name="TASK">
+				<task-object name="OBJECT_ONE" object-type="java.lang.Integer" />
+				<task-object name="OBJECT_TWO" object-type="java.lang.String" />
+			</work-task>
+		</work>
+	</works>
+</desk>
