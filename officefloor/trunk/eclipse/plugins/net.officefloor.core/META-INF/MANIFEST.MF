@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Core
 Bundle-SymbolicName: net.officefloor.core;singleton:=true
 Bundle-Vendor: OfficeFloor
-Bundle-Version: 2.14.0
+Bundle-Version: 2.15.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
 Export-Package: com.google.common.annotations,
@@ -527,11 +527,11 @@ Bundle-ClassPath: .,
  easymock-1.1.jar,
  junit-4.11.jar,
  mx4j-tools-3.0.1.jar,
- officebuilding-2.14.0.jar,
- officecompiler-2.14.0.jar,
- officeframe-2.14.0.jar,
- officemodelgen-2.14.0.jar,
- officexml-2.14.0.jar,
+ officebuilding-2.15.0.jar,
+ officecompiler-2.15.0.jar,
+ officeframe-2.15.0.jar,
+ officemodelgen-2.15.0.jar,
+ officexml-2.15.0.jar,
  maven-aether-provider-3.0.4.jar,
  maven-artifact-3.0.4.jar,
  maven-compat-3.0.4.jar,

@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Tests for Eclipse UI
 Bundle-SymbolicName: net.officefloor.ui.tests;singleton:=true
-Bundle-Version: 2.14.0
-Fragment-Host: net.officefloor.ui;bundle-version="2.14.0"
+Bundle-Version: 2.15.0
+Fragment-Host: net.officefloor.ui;bundle-version="2.15.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.junit;version="4.8.2"
 Bundle-ClassPath: .,

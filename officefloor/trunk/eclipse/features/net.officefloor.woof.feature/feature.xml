@@ -2,7 +2,7 @@
 <feature
       label="Web on OfficeFloor (WoOF) Feature"
       id="net.officefloor.woof.feature"
-      version="2.14.0"
+      version="2.15.0"
       provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
@@ -22,7 +22,7 @@
    </url>
 
    <requires>
-      <import feature="net.officefloor.feature" version="2.14.0"/>
+      <import feature="net.officefloor.feature" version="2.15.0"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.jobs"/>
@@ -34,7 +34,7 @@
 
    <plugin
          id="net.officefloor.woof"
-         version="2.14.0"
+         version="2.15.0"
          download-size="0"
          install-size="0"
          unpack="false"/>

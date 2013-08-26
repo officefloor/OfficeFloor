@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>officefloor</artifactId>
-	<version>2.14.0</version>
+	<version>2.15.0</version>
 	<packaging>pom</packaging>
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
@@ -1287,7 +1287,7 @@
 									<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
 									<!-- Woopra (avoid SSL issues when logged in) -->
 									<excludedLink>http://woopra.com</excludedLink>
-									<!-- TODO remove after 2.14.0 release when images available -->
+									<!-- TODO remove after 2.15.0 release when images available -->
 									<excludedLink>http://officefloor.net/images/</excludedLink>
 								</excludedLinks>
 							</configuration>
