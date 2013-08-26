@@ -1294,12 +1294,6 @@ nodes and the hand-off mappings as directed lines between these nodes.  Due to
 the similarity of this configuration with Service Orchestration this graphical
 configuration is identified as Task Orchestration.
 
-Functions can also be used in place of methods.  When implementing
-\texttt{Task}s with functions, the functions will not be pure.  As state is
-shared between \texttt{Task}s by mutable state within dependencies, functions
-will need to cause side effects (mutate state) to share state with other
-\texttt{Task}s.
-
 
 
 \subsubsection*{Related implementations}
