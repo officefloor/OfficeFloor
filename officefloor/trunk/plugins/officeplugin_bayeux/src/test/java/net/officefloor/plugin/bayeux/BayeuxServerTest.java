@@ -15,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.cometd;
+package net.officefloor.plugin.bayeux;
 
 import java.util.Queue;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.cometd.publish.TransportLine;
-import net.officefloor.plugin.cometd.publish.TransportServerSession;
+import net.officefloor.plugin.bayeux.publish.TransportLine;
+import net.officefloor.plugin.bayeux.publish.TransportServerSession;
 
 import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.Message;
@@ -45,14 +45,12 @@ import org.cometd.bayeux.server.ServerSession.DeQueueListener;
 import org.cometd.bayeux.server.ServerSession.MaxQueueListener;
 import org.cometd.bayeux.server.ServerSession.RemoveListener;
 import org.easymock.AbstractMatcher;
-import org.junit.Ignore;
 
 /**
  * Tests the {@link BayeuxServerImpl}.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO complete and then write functionality")
 public class BayeuxServerTest extends OfficeFrameTestCase {
 
 	/**
@@ -122,17 +120,17 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 		});
 
 		// Record security policy (create channel)
-		final ServerMessage channelMessage = this
-				.createMock(ServerMessage.class);
-		this.recordReturn(securityPolicy, securityPolicy.canCreate(
-				this.instance, this.session, "/test", channelMessage), true,
+		this.recordReturn(securityPolicy,
+				securityPolicy.canCreate(null, null, "/test", null), true,
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertBayeuxServer(0, actual);
-						BayeuxServerTest.this.assertServerSession(1, actual);
+						BayeuxServerTest.this.assertNewBayeuxServer(0, actual);
+
+						// Validate remaining parameters
+						assertNull("Should not have session", actual[1]);
 						assertEquals("Incorrect channel ID", "/test", actual[2]);
-						assertMessage(channelMessage, 3, actual);
+						assertNull("Should be no message", actual[3]);
 						return true;
 					}
 				});
@@ -143,7 +141,9 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 		AbstractMatcher channelMatcher = new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
-				BayeuxServerTest.this.assertServerChannel(0, actual);
+				// Channel not yet obtained, so check has correct id
+				ServerChannel channel = (ServerChannel) actual[0];
+				assertEquals("Incorrect channel", "/test", channel.getId());
 				return true;
 			}
 		};
@@ -153,17 +153,16 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 		this.control(channelListener).setMatcher(channelMatcher);
 
 		// Record security policy (subscribe to channel)
-		final ServerMessage subscribeMessage = this
-				.createMock(ServerMessage.class);
 		this.recordReturn(securityPolicy, securityPolicy.canSubscribe(
-				this.instance, this.session, this.channel, subscribeMessage),
-				true, new AbstractMatcher() {
+				this.instance, this.session, this.channel, null), true,
+				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertBayeuxServer(0, actual);
+						BayeuxServerTest.this.assertNewBayeuxServer(0, actual);
 						BayeuxServerTest.this.assertServerSession(1, actual);
 						BayeuxServerTest.this.assertServerChannel(2, actual);
-						assertMessage(subscribeMessage, 3, actual);
+						assertNull("Should not have subscribe message",
+								actual[3]);
 						return true;
 					}
 				});
@@ -171,17 +170,26 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 		// Record authorizing subscription to channel
 		Authorizer authorizer = this.createMock(Authorizer.class);
 		this.recordReturn(authorizer, authorizer.authorize(Operation.SUBSCRIBE,
-				channelId, this.session, subscribeMessage), Result.grant(),
+				channelId, this.session, null), Result.grant(),
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						assertEquals("Incorrect operation",
-								Operation.SUBSCRIBE, actual[0]);
-						assertEquals("Incorrect channel ID", channelId,
-								actual[1]);
+
+						// Ensure operation the same
+						boolean isMatch = (expected[0].equals(actual[0]));
+
+						// Ensure channel ID matches
+						isMatch &= (expected[1].equals(actual[1]));
+
+						// Validate session
 						BayeuxServerTest.this.assertServerSession(2, actual);
-						assertMessage(subscribeMessage, 3, actual);
-						return true;
+
+						// Validate the message
+						isMatch &= (expected[3] == null ? (actual[3] == null)
+								: (expected[3].equals(actual[3])));
+
+						// Indicate if match
+						return isMatch;
 					}
 				});
 
@@ -220,13 +228,17 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				true, new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertBayeuxServer(0, actual);
+						BayeuxServerTest.this.assertNewBayeuxServer(0, actual);
 						BayeuxServerTest.this.assertServerSession(1, actual);
 						BayeuxServerTest.this.assertServerChannel(2, actual);
 						assertMessage(publishMessage, 3, actual);
 						return true;
 					}
 				});
+
+		// Record authorizing publishing to channel
+		this.recordReturn(authorizer, authorizer.authorize(Operation.PUBLISH,
+				channelId, this.session, publishMessage), Result.grant());
 
 		// Record server extension receiving message
 		Extension serverExtension = this.createMock(Extension.class);
@@ -284,8 +296,8 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 
 		// Record session extension sending message
 		this.recordReturn(sessionExtension,
-				sessionExtension.send(this.session, publishMessage), true,
-				new AbstractMatcher() {
+				sessionExtension.send(this.session, publishMessage),
+				publishMessage, new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
 						BayeuxServerTest.this.assertServerSession(0, actual);
@@ -352,14 +364,38 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 			}
 		});
 
-		// Record session timing out
+		// Record unsubscribe from channel as disconnecting the session
+		serverSubscriptionListener.unsubscribed(this.session, this.channel);
+		this.control(serverSubscriptionListener).setMatcher(
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						BayeuxServerTest.this.assertServerSession(0, actual);
+						BayeuxServerTest.this.assertServerChannel(1, actual);
+						return true;
+					}
+				});
+
+		// Record channel unsubscription as disconnecting the session
+		channelSubscriptionListener.unsubscribed(this.session, this.channel);
+		this.control(channelSubscriptionListener).setMatcher(
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						BayeuxServerTest.this.assertServerSession(0, actual);
+						BayeuxServerTest.this.assertServerChannel(1, actual);
+						return true;
+					}
+				});
+
+		// Record removing session as disconnected
 		RemoveListener removeListener = this.createMock(RemoveListener.class);
-		removeListener.removed(this.session, true);
+		removeListener.removed(this.session, false);
 		this.control(removeListener).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				BayeuxServerTest.this.assertServerSession(0, actual);
-				assertTrue("Should be timed out",
+				assertFalse("Should be due to last subscription removed",
 						((Boolean) actual[1]).booleanValue());
 				return true;
 			}
@@ -401,29 +437,32 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 		assertTrue("Should be initialised", isInitialized);
 
 		// Obtain the channel
-		ServerChannel channel = this.instance.getChannel("/test");
+		this.channel = this.instance.getChannel("/test");
 
 		// Configure the channel
-		channel.addAuthorizer(authorizer);
-		channel.addListener(channelSubscriptionListener);
-		channel.addListener(channelMessageListener);
+		this.channel.addAuthorizer(authorizer);
+		this.channel.addListener(channelSubscriptionListener);
+		this.channel.addListener(channelMessageListener);
 
 		// Obtain the server session
-		ServerSession session = this.instance.getSession("TEST");
+		this.session = this.instance.getSession("TEST");
 
 		// Configure the session
-		session.addListener(deQueueListener);
-		session.addListener(maxQueueListener);
-		session.addListener(sessionMessageListener);
-		session.addListener(removeListener);
-		session.addExtension(sessionExtension);
+		this.session.addListener(deQueueListener);
+		this.session.addListener(maxQueueListener);
+		this.session.addListener(sessionMessageListener);
+		this.session.addListener(removeListener);
+		this.session.addExtension(sessionExtension);
 
 		// Subscribe to channel
-		boolean isSubscribed = channel.subscribe(session);
+		boolean isSubscribed = this.channel.subscribe(this.session);
 		assertTrue("Should be subscribed successfully", isSubscribed);
 
 		// Publish a message
-		channel.publish(session, publishMessage);
+		this.channel.publish(this.session, publishMessage);
+
+		// Disconnect session (trigger unsubscribe and remove session)
+		this.session.disconnect();
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -440,6 +479,21 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 	private void assertBayeuxServer(int index, Object[] actual) {
 		BayeuxServer server = (BayeuxServer) actual[index];
 		assertSame("Incorrect bayeux server", this.instance, server);
+	}
+
+	/**
+	 * Asserts a {@link BayeuxServer} is provided but different instance.
+	 * 
+	 * @param index
+	 *            Index of the {@link BayeuxServer}.
+	 * @param actual
+	 *            Objects.
+	 */
+	private void assertNewBayeuxServer(int index, Object[] actual) {
+		BayeuxServer server = (BayeuxServer) actual[index];
+		assertNotNull("Should have server", server);
+		assertNotSame("Should be difference server",
+				BayeuxServerTest.this.instance, server);
 	}
 
 	/**

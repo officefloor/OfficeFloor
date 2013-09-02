@@ -15,25 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.cometd.publish;
+package net.officefloor.plugin.bayeux.publish;
 
-import org.cometd.bayeux.Transport;
-import org.cometd.bayeux.server.ServerSession;
+import org.cometd.bayeux.server.ServerMessage.Mutable;
 
 /**
- * {@link Transport} interface to the {@link ServerSession}.
+ * Particular responder to enable publishing the cometd event.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TransportServerSession extends ServerSession {
-
-	/**
-	 * Registers a {@link TransportLine} to the client for this
-	 * {@link ServerSession}.
-	 * 
-	 * @param line
-	 *            {@link TransportLine}.
-	 */
-	void registerTransportLine(TransportLine line);
+public interface TransportLine {
+	
+	
+	void respond(Mutable message);
 
 }

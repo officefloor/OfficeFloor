@@ -15,18 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.cometd;
+package net.officefloor.plugin.bayeux;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.officefloor.plugin.cometd.publish.TransportLine;
-import net.officefloor.plugin.cometd.publish.TransportServerSession;
+import net.officefloor.plugin.bayeux.publish.TransportLine;
+import net.officefloor.plugin.bayeux.publish.TransportServerSession;
 
 import org.cometd.bayeux.Session;
 import org.cometd.bayeux.server.LocalSession;
 import org.cometd.bayeux.server.ServerChannel;
+import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerMessage.Mutable;
 import org.cometd.bayeux.server.ServerSession;
 
@@ -38,9 +41,67 @@ import org.cometd.bayeux.server.ServerSession;
 public class ServerSessionImpl implements ServerSession, TransportServerSession {
 
 	/**
+	 * Identifier of this {@link ServerSession}.
+	 */
+	private final String id;
+
+	/**
+	 * {@link BayeuxServerImpl}.
+	 */
+	private final BayeuxServerImpl server;
+
+	/**
 	 * {@link TransportLine} instances.
 	 */
 	private final List<TransportLine> lines = new LinkedList<TransportLine>();
+
+	/**
+	 * {@link ServerSessionListener} instances.
+	 */
+	private final List<ServerSessionListener> listeners = new LinkedList<ServerSessionListener>();
+
+	/**
+	 * {@link Extension} instances.
+	 */
+	private final List<Extension> extensions = new LinkedList<Extension>();
+
+	/**
+	 * Subscribed {@link ServerChannel} instances.
+	 */
+	private final Set<ServerChannel> subscribedChannels = new HashSet<ServerChannel>();
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param id
+	 *            Identifier of this {@link ServerSession}.
+	 * @param server
+	 *            {@link BayeuxServerImpl}.
+	 */
+	public ServerSessionImpl(String id, BayeuxServerImpl server) {
+		this.id = id;
+		this.server = server;
+	}
+
+	/**
+	 * Registers a subscribed {@link ServerChannel}.
+	 * 
+	 * @param channel
+	 *            Subscribed {@link ServerChannel}.
+	 */
+	void registerSubscribedChannel(ServerChannel channel) {
+		this.subscribedChannels.add(channel);
+	}
+
+	/**
+	 * Unregisters the subscribed {@link ServerChannel}.
+	 * 
+	 * @param channel
+	 *            Subscribed {@link ServerChannel}.
+	 */
+	void unregisterSubscribedChannel(ServerChannel channel) {
+		this.subscribedChannels.remove(channel);
+	}
 
 	/*
 	 * ================== TransportServerSession ================
@@ -57,8 +118,7 @@ public class ServerSessionImpl implements ServerSession, TransportServerSession 
 
 	@Override
 	public String getId() {
-		// TODO implement Session.getId
-		throw new UnsupportedOperationException("TODO implement Session.getId");
+		return this.id;
 	}
 
 	@Override
@@ -77,9 +137,23 @@ public class ServerSessionImpl implements ServerSession, TransportServerSession 
 
 	@Override
 	public void disconnect() {
-		// TODO implement Session.disconnect
-		throw new UnsupportedOperationException(
-				"TODO implement Session.disconnect");
+
+		// Unsubscribe from all subscribed channels
+		for (ServerChannel channel : this.subscribedChannels) {
+			channel.unsubscribe(this);
+		}
+
+		// Undertake session listening
+		for (ServerSessionListener listener : this.listeners) {
+
+			// Determine if remove listener
+			if (listener instanceof RemoveListener) {
+				RemoveListener removeListener = (RemoveListener) listener;
+
+				// Enable listen on remove of session
+				removeListener.removed(this, false);
+			}
+		}
 	}
 
 	@Override
@@ -132,9 +206,7 @@ public class ServerSessionImpl implements ServerSession, TransportServerSession 
 
 	@Override
 	public void addExtension(Extension extension) {
-		// TODO implement ServerSession.addExtension
-		throw new UnsupportedOperationException(
-				"TODO implement ServerSession.addExtension");
+		this.extensions.add(extension);
 	}
 
 	@Override
@@ -146,16 +218,12 @@ public class ServerSessionImpl implements ServerSession, TransportServerSession 
 
 	@Override
 	public List<Extension> getExtensions() {
-		// TODO implement ServerSession.getExtensions
-		throw new UnsupportedOperationException(
-				"TODO implement ServerSession.getExtensions");
+		return this.extensions;
 	}
 
 	@Override
 	public void addListener(ServerSessionListener listener) {
-		// TODO implement ServerSession.addListener
-		throw new UnsupportedOperationException(
-				"TODO implement ServerSession.addListener");
+		this.listeners.add(listener);
 	}
 
 	@Override
@@ -181,6 +249,78 @@ public class ServerSessionImpl implements ServerSession, TransportServerSession 
 
 	@Override
 	public void deliver(Session from, Mutable message) {
+
+		// Obtain the from valid server session
+		ServerSession validFromSession = this.server
+				.getValidServerSession(from);
+
+		// Enable server extensions
+		boolean isContinueToPublish = this.server._Extension_send(
+				validFromSession, this, message);
+		if (!isContinueToPublish) {
+			return; // do not publish
+		}
+
+		// Enable session extensions
+		ServerMessage extensionMessage = message;
+		for (Extension extension : this.extensions) {
+			extensionMessage = extension.send(this, extensionMessage);
+		}
+
+		// TODO undertake check for max queue size
+		boolean isMaxingQueueSize = true;
+
+		// Enable determining if listener allowing queuing beyond max queue size
+		boolean isMaxQueueListenerAllowingToQueue = false;
+
+		// Undertake session listening
+		for (ServerSessionListener listener : this.listeners) {
+
+			// Determine if message listener
+			if (listener instanceof MessageListener) {
+				MessageListener messageListener = (MessageListener) listener;
+
+				// Enable listen on the message
+				isContinueToPublish = messageListener.onMessage(this,
+						validFromSession, extensionMessage);
+				if (!isContinueToPublish) {
+					return; // do not publish
+				}
+			}
+
+			// Determine if dequeue listener
+			if (listener instanceof DeQueueListener) {
+				DeQueueListener dequeueListener = (DeQueueListener) listener;
+
+				// Handle dequeue of messages
+				dequeueListener.deQueue(this, new LinkedList<ServerMessage>(
+						Arrays.asList(extensionMessage)));
+			}
+
+			// Determine if queue
+			if (isMaxingQueueSize) {
+
+				if (listener instanceof MaxQueueListener) {
+					MaxQueueListener maxQueueListener = (MaxQueueListener) listener;
+
+					// Determine if may add message
+					boolean isQueueMessage = maxQueueListener.queueMaxed(this,
+							from, extensionMessage);
+					if (!isQueueMessage) {
+						// Do not queue the message
+						return;
+					} else {
+						// Max queue listener allowing the queue
+						isMaxQueueListenerAllowingToQueue = true;
+					}
+				}
+			}
+		}
+
+		// Default on max queue with no listener is not to queue
+		if ((isMaxingQueueSize) && (!isMaxQueueListenerAllowingToQueue)) {
+			return; // do not queue the message
+		}
 
 		// Deliver to transport line
 		TransportLine line = this.lines.remove(0);
