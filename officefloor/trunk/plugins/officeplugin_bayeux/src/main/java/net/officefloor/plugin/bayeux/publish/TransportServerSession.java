@@ -15,35 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.cometd.publish;
+package net.officefloor.plugin.bayeux.publish;
 
-import net.officefloor.plugin.cometd.BayeuxServerImpl;
+import org.cometd.bayeux.Transport;
+import org.cometd.bayeux.server.ServerSession;
 
 /**
- * Provides the current state regarding publishing the cometd event.
+ * {@link Transport} interface to the {@link ServerSession}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CometdPublishState {
+public interface TransportServerSession extends ServerSession {
 
 	/**
-	 * {@link BayeuxServerImpl}.
-	 */
-	private final BayeuxServerImpl server;
-	
-	/**
-	 * Flag indicating whether to continue publishing.
-	 */
-	private volatile boolean isContinuePublish = true;
-
-	/**
-	 * Initiate.
+	 * Registers a {@link TransportLine} to the client for this
+	 * {@link ServerSession}.
 	 * 
-	 * @param server
-	 *            {@link BayeuxServerImpl}.
+	 * @param line
+	 *            {@link TransportLine}.
 	 */
-	public CometdPublishState(BayeuxServerImpl server) {
-		this.server = server;
-	}
+	void registerTransportLine(TransportLine line);
 
 }

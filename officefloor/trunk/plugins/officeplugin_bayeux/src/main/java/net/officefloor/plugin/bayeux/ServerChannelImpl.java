@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.cometd;
+package net.officefloor.plugin.bayeux;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -24,9 +24,14 @@ import java.util.Set;
 import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.Session;
 import org.cometd.bayeux.server.Authorizer;
+import org.cometd.bayeux.server.Authorizer.Operation;
+import org.cometd.bayeux.server.Authorizer.Result;
+import org.cometd.bayeux.server.Authorizer.Result.Denied;
+import org.cometd.bayeux.server.Authorizer.Result.Granted;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerMessage.Mutable;
 import org.cometd.bayeux.server.ServerSession;
+import org.cometd.bayeux.server.ServerSession.Extension;
 
 /**
  * {@link ServerChannel} implementation.
@@ -34,6 +39,16 @@ import org.cometd.bayeux.server.ServerSession;
  * @author Daniel Sagenschneider
  */
 public class ServerChannelImpl implements ServerChannel {
+
+	/**
+	 * Identifier of this {@link ServerChannel}.
+	 */
+	private final String id;
+
+	/**
+	 * {@link BayeuxServerImpl}.
+	 */
+	private final BayeuxServerImpl server;
 
 	/**
 	 * Indicates of this {@link ServerChannel} is persistent.
@@ -45,15 +60,36 @@ public class ServerChannelImpl implements ServerChannel {
 	 */
 	private final List<ServerSession> subscriptions = new LinkedList<ServerSession>();
 
+	/**
+	 * {@link Authorizer} instances.
+	 */
+	private final List<Authorizer> authorizers = new LinkedList<Authorizer>();
+
+	/**
+	 * {@link ServerChannelListener} instances.
+	 */
+	private final List<ServerChannelListener> listeners = new LinkedList<ServerChannelListener>();
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param id
+	 *            Identifier of this {@link ServerChannel}.
+	 * @param server
+	 *            {@link BayeuxServerImpl}.
+	 */
+	public ServerChannelImpl(String id, BayeuxServerImpl server) {
+		this.id = id;
+		this.server = server;
+	}
+
 	/*
 	 * ==================== ServerChannel ======================
 	 */
 
 	@Override
 	public void addListener(ServerChannelListener listener) {
-		// TODO implement ConfigurableServerChannel.addListener
-		throw new UnsupportedOperationException(
-				"TODO implement ConfigurableServerChannel.addListener");
+		this.listeners.add(listener);
 	}
 
 	@Override
@@ -112,9 +148,7 @@ public class ServerChannelImpl implements ServerChannel {
 
 	@Override
 	public void addAuthorizer(Authorizer authorizer) {
-		// TODO implement ConfigurableServerChannel.addAuthorizer
-		throw new UnsupportedOperationException(
-				"TODO implement ConfigurableServerChannel.addAuthorizer");
+		this.authorizers.add(authorizer);
 	}
 
 	@Override
@@ -133,15 +167,12 @@ public class ServerChannelImpl implements ServerChannel {
 
 	@Override
 	public String getId() {
-		// TODO implement Channel.getId
-		throw new UnsupportedOperationException("TODO implement Channel.getId");
+		return this.id;
 	}
 
 	@Override
 	public ChannelId getChannelId() {
-		// TODO implement Channel.getChannelId
-		throw new UnsupportedOperationException(
-				"TODO implement Channel.getChannelId");
+		return new ChannelId(this.id);
 	}
 
 	@Override
@@ -214,24 +245,154 @@ public class ServerChannelImpl implements ServerChannel {
 
 	@Override
 	public boolean subscribe(ServerSession session) {
-		
+
+		// Obtain the valid server session
+		ServerSessionImpl validSession = this.server
+				.getValidServerSession(session);
+
+		// Validate allowed to subscribe
+		boolean isAllowedToSubscribe = this.server
+				._SecurityPolicy_canSubscribe(validSession, this, null);
+		if (!isAllowedToSubscribe) {
+			return false; // not allowed to subscribe
+		}
+
+		// Ensure able to subscribe
+		Result lastResult = null;
+		boolean isGranted = false;
+		for (Authorizer authorisor : this.authorizers) {
+			lastResult = authorisor.authorize(Operation.SUBSCRIBE,
+					this.getChannelId(), validSession, null);
+			if (lastResult instanceof Granted) {
+				isGranted = true;
+			} else if (lastResult instanceof Denied) {
+				return false; // do not allow subscribe
+			}
+		}
+		if ((lastResult != null) && (!isGranted)) {
+			// Authorisor but none granted the subscribe
+			return false; // do not allow subscribe
+		}
+
+		// Flag that subscribed with channel
+		for (ServerChannelListener listener : this.listeners) {
+
+			// Determine if subscription listener
+			if (listener instanceof SubscriptionListener) {
+				SubscriptionListener subscriptionListener = (SubscriptionListener) listener;
+
+				// Undertake subscription listening
+				subscriptionListener.subscribed(validSession, this);
+			}
+		}
+
+		// Flag that subscribed with server
+		this.server._SubscriptionListener_subscribed(validSession, this);
+
+		// Flag that subscribed with session
+		validSession.registerSubscribedChannel(this);
+
 		// Subscribe
-		this.subscriptions.add(session);
-		
+		this.subscriptions.add(validSession);
+
 		// Successfully subscribed
 		return true;
 	}
 
 	@Override
 	public boolean unsubscribe(ServerSession session) {
-		// TODO implement ServerChannel.unsubscribe
-		throw new UnsupportedOperationException(
-				"TODO implement ServerChannel.unsubscribe");
+
+		// Obtain the valid server session
+		ServerSessionImpl validSession = this.server
+				.getValidServerSession(session);
+
+		// Flag that unsubscribed with channel
+		for (ServerChannelListener listener : this.listeners) {
+
+			// Determine if subscription listener
+			if (listener instanceof SubscriptionListener) {
+				SubscriptionListener subscriptionListener = (SubscriptionListener) listener;
+
+				// Undertake unsubscribe listening
+				subscriptionListener.unsubscribed(validSession, this);
+			}
+		}
+
+		// Flag that unsubscribed with server
+		this.server._SubscriptionListener_unsubscribed(validSession, this);
+
+		// Notify session of unsubscribe
+		validSession.unregisterSubscribedChannel(this);
+
+		// Unsubscribe
+		this.subscriptions.remove(validSession);
+
+		// Successfully unsubscribed
+		return true;
 	}
 
 	@Override
 	public void publish(Session from, Mutable message) {
-		
+
+		// Obtain the valid server session
+		ServerSession validSession = this.server.getValidServerSession(from);
+
+		// Ensure able to publish
+		boolean isAllowedToPublish = this.server._SecurityPolicy_canPublish(
+				validSession, this, message);
+		if (!isAllowedToPublish) {
+			return; // do not publish
+		}
+
+		// Ensure able to publish
+		Result lastResult = null;
+		boolean isGranted = false;
+		for (Authorizer authorisor : this.authorizers) {
+			lastResult = authorisor.authorize(Operation.PUBLISH,
+					this.getChannelId(), validSession, message);
+			if (lastResult instanceof Granted) {
+				isGranted = true;
+			} else if (lastResult instanceof Denied) {
+				return; // do not publish
+			}
+		}
+		if ((lastResult != null) && (!isGranted)) {
+			// Authorisor but none granted the publish
+			return; // do not publish
+		}
+
+		// Enable server extensions
+		isAllowedToPublish = this.server._Extension_rcv(validSession, message);
+		if (!isAllowedToPublish) {
+			return; // do not publish
+		}
+
+		// Enable session extensions
+		if (validSession != null) {
+			for (Extension extension : validSession.getExtensions()) {
+				isAllowedToPublish = extension.rcv(validSession, message);
+				if (!isAllowedToPublish) {
+					return; // do not publish
+				}
+			}
+		}
+
+		// Enable listening on the channel
+		for (ServerChannelListener listener : this.listeners) {
+
+			// Determine if message listener
+			if (listener instanceof MessageListener) {
+				MessageListener messageListener = (MessageListener) listener;
+
+				// Undertake message listening
+				isAllowedToPublish = messageListener.onMessage(validSession,
+						this, message);
+				if (!isAllowedToPublish) {
+					return; // do not publish
+				}
+			}
+		}
+
 		// Publish the message to the subscribers
 		for (ServerSession session : this.subscriptions) {
 			session.deliver(from, message);
