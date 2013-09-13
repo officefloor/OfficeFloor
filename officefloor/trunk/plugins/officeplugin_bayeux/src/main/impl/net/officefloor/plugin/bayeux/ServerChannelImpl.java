@@ -136,9 +136,7 @@ public class ServerChannelImpl implements ServerChannel {
 
 	@Override
 	public boolean isPersistent() {
-		// TODO implement ConfigurableServerChannel.isPersistent
-		throw new UnsupportedOperationException(
-				"TODO implement ConfigurableServerChannel.isPersistent");
+		return this.isPersistent;
 	}
 
 	@Override

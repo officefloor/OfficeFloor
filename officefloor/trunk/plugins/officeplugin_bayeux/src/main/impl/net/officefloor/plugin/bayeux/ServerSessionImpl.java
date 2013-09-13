@@ -23,8 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.officefloor.plugin.bayeux.publish.TransportLine;
-import net.officefloor.plugin.bayeux.publish.TransportServerSession;
+import net.officefloor.plugin.bayeux.transport.TransportServerSession;
 
 import org.cometd.bayeux.Session;
 import org.cometd.bayeux.server.LocalSession;
@@ -49,11 +48,6 @@ public class ServerSessionImpl implements ServerSession, TransportServerSession 
 	 * {@link BayeuxServerImpl}.
 	 */
 	private final BayeuxServerImpl server;
-
-	/**
-	 * {@link TransportLine} instances.
-	 */
-	private final List<TransportLine> lines = new LinkedList<TransportLine>();
 
 	/**
 	 * {@link ServerSessionListener} instances.
@@ -101,15 +95,6 @@ public class ServerSessionImpl implements ServerSession, TransportServerSession 
 	 */
 	void unregisterSubscribedChannel(ServerChannel channel) {
 		this.subscribedChannels.remove(channel);
-	}
-
-	/*
-	 * ================== TransportServerSession ================
-	 */
-
-	@Override
-	public void registerTransportLine(TransportLine line) {
-		this.lines.add(line);
 	}
 
 	/*
@@ -322,9 +307,7 @@ public class ServerSessionImpl implements ServerSession, TransportServerSession 
 			return; // do not queue the message
 		}
 
-		// Deliver to transport line
-		TransportLine line = this.lines.remove(0);
-		line.respond(message);
+		// TODO Deliver to available /meta/connect request
 	}
 
 	@Override
