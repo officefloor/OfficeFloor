@@ -15,35 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.bayeux.publish;
+package net.officefloor.plugin.bayeux.transport.handshake;
 
-import net.officefloor.plugin.bayeux.BayeuxServerImpl;
+import net.officefloor.plugin.bayeux.transport.TransportMessage;
 
 /**
- * Provides the current state regarding publishing the cometd event.
+ * Details of the successful handshake.
  * 
  * @author Daniel Sagenschneider
+ * 
+ * @see HandshakeCallback
  */
-public class CometdPublishState {
+public interface SuccessfulHandshake {
 
 	/**
-	 * {@link BayeuxServerImpl}.
-	 */
-	private final BayeuxServerImpl server;
-	
-	/**
-	 * Flag indicating whether to continue publishing.
-	 */
-	private volatile boolean isContinuePublish = true;
-
-	/**
-	 * Initiate.
+	 * Obtains the successful {@link TransportMessage}.
 	 * 
-	 * @param server
-	 *            {@link BayeuxServerImpl}.
+	 * @return Successful {@link TransportMessage}.
 	 */
-	public CometdPublishState(BayeuxServerImpl server) {
-		this.server = server;
-	}
+	TransportMessage getResponse();
 
 }

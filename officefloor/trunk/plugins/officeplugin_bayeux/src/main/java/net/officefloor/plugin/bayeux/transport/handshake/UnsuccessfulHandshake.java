@@ -15,18 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.bayeux.publish;
+package net.officefloor.plugin.bayeux.transport.handshake;
 
-import org.cometd.bayeux.server.ServerMessage.Mutable;
+import net.officefloor.plugin.bayeux.transport.TransportMessage;
 
 /**
- * Particular responder to enable publishing the cometd event.
+ * Details of the unsuccessful handshake.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TransportLine {
-	
-	
-	void respond(Mutable message);
+public interface UnsuccessfulHandshake {
+
+	/**
+	 * Obtains the unsuccessful {@link TransportMessage}.
+	 * 
+	 * @return Unsuccessful {@link TransportMessage}.
+	 */
+	TransportMessage getResponse();
 
 }

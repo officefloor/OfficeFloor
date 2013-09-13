@@ -20,30 +20,36 @@ package net.officefloor.plugin.bayeux;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
-import net.officefloor.plugin.bayeux.publish.TransportServerSession;
+import net.officefloor.plugin.bayeux.transport.TransportBayeuxServer;
+import net.officefloor.plugin.bayeux.transport.TransportMessage.TransportMutable;
+import net.officefloor.plugin.bayeux.transport.TransportServerSession;
+import net.officefloor.plugin.bayeux.transport.disconnect.DisconnectCallback;
+import net.officefloor.plugin.bayeux.transport.handshake.HandshakeCallback;
 
 import org.cometd.bayeux.ChannelId;
+import org.cometd.bayeux.Message;
 import org.cometd.bayeux.Session;
 import org.cometd.bayeux.server.BayeuxServer;
+import org.cometd.bayeux.server.BayeuxServer.BayeuxServerListener;
+import org.cometd.bayeux.server.BayeuxServer.ChannelListener;
 import org.cometd.bayeux.server.BayeuxServer.Extension;
+import org.cometd.bayeux.server.BayeuxServer.SessionListener;
 import org.cometd.bayeux.server.BayeuxServer.SubscriptionListener;
+import org.cometd.bayeux.server.ConfigurableServerChannel.Initializer;
 import org.cometd.bayeux.server.SecurityPolicy;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerMessage.Mutable;
 import org.cometd.bayeux.server.ServerSession;
-import org.cometd.bayeux.server.BayeuxServer.BayeuxServerListener;
-import org.cometd.bayeux.server.BayeuxServer.ChannelListener;
-import org.cometd.bayeux.server.BayeuxServer.SessionListener;
-import org.cometd.bayeux.server.ConfigurableServerChannel.Initializer;
 
 /**
  * {@link BayeuxServer} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class BayeuxServerImpl {
+public class BayeuxServerImpl implements TransportBayeuxServer {
 
 	/**
 	 * Default {@link SecurityPolicy}.
@@ -74,6 +80,22 @@ public class BayeuxServerImpl {
 			return true; // by default always allowed publish to a channel
 		}
 	};
+
+	/**
+	 * Default {@link SessionIdentifierGenerator}.
+	 */
+	private static final SessionIdentifierGenerator defaultSessionIdentifierGenerator = new SessionIdentifierGenerator() {
+
+		@Override
+		public String newSessionId() {
+			return UUID.randomUUID().toString();
+		}
+	};
+
+	/**
+	 * {@link SessionIdentifierGenerator}.
+	 */
+	private final SessionIdentifierGenerator sessionIdentifierGenerator;
 
 	/**
 	 * {@link ServerChannel} instances by their {@link ChannelId}.
@@ -111,13 +133,33 @@ public class BayeuxServerImpl {
 	private SecurityPolicy securityPolicy = defaultSecurityPolicy;
 
 	/**
+	 * Default constructor.
+	 */
+	public BayeuxServerImpl() {
+		this(null);
+	}
+
+	/**
+	 * Configurable initiation.
+	 * 
+	 * @param sessionIdentifierGenerator
+	 *            {@link SessionIdentifierGenerator}. May be <code>null</code>
+	 *            to use default.
+	 */
+	public BayeuxServerImpl(
+			SessionIdentifierGenerator sessionIdentifierGenerator) {
+		this.sessionIdentifierGenerator = (sessionIdentifierGenerator != null) ? sessionIdentifierGenerator
+				: defaultSessionIdentifierGenerator;
+	}
+
+	/**
 	 * Creates a {@link BayeuxServer} instance.
 	 * 
 	 * @param session
 	 *            {@link ServerSession} for the {@link BayeuxServer}.
 	 * @return {@link BayeuxServer}.
 	 */
-	public BayeuxServer createBayeuxServerInstance(ServerSession session) {
+	BayeuxServer createBayeuxServerInstance(ServerSession session) {
 		return new BayeuxServerInstance(this, session);
 	}
 
@@ -127,7 +169,7 @@ public class BayeuxServerImpl {
 	 * @param listener
 	 *            {@link BayeuxServerListener}.
 	 */
-	public void addListener(BayeuxServerListener listener) {
+	void addListener(BayeuxServerListener listener) {
 		if (listener instanceof ChannelListener) {
 			this.channelListeners.add((ChannelListener) listener);
 		} else if (listener instanceof SessionListener) {
@@ -147,7 +189,7 @@ public class BayeuxServerImpl {
 	 * @param extension
 	 *            {@link Extension}.
 	 */
-	public void addExtension(Extension extension) {
+	void addExtension(Extension extension) {
 		this.extensions.add(extension);
 	}
 
@@ -157,7 +199,7 @@ public class BayeuxServerImpl {
 	 * @param securityPolicy
 	 *            {@link SecurityPolicy}.
 	 */
-	public void setSecurityPolicy(SecurityPolicy securityPolicy) {
+	void setSecurityPolicy(SecurityPolicy securityPolicy) {
 		this.securityPolicy = (securityPolicy != null ? securityPolicy
 				: defaultSecurityPolicy);
 	}
@@ -171,7 +213,7 @@ public class BayeuxServerImpl {
 	 *            {@link Initializer} instances for the {@link ServerChannel}.
 	 * @return <code>true</code> if the {@link ServerChannel} is initialised.
 	 */
-	public boolean createIfAbsent(String channelId, Initializer... initializers) {
+	boolean createIfAbsent(String channelId, Initializer... initializers) {
 
 		// Create the server channel
 		ServerChannel channel = new ServerChannelImpl(channelId, this);
@@ -215,7 +257,7 @@ public class BayeuxServerImpl {
 	 *            {@link ChannelId} value.
 	 * @return {@link ServerChannel}.
 	 */
-	public ServerChannel getChannel(String channelId) {
+	ServerChannel getChannel(String channelId) {
 		return this.channels.get(channelId);
 	}
 
@@ -265,7 +307,7 @@ public class BayeuxServerImpl {
 	 *            Identifier for the {@link ServerSession}.
 	 * @return {@link ServerSession}.
 	 */
-	public ServerSession getSession(String clientId) {
+	ServerSession getSession(String clientId) {
 		return this.sessions.get(clientId);
 	}
 
@@ -343,7 +385,7 @@ public class BayeuxServerImpl {
 	 *            {@link Mutable} {@link ServerMessage} being published.
 	 * @return <code>false</code> to stop publishing the {@link ServerMessage}.
 	 */
-	public boolean _Extension_rcv(ServerSession from, Mutable message) {
+	boolean _Extension_rcv(ServerSession from, Mutable message) {
 
 		// Undertake receive message extensions
 		for (Extension extension : this.extensions) {
@@ -370,7 +412,7 @@ public class BayeuxServerImpl {
 	 *            {@link Mutable} {@link ServerMessage}.
 	 * @return <code>false</code> to stop publishing the {@link ServerMessage}.
 	 */
-	public boolean _Extension_send(ServerSession from, ServerSession to,
+	boolean _Extension_send(ServerSession from, ServerSession to,
 			Mutable message) {
 
 		// Undertake send message extensions
@@ -399,7 +441,7 @@ public class BayeuxServerImpl {
 	 *            {@link ServerMessage} requesting the subscribe.
 	 * @return <code>true</code> if may subscribe.
 	 */
-	public boolean _SecurityPolicy_canSubscribe(ServerSession session,
+	boolean _SecurityPolicy_canSubscribe(ServerSession session,
 			ServerChannel channel, ServerMessage message) {
 
 		// Create the server
@@ -423,7 +465,7 @@ public class BayeuxServerImpl {
 	 *            {@link ServerMessage} being published.
 	 * @return <code>true</code> if may publish.
 	 */
-	public boolean _SecurityPolicy_canPublish(ServerSession session,
+	boolean _SecurityPolicy_canPublish(ServerSession session,
 			ServerChannel channel, ServerMessage message) {
 
 		// Create the server
@@ -432,6 +474,36 @@ public class BayeuxServerImpl {
 		// Return whether may publish
 		return this.securityPolicy
 				.canPublish(server, session, channel, message);
+	}
+
+	/*
+	 * ======================== TransportBayeuxServer ==========================
+	 */
+
+	@Override
+	public BayeuxServer getBayeuxServer() {
+		return this.createBayeuxServerInstance(null);
+	}
+
+	@Override
+	public TransportMutable createMessage() {
+		// TODO implement TransportBayeuxServer.createMessage
+		throw new UnsupportedOperationException(
+				"TODO implement TransportBayeuxServer.createMessage");
+	}
+
+	@Override
+	public void handshake(Message message, HandshakeCallback callback) {
+		// TODO implement TransportBayeuxServer.handshake
+		throw new UnsupportedOperationException(
+				"TODO implement TransportBayeuxServer.handshake");
+	}
+
+	@Override
+	public void disconnect(Message message, DisconnectCallback callback) {
+		// TODO implement TransportBayeuxServer.disconnect
+		throw new UnsupportedOperationException(
+				"TODO implement TransportBayeuxServer.disconnect");
 	}
 
 }

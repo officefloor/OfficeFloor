@@ -20,8 +20,7 @@ package net.officefloor.plugin.bayeux;
 import java.util.Queue;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.bayeux.publish.TransportLine;
-import net.officefloor.plugin.bayeux.publish.TransportServerSession;
+import net.officefloor.plugin.bayeux.transport.TransportServerSession;
 
 import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.Message;
@@ -51,7 +50,7 @@ import org.easymock.AbstractMatcher;
  * 
  * @author Daniel Sagenschneider
  */
-public class BayeuxServerTest extends OfficeFrameTestCase {
+public class BayeuxServerListenerTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link BayeuxServer}.
@@ -125,7 +124,8 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertNewBayeuxServer(0, actual);
+						BayeuxServerListenerTest.this.assertNewBayeuxServer(0,
+								actual);
 
 						// Validate remaining parameters
 						assertNull("Should not have session", actual[1]);
@@ -158,9 +158,12 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertNewBayeuxServer(0, actual);
-						BayeuxServerTest.this.assertServerSession(1, actual);
-						BayeuxServerTest.this.assertServerChannel(2, actual);
+						BayeuxServerListenerTest.this.assertNewBayeuxServer(0,
+								actual);
+						BayeuxServerListenerTest.this.assertServerSession(1,
+								actual);
+						BayeuxServerListenerTest.this.assertServerChannel(2,
+								actual);
 						assertNull("Should not have subscribe message",
 								actual[3]);
 						return true;
@@ -182,7 +185,8 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 						isMatch &= (expected[1].equals(actual[1]));
 
 						// Validate session
-						BayeuxServerTest.this.assertServerSession(2, actual);
+						BayeuxServerListenerTest.this.assertServerSession(2,
+								actual);
 
 						// Validate the message
 						isMatch &= (expected[3] == null ? (actual[3] == null)
@@ -201,8 +205,10 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertServerSession(0, actual);
-						BayeuxServerTest.this.assertServerChannel(1, actual);
+						BayeuxServerListenerTest.this.assertServerSession(0,
+								actual);
+						BayeuxServerListenerTest.this.assertServerChannel(1,
+								actual);
 						return true;
 					}
 				});
@@ -215,8 +221,10 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertServerSession(0, actual);
-						BayeuxServerTest.this.assertServerChannel(1, actual);
+						BayeuxServerListenerTest.this.assertServerSession(0,
+								actual);
+						BayeuxServerListenerTest.this.assertServerChannel(1,
+								actual);
 						return true;
 					}
 				});
@@ -228,9 +236,12 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				true, new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertNewBayeuxServer(0, actual);
-						BayeuxServerTest.this.assertServerSession(1, actual);
-						BayeuxServerTest.this.assertServerChannel(2, actual);
+						BayeuxServerListenerTest.this.assertNewBayeuxServer(0,
+								actual);
+						BayeuxServerListenerTest.this.assertServerSession(1,
+								actual);
+						BayeuxServerListenerTest.this.assertServerChannel(2,
+								actual);
 						assertMessage(publishMessage, 3, actual);
 						return true;
 					}
@@ -247,7 +258,8 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertServerSession(0, actual);
+						BayeuxServerListenerTest.this.assertServerSession(0,
+								actual);
 						assertMessage(publishMessage, 1, actual);
 						return true;
 					}
@@ -261,7 +273,8 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertServerSession(0, actual);
+						BayeuxServerListenerTest.this.assertServerSession(0,
+								actual);
 						assertMessage(publishMessage, 1, actual);
 						return true;
 					}
@@ -275,8 +288,10 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertServerSession(0, actual);
-						BayeuxServerTest.this.assertServerChannel(1, actual);
+						BayeuxServerListenerTest.this.assertServerSession(0,
+								actual);
+						BayeuxServerListenerTest.this.assertServerChannel(1,
+								actual);
 						assertMessage(publishMessage, 2, actual);
 						return true;
 					}
@@ -287,8 +302,8 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				this.session, publishMessage), true, new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
-				BayeuxServerTest.this.assertServerSession(0, actual);
-				BayeuxServerTest.this.assertServerSession(1, actual);
+				BayeuxServerListenerTest.this.assertServerSession(0, actual);
+				BayeuxServerListenerTest.this.assertServerSession(1, actual);
 				assertMessage(publishMessage, 2, actual);
 				return true;
 			}
@@ -300,7 +315,8 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				publishMessage, new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertServerSession(0, actual);
+						BayeuxServerListenerTest.this.assertServerSession(0,
+								actual);
 						assertMessage(publishMessage, 1, actual);
 						return true;
 					}
@@ -314,7 +330,7 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 			@Override
 			@SuppressWarnings("unchecked")
 			public boolean matches(Object[] expected, Object[] actual) {
-				BayeuxServerTest.this.assertServerSession(0, actual);
+				BayeuxServerListenerTest.this.assertServerSession(0, actual);
 				Queue<ServerMessage> queue = (Queue<ServerMessage>) actual[1];
 				assertEquals("Should only be the one message", 1, queue.size());
 				assertSame("Incorrect message in queue", publishMessage,
@@ -331,8 +347,10 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertServerSession(0, actual);
-						BayeuxServerTest.this.assertServerSession(1, actual);
+						BayeuxServerListenerTest.this.assertServerSession(0,
+								actual);
+						BayeuxServerListenerTest.this.assertServerSession(1,
+								actual);
 						assertMessage(publishMessage, 2, actual);
 						return true;
 					}
@@ -346,23 +364,14 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertServerSession(0, actual);
-						BayeuxServerTest.this.assertServerSession(1, actual);
+						BayeuxServerListenerTest.this.assertServerSession(0,
+								actual);
+						BayeuxServerListenerTest.this.assertServerSession(1,
+								actual);
 						assertMessage(publishMessage, 2, actual);
 						return true;
 					}
 				});
-
-		// Record the subscribed response
-		final TransportLine line = this.createMock(TransportLine.class);
-		line.respond(publishMessage);
-		this.control(line).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertMessage(publishMessage, 0, actual);
-				return true;
-			}
-		});
 
 		// Record unsubscribe from channel as disconnecting the session
 		serverSubscriptionListener.unsubscribed(this.session, this.channel);
@@ -370,8 +379,10 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertServerSession(0, actual);
-						BayeuxServerTest.this.assertServerChannel(1, actual);
+						BayeuxServerListenerTest.this.assertServerSession(0,
+								actual);
+						BayeuxServerListenerTest.this.assertServerChannel(1,
+								actual);
 						return true;
 					}
 				});
@@ -382,8 +393,10 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						BayeuxServerTest.this.assertServerSession(0, actual);
-						BayeuxServerTest.this.assertServerChannel(1, actual);
+						BayeuxServerListenerTest.this.assertServerSession(0,
+								actual);
+						BayeuxServerListenerTest.this.assertServerChannel(1,
+								actual);
 						return true;
 					}
 				});
@@ -394,7 +407,7 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 		this.control(removeListener).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
-				BayeuxServerTest.this.assertServerSession(0, actual);
+				BayeuxServerListenerTest.this.assertServerSession(0, actual);
 				assertFalse("Should be due to last subscription removed",
 						((Boolean) actual[1]).booleanValue());
 				return true;
@@ -419,9 +432,6 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 		TransportServerSession transport = server.addSession("TEST",
 				handshakeMessage);
 
-		// Register line with session
-		transport.registerTransportLine(line);
-
 		// Create the server instance
 		this.instance = server.createBayeuxServerInstance(transport);
 
@@ -438,6 +448,7 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 
 		// Obtain the channel
 		this.channel = this.instance.getChannel("/test");
+		assertTrue("Should be persistent channel", this.channel.isPersistent());
 
 		// Configure the channel
 		this.channel.addAuthorizer(authorizer);
@@ -469,19 +480,6 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Asserts the {@link BayeuxServer}.
-	 * 
-	 * @param index
-	 *            Index of the {@link BayeuxServer}.
-	 * @param actual
-	 *            Objects.
-	 */
-	private void assertBayeuxServer(int index, Object[] actual) {
-		BayeuxServer server = (BayeuxServer) actual[index];
-		assertSame("Incorrect bayeux server", this.instance, server);
-	}
-
-	/**
 	 * Asserts a {@link BayeuxServer} is provided but different instance.
 	 * 
 	 * @param index
@@ -493,7 +491,7 @@ public class BayeuxServerTest extends OfficeFrameTestCase {
 		BayeuxServer server = (BayeuxServer) actual[index];
 		assertNotNull("Should have server", server);
 		assertNotSame("Should be difference server",
-				BayeuxServerTest.this.instance, server);
+				BayeuxServerListenerTest.this.instance, server);
 	}
 
 	/**
