@@ -27,7 +27,7 @@
 
 %%This is a very basic article template.
 %%There is just one section and two subsections.
-\documentclass[prodmode]{style/acmlarge}
+\documentclass[prodmode,a4paper]{style/acmlarge}
 
 % Include packages
 \usepackage{listings}
@@ -60,7 +60,7 @@
 
 \begin{abstract}
 OfficeFloor is a middleware framework that bases its design on the patterns
-occurring within the office.  Re-using office patterns within software provides
+occurring within an office.  Re-using office patterns within software provides
 two improvements to software design.  The first is improved performance tuning
 of applications operating within complex enterprise environments.  Complex
 enterprise environments, such as Service-Oriented Architecture, require
@@ -128,8 +128,8 @@ that business processes occurred manually within offices before technology
 systems began automating tasks.  Therefore, rather than impose mechanical
 software models on the business
 \cite{enterprise-process-modelling,model-business-process,model-sociotechnical},
-this paper discusses OfficeFloor's use of office patterns occurring within
-businesses to improve software design.
+this paper discusses OfficeFloor's use of patterns occurring within offices to
+improve software design.
 
 \begin{figure}[!t]
 \centering
@@ -336,7 +336,7 @@ to execute methods (tasks).
 \subsubsection*{\textbf{Problem}} Obtain optimal throughput execution of methods by a
 thread pool.
 
-\subsubsection*{Forces} Having too few threads will under utilize the hardware
+\subsubsection*{Forces} Having too few threads will under utilise the hardware
 and not provide optimal throughput.  Having too many threads will cause
 excessive thread overheads (e.g. thread-context switching) and exhaustion of
 available resources (e.g. memory), which in turn will decrease throughput.
@@ -363,9 +363,9 @@ manage the thread pool size.
 \subsubsection*{Context} Within an office, certain tasks are more efficient if
 undertaken by oneself without delegating to someone else.  If every task along
 the process had to be undertaken by a different person, it would create
-significant communication overheads, which would negatively impact the
-efficiency of the office.  Therefore, within an office many tasks are undertaken
-by the current person involved in the process.
+significant communication overheads that would negatively impact the efficiency
+of the office.  Therefore, within an office many tasks are undertaken by the
+current person involved in the process.
 
 Within software, assigning a method (task) to a thread pool (team) requires
 threading overheads (e.g. thread synchronisation and thread-context switching)
@@ -681,10 +681,10 @@ all requests.
 Modern event-based frameworks based on the \textsc{proactor} pattern, such as
 Node.js~\cite{nodejs}, are enabling increased concurrency for applications.
 However, the use of the \textsc{proactor} pattern forces interaction with
-downstream systems to be non-blocking I/O.  OfficeFloor enables use of
-non-blocking I/O via the \textsc{pick up task again} pattern.  Furthermore,
-through responsible thread pools OfficeFloor enables prioritisation of blocking
-I/O for more intuitive development.
+downstream systems to be non-blocking I/O.  The responsible thread pools of
+OfficeFloor enables prioritisation of blocking I/O for more intuitive
+development.  OfficeFloor also enables use of non-blocking I/O via the
+\textsc{pick up task again} pattern discussed later in this paper.
 
 
 
@@ -728,9 +728,9 @@ invocation of the respective target handling method.
 
 \subsubsection*{Consequences} The handling method is asynchronously invoked by
 another thread of control.  However, due to the asynchronous invocation no
-return value is available from the invoked method.  Furthermore, each hand-off
-incurs threading overheads (e.g. thread synchronisation and thread-context
-switching).
+return value is available from the invoked handling method.  Furthermore, each
+hand-off incurs threading overheads (e.g. thread synchronisation and
+thread-context switching).
 
 \subsubsection*{Related Patterns} Is a sequence on \textsc{responsible team} to
 hand-off methods to a responsible team.  This pattern has similarities to the
@@ -778,11 +778,11 @@ failures.
 
 \subsubsection*{Context} Within an office, a process is executed as a sequence
 of tasks.  The actual sequence of tasks varies based on the outcome of the
-current task being executed.  This is because for each outcome of the current
-task there is an appropriate next task.  For example, before undertaking any
-software enhancement the finance team checks if the client owes money.  If the
-client owes money the software enhancement is not developed and the client is
-sent a reminder for the outstanding money.
+current task being executed.  This is because for each possible outcome of the
+current task there is an appropriate next task.  For example, before undertaking
+any software enhancement the finance team checks if the client owes money.  If
+the client owes money the software enhancement is not developed and the client
+is sent a reminder for the outstanding money.
 
 The process can be changed by altering the next task for an outcome of the
 current task.  For the above example, on the client owing money the next task
@@ -864,11 +864,11 @@ threading overheads.
 \subsubsection*{Context} Within an office, a person may need to know when the
 tasks they have handed-off to other teams are complete.  For example, a sales
 person will need to get back to the customer when the finance team has the
-invoice ready.
+quote ready.
 
 Within software, the hand-off returns control to the calling method (task)
 before the invoked method (task) is complete.  Therefore, the calling method is
-uncertain as to whether the handed-off method is complete.
+uncertain as to whether the invoked handling method of the hand-off is complete.
 
 \subsubsection*{\textbf{Problem}} Know when the handed-off method is complete.
 
@@ -952,8 +952,8 @@ references via its owning object.  However, this is to be avoided with the
 \subsubsection*{\textbf{Problem}} Enable the method to retrieve information from
 previous methods other than its calling method.
 
-\subsubsection*{Forces} Method invocation requires the caller to provide all
-parameters to the invoked method.
+\subsubsection*{Forces} Method invocation requires the caller to provide all the
+arguments to the parameters of the invoked method.
 
 \subsubsection*{\textbf{Solution}} Use \textsc{dependency injection}~\cite{ioc}
 to inject cached dependencies as the arguments to the methods.
@@ -1021,8 +1021,8 @@ external to the office.
 Within software, references to methods (tasks) are only available within the
 application (office).
 
-\subsubsection*{\textbf{Problem}} Handing-off the first method (task) when not
-provided a hand-off interface, as the caller is outside the application
+\subsubsection*{\textbf{Problem}} Handing-off to the first method (task) when
+not provided a hand-off interface, as the caller is outside the application
 (office).
 
 \subsubsection*{Forces} The interface to invoke a hand-off is only provided to
@@ -1288,7 +1288,7 @@ This removes the thread of control constraint imposed by the
 
 Understanding the collaboration of \texttt{Task}s would become difficult due to
 the indirection involved.  However, the \textsc{define process flows}
-configuration reduce this difficulty by providing means for graphical tools to
+configuration reduces this difficulty by providing means for graphical tools to
 manage the configuration.  The tools graphically represent the \texttt{Task}s as
 nodes and the hand-off mappings as directed lines between these nodes.  Due to
 the similarity of this configuration with Service Orchestration this graphical
@@ -1314,13 +1314,12 @@ code changes.
 
 The combined \textsc{do your work} pattern and \textsc{do it yourself} pattern
 of OfficeFloor has similarities to a monadic thread \cite{monadic-thread}.  The
-\texttt{Task}s can be considered nodes in the lazy trace of the monadic thread. 
-The lazy trace ends when another thread of control is required.  The advantage of
-OfficeFloor\footnote{Beyond Task Orchestration being easier for the developer to
-understand than monad programming.} is that the \textsc{responsible team}
-pattern allows the execution of blocking I/O nodes (\texttt{Task}s) to be
-prioritised.  Monadic threads can not prioritise blocking I/O nodes as they know
-little about them and subsequently execute them within a single thread pool.
+\texttt{Task}s can be considered nodes in the lazy trace of the monadic thread.
+The lazy trace ends when another thread of control is required.  The advantage
+of OfficeFloor is that the \textsc{responsible team} pattern allows the
+execution of blocking I/O nodes (\texttt{Task}s) to be prioritised.  Monadic
+threads can not prioritise blocking I/O nodes as they know little about them and
+subsequently execute them within a single thread pool.
 
 OfficeFloor can be considered an implementation of the Actor Model \cite{actors}
 as it adheres to the principles of the Actor Model.  The \texttt{Task} is the
@@ -1448,11 +1447,11 @@ contained tasks (from \textsc{record information}) becomes the set of
 dependencies for the component.
 
 To reduce the set of dependencies for the interface of the component, the same
-dependency used by many of its contained tasks is represented as single
+dependency used by many of its contained tasks is represented as a single
 dependency of the component.
 
 Also, to reduce the hand-offs for the interface of the component, hand-offs from
-multiple contained tasks are mapped to a single hand-off exposed from the
+multiple contained tasks may be mapped to a single hand-off exposed from the
 component.
 
 \subsubsection*{Consequences} As the component is interchangeable with a task,
@@ -1466,18 +1465,17 @@ within the application, as adding composite components is further indirection
 that requires visual representation to comprehend.
 
 The \textsc{categorise task} pattern of each contained task within the component
-(and composite components) is still followed.  As the component is constructed from
-only tasks, the component focuses only on functionality and allows all its tasks
-to be executed by their respective \textsc{responsible team} pattern.
-Therefore, if the responsible thread pools are changed for the application the
+(and composite components) is still followed.  The component has all its
+aggregated tasks executed by their respective \textsc{responsible team} pattern.
+ Therefore, if the responsible thread pools are changed for the application the
 execution of the tasks within the components follow the new threading model
 without requiring code nor configuration changes\footnote{Changing the
 responsible thread pools follows the analogy of changing the functional (teams)
 departments within a business.  The functional departmentalisation to execute
 the tasks of the processes are changed while the sequence of tasks for the
 process is not changed.}.  This enables the threading model of the application
-to be tuned to the hardware on which it is running (e.g. single thread pool for a low
-powered single CPU device or multiple specialised thread pools for
+to be tuned to the hardware on which it is running (e.g. single thread pool for
+a low powered single CPU device or multiple specialised thread pools for
 high-performance multi-core hardware\footnote{Using increasingly better hardware
 follows the analogy of growing the workforce of a business.  The business starts
 out only as a small number of people doing many categories of tasks to becoming
