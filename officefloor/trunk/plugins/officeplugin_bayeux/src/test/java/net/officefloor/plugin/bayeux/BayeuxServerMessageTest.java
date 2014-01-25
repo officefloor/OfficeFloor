@@ -19,16 +19,20 @@ package net.officefloor.plugin.bayeux;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.bayeux.adapt.SecurityPolicyAdapter;
+import net.officefloor.plugin.bayeux.transport.ConnectResult;
+import net.officefloor.plugin.bayeux.transport.DisconnectResult;
+import net.officefloor.plugin.bayeux.transport.HandshakeResult;
+import net.officefloor.plugin.bayeux.transport.PublishResult;
+import net.officefloor.plugin.bayeux.transport.SubscribeResult;
 import net.officefloor.plugin.bayeux.transport.TransportBayeuxServer;
 import net.officefloor.plugin.bayeux.transport.TransportMessage;
+import net.officefloor.plugin.bayeux.transport.UnsubscribeResult;
 import net.officefloor.plugin.bayeux.transport.TransportMessage.TransportMutable;
-import net.officefloor.plugin.bayeux.transport.disconnect.Disconnect;
-import net.officefloor.plugin.bayeux.transport.handshake.SuccessfulHandshake;
-import net.officefloor.plugin.bayeux.transport.handshake.UnsuccessfulHandshake;
 
 import org.cometd.bayeux.Channel;
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.server.BayeuxServer;
+import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
 import org.junit.Ignore;
@@ -70,9 +74,9 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 				"iframe");
 
 		// Undertake handshake
-		MockHandshakeCallback callback = new MockHandshakeCallback();
+		MockTransportCallback<HandshakeResult> callback = new MockTransportCallback<HandshakeResult>();
 		this.server.handshake(request, callback);
-		SuccessfulHandshake result = callback.getSuccessfulHandshake();
+		HandshakeResult result = callback.getSuccessfulResult();
 
 		// Ensure enough information to send response
 		TransportMessage response = result.getResponse();
@@ -109,9 +113,9 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 				"iframe");
 
 		// Undertake handshake
-		MockHandshakeCallback callback = new MockHandshakeCallback();
+		MockTransportCallback<HandshakeResult> callback = new MockTransportCallback<HandshakeResult>();
 		this.server.handshake(message, callback);
-		UnsuccessfulHandshake result = callback.getUnsuccessfulHandshake();
+		HandshakeResult result = callback.getUnsuccessfulResult();
 
 		// Ensure enough information to send response
 		TransportMessage response = result.getResponse();
@@ -122,6 +126,35 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 				CLIENT_ID, Message.SUCCESSFUL_FIELD, String.valueOf(false),
 				Message.ERROR_FIELD, "Authentication failed",
 				Message.ADVICE_FIELD, "{" + Message.RECONNECT_FIELD + "="
+						+ Message.RECONNECT_NONE_VALUE + "}");
+	}
+
+	/**
+	 * Ensure able to connect.
+	 */
+	public void testConnect() {
+
+		// Handshake
+		this.doHandshake();
+
+		// Create the connect request
+		TransportMutable request = this.server.createMessage();
+		request.setChannel(Channel.META_CONNECT);
+		request.setClientId(CLIENT_ID);
+		request.setConnectionType("long-polling");
+
+		// Undertake connect
+		MockTransportCallback<ConnectResult> callback = new MockTransportCallback<ConnectResult>();
+		this.server.connect(request, null);
+		ConnectResult result = callback.getSuccessfulResult();
+
+		// Ensure enough information to send the response
+		TransportMessage response = result.getResponse();
+		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
+				Channel.META_CONNECT, Message.SUCCESSFUL_FIELD, "true",
+				Message.ERROR_FIELD, "", Message.CLIENT_ID_FIELD, CLIENT_ID,
+				Message.TIMESTAMP_FIELD, "12:00:00 1970", Message.ADVICE_FIELD,
+				"{" + Message.RECONNECT_FIELD + "="
 						+ Message.RECONNECT_NONE_VALUE + "}");
 	}
 
@@ -139,15 +172,136 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		request.setClientId(CLIENT_ID);
 
 		// Undertake disconnect
-		MockDisconnectCallback callback = new MockDisconnectCallback();
+		MockTransportCallback<DisconnectResult> callback = new MockTransportCallback<DisconnectResult>();
 		this.server.disconnect(request, null);
-		Disconnect result = callback.getDisconnect();
+		DisconnectResult result = callback.getSuccessfulResult();
 
 		// Ensure enough information to send response
 		TransportMessage response = result.getResponse();
 		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
 				Channel.META_DISCONNECT, Message.CLIENT_ID_FIELD, CLIENT_ID,
 				Message.SUCCESSFUL_FIELD, String.valueOf(true));
+	}
+
+	/**
+	 * Ensure able to subscribe successfully.
+	 */
+	public void testSuccessfulSubscribe() {
+
+		// Handshake
+		this.doHandshake();
+
+		// Create the subscribe request
+		TransportMutable request = this.server.createMessage();
+		request.setChannel(Channel.META_SUBSCRIBE);
+		request.setClientId(CLIENT_ID);
+		request.setSubscription("/foo/**");
+
+		// Undertake the subscription
+		MockTransportCallback<SubscribeResult> callback = new MockTransportCallback<SubscribeResult>();
+		this.server.subscribe(request, callback);
+		SubscribeResult result = callback.getSuccessfulResult();
+
+		// Ensure enough information to send response
+		TransportMessage response = result.getResponse();
+		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
+				Channel.META_SUBSCRIBE, Message.CLIENT_ID_FIELD, CLIENT_ID,
+				Message.SUBSCRIPTION_FIELD, "/foo/**",
+				Message.SUCCESSFUL_FIELD, "true", Message.ERROR_FIELD, "");
+	}
+
+	/**
+	 * Ensure able to not subscribe.
+	 */
+	public void testUnsuccessfulSubscribe() {
+
+		// Disallow subscriptions
+		BayeuxServer bayeuxServer = this.server.getBayeuxServer();
+		bayeuxServer.setSecurityPolicy(new SecurityPolicyAdapter() {
+			@Override
+			public boolean canSubscribe(BayeuxServer server,
+					ServerSession session, ServerChannel channel,
+					ServerMessage message) {
+				return false;
+			}
+		});
+
+		// Handshake
+		this.doHandshake();
+
+		// Create the subscribe request
+		TransportMutable request = this.server.createMessage();
+		request.setChannel(Channel.META_SUBSCRIBE);
+		request.setClientId(CLIENT_ID);
+		request.setSubscription("/bar/baz");
+
+		// Undertake the subscribe
+		MockTransportCallback<SubscribeResult> callback = new MockTransportCallback<SubscribeResult>();
+		this.server.subscribe(request, callback);
+		SubscribeResult result = callback.getUnsuccessfulResult();
+
+		// Ensure enough information to send response
+		TransportMessage response = result.getResponse();
+		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
+				Channel.META_SUBSCRIBE, Message.CLIENT_ID_FIELD, CLIENT_ID,
+				Message.SUBSCRIPTION_FIELD, "/bar/baz",
+				Message.SUCCESSFUL_FIELD, "false", Message.ERROR_FIELD,
+				"403:/bar/baz:Permission Denied");
+	}
+
+	/**
+	 * Ensure able to unsubscribe.
+	 */
+	public void testUnsubscribe() {
+
+		// Subscribe
+		this.doHandshake();
+		this.doSubscribe("/foo/**");
+
+		// Create the unsubscribe request
+		TransportMutable request = this.server.createMessage();
+		request.setChannel(Channel.META_UNSUBSCRIBE);
+		request.setClientId(CLIENT_ID);
+		request.setSubscription("/foo/**");
+
+		// Undertake the unsubscribe
+		MockTransportCallback<UnsubscribeResult> callback = new MockTransportCallback<UnsubscribeResult>();
+		this.server.unsubscribe(request, callback);
+		UnsubscribeResult result = callback.getSuccessfulResult();
+
+		// Ensure enough information to send response
+		TransportMessage response = result.getResponse();
+		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
+				Channel.META_UNSUBSCRIBE, Message.CLIENT_ID_FIELD, CLIENT_ID,
+				Message.SUBSCRIPTION_FIELD, "/foo/**",
+				Message.SUCCESSFUL_FIELD, "true", Message.ERROR_FIELD, "");
+	}
+
+	/**
+	 * Ensure able to publish.
+	 */
+	public void testPublish() {
+
+		// Handshake
+		this.doHandshake();
+
+		// Create the publish request
+		TransportMutable request = this.server.createMessage();
+		request.setChannel("/some/channel");
+		request.setClientId(CLIENT_ID);
+		request.setData("some application string or JSON encoded object");
+		request.setId("some unique message id");
+
+		// Undertake the publish
+		MockTransportCallback<PublishResult> callback = new MockTransportCallback<PublishResult>();
+		this.server.publish(request, callback);
+		PublishResult result = callback.getSuccessfulResult();
+
+		// Ensure enough information to send response
+		TransportMessage response = result.getResponse();
+		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
+				"/some/channel", Message.SUCCESSFUL_FIELD, "true",
+				Message.ID_FIELD, "some unique message id");
 	}
 
 	/**
@@ -162,13 +316,36 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		request.setSupportedConnectionTypes("long-polling", "callback-polling",
 				"iframe");
 
-		// Undertake handshake
-		MockHandshakeCallback callback = new MockHandshakeCallback();
+		// Undertake handshake (with generic callback implementation)
+		MockTransportCallback<Object> callback = new MockTransportCallback<Object>();
 		this.server.handshake(request, callback);
 
 		// Ensure successful
 		assertNotNull("Handshake should be successful",
-				callback.getSuccessfulHandshake());
+				callback.getSuccessfulResult());
+	}
+
+	/**
+	 * Undertakes subscribe with the server.
+	 * 
+	 * @param path
+	 *            Path to subscribe.
+	 */
+	private void doSubscribe(String path) {
+
+		// Create the subscribe request
+		TransportMutable request = this.server.createMessage();
+		request.setChannel(Channel.META_SUBSCRIBE);
+		request.setClientId(CLIENT_ID);
+		request.setSubscription(path);
+
+		// Undertake subscribe (with generic callback implementation)
+		MockTransportCallback<Object> callback = new MockTransportCallback<Object>();
+		this.server.subscribe(request, callback);
+
+		// Ensure successful
+		assertNotNull("Subscribe to path " + path + " should be successful",
+				callback.getSuccessfulResult());
 	}
 
 }

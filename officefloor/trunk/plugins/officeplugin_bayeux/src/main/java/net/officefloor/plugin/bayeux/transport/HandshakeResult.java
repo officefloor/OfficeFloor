@@ -15,21 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.bayeux.transport.disconnect;
+package net.officefloor.plugin.bayeux.transport;
 
-import net.officefloor.plugin.bayeux.transport.TransportMessage;
 
 /**
- * Result of the disconnect.
+ * Details of the handshake.
  * 
  * @author Daniel Sagenschneider
+ * 
+ * @see HandshakeCallback
  */
-public interface Disconnect {
+public interface HandshakeResult {
 
 	/**
-	 * Obtains the {@link TransportMessage}.
+	 * Obtains the successful {@link TransportMessage}.
 	 * 
-	 * @return {@link TransportMessage}.
+	 * @return Successful {@link TransportMessage}.
 	 */
 	TransportMessage getResponse();
 

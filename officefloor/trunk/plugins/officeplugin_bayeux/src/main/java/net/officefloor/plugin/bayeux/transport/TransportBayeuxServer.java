@@ -18,8 +18,6 @@
 package net.officefloor.plugin.bayeux.transport;
 
 import net.officefloor.plugin.bayeux.transport.TransportMessage.TransportMutable;
-import net.officefloor.plugin.bayeux.transport.disconnect.DisconnectCallback;
-import net.officefloor.plugin.bayeux.transport.handshake.HandshakeCallback;
 
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.Transport;
@@ -52,9 +50,22 @@ public interface TransportBayeuxServer {
 	 * @param message
 	 *            Handshake {@link Message}.
 	 * @param callback
-	 *            {@link HandshakeCallback} to notify of handshake result.
+	 *            {@link TransportCallback} to notify of {@link HandshakeResult}
+	 *            .
 	 */
-	void handshake(Message message, HandshakeCallback callback);
+	void handshake(Message message,
+			TransportCallback<? super HandshakeResult> callback);
+
+	/**
+	 * Undertakes connect.
+	 * 
+	 * @param message
+	 *            Connect {@link Message}.
+	 * @param callback
+	 *            {@link TransportCallback} to notify of {@link ConnectResult}.
+	 */
+	void connect(Message message,
+			TransportCallback<? super ConnectResult> callback);
 
 	/**
 	 * Undertakes disconnect.
@@ -62,8 +73,45 @@ public interface TransportBayeuxServer {
 	 * @param message
 	 *            Disconnect {@link Message}.
 	 * @param callback
-	 *            {@link DisconnectCallback} to notify of disconnect result.
+	 *            {@link TransportCallback} to notify of
+	 *            {@link DisconnectResult}.
 	 */
-	void disconnect(Message message, DisconnectCallback callback);
+	void disconnect(Message message,
+			TransportCallback<? super DisconnectResult> callback);
+
+	/**
+	 * Undertakes subscribe.
+	 * 
+	 * @param message
+	 *            Subscribe {@link Message}.
+	 * @param callback
+	 *            {@link TransportCallback} to notify of {@link SubscribeResult}
+	 *            .
+	 */
+	void subscribe(Message message,
+			TransportCallback<? super SubscribeResult> callback);
+
+	/**
+	 * Undertakes unsubscribe.
+	 * 
+	 * @param message
+	 *            Unsubscribe {@link Message}.
+	 * @param callback
+	 *            {@link TransportCallback} to notify of
+	 *            {@link UnsubscribeResult}.
+	 */
+	void unsubscribe(Message message,
+			TransportCallback<? super UnsubscribeResult> callback);
+
+	/**
+	 * Undertakes publish.
+	 * 
+	 * @param message
+	 *            Publish {@link Message}.
+	 * @param callback
+	 *            {@link TransportCallback} to notify of {@link PublishResult}.
+	 */
+	void publish(Message message,
+			TransportCallback<? super PublishResult> callback);
 
 }

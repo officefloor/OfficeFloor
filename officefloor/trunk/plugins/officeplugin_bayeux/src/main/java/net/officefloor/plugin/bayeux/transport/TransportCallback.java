@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2014 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,31 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.bayeux.transport.handshake;
-
-import org.cometd.bayeux.server.BayeuxServer;
+package net.officefloor.plugin.bayeux.transport;
 
 /**
- * Callback on result of handshake with {@link BayeuxServer}.
+ * Generic transport callback.
  * 
  * @author Daniel Sagenschneider
  */
-public interface HandshakeCallback {
+public interface TransportCallback<R> {
 
 	/**
-	 * Notifies the handshake was successful.
+	 * Invoked for a successful result of the transport.
 	 * 
 	 * @param result
-	 *            Details of the successful handshake.
+	 *            Result for the transport.
 	 */
-	void successful(SuccessfulHandshake result);
+	void successful(R result);
 
 	/**
-	 * Notifies the handshake was unsuccessful.
+	 * Invoked for an unsuccessful result of the transport.
 	 * 
 	 * @param result
-	 *            Details of the unsuccessful handshake.
+	 *            Unsuccessful result of the transport.
 	 */
-	void unsuccessful(UnsuccessfulHandshake result);
+	void unsuccessful(R result);
 
 }

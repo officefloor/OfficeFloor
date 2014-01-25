@@ -15,21 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.bayeux.transport.handshake;
-
-import net.officefloor.plugin.bayeux.transport.TransportMessage;
+package net.officefloor.plugin.bayeux.transport;
 
 /**
- * Details of the unsuccessful handshake.
+ * Result of the publish.
  * 
  * @author Daniel Sagenschneider
  */
-public interface UnsuccessfulHandshake {
+public interface PublishResult {
 
 	/**
-	 * Obtains the unsuccessful {@link TransportMessage}.
+	 * Obtains the {@link TransportMessage}.
 	 * 
-	 * @return Unsuccessful {@link TransportMessage}.
+	 * @return {@link TransportMessage}.
 	 */
 	TransportMessage getResponse();
 

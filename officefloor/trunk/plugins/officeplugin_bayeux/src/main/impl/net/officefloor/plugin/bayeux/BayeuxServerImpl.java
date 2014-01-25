@@ -22,11 +22,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import net.officefloor.plugin.bayeux.transport.ConnectResult;
+import net.officefloor.plugin.bayeux.transport.DisconnectResult;
+import net.officefloor.plugin.bayeux.transport.HandshakeResult;
+import net.officefloor.plugin.bayeux.transport.PublishResult;
+import net.officefloor.plugin.bayeux.transport.SubscribeResult;
 import net.officefloor.plugin.bayeux.transport.TransportBayeuxServer;
+import net.officefloor.plugin.bayeux.transport.TransportCallback;
 import net.officefloor.plugin.bayeux.transport.TransportMessage.TransportMutable;
 import net.officefloor.plugin.bayeux.transport.TransportServerSession;
-import net.officefloor.plugin.bayeux.transport.disconnect.DisconnectCallback;
-import net.officefloor.plugin.bayeux.transport.handshake.HandshakeCallback;
+import net.officefloor.plugin.bayeux.transport.UnsubscribeResult;
 
 import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.Message;
@@ -493,17 +498,51 @@ public class BayeuxServerImpl implements TransportBayeuxServer {
 	}
 
 	@Override
-	public void handshake(Message message, HandshakeCallback callback) {
+	public void handshake(Message message,
+			TransportCallback<? super HandshakeResult> callback) {
 		// TODO implement TransportBayeuxServer.handshake
 		throw new UnsupportedOperationException(
 				"TODO implement TransportBayeuxServer.handshake");
 	}
 
 	@Override
-	public void disconnect(Message message, DisconnectCallback callback) {
+	public void connect(Message message,
+			TransportCallback<? super ConnectResult> callback) {
+		// TODO implement TransportBayeuxServer.connect
+		throw new UnsupportedOperationException(
+				"TODO implement TransportBayeuxServer.connect");
+	}
+
+	@Override
+	public void disconnect(Message message,
+			TransportCallback<? super DisconnectResult> callback) {
 		// TODO implement TransportBayeuxServer.disconnect
 		throw new UnsupportedOperationException(
 				"TODO implement TransportBayeuxServer.disconnect");
+	}
+
+	@Override
+	public void subscribe(Message message,
+			TransportCallback<? super SubscribeResult> callback) {
+		// TODO implement TransportBayeuxServer.subscribe
+		throw new UnsupportedOperationException(
+				"TODO implement TransportBayeuxServer.subscribe");
+	}
+
+	@Override
+	public void unsubscribe(Message message,
+			TransportCallback<? super UnsubscribeResult> callback) {
+		// TODO implement TransportBayeuxServer.unsubscribe
+		throw new UnsupportedOperationException(
+				"TODO implement TransportBayeuxServer.unsubscribe");
+	}
+
+	@Override
+	public void publish(Message message,
+			TransportCallback<? super PublishResult> callback) {
+		// TODO implement TransportBayeuxServer.publish
+		throw new UnsupportedOperationException(
+				"TODO implement TransportBayeuxServer.publish");
 	}
 
 }
