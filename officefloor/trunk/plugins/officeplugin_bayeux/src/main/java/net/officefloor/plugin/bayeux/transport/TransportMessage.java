@@ -47,11 +47,25 @@ public interface TransportMessage extends ServerMessage {
 	String[] getSupportedConnectionTypes();
 
 	/**
+	 * Obtains the {@link Message#CONNECTION_TYPE_FIELD}.
+	 * 
+	 * @return Connection type.
+	 */
+	String[] getConnectionType();
+
+	/**
 	 * Obtains the {@link #AUTH_SUCCESSFUL_FIELD}.
 	 * 
 	 * @return Indicates if authentication successful.
 	 */
 	Boolean isAuthSuccessful();
+
+	/**
+	 * Obtains the {@link Message#SUBSCRIPTION_FIELD}.
+	 * 
+	 * @return Subscription.
+	 */
+	String getSubscription();
 
 	/**
 	 * Obtains the {@link Message#ERROR_FIELD}.
@@ -80,6 +94,22 @@ public interface TransportMessage extends ServerMessage {
 		 *            Supported connection types.
 		 */
 		void setSupportedConnectionTypes(String... supportedConnectionTypes);
+
+		/**
+		 * Specifies the {@link Message#CONNECTION_TYPE_FIELD}.
+		 * 
+		 * @param connectionType
+		 *            Connection type.
+		 */
+		void setConnectionType(String connectionType);
+
+		/**
+		 * Specifies the {@link Message#SUBSCRIPTION_FIELD}.
+		 * 
+		 * @param subscription
+		 *            Subscription.
+		 */
+		void setSubscription(String subscription);
 	}
 
 }

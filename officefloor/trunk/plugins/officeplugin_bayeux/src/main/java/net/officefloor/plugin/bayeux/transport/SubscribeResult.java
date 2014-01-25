@@ -15,23 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.bayeux.transport.disconnect;
+package net.officefloor.plugin.bayeux.transport;
 
-import org.cometd.bayeux.server.BayeuxServer;
 
 /**
- * Callback on the result of disconnect with the {@link BayeuxServer}.
+ * Result of the subscribe.
  * 
  * @author Daniel Sagenschneider
  */
-public interface DisconnectCallback {
+public interface SubscribeResult {
 
 	/**
-	 * Notifies of completion of the disconnect.
+	 * Obtains the {@link TransportMessage}.
 	 * 
-	 * @param result
-	 *            Result of the {@link Disconnect}.
+	 * @return {@link TransportMessage}.
 	 */
-	void disconnect(Disconnect result);
+	TransportMessage getResponse();
 
 }

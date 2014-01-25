@@ -15,11 +15,12 @@
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{../GwtService/index.html}AJAX via GWT RPC}}                | Provides easy implementation of both AJAX functionality within the page and servicing by the server | Service Async Interface
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{../CometApp/index.html}Comet}}                             | Shows the ease of using Comet (AJAX push, reverse AJAX) with WoOF | OfficeFloorComet
+| {{{../CometApp/index.html}Comet}} <(being deprecated*)>      | Shows the ease of using Comet (AJAX push, reverse AJAX) with WoOF | OfficeFloorComet
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{../CometManualApp/index.html}Server events}}               | Demonstrates the ease of publishing events                 | @Comet
+| {{{../CometManualApp/index.html}Server events}} <(being deprecated*)>       | Demonstrates the ease of publishing events                 | @Comet
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
+ <\* The comet functionality of GWT will be deprecated shortly due to a Bayeux plugin currently under development.>
 
 Next
 

@@ -575,7 +575,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.0-beta-3</version>
+					<version>3.3</version>
 					<dependencies>
 						<dependency>
 							<groupId>com.anasoft.os</groupId>
@@ -1216,6 +1216,19 @@
 						<phase>post-site</phase>
 						<goals>
 							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Generate the sitemap.xml file -->
+				<groupId>com.github.s4u.plugins</groupId>
+				<artifactId>sitemapxml-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>gen</goal>
 						</goals>
 					</execution>
 				</executions>

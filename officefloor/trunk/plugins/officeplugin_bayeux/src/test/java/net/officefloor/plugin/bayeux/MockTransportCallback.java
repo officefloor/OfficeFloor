@@ -17,36 +17,34 @@
  */
 package net.officefloor.plugin.bayeux;
 
-import net.officefloor.plugin.bayeux.transport.handshake.HandshakeCallback;
-import net.officefloor.plugin.bayeux.transport.handshake.SuccessfulHandshake;
-import net.officefloor.plugin.bayeux.transport.handshake.UnsuccessfulHandshake;
+import net.officefloor.plugin.bayeux.transport.TransportCallback;
 
 import org.junit.Assert;
 
 /**
- * Mock {@link HandshakeCallback}.
+ * Mock {@link TransportCallback}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHandshakeCallback implements HandshakeCallback {
+public class MockTransportCallback<R> implements TransportCallback<R> {
 
 	/**
-	 * {@link SuccessfulHandshake} result.
+	 * Successful result.
 	 */
-	private SuccessfulHandshake successfulResult = null;
+	private R successfulResult = null;
 
 	/**
-	 * {@link UnsuccessfulHandshake}.
+	 * Unsuccessful result.
 	 */
-	private UnsuccessfulHandshake unsuccessfulResult = null;
+	private R unsuccessfulResult = null;
 
 	/**
-	 * Obtains the {@link SuccessfulHandshake}.
+	 * Obtains the successful result.
 	 * 
-	 * @return {@link SuccessfulHandshake}.
+	 * @return Successful result.
 	 */
-	public SuccessfulHandshake getSuccessfulHandshake() {
-		Assert.assertNotNull("Should be successful handshake",
+	public R getSuccessfulResult() {
+		Assert.assertNotNull("Should be successful",
 				this.successfulResult);
 		Assert.assertNull("Should be no unsuccessful callback",
 				this.unsuccessfulResult);
@@ -54,12 +52,12 @@ public class MockHandshakeCallback implements HandshakeCallback {
 	}
 
 	/**
-	 * Obtains the {@link UnsuccessfulHandshake}.
+	 * Obtains the unsuccessful result.
 	 * 
-	 * @return {@link UnsuccessfulHandshake}.
+	 * @return Unsuccessful result.
 	 */
-	public UnsuccessfulHandshake getUnsuccessfulHandshake() {
-		Assert.assertNotNull("Should be unsuccessful handshake",
+	public R getUnsuccessfulResult() {
+		Assert.assertNotNull("Should be unsuccessful",
 				this.unsuccessfulResult);
 		Assert.assertNull("Should be no successful callback",
 				this.successfulResult);
@@ -67,18 +65,18 @@ public class MockHandshakeCallback implements HandshakeCallback {
 	}
 
 	/*
-	 * =============== HandshakeCallback =======================
+	 * =============== TransportCallback =======================
 	 */
 
 	@Override
-	public void successful(SuccessfulHandshake result) {
+	public void successful(R result) {
 		// TODO implement HandshakeCallback.successful
 		throw new UnsupportedOperationException(
 				"TODO implement HandshakeCallback.successful");
 	}
 
 	@Override
-	public void unsuccessful(UnsuccessfulHandshake result) {
+	public void unsuccessful(R result) {
 		// TODO implement HandshakeCallback.unsuccessful
 		throw new UnsupportedOperationException(
 				"TODO implement HandshakeCallback.unsuccessful");
