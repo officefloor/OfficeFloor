@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.bayeux.transport;
 
-
 /**
  * Details of the handshake.
  * 
@@ -25,13 +24,5 @@ package net.officefloor.plugin.bayeux.transport;
  * 
  * @see HandshakeCallback
  */
-public interface HandshakeResult {
-
-	/**
-	 * Obtains the successful {@link TransportMessage}.
-	 * 
-	 * @return Successful {@link TransportMessage}.
-	 */
-	TransportMessage getResponse();
-
+public interface HandshakeResult extends TransportResult {
 }

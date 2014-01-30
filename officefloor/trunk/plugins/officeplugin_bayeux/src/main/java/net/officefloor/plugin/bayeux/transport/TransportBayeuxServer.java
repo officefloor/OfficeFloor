@@ -19,7 +19,6 @@ package net.officefloor.plugin.bayeux.transport;
 
 import net.officefloor.plugin.bayeux.transport.TransportMessage.TransportMutable;
 
-import org.cometd.bayeux.Message;
 import org.cometd.bayeux.Transport;
 import org.cometd.bayeux.server.BayeuxServer;
 
@@ -48,70 +47,70 @@ public interface TransportBayeuxServer {
 	 * Undertakes handshake.
 	 * 
 	 * @param message
-	 *            Handshake {@link Message}.
+	 *            Handshake {@link TransportMessage}.
 	 * @param callback
 	 *            {@link TransportCallback} to notify of {@link HandshakeResult}
 	 *            .
 	 */
-	void handshake(Message message,
+	void handshake(TransportMessage message,
 			TransportCallback<? super HandshakeResult> callback);
 
 	/**
 	 * Undertakes connect.
 	 * 
 	 * @param message
-	 *            Connect {@link Message}.
+	 *            Connect {@link TransportMessage}.
 	 * @param callback
 	 *            {@link TransportCallback} to notify of {@link ConnectResult}.
 	 */
-	void connect(Message message,
+	void connect(TransportMessage message,
 			TransportCallback<? super ConnectResult> callback);
 
 	/**
 	 * Undertakes disconnect.
 	 * 
 	 * @param message
-	 *            Disconnect {@link Message}.
+	 *            Disconnect {@link TransportMessage}.
 	 * @param callback
 	 *            {@link TransportCallback} to notify of
 	 *            {@link DisconnectResult}.
 	 */
-	void disconnect(Message message,
+	void disconnect(TransportMessage message,
 			TransportCallback<? super DisconnectResult> callback);
 
 	/**
 	 * Undertakes subscribe.
 	 * 
 	 * @param message
-	 *            Subscribe {@link Message}.
+	 *            Subscribe {@link TransportMessage}.
 	 * @param callback
 	 *            {@link TransportCallback} to notify of {@link SubscribeResult}
 	 *            .
 	 */
-	void subscribe(Message message,
+	void subscribe(TransportMessage message,
 			TransportCallback<? super SubscribeResult> callback);
 
 	/**
 	 * Undertakes unsubscribe.
 	 * 
 	 * @param message
-	 *            Unsubscribe {@link Message}.
+	 *            Unsubscribe {@link TransportMessage}.
 	 * @param callback
 	 *            {@link TransportCallback} to notify of
 	 *            {@link UnsubscribeResult}.
 	 */
-	void unsubscribe(Message message,
+	void unsubscribe(TransportMessage message,
 			TransportCallback<? super UnsubscribeResult> callback);
 
 	/**
 	 * Undertakes publish.
 	 * 
 	 * @param message
-	 *            Publish {@link Message}.
+	 *            Publish {@link TransportMessage}.
 	 * @param callback
 	 *            {@link TransportCallback} to notify of {@link PublishResult}.
 	 */
-	void publish(Message message,
+	void publish(TransportMessage message,
 			TransportCallback<? super PublishResult> callback);
 
 }

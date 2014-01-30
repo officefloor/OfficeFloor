@@ -18,6 +18,8 @@
 package net.officefloor.plugin.bayeux;
 
 import net.officefloor.plugin.bayeux.transport.TransportCallback;
+import net.officefloor.plugin.bayeux.transport.TransportMessage;
+import net.officefloor.plugin.bayeux.transport.TransportResult;
 
 import org.junit.Assert;
 
@@ -26,7 +28,8 @@ import org.junit.Assert;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockTransportCallback<R> implements TransportCallback<R> {
+public class MockTransportCallback<R extends TransportResult> implements
+		TransportCallback<R> {
 
 	/**
 	 * Successful result.
@@ -44,11 +47,23 @@ public class MockTransportCallback<R> implements TransportCallback<R> {
 	 * @return Successful result.
 	 */
 	public R getSuccessfulResult() {
-		Assert.assertNotNull("Should be successful",
-				this.successfulResult);
+		Assert.assertNotNull("Should be successful", this.successfulResult);
 		Assert.assertNull("Should be no unsuccessful callback",
 				this.unsuccessfulResult);
 		return this.successfulResult;
+	}
+
+	/**
+	 * Obtains the successful {@link TransportMessage}.
+	 * 
+	 * @return Successful {@link TransportMessage}.
+	 */
+	public TransportMessage getSuccessfulMessage() {
+		R result = this.getSuccessfulResult();
+		TransportMessage[] messages = result.getResponse();
+		Assert.assertEquals("Should be only 1 successful message", 1,
+				messages.length);
+		return messages[0];
 	}
 
 	/**
@@ -57,11 +72,23 @@ public class MockTransportCallback<R> implements TransportCallback<R> {
 	 * @return Unsuccessful result.
 	 */
 	public R getUnsuccessfulResult() {
-		Assert.assertNotNull("Should be unsuccessful",
-				this.unsuccessfulResult);
+		Assert.assertNotNull("Should be unsuccessful", this.unsuccessfulResult);
 		Assert.assertNull("Should be no successful callback",
 				this.successfulResult);
 		return this.unsuccessfulResult;
+	}
+
+	/**
+	 * Obtains the unsuccessful {@link TransportMessage}.
+	 * 
+	 * @return Unsuccessful {@link TransportMessage}.
+	 */
+	public TransportMessage getUnsuccessfulMessage() {
+		R result = this.getUnsuccessfulResult();
+		TransportMessage[] messages = result.getResponse();
+		Assert.assertEquals("Should be only 1 unsuccessful message", 1,
+				messages.length);
+		return messages[0];
 	}
 
 	/*
@@ -70,9 +97,7 @@ public class MockTransportCallback<R> implements TransportCallback<R> {
 
 	@Override
 	public void successful(R result) {
-		// TODO implement HandshakeCallback.successful
-		throw new UnsupportedOperationException(
-				"TODO implement HandshakeCallback.successful");
+		this.successfulResult = result;
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2013 Daniel Sagenschneider
+ * Copyright (C) 2005-2014 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,17 @@
 package net.officefloor.plugin.bayeux.transport;
 
 /**
- * Result of the subscribe.
+ * Generic result of an operation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SubscribeResult extends TransportResult {
+public interface TransportResult {
+
+	/**
+	 * Obtains the response {@link TransportMessage} instances.
+	 * 
+	 * @return Response {@link TransportMessage} instances.
+	 */
+	TransportMessage[] getResponse();
+
 }

@@ -17,19 +17,10 @@
  */
 package net.officefloor.plugin.bayeux.transport;
 
-
 /**
  * Result of the connect.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ConnectResult {
-
-	/**
-	 * Obtains the {@link TransportMessage}.
-	 * 
-	 * @return {@link TransportMessage}.
-	 */
-	TransportMessage getResponse();
-
+public interface ConnectResult extends TransportResult {
 }

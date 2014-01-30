@@ -22,13 +22,5 @@ package net.officefloor.plugin.bayeux.transport;
  * 
  * @author Daniel Sagenschneider
  */
-public interface PublishResult {
-
-	/**
-	 * Obtains the {@link TransportMessage}.
-	 * 
-	 * @return {@link TransportMessage}.
-	 */
-	TransportMessage getResponse();
-
+public interface PublishResult extends TransportResult {
 }
