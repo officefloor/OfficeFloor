@@ -17,19 +17,10 @@
  */
 package net.officefloor.plugin.bayeux.transport;
 
-
 /**
  * Result of the disconnect.
  * 
  * @author Daniel Sagenschneider
  */
-public interface DisconnectResult {
-
-	/**
-	 * Obtains the {@link TransportMessage}.
-	 * 
-	 * @return {@link TransportMessage}.
-	 */
-	TransportMessage getResponse();
-
+public interface DisconnectResult extends TransportResult {
 }

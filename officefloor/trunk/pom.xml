@@ -1221,19 +1221,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Generate the sitemap.xml file -->
-				<groupId>com.github.s4u.plugins</groupId>
-				<artifactId>sitemapxml-maven-plugin</artifactId>
-				<version>1.0.0</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>gen</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<!-- Generate the site documentation -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
@@ -1305,6 +1292,21 @@
 								</excludedLinks>
 							</configuration>
 						</plugin>
+						<!--  
+						<plugin>
+							- Generate the sitemap.xml file -
+							<groupId>com.github.s4u.plugins</groupId>
+							<artifactId>sitemapxml-maven-plugin</artifactId>
+							<version>1.0.0</version>
+							<executions>
+								<execution>
+									<goals>
+										<goal>gen</goal>
+									</goals>
+								</execution>
+							</executions>
+						</plugin>
+						-->
 					</reportPlugins>
 				</configuration>
 			</plugin>

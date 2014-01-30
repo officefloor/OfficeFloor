@@ -26,8 +26,9 @@ import net.officefloor.plugin.bayeux.transport.PublishResult;
 import net.officefloor.plugin.bayeux.transport.SubscribeResult;
 import net.officefloor.plugin.bayeux.transport.TransportBayeuxServer;
 import net.officefloor.plugin.bayeux.transport.TransportMessage;
-import net.officefloor.plugin.bayeux.transport.UnsubscribeResult;
 import net.officefloor.plugin.bayeux.transport.TransportMessage.TransportMutable;
+import net.officefloor.plugin.bayeux.transport.TransportResult;
+import net.officefloor.plugin.bayeux.transport.UnsubscribeResult;
 
 import org.cometd.bayeux.Channel;
 import org.cometd.bayeux.Message;
@@ -35,14 +36,12 @@ import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
-import org.junit.Ignore;
 
 /**
  * Tests the {@link BayeuxServer} for {@link Message} communication.
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO implement tests and functionality")
 public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 
 	/**
@@ -76,10 +75,9 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		// Undertake handshake
 		MockTransportCallback<HandshakeResult> callback = new MockTransportCallback<HandshakeResult>();
 		this.server.handshake(request, callback);
-		HandshakeResult result = callback.getSuccessfulResult();
 
 		// Ensure enough information to send response
-		TransportMessage response = result.getResponse();
+		TransportMessage response = callback.getSuccessfulMessage();
 		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
 				Channel.META_HANDSHAKE, Message.VERSION_FIELD, "1.0",
 				Message.SUPPORTED_CONNECTION_TYPES_FIELD,
@@ -115,10 +113,9 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		// Undertake handshake
 		MockTransportCallback<HandshakeResult> callback = new MockTransportCallback<HandshakeResult>();
 		this.server.handshake(message, callback);
-		HandshakeResult result = callback.getUnsuccessfulResult();
 
 		// Ensure enough information to send response
-		TransportMessage response = result.getResponse();
+		TransportMessage response = callback.getUnsuccessfulMessage();
 		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
 				Channel.META_HANDSHAKE, Message.VERSION_FIELD, "1.0",
 				Message.SUPPORTED_CONNECTION_TYPES_FIELD,
@@ -146,10 +143,9 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		// Undertake connect
 		MockTransportCallback<ConnectResult> callback = new MockTransportCallback<ConnectResult>();
 		this.server.connect(request, null);
-		ConnectResult result = callback.getSuccessfulResult();
 
 		// Ensure enough information to send the response
-		TransportMessage response = result.getResponse();
+		TransportMessage response = callback.getSuccessfulMessage();
 		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
 				Channel.META_CONNECT, Message.SUCCESSFUL_FIELD, "true",
 				Message.ERROR_FIELD, "", Message.CLIENT_ID_FIELD, CLIENT_ID,
@@ -174,10 +170,9 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		// Undertake disconnect
 		MockTransportCallback<DisconnectResult> callback = new MockTransportCallback<DisconnectResult>();
 		this.server.disconnect(request, null);
-		DisconnectResult result = callback.getSuccessfulResult();
 
 		// Ensure enough information to send response
-		TransportMessage response = result.getResponse();
+		TransportMessage response = callback.getSuccessfulMessage();
 		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
 				Channel.META_DISCONNECT, Message.CLIENT_ID_FIELD, CLIENT_ID,
 				Message.SUCCESSFUL_FIELD, String.valueOf(true));
@@ -200,10 +195,9 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		// Undertake the subscription
 		MockTransportCallback<SubscribeResult> callback = new MockTransportCallback<SubscribeResult>();
 		this.server.subscribe(request, callback);
-		SubscribeResult result = callback.getSuccessfulResult();
 
 		// Ensure enough information to send response
-		TransportMessage response = result.getResponse();
+		TransportMessage response = callback.getSuccessfulMessage();
 		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
 				Channel.META_SUBSCRIBE, Message.CLIENT_ID_FIELD, CLIENT_ID,
 				Message.SUBSCRIPTION_FIELD, "/foo/**",
@@ -238,10 +232,9 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		// Undertake the subscribe
 		MockTransportCallback<SubscribeResult> callback = new MockTransportCallback<SubscribeResult>();
 		this.server.subscribe(request, callback);
-		SubscribeResult result = callback.getUnsuccessfulResult();
 
 		// Ensure enough information to send response
-		TransportMessage response = result.getResponse();
+		TransportMessage response = callback.getUnsuccessfulMessage();
 		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
 				Channel.META_SUBSCRIBE, Message.CLIENT_ID_FIELD, CLIENT_ID,
 				Message.SUBSCRIPTION_FIELD, "/bar/baz",
@@ -267,10 +260,9 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		// Undertake the unsubscribe
 		MockTransportCallback<UnsubscribeResult> callback = new MockTransportCallback<UnsubscribeResult>();
 		this.server.unsubscribe(request, callback);
-		UnsubscribeResult result = callback.getSuccessfulResult();
 
 		// Ensure enough information to send response
-		TransportMessage response = result.getResponse();
+		TransportMessage response = callback.getSuccessfulMessage();
 		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
 				Channel.META_UNSUBSCRIBE, Message.CLIENT_ID_FIELD, CLIENT_ID,
 				Message.SUBSCRIPTION_FIELD, "/foo/**",
@@ -295,10 +287,9 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		// Undertake the publish
 		MockTransportCallback<PublishResult> callback = new MockTransportCallback<PublishResult>();
 		this.server.publish(request, callback);
-		PublishResult result = callback.getSuccessfulResult();
 
 		// Ensure enough information to send response
-		TransportMessage response = result.getResponse();
+		TransportMessage response = callback.getSuccessfulMessage();
 		MessageValidateUtil.assertMessage(response, Message.CHANNEL_FIELD,
 				"/some/channel", Message.SUCCESSFUL_FIELD, "true",
 				Message.ID_FIELD, "some unique message id");
@@ -317,7 +308,7 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 				"iframe");
 
 		// Undertake handshake (with generic callback implementation)
-		MockTransportCallback<Object> callback = new MockTransportCallback<Object>();
+		MockTransportCallback<TransportResult> callback = new MockTransportCallback<TransportResult>();
 		this.server.handshake(request, callback);
 
 		// Ensure successful
@@ -340,7 +331,7 @@ public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 		request.setSubscription(path);
 
 		// Undertake subscribe (with generic callback implementation)
-		MockTransportCallback<Object> callback = new MockTransportCallback<Object>();
+		MockTransportCallback<TransportResult> callback = new MockTransportCallback<TransportResult>();
 		this.server.subscribe(request, callback);
 
 		// Ensure successful

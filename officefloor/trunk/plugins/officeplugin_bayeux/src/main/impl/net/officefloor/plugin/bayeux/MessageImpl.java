@@ -20,19 +20,26 @@ package net.officefloor.plugin.bayeux;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.plugin.bayeux.transport.TransportMessage.TransportMutable;
+
 import org.cometd.bayeux.ChannelId;
 import org.cometd.bayeux.Message;
-import org.cometd.bayeux.server.ServerMessage.Mutable;
+import org.cometd.bayeux.server.ServerMessage;
 
 /**
  * {@link Message} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class MessageImpl extends HashMap<String, Object> implements Mutable {
+public class MessageImpl extends HashMap<String, Object> implements
+		TransportMutable {
+
+	/*
+	 * ===================== TransportMutable ===============================
+	 */
 
 	@Override
-	public org.cometd.bayeux.server.ServerMessage.Mutable getAssociated() {
+	public ServerMessage.Mutable getAssociated() {
 		// TODO implement ServerMessage.getAssociated
 		throw new UnsupportedOperationException(
 				"TODO implement ServerMessage.getAssociated");
@@ -148,9 +155,7 @@ public class MessageImpl extends HashMap<String, Object> implements Mutable {
 
 	@Override
 	public void setChannel(String channel) {
-		// TODO implement Mutable.setChannel
-		throw new UnsupportedOperationException(
-				"TODO implement Mutable.setChannel");
+		this.put(CHANNEL_FIELD, channel);
 	}
 
 	@Override
@@ -193,6 +198,72 @@ public class MessageImpl extends HashMap<String, Object> implements Mutable {
 		// TODO implement Mutable.setLazy
 		throw new UnsupportedOperationException(
 				"TODO implement Mutable.setLazy");
+	}
+
+	@Override
+	public String getVersion() {
+		// TODO implement TransportMessage.getVersion
+		throw new UnsupportedOperationException(
+				"TODO implement TransportMessage.getVersion");
+	}
+
+	@Override
+	public String[] getSupportedConnectionTypes() {
+		// TODO implement TransportMessage.getSupportedConnectionTypes
+		throw new UnsupportedOperationException(
+				"TODO implement TransportMessage.getSupportedConnectionTypes");
+	}
+
+	@Override
+	public String[] getConnectionType() {
+		// TODO implement TransportMessage.getConnectionType
+		throw new UnsupportedOperationException(
+				"TODO implement TransportMessage.getConnectionType");
+	}
+
+	@Override
+	public Boolean isAuthSuccessful() {
+		// TODO implement TransportMessage.isAuthSuccessful
+		throw new UnsupportedOperationException(
+				"TODO implement TransportMessage.isAuthSuccessful");
+	}
+
+	@Override
+	public String getSubscription() {
+		// TODO implement TransportMessage.getSubscription
+		throw new UnsupportedOperationException(
+				"TODO implement TransportMessage.getSubscription");
+	}
+
+	@Override
+	public String getError() {
+		// TODO implement TransportMessage.getError
+		throw new UnsupportedOperationException(
+				"TODO implement TransportMessage.getError");
+	}
+
+	@Override
+	public void setVersion(String version) {
+		this.put(VERSION_FIELD, version);
+	}
+
+	@Override
+	public void setSupportedConnectionTypes(String... supportedConnectionTypes) {
+		this.put(SUPPORTED_CONNECTION_TYPES_FIELD, supportedConnectionTypes);
+	}
+
+	@Override
+	public void setConnectionType(String connectionType) {
+		// TODO implement TransportMutable.setConnectionType
+		throw new UnsupportedOperationException(
+				"TODO implement TransportMutable.setConnectionType");
+	}
+
+	@Override
+	public void setSubscription(String subscription) {
+		// TODO implement TransportMutable.setSubscription
+		throw new UnsupportedOperationException(
+				"TODO implement TransportMutable.setSubscription");
 	}
 
 }

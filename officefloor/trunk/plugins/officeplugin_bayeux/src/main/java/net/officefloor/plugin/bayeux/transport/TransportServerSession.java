@@ -26,5 +26,4 @@ import org.cometd.bayeux.server.ServerSession;
  * @author Daniel Sagenschneider
  */
 public interface TransportServerSession extends ServerSession {
-
 }
