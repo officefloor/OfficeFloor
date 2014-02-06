@@ -36,12 +36,14 @@ import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerMessage;
 import org.cometd.bayeux.server.ServerSession;
+import org.junit.Ignore;
 
 /**
  * Tests the {@link BayeuxServer} for {@link Message} communication.
  * 
  * @author Daniel Sagenschneider
  */
+@Ignore("TODO provide implementation of tests")
 public class BayeuxServerMessageTest extends OfficeFrameTestCase {
 
 	/**
