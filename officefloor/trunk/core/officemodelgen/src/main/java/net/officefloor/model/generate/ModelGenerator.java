@@ -659,6 +659,7 @@ public class ModelGenerator {
 	/**
 	 * Writes the listing of objects.
 	 */
+	@SuppressWarnings("unchecked")
 	private void writeListing(String separator, WriteAction action,
 			List<? extends AbstractPropertyMetaData>... properties)
 			throws Exception {

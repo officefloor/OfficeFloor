@@ -34,7 +34,7 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
 /**
@@ -118,7 +118,7 @@ public abstract class AbstractTcpServerTestCase extends
 		this.setVerbose(true);
 
 		// Specify the port
-		PORT = MockHttpServer.getAvailablePort();
+		PORT = HttpTestUtil.getAvailablePort();
 
 		// Names to handle ServerTcpConnection
 		final String MO_NAME = "MO";

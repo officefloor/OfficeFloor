@@ -17,8 +17,7 @@
  */
 package net.officefloor.plugin.web.http.security.integrate;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
@@ -69,10 +68,7 @@ public class BasicHttpSecurityIntegrateTest extends
 		this.doRequest("service", 401, "");
 
 		// Should authenticate with credentials
-		this.getHttpClient()
-				.getCredentialsProvider()
-				.setCredentials(new AuthScope(null, -1, "TestRealm"),
-						new UsernamePasswordCredentials("daniel", "password"));
+		this.useCredentials("TestRealm", null, "daniel", "password");
 		this.doRequest("service", 200, "Serviced for daniel");
 	}
 
@@ -88,10 +84,7 @@ public class BasicHttpSecurityIntegrateTest extends
 		this.doRequest("service", 401, "");
 
 		// Should authenticate with credentials
-		this.getHttpClient()
-				.getCredentialsProvider()
-				.setCredentials(new AuthScope(null, -1, "TestRealm"),
-						new UsernamePasswordCredentials("daniel", "password"));
+		this.useCredentials("TestRealm", null, "daniel", "password");
 		this.doRequest("service", 200, "Serviced for daniel");
 	}
 
@@ -101,14 +94,11 @@ public class BasicHttpSecurityIntegrateTest extends
 	public void testLogout() throws Exception {
 
 		// Authenticate with credentials
-		this.getHttpClient()
-				.getCredentialsProvider()
-				.setCredentials(new AuthScope(null, -1, "TestRealm"),
-						new UsernamePasswordCredentials("daniel", "password"));
+		CredentialsProvider provider = this.useCredentials("TestRealm", null, "daniel", "password");
 		this.doRequest("service", 200, "Serviced for daniel");
 
 		// Clear login details
-		this.getHttpClient().getCredentialsProvider().clear();
+		provider.clear();
 
 		// Request again to ensure stay logged in
 		this.doRequest("service", 200, "Serviced for daniel");

@@ -24,13 +24,14 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Ensure integration of {@link HttpTemplateWorkSource} and
@@ -41,9 +42,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class TemplateAndRouteIntegrationTest extends TestCase {
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
 	 * {@link OfficeFloor}.
@@ -73,7 +74,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 	protected void tearDown() throws Exception {
 		try {
 			// Stop client
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 		} finally {
 			// Stop server
 			if (this.officeFloor != null) {

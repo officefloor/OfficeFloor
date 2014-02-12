@@ -36,8 +36,8 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.work.WorkSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
@@ -56,16 +56,13 @@ import net.officefloor.plugin.web.http.template.section.PostRedirectGetLogic.Par
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Tests the integration of the {@link HttpTemplateSectionSource}.
@@ -131,35 +128,35 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	private AutoWireOfficeFloor officeFloor;
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private HttpClient client;
+	private CloseableHttpClient client;
 
 	@Override
 	protected void setUp() throws Exception {
 
 		// Obtain the ports
-		this.httpPort = MockHttpServer.getAvailablePort();
-		this.httpsPort = MockHttpServer.getAvailablePort();
+		this.httpPort = HttpTestUtil.getAvailablePort();
+		this.httpsPort = HttpTestUtil.getAvailablePort();
 
 		// Create the client that will not automatically redirect
-		HttpParams params = new BasicHttpParams();
-		params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		this.client = new DefaultHttpClient(params);
-
-		// Allow anonymous secure communication for testing
-		MockHttpServer.configureHttps(this.client, this.httpsPort);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		HttpTestUtil.configureHttps(builder);
+		HttpTestUtil.configureNoRedirects(builder);
+		this.client = builder.build();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 
-		// Disconnect client
-		this.client.getConnectionManager().shutdown();
-
-		// Close the OfficeFloor
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
+		try {
+			// Disconnect client
+			this.client.close();
+		} finally {
+			// Close the OfficeFloor
+			if (this.officeFloor != null) {
+				this.officeFloor.closeOfficeFloor();
+			}
 		}
 	}
 
@@ -431,7 +428,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 			String redirectUrl = response.getFirstHeader("Location").getValue();
 			assertEquals("Incorrect redirect URL", "/uri"
 					+ HttpRouteTask.REDIRECT_URI_SUFFIX, redirectUrl);
-			response.getEntity().consumeContent();
+			response.getEntity().getContent().close();
 
 			// Undertake the GET (as triggered by redirect)
 			HttpGet get = new HttpGet("http://" + HOST_NAME + ":"
@@ -442,7 +439,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		}
 
 		// Ensure correct rendering of template
-		String rendering = MockHttpServer.getEntityBody(response);
+		String rendering = HttpTestUtil.getEntityBody(response);
 		assertEquals("Incorrect rendering", expectedResponse, rendering);
 
 		// Return the response
@@ -1050,7 +1047,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 				.getStatusCode());
 
 		// Obtain and return the response content
-		String content = MockHttpServer.getEntityBody(response);
+		String content = HttpTestUtil.getEntityBody(response);
 		return content;
 	}
 
@@ -1171,7 +1168,7 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 
 		// Add the HTTPS server socket listener
 		HttpsServerSocketManagedObjectSource.autoWire(this.source,
-				this.httpsPort, MockHttpServer.getSslEngineSourceClass(),
+				this.httpsPort, HttpTestUtil.getSslEngineSourceClass(),
 				"ROUTE", "route");
 
 		// Add dependencies

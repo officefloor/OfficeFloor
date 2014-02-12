@@ -136,7 +136,7 @@ public abstract class AbstractGovernanceTestCase extends
 	/**
 	 * Name of the {@link Test} method.
 	 */
-	private String testMethodName;
+	protected String testMethodName;
 
 	/**
 	 * Indicates if multi-threaded {@link Team} responsible for {@link Task}.

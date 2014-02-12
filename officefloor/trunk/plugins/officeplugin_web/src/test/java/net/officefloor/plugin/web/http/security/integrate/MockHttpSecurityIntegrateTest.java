@@ -17,12 +17,11 @@
  */
 package net.officefloor.plugin.web.http.security.integrate;
 
+import org.apache.http.client.CredentialsProvider;
+
 import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.scheme.MockHttpSecuritySource;
-
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 
 /**
  * Integrate tests the {@link MockHttpSecuritySource}.
@@ -53,10 +52,7 @@ public class MockHttpSecurityIntegrateTest extends
 		this.doRequest("service", 401, "");
 
 		// Should authenticate with credentials
-		this.getHttpClient()
-				.getCredentialsProvider()
-				.setCredentials(new AuthScope(null, -1, "Test"),
-						new UsernamePasswordCredentials("daniel", "daniel"));
+		this.useCredentials("Test", null, "daniel", "daniel");
 		this.doRequest("service", 200, "Serviced for daniel");
 	}
 
@@ -66,14 +62,12 @@ public class MockHttpSecurityIntegrateTest extends
 	public void testLogout() throws Exception {
 
 		// Authenticate with credentials
-		this.getHttpClient()
-				.getCredentialsProvider()
-				.setCredentials(new AuthScope(null, -1, "Test"),
-						new UsernamePasswordCredentials("daniel", "daniel"));
+		CredentialsProvider provider = this.useCredentials("Test", null,
+				"daniel", "daniel");
 		this.doRequest("service", 200, "Serviced for daniel");
 
 		// Clear login details
-		this.getHttpClient().getCredentialsProvider().clear();
+		provider.clear();
 
 		// Request again to ensure stay logged in
 		this.doRequest("service", 200, "Serviced for daniel");

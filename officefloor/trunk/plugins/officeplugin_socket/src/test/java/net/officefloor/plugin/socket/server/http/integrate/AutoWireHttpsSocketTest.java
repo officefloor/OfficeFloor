@@ -21,20 +21,20 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLHandshakeException;
 
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Ensure able to use {@link HttpsServerSocketManagedObjectSource} with the
@@ -55,11 +55,6 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 	private final AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
 
 	/**
-	 * {@link HttpClient}.
-	 */
-	private final HttpClient client = new DefaultHttpClient();
-
-	/**
 	 * {@link AutoWireOfficeFloor}.
 	 */
 	private AutoWireOfficeFloor officeFloor = null;
@@ -68,7 +63,7 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Obtain the port for the test
-		this.port = MockHttpServer.getAvailablePort();
+		this.port = HttpTestUtil.getAvailablePort();
 
 		// Add the section to handle the HTTP request
 		this.autoWire.addSection("TEST", ClassSectionSource.class.getName(),
@@ -78,15 +73,9 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		try {
-			// Ensure stop the client
-			this.client.getConnectionManager().shutdown();
-
-		} finally {
-			// Ensure OfficeFloor is closed
-			if (this.officeFloor != null) {
-				this.officeFloor.closeOfficeFloor();
-			}
+		// Ensure OfficeFloor is closed
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
 		}
 	}
 
@@ -102,14 +91,19 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 		// Open the OfficeFloor
 		this.officeFloor = this.autoWire.openOfficeFloor();
 
-		// Send request
-		try {
-			this.client.execute(new HttpGet("https://localhost:" + this.port));
-			fail("Should not be successful");
+		// Use default SslContext which should not match on cypher
+		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 
-		} catch (SSLPeerUnverifiedException ex) {
-			assertEquals("Incorrect cause", "peer not authenticated",
-					ex.getMessage());
+			// Send request
+			try {
+				client.execute(new HttpGet("https://localhost:" + this.port));
+				fail("Should not be successful");
+
+			} catch (SSLHandshakeException ex) {
+				assertEquals("Incorrect cause",
+						"Remote host closed connection during handshake",
+						ex.getMessage());
+			}
 		}
 	}
 
@@ -119,25 +113,28 @@ public class AutoWireHttpsSocketTest extends OfficeFrameTestCase {
 	public void testCallAutoWiredHttpsServer() throws Exception {
 
 		// Register the managed object source
-		HttpsServerSocketManagedObjectSource.autoWire(this.autoWire, this.port,
-				MockHttpServer.getSslEngineSourceClass(), "TEST",
-				"handleRequest");
+		HttpsServerSocketManagedObjectSource
+				.autoWire(this.autoWire, this.port,
+						HttpTestUtil.getSslEngineSourceClass(), "TEST",
+						"handleRequest");
 
 		// Open the OfficeFloor
 		this.officeFloor = this.autoWire.openOfficeFloor();
 
-		// Send request (with anonymous connection)
-		MockHttpServer.configureHttps(this.client, this.port);
-		HttpGet request = new HttpGet("https://localhost:" + this.port);
-		org.apache.http.HttpResponse response = this.client.execute(request);
+		// Send request (with OfficeFloor test SslContext)
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient(true)) {
 
-		// Ensure request successful
-		assertEquals("Request must be successful", 200, response
-				.getStatusLine().getStatusCode());
+			HttpGet request = new HttpGet("https://localhost:" + this.port);
+			org.apache.http.HttpResponse response = client.execute(request);
 
-		// Ensure appropriate response
-		assertEquals("Incorrect response", "hello world",
-				MockHttpServer.getEntityBody(response));
+			// Ensure request successful
+			assertEquals("Request must be successful", 200, response
+					.getStatusLine().getStatusCode());
+
+			// Ensure appropriate response
+			assertEquals("Incorrect response", "hello world",
+					HttpTestUtil.getEntityBody(response));
+		}
 	}
 
 	/**

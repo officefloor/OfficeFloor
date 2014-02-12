@@ -77,8 +77,6 @@ import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
-import org.codehaus.plexus.DefaultPlexusContainer;
-
 /**
  * {@link OfficeBuilding} Manager.
  * 
@@ -916,7 +914,6 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 				// Configure class path factory
 				ClassPathFactory classPathFactory = new ClassPathFactoryImpl(
-						new DefaultPlexusContainer(),
 						localRepository,
 						remoteRepositories
 								.toArray(new RemoteRepository[remoteRepositories

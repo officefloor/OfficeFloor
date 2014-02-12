@@ -42,8 +42,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedO
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.ConnectionManager;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
@@ -141,7 +141,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	protected void setUp() throws Exception {
 		try {
 			// Obtain port
-			this.port = MockHttpServer.getAvailablePort();
+			this.port = HttpTestUtil.getAvailablePort();
 
 			// Obtain the socket buffer send size
 			Socket socket = new Socket();

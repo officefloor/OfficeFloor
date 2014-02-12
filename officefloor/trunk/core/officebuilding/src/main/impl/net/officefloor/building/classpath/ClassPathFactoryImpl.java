@@ -35,22 +35,30 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
-import org.apache.maven.repository.internal.MavenRepositorySystemSession;
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuildingResult;
+import org.codehaus.plexus.DefaultContainerConfiguration;
+import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
-import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.collection.CollectRequest;
-import org.sonatype.aether.collection.CollectResult;
-import org.sonatype.aether.graph.Dependency;
-import org.sonatype.aether.graph.DependencyNode;
-import org.sonatype.aether.repository.LocalRepository;
-import org.sonatype.aether.resolution.DependencyRequest;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
-import org.sonatype.aether.util.graph.PreorderNodeListGenerator;
+import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.collection.CollectResult;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.graph.DependencyNode;
+import org.eclipse.aether.internal.impl.EnhancedLocalRepositoryManagerFactory;
+import org.eclipse.aether.repository.LocalRepository;
+import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.spi.localrepo.LocalRepositoryManagerFactory;
+import org.eclipse.aether.util.graph.visitor.PreorderNodeListGenerator;
 
 /**
  * {@link ClassPathFactory} implementation.
@@ -89,14 +97,11 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	/**
 	 * Obtains the local repository as configured for the user.
 	 * 
-	 * @param plexusContainer
-	 *            {@link PlexusContainer}.
 	 * @return Local repository.
 	 * @throws Exception
 	 *             If fails to obtain the user configured local repository.
 	 */
-	public static File getUserLocalRepository(PlexusContainer plexusContainer)
-			throws Exception {
+	public static File getUserLocalRepository() throws Exception {
 
 		// Obtain the local repository path
 		String localRepositoryPath = null;
@@ -107,8 +112,8 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 				"settings.xml");
 		if (settingsFile.exists()) {
 			// Load user settings and obtain local repository
-			SettingsBuilder settingsBuilder = plexusContainer
-					.lookup(SettingsBuilder.class);
+			SettingsBuilder settingsBuilder = new DefaultSettingsBuilderFactory()
+					.newInstance();
 			SettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
 			request.setUserSettingsFile(settingsFile);
 			SettingsBuildingResult result = settingsBuilder.build(request);
@@ -150,7 +155,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 * Initiate.
 	 * 
 	 * @param plexusContainer
-	 *            {@link PlexusContainer}.
+	 *            {@link PlexusContainer}. May be <code>null</code>.
 	 * @param repositorySystem
 	 *            {@link RepositorySystem}. May be <code>null</code>.
 	 * @param localRepository
@@ -164,8 +169,18 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	public ClassPathFactoryImpl(PlexusContainer plexusContainer,
 			RepositorySystem repositorySystem, File localRepository,
 			RemoteRepository[] remoteRepositories) throws Exception {
-		this.plexusContainer = plexusContainer;
 		this.remoteRepositories = remoteRepositories;
+
+		// Obtain the plexus container
+		if (plexusContainer == null) {
+			// Create the plexus container
+			DefaultContainerConfiguration configuration = new DefaultContainerConfiguration();
+			configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
+			this.plexusContainer = new DefaultPlexusContainer(configuration);
+		} else {
+			// Use the specified plexus container
+			this.plexusContainer = plexusContainer;
+		}
 
 		// Obtain the repository system
 		this.repositorySystem = (repositorySystem != null ? repositorySystem
@@ -173,14 +188,12 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 
 		// Obtain the local repository
 		this.localRepository = (localRepository != null ? localRepository
-				: getUserLocalRepository(this.plexusContainer));
+				: getUserLocalRepository());
 	}
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param plexusContainer
-	 *            {@link PlexusContainer}.
 	 * @param localRepository
 	 *            Local repository. May be <code>null</code> to use default user
 	 *            local repository.
@@ -189,10 +202,9 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 * @throws Exception
 	 *             If fails to initiate.
 	 */
-	public ClassPathFactoryImpl(PlexusContainer plexusContainer,
-			File localRepository, RemoteRepository[] remoteRepositories)
-			throws Exception {
-		this(plexusContainer, null, localRepository, remoteRepositories);
+	public ClassPathFactoryImpl(File localRepository,
+			RemoteRepository[] remoteRepositories) throws Exception {
+		this(null, null, localRepository, remoteRepositories);
 	}
 
 	/**
@@ -206,12 +218,8 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 */
 	public MavenProject getMavenProject(File pomFile) throws Exception {
 
-		// Create the Maven session
-		MavenRepositorySystemSession session = new MavenRepositorySystemSession();
-		LocalRepository localRepository = new LocalRepository(
-				this.localRepository);
-		session.setLocalRepositoryManager(this.repositorySystem
-				.newLocalRepositoryManager(localRepository));
+		// Create the repository session
+		RepositorySystemSession session = this.createRepositorySystemSession();
 
 		// Obtain the Maven Project
 		ProjectBuilder builder = this.plexusContainer
@@ -223,6 +231,27 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 
 		// Return the Maven Project
 		return project;
+	}
+
+	/**
+	 * Creates the {@link RepositorySystemSession}.
+	 * 
+	 * @return {@link RepositorySystemSession}.
+	 * @throws Exception
+	 *             If fails to create {@link RepositorySystemSession}.
+	 */
+	private RepositorySystemSession createRepositorySystemSession()
+			throws Exception {
+
+		// Create the configured repository system session
+		DefaultRepositorySystemSession session = MavenRepositorySystemUtils
+				.newSession();
+		LocalRepositoryManagerFactory factory = new EnhancedLocalRepositoryManagerFactory();
+		session.setLocalRepositoryManager(factory.newInstance(session,
+				new LocalRepository(this.localRepository)));
+
+		// Return the repository system session
+		return session;
 	}
 
 	/*
@@ -287,8 +316,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		// Resolve the class path
 		ArtifactClassPathResolver resolver = new ArtifactClassPathResolver(
 				new DefaultArtifact(groupId, artifactId, classifier, type,
-						version), this.repositorySystem, this.localRepository,
-				this.remoteRepositories);
+						version));
 		new Thread(resolver).start();
 
 		// Return the resolved class path
@@ -330,6 +358,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 			}
 		}
 		if (pomEntry == null) {
+			archive.close(); // ensure close archive
 			return null; // no pom.xml
 		}
 
@@ -338,6 +367,9 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		InputStream pomContents = archive.getInputStream(pomEntry);
 		Model pomModel = reader.read(pomContents, null);
 		pomContents.close();
+
+		// Close the archive
+		archive.close();
 
 		// Return the POM model
 		return pomModel;
@@ -354,21 +386,6 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		private final Artifact artifact;
 
 		/**
-		 * {@link RepositorySystem}.
-		 */
-		private final RepositorySystem repositorySystem;
-
-		/**
-		 * Local repository directory.
-		 */
-		private final File localRepositoryDirectory;
-
-		/**
-		 * Remote repositories.
-		 */
-		private final RemoteRepository[] remoteRepositories;
-
-		/**
 		 * Resolved class path entries.
 		 */
 		private String[] classPathEntries = null;
@@ -383,21 +400,9 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		 * 
 		 * @param artifact
 		 *            {@link Artifact} to be resolved.
-		 * @param repositorySystem
-		 *            {@link RepositorySystem}.
-		 * @param localRepositoryDirectory
-		 *            Local repository directory.
-		 * @param remoteRepositories
-		 *            Listing of {@link RemoteRepository} instances.
 		 */
-		public ArtifactClassPathResolver(Artifact artifact,
-				RepositorySystem repositorySystem,
-				File localRepositoryDirectory,
-				RemoteRepository[] remoteRepositories) {
+		public ArtifactClassPathResolver(Artifact artifact) {
 			this.artifact = artifact;
-			this.repositorySystem = repositorySystem;
-			this.localRepositoryDirectory = localRepositoryDirectory;
-			this.remoteRepositories = remoteRepositories;
 		}
 
 		/**
@@ -427,7 +432,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 					}
 
 					// Wait some time for resolution
-					this.wait(1000);
+					this.wait(100);
 				}
 
 				// Determine if timed out
@@ -447,21 +452,18 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		public void run() {
 			try {
 
-				// Create the maven session
-				MavenRepositorySystemSession session = new MavenRepositorySystemSession();
-				LocalRepository localRepository = new LocalRepository(
-						this.localRepositoryDirectory);
-				session.setLocalRepositoryManager(this.repositorySystem
-						.newLocalRepositoryManager(localRepository));
+				// Create the repository session
+				RepositorySystemSession session = ClassPathFactoryImpl.this
+						.createRepositorySystemSession();
 
 				// Create the dependency
-				Dependency dependency = new Dependency(this.artifact, "compile");
+				Dependency dependency = new Dependency(this.artifact, "run");
 
 				// Create request to collect dependencies
 				CollectRequest request = new CollectRequest();
 				request.setRoot(dependency);
 				Set<String> uniqueIds = new HashSet<String>();
-				for (RemoteRepository remoteRepository : this.remoteRepositories) {
+				for (RemoteRepository remoteRepository : ClassPathFactoryImpl.this.remoteRepositories) {
 
 					// Obtain unique id for repository
 					int index = 0;
@@ -474,17 +476,18 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 					uniqueIds.add(uniqueId);
 
 					// Add the remote repository
-					request.addRepository(new org.sonatype.aether.repository.RemoteRepository(
+					org.eclipse.aether.repository.RemoteRepository.Builder remoteRepositoryBuilder = new org.eclipse.aether.repository.RemoteRepository.Builder(
 							uniqueId, remoteRepository.getType(),
-							remoteRepository.getUrl()));
+							remoteRepository.getUrl());
+					request.addRepository(remoteRepositoryBuilder.build());
 				}
 
 				// Collect the results
-				CollectResult result = this.repositorySystem
+				CollectResult result = ClassPathFactoryImpl.this.repositorySystem
 						.collectDependencies(session, request);
 				DependencyNode node = result.getRoot();
-				this.repositorySystem.resolveDependencies(session,
-						new DependencyRequest(node, null));
+				ClassPathFactoryImpl.this.repositorySystem.resolveDependencies(
+						session, new DependencyRequest(node, null));
 
 				// Generate the class path
 				PreorderNodeListGenerator generator = new PreorderNodeListGenerator();

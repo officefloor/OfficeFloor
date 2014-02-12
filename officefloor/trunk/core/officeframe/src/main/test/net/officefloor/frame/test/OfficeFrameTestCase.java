@@ -904,6 +904,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param expectedItems
 	 *            Items expected to be in the list.
 	 */
+	@SafeVarargs
 	public static <O> void assertList(ListItemMatcher<O> matcher, List<O> list,
 			O... expectedItems) {
 
@@ -925,6 +926,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param expectedItems
 	 *            Items expected in the list.
 	 */
+	@SafeVarargs
 	public static <O> void assertList(List<O> list, O... expectedItems) {
 		assertList(new ListItemMatcher<O>() {
 			public void match(int index, O expected, O actual) {
@@ -943,6 +945,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param expectedItems
 	 *            Items expected in the list.
 	 */
+	@SafeVarargs
 	public static <O> void assertList(final String[] methods, List<O> list,
 			O... expectedItems) {
 		assertList(new ListItemMatcher<O>() {
@@ -967,6 +970,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param expectedItems
 	 *            Items expected in the array.
 	 */
+	@SafeVarargs
 	public static <O> void assertList(final String[] methods, O[] array,
 			O... expectedItems) {
 		assertList(methods, Arrays.asList(array), expectedItems);
@@ -986,6 +990,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param expectedItems
 	 *            Items expected in the list.
 	 */
+	@SafeVarargs
 	public static <O> void assertList(final String sortMethod,
 			String[] methods, List<O> list, O... expectedItems) {
 
