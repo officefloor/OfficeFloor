@@ -735,6 +735,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	 * @param tasks
 	 *            {@link RecordedTask} instances for each {@link Task}.
 	 */
+	@SuppressWarnings("unchecked")
 	private void record_tasks(RecordedTask... tasks) {
 		this.record_tasks(null, null, tasks);
 	}
@@ -750,6 +751,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	 * @param tasks
 	 *            {@link RecordedTask} instances for each {@link Task}.
 	 */
+	@SuppressWarnings("unchecked")
 	private void record_tasks(String initialTaskName,
 			AssetManager assetManager,
 			RawWorkMetaDataTest<W>.RecordedTask... tasks) {

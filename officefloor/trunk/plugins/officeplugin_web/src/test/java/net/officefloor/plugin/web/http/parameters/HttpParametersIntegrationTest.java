@@ -25,16 +25,16 @@ import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireApplication;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserTest;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * <p>
@@ -57,9 +57,9 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 	private AutoWireOfficeFloor server;
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
 	 * Actual value.
@@ -83,7 +83,7 @@ public class HttpParametersIntegrationTest extends OfficeFrameTestCase {
 	protected void tearDown() throws Exception {
 		try {
 			// Stop the client
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 		} finally {
 			// Stop the server
 			if (this.server != null) {

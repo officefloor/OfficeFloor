@@ -155,135 +155,143 @@ public class ProcessManager implements ProcessManagerMBean {
 		} catch (MalformedURLException ex) {
 			throw newProcessException(null, ex.getMessage(), ex);
 		}
-		URLClassLoader processClassLoader = new URLClassLoader(
+		try (URLClassLoader processClassLoader = new URLClassLoader(
 				processClassPathUrls.toArray(new URL[processClassPathUrls
-						.size()]));
+						.size()]))) {
 
-		// Obtain the process name (also name space as not register MBeans)
-		String processName = configuration.getProcessName();
-		if (isBlank(processName)) {
-			processName = DEFAULT_PROCESS_NAME;
-		}
-		final String processNamespace = processName;
-
-		// Serialise managed process for use
-		final ByteArrayOutputStream serialisedManagedProcess = new ByteArrayOutputStream();
-		synchronized (serialisedManagedProcess) {
-			try {
-				ObjectOutputStream serialiser = new ObjectOutputStream(
-						serialisedManagedProcess);
-				serialiser.writeObject(managedProcess);
-			} catch (IOException ex) {
-				throw newProcessException(null, ex.getMessage(), ex);
+			// Obtain the process name (also name space as not register MBeans)
+			String processName = configuration.getProcessName();
+			if (isBlank(processName)) {
+				processName = DEFAULT_PROCESS_NAME;
 			}
-		}
+			final String processNamespace = processName;
 
-		// Create the process manager
-		ProcessManager processManager = new ProcessManager(processName,
-				processName, null, null, null);
-
-		// Maintain class path for resetting
-		final String originalClassPath = System
-				.getProperty(SYSTEM_PROPERTY_CLASS_PATH);
-		try {
-
-			// Specify the java class path
-			System.setProperty(SYSTEM_PROPERTY_CLASS_PATH, processClassPath);
-
-			// Notify starting listener (if one provided)
-			ProcessStartListener startListener = configuration
-					.getProcessStartListener();
-			if (startListener != null) {
-				startListener.processStarted(processManager);
-			}
-
-			// Run the process (in another thread to not change this thread)
-			final boolean[] isComplete = new boolean[1];
-			isComplete[0] = false;
-			final Throwable[] failure = new Throwable[1];
-			Thread localProcess = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-
-						// Obtain the serialised managed process
-						byte[] managedProcessBytes;
-						synchronized (serialisedManagedProcess) {
-							managedProcessBytes = serialisedManagedProcess
-									.toByteArray();
-						}
-
-						// Create the process shell within class loader
-						Class<?> shellClass = Thread.currentThread()
-								.getContextClassLoader()
-								.loadClass(ProcessShell.class.getName());
-
-						// Run the process within shell
-						Method runMethod = shellClass.getMethod("run",
-								String.class, byte[].class);
-						runMethod.invoke(null, processNamespace,
-								managedProcessBytes);
-
-					} catch (Throwable ex) {
-						// Capture failure to propagate
-						synchronized (isComplete) {
-							if (ex instanceof InvocationTargetException) {
-								// Provide run failure
-								failure[0] = ex.getCause();
-							} else {
-								// Failure
-								failure[0] = ex;
-							}
-						}
-					} finally {
-						// Flag process complete
-						synchronized (isComplete) {
-							isComplete[0] = true;
-						}
-					}
-				}
-			});
-
-			// Execute the local process
-			localProcess.setContextClassLoader(processClassLoader);
-			localProcess.start();
-
-			// Wait until process complete
-			for (;;) {
-				synchronized (isComplete) {
-					// Propagate failure in process
-					if (failure[0] != null) {
-						throw newProcessException(null,
-								"Failed to run ProcessShell for "
-										+ managedProcess + " ["
-										+ managedProcess.getClass().getName()
-										+ "]", failure[0]);
-					}
-
-					// Determine if complete
-					if (isComplete[0]) {
-						return; // completed so finish
-					}
-				}
-
-				// Wait until process complete
+			// Serialise managed process for use
+			final ByteArrayOutputStream serialisedManagedProcess = new ByteArrayOutputStream();
+			synchronized (serialisedManagedProcess) {
 				try {
-					Thread.sleep(100);
-				} catch (InterruptedException ex) {
+					ObjectOutputStream serialiser = new ObjectOutputStream(
+							serialisedManagedProcess);
+					serialiser.writeObject(managedProcess);
+				} catch (IOException ex) {
 					throw newProcessException(null, ex.getMessage(), ex);
 				}
 			}
 
-		} finally {
-			// Reset to original class path
-			System.setProperty(SYSTEM_PROPERTY_CLASS_PATH, originalClassPath);
+			// Create the process manager
+			ProcessManager processManager = new ProcessManager(processName,
+					processName, null, null, null);
 
-			// Notify completion listener (if one provided)
-			ProcessCompletionListener completionListener = configuration
-					.getProcessCompletionListener();
-			if (completionListener != null) {
-				completionListener.processCompleted(processManager);
+			// Maintain class path for resetting
+			final String originalClassPath = System
+					.getProperty(SYSTEM_PROPERTY_CLASS_PATH);
+			try {
+
+				// Specify the java class path
+				System.setProperty(SYSTEM_PROPERTY_CLASS_PATH, processClassPath);
+
+				// Notify starting listener (if one provided)
+				ProcessStartListener startListener = configuration
+						.getProcessStartListener();
+				if (startListener != null) {
+					startListener.processStarted(processManager);
+				}
+
+				// Run the process (in another thread to not change this thread)
+				final boolean[] isComplete = new boolean[1];
+				isComplete[0] = false;
+				final Throwable[] failure = new Throwable[1];
+				Thread localProcess = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+
+							// Obtain the serialised managed process
+							byte[] managedProcessBytes;
+							synchronized (serialisedManagedProcess) {
+								managedProcessBytes = serialisedManagedProcess
+										.toByteArray();
+							}
+
+							// Create the process shell within class loader
+							Class<?> shellClass = Thread.currentThread()
+									.getContextClassLoader()
+									.loadClass(ProcessShell.class.getName());
+
+							// Run the process within shell
+							Method runMethod = shellClass.getMethod("run",
+									String.class, byte[].class);
+							runMethod.invoke(null, processNamespace,
+									managedProcessBytes);
+
+						} catch (Throwable ex) {
+							// Capture failure to propagate
+							synchronized (isComplete) {
+								if (ex instanceof InvocationTargetException) {
+									// Provide run failure
+									failure[0] = ex.getCause();
+								} else {
+									// Failure
+									failure[0] = ex;
+								}
+							}
+						} finally {
+							// Flag process complete
+							synchronized (isComplete) {
+								isComplete[0] = true;
+							}
+						}
+					}
+				});
+
+				// Execute the local process
+				localProcess.setContextClassLoader(processClassLoader);
+				localProcess.start();
+
+				// Wait until process complete
+				for (;;) {
+					synchronized (isComplete) {
+						// Propagate failure in process
+						if (failure[0] != null) {
+							throw newProcessException(null,
+									"Failed to run ProcessShell for "
+											+ managedProcess
+											+ " ["
+											+ managedProcess.getClass()
+													.getName() + "]",
+									failure[0]);
+						}
+
+						// Determine if complete
+						if (isComplete[0]) {
+							return; // completed so finish
+						}
+					}
+
+					// Wait until process complete
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException ex) {
+						throw newProcessException(null, ex.getMessage(), ex);
+					}
+				}
+
+			} finally {
+				// Reset to original class path
+				System.setProperty(SYSTEM_PROPERTY_CLASS_PATH,
+						originalClassPath);
+
+				// Notify completion listener (if one provided)
+				ProcessCompletionListener completionListener = configuration
+						.getProcessCompletionListener();
+				if (completionListener != null) {
+					completionListener.processCompleted(processManager);
+				}
 			}
+
+		} catch (IOException ex) {
+			// Propagate failure
+			throw newProcessException(null, ex.getMessage(), ex);
 		}
 	}
 
@@ -399,7 +407,7 @@ public class ProcessManager implements ProcessManagerMBean {
 			// Start the process (first as Process required by Manager)
 			ProcessBuilder builder = new ProcessBuilder(command);
 			process = builder.start();
-			
+
 			// Gobble the stdout and stderr of the process
 			new StreamGobbler(mbeanNamespace, process.getInputStream(),
 					outStream).start();

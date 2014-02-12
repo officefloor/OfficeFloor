@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.web.http.security.integrate;
 
+import org.apache.http.client.CredentialsProvider;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
@@ -24,9 +26,6 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.scheme.DigestHttpSecuritySource;
 import net.officefloor.plugin.web.http.security.store.CredentialStore;
 import net.officefloor.plugin.web.http.security.store.PasswordFileManagedObjectSource;
-
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 
 /**
  * Integrate the {@link DigestHttpSecuritySource}.
@@ -75,10 +74,7 @@ public class DigestHttpSecurityIntegrateTest extends
 		this.doRequest("service", 401, "");
 
 		// Should authenticate with credentials
-		this.getHttpClient()
-				.getCredentialsProvider()
-				.setCredentials(new AuthScope(null, -1, REALM, "Digest"),
-						new UsernamePasswordCredentials("daniel", "password"));
+		this.useCredentials(REALM, "Digest", "daniel", "password");
 		this.doRequest("service", 200, "Serviced for daniel");
 	}
 
@@ -88,14 +84,12 @@ public class DigestHttpSecurityIntegrateTest extends
 	public void testLogout() throws Exception {
 
 		// Authenticate with credentials
-		this.getHttpClient()
-				.getCredentialsProvider()
-				.setCredentials(new AuthScope(null, -1, REALM, "Digest"),
-						new UsernamePasswordCredentials("daniel", "password"));
+		CredentialsProvider provider = this.useCredentials(REALM, "Digest",
+				"daniel", "password");
 		this.doRequest("service", 200, "Serviced for daniel");
 
 		// Clear login details
-		this.getHttpClient().getCredentialsProvider().clear();
+		provider.clear();
 
 		// Request again to ensure stay logged in
 		this.doRequest("service", 200, "Serviced for daniel");

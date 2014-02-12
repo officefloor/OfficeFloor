@@ -825,6 +825,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 *            Flow keys to be defined in meta-data. Provide
 	 *            <code>null</code> values for indexing.
 	 */
+	@SuppressWarnings("unchecked")
 	private <F extends Enum<?>> void record_basicMetaData(F... flowKeys) {
 		this.record_securityClass();
 

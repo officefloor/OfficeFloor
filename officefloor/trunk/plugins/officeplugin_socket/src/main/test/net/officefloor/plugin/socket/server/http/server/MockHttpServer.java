@@ -17,21 +17,10 @@
  */
 package net.officefloor.plugin.socket.server.http.server;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -43,22 +32,14 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
-import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
-import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.scheme.LayeredSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * <p>
@@ -71,96 +52,6 @@ import org.apache.http.params.HttpParams;
  */
 public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		implements HttpServicerBuilder {
-
-	/**
-	 * Starting port number.
-	 */
-	private static int portStart = 12643;
-
-	/**
-	 * Obtains the next port number for testing.
-	 * 
-	 * @return Next port number for testing.
-	 */
-	public static synchronized int getAvailablePort() {
-		int port = portStart;
-		portStart++; // increment port for next text
-		return port;
-	}
-
-	/**
-	 * Obtains the {@link HttpEntity} content.
-	 * 
-	 * @param response
-	 *            {@link HttpResponse}.
-	 * @return Content of {@link HttpEntity}.
-	 * @throws IOException
-	 *             If fails to obtain content.
-	 */
-	public static String getEntityBody(HttpResponse response)
-			throws IOException {
-		return getEntityBody(response, Charset.defaultCharset());
-	}
-
-	/**
-	 * Obtains the {@link HttpEntity} content.
-	 * 
-	 * @param response
-	 *            {@link HttpResponse}.
-	 * @param charset
-	 *            {@link Charset}.
-	 * @return Content of {@link HttpEntity}.
-	 * @throws IOException
-	 *             If fails to obtain content.
-	 */
-	public static String getEntityBody(HttpResponse response, Charset charset)
-			throws IOException {
-
-		// Obtain the entity
-		HttpEntity entity = response.getEntity();
-		if (entity == null) {
-			return null; // no entity so no content
-		}
-
-		// Obtain the entity content
-		Reader body = new InputStreamReader(entity.getContent(), charset);
-		StringWriter buffer = new StringWriter();
-		for (int character = body.read(); character >= 0; character = body
-				.read()) {
-			buffer.write(character);
-		}
-
-		// Return the entity content
-		return buffer.toString();
-	}
-
-	/**
-	 * Configures the {@link HttpClient} with HTTPS {@link Scheme}.
-	 * 
-	 * @param client
-	 *            {@link HttpClient}.
-	 * @param port
-	 *            Default port for the HTTPS.
-	 * 
-	 * @see #getSslEngineSourceClass()
-	 */
-	public static void configureHttps(HttpClient client, int port) {
-		SocketFactory socketFactory = new OfficeFloorDefaultSocketFactory();
-		Scheme scheme = new Scheme("https", socketFactory, port);
-		client.getConnectionManager().getSchemeRegistry().register(scheme);
-	}
-
-	/**
-	 * Obtains the {@link SslEngineSource} for the corresponding configured
-	 * HTTPS.
-	 * 
-	 * @return {@link SslEngineSource} for the corresponding configured HTTPS.
-	 * 
-	 * @see #configureHttps(HttpClient, int)
-	 */
-	public static Class<? extends SslEngineSource> getSslEngineSourceClass() {
-		return OfficeFloorDefaultSslEngineSource.class;
-	}
 
 	/**
 	 * Port number to use for testing.
@@ -181,7 +72,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	/**
 	 * Listing of the {@link HttpClient} instances.
 	 */
-	private final List<HttpClient> httpClients = new LinkedList<HttpClient>();
+	private final List<CloseableHttpClient> httpClients = new LinkedList<>();
 
 	/**
 	 * Flags to setup the {@link MockHttpServer} with secure connections.
@@ -202,7 +93,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		AbstractServerSocketManagedObjectSource.closeConnectionManager();
 
 		// Specify the port
-		this.port = getAvailablePort();
+		this.port = HttpTestUtil.getAvailablePort();
 
 		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
@@ -219,7 +110,7 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 					MockTeamSource.createOnePersonTeam("SSL_TASKS"));
 			serverSocketBuilder.addProperty(
 					SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
-					getSslEngineSourceClass().getName());
+					HttpTestUtil.getSslEngineSourceClass().getName());
 		} else {
 			// Setup unsecure HTTP server
 			this.isServerSecure = false;
@@ -301,11 +192,8 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	public HttpClient createHttpClient() {
 
 		// Create the HTTP client
-		HttpClient client = new DefaultHttpClient();
-		if (this.isServerSecure()) {
-			// Configure to be secure client
-			configureHttps(client, this.port);
-		}
+		CloseableHttpClient client = HttpTestUtil
+				.createHttpClient(this.isServerSecure);
 
 		// Register the HTTP client for cleanup
 		this.httpClients.add(client);
@@ -348,8 +236,8 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 	@Override
 	protected void tearDown() throws Exception {
 		// Shutdown the HTTP Clients
-		for (HttpClient client : this.httpClients) {
-			client.getConnectionManager().shutdown();
+		for (CloseableHttpClient client : this.httpClients) {
+			client.close();
 		}
 
 		// Clean up parent
@@ -367,69 +255,6 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 		fail("Must override " + HttpServicerBuilder.class.getSimpleName()
 				+ " test case implementation");
 		return null;
-	}
-
-	/**
-	 * <p>
-	 * {@link LayeredSocketFactory} to connect to the {@link MockHttpServer}
-	 * over secure connection.
-	 * <p>
-	 * This allows working with a {@link OfficeFloorDefaultSslEngineSource}.
-	 */
-	private static class OfficeFloorDefaultSocketFactory implements
-			LayeredSocketFactory {
-
-		/*
-		 * ============== LayeredSocketFactory ======================
-		 */
-
-		@Override
-		public Socket createSocket() throws IOException {
-
-			// Create the secure connected socket
-			SSLContext context;
-			try {
-				context = OfficeFloorDefaultSslEngineSource
-						.createClientSslContext(null);
-
-			} catch (Exception ex) {
-				// Propagate failure in configuring OfficeFloor default key
-				throw new IOException(ex);
-			}
-
-			// Create the socket
-			SSLSocketFactory socketFactory = context.getSocketFactory();
-			Socket socket = socketFactory.createSocket();
-			assertFalse("Socket should not be connected", socket.isConnected());
-
-			// Return the socket
-			return socket;
-		}
-
-		@Override
-		public Socket createSocket(Socket socket, String host, int port,
-				boolean autoClose) throws IOException, UnknownHostException {
-			return socket;
-		}
-
-		@Override
-		public Socket connectSocket(Socket socket, String host, int port,
-				InetAddress localAddress, int localPort, HttpParams params)
-				throws IOException, UnknownHostException,
-				ConnectTimeoutException {
-
-			// Connect the socket
-			socket.connect(new InetSocketAddress(host, port));
-			assertTrue("Socket should now be connected", socket.isConnected());
-
-			// Return the connected socket
-			return socket;
-		}
-
-		@Override
-		public boolean isSecure(Socket socket) throws IllegalArgumentException {
-			return (socket instanceof SSLSocket);
-		}
 	}
 
 }

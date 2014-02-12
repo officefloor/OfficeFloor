@@ -28,16 +28,14 @@ import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
-import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link HttpSessionManagedObjectSource}.
@@ -88,18 +86,20 @@ public class HttpSessionManagedObjectSourceTest extends MockHttpServer {
 	public void testHttpSessionStateAcrossCalls() throws Exception {
 
 		// Loop calling server (HttpClient should send back Session Id)
-		HttpClient client = new DefaultHttpClient();
-		for (int i = 0; i < 10; i++) {
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+			for (int i = 0; i < 10; i++) {
 
-			// Call the server
-			HttpGet request = new HttpGet(this.getServerUrl());
-			HttpResponse response = client.execute(request);
-			int status = response.getStatusLine().getStatusCode();
-			String callIndex = MockHttpServer.getEntityBody(response);
+				// Call the server
+				HttpGet request = new HttpGet(this.getServerUrl());
+				HttpResponse response = client.execute(request);
+				int status = response.getStatusLine().getStatusCode();
+				String callIndex = HttpTestUtil.getEntityBody(response);
 
-			// Ensure results match and call index remembered by Session
-			assertEquals("Call should be successful", 200, status);
-			assertEquals("Incorrect call index", String.valueOf(i), callIndex);
+				// Ensure results match and call index remembered by Session
+				assertEquals("Call should be successful", 200, status);
+				assertEquals("Incorrect call index", String.valueOf(i),
+						callIndex);
+			}
 		}
 	}
 

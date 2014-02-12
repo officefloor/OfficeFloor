@@ -186,6 +186,7 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 				int parentPort = fromParentObjectPipe.readInt();
 
 				// Connect to parent to send notifications
+				@SuppressWarnings("resource")  // socket closed by shell
 				Socket parentSocket = new Socket();
 				parentSocket.connect(new InetSocketAddress(parentPort));
 				toParentPipe = new ObjectOutputStream(

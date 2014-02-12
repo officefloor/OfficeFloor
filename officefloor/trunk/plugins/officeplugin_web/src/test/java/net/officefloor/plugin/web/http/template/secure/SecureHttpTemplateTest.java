@@ -27,8 +27,8 @@ import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpParameters;
 import net.officefloor.plugin.web.http.application.HttpRequestObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
@@ -39,14 +39,11 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.params.ClientPNames;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Ensures secure functionality of {@link HttpTemplate}.
@@ -80,19 +77,17 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 	private AutoWireOfficeFloor officeFloor;
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private HttpClient client;
+	private CloseableHttpClient client;
 
 	@Override
 	protected void setUp() throws Exception {
 		// Configure the client (to not redirect)
-		HttpParams params = new BasicHttpParams();
-		params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		this.client = new DefaultHttpClient(params);
-
-		// Configure the client for anonymous HTTPS
-		MockHttpServer.configureHttps(this.client, 7979);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		HttpTestUtil.configureHttps(builder);
+		HttpTestUtil.configureNoRedirects(builder);
+		this.client = builder.build();
 	}
 
 	@Override
@@ -100,7 +95,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 		try {
 			// Stop the client
 			if (this.client != null) {
-				this.client.getConnectionManager().shutdown();
+				this.client.close();
 			}
 
 		} finally {
@@ -264,7 +259,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 					.getFirstHeader("Location").getValue());
 
 			// Complete request to do next request
-			response.getEntity().consumeContent();
+			response.getEntity().getContent().close();
 
 			// Undertake redirect to ensure parameters and entity are maintained
 			response = this.client.execute(new HttpGet(redirectUrl));
@@ -386,7 +381,7 @@ public class SecureHttpTemplateTest extends OfficeFrameTestCase {
 					.getStatusCode());
 			assertEquals("Incorrect redirect URL", redirectUrl, response
 					.getFirstHeader("Location").getValue());
-			response.getEntity().consumeContent();
+			response.getEntity().getContent().close();
 
 			// Undertake redirect to ensure parameters and entity are maintained
 			response = this.client.execute(new HttpGet(redirectUrl));

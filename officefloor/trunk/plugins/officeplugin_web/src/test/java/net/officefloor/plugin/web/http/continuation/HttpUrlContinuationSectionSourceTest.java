@@ -28,8 +28,8 @@ import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.work.WorkSectionSource;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
@@ -44,12 +44,9 @@ import net.officefloor.plugin.web.http.session.HttpSessionManagedObjectSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Tests the {@link HttpUrlContinuationSectionSource}.
@@ -148,7 +145,7 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		HttpServerSocketManagedObjectSource.autoWire(source, 7878, "ROUTE",
 				HttpRouteWorkSource.TASK_NAME);
 		HttpsServerSocketManagedObjectSource.autoWire(source, 7979,
-				MockHttpServer.getSslEngineSourceClass(), "ROUTE",
+				HttpTestUtil.getSslEngineSourceClass(), "ROUTE",
 				HttpRouteWorkSource.TASK_NAME);
 		AutoWireSection route = source.addSection("ROUTE",
 				WorkSectionSource.class.getName(),
@@ -186,10 +183,10 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		assertSame("Incorrect URI link", link, registeredUriLinks[0]);
 
 		// Create the client (without redirect)
-		HttpParams params = new BasicHttpParams();
-		params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		HttpClient client = new DefaultHttpClient(params);
-		MockHttpServer.configureHttps(client, 7979);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		HttpTestUtil.configureHttps(builder);
+		HttpTestUtil.configureNoRedirects(builder);
+		CloseableHttpClient client = builder.build();
 
 		// Obtain the host name
 		String hostName = HttpApplicationLocationManagedObjectSource
@@ -218,19 +215,19 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 					.getStatusCode());
 			assertEquals("Incorrect redirect location", urlRedirect, response
 					.getFirstHeader("Location").getValue());
-			response.getEntity().consumeContent();
+			response.getEntity().getContent().close();
 
 			// Ensure servicing request
 			response = client.execute(new HttpGet(urlRedirect));
 			assertEquals("Should be successful", 200, response.getStatusLine()
 					.getStatusCode());
 			assertEquals("Incorrect response", "SERVICED",
-					MockHttpServer.getEntityBody(response));
+					HttpTestUtil.getEntityBody(response));
 
 		} finally {
 			try {
 				// Ensure stop client
-				client.getConnectionManager().shutdown();
+				client.close();
 			} finally {
 				// Ensure stop application
 				officeFloor.closeOfficeFloor();

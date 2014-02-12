@@ -27,6 +27,7 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.request.config.CommunicationConfig;
 import net.officefloor.plugin.socket.server.http.request.config.HeaderConfig;
 import net.officefloor.plugin.socket.server.http.request.config.ProcessConfig;
@@ -307,7 +308,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			HttpResponse methodResponse = client.execute(method);
 
 			// Obtain the response body
-			String actualResponseBody = MockHttpServer
+			String actualResponseBody = HttpTestUtil
 					.getEntityBody(methodResponse);
 
 			// Validate no failure in processing

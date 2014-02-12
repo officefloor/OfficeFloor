@@ -76,8 +76,7 @@ public class OfficeBuildingTestUtil {
 	 */
 	public static File getUserLocalRepository() {
 		try {
-			return ClassPathFactoryImpl
-					.getUserLocalRepository(new DefaultPlexusContainer());
+			return ClassPathFactoryImpl.getUserLocalRepository();
 		} catch (Exception ex) {
 			throw OfficeFrameTestCase.fail(ex);
 		}

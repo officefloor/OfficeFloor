@@ -26,13 +26,12 @@ import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Ensure able to use {@link HttpServerSocketManagedObjectSource} with the
@@ -47,7 +46,7 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 	 */
 	public void testCallAutoWiredHttpServer() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 		final AutoWireOfficeFloorSource autoWire = new AutoWireOfficeFloorSource();
 
 		// Add the section to handle the HTTP request
@@ -58,35 +57,31 @@ public class AutoWireHttpSocketTest extends OfficeFrameTestCase {
 		HttpServerSocketManagedObjectSource.autoWire(autoWire, PORT, "TEST",
 				"handleRequest");
 
-		// Create the client
-		HttpClient client = new DefaultHttpClient();
-
 		// Open the OfficeFloor
 		AutoWireOfficeFloor officeFloor = autoWire.openOfficeFloor();
 		try {
 
-			// Send request
-			HttpGet request = new HttpGet("http://localhost:" + PORT);
-			org.apache.http.HttpResponse response = client.execute(request);
+			try (CloseableHttpClient client = HttpTestUtil
+					.createHttpClient(false)) {
 
-			// Ensure request successful
-			assertEquals("Request must be successful", 200, response
-					.getStatusLine().getStatusCode());
+				// Send request
+				HttpGet request = new HttpGet("http://localhost:" + PORT);
+				org.apache.http.HttpResponse response = client.execute(request);
 
-			// Ensure appropriate response
-			assertEquals("Incorrect response", "hello world",
-					MockHttpServer.getEntityBody(response));
+				// Ensure request successful
+				assertEquals("Request must be successful", 200, response
+						.getStatusLine().getStatusCode());
+
+				// Ensure appropriate response
+				assertEquals("Incorrect response", "hello world",
+						HttpTestUtil.getEntityBody(response));
+
+			}
 
 		} finally {
-			try {
-				// Ensure stop client
-				client.getConnectionManager().shutdown();
-
-			} finally {
-				// Ensure OfficeFloor is closed
-				if (officeFloor != null) {
-					officeFloor.closeOfficeFloor();
-				}
+			// Ensure OfficeFloor is closed
+			if (officeFloor != null) {
+				officeFloor.closeOfficeFloor();
 			}
 		}
 	}

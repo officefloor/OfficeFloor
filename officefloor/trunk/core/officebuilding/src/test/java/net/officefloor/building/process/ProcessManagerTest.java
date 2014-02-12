@@ -556,14 +556,15 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		StringWriter expectedLogMessage = new StringWriter();
 		expectedLogMessage.append("WARNING: Failed to initialise process\n");
 		failure.printStackTrace(new PrintWriter(expectedLogMessage, true));
+		String expectedLogMessageText = expectedLogMessage.toString().trim();
 
 		// Obtain the log message
-		String actualLogMessage = factory.getErrContent();
+		String actualLogMessage = factory.getErrContent().trim();
 
 		// Ensure log failure to initialise
 		assertTrue("Should log failure to initialise, but was:\n"
 				+ actualLogMessage,
-				factory.getErrContent().endsWith(expectedLogMessage.toString()));
+				actualLogMessage.endsWith(expectedLogMessageText));
 	}
 
 	/**

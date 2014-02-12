@@ -26,8 +26,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.HttpAuthentication;
@@ -36,9 +36,10 @@ import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Abstract functionality for integration testing of the
@@ -52,12 +53,12 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 	/**
 	 * Port to use for testing.
 	 */
-	private final int PORT = MockHttpServer.getAvailablePort();
+	private final int PORT = HttpTestUtil.getAvailablePort();
 
 	/**
-	 * {@link HttpClient} to use for testing.
+	 * {@link CloseableHttpClient} to use for testing.
 	 */
-	private final DefaultHttpClient client = new DefaultHttpClient();
+	private CloseableHttpClient client = HttpTestUtil.createHttpClient(false);
 
 	/**
 	 * {@link AutoWireOfficeFloor}.
@@ -107,7 +108,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 	protected void tearDown() throws Exception {
 		// Stop client then server
 		try {
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 		} finally {
 			if (this.officeFloor != null) {
 				this.officeFloor.closeOfficeFloor();
@@ -116,12 +117,34 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 	}
 
 	/**
-	 * Obtains the {@link HttpClient}.
+	 * Use credentials.
 	 * 
-	 * @return {@link HttpClient}.
+	 * @param realm
+	 *            Security realm.
+	 * @param scheme
+	 *            Security scheme.
+	 * @param username
+	 *            User name.
+	 * @param password
+	 *            Password.
+	 * @return {@link CredentialsProvider}.
+	 * @throws IOException
+	 *             If fails to use credentials.
 	 */
-	protected DefaultHttpClient getHttpClient() {
-		return this.client;
+	protected CredentialsProvider useCredentials(String realm, String scheme,
+			String username, String password) throws IOException {
+
+		// Close the existing client
+		this.client.close();
+
+		// Use client with credentials
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		CredentialsProvider provider = HttpTestUtil.configureCredentials(
+				builder, realm, scheme, username, password);
+		this.client = builder.build();
+
+		// Return the credentials provider
+		return provider;
 	}
 
 	/**
@@ -146,10 +169,11 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 			org.apache.http.HttpResponse response = this.client
 					.execute(request);
 			int status = response.getStatusLine().getStatusCode();
-			String body = MockHttpServer.getEntityBody(response);
+			String body = HttpTestUtil.getEntityBody(response);
 
 			// Verify response
-			assertEquals("Should be successful. Response: " + body,
+			assertEquals("Should be successful. Response: " + body + " ["
+					+ response.getStatusLine().getReasonPhrase() + "]",
 					expectedStatus, status);
 			assertEquals("Incorrect response body", expectedBodyContent, body);
 

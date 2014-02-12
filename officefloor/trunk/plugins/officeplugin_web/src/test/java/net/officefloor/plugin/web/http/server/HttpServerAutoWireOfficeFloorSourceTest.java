@@ -29,8 +29,8 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.ssl.protocol.SslCommunicationProtocol;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpApplicationStateful;
@@ -45,7 +45,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link HttpServerAutoWireOfficeFloorSource}.
@@ -73,19 +73,14 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	/**
 	 * {@link HttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
-
-	@Override
-	protected void setUp() throws Exception {
-		// Configure the client
-		MockHttpServer.configureHttps(this.client, 7979);
-	}
+	private final CloseableHttpClient client = HttpTestUtil
+			.createHttpClient(true);
 
 	@Override
 	protected void tearDown() throws Exception {
 		try {
 			// Stop the client
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 
 		} finally {
 			// Ensure close
@@ -127,7 +122,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testInitiateHttpPort() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 
 		// Construct HTTP instance with specified port
 		this.source = new HttpServerAutoWireOfficeFloorSource(PORT);
@@ -145,12 +140,12 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testInitiateHttpsPort() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
-		final int SECURE_PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
+		final int SECURE_PORT = HttpTestUtil.getAvailablePort();
 
 		// Construct HTTP instance with specified port
 		this.source = new HttpServerAutoWireOfficeFloorSource(PORT,
-				SECURE_PORT, MockHttpServer.getSslEngineSourceClass());
+				SECURE_PORT, HttpTestUtil.getSslEngineSourceClass());
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
@@ -166,7 +161,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testAddHttpSocket() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 
 		// Specify the HTTP port
 		this.source.addHttpServerSocket(PORT);
@@ -184,11 +179,11 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testAddHttpsSocket() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 
 		// Specify the HTTPS port
 		this.source.addHttpsServerSocket(PORT,
-				MockHttpServer.getSslEngineSourceClass());
+				HttpTestUtil.getSslEngineSourceClass());
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
@@ -203,7 +198,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testAddSameHttpSocketTwice() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 
 		// Add the port twice
 		AutoWireObject one = this.source.addHttpServerSocket(PORT);
@@ -223,13 +218,13 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testAddSameHttpsSocketTwice() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 
 		// Add the port twice
 		AutoWireObject one = this.source.addHttpsServerSocket(PORT,
-				MockHttpServer.getSslEngineSourceClass());
+				HttpTestUtil.getSslEngineSourceClass());
 		AutoWireObject two = this.source.addHttpsServerSocket(PORT,
-				MockHttpServer.getSslEngineSourceClass());
+				HttpTestUtil.getSslEngineSourceClass());
 		assertSame("Ensure same object for same port", one, two);
 		this.source.openOfficeFloor();
 
@@ -246,7 +241,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testConfigureHttpPort() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 
 		// Open on alternate port (via OfficeFloor configuration)
 		this.source.getOfficeFloorCompiler().addProperty(
@@ -267,7 +262,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testConfigureHttpsPort() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 
 		// Open on alternate port (via OfficeFloor configuration)
 		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
@@ -276,7 +271,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 				String.valueOf(PORT));
 		compiler.addProperty(
 				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
-				MockHttpServer.getSslEngineSourceClass().getName());
+				HttpTestUtil.getSslEngineSourceClass().getName());
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
@@ -292,7 +287,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testConfigureClusterHttpPort() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 
 		// Open on alternate port (via OfficeFloor configuration)
 		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
@@ -317,7 +312,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testConfigureClusterHttpsPort() throws Exception {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 
 		// Open on alternate port (via OfficeFloor configuration)
 		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
@@ -329,7 +324,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 				String.valueOf(PORT));
 		compiler.addProperty(
 				SslCommunicationProtocol.PROPERTY_SSL_ENGINE_SOURCE,
-				MockHttpServer.getSslEngineSourceClass().getName());
+				HttpTestUtil.getSslEngineSourceClass().getName());
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
@@ -344,8 +339,8 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testListenOnMultipleHttpPorts() throws Exception {
 
-		final int EXTRA_PORT_ONE = MockHttpServer.getAvailablePort();
-		final int EXTRA_PORT_TWO = MockHttpServer.getAvailablePort();
+		final int EXTRA_PORT_ONE = HttpTestUtil.getAvailablePort();
+		final int EXTRA_PORT_TWO = HttpTestUtil.getAvailablePort();
 		final int DEFAULT_PORT = 7878; // listen on default port as well
 
 		// Listen on multiple HTTP Server socket
@@ -371,17 +366,17 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testListenOnMultipleHttpsPorts() throws Exception {
 
-		final int EXTRA_PORT_ONE = MockHttpServer.getAvailablePort();
-		final int EXTRA_PORT_TWO = MockHttpServer.getAvailablePort();
+		final int EXTRA_PORT_ONE = HttpTestUtil.getAvailablePort();
+		final int EXTRA_PORT_TWO = HttpTestUtil.getAvailablePort();
 		final int DEFAULT_PORT = 7979; // listen on default port as well
 
 		// Listen on multiple HTTPS Server socket
 		this.source = new HttpServerAutoWireOfficeFloorSource(7878,
-				EXTRA_PORT_ONE, MockHttpServer.getSslEngineSourceClass());
+				EXTRA_PORT_ONE, HttpTestUtil.getSslEngineSourceClass());
 		this.source.addHttpsServerSocket(EXTRA_PORT_TWO,
-				MockHttpServer.getSslEngineSourceClass());
+				HttpTestUtil.getSslEngineSourceClass());
 		this.source.addHttpsServerSocket(DEFAULT_PORT,
-				MockHttpServer.getSslEngineSourceClass());
+				HttpTestUtil.getSslEngineSourceClass());
 		this.source.openOfficeFloor();
 
 		// Obtain the expected content
@@ -573,8 +568,7 @@ public class HttpServerAutoWireOfficeFloorSourceTest extends
 			}
 
 			// Obtain the actual entity
-			String actualResponseEntity = MockHttpServer
-					.getEntityBody(response);
+			String actualResponseEntity = HttpTestUtil.getEntityBody(response);
 
 			// Ensure correct response status
 			assertEquals("Should be successful [" + actualResponseEntity + "]",

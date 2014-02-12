@@ -20,6 +20,7 @@ package net.officefloor.plugin.socket.server.http.integrate;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
@@ -164,7 +165,7 @@ public class HttpServerTest extends MockHttpServer {
 		assertEquals("Incorrect status", 200, status);
 
 		// Read in the body of the response
-		String body = MockHttpServer.getEntityBody(response);
+		String body = HttpTestUtil.getEntityBody(response);
 
 		// Return the body
 		return body;

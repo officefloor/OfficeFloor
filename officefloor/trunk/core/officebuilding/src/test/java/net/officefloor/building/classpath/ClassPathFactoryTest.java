@@ -26,7 +26,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.DefaultPlexusContainer;
 
 /**
  * Tests the {@link ClassPathFactory}.
@@ -107,8 +106,7 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 		// Create the class path factory to test
 		File remoteRepository = new File(".",
 				"src/test/resources/remoteRepository");
-		this.classPathFactory = new ClassPathFactoryImpl(
-				new DefaultPlexusContainer(), this.localRepository,
+		this.classPathFactory = new ClassPathFactoryImpl(this.localRepository,
 				new RemoteRepository[] { new RemoteRepository(remoteRepository
 						.toURI().toURL().toString()) });
 	}
@@ -231,8 +229,8 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 		File pomFile = this.findFile(this.getClass(), "pom.test.xml");
 
 		// Obtain the Maven Project (using build local repository)
-		ClassPathFactoryImpl factory = new ClassPathFactoryImpl(
-				new DefaultPlexusContainer(), null, new RemoteRepository[0]);
+		ClassPathFactoryImpl factory = new ClassPathFactoryImpl(null,
+				new RemoteRepository[0]);
 		MavenProject project = factory.getMavenProject(pomFile);
 
 		// Ensure contains appropriate dependencies

@@ -33,8 +33,6 @@ import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
-import org.codehaus.plexus.DefaultPlexusContainer;
-
 /**
  * Tests the {@link OfficeFloorExecutionUnit}.
  * 
@@ -165,7 +163,7 @@ public class OfficeFloorExecutionUnitFactoryTest extends OfficeFrameTestCase {
 				+ OfficeBuildingTestUtil.getUserLocalRepository()
 						.getAbsolutePath();
 		ClassPathFactory classPathFactory = new ClassPathFactoryImpl(
-				new DefaultPlexusContainer(), localRepositoryDirectory,
+				localRepositoryDirectory,
 				new RemoteRepository[] { new RemoteRepository(
 						remoteRepositoryUrl) });
 

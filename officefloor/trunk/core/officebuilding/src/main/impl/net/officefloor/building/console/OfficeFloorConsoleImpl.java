@@ -47,8 +47,6 @@ import net.officefloor.building.process.ProcessException;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessStartListener;
 
-import org.codehaus.plexus.DefaultPlexusContainer;
-
 /**
  * {@link OfficeFloorConsole} implementation.
  * 
@@ -215,7 +213,6 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 			ClassPathFactory classPathFactory;
 			try {
 				classPathFactory = new ClassPathFactoryImpl(
-						new DefaultPlexusContainer(),
 						null,
 						remoteRepositories
 								.toArray(new RemoteRepository[remoteRepositories

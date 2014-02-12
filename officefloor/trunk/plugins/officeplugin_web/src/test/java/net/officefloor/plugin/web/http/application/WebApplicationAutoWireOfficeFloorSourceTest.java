@@ -38,8 +38,8 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
@@ -54,14 +54,11 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Tests the {@link WebApplicationAutoWireOfficeFloorSource}.
@@ -83,9 +80,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	private final WebApplicationAutoWireOfficeFloorSource source = new WebApplicationAutoWireOfficeFloorSource();
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private HttpClient client;
+	private CloseableHttpClient client;
 
 	/**
 	 * Port on which the web application is to run.
@@ -101,7 +98,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	protected void setUp() throws Exception {
 
 		// Configure the port
-		this.port = MockHttpServer.getAvailablePort();
+		this.port = HttpTestUtil.getAvailablePort();
 		this.source.getOfficeFloorCompiler().addProperty(
 				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
 				String.valueOf(this.port));
@@ -110,12 +107,12 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_INPUT_NAME);
 
 		// Configure the secure port
-		this.securePort = MockHttpServer.getAvailablePort();
+		this.securePort = HttpTestUtil.getAvailablePort();
 		this.source.getOfficeFloorCompiler().addProperty(
 				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
 				String.valueOf(this.securePort));
 		HttpsServerSocketManagedObjectSource.autoWire(this.source,
-				this.securePort, MockHttpServer.getSslEngineSourceClass(),
+				this.securePort, HttpTestUtil.getSslEngineSourceClass(),
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_INPUT_NAME);
 
@@ -128,19 +125,17 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 				new AutoWire(HttpSession.class)).setTimeout(60 * 1000);
 
 		// Configure the client (to not redirect)
-		HttpParams params = new BasicHttpParams();
-		params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-		this.client = new DefaultHttpClient(params);
-
-		// Configure HTTPS for client
-		MockHttpServer.configureHttps(this.client, this.securePort);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		HttpTestUtil.configureHttps(builder);
+		HttpTestUtil.configureNoRedirects(builder);
+		this.client = builder.build();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		try {
 			// Stop the client
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 		} finally {
 			// Ensure close
 			AutoWireManagement.closeAllOfficeFloors();
@@ -1767,7 +1762,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 						.getFirstHeader("Location").getValue());
 
 				// Consume response to allow sending next request
-				response.getEntity().consumeContent();
+				response.getEntity().getContent().close();
 
 				// Handle server relative redirect
 				if (redirectUrl.startsWith("/")) {
@@ -1780,7 +1775,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			}
 
 			// Ensure obtained as expected
-			String actualResponseBody = MockHttpServer.getEntityBody(response);
+			String actualResponseBody = HttpTestUtil.getEntityBody(response);
 			assertEquals("Incorrect response", expectedResponseEntity,
 					actualResponseBody);
 
