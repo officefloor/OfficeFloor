@@ -59,7 +59,7 @@ header {
 	width: 50%;
 }
 
-@media only screen and (max-width: 800px) {
+@media (max-width: 800px) {
 	.header-col {
 		float: none;
 		width: 100%;
@@ -162,7 +162,7 @@ section#steps>h1 {
 	width: 25%;
 }
 
-@media only screen and (max-width: 800px) {
+@media (max-width: 800px) {
 	.steps-col {
 		float: none;
 		width: 100%;
@@ -214,7 +214,7 @@ footer {
 	width: 20%;
 }
 
-@media only screen and (max-width: 800px) {
+@media (max-width: 800px) {
 	.footer-link-col {
 		float: none;
 		width: 100%;
@@ -241,6 +241,7 @@ footer img {
 
 #associate {
 	padding: 1em 20%;
+	clear: right;
 }
 
 #associate>table {
