@@ -1,0 +1,261 @@
+/*
+ * ----------- GENERIC ----------------
+ */
+body,div,p {
+	margin: 0px;
+	padding: 0px;
+}
+
+body {
+	background-color: #FFFFFF;
+	line-height: 180%;
+	font-family: verdana, helvetica, arial, sans-serif;
+}
+
+img {
+	width: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+/*
+ * ----------- HEADER ----------------
+ */
+header {
+	/* Generated from http://www.colorzilla.com/gradient-editor/ */
+	background: #f0f9ff; /* Old browsers */
+	background: -moz-linear-gradient(top, #f0f9ff 0%, #cbebff 47%, #bbe0ff 100%);
+	/* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f0f9ff),
+		color-stop(47%, #cbebff), color-stop(100%, #bbe0ff));
+	/* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #f0f9ff 0%, #cbebff 47%, #bbe0ff 100%);
+	/* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #f0f9ff 0%, #cbebff 47%, #bbe0ff 100%);
+	/* Opera 11.10+ */
+	background: -ms-linear-gradient(top, #f0f9ff 0%, #cbebff 47%, #bbe0ff 100%);
+	/* IE10+ */
+	background: linear-gradient(top, #f0f9ff 0%, #cbebff 47%, #bbe0ff 100%);
+	/* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f0f9ff',
+		endColorstr='#bbe0ff', GradientType=0); /* IE6-9 */
+}
+
+#header-columns {
+	padding: 3% 10%;
+}
+
+.header-col {
+	padding: 1%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	float: left;
+	width: 50%;
+}
+
+@media only screen and (max-width: 800px) {
+	.header-col {
+		float: none;
+		width: 100%;
+		margin-bottom: 2em;
+	}
+}
+
+.header-col-clear {
+	clear: left;
+	visibility: hidden;
+}
+
+img#officefloor-banner {
+	position: relative;
+	left: -1em;
+}
+
+p#version {
+	font-size: small;
+	text-align: center;
+}
+
+p#software-brick {
+	padding-top: 1em;
+	font-size: small;
+}
+
+ul#header-bullets {
+	list-style-type: none;
+	padding: 0px;
+}
+
+ul#header-bullets>li {
+	background-image: url(../images/tick.png);
+	background-repeat: no-repeat;
+	background-position: 0px 0.3em;
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+	padding-left: 3em;
+}
+
+p#link-buttons {
+	margin-top: 1em;
+	text-align: center;
+}
+
+a.link-button {
+	color: #E5E5E5;
+	background-color: #008BFF;
+	border-radius: 0.8em;
+	padding: 0.3em 0.8em;
+	text-transform: uppercase;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+p#license {
+	font-size: x-small;
+	text-align: center;
+	padding: 1em;
+}
+
+/*
+ * ----------- IOC ----------------
+ */
+article#ioc {
+	border-top: 1px solid #c0c0c0;
+	background-color: #e5e5e5;
+}
+
+article#ioc>p {
+	text-align: center;
+	margin: 0em 10% 0em 10%;
+	padding: 0.5em;
+	color: #505050;
+	font-size: large;
+}
+
+/*
+ * ----------- STEPS ----------------
+ */
+section#steps {
+	padding-top: 2em;
+	padding-bottom: 2em;
+}
+
+section#steps>h1 {
+	color: #505050;
+	font-size: 1.3em;
+	font-weight: normal;
+	text-align: left;
+	padding-left: 3em;
+}
+
+.steps-col {
+	padding: 1%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	float: left;
+	width: 25%;
+}
+
+@media only screen and (max-width: 800px) {
+	.steps-col {
+		float: none;
+		width: 100%;
+		margin-bottom: 1em;
+	}
+}
+
+.steps-col-clear {
+	clear: left;
+	visibility: hidden;
+}
+
+.step {
+	text-align: left;
+	line-height: 150%;
+	font-size: small;
+	padding: 5px;
+	border-radius: 10px;
+	border: 1px solid #c0c0c0;
+	background-color: #FAFAFA;
+	vertical-align: top;
+}
+
+.step>p {
+	padding-top: 1em;
+}
+
+.step>hr {
+	margin-top: 2em;
+}
+
+/*
+ * ----------- FOOTER ----------------
+ */
+footer {
+	background-color: #BBE0FF;
+	border-top: 1px solid #c0c0c0;
+}
+
+#footer-links {
+	padding: 0em 10%;
+}
+
+.footer-link-col {
+	padding: 3%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	float: left;
+	width: 20%;
+}
+
+@media only screen and (max-width: 800px) {
+	.footer-link-col {
+		float: none;
+		width: 100%;
+	}
+}
+
+.footer-link-col>a {
+	font-size: large;
+}
+
+.footer-link-col>p {
+	font-size: small;
+	line-height: 150%;
+}
+
+.footer-link-col-clear {
+	clear: left;
+	visibility: hidden;
+}
+
+footer img {
+	width: 90px;
+}
+
+#associate {
+	padding: 1em 20%;
+}
+
+#associate>table {
+	background-color: #FFFFFF;
+	padding: 0em 1em;
+	border-radius: 1em;
+}
+
+#copyright {
+	float: right;
+	font-size: small;
+	padding-top: 1em;
+	padding-bottom: 5em;
+}
+
+#copyright-clear {
+	clear: right;
+}
