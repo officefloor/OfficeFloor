@@ -1,294 +1,303 @@
 <html>
 <head>
-	<title>OfficeFloor - True Inversion of Control</title>
-	<meta name="author" content="Daniel Sagenschneider" />
-	<meta http-equiv="Content-Language" content="en" />
-	<link rel="shortcut icon" href="./favicon.ico"/>
-	<script type="text/javascript">var _gaq = _gaq || [];
-				_gaq.push(['_setAccount',
-				'UA-23477455-1']);
-				_gaq.push(['_trackPageview']);
-
-				(function() {
-				var ga
-				= document.createElement('script'); ga.type = 'text/javascript';
-				ga.async = true;
-				ga.src = ('https:' == document.location.protocol ?
-				'https://ssl' :
-				'http://www') + '.google-analytics.com/ga.js';
-				var s =
-				document.getElementsByTagName('script')[0];
-				s.parentNode.insertBefore(ga, s);
-				})();
-	</script>                                                    
-	<script>var woo_settings = {idle_timeout:'300000',
-				domain:'officefloor.net'};
-				(function(){
-				var wsc =
-				document.createElement('script');
-				wsc.src =
-				document.location.protocol+'//static.woopra.com/js/woopra.js';
-				wsc.type = 'text/javascript';
-				wsc.async = true;
-				var ssc =
-				document.getElementsByTagName('script')[0];
-				ssc.parentNode.insertBefore(wsc, ssc);
-				})();
-	</script>
-	<style type="text/css" media="all">
-	
-html, body {
-	min-width: 100%;
-}
-
-body, div, p {
-	margin: 0px; 
-	padding: 0px;
-}
-	
-body {
-	background: none repeat scroll 0 0 #FFFFFF;
-	line-height: 180%;
-	font-family: verdana,helvetica,arial,sans-serif;
-}
-
-a {
-	text-decoration: none;
-}
-a:hover {
-	text-decoration: underline;
-}
-
-h2 {
-	color: #505050; 
-	font-size: 1.3em; 
-	font-weight: normal;
-	text-align: left;
-	padding-left: 3em;
-}
-
-iframe {
-	width: 100%;
-	border: 0px;
-}
-
-.introduction {
-  /* Generated from http://www.colorzilla.com/gradient-editor/ */
-  background: #f0f9ff; /* Old browsers */
-  background: -moz-linear-gradient(top,  #f0f9ff 0%, #cbebff 47%, #bbe0ff 100%); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f0f9ff), color-stop(47%,#cbebff), color-stop(100%,#bbe0ff)); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#bbe0ff 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#bbe0ff 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#bbe0ff 100%); /* IE10+ */
-  background: linear-gradient(top,  #f0f9ff 0%,#cbebff 47%,#bbe0ff 100%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f0f9ff', endColorstr='#bbe0ff',GradientType=0 ); /* IE6-9 */
-}
-
-.linkButton {
-	color: #E5E5E5;
-	background-color: #008BFF;
-	border-radius: 10px;
-	padding: 5px 10px;
-	text-transform: uppercase;
-	text-decoration: none;
-	font-weight: bold;
-}
-
-	</style>	
+<title>OfficeFloor - True Inversion of Control</title>
+<meta name="author" content="Daniel Sagenschneider" />
+<meta http-equiv="Content-Language" content="en" />
+<link rel="shortcut icon" href="./favicon.ico" />
+<link rel="stylesheet" href="./css/Landing.css" type="text/css" />
 </head>
 <body>
 
 
-<div class="introduction" style="width: 100%">
-	<table style="margin: 0px auto; padding-top: 2em">
-		<tr>
-	
-		<td style="width: 500px; height: 100%; padding: 1em; vertical-align: top">
-			<img style="width: 100%" src="./images/OfficeFloorBannerImage.png" />
-			<p style="font-size: small; text-align: center" class="version">v2.15.0</p>
-			<br />
-			<p><font size="2">Moulding the <i><a href="./mission.html">Software Brick</a></i></font></p>
-			<br />
+	<header>
+		<div id="header-columns">
+			<div class="header-col">
+				<img id="officefloor-banner"
+					src="http://www.officefloor.net/images/OfficeFloorBannerImage.png"
+					alt="OfficeFloor" />
+				<p id="version">v2.15.0</p>
+				<p id="software-brick">
+					Moulding the <em><a href="./mission.html">Software Brick</a></em>
+				</p>
+				<ul id="header-bullets">
+					<li>Create a working prototype in minutes</li>
+					<li>Easily enhance the prototype to an application</li>
+					<li>Continuously deliver new enhancements</li>
+					<li>Self documenting for Agile development</li>
+				</ul>
+				<p id="link-buttons">
+					<a class="link-button" href="./install.html">Install</a> <a
+						class="link-button" href="./tutorials/index.html">Tutorials</a>
+				</p>
+			</div>
+			<div class="header-col">
+				<img src="./images/landing_application_woof.png"
+					alt="Example OfficeFloor Graphical Configuration" />
+				<p id="license">
+					OfficeFloor is freely distributed under GPL and the source is
+					available <a href="./source-repository.html">here</a>.
+				</p>
+			</div>
+			<div class="header-col-clear"></div>
+		</div>
+	</header>
+
+
+	<article id="ioc">
+		<p>Inversion of Control = Dependency Injection + Thread Injection
+			+ Continuation Injection</p>
+	</article>
+
+
+	<section id="steps">
+		<h1>Four steps to build an OfficeFloor application</h1>
+		<div class="steps-col">
+			<article class="step">
+				<img src="./images/OfficeFloor_StepOne.png"
+					alt="OfficeFloor Step One" />
+				<p>
+					<strong>Write some HTML</strong>
+				</p>
+				<p>OfficeFloor dynamic web pages only require the following 3
+					non-obtrusive tags:</p>
+				<ul>
+					<li><strong>${bean ... $}</strong> , <strong>${property}</strong>
+						: allows dynamic content from POJOs (plain old Java objects) to be
+						rendered on the web page</li>
+					<li><strong>#{link}</strong> : allows indirection of web page
+						links to enable graphical configuration of the web site navigation</li>
+					<li><strong>&lt;!-- {section} --&gt;</strong> : segments the
+						web page into functions</li>
+				</ul>
+				<hr />
+				<p>
+					The reason for using non-obtrusive tags in the OfficeFloor web
+					pages is to allow using WYSIWYG web design tools (e.g. <a
+						href="http://www.eclipse.org/webtools">Web Tools Platform</a>, <a
+						href="http://www.adobe.com/products/dreamweaver.html">DreamWeaver</a>,
+					<a href="http://kompozer.net">KompoZer</a>) to create and edit the
+					web pages.
+				</p>
+				<p>Also reviewers can open the raw web pages in any web browser.
+					This makes for faster feedback loops with the Web Designer enabling
+					the right look and feel for the web application.</p>
+			</article>
+		</div>
+		<div class="steps-col">
+			<article class="step">
+				<img src="./images/OfficeFloor_StepTwo.png"
+					alt="OfficeFloor Step Two." />
+				<p>
+					<strong>Write some methods</strong>
+				</p>
+				<p>The application logic is written with POJOs (plain old Java
+					objects) but with a slightly different focus to many dependency
+					injection frameworks. OfficeFloor injects the dependency as a
+					parameter into the method rather than into the object. This
+					difference is key to OfficeFloor's simplicity yet power!</p>
+				<hr />
+				<p>
+					Dependency injection into methods is fundamental to <strong>Inversion
+						of Control</strong> as methods are the natural building blocks for managed
+					code. The JEE API's highlight this:
+				</p>
+				<ul>
+					<li>Servlet has the service(...) method</li>
+					<li>JMS has the onMessage(...) method</li>
+					<li>Session Beans contain methods run within a context</li>
+				</ul>
+				<p>
+					OfficeFloor focuses on the method and its <strong>Dependency
+						Injection</strong> and the invoking thread (<strong>Thread
+						Injection</strong>).
+				</p>
+			</article>
+		</div>
+		<div class="steps-col">
+			<article class="step">
+				<img src="./images/OfficeFloor_StepThree.png"
+					alt="OfficeFloor Step Three." />
+				<p>
+					<strong>Draw some lines</strong>
+				</p>
+				<br />
+				<p>
+					The web pages and POJO methods are connected together via
+					OfficeFloor's <strong>Task Orchestration</strong> providing a
+					cohesive application.
+				</p>
+				<hr />
+				<p>OfficeFloor's task orchestration is configured graphically
+					which improves application development by:</p>
+				<ul>
+					<li>providing a visual representation that all stakeholders
+						can use to understand and review the application</li>
+					<li>making OfficeFloor applications self documenting, which is
+						great for Agile and Support teams</li>
+					<li>simplifying application changes</li>
+				</ul>
+				<p>
+					No additional coding/configuration is required for task
+					orchestration, as OfficeFloor is built from the ground up with <strong>Continuation
+						Injection</strong>. This enables development teams to focus on the web
+					pages and POJOs.
+				</p>
+			</article>
+		</div>
+		<div class="steps-col">
+			<article class="step">
+				<img src="./images/OfficeFloor_StepFour.png"
+					alt="OfficeFloor Step Four." />
+				<p>
+					<strong>You're ready to go</strong>
+				</p>
+				<p>The run anywhere flexibility provided by OfficeFloor's
+					inversion of control fundamentals means that applications built
+					with OfficeFloor can be deployed anywhere, including:</p>
+				<ul>
+					<li>on the developer's workstation</li>
+					<li>as a stand-alone application</li>
+					<li>within an existing JEE Application Server</li>
+					<li>by a Cloud Computing provider</li>
+				</ul>
+				<hr />
+				<p>
+					The <strong>build once run anywhere</strong> capability of
+					OfficeFloor provides flexibility to make the best deployment
+					decisions for the application - both now and in the future.
+				</p>
+			</article>
+		</div>
+		<div class="steps-col-clear"></div>
+	</section>
+
+	<footer>
+		<div id="footer-links">
+			<div class="footer-link-col">
+				<a href="./eclipse/index.html">Eclipse</a>
+				<p>Install the Eclipse Plug-in and try out OfficeFloor</p>
+			</div>
+			<div class="footer-link-col">
+				<a href="./tutorials/index.html">Tutorials</a>
+				<p>Check out the tutorials covering various features of
+					OfficeFloor</p>
+			</div>
+			<div class="footer-link-col">
+				<a href="./mission.html">Mission</a>
+				<p>Read the mission statement of the OfficeFloor team and get
+					involved</p>
+			</div>
+			<div class="footer-link-col">
+				<a href="http://officefloor.wordpress.com">Blog</a>
+				<p>Get the latest information regarding OfficeFloor</p>
+			</div>
+			<div class="footer-link-col">
+				<a href="./getting-help.html">Help</a>
+				<p>Get help in using Officefloor</p>
+			</div>
+			<div class="footer-link-col-clear"></div>
+		</div>
+
+		<div id="associate">
 			<table>
-				<tr><td><img src="./images/tick.png" /></td><td>Create a working prototype in minutes</td></tr>
-				<tr><td><img src="./images/tick.png" /></td><td>Easily enhance the prototype to an application</td></tr>
-				<tr><td><img src="./images/tick.png" /></td><td>Continuously deliver new enhancements</td></tr>
-				<tr><td><img src="./images/tick.png" /></td><td>Self documenting for Agile development</td></tr>
+				<tr>
+					<td>
+						<!-- AddThis Button BEGIN -->
+						<div
+							class="addthis_toolbox addthis_default_style addthis_32x32_style">
+							<a class="addthis_button_preferred_1"></a> <a
+								class="addthis_button_preferred_2"></a> <a
+								class="addthis_button_preferred_3"></a> <a
+								class="addthis_button_preferred_4"></a> <a
+								class="addthis_button_compact"></a>
+							<!--  <a
+				class="addthis_counter addthis_bubble_style"></a>-->
+						</div> <script type="text/javascript"
+							src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=sagenschneider"></script>
+						<!-- AddThis Button END -->
+					</td>
+
+					<td><a href="http://maven.apache.org/"><img
+							src="http://maven.apache.org/images/logos/maven-feather.png" /></a></td>
+
+					<td><a
+						href="http://marketplace.eclipse.org/content/officefloor"><img
+							src="http://www.eclipse.org/artwork/eclipseready/images/rea_eclipse_pos_logo_fc_sm.jpg" /></a></td>
+
+					<td><a href="http://sourceforge.net/"><img
+							src="http://sflogo.sourceforge.net/sflogo.php?group_id=156349&amp;type=1" /></a></td>
+
+					<td><a
+						href="http://sourceforge.net/donate/index.php?group_id=156349"><img
+							src="http://images.sourceforge.net/images/project-support.jpg" /></a></td>
+				</tr>
 			</table>
-			<p style="margin-top: 2em; margin-bottom: 1em; text-align: center">
-				<a class="linkButton" href="./install.html">Install</a>
-				<a class="linkButton" href="./tutorials/index.html">Tutorials</a>
-			</p>
-		</td>
+		</div>
 
-		<td style="width: 550px; height: 100%; padding: 1em; vertical-align: top">
-			<img style="width: 100%" src="./images/landing_application_woof.png" alt="Example OfficeFloor Graphical Configuration" />
-			<br />
-			<br />
-			<p style="font-size: small; padding: 0em 1em 0em 1em">OfficeFloor is freely distributed under GPL and the source is available <a href="./source-repository.html">here</a>.</p>
-		</td>
-	
-		</tr>
-	</table>
-</div>
+		<div id="copyright">
+			<p>Copyright &#169; 2005-2014. All Rights Reserved.</p>
+		</div>
+		<div id="copyright-clear"></div>
+	</footer>
 
 
-<div style="width: 100%; border-top: 1px solid #c0c0c0; background-color: #e5e5e5">
-	<p style="text-align: center; margin: 0em 10% 0em 10%; padding: 0.5em; color: #505050; font-size: large">Inversion of Control = Dependency Injection + Thread Injection + Continuation Injection</p>
-</div>
+	<script type="text/javascript">
+		// Google
+		var _gaq = _gaq || [];
+		_gaq.push([ '_setAccount', 'UA-23477455-1' ]);
+		_gaq.push([ '_trackPageview' ]);
 
-
-<div style="width: 100%; padding: 2em 0em 3em 0em">
-	<h2>Four steps to build an OfficeFloor application</h2>
-	<table style="margin: 0px auto; text-align: left; line-height: 150%; font-size: small">
-		<tr>
-	
-		<td style="vertical-align: top; width: 300px; height: 100%; padding: 5px; border-radius: 10px; border: 1px solid #c0c0c0; background-color: #FAFAFA">
-			<img style="width: 100%" src="./images/OfficeFloor_StepOne.png" alt="OfficeFloor Step One" />
-			<br/>
-			<br/>
-			<p><b>Write some HTML</b></p>
-			<br/>
-			<p>OfficeFloor dynamic web pages only require the following 3 non-obtrusive tags:</p>
-			<ul>
-				<li><b>${bean ... $}</b> , <b>${property}</b> : allows dynamic content from POJOs (plain old Java objects) to be rendered on the web page</li>
-				<li><b>#{link}</b> : allows indirection of web page links to enable graphical configuration of the web site navigation</li>
-   				<li><b>&lt;!-- {section} --&gt;</b> : segments the web page into functions</li>
-			</ul>
-			<br/>
-			<hr/>
-			<p>The reason for using non-obtrusive tags in the OfficeFloor web pages is to allow using WYSIWYG web design tools (e.g. <a href="http://www.eclipse.org/webtools">Web Tools Platform</a>, <a href="http://www.adobe.com/products/dreamweaver.html">DreamWeaver</a>, <a href="http://kompozer.net">KompoZer</a>) to create and edit the web pages.</p>
-			<p>Also reviewers can open the raw web pages in any web browser.  This makes for faster feedback loops with the Web Designer enabling the right look and feel for the web application.</p>
-		</td>
-
-		<td style="vertical-align: top; width: 300px; height: 100%; padding: 5px; border-radius: 10px; border: 1px solid #c0c0c0; background-color: #FAFAFA">
-			<img style="width: 100%" src="./images/OfficeFloor_StepTwo.png" alt="OfficeFloor Step Two." />
-			<br/>
-			<br/>
-			<p><b>Write some methods</b></p>
-			<br/>
-			<p>The application logic is written with POJOs (plain old Java objects) but with a slightly different focus to many dependency injection frameworks.  OfficeFloor injects the dependency as a parameter into the method rather than into the object.  This difference is key to OfficeFloor's simplicity yet power!</p>
-			<br/>
-			<hr/>
-			<p>Dependency injection into methods is fundamental to <b>Inversion of Control</b> as methods are the natural building blocks for managed code.  The JEE API's highlight this:</p>
-			<ul>
-				<li>Servlet has the service(...) method</li>
-				<li>JMS has the onMessage(...) method</li>
-				<li>Session Beans contain methods run within a context</li>
-			</ul>
-			<p>OfficeFloor focuses on the method and its <b>Dependency Injection</b> and the invoking thread (<b>Thread Injection</b>).</p>
-		</td>
-
-		<td style="vertical-align: top; width: 300px; height: 100%; padding: 5px; border-radius: 10px; border: 1px solid #c0c0c0; background-color: #FAFAFA">
-			<img style="width: 100%" src="./images/OfficeFloor_StepThree.png" alt="OfficeFloor Step Three." />
-			<br/>
-			<br/>
-			<p><b>Draw some lines</b></p>
-			<br/>
-			<p>The web pages and POJO methods are connected together via OfficeFloor's <b>Task Orchestration</b> providing a cohesive application.</p>
-			<br/>
-			<hr/>
-			<p>OfficeFloor's task orchestration is configured graphically which improves application development by:</p>
-			<ul>
-				<li>providing a visual representation that all stakeholders can use to understand and review the application</li>
-				<li>making OfficeFloor applications self documenting, which is great for Agile and Support teams</li>
-				<li>simplifying application changes</li>
-			</ul>
-			<p>No additional coding/configuration is required for task orchestration, as OfficeFloor is built from the ground up with <b>Continuation Injection</b>.  This enables development teams to focus on the web pages and POJOs.</p>
-		</td>
-
-		<td style="vertical-align: top; width: 300px; height: 100%; padding: 5px; border-radius: 10px; border: 1px solid #c0c0c0; background-color: #FAFAFA">
-			<img style="width: 100%" src="./images/OfficeFloor_StepFour.png" alt="OfficeFloor Step Four." />
-			<br/>
-			<br/>
-			<p><b>You're ready to go</b></p>
-			<br/>
-			<p>The run anywhere flexibility provided by OfficeFloor's inversion of control fundamentals means that applications built with OfficeFloor can be deployed anywhere, including:</p>
-			<ul>
-				<li>on the developer's workstation</li>
-				<li>as a stand-alone application</li>
-				<li>within an existing JEE Application Server</li>
-				<li>by a Cloud Computing provider</li>
-			</ul>
-			<br/>
-			<hr/>
-			<p>The <b>build once run anywhere</b> capability of OfficeFloor provides flexibility to make the best deployment decisions for the application - both now and in the future.</p>
-		</td>
-		
-		</tr>
-	</table>
-</div>
-
-
-<div style="background-color: #BBE0FF; border-top: 1px solid #c0c0c0">
-	<table style="margin: 0px auto; font-size: small; line-height: 150%">
-		<tr>
-	
-		<td style="width: 125px; vertical-align: top; padding: 3em">
-			<a style="font-size: large" href="./eclipse/index.html">Eclipse</a>
-			<p>Install the Eclipse Plug-in and try out OfficeFloor</p>
-		</td>
-	
-		<td style="width: 125px; vertical-align: top; padding: 3em">
-			<a style="font-size: large" href="./tutorials/index.html">Tutorials</a>
-			<p>Check out the tutorials covering various features of OfficeFloor</p>
-		</td>
-	
-		<td style="width: 125px; vertical-align: top; padding: 3em">
-			<a style="font-size: large" href="./mission.html">Mission</a>
-			<p>Read the mission statement of the OfficeFloor team and get involved</p>
-		</td>
-	
-		<td style="width: 125px; vertical-align: top; padding: 3em">
-			<a style="font-size: large" href="http://officefloor.wordpress.com">Blog</a>
-			<p>Get the latest information regarding OfficeFloor</p>
-		</td>
-	
-		<td style="width: 125px; vertical-align: top; padding: 3em">
-			<a style="font-size: large" href="./getting-help.html">Help</a>
-			<p>Get help in using Officefloor</p>
-		</td>
-		
-		</tr>
-	</table>
-</div>
-
-
-<div style="width: 100%; padding-top: 2em; padding-bottom: 5em; background-color: #BBE0FF">
-	<table style=" margin: 0px auto; padding: 0em 1em 0em 1em; background-color: #FFFFFF; border-radius: 10px">
-		<tr style="padding: 0em 1em 0em 1em">
-		
-		<td style="vertical-align: middle">
-		
-<!-- AddThis Button BEGIN -->
-<div class="addthis_toolbox addthis_default_style addthis_32x32_style">
-<a class="addthis_button_preferred_1"></a>
-<a class="addthis_button_preferred_2"></a>
-<a class="addthis_button_preferred_3"></a>
-<a class="addthis_button_preferred_4"></a>
-<a class="addthis_button_compact"></a>
-<a class="addthis_counter addthis_bubble_style"></a>
-</div>
-<script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=sagenschneider"></script>
-<!-- AddThis Button END -->
-		
-		</td>
-		<td style="vertical-align: middle"><a href="http://maven.apache.org/"><img src="http://maven.apache.org/images/logos/maven-feather.png" width="90px" /></a></td>
-		<td style="vertical-align: middle"><a href="http://marketplace.eclipse.org/content/officefloor"><img src="http://www.eclipse.org/artwork/eclipseready/images/rea_eclipse_pos_logo_fc_sm.jpg" width="90px" height="90px" /></a></td>
-		<td style="vertical-align: middle"><a href="http://sourceforge.net/"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=156349&amp;type=1" width="90px" /></a></td>
-		<td style="vertical-align: middle"><a href="http://sourceforge.net/donate/index.php?group_id=156349"><img src="http://images.sourceforge.net/images/project-support.jpg" width="90px" /></a></td>
-		
-		</tr>
-	</table>
-</div>
-
-
-<div style="width: 100%; padding-top: 2em; padding-bottom: 5em; background-color: #BBE0FF">
-	<div style="float:right; font-size:small">
-    	Copyright &#169; 2005-2013. All Rights Reserved.
-	</div>
-</div>
-
+		(function() {
+			var ga = document.createElement('script');
+			ga.type = 'text/javascript';
+			ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+					: 'http://www')
+					+ '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0];
+			s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
+	<script type="text/javascript">
+		// Woopra
+		var woo_settings = {
+			idle_timeout : '300000',
+			domain : 'officefloor.net'
+		};
+		(function() {
+			var wsc = document.createElement('script');
+			wsc.src = document.location.protocol
+					+ '//static.woopra.com/js/woopra.js';
+			wsc.type = 'text/javascript';
+			wsc.async = true;
+			var ssc = document.getElementsByTagName('script')[0];
+			ssc.parentNode.insertBefore(wsc, ssc);
+		})();
+	</script>
+	<script type="text/javascript"
+		src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+	<script type="text/javascript">
+		// Make all step articles the same height
+		var officefloor = {
+			formatColumns : function(colClassName) {
+				var maxHeight = 0;
+				$(colClassName).each(function() {
+					if ($(this).height() > maxHeight) {
+						maxHeight = $(this).height();
+					}
+				});
+				$(colClassName).each(function() {
+					$(this).height(maxHeight);
+				});
+			}
+		};
+		$(window).ready(function() {
+			officefloor.formatColumns('.step');
+		});
+		$(window).resize(function() {
+			officefloor.formatColumns('.step');
+		});
+	</script>
 
 </body>
 </html>
