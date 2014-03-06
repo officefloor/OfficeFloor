@@ -280,12 +280,21 @@
 		// Make all step articles the same height
 		var officefloor = {
 			formatColumns : function(colClassName) {
+
+				// Reset the column heights (to window size)
+				$(colClassName).each(function() {
+					$(this).height('auto');
+				});
+
+				// Obtain max height
 				var maxHeight = 0;
 				$(colClassName).each(function() {
 					if ($(this).height() > maxHeight) {
 						maxHeight = $(this).height();
 					}
 				});
+				
+				// Specify the max height
 				$(colClassName).each(function() {
 					$(this).height(maxHeight);
 				});
