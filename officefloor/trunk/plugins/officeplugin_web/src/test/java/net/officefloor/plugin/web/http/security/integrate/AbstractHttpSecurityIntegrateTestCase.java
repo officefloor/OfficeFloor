@@ -28,6 +28,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
 import net.officefloor.plugin.web.http.application.HttpSecurityAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.security.HttpAuthentication;
@@ -37,7 +38,9 @@ import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -59,6 +62,17 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 	 * {@link CloseableHttpClient} to use for testing.
 	 */
 	private CloseableHttpClient client = HttpTestUtil.createHttpClient(false);
+
+	/**
+	 * {@link HttpClientContext}.
+	 */
+	private HttpClientContext context = new HttpClientContext();
+
+	/**
+	 * FIXME: flag indicating if fix for Digest authentication in that the
+	 * {@link HttpClient} does not send cookies on authentication request.
+	 */
+	private boolean isDigestHttpClientCookieBug = false;
 
 	/**
 	 * {@link AutoWireOfficeFloor}.
@@ -143,6 +157,14 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 				builder, realm, scheme, username, password);
 		this.client = builder.build();
 
+		// Reset the client context
+		this.context = new HttpClientContext();
+
+		// FIXME: determine if HttpClient cookie authentication fix
+		if ("Digest".equalsIgnoreCase(scheme)) {
+			isDigestHttpClientCookieBug = true;
+		}
+
 		// Return the credentials provider
 		return provider;
 	}
@@ -166,8 +188,28 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends
 					+ requestUriPath);
 
 			// Execute the method
-			org.apache.http.HttpResponse response = this.client
-					.execute(request);
+			org.apache.http.HttpResponse response;
+			if (this.isDigestHttpClientCookieBug) {
+				// Use the context to keep cookies
+				response = this.client.execute(request, this.context);
+			} else {
+				// Follow normal use
+				response = this.client.execute(request);
+			}
+
+			/*
+			 * FIXME: work-around for bug in HttpClient no cookies on
+			 * authentication
+			 */
+			if (this.isDigestHttpClientCookieBug
+					&& (response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED)) {
+				// Try authentication again, with the cookie
+				this.context.getTargetAuthState().reset();
+				request.reset();
+				response = this.client.execute(request, this.context);
+			}
+
+			// Obtain the details of the response
 			int status = response.getStatusLine().getStatusCode();
 			String body = HttpTestUtil.getEntityBody(response);
 

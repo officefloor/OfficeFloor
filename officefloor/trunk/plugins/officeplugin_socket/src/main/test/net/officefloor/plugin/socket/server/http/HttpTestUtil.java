@@ -136,12 +136,15 @@ public class HttpTestUtil {
 
 		// Create the HTTP client
 		HttpClientBuilder builder = HttpClientBuilder.create();
+
+		// Configure to be secure client
 		if (isSecure) {
-			// Configure to be secure client
 			configureHttps(builder);
 		}
-		CloseableHttpClient client = builder.build();
 
+		// Create the client
+		CloseableHttpClient client = builder.build();
+		
 		// Return the client
 		return client;
 	}
@@ -203,13 +206,13 @@ public class HttpTestUtil {
 	public static CredentialsProvider configureCredentials(
 			HttpClientBuilder builder, String realm, String scheme,
 			String username, String password) {
-		
+
 		// Provide credentials
 		BasicCredentialsProvider provider = new BasicCredentialsProvider();
 		provider.setCredentials(new AuthScope(null, -1, realm, scheme),
 				new UsernamePasswordCredentials(username, password));
 		builder.setDefaultCredentialsProvider(provider);
-		
+
 		// Return the credentials provider
 		return provider;
 	}
