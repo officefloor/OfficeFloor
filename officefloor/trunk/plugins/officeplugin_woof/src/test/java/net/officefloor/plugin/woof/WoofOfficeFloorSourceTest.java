@@ -20,6 +20,7 @@ package net.officefloor.plugin.woof;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.logging.LogRecord;
 
 import net.officefloor.autowire.AutoWire;
@@ -29,6 +30,7 @@ import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
@@ -36,10 +38,9 @@ import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSourc
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link WoofOfficeFloorSource}.
@@ -49,9 +50,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
 	 * {@link LoggerAssertion} for the {@link WoofLoader}.
@@ -88,7 +89,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		// Shutdown
 		try {
 			try {
-				this.client.getConnectionManager().shutdown();
+				this.client.close();
 			} finally {
 				WoofOfficeFloorSource.stop();
 			}
@@ -154,14 +155,17 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testUnitTestMethods() throws Exception {
 
+		String loopbackAddress = InetAddress.getLoopbackAddress()
+				.getHostAddress();
+		final String connectionMessage = "Connect to localhost:7878 [localhost/"
+				+ loopbackAddress + "] failed: Connection refused";
+
 		// Should not successfully connect
 		try {
 			this.doRequest("/test");
 			fail("Should not be successful");
 		} catch (HttpHostConnectException ex) {
-			assertEquals("Incorrect cause",
-					"Connection to http://localhost:7878 refused",
-					ex.getMessage());
+			assertEquals("Incorrect cause", connectionMessage, ex.getMessage());
 		}
 
 		// Run the application
@@ -174,16 +178,14 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		WoofOfficeFloorSource.stop();
 
 		// Should not successfully connect
-		HttpClient refreshedClient = new DefaultHttpClient();
+		CloseableHttpClient refreshedClient = HttpTestUtil.createHttpClient();
 		try {
 			refreshedClient.execute(new HttpGet("http://localhost:7878/test"));
 			fail("Should not be successful");
 		} catch (HttpHostConnectException ex) {
-			assertEquals("Incorrect cause",
-					"Connection to http://localhost:7878 refused",
-					ex.getMessage());
+			assertEquals("Incorrect cause", connectionMessage, ex.getMessage());
 		} finally {
-			refreshedClient.getConnectionManager().shutdown();
+			refreshedClient.close();
 		}
 	}
 
