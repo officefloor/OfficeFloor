@@ -32,8 +32,8 @@ import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSou
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 import org.junit.Test;
@@ -267,7 +267,7 @@ public class ServerGwtRpcConnectionManagedObjectSourceTest extends
 			throws Exception {
 
 		// Configure the server (run on different port due to URL limitation)
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource(
 				PORT);
 		source.addManagedObject(ServerGwtRpcConnectionManagedObjectSource.class

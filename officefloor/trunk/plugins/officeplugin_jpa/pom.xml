@@ -18,7 +18,7 @@
 		<plugins>
 			<plugin>
 				<groupId>org.datanucleus</groupId>
-				<artifactId>maven-datanucleus-plugin</artifactId>
+				<artifactId>datanucleus-maven-plugin</artifactId>
 				<configuration>
 					<metadataDirectory>${project.build.testOutputDirectory}</metadataDirectory>
 					<api>JPA</api>
@@ -44,7 +44,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-jpa_2.0_spec</artifactId>
+			<artifactId>geronimo-jpa_3.0_spec</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

@@ -32,16 +32,11 @@ import net.officefloor.plugin.gwt.comet.internal.CometEvent;
 import net.officefloor.plugin.gwt.comet.internal.CometInterest;
 import net.officefloor.plugin.gwt.comet.internal.CometRequest;
 import net.officefloor.plugin.gwt.comet.internal.CometResponse;
-import net.officefloor.plugin.gwt.comet.spi.CometRequestServicer;
-import net.officefloor.plugin.gwt.comet.spi.CometRequestServicerManagedObjectSource;
-import net.officefloor.plugin.gwt.comet.spi.CometService;
-import net.officefloor.plugin.gwt.comet.spi.CometServiceManagedObjectSource;
-import net.officefloor.plugin.gwt.comet.spi.PublishedEvent;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnectionManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 /**
@@ -67,7 +62,7 @@ public class CometServiceIntegrationTest extends OfficeFrameTestCase {
 		final long eventTimeout = 500;
 
 		// Start the server
-		this.port = MockHttpServer.getAvailablePort();
+		this.port = HttpTestUtil.getAvailablePort();
 		HttpServerAutoWireOfficeFloorSource server = new HttpServerAutoWireOfficeFloorSource(
 				this.port);
 		server.addManagedObject(

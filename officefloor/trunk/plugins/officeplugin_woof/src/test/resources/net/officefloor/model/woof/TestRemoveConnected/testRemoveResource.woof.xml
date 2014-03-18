@@ -60,10 +60,10 @@
 	<resources />
 
 	<exceptions>
-		<exception class="java.lang.RuntimeException">
+		<exception class="java.io.IOException">
 			<template name="TEMPLATE" />
 		</exception>
-		<exception class="java.io.IOException">
+		<exception class="java.lang.RuntimeException">
 			<input section="SECTION" input="INPUT" />
 		</exception>
 		<exception class="java.sql.SQLException" />

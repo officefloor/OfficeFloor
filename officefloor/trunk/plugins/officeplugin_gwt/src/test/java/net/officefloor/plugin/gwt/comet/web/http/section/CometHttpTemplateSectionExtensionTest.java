@@ -33,20 +33,18 @@ import net.officefloor.plugin.gwt.comet.internal.CometInterest;
 import net.officefloor.plugin.gwt.comet.internal.CometRequest;
 import net.officefloor.plugin.gwt.comet.internal.CometResponse;
 import net.officefloor.plugin.gwt.comet.spi.CometService;
-import net.officefloor.plugin.gwt.comet.web.http.section.CometHttpTemplateSectionExtension;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
 import net.officefloor.plugin.gwt.web.http.section.GwtHttpTemplateSectionExtension;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link OfficeFloorComet} functionality.
@@ -118,7 +116,7 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			String gwtServiceRelativePath) {
 
 		// Start the server
-		int port = MockHttpServer.getAvailablePort();
+		int port = HttpTestUtil.getAvailablePort();
 		startServer(port, templateUri);
 
 		// Subscribe for event
@@ -175,7 +173,7 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			String gwtServiceRelativePath) {
 
 		// Start the server (with manual handling of publishing)
-		int port = MockHttpServer.getAvailablePort();
+		int port = HttpTestUtil.getAvailablePort();
 		startServer(
 				port,
 				templateUri,
@@ -240,7 +238,7 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 			String gwtServiceRelativePath, String linkUri) throws Exception {
 
 		// Start the server (with manual handling of publishing)
-		int port = MockHttpServer.getAvailablePort();
+		int port = HttpTestUtil.getAvailablePort();
 		startServer(port, templateUri);
 
 		// Subscribe for event
@@ -252,17 +250,17 @@ public class CometHttpTemplateSectionExtensionTest extends OfficeFrameTestCase {
 				subscription.checkForResponse());
 
 		// Trigger server to publish an event
-		HttpClient client = new DefaultHttpClient();
-		HttpResponse httpResponse = client.execute(new HttpGet(
-				"http://localhost:" + port + "/" + linkUri
-						+ "-triggerServerEvent"));
-		assertEquals("Ensure successful", 200, httpResponse.getStatusLine()
-				.getStatusCode());
-		assertTrue("Should have a response entity", httpResponse.getEntity()
-				.getContentLength() > 0);
-		assertEquals("Ensure success flag", 1, httpResponse.getEntity()
-				.getContent().read());
-		client.getConnectionManager().shutdown();
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+			HttpResponse httpResponse = client.execute(new HttpGet(
+					"http://localhost:" + port + "/" + linkUri
+							+ "-triggerServerEvent"));
+			assertEquals("Ensure successful", 200, httpResponse.getStatusLine()
+					.getStatusCode());
+			assertTrue("Should have a response entity", httpResponse
+					.getEntity().getContentLength() > 0);
+			assertEquals("Ensure success flag", 1, httpResponse.getEntity()
+					.getContent().read());
+		}
 
 		// Obtain the subscribed event
 		CometResponse response = subscription.waitOnResponse();
