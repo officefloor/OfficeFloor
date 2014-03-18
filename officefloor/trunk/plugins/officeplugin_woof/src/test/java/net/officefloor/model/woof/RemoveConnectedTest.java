@@ -117,14 +117,14 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 	 * template.
 	 */
 	public void testRemoveExceptionLinkedToTemplate() {
-		this.doRemoveExceptionTest(0, RuntimeException.class);
+		this.doRemoveExceptionTest(0, IOException.class);
 	}
 
 	/**
 	 * Ensure able to remove the {@link WoofExceptionModel} linked to a section.
 	 */
 	public void testRemoveExceptionLinkedToSection() {
-		this.doRemoveExceptionTest(1, IOException.class);
+		this.doRemoveExceptionTest(1, RuntimeException.class);
 	}
 
 	/**

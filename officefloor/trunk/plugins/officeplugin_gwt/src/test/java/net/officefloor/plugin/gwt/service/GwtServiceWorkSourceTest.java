@@ -47,7 +47,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
@@ -304,7 +304,7 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 	private <T> T startServer(Class<T> serviceInterfaceType) throws Exception {
 
 		// Configure the server for GWT service
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource(
 				PORT);
 

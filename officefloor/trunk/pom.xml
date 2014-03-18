@@ -76,7 +76,7 @@
 		<jetty-version>8.1.14.v20131031</jetty-version>
 		<gwt-version>2.6.0</gwt-version>
 		<syncrpc-version>0.3</syncrpc-version>
-		<datanucleus-version>3.3.7</datanucleus-version>
+		<datanucleus-version>4.0.0-m1</datanucleus-version>
 		<failsafe-version>2.16</failsafe-version>
 		<ant-jsch-version>1.8.4</ant-jsch-version>
 	</properties>
@@ -326,8 +326,8 @@
 			<dependency>
 				<!-- JEE spec dependencies are only interfaces -->
 				<groupId>org.apache.geronimo.specs</groupId>
-				<artifactId>geronimo-jpa_2.0_spec</artifactId>
-				<version>1.1</version>
+				<artifactId>geronimo-jpa_3.0_spec</artifactId>
+				<version>1.1.1</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
@@ -777,16 +777,8 @@
 				</plugin>
 				<plugin>
 					<groupId>org.datanucleus</groupId>
-					<artifactId>maven-datanucleus-plugin</artifactId>
-					<version>3.2.0-m1</version>
-					<dependencies>
-						<!-- Ensure enhancing uses same version -->
-						<dependency>
-							<groupId>org.datanucleus</groupId>
-							<artifactId>datanucleus-core</artifactId>
-							<version>${datanucleus-version}</version>
-						</dependency>
-					</dependencies>
+					<artifactId>datanucleus-maven-plugin</artifactId>
+					<version>${datanucleus-version}</version>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->

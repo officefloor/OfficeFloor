@@ -27,14 +27,13 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.gwt.service.MockGwtServiceInterface;
 import net.officefloor.plugin.gwt.service.MockGwtServiceInterfaceAsync;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 import com.gdevelop.gwt.syncrpc.SyncProxy;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -59,7 +58,7 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	/**
 	 * HTTP Client.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
 	 * {@link Escalation} from the {@link OfficeFloor}.
@@ -69,7 +68,7 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		// Configure the port
-		this.port = MockHttpServer.getAvailablePort();
+		this.port = HttpTestUtil.getAvailablePort();
 		this.source = new HttpServerAutoWireOfficeFloorSource(this.port);
 	}
 
@@ -199,9 +198,9 @@ public class GwtIntegrationTest extends OfficeFrameTestCase {
 	protected void tearDown() throws Exception {
 		// Shutdown
 		try {
-			AutoWireManagement.closeAllOfficeFloors();
+			this.client.close();
 		} finally {
-			this.client.getConnectionManager().shutdown();
+			AutoWireManagement.closeAllOfficeFloors();
 		}
 
 		// Ensure no escalation failure
