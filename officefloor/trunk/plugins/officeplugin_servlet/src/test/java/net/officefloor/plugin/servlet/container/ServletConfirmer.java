@@ -32,11 +32,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -176,8 +176,7 @@ public class ServletConfirmer extends HttpServlet {
 			server.start();
 
 			// Send request to the server
-			HttpClient client = new DefaultHttpClient();
-			try {
+			try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 				uri = (uri == null ? "" : uri);
 				uri = (uri.startsWith("/") ? uri : "/" + uri);
 				HttpPost request = new HttpPost("http://localhost:" + PORT
@@ -190,8 +189,6 @@ public class ServletConfirmer extends HttpServlet {
 				HttpResponse response = client.execute(request);
 				TestCase.assertEquals("Expecting response to be successful",
 						200, response.getStatusLine().getStatusCode());
-			} finally {
-				client.getConnectionManager().shutdown();
 			}
 
 			// Return the last result

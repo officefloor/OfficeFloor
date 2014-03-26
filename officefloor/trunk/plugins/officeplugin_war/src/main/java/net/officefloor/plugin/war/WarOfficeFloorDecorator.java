@@ -241,8 +241,7 @@ public class WarOfficeFloorDecorator implements OfficeFloorDecorator {
 			OfficeFloorDecoratorContext context) throws IOException {
 
 		// Determine if Web Archive (archive containing web.xml file)
-		try {
-			JarFile archive = new JarFile(rawClassPathFile);
+		try (JarFile archive = new JarFile(rawClassPathFile)) {
 			JarEntry webXml = archive.getJarEntry(WEB_INF_WEB_XML);
 			if (webXml == null) {
 				return false; // no web.xml, so do not decorate

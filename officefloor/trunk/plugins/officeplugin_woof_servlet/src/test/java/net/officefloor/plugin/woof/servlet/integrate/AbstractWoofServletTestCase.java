@@ -21,14 +21,6 @@ import java.io.ByteArrayOutputStream;
 
 import javax.servlet.ServletContext;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.eclipse.jetty.server.Server;
-
-import com.gdevelop.gwt.syncrpc.SyncProxy;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.gwt.comet.internal.CometEvent;
@@ -36,23 +28,30 @@ import net.officefloor.plugin.gwt.comet.internal.CometInterest;
 import net.officefloor.plugin.gwt.comet.internal.CometRequest;
 import net.officefloor.plugin.gwt.comet.internal.CometResponse;
 import net.officefloor.plugin.gwt.comet.internal.CometSubscriptionService;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.servlet.MockDependency;
-import net.officefloor.plugin.woof.servlet.WoofServlet;
 import net.officefloor.plugin.woof.servlet.MockLogic.CometTrigger;
+import net.officefloor.plugin.woof.servlet.WoofServlet;
 import net.officefloor.plugin.woof.servlet.client.MockGwtService;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.eclipse.jetty.server.Server;
+
+import com.gdevelop.gwt.syncrpc.SyncProxy;
 
 /**
  * <p>
  * Abstract tests for the {@link WoofServlet}.
  * <p>
- * This allows testing the {@link WoofServlet} within different JEE
- * Servlet Container implementations.
+ * This allows testing the {@link WoofServlet} within different JEE Servlet
+ * Container implementations.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractWoofServletTestCase extends
-		OfficeFrameTestCase {
+public abstract class AbstractWoofServletTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Port {@link Server} is listening on.
@@ -60,9 +59,9 @@ public abstract class AbstractWoofServletTestCase extends
 	private int port;
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
 	 * Starts the server.
@@ -249,7 +248,7 @@ public abstract class AbstractWoofServletTestCase extends
 	protected void tearDown() throws Exception {
 		try {
 			// Stop the client
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 
 		} finally {
 			// Stop the server

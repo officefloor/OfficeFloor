@@ -19,7 +19,7 @@ package net.officefloor.plugin.woof.servlet.integrate;
 
 import java.io.File;
 
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.servlet.WoofServlet;
 
 import org.eclipse.jetty.server.Server;
@@ -47,7 +47,7 @@ public class JettyWoofServletTest extends
 	protected int startServer(String contextPath) throws Exception {
 
 		// Obtain the port
-		int port = MockHttpServer.getAvailablePort();
+		int port = HttpTestUtil.getAvailablePort();
 
 		// Find the base directory for resources
 		File baseDirectory = new File(".", "src/test/webapp");

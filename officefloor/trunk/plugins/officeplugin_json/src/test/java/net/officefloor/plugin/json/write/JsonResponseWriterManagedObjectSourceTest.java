@@ -28,14 +28,14 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.JsonResponseWriter;
 import net.officefloor.plugin.json.write.JsonResponseWriterManagedObjectSource.Dependencies;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
 /**
@@ -113,8 +113,7 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 				JsonResponseWriterManagedObjectSource.class.getName(), null,
 				new AutoWire(JsonResponseWriter.class));
 		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
-		HttpClient client = new DefaultHttpClient();
-		try {
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Specify the JSON object
 			MockService.object = jsonObject;
@@ -128,12 +127,8 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 					EntityUtils.toString(response.getEntity()));
 
 		} finally {
-			// Ensure stop client and server
-			try {
-				client.getConnectionManager().shutdown();
-			} finally {
-				officeFloor.closeOfficeFloor();
-			}
+			// Ensure stop server (client already closed)
+			officeFloor.closeOfficeFloor();
 		}
 	}
 

@@ -28,13 +28,12 @@ import java.util.List;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gwt.core.ext.ServletContainer;
@@ -49,9 +48,9 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
 	 * Port listening for HTTP requests.
@@ -86,7 +85,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Specify the port
-		this.port = MockHttpServer.getAvailablePort();
+		this.port = HttpTestUtil.getAvailablePort();
 
 		// Obtain the temp location to create necessary directories
 		File tempDir = new File(System.getProperty("java.io.tmpdir"), this
@@ -141,7 +140,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 	protected void tearDown() throws Exception {
 		try {
 			// Stop the client
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 
 		} finally {
 			// Ensure also stop WoOF
@@ -213,7 +212,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		try {
 			// Attempt to start new instance that has invalid configuration
 			this.servletContainer = new WoofServletContainer(logger, "NAME",
-					MockHttpServer.getAvailablePort(), this.webappDirectory,
+					HttpTestUtil.getAvailablePort(), this.webappDirectory,
 					new File[0], OfficeFloorCompiler.newPropertyList()) {
 				@Override
 				protected WoofOfficeFloorSource createWoofOfficeFloorSource() {

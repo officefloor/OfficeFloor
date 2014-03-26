@@ -27,16 +27,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.plugin.servlet.container.source.HttpServletWorkSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Tests integration of {@link HttpServletWorkSource} with dependencies to
@@ -158,17 +158,18 @@ public class HttpServletIntegrateTest extends MockHttpServletServer {
 		});
 
 		// Provide preemptive authentication
-		DefaultHttpClient client = (DefaultHttpClient) this.createHttpClient();
-		client.getCredentialsProvider().setCredentials(
-				new AuthScope(null, -1, "TestRealm"),
-				new UsernamePasswordCredentials("Daniel", "password"));
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		HttpTestUtil.configureCredentials(builder, "TestRealm", null, "Daniel",
+				"password");
+		try (CloseableHttpClient client = builder.build()) {
 
-		// Send request
-		HttpGet request = new HttpGet(this.getServerUrl());
-		HttpResponse response = client.execute(request);
+			// Send request
+			HttpGet request = new HttpGet(this.getServerUrl());
+			HttpResponse response = client.execute(request);
 
-		// Validate the response
-		assertHttpResponse(response, 200, "Hello Daniel");
+			// Validate the response
+			assertHttpResponse(response, 200, "Hello Daniel");
+		}
 	}
 
 	/**

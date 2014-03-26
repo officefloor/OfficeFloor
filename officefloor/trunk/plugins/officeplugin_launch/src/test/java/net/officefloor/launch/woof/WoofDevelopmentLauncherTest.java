@@ -31,17 +31,15 @@ import net.officefloor.building.classpath.ClassPathFactoryImpl;
 import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.DefaultPlexusContainer;
 
 import com.google.gwt.dev.DevMode;
 
@@ -59,9 +57,9 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	private MockDevMode devMode;
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	@Override
 	protected void setUp() throws Exception {
@@ -76,7 +74,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 		WoofDevelopmentLauncher.setGwtLauncher(null);
 
 		// Stop HTTP client
-		this.client.getConnectionManager().shutdown();
+		this.client.close();
 
 		// Stop GWT
 		if (this.devMode != null) {
@@ -166,9 +164,8 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 		File pomFile = this.findFile("pom.xml");
 
 		// Obtain the GWT version
-		MavenProject project = new ClassPathFactoryImpl(
-				new DefaultPlexusContainer(), null, new RemoteRepository[0])
-				.getMavenProject(pomFile);
+		MavenProject project = new ClassPathFactoryImpl(null,
+				new RemoteRepository[0]).getMavenProject(pomFile);
 		String gwtDevVersion = null;
 		for (Dependency dependency : project.getDependencies()) {
 			String groupId = dependency.getGroupId();
@@ -441,7 +438,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 			List<String> argumentsList = new ArrayList<String>(
 					this.arguments.length + 2);
 			argumentsList.addAll(Arrays.asList("-codeServerPort",
-					String.valueOf(MockHttpServer.getAvailablePort())));
+					String.valueOf(HttpTestUtil.getAvailablePort())));
 			argumentsList.addAll(Arrays.asList(this.arguments));
 
 			// By default run head less (for continuous integration)

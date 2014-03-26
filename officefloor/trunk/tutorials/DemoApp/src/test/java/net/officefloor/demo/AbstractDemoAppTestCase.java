@@ -21,14 +21,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Provides abstract tests to validate each means of running the application.
@@ -102,9 +102,9 @@ public abstract class AbstractDemoAppTestCase extends OfficeFrameTestCase {
 	private int serverPort;
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	protected final HttpClient client = new DefaultHttpClient();
+	protected final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
 	 * Ensure able to obtain resource file.
@@ -132,7 +132,7 @@ public abstract class AbstractDemoAppTestCase extends OfficeFrameTestCase {
 	protected void tearDown() throws Exception {
 		try {
 			// Stop the client
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 
 		} finally {
 			// Stop the server

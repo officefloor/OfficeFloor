@@ -30,12 +30,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -82,7 +81,7 @@ public class WebInfResourceAccessTest extends OfficeFrameTestCase {
 	 */
 	public void testAccessWebInfContent() throws Exception {
 
-		int port = MockHttpServer.getAvailablePort();
+		int port = HttpTestUtil.getAvailablePort();
 
 		// Start the HTTP container for the HTTP Servlet
 		Server server = new Server(port);
@@ -108,15 +107,12 @@ public class WebInfResourceAccessTest extends OfficeFrameTestCase {
 			server.start();
 
 			// Send request to the server
-			HttpClient client = new DefaultHttpClient();
-			try {
+			try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 				HttpPost request = new HttpPost("http://localhost:" + port
 						+ "/servlet");
 				HttpResponse response = client.execute(request);
 				TestCase.assertEquals("Expecting response to be successful",
 						200, response.getStatusLine().getStatusCode());
-			} finally {
-				client.getConnectionManager().shutdown();
 			}
 
 		} finally {

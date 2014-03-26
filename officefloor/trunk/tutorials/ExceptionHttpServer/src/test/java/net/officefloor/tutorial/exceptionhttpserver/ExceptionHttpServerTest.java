@@ -21,11 +21,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Ensure appropriately handling exception.
@@ -59,7 +59,7 @@ public class ExceptionHttpServerTest extends TestCase {
 
 	private PrintStream stderr;
 
-	private HttpClient client = new DefaultHttpClient();
+	private CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	@Override
 	protected void setUp() throws Exception {
@@ -74,7 +74,7 @@ public class ExceptionHttpServerTest extends TestCase {
 		System.setErr(this.stderr);
 
 		// Shutdown client
-		this.client.getConnectionManager().shutdown();
+		this.client.close();
 
 		// Stop server
 		WoofOfficeFloorSource.stop();

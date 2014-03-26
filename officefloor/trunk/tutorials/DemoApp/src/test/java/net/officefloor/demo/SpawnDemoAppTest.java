@@ -29,7 +29,7 @@ import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
 import net.officefloor.building.process.ProcessManager;
 import net.officefloor.console.OfficeBuilding;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 /**
@@ -54,7 +54,7 @@ public class SpawnDemoAppTest extends AbstractDemoAppTestCase {
 
 		// Details for starting the OfficeBuilding
 		final String officeBuildingHost = "localhost";
-		int officeBuildingPort = MockHttpServer.getAvailablePort();
+		int officeBuildingPort = HttpTestUtil.getAvailablePort();
 		File keyStore = KeyStoreOfficeFloorCommandParameter
 				.getDefaultKeyStoreFile();
 		String keyStorePassword = KeyStorePasswordOfficeFloorCommandParameter.DEFAULT_KEY_STORE_PASSWORD;
@@ -73,7 +73,7 @@ public class SpawnDemoAppTest extends AbstractDemoAppTestCase {
 				keyStorePassword, userName, password);
 
 		// Obtain port for this application
-		int applicationPort = MockHttpServer.getAvailablePort();
+		int applicationPort = HttpTestUtil.getAvailablePort();
 
 		// Obtain the WebApp directory
 		File webAppDir = new File(".", "src/main/webapp");

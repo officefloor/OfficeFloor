@@ -24,8 +24,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
 
-import org.hsqldb.jdbcDriver;
-
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireObject;
@@ -38,6 +36,8 @@ import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
+
+import org.hsqldb.jdbcDriver;
 
 /**
  * Tests the {@link JpaEntityManagerManagedObjectSource}.
@@ -142,8 +142,7 @@ public class JpaEntityManagerManagedObjectSourceTest extends
 
 			// Retrieve the entity
 			TypedQuery<MockEntity> query = entityManager.createQuery(
-					"SELECT M FROM MockEntity M WHERE M.name = 'test'",
-					MockEntity.class);
+					"SELECT M FROM MockEntity M WHERE M.name = 'test'", MockEntity.class);
 			MockEntity entity = query.getSingleResult();
 
 			// Specify the result

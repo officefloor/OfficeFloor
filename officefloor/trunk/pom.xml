@@ -483,6 +483,18 @@
 				<version>1.7</version>
 			</dependency>
 			<dependency>
+				<groupId>org.eclipse.persistence</groupId>
+				<artifactId>javax.persistence</artifactId>
+				<version>2.1.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
+				<version>${datanucleus-version}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
 				<groupId>easymock</groupId>
 				<artifactId>easymock</artifactId>
 				<version>1.1</version>
@@ -506,26 +518,6 @@
 				<groupId>com.gdevelop.gwt</groupId>
 				<artifactId>syncrpc</artifactId>
 				<version>${syncrpc-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.datanucleus</groupId>
-				<artifactId>datanucleus-core</artifactId>
-				<version>${datanucleus-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.datanucleus</groupId>
-				<artifactId>datanucleus-api-jpa</artifactId>
-				<version>${datanucleus-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.datanucleus</groupId>
-				<artifactId>datanucleus-rdbms</artifactId>
-				<version>${datanucleus-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.jdo</groupId>
-				<artifactId>jdo-api</artifactId>
-				<version>3.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.gwt.google-apis</groupId>

@@ -33,7 +33,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.PlexusContainer;
-import org.sonatype.aether.connector.wagon.WagonProvider;
+import org.eclipse.aether.RepositorySystem;
 
 /**
  * Maven goal to run the {@link WoofOfficeFloorSource}.
@@ -61,11 +61,11 @@ public class RunWoofGoal extends AbstractMojo {
 	private PlexusContainer plexusContainer;
 
 	/**
-	 * {@link WagonProvider}.
+	 * {@link RepositorySystem}.
 	 * 
 	 * @component
 	 */
-	private WagonProvider wagonProvider;
+	private RepositorySystem repositorySystem;
 
 	/**
 	 * Plug-in dependencies.
@@ -117,7 +117,8 @@ public class RunWoofGoal extends AbstractMojo {
 		StartOfficeBuildingGoal startGoal = StartOfficeBuildingGoal
 				.createStartOfficeBuildingGoal(this.project,
 						this.pluginDependencies, this.localRepository,
-						this.plexusContainer, this.wagonProvider, this.getLog());
+						this.repositorySystem, this.plexusContainer,
+						this.getLog());
 
 		// Include officeplugin_war on class path (handle WoOF resources)
 		startGoal.includePluginDependencyToOfficeBuildingClassPath(

@@ -62,14 +62,14 @@ import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.route.source.ServletRouteWorkSource;
 import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.servlet.webxml.model.WebAppModel;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.security.HttpSecurity;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Abstract functionality for <code>web.xml</code> testing.
@@ -79,9 +79,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 
 	/**
-	 * Created {@link HttpClient} instances.
+	 * Created {@link CloseableHttpClient} instances.
 	 */
-	private final List<HttpClient> clients = new LinkedList<HttpClient>();
+	private final List<CloseableHttpClient> clients = new LinkedList<>();
 
 	/**
 	 * {@link OfficeFloor} for the Servlet application.
@@ -97,8 +97,8 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 	protected void tearDown() throws Exception {
 
 		// Stop the HTTP clients
-		for (HttpClient client : this.clients) {
-			client.getConnectionManager().shutdown();
+		for (CloseableHttpClient client : this.clients) {
+			client.close();
 		}
 
 		// Stop servlet application (if started)
@@ -118,7 +118,7 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 	protected void startServletApplication(String webXmlFileName) {
 		try {
 			// Obtain the port for the application
-			this.port = MockHttpServer.getAvailablePort();
+			this.port = HttpTestUtil.getAvailablePort();
 
 			// Create the configuration context
 			XmlConfigurationContext xmlContext = new XmlConfigurationContext(
@@ -152,7 +152,7 @@ public abstract class AbstractWebXmlTestCase extends OfficeFrameTestCase {
 	 * @return {@link HttpClient}.
 	 */
 	protected HttpClient createHttpClient() {
-		HttpClient client = new DefaultHttpClient();
+		CloseableHttpClient client = HttpTestUtil.createHttpClient();
 		this.clients.add(client);
 		return client;
 	}

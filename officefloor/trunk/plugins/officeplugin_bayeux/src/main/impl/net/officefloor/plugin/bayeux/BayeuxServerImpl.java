@@ -36,7 +36,6 @@ import net.officefloor.plugin.bayeux.transport.UnsubscribeResult;
 
 import org.cometd.bayeux.Channel;
 import org.cometd.bayeux.ChannelId;
-import org.cometd.bayeux.Message;
 import org.cometd.bayeux.Session;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.BayeuxServer.BayeuxServerListener;

@@ -36,31 +36,16 @@
 		</plugins>
 	</build>
 	<dependencies>
-
-		<dependency>
-			<groupId>javax.jdo</groupId>
-			<artifactId>jdo-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-jpa_3.0_spec</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
+	
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.datanucleus</groupId>
-			<artifactId>datanucleus-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.datanucleus</groupId>
-			<artifactId>datanucleus-api-jpa</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.datanucleus</groupId>
-			<artifactId>datanucleus-rdbms</artifactId>
+			<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
+			<type>pom</type>
 			<scope>provided</scope>
 		</dependency>
 
