@@ -20,13 +20,12 @@ package net.officefloor.tutorial.authenticationhttpserver;
 import java.io.IOException;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
 /**
@@ -37,22 +36,16 @@ import org.apache.http.util.EntityUtils;
 public class AuthenticationHttpServerTest extends TestCase {
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
-
-	@Override
-	protected void setUp() throws Exception {
-
-		// Ensure able to trust OfficeFloor
-		MockHttpServer.configureHttps(this.client, 7979);
-	}
+	private final CloseableHttpClient client = HttpTestUtil
+			.createHttpClient(true);
 
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure stop
 		try {
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 		} finally {
 			WoofOfficeFloorSource.stop();
 		}

@@ -21,7 +21,7 @@ import java.io.File;
 
 import javax.servlet.Servlet;
 
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.servlet.WoofServlet;
 
 import org.eclipse.jetty.server.Server;
@@ -99,7 +99,7 @@ public class JettyDemoAppTest extends AbstractDemoAppTestCase {
 	protected int startServer() throws Exception {
 
 		// Obtain port for running
-		int port = MockHttpServer.getAvailablePort();
+		int port = HttpTestUtil.getAvailablePort();
 
 		// Start the server
 		this.server = startServer("", port, findWebApDirectory());

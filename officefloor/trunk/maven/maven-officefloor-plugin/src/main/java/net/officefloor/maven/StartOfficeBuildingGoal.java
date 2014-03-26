@@ -46,12 +46,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.repository.internal.MavenServiceLocator;
 import org.codehaus.plexus.PlexusContainer;
-import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.connector.wagon.WagonProvider;
-import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
-import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
+import org.eclipse.aether.RepositorySystem;
 
 /**
  * Maven goal to start the {@link OfficeBuilding}.
@@ -74,7 +70,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 * 
 	 * @return Key store {@link File}.
 	 * @throws MojoFailureException
-	 *             If fails to obtian the key store {@link File}.
+	 *             If fails to obtain the key store {@link File}.
 	 */
 	public static File getKeyStoreFile() throws MojoFailureException {
 		try {
@@ -111,10 +107,10 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 *            Plug-in dependencies.
 	 * @param localRepository
 	 *            Local repository.
+	 * @param repositorySystem
+	 *            {@link RepositorySystem}.
 	 * @param plexusContainer
 	 *            {@link PlexusContainer}.
-	 * @param wagonProvider
-	 *            {@link WagonProvider}.
 	 * @param log
 	 *            {@link Log}.
 	 * @return {@link StartOfficeBuildingGoal}.
@@ -122,14 +118,14 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	public static StartOfficeBuildingGoal createStartOfficeBuildingGoal(
 			MavenProject project, List<Artifact> pluginDependencies,
 			ArtifactRepository localRepository,
-			PlexusContainer plexusContainer, WagonProvider wagonProvider,
+			RepositorySystem repositorySystem, PlexusContainer plexusContainer,
 			Log log) {
 		StartOfficeBuildingGoal goal = new StartOfficeBuildingGoal();
 		goal.project = project;
-		goal.plexusContainer = plexusContainer;
-		goal.wagonProvider = wagonProvider;
 		goal.pluginDependencies = pluginDependencies;
 		goal.localRepository = localRepository;
+		goal.repositorySystem = repositorySystem;
+		goal.plexusContainer = plexusContainer;
 		goal.setLog(log);
 		return goal;
 	}
@@ -141,20 +137,6 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 * @required
 	 */
 	private MavenProject project;
-
-	/**
-	 * {@link PlexusContainer}.
-	 * 
-	 * @component
-	 */
-	private PlexusContainer plexusContainer;
-
-	/**
-	 * {@link WagonProvider}.
-	 * 
-	 * @component
-	 */
-	private WagonProvider wagonProvider;
 
 	/**
 	 * Plug-in dependencies.
@@ -171,6 +153,20 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 * @required
 	 */
 	private ArtifactRepository localRepository;
+
+	/**
+	 * {@link RepositorySystem}.
+	 * 
+	 * @component
+	 */
+	private RepositorySystem repositorySystem;
+
+	/**
+	 * {@link PlexusContainer}.
+	 * 
+	 * @component
+	 */
+	private PlexusContainer plexusContainer;
 
 	/**
 	 * Port to run the {@link OfficeBuilding} on.
@@ -234,8 +230,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		ensureNotNull("Must have project", this.project);
 		ensureNotNull("Must have plug-in dependencies", this.pluginDependencies);
 		ensureNotNull("Must have local repository", this.localRepository);
-		ensureNotNull("Must have plexus container", this.plexusContainer);
-		ensureNotNull("Must have wagon provider", this.wagonProvider);
+		ensureNotNull("Must have repository system", this.repositorySystem);
 		ensureNotNull(
 				"Port not configured for the "
 						+ OfficeBuilding.class.getSimpleName(), this.port);
@@ -297,14 +292,6 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		String[] remoteRepositoryURLs;
 		try {
 
-			// Obtain the repository system
-			MavenServiceLocator locator = new MavenServiceLocator();
-			locator.setServices(WagonProvider.class, this.wagonProvider);
-			locator.addService(RepositoryConnectorFactory.class,
-					WagonRepositoryConnectorFactory.class);
-			RepositorySystem repoSystem = locator
-					.getService(RepositorySystem.class);
-
 			// Indicate the remote repositories
 			log.debug("\tRemote repositories:");
 
@@ -327,7 +314,8 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			File localRepositoryDirectory = new File(
 					this.localRepository.getBasedir());
 			ClassPathFactory classPathFactory = new ClassPathFactoryImpl(
-					this.plexusContainer, repoSystem, localRepositoryDirectory,
+					this.plexusContainer, this.repositorySystem,
+					localRepositoryDirectory,
 					remoteRepositories
 							.toArray(new RemoteRepository[remoteRepositories
 									.size()]));

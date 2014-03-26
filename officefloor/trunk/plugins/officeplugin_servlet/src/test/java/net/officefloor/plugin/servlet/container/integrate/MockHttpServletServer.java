@@ -48,6 +48,7 @@ import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource.Depe
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.server.HttpServicerTask;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
@@ -122,7 +123,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 					response.getStatusLine().getStatusCode());
 
 			// Validate the body
-			String body = getEntityBody(response);
+			String body = HttpTestUtil.getEntityBody(response);
 			assertEquals("Incorrect response body", expectedBody, body);
 
 			// Validate the headers

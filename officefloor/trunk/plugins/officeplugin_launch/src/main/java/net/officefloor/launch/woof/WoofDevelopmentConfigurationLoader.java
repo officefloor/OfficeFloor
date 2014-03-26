@@ -42,8 +42,6 @@ import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusContainer;
 
 /**
  * Loads the {@link WoofDevelopmentConfiguration} from the project.
@@ -86,9 +84,8 @@ public class WoofDevelopmentConfigurationLoader {
 	public static String[] getDevModeClassPath(File pomFile) throws Exception {
 
 		// Create initial class path factory
-		PlexusContainer plexusContainer = new DefaultPlexusContainer();
-		ClassPathFactoryImpl initial = new ClassPathFactoryImpl(
-				plexusContainer, null, new RemoteRepository[0]);
+		ClassPathFactoryImpl initial = new ClassPathFactoryImpl(null,
+				new RemoteRepository[0]);
 
 		// Obtain the Maven project and its remote repositories
 		MavenProject project = initial.getMavenProject(pomFile);
@@ -101,7 +98,6 @@ public class WoofDevelopmentConfigurationLoader {
 
 		// Create class path factory from POM remote repositories
 		ClassPathFactory factory = new ClassPathFactoryImpl(
-				plexusContainer,
 				null,
 				remoteRepositories
 						.toArray(new RemoteRepository[remoteRepositories.size()]));

@@ -20,20 +20,20 @@ package net.officefloor.plugin.json.woof;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-
 import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.HttpJson;
 import net.officefloor.plugin.json.JsonResponseWriter;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofLoader;
 import net.officefloor.plugin.woof.WoofLoaderImpl;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 
 /**
  * Ensure JSON implicitly works for WoOF.
@@ -43,9 +43,9 @@ import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
 	 * {@link LoggerAssertion} for the {@link WoofLoader}.
@@ -74,7 +74,7 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 
 			// Ensure stop
 			try {
-				this.client.getConnectionManager().shutdown();
+				this.client.close();
 			} finally {
 				WoofOfficeFloorSource.stop();
 			}

@@ -38,6 +38,7 @@ import net.officefloor.plugin.json.read.JsonRequestReaderManagedObjectSource.Dep
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpRequestParserImpl;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
@@ -46,10 +47,9 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.easymock.AbstractMatcher;
 
@@ -308,8 +308,7 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 				JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
 				MockJsonObject.class.getName());
 		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
-		HttpClient client = new DefaultHttpClient();
-		try {
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Reset service to obtain the JSON object
 			MockService.object = null;
@@ -326,12 +325,8 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 					.getStatusLine().getStatusCode());
 
 		} finally {
-			// Ensure stop client and server
-			try {
-				client.getConnectionManager().shutdown();
-			} finally {
-				officeFloor.closeOfficeFloor();
-			}
+			// Ensure stop server (client also is closed)
+			officeFloor.closeOfficeFloor();
 		}
 
 		// Ensure correctly loaded JSON object

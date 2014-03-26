@@ -26,7 +26,7 @@ import javax.servlet.Servlet;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.woof.WoofApplicationExtensionService;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
@@ -34,9 +34,8 @@ import net.officefloor.plugin.woof.servlet.MockDependency;
 import net.officefloor.plugin.woof.servlet.ServletContainerWoofApplicationExtensionService;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Ensure able to embed the {@link Servlet} container within WoOF as a chained
@@ -48,9 +47,9 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 		OfficeFrameTestCase {
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
 	 * Port application running on.
@@ -167,7 +166,7 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 				webAppDir.getAbsolutePath());
 
 		// Obtain the port for the application
-		this.port = MockHttpServer.getAvailablePort();
+		this.port = HttpTestUtil.getAvailablePort();
 
 		// Start WoOF (should load servlet container as servicer)
 		WoofOfficeFloorSource
@@ -186,7 +185,7 @@ public class ServletContainerWoofApplicationExtensionServiceTest extends
 
 		try {
 			// Stop the client
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 
 		} finally {
 			// Stop the server

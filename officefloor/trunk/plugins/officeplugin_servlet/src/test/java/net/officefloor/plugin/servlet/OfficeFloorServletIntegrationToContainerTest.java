@@ -27,8 +27,8 @@ import javax.servlet.ServletContextListener;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpApplicationState;
 import net.officefloor.plugin.web.http.application.HttpApplicationStateful;
 import net.officefloor.plugin.web.http.application.HttpParameters;
@@ -41,10 +41,9 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.jasper.servlet.JspServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -78,15 +77,15 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 	private ServletContextHandler context;
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private HttpClient client;
+	private CloseableHttpClient client;
 
 	@Override
 	protected void setUp() throws Exception {
 
 		// Obtain the port for the application
-		this.port = MockHttpServer.getAvailablePort();
+		this.port = HttpTestUtil.getAvailablePort();
 
 		// Start servlet container with servlet
 		this.server = new Server(this.port);
@@ -99,14 +98,14 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		this.server.setHandler(this.context);
 
 		// Create client
-		this.client = new DefaultHttpClient();
+		this.client = HttpTestUtil.createHttpClient();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure stop client
 		if (this.client != null) {
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 		}
 
 		// Ensure stop server

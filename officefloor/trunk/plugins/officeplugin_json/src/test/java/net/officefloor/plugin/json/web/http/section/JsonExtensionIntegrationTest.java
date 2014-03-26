@@ -20,20 +20,20 @@ package net.officefloor.plugin.json.web.http.section;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.HttpJson;
 import net.officefloor.plugin.json.JsonResponseWriter;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.application.HttpTemplateAutoWireSection;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 
 /**
  * Validates the extension of {@link HttpTemplateAutoWireSection} via JSON.
@@ -61,8 +61,7 @@ public class JsonExtensionIntegrationTest extends OfficeFrameTestCase {
 
 		// Start application
 		AutoWireOfficeFloor officeFloor = application.openOfficeFloor();
-		HttpClient client = new DefaultHttpClient();
-		try {
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Ensure handles JSON object and JSON writer appropriately
 			HttpPost request = new HttpPost("http://localhost:7878/test-ajax");
@@ -74,12 +73,8 @@ public class JsonExtensionIntegrationTest extends OfficeFrameTestCase {
 					EntityUtils.toString(response.getEntity()));
 
 		} finally {
-			// Ensure stop
-			try {
-				client.getConnectionManager().shutdown();
-			} finally {
-				officeFloor.closeOfficeFloor();
-			}
+			// Ensure stop server (client already closed)
+			officeFloor.closeOfficeFloor();
 		}
 	}
 

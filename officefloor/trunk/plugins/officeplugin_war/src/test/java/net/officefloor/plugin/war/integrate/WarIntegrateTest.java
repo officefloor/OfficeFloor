@@ -31,14 +31,13 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Integration testing of running a WAR.
@@ -74,7 +73,7 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 			Class<? extends OfficeFloorSource> officeFloorSourceClass,
 			String officeFloorLocation) throws Throwable {
 
-		final int PORT = MockHttpServer.getAvailablePort();
+		final int PORT = HttpTestUtil.getAvailablePort();
 
 		// Ensure clean system properties
 		System.clearProperty(HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT);
@@ -105,8 +104,7 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 						true,
 						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl.DEFAULT_REMOTE_REPOSITORY_URLS);
 
-		HttpClient client = null;
-		try {
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Open the WAR by decoration of OfficeFloor
 			OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
@@ -129,23 +127,16 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 			Thread.sleep(1000);
 
 			// Request data from servlet
-			client = new DefaultHttpClient();
 			HttpGet request = new HttpGet("http://localhost:" + PORT);
 			HttpResponse response = client.execute(request);
 
 			// Ensure valid response
 			assertEquals("Response should be successful", 200, response
 					.getStatusLine().getStatusCode());
-			String body = MockHttpServer.getEntityBody(response);
+			String body = HttpTestUtil.getEntityBody(response);
 			assertEquals("Incorrect response body", "WAR", body);
 
 		} finally {
-
-			// Ensure stop client
-			if (client != null) {
-				client.getConnectionManager().shutdown();
-			}
-
 			// Ensure stop the OfficeBuilding (and subsequently OfficeFloor)
 			officeBuildingManager.stopOfficeBuilding(10000);
 		}

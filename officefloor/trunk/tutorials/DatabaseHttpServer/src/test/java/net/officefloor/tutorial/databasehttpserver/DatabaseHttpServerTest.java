@@ -24,12 +24,12 @@ import java.sql.ResultSet;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.hsqldb.jdbc.jdbcDataSource;
 
 /**
@@ -59,7 +59,7 @@ public class DatabaseHttpServerTest extends TestCase {
 	protected void tearDown() throws Exception {
 
 		// Disconnect client
-		this.client.getConnectionManager().shutdown();
+		this.client.close();
 
 		// Stop HTTP Server
 		WoofOfficeFloorSource.stop();
@@ -98,7 +98,7 @@ public class DatabaseHttpServerTest extends TestCase {
 	 * Requests page from HTTP Server.
 	 */
 	// START SNIPPET: test
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	public void testInteraction() throws Exception {
 

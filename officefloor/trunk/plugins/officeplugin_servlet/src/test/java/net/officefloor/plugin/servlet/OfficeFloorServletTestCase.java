@@ -38,8 +38,8 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
@@ -47,7 +47,7 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -76,9 +76,9 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 	private String contextPath = "/";
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private HttpClient client;
+	private CloseableHttpClient client;
 
 	/**
 	 * {@link OfficeFloorServlet} as {@link ServletContextListener}.
@@ -121,7 +121,7 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 			this.server.stop();
 		}
 		if (this.client != null) {
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 		}
 	}
 
@@ -299,7 +299,7 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 
 		// Lazy create the client
 		if (this.client == null) {
-			this.client = new DefaultHttpClient();
+			this.client = HttpTestUtil.createHttpClient();
 		}
 		return this.client;
 	}
@@ -313,7 +313,7 @@ public class OfficeFloorServletTestCase extends OfficeFrameTestCase {
 		servlet = null;
 
 		// Obtain the port for the application
-		this.port = MockHttpServer.getAvailablePort();
+		this.port = HttpTestUtil.getAvailablePort();
 
 		// Start servlet container with servlet
 		this.server = new Server(this.port);
