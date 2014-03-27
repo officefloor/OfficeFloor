@@ -486,7 +486,6 @@
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>javax.persistence</artifactId>
 				<version>2.1.0</version>
-				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.datanucleus</groupId>

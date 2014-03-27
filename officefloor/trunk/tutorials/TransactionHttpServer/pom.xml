@@ -20,7 +20,7 @@
 		<plugins>
 			<plugin>
 				<groupId>org.datanucleus</groupId>
-				<artifactId>maven-datanucleus-plugin</artifactId>
+				<artifactId>datanucleus-maven-plugin</artifactId>
 				<configuration>
 					<api>JPA</api>
 					<verbose>true</verbose>
@@ -49,25 +49,14 @@
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_jdbc</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>javax.jdo</groupId>
-			<artifactId>jdo-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-jpa_2.0_spec</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.datanucleus</groupId>
-			<artifactId>datanucleus-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.datanucleus</groupId>
-			<artifactId>datanucleus-api-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.datanucleus</groupId>
-			<artifactId>datanucleus-rdbms</artifactId>
+			<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
+			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
