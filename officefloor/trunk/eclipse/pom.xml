@@ -177,9 +177,9 @@
 			<repositories>
 				<repository>
 					<!-- Eclipse -->
-					<id>eclipse-juno</id>
+					<id>eclipse-kepler</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/releases/juno</url>
+					<url>http://download.eclipse.org/releases/kepler</url>
 				</repository>
 			</repositories>
 		</profile>
