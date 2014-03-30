@@ -20,12 +20,12 @@ package net.officefloor.tutorial.gwtapp;
 import java.io.ByteArrayOutputStream;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the GWT App.
@@ -38,8 +38,8 @@ public class GwtAppTest extends TestCase {
 	 * Ensure includes GWT script and iframe.
 	 */
 	public void testIncludeGwtAspects() throws Exception {
-		final HttpClient client = new DefaultHttpClient();
-		try {
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+
 			// Start server
 			WoofOfficeFloorSource.start();
 
@@ -63,7 +63,6 @@ public class GwtAppTest extends TestCase {
 
 		} finally {
 			// Stop the client and server
-			client.getConnectionManager().shutdown();
 			WoofOfficeFloorSource.stop();
 		}
 	}

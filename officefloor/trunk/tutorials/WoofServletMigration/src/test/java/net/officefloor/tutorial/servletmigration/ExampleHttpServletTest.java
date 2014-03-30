@@ -19,14 +19,13 @@ package net.officefloor.tutorial.servletmigration;
 
 import java.io.ByteArrayOutputStream;
 
+import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import junit.framework.TestCase;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link ExampleHttpServlet} is servicing requests.
@@ -36,9 +35,9 @@ import junit.framework.TestCase;
 public class ExampleHttpServletTest extends TestCase {
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	/**
 	 * Ensure {@link ExampleHttpServlet} servicing request.
@@ -60,14 +59,14 @@ public class ExampleHttpServletTest extends TestCase {
 		response.getEntity().writeTo(buffer);
 		assertEquals("Incorrect response entity", "SERVLET", buffer.toString());
 	}
+
 	// END SNIPPET: tutorial
 
 	@Override
 	protected void tearDown() throws Exception {
 		try {
 			// Stop the client
-			this.client.getConnectionManager().shutdown();
-
+			this.client.close();
 		} finally {
 			// Stop the server
 			WoofOfficeFloorSource.stop();

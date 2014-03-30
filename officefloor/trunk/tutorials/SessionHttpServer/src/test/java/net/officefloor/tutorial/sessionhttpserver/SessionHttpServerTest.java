@@ -18,14 +18,14 @@
 package net.officefloor.tutorial.sessionhttpserver;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Post;
 import net.officefloor.tutorial.sessionhttpserver.TemplateLogic.Posts;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the Session HTTP Server.
@@ -51,9 +51,10 @@ public class SessionHttpServerTest extends TestCase {
 		assertSame("Ensure post available", post, logic
 				.getTemplateData(session).getPosts()[0]);
 	}
+
 	// END SNIPPET: pojo
 
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	public void testSessionPage() throws Exception {
 
@@ -76,8 +77,13 @@ public class SessionHttpServerTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		// Stop server
-		WoofOfficeFloorSource.stop();
+		try {
+			// Stop client
+			this.client.close();
+		} finally {
+			// Stop server
+			WoofOfficeFloorSource.stop();
+		}
 	}
 
 }

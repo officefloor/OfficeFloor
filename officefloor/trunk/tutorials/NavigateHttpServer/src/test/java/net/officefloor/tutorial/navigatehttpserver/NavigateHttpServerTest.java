@@ -18,12 +18,12 @@
 package net.officefloor.tutorial.navigatehttpserver;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link NavigateHttpServer}.
@@ -33,7 +33,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class NavigateHttpServerTest extends TestCase {
 
 	// START SNIPPET: test
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	public void testNavigate() throws Exception {
 
@@ -56,11 +56,12 @@ public class NavigateHttpServerTest extends TestCase {
 				.getStatusLine().getStatusCode());
 		response.getEntity().writeTo(System.out);
 	}
+
 	// END SNIPPET: test
 
 	@Override
 	protected void tearDown() throws Exception {
-		this.client.getConnectionManager().shutdown();
+		this.client.close();
 		WoofOfficeFloorSource.stop();
 	}
 

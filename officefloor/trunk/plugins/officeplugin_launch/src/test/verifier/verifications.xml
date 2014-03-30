@@ -1,9 +1,17 @@
 <verifications>
 	<files>
+
 		<!-- Ensure using latest version -->
 		<file>
 			<location>${basedir}/../../pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
 		</file>
+
+		<!-- Ensure using default version of GWT matching OfficeFloor builds -->
+		<file>
+			<location>src/main/java/net/officefloor/launch/woof/WoofDevelopmentConfigurationLoader.java</location>
+			<contains><![CDATA[DEFAULT_GWT_DEV_VERSION = "@{gwt-dev_version}";]]></contains>
+		</file>
+
 	</files>
 </verifications>

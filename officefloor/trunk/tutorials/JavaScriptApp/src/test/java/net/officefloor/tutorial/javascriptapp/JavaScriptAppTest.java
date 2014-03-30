@@ -21,15 +21,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-import junit.framework.TestCase;
 
 /**
  * Tests the JavaScript application.
@@ -49,9 +49,9 @@ public class JavaScriptAppTest extends TestCase {
 	}
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	@Override
 	protected void setUp() throws Exception {
@@ -61,7 +61,7 @@ public class JavaScriptAppTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 		try {
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 		} finally {
 			WoofOfficeFloorSource.stop();
 		}

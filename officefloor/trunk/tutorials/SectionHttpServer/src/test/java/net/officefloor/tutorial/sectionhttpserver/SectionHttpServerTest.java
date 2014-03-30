@@ -19,13 +19,13 @@ package net.officefloor.tutorial.sectionhttpserver;
 
 import java.io.ByteArrayOutputStream;
 
+import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
-import junit.framework.TestCase;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link TemplateLogic}.
@@ -48,28 +48,31 @@ public class SectionHttpServerTest extends TestCase {
 
 	public void testPageRendering() throws Exception {
 
-		// Send request for dynamic page
-		HttpResponse response = new DefaultHttpClient().execute(new HttpGet(
-				"http://localhost:7878/example.woof"));
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
-		// Ensure request is successful
-		assertEquals("Request should be successful", 200, response
-				.getStatusLine().getStatusCode());
+			// Send request for dynamic page
+			HttpResponse response = client.execute(new HttpGet(
+					"http://localhost:7878/example.woof"));
 
-		// Obtain the response
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		response.getEntity().writeTo(buffer);
-		String responseText = new String(buffer.toByteArray());
+			// Ensure request is successful
+			assertEquals("Request should be successful", 200, response
+					.getStatusLine().getStatusCode());
 
-		// Ensure correct response
-		assertTrue("Missing template section",
-				responseText.contains("<p>Hi</p>"));
-		assertTrue("Missing Hello section",
-				responseText.contains("<p>Hello</p>"));
-		assertFalse("NotRender section should not be rendered",
-				responseText.contains("<p>Not rendered</p>"));
-		assertTrue("Missing NoBean section",
-				responseText.contains("<p>How are you?</p>"));
+			// Obtain the response
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			response.getEntity().writeTo(buffer);
+			String responseText = new String(buffer.toByteArray());
+
+			// Ensure correct response
+			assertTrue("Missing template section",
+					responseText.contains("<p>Hi</p>"));
+			assertTrue("Missing Hello section",
+					responseText.contains("<p>Hello</p>"));
+			assertFalse("NotRender section should not be rendered",
+					responseText.contains("<p>Not rendered</p>"));
+			assertTrue("Missing NoBean section",
+					responseText.contains("<p>How are you?</p>"));
+		}
 	}
 
 }
