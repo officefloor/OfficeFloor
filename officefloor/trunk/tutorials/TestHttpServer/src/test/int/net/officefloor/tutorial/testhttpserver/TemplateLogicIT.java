@@ -17,10 +17,11 @@
  */
 package net.officefloor.tutorial.testhttpserver;
 
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,23 +33,21 @@ import org.junit.Test;
  */
 public class TemplateLogicIT extends Assert {
 
-
 	// START SNIPPET: integration
 	@Test
 	public void integrationTest() throws Exception {
 
-		// Send request to add
-		HttpGet request = new HttpGet(
-				"http://localhost:7878/template-add.woof?a=1&b=2");
-		HttpClient client = new DefaultHttpClient();
-		HttpResponse response = client.execute(request);
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
-		// Ensure added the values
-		String entity = EntityUtils.toString(response.getEntity());
-		assertTrue("Should have added the values", entity.contains("= 3"));
+			// Send request to add
+			HttpGet request = new HttpGet(
+					"http://localhost:7878/template-add.woof?a=1&b=2");
+			HttpResponse response = client.execute(request);
 
-		// Stop the client
-		client.getConnectionManager().shutdown();
+			// Ensure added the values
+			String entity = EntityUtils.toString(response.getEntity());
+			assertTrue("Should have added the values", entity.contains("= 3"));
+		}
 	}
 	// END SNIPPET: integration
 

@@ -18,12 +18,12 @@
 package net.officefloor.tutorial.pageflowhttpserver;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link PageFlowHttpServer}.
@@ -33,7 +33,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 public class PageFlowHttpServerTest extends TestCase {
 
 	// START SNIPPET: test
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	public void testPageInteraction() throws Exception {
 
@@ -53,11 +53,12 @@ public class PageFlowHttpServerTest extends TestCase {
 				.getStatusLine().getStatusCode());
 		response.getEntity().writeTo(System.out);
 	}
+
 	// END SNIPPET: test
 
 	@Override
 	protected void tearDown() throws Exception {
-		this.client.getConnectionManager().shutdown();
+		this.client.close();
 		WoofOfficeFloorSource.stop();
 	}
 

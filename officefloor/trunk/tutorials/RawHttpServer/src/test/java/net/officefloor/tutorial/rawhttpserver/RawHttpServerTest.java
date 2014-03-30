@@ -20,11 +20,12 @@ package net.officefloor.tutorial.rawhttpserver;
 import java.io.ByteArrayOutputStream;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the web application is returning correctly.
@@ -41,22 +42,25 @@ public class RawHttpServerTest extends TestCase {
 		// Start server
 		WoofOfficeFloorSource.start();
 
-		// Send request for dynamic page
-		HttpResponse response = new DefaultHttpClient().execute(new HttpGet(
-				"http://localhost:7878/example.woof"));
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
-		// Ensure request is successful
-		assertEquals("Request should be successful", 200, response
-				.getStatusLine().getStatusCode());
+			// Send request for dynamic page
+			HttpResponse response = client.execute(new HttpGet(
+					"http://localhost:7878/example.woof"));
 
-		// Indicate response
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		response.getEntity().writeTo(buffer);
-		String responseText = new String(buffer.toByteArray());
+			// Ensure request is successful
+			assertEquals("Request should be successful", 200, response
+					.getStatusLine().getStatusCode());
 
-		// Ensure raw html rendered to page
-		assertTrue("Should have raw HTML rendered",
-				responseText.contains("Web on OfficeFloor (WoOF)"));
+			// Indicate response
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			response.getEntity().writeTo(buffer);
+			String responseText = new String(buffer.toByteArray());
+
+			// Ensure raw html rendered to page
+			assertTrue("Should have raw HTML rendered",
+					responseText.contains("Web on OfficeFloor (WoOF)"));
+		}
 	}
 
 	@Override

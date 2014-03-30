@@ -17,13 +17,13 @@
  */
 package net.officefloor.tutorial.testhttpserver;
 
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import net.officefloor.tutorial.testhttpserver.TemplateLogic.Parameters;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -60,21 +60,21 @@ public class TemplateLogicTest extends Assert {
 		// Start the application
 		WoofOfficeFloorSource.start();
 
-		// Send request to add
-		HttpGet request = new HttpGet(
-				"http://localhost:7878/template-add.woof?a=1&b=2");
-		HttpClient client = new DefaultHttpClient();
-		HttpResponse response = client.execute(request);
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
-		// Ensure added the values
-		String entity = EntityUtils.toString(response.getEntity());
-		assertTrue("Should have added the values", entity.contains("= 3"));
+			// Send request to add
+			HttpGet request = new HttpGet(
+					"http://localhost:7878/template-add.woof?a=1&b=2");
+			HttpResponse response = client.execute(request);
 
-		// Stop the client
-		client.getConnectionManager().shutdown();
+			// Ensure added the values
+			String entity = EntityUtils.toString(response.getEntity());
+			assertTrue("Should have added the values", entity.contains("= 3"));
 
-		// Stop the application
-		WoofOfficeFloorSource.stop();
+		} finally {
+			// Stop the application
+			WoofOfficeFloorSource.stop();
+		}
 	}
 	// END SNIPPET: system
 

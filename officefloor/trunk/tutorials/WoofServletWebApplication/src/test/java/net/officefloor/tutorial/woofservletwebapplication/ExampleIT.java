@@ -21,11 +21,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link ExampleFilter}.
@@ -35,7 +35,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 // START SNIPPET: example
 public class ExampleIT extends TestCase {
 
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	public void testStaticResource() throws IOException {
 		this.assertRequest("/resource.html",
@@ -70,6 +70,11 @@ public class ExampleIT extends TestCase {
 		response.getEntity().writeTo(buffer);
 		assertEquals("Incorrect response entity", expectedContent,
 				buffer.toString());
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		this.client.close();
 	}
 
 }

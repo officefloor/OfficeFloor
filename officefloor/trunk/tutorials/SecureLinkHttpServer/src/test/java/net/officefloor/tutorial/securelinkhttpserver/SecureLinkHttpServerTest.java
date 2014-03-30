@@ -17,16 +17,15 @@
  */
 package net.officefloor.tutorial.securelinkhttpserver;
 
+import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-
-import junit.framework.TestCase;
 
 /**
  * Tests the Secure Link.
@@ -36,15 +35,15 @@ import junit.framework.TestCase;
 public class SecureLinkHttpServerTest extends TestCase {
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	@Override
 	protected void tearDown() throws Exception {
 		// Ensure stop
 		try {
-			this.client.getConnectionManager().shutdown();
+			this.client.close();
 		} finally {
 			WoofOfficeFloorSource.stop();
 		}
@@ -67,7 +66,7 @@ public class SecureLinkHttpServerTest extends TestCase {
 		HttpResponse response = this.client.execute(new HttpGet("http://"
 				+ hostName + ":7878"));
 		String renderedPage = EntityUtils.toString(response.getEntity());
-		
+
 		// Ensure login form (link) is secure
 		assertTrue(
 				"Login form should be secure",

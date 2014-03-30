@@ -21,11 +21,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Ensure obtains the response from integration of WoOF with JSP.
@@ -50,9 +50,9 @@ public class JspIT extends TestCase {
 	private void assertRequest(String uri, String expectedContent)
 			throws IOException {
 
-		// Undertake the request
-		HttpClient client = new DefaultHttpClient();
-		try {
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
+
+			// Undertake the request
 			HttpResponse response = client.execute(new HttpGet(
 					"http://localhost:18180" + uri));
 			assertEquals("Request should be successful: " + uri, 200, response
@@ -73,9 +73,6 @@ public class JspIT extends TestCase {
 			// Ensure response is as expected
 			assertEquals("Incorrect response entity", expectedContent, html);
 
-		} finally {
-			// Ensure stop client
-			client.getConnectionManager().shutdown();
 		}
 	}
 }

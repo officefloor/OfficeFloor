@@ -21,13 +21,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import junit.framework.TestCase;
-
-import net.officefloor.tutorial.woofservletdependencyinjection.ExampleServlet;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link ExampleServlet}.
@@ -36,18 +34,19 @@ import org.apache.http.impl.client.DefaultHttpClient;
  */
 public class ExampleIT extends TestCase {
 
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	@Override
 	protected void tearDown() throws Exception {
-		this.client.getConnectionManager().shutdown();
+		this.client.close();
 	}
 
 	// START SNIPPET: example
 	public void testTemplate() throws IOException {
 
 		// Undertake the request
-		HttpGet request = new HttpGet("http://localhost:18181/test/template.woof");
+		HttpGet request = new HttpGet(
+				"http://localhost:18181/test/template.woof");
 		HttpResponse response = this.client.execute(request);
 		assertEquals("Request should be successful", 200, response
 				.getStatusLine().getStatusCode());

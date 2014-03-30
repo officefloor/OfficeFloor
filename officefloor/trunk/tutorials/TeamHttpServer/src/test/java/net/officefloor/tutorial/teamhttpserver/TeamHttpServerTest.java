@@ -24,12 +24,12 @@ import java.sql.ResultSet;
 import javax.sql.DataSource;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.hsqldb.jdbc.jdbcDataSource;
 
 /**
@@ -50,9 +50,9 @@ public class TeamHttpServerTest extends TestCase {
 	private static final String DATABASE_USER = "sa";
 
 	/**
-	 * {@link HttpClient}.
+	 * {@link CloseableHttpClient}.
 	 */
-	private final HttpClient client = new DefaultHttpClient();
+	private final CloseableHttpClient client = HttpTestUtil.createHttpClient();
 
 	@Override
 	protected void setUp() throws Exception {
@@ -63,15 +63,19 @@ public class TeamHttpServerTest extends TestCase {
 	@Override
 	protected void tearDown() throws Exception {
 
-		// Disconnect client
-		this.client.getConnectionManager().shutdown();
-
-		// Stop HTTP Server
-		WoofOfficeFloorSource.stop();
-
-		// Stop database for new instance each test
-		DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "")
-				.createStatement().execute("SHUTDOWN IMMEDIATELY");
+		try {
+			// Disconnect client
+			this.client.close();
+		} finally {
+			try {
+				// Stop HTTP Server
+				WoofOfficeFloorSource.stop();
+			} finally {
+				// Stop database for new instance each test
+				DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "")
+						.createStatement().execute("SHUTDOWN IMMEDIATELY");
+			}
+		}
 	}
 
 	/**
