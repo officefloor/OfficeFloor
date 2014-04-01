@@ -329,15 +329,17 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 		mappedUris[mappedUris.length - 1] = "*" + templateUriSuffix;
 
 		// Provide Servlet and its configuration
-		Dynamic dynamic = servletContext.addServlet(servletName, servletClass);
-		dynamic.setInitParameter(INIT_PROPERTY_APPLICATION_INDEX,
+		Dynamic servlet = servletContext.addServlet(servletName, servletClass);
+		servlet.setInitParameter(INIT_PROPERTY_APPLICATION_INDEX,
 				String.valueOf(applicationIndex));
-		dynamic.addMapping(mappedUris);
-		dynamic.setLoadOnStartup(1);
+		servlet.addMapping(mappedUris);
+		servlet.setAsyncSupported(true);
+		servlet.setLoadOnStartup(1);
 
 		// Provide Filter to override DefaultServlet of Server
 		javax.servlet.FilterRegistration.Dynamic filter = servletContext
 				.addFilter(servletName, servletClass);
+		filter.setAsyncSupported(true);
 		filter.setInitParameter(INIT_PROPERTY_APPLICATION_INDEX,
 				String.valueOf(applicationIndex));
 		filter.addMappingForUrlPatterns(null, false, mappedUris);
