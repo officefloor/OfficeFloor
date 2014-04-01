@@ -8,34 +8,39 @@
 	<name>WoofArchetypeResult</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gwt.version>2.5.0</gwt.version>
+		<officefloor-version>2.15</officefloor-version>
+		<gwt-version>2.6.0</gwt-version>
+		<jetty-version>9.1.3.v20140225</jetty-version>
+		<compiler-version>3.1</compiler-version>
+		<failsafe-version>2.16</failsafe-version>
+		<junit-version>4.11</junit-version>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof</artifactId>
-			<version>2.15.0</version>
+			<version>${officefloor-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_gwt</artifactId>
-			<version>2.15.0</version>
+			<version>${officefloor-version}</version>
 		</dependency>
 		<dependency>
 			<!-- Remove if running stand alone -->
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof_servlet</artifactId>
-			<version>2.15.0</version>
+			<version>${officefloor-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
-			<version>${gwt.version}</version>
+			<version>${gwt-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>${junit-version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -45,7 +50,7 @@
 				<!-- Standard JVM for compilation -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>${compiler-version}</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -55,7 +60,7 @@
 				<!-- Compile GWT Java to JavaScript -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
-				<version>${gwt.version}</version>
+				<version>${gwt-version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -68,7 +73,7 @@
 				<!-- Test WoOF within Servlet Container -->
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>8.1.8.v20121106</version>
+				<version>${jetty-version}</version>
 				<configuration>
 					<connectors>
 						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
@@ -102,7 +107,7 @@
 				<!-- Run tests against WoOF within Servlet Container -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.13</version>
+				<version>${failsafe-version}</version>
 				<executions>
 					<execution>
 						<goals>
