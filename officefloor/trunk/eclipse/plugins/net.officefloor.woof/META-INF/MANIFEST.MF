@@ -8,7 +8,7 @@ Bundle-Activator: net.officefloor.eclipse.WoofPlugin
 Bundle-ActivationPolicy: lazy
 Require-Bundle: net.officefloor.core;bundle-version="2.15.0",
  net.officefloor.ui;bundle-version="2.15.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: registered
 Eclipse-RegisterBuddy: net.officefloor.core, 
  net.officefloor.ui
