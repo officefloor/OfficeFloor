@@ -483,8 +483,8 @@ public class OfficeFloorServletIntegrationToContainerTest extends
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
 		String body = buffer.toString();
-		assertEquals("Incorrect response (response status " + statusCode
-				+ ")", expectedResponse, body.trim());
+		assertEquals("Incorrect response (response status " + statusCode + ")",
+				expectedResponse, body.trim());
 
 		// Ensure also successful
 		assertEquals("Should be successful", 200, statusCode);
