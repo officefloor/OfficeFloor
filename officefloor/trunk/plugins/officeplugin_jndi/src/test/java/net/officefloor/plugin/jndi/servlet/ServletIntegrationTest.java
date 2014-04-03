@@ -25,6 +25,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
@@ -55,11 +57,11 @@ public class ServletIntegrationTest extends TestCase {
 		// Start servlet container with servlet
 		this.server = new Server(this.port);
 		WebAppContext context = new WebAppContext();
-		// context.setBaseResource(Resource.newClassPathResource(this
-		// .getClass().getPackage().getName().replace('.', '/')
-		// + "/integrate"));
+		context.setBaseResource(Resource.newClassPathResource(this.getClass()
+				.getPackage().getName().replace('.', '/')
+				+ "/integrate"));
 		context.setContextPath("/");
-		// context.setSessionHandler(new SessionHandler());
+		context.setSessionHandler(new SessionHandler());
 		context.addServlet(MockServlet.class, "/");
 		this.server.setHandler(context);
 
@@ -85,22 +87,12 @@ public class ServletIntegrationTest extends TestCase {
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Send request
-//			HttpTester request = new HttpTester();
-//			request.setMethod("GET");
-//			request.addHeader("Host", "tester");
-//			request.setVersion("HTTP/1.0");
-//			request.setURI("/");
-
-			// Send request
 			HttpResponse response = client.execute(new HttpGet(
-					"http://localhost:" + this.port));
-
-			// Obtain response
-//			HttpTester response = new HttpTester();
-//			response.parse(this.tester.getResponses(request.generate()));
+					"http://localhost:" + this.port + "/"));
 
 			// Ensure successful response
-			assertEquals("Unsuccessful request", 200, response.getStatusLine().getStatusCode());
+			assertEquals("Unsuccessful request", 200, response.getStatusLine()
+					.getStatusCode());
 
 			// Ensure OfficeFloor task invoked
 			String responseContent = HttpTestUtil.getEntityBody(response);
