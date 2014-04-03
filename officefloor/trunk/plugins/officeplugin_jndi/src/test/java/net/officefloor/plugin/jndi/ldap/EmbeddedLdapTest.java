@@ -21,8 +21,8 @@ import javax.naming.NamingEnumeration;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.DirContext;
 
-import org.apache.directory.server.core.entry.ServerEntry;
-import org.apache.directory.shared.ldap.name.LdapDN;
+import org.apache.directory.api.ldap.model.entry.Entry;
+import org.apache.directory.api.ldap.model.name.Dn;
 
 /**
  * Tests LDAP integration.
@@ -41,8 +41,8 @@ public class EmbeddedLdapTest extends AbstractLdapTest {
 	 */
 	public void testEmbeddedAccess() throws Exception {
 		// Lookup the OfficeFloor entry
-		ServerEntry entry = this.ldap.getDirectoryService().getAdminSession()
-				.lookup(new LdapDN("dc=officefloor,dc=net"));
+		Entry entry = this.ldap.getDirectoryService().getAdminSession()
+				.lookup(new Dn("dc=officefloor,dc=net"));
 		assertNotNull("Expected entry", entry);
 		System.out.println("Looked up entry: " + entry);
 	}

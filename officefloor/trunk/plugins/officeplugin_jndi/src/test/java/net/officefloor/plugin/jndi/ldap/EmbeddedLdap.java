@@ -28,19 +28,18 @@ import javax.naming.Context;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 
-import junit.framework.TestCase;
-
-import org.apache.directory.server.core.DefaultDirectoryService;
-import org.apache.directory.server.core.DirectoryService;
-import org.apache.directory.server.core.entry.ServerEntry;
-import org.apache.directory.server.core.partition.Partition;
+import org.apache.directory.api.ldap.model.entry.Entry;
+import org.apache.directory.api.ldap.model.name.Dn;
+import org.apache.directory.server.core.api.DirectoryService;
+import org.apache.directory.server.core.api.InstanceLayout;
+import org.apache.directory.server.core.api.partition.Partition;
+import org.apache.directory.server.core.factory.DefaultDirectoryServiceFactory;
+import org.apache.directory.server.core.partition.impl.avl.AvlPartition;
 import org.apache.directory.server.core.partition.impl.btree.jdbm.JdbmIndex;
-import org.apache.directory.server.core.partition.impl.btree.jdbm.JdbmPartition;
 import org.apache.directory.server.ldap.LdapServer;
-import org.apache.directory.server.ldap.handlers.bind.digestMD5.DigestMd5MechanismHandler;
+import org.apache.directory.server.ldap.handlers.sasl.digestMD5.DigestMd5MechanismHandler;
 import org.apache.directory.server.protocol.shared.transport.TcpTransport;
 import org.apache.directory.server.xdbm.Index;
-import org.apache.directory.shared.ldap.name.LdapDN;
 
 /**
  * Embedded LDAP for testing.
@@ -72,12 +71,12 @@ public class EmbeddedLdap {
 	/**
 	 * {@link DirectoryService}.
 	 */
-	private final DirectoryService directory = new DefaultDirectoryService();
+	private final DirectoryService directoryService;
 
 	/**
 	 * {@link LdapServer}.
 	 */
-	private final LdapServer ldap = new LdapServer();
+	private final LdapServer ldapServer = new LdapServer();
 
 	/**
 	 * URL to the {@link LdapServer}.
@@ -85,12 +84,41 @@ public class EmbeddedLdap {
 	private String ldapUrl;
 
 	/**
+	 * Initiate.
+	 * 
+	 * @throws Exception
+	 *             If fails to construct.
+	 */
+	public EmbeddedLdap() throws Exception {
+
+		// Obtain details for setup of directory
+		String userName = System.getProperty("user.name");
+		String instanceDirectory = this.getClass().getName().replace('.', '_');
+
+		// Ensure directory is available
+		String tempDirectory = System.getProperty("java.io.tmpdir");
+		File workingDirectory = new File(tempDirectory, userName + "/"
+				+ instanceDirectory);
+		workingDirectory.mkdirs();
+
+		// Create the directory service
+		DefaultDirectoryServiceFactory factory = new DefaultDirectoryServiceFactory();
+		factory.init("Test");
+		this.directoryService = factory.getDirectoryService();
+		this.directoryService.getChangeLog().setEnabled(false);
+		this.directoryService.setShutdownHookEnabled(true);
+		this.directoryService.setAllowAnonymousAccess(true);
+		this.directoryService.setInstanceLayout(new InstanceLayout(
+				workingDirectory));
+	}
+
+	/**
 	 * Obtains the {@link DirectoryService}.
 	 * 
 	 * @return {@link DirectoryService}.
 	 */
 	public DirectoryService getDirectoryService() {
-		return this.directory;
+		return this.directoryService;
 	}
 
 	/**
@@ -108,11 +136,14 @@ public class EmbeddedLdap {
 	public void addPartition(String partitionId, String partitionDn,
 			String... attributes) throws Exception {
 
-		// Create the partition
-		JdbmPartition partition = new JdbmPartition();
+		// Add in memory partition to the service
+		AvlPartition partition = new AvlPartition(
+				this.directoryService.getSchemaManager());
 		partition.setId(partitionId);
-		partition.setSuffix(partitionDn);
-		this.directory.addPartition(partition);
+		partition.setSuffixDn(new Dn(this.directoryService.getSchemaManager(),
+				partitionDn));
+		partition.initialize();
+		this.directoryService.addPartition(partition);
 
 		// Ensure have attributes
 		if (attributes.length == 0) {
@@ -120,10 +151,9 @@ public class EmbeddedLdap {
 		}
 
 		// Specifies the index for the partition
-		Set<Index<?, ServerEntry>> indexedAttributes = new HashSet<Index<?, ServerEntry>>();
+		Set<Index<?, String>> indexedAttributes = new HashSet<>();
 		for (String attribute : attributes) {
-			indexedAttributes
-					.add(new JdbmIndex<String, ServerEntry>(attribute));
+			indexedAttributes.add(new JdbmIndex<>(attribute, false));
 		}
 		partition.setIndexedAttributes(indexedAttributes);
 	}
@@ -138,25 +168,15 @@ public class EmbeddedLdap {
 	 */
 	public void start(int port) throws Exception {
 
-		// Specify to use temporary directory
-		String tempDirectory = System.getProperty("java.io.tmpdir");
-		String userName = System.getProperty("user.name");
-		File workingDirectory = new File(tempDirectory, userName
-				+ "/EmbeddedLdap-" + port + "-" + System.currentTimeMillis());
-		TestCase.assertFalse("Need new working directory", workingDirectory
-				.exists());
-		workingDirectory.mkdirs();
-		this.directory.setWorkingDirectory(workingDirectory);
-
 		// Initialise the LDAP server
-		this.ldap.setDirectoryService(this.directory);
-		this.ldap.setTransports(new TcpTransport(port));
+		this.ldapServer.setDirectoryService(this.directoryService);
+		this.ldapServer.setTransports(new TcpTransport(port));
 
 		// Provide SASL for MD5 login
-		this.ldap.setSaslHost("localhost");
-		this.ldap.setSaslRealms(Arrays.asList("officefloor"));
-		this.ldap.setSearchBaseDn("ou=People,dc=officefloor,dc=net");
-		this.ldap.addSaslMechanismHandler("DIGEST-MD5",
+		this.ldapServer.setSaslHost("localhost");
+		this.ldapServer.setSaslRealms(Arrays.asList("officefloor"));
+		this.ldapServer.setSearchBaseDn("ou=People,dc=officefloor,dc=net");
+		this.ldapServer.addSaslMechanismHandler("DIGEST-MD5",
 				new DigestMd5MechanismHandler());
 
 		// Specify the URL for server
@@ -165,8 +185,8 @@ public class EmbeddedLdap {
 		// Start the service
 		System.out.print("Starting LDAP server ... ");
 		System.out.flush();
-		this.directory.startup();
-		this.ldap.start();
+		this.directoryService.startup();
+		this.ldapServer.start();
 		System.out.println("Started");
 	}
 
@@ -181,9 +201,9 @@ public class EmbeddedLdap {
 		System.out.print("Stopping LDAP server ... ");
 		System.out.flush();
 		try {
-			this.ldap.stop();
+			this.ldapServer.stop();
 		} finally {
-			this.directory.shutdown();
+			this.directoryService.shutdown();
 		}
 		System.out.println("Stopped");
 	}
@@ -248,44 +268,45 @@ public class EmbeddedLdap {
 	}
 
 	/**
-	 * Creates a new {@link ServerEntry}.
+	 * Creates a new {@link Entry}.
 	 * 
 	 * @param partitionDn
 	 *            Domain name for {@link Partition}.
-	 * @return New {@link ServerEntry}.
+	 * @return New {@link Entry}.
 	 * @throws Exception
-	 *             If fails to create {@link ServerEntry}.
+	 *             If fails to create {@link Entry}.
 	 */
-	public ServerEntry newEntry(String partitionDn) throws Exception {
-		return this.directory.newEntry(new LdapDN(partitionDn));
+	public Entry newEntry(String partitionDn) throws Exception {
+		return this.directoryService.newEntry(new Dn(this.directoryService
+				.getSchemaManager(), partitionDn));
 	}
 
 	/**
-	 * Binds the {@link ServerEntry}.
+	 * Binds the {@link Entry}.
 	 * 
 	 * @param entry
-	 *            {@link ServerEntry}.
+	 *            {@link Entry}.
 	 * @throws Exception
-	 *             If fails to bind the {@link ServerEntry}.
+	 *             If fails to bind the {@link Entry}.
 	 */
-	public void bindEntry(ServerEntry entry) throws Exception {
-		this.directory.getAdminSession().add(entry);
+	public void bindEntry(Entry entry) throws Exception {
+		this.directoryService.getAdminSession().add(entry);
 	}
 
 	/**
-	 * Adds a {@link ServerEntry}.
+	 * Adds a {@link Entry}.
 	 * 
 	 * @param dn
-	 *            Path for {@link ServerEntry}.
+	 *            Path for {@link Entry}.
 	 * @param attributeNameValues
 	 *            Attribute name and value pairs. Multiple values may be
 	 *            semi-colon &quot;;&quot; separated.
 	 * @throws Exception
-	 *             If fails to add {@link ServerEntry}.
+	 *             If fails to add {@link Entry}.
 	 */
 	public void addEntry(String dn, String... attributeNameValues)
 			throws Exception {
-		ServerEntry entry = this.newEntry(dn);
+		Entry entry = this.newEntry(dn);
 		for (int i = 0; i < attributeNameValues.length; i += 2) {
 			String attributeName = attributeNameValues[i];
 			String attributeValues = attributeNameValues[i + 1];
@@ -293,8 +314,8 @@ public class EmbeddedLdap {
 			// Add the attribute
 			if ("userPassword".equalsIgnoreCase(attributeName)) {
 				// Add the password (must be binary entry)
-				entry.add(attributeName, attributeValues.getBytes(Charset
-						.forName("ASCII")));
+				entry.add(attributeName,
+						attributeValues.getBytes(Charset.forName("ASCII")));
 			} else {
 				// Add the attribute values
 				String[] values = attributeValues.split(";");
@@ -305,10 +326,10 @@ public class EmbeddedLdap {
 	}
 
 	/**
-	 * Adds the {@link ServerEntry} instances to use as a Credential Store.
+	 * Adds the {@link Entry} instances to use as a Credential Store.
 	 * 
 	 * @throws Exception
-	 *             If fails to add {@link ServerEntry} instances.
+	 *             If fails to add {@link Entry} instances.
 	 */
 	public void addCredentialStoreEntries() throws Exception {
 
@@ -332,17 +353,16 @@ public class EmbeddedLdap {
 				digestMd5Password);
 		this.addEntry("ou=Groups,dc=officefloor,dc=net", "objectClass",
 				"top;organizationalUnit", "ou", "Groups");
-		this
-				.addEntry(
-						"cn=developers,ou=Groups,dc=officefloor,dc=net",
-						"objectClass",
-						"top;groupOfNames",
-						"cn",
-						"developers",
-						"ou",
-						"developer",
-						"member",
-						"uid=daniel,ou=People,dc=officefloor,dc=net;uid=melanie,ou=People,dc=officefloor,dc=net");
+		this.addEntry(
+				"cn=developers,ou=Groups,dc=officefloor,dc=net",
+				"objectClass",
+				"top;groupOfNames",
+				"cn",
+				"developers",
+				"ou",
+				"developer",
+				"member",
+				"uid=daniel,ou=People,dc=officefloor,dc=net;uid=melanie,ou=People,dc=officefloor,dc=net");
 		this.addEntry("cn=committers,ou=Groups,dc=officefloor,dc=net",
 				"objectClass", "top;groupOfNames", "cn", "committers", "ou",
 				"committer", "member",
