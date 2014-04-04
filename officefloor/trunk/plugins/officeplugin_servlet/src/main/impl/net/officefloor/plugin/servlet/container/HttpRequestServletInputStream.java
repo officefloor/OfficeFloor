@@ -20,6 +20,7 @@ package net.officefloor.plugin.servlet.container;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -93,6 +94,25 @@ public class HttpRequestServletInputStream extends ServletInputStream {
 	@Override
 	public long skip(long n) throws IOException {
 		return this.delegate.skip(n);
+	}
+
+	/*
+	 * ------------------ Servlet 3.x methods ----------------------
+	 */
+
+	@Override
+	public boolean isFinished() {
+		return UnsupportedHttpServletMethodException.notSupported();
+	}
+
+	@Override
+	public boolean isReady() {
+		return UnsupportedHttpServletMethodException.notSupported();
+	}
+
+	@Override
+	public void setReadListener(ReadListener readListener) {
+		UnsupportedHttpServletMethodException.notSupported();
 	}
 
 }

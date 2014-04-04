@@ -483,35 +483,32 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	}
 
 	/*
-	 * ------------------ Servlet 3.0 methods ----------------------
+	 * ------------------ Servlet 3.x methods ----------------------
 	 */
 
 	@Override
 	public String getHeader(String arg0) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public Collection<String> getHeaderNames() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public Collection<String> getHeaders(String arg0) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public int getStatus() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
+	}
+
+	@Override
+	public void setContentLengthLong(long len) {
+		UnsupportedHttpServletMethodException.notSupported();
 	}
 
 }

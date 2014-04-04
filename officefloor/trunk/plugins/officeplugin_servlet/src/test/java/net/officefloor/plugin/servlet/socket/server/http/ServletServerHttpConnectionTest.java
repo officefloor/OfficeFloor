@@ -32,8 +32,10 @@ import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -141,7 +143,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		final String HEADER_NAME = "HEADER_NAME";
 		Enumeration<String> headerValues = this.createMock(Enumeration.class);
 		final String HEADER_VALUE = "HEADER_VALUE";
-		InputStream requestEntity = new ServletInputStream() {
+		InputStream requestEntity = new AbstractServletInputStream() {
 			@Override
 			public int read() throws IOException {
 				return 1;
@@ -151,7 +153,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		// Record initially adding response header and writing content
 		this.response.addHeader("NAME", "VALUE");
 		this.recordReturn(this.response, this.response.getOutputStream(),
-				new ServletOutputStream() {
+				new AbstractServletOutputStream() {
 					@Override
 					public void write(int b) throws IOException {
 						fail("Should not write out content");
@@ -189,7 +191,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		// Record flushing response
 		final ByteArrayOutputStream responseEntity = new ByteArrayOutputStream();
 		this.recordReturn(this.response, this.response.getOutputStream(),
-				new ServletOutputStream() {
+				new AbstractServletOutputStream() {
 					@Override
 					public void write(int b) throws IOException {
 						responseEntity.write(b);
@@ -364,7 +366,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		this.recordReturn(this.request, this.request.getContentLength(), 1);
 
 		// Record loading the data
-		InputStream expected = new ServletInputStream() {
+		InputStream expected = new AbstractServletInputStream() {
 			@Override
 			public int read() throws IOException {
 				return 1;
@@ -516,7 +518,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		// Capture the written data
 		final byte[] data = new byte[1];
 		data[0] = 0;
-		OutputStream expected = new ServletOutputStream() {
+		OutputStream expected = new AbstractServletOutputStream() {
 			@Override
 			public void write(int b) throws IOException {
 				data[0] = (byte) b;
@@ -546,7 +548,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		// Capture the written data
 		final byte[] data = new byte[1];
 		data[0] = 0;
-		OutputStream expected = new ServletOutputStream() {
+		OutputStream expected = new AbstractServletOutputStream() {
 			@Override
 			public void write(int b) throws IOException {
 				data[0] = (byte) b;
@@ -579,7 +581,7 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 		// Capture the written data
 		final byte[] data = new byte[1];
 		data[0] = 0;
-		OutputStream expected = new ServletOutputStream() {
+		OutputStream expected = new AbstractServletOutputStream() {
 			@Override
 			public void write(int b) throws IOException {
 				data[0] = (byte) b;
@@ -598,6 +600,48 @@ public class ServletServerHttpConnectionTest extends OfficeFrameTestCase {
 
 		// Ensure correct output
 		assertEquals("Incorrect writer", 'a', ((char) data[0]));
+	}
+
+	/**
+	 * Abstract {@link ServletInputStream} for testing.
+	 */
+	private static abstract class AbstractServletInputStream extends
+			ServletInputStream {
+
+		@Override
+		public boolean isFinished() {
+			fail("Should not be invoked");
+			return false;
+		}
+
+		@Override
+		public boolean isReady() {
+			fail("Should not be invoked");
+			return false;
+		}
+
+		@Override
+		public void setReadListener(ReadListener readListener) {
+			fail("Should not be invoked");
+		}
+	}
+
+	/**
+	 * Abstract {@link ServletOutputStream} for testing.
+	 */
+	private static abstract class AbstractServletOutputStream extends
+			ServletOutputStream {
+
+		@Override
+		public boolean isReady() {
+			fail("Should not be invoked");
+			return false;
+		}
+
+		@Override
+		public void setWriteListener(WriteListener writeListener) {
+			fail("Should not be invoked");
+		}
 	}
 
 }

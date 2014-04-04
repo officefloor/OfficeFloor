@@ -215,195 +215,148 @@ public class ServletContextImpl implements ServletContext {
 	}
 
 	/*
-	 * ------------------ Servlet 3.0 methods ----------------------
+	 * ------------------ Servlet 3.x methods ----------------------
 	 */
 
 	@Override
 	public Dynamic addFilter(String arg0, String arg1) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public Dynamic addFilter(String arg0, Filter arg1) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public Dynamic addFilter(String arg0, Class<? extends Filter> arg1) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public void addListener(String arg0) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public <T extends EventListener> void addListener(T arg0) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public void addListener(Class<? extends EventListener> arg0) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public javax.servlet.ServletRegistration.Dynamic addServlet(String arg0,
 			String arg1) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public javax.servlet.ServletRegistration.Dynamic addServlet(String arg0,
 			Servlet arg1) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public javax.servlet.ServletRegistration.Dynamic addServlet(String arg0,
 			Class<? extends Servlet> arg1) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public <T extends Filter> T createFilter(Class<T> arg0)
 			throws ServletException {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public <T extends EventListener> T createListener(Class<T> arg0)
 			throws ServletException {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public <T extends Servlet> T createServlet(Class<T> arg0)
 			throws ServletException {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public void declareRoles(String... arg0) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public ClassLoader getClassLoader() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public Set<SessionTrackingMode> getDefaultSessionTrackingModes() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public int getEffectiveMajorVersion() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public int getEffectiveMinorVersion() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public Set<SessionTrackingMode> getEffectiveSessionTrackingModes() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public FilterRegistration getFilterRegistration(String arg0) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public JspConfigDescriptor getJspConfigDescriptor() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public ServletRegistration getServletRegistration(String arg0) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public Map<String, ? extends ServletRegistration> getServletRegistrations() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public SessionCookieConfig getSessionCookieConfig() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public boolean setInitParameter(String arg0, String arg1) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public void setSessionTrackingModes(Set<SessionTrackingMode> arg0) {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		UnsupportedHttpServletMethodException.notSupported();
+	}
+
+	@Override
+	public String getVirtualServerName() {
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 }

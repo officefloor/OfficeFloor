@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletRequest;
 
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -198,6 +199,20 @@ public class HttpResponseServletOutputStream extends ServletOutputStream {
 
 		// Trigger flush on delegate
 		this.delegate.flush();
+	}
+
+	/*
+	 * ------------------ Servlet 3.x methods ----------------------
+	 */
+
+	@Override
+	public boolean isReady() {
+		return UnsupportedHttpServletMethodException.notSupported();
+	}
+
+	@Override
+	public void setWriteListener(WriteListener writeListener) {
+		UnsupportedHttpServletMethodException.notSupported();
 	}
 
 }
