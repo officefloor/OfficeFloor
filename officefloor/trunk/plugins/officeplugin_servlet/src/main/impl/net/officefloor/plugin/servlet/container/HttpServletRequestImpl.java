@@ -51,6 +51,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 import net.officefloor.frame.api.execute.TaskContext;
@@ -891,17 +892,13 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 
 	@Override
 	public String getCharacterEncoding() {
-		// TODO implement ServletRequest.getCharacterEncoding
-		throw new UnsupportedOperationException(
-				"TODO implement ServletRequest.getCharacterEncoding");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public void setCharacterEncoding(String env)
 			throws UnsupportedEncodingException {
-		// TODO implement ServletRequest.setCharacterEncoding
-		throw new UnsupportedOperationException(
-				"TODO implement ServletRequest.setCharacterEncoding");
+		UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
@@ -1053,93 +1050,85 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 	}
 
 	/*
-	 * ------------------ Servlet 3.0 methods ----------------------
+	 * ------------------ Servlet 3.x methods ----------------------
 	 */
 
 	@Override
 	public AsyncContext getAsyncContext() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public DispatcherType getDispatcherType() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public ServletContext getServletContext() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public boolean isAsyncStarted() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public boolean isAsyncSupported() {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public AsyncContext startAsync() throws IllegalStateException {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public AsyncContext startAsync(ServletRequest arg0, ServletResponse arg1)
 			throws IllegalStateException {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public boolean authenticate(HttpServletResponse arg0) throws IOException,
 			ServletException {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public Part getPart(String arg0) throws IOException, ServletException {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public Collection<Part> getParts() throws IOException, ServletException {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public void login(String arg0, String arg1) throws ServletException {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		UnsupportedHttpServletMethodException.notSupported();
 	}
 
 	@Override
 	public void logout() throws ServletException {
-		// TODO support Servlet 3.0 specification
-		throw new UnsupportedOperationException(
-				"TODO WoOF to support Servlet 3.0 specification");
+		UnsupportedHttpServletMethodException.notSupported();
+	}
+
+	@Override
+	public long getContentLengthLong() {
+		return UnsupportedHttpServletMethodException.notSupported();
+	}
+
+	@Override
+	public String changeSessionId() {
+		return UnsupportedHttpServletMethodException.notSupported();
+	}
+
+	@Override
+	public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass)
+			throws IOException, ServletException {
+		return UnsupportedHttpServletMethodException.notSupported();
 	}
 
 }
