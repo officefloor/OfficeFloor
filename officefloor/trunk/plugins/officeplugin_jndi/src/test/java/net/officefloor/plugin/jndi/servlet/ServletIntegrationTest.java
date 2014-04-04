@@ -37,11 +37,6 @@ import org.eclipse.jetty.webapp.WebAppContext;
 public class ServletIntegrationTest extends TestCase {
 
 	/**
-	 * {@link ServletTester} to aid in testing.
-	 */
-	// private final ServletTester tester = new ServletTester();
-
-	/**
 	 * Port of {@link Server}.
 	 */
 	private final int port = HttpTestUtil.getAvailablePort();
@@ -58,23 +53,17 @@ public class ServletIntegrationTest extends TestCase {
 		this.server = new Server(this.port);
 		WebAppContext context = new WebAppContext();
 		context.setBaseResource(Resource.newClassPathResource(this.getClass()
-				.getPackage().getName().replace('.', '/')
-				+ "/integrate"));
+				.getPackage().getName().replace('.', '/')));
 		context.setContextPath("/");
 		context.setSessionHandler(new SessionHandler());
 		context.addServlet(MockServlet.class, "/");
 		this.server.setHandler(context);
-
-		// Create the servlet tester
-		// this.tester.setContextPath("/");
-		// this.tester.addServlet(MockServlet.class, "/");
-		// this.tester.start();
+		this.server.start();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		// Stop the servlet tester
-		// this.tester.stop();
 		this.server.stop();
 	}
 
