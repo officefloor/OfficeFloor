@@ -330,10 +330,10 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 
 		// Provide Servlet and its configuration
 		Dynamic servlet = servletContext.addServlet(servletName, servletClass);
+		servlet.setAsyncSupported(true);
 		servlet.setInitParameter(INIT_PROPERTY_APPLICATION_INDEX,
 				String.valueOf(applicationIndex));
 		servlet.addMapping(mappedUris);
-		servlet.setAsyncSupported(true);
 		servlet.setLoadOnStartup(1);
 
 		// Provide Filter to override DefaultServlet of Server
