@@ -444,7 +444,7 @@
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-simple</artifactId>
 				<version>1.7.6</version>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>org.apache.tomcat</groupId>
 				<artifactId>jasper</artifactId>
@@ -1208,7 +1208,9 @@
 				<inherited>false</inherited> <!-- run only at top level (not each module) -->
 				<configuration>
 					<webAppSourceDirectory>${basedir}/target/staging/shell.sourceforge.net/home/project-web/officefloor/htdocs</webAppSourceDirectory>
-					<port>9999</port>
+					<httpConnector>
+						<port>9999</port>
+					</httpConnector>
 					<stopKey>OfficeFloor</stopKey>
 					<stopPort>9966</stopPort>
 				</configuration>
