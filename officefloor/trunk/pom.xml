@@ -1208,13 +1208,9 @@
 				<inherited>false</inherited> <!-- run only at top level (not each module) -->
 				<configuration>
 					<webAppSourceDirectory>${basedir}/target/staging/shell.sourceforge.net/home/project-web/officefloor/htdocs</webAppSourceDirectory>
+					<port>9999</port>
 					<stopKey>OfficeFloor</stopKey>
 					<stopPort>9966</stopPort>
-					<connectors>
-						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-							<port>9999</port>
-						</connector>
-					</connectors>
 				</configuration>
 				<executions>
 					<execution>

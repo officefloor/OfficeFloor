@@ -121,6 +121,7 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 		// Configure the WoOF Servlet
 		this.recordReturn(this.context, this.context.addServlet(
 				WoofServlet.SERVLET_NAME, WoofServlet.class), servletDynamic);
+		servletDynamic.setAsyncSupported(true);
 		this.recordReturn(servletDynamic, servletDynamic.setInitParameter(
 				"officefloorservlet.application.index", "1"), true);
 		this.recordReturn(servletDynamic, servletDynamic.addMapping(
@@ -144,6 +145,7 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 		// Configure the Filter
 		this.recordReturn(this.context, this.context.addFilter(
 				WoofServlet.SERVLET_NAME, WoofServlet.class), filterDynamic);
+		filterDynamic.setAsyncSupported(true);
 		this.recordReturn(filterDynamic, filterDynamic.setInitParameter(
 				"officefloorservlet.application.index", "1"), true);
 		filterDynamic.addMappingForUrlPatterns(null, false, "/gwt/service",
