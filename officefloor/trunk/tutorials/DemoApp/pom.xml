@@ -85,11 +85,9 @@
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<configuration>
-					<connectors>
-						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-							<port>18280</port>
-						</connector>
-					</connectors>
+					<httpConnector>
+						<port>18280</port>
+					</httpConnector>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
 					<stopKey>officefloor</stopKey>
 					<stopPort>18281</stopPort>
