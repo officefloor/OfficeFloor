@@ -609,7 +609,6 @@ Bundle-ClassPath: .,
  plexus-utils-3.0.15.jar,
  sisu-guice-3.1.0-no_aop.jar,
  slf4j-api-1.7.5.jar,
- slf4j-jdk14-1.7.2.jar,
  wagon-provider-api-1.0.jar,
  wagon-ssh-2.6.jar,
  wagon-ssh-common-2.6.jar

@@ -58,6 +58,9 @@ public class TeamHttpServerTest extends TestCase {
 	protected void setUp() throws Exception {
 		// Start the database and HTTP Server
 		WoofOfficeFloorSource.start();
+		
+		// Request page to allow time for database setup
+		this.doRequest("http://localhost:7878/example.woof");
 	}
 
 	@Override
