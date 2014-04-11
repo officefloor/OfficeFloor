@@ -107,7 +107,7 @@ public abstract class AbstractGoal extends AbstractMojo {
 		}
 
 		// Create and return the Mojo Execution Exception
-		return new MojoExecutionException(msg.toString());
+		return new MojoExecutionException(msg.toString(), cause);
 	}
 
 }
