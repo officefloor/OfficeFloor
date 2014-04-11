@@ -198,9 +198,8 @@ public class ProcessManager implements ProcessManagerMBean {
 				}
 
 				// Run the process (in another thread to not change this thread)
-				final boolean[] isComplete = new boolean[1];
-				isComplete[0] = false;
-				final Throwable[] failure = new Throwable[1];
+				final boolean[] isComplete = new boolean[] { false };
+				final Throwable[] failure = new Throwable[] { null };
 				Thread localProcess = new Thread(new Runnable() {
 					@Override
 					public void run() {
@@ -239,6 +238,9 @@ public class ProcessManager implements ProcessManagerMBean {
 							// Flag process complete
 							synchronized (isComplete) {
 								isComplete[0] = true;
+
+								// Notify complete
+								isComplete.notify();
 							}
 						}
 					}
@@ -249,8 +251,8 @@ public class ProcessManager implements ProcessManagerMBean {
 				localProcess.start();
 
 				// Wait until process complete
-				for (;;) {
-					synchronized (isComplete) {
+				synchronized (isComplete) {
+					for (;;) {
 						// Propagate failure in process
 						if (failure[0] != null) {
 							throw newProcessException(null,
@@ -266,13 +268,13 @@ public class ProcessManager implements ProcessManagerMBean {
 						if (isComplete[0]) {
 							return; // completed so finish
 						}
-					}
 
-					// Wait until process complete
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException ex) {
-						throw newProcessException(null, ex.getMessage(), ex);
+						// Wait some time for process to complete
+						try {
+							isComplete.wait(100);
+						} catch (InterruptedException ex) {
+							throw newProcessException(null, ex.getMessage(), ex);
+						}
 					}
 				}
 

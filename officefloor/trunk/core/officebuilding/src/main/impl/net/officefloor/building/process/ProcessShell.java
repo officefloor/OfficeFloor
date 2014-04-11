@@ -119,13 +119,16 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 		// Create the context for the managed process
 		ProcessShell context = new ProcessShell(processNamespace,
 				ManagementFactory.getPlatformMBeanServer());
+		try {
 
-		// Run the process
-		managedProcess.init(context);
-		managedProcess.main();
+			// Run the process
+			managedProcess.init(context);
+			managedProcess.main();
 
-		// Process complete so unregister MBean instances
-		context.unregisterMBeans();
+		} finally {
+			// Process complete so unregister MBean instances
+			context.unregisterMBeans();
+		}
 	}
 
 	/**
@@ -186,7 +189,8 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 				int parentPort = fromParentObjectPipe.readInt();
 
 				// Connect to parent to send notifications
-				@SuppressWarnings("resource")  // socket closed by shell
+				@SuppressWarnings("resource")
+				// socket closed by shell
 				Socket parentSocket = new Socket();
 				parentSocket.connect(new InetSocketAddress(parentPort));
 				toParentPipe = new ObjectOutputStream(

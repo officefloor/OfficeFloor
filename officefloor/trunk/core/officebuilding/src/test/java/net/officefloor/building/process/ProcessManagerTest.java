@@ -342,8 +342,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	public void test_start_Classpath() throws Exception {
 
 		// Obtain the file on class path
-		final String CLASS_PATH_FILE_NAME = "Test.txt";
-		final String CLASS_PATH_FILE_PATH = "classpath/" + CLASS_PATH_FILE_NAME;
+		final String CLASS_PATH_FILE_PATH = "classpath/Test.txt";
 		File classpathFile = this.findFile(this.getClass(),
 				CLASS_PATH_FILE_PATH);
 		String testContent = this.getFileContents(classpathFile).trim();
@@ -353,13 +352,14 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 
 		// Create process configuration
 		ProcessConfiguration configuration = new ProcessConfiguration();
-		File additionalClasspathDir = classpathFile.getParentFile();
+		File additionalClasspathDir = classpathFile.getParentFile()
+				.getParentFile();
 		configuration.setAdditionalClassPath(additionalClasspathDir
 				.getAbsolutePath());
 
 		// Start the process
 		this.manager = ProcessManager.startProcess(new ClassPathProcess(
-				CLASS_PATH_FILE_NAME, file.getAbsolutePath()), configuration);
+				CLASS_PATH_FILE_PATH, file.getAbsolutePath()), configuration);
 
 		// Wait until process writes content to file
 		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
@@ -375,8 +375,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	public void test_run_Classpath() throws Exception {
 
 		// Obtain the file on class path
-		final String CLASS_PATH_FILE_NAME = "Test.txt";
-		final String CLASS_PATH_FILE_PATH = "classpath/" + CLASS_PATH_FILE_NAME;
+		final String CLASS_PATH_FILE_PATH = "classpath/Test.txt";
 		File classpathFile = this.findFile(this.getClass(),
 				CLASS_PATH_FILE_PATH);
 		String testContent = this.getFileContents(classpathFile).trim();
@@ -386,12 +385,13 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 
 		// Create process configuration
 		ProcessConfiguration configuration = new ProcessConfiguration();
-		File additionalClasspathDir = classpathFile.getParentFile();
+		File additionalClasspathDir = classpathFile.getParentFile()
+				.getParentFile();
 		configuration.setAdditionalClassPath(additionalClasspathDir
 				.getAbsolutePath());
 
 		// Run local process
-		ProcessManager.runProcess(new ClassPathProcess(CLASS_PATH_FILE_NAME,
+		ProcessManager.runProcess(new ClassPathProcess(CLASS_PATH_FILE_PATH,
 				file.getAbsolutePath()), configuration);
 
 		// Ensure content in file
