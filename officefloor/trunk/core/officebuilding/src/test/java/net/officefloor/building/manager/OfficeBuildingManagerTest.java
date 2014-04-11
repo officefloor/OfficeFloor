@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
+import java.rmi.NoSuchObjectException;
 import java.rmi.UnmarshalException;
 import java.rmi.server.RMIClientSocketFactory;
 import java.util.HashMap;
@@ -522,6 +523,9 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 			try {
 				this.connectToJmxAgent(serviceUrl, true);
 				fail("Should not connect to stopped remote process");
+
+			} catch (NoSuchObjectException ex) {
+				// In process of shutting down (keep waiting)
 
 			} catch (ConnectException ex) {
 				assertEquals("Incorrect cause", "Connection refused", ex
