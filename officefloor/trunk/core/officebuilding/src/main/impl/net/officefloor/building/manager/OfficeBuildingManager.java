@@ -827,8 +827,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	@Override
-	public String openOfficeFloor(String arguments)
-			throws OfficeBuildingException {
+	public String openOfficeFloor(String arguments) throws ProcessException {
 		try {
 
 			// Split out the arguments
@@ -849,13 +848,13 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			return this.openOfficeFloor(configuration);
 
 		} catch (Throwable ex) {
-			throw OfficeBuildingException.newException(ex);
+			throw ProcessException.propagate(ex);
 		}
 	}
 
 	@Override
 	public String openOfficeFloor(OpenOfficeFloorConfiguration configuration)
-			throws OfficeBuildingException {
+			throws ProcessException {
 		try {
 
 			// Ensure the OfficeBuilding is open
@@ -1005,7 +1004,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				ProcessStartListener startListener = new ProcessStartListener() {
 					@Override
 					public void processStarted(
-							ProcessManagerMBean processManager) {
+							ProcessManagerMBean processManager)
+							throws IOException {
 
 						// Only register if process not already complete
 						synchronized (OfficeBuildingManager.this) {
@@ -1097,13 +1097,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			}
 
 		} catch (Throwable ex) {
-			throw OfficeBuildingException.newException(ex);
+			throw ProcessException.propagate(ex);
 		}
 	}
 
 	@Override
-	public synchronized String listProcessNamespaces()
-			throws OfficeBuildingException {
+	public synchronized String listProcessNamespaces() throws ProcessException {
 		try {
 
 			// Create listing of process name spaces
@@ -1126,13 +1125,13 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			return namespaces.toString();
 
 		} catch (Throwable ex) {
-			throw OfficeBuildingException.newException(ex);
+			throw ProcessException.propagate(ex);
 		}
 	}
 
 	@Override
 	public synchronized String closeOfficeFloor(String processNamespace,
-			long waitTime) throws OfficeBuildingException {
+			long waitTime) throws ProcessException {
 		try {
 
 			// Find the process manager for the OfficeFloor
@@ -1177,13 +1176,13 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			}
 
 		} catch (Throwable ex) {
-			throw OfficeBuildingException.newException(ex);
+			throw ProcessException.propagate(ex);
 		}
 	}
 
 	@Override
 	public synchronized String stopOfficeBuilding(long waitTime)
-			throws OfficeBuildingException {
+			throws ProcessException {
 		try {
 
 			// Flag no longer open
@@ -1286,7 +1285,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			}
 
 		} catch (Throwable ex) {
-			throw OfficeBuildingException.newException(ex);
+			throw ProcessException.propagate(ex);
 		}
 	}
 

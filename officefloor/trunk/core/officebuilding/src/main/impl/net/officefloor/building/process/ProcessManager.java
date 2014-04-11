@@ -588,7 +588,7 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		// Return the process exception
 		if (cause != null) {
-			return new ProcessException(message, cause);
+			return ProcessException.propagate(message, cause);
 		} else {
 			return new ProcessException(message);
 		}
@@ -786,6 +786,9 @@ public class ProcessManager implements ProcessManagerMBean {
 
 	/**
 	 * Flags the {@link Process} is complete.
+	 * 
+	 * @throws IOException
+	 *             If
 	 */
 	private void flagComplete() {
 
@@ -824,7 +827,13 @@ public class ProcessManager implements ProcessManagerMBean {
 
 		// Notify process complete
 		if (listener != null) {
-			listener.processCompleted(this);
+			try {
+				listener.processCompleted(this);
+			} catch (Throwable ex) {
+				LOGGER.log(Level.WARNING,
+						ProcessCompletionListener.class.getSimpleName() + " "
+								+ listener.getClass().getName() + " failed", ex);
+			}
 		}
 	}
 

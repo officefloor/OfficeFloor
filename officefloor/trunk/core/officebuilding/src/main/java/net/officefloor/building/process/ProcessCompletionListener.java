@@ -17,6 +17,8 @@
  */
 package net.officefloor.building.process;
 
+import java.io.IOException;
+
 /**
  * Listener for the completion of the {@link ManagedProcess}.
  * 
@@ -32,7 +34,9 @@ public interface ProcessCompletionListener {
 	 *            {@link ManagedProcess}. This allows using the same
 	 *            {@link ProcessCompletionListener} for multiple
 	 *            {@link ManagedProcess} instances.
+	 * @throws IOException
+	 *             Allows propagating issues with {@link ProcessManagerMBean}.
 	 */
-	void processCompleted(ProcessManagerMBean manager);
+	void processCompleted(ProcessManagerMBean manager) throws IOException;
 
 }
