@@ -32,6 +32,7 @@ import javax.management.ObjectName;
 
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
+import net.officefloor.building.process.ProcessException;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
@@ -203,28 +204,34 @@ public class OfficeFloorManager implements ManagedProcess,
 
 	@Override
 	public void invokeTask(String officeName, String workName, String taskName,
-			String parameter) throws Exception {
+			String parameter) throws ProcessException {
+		try {
 
-		WorkState work = null;
-		OfficeFloor officeFloor;
-		synchronized (this) {
-			officeFloor = this.officeFloor;
+			WorkState work = null;
+			OfficeFloor officeFloor;
+			synchronized (this) {
+				officeFloor = this.officeFloor;
 
-			// Determine if already opened the OfficeFloor
-			if (this.isOpen) {
-				// OfficeFloor running so invoke immediately
-				work = new WorkState(officeName, workName, taskName, parameter);
+				// Determine if already opened the OfficeFloor
+				if (this.isOpen) {
+					// OfficeFloor running so invoke immediately
+					work = new WorkState(officeName, workName, taskName,
+							parameter);
 
-			} else {
-				// Register the work to be invoked inside the main
-				this.workStates.add(new WorkState(officeName, workName,
-						taskName, parameter));
+				} else {
+					// Register the work to be invoked inside the main
+					this.workStates.add(new WorkState(officeName, workName,
+							taskName, parameter));
+				}
 			}
-		}
 
-		// Invoke work if have (outside locks)
-		if (work != null) {
-			work.invoke(officeFloor);
+			// Invoke work if have (outside locks)
+			if (work != null) {
+				work.invoke(officeFloor);
+			}
+
+		} catch (Throwable ex) {
+			throw ProcessException.propagate(ex);
 		}
 	}
 

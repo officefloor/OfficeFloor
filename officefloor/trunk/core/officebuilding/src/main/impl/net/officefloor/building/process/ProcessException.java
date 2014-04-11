@@ -44,6 +44,37 @@ public class ProcessException extends Exception implements Serializable {
 	static final long serialVersionUID = 1487316913125229048L;
 
 	/**
+	 * Propagates the {@link ProcessException}.
+	 * 
+	 * @param cause
+	 *            Cause.
+	 * @return {@link ProcessException} to propagate.
+	 */
+	public static ProcessException propagate(Throwable cause) {
+		return propagate(null, cause);
+	}
+
+	/**
+	 * Propagates the {@link ProcessException}.
+	 * 
+	 * @param message
+	 *            Message.
+	 * @param cause
+	 *            Cause.
+	 * @return {@link ProcessException} to propagate.
+	 */
+	public static ProcessException propagate(String message, Throwable cause) {
+
+		// Determine if cause is process exception
+		if (cause instanceof ProcessException) {
+			return (ProcessException) cause;
+		}
+
+		// Return newly constructed process exception
+		return new ProcessException(message, cause);
+	}
+
+	/**
 	 * Cause of the {@link ProcessException}.
 	 */
 	private Throwable cause;
@@ -80,22 +111,12 @@ public class ProcessException extends Exception implements Serializable {
 	/**
 	 * Initiate.
 	 * 
-	 * @param cause
-	 *            Cause.
-	 */
-	public ProcessException(Throwable cause) {
-		this(null, cause);
-	}
-
-	/**
-	 * Initiate.
-	 * 
 	 * @param message
 	 *            Message.
 	 * @param cause
 	 *            Cause.
 	 */
-	public ProcessException(String message, Throwable cause) {
+	private ProcessException(String message, Throwable cause) {
 		super(message != null ? message : cause != null ? cause.getMessage()
 				: null);
 		this.cause = cause;

@@ -17,6 +17,8 @@
  */
 package net.officefloor.building.process;
 
+import java.io.IOException;
+
 import javax.management.remote.JMXServiceURL;
 
 /**
@@ -32,12 +34,19 @@ public interface ProcessShellMBean {
 	 * 
 	 * @return {@link JMXConnector} {@link JMXServiceURL} for the
 	 *         {@link Process}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link ProcessShellMBean}.
 	 */
-	String getJmxConnectorServiceUrl();
+	String getJmxConnectorServiceUrl() throws IOException;
 
 	/**
 	 * Triggers gracefully stopping the {@link Process}.
+	 * 
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link ProcessShellMBean}.
 	 */
-	void triggerStopProcess();
+	void triggerStopProcess() throws IOException;
 
 }

@@ -17,6 +17,7 @@
  */
 package net.officefloor.building.process;
 
+import java.io.IOException;
 
 /**
  * Listens for started {@link ManagedProcess} instances.
@@ -30,7 +31,9 @@ public interface ProcessStartListener {
 	 * 
 	 * @param processManager
 	 *            {@link ProcessManagerMBean} for the {@link ManagedProcess}.
+	 * @throws IOException
+	 *             Allow propagating issues with {@link ProcessManagerMBean}.
 	 */
-	void processStarted(ProcessManagerMBean processManager);
+	void processStarted(ProcessManagerMBean processManager) throws IOException;
 
 }

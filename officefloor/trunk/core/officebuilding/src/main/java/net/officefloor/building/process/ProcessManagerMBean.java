@@ -17,6 +17,7 @@
  */
 package net.officefloor.building.process;
 
+import java.io.IOException;
 import java.rmi.registry.Registry;
 
 import javax.management.MBeanServer;
@@ -40,9 +41,13 @@ public interface ProcessManagerMBean {
 	 * See {@link #getProcessNamespace()} for a unique name.
 	 * 
 	 * @return Name given to the {@link Process}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link ProcessManagerMBean}.
+	 * 
 	 * @see #getProcessNamespace()
 	 */
-	String getProcessName();
+	String getProcessName() throws IOException;
 
 	/**
 	 * <p>
@@ -54,15 +59,21 @@ public interface ProcessManagerMBean {
 	 * may be adjusted (typically by providing a unique suffix).
 	 * 
 	 * @return Unique name space for the {@link Process}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link ProcessManagerMBean}.
 	 */
-	String getProcessNamespace();
+	String getProcessNamespace() throws IOException;
 
 	/**
 	 * Obtains the host name that the {@link Process} is running on.
 	 * 
 	 * @return Host name that the {@link Process} is running on.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link ProcessManagerMBean}.
 	 */
-	String getProcessHostName();
+	String getProcessHostName() throws IOException;
 
 	/**
 	 * Obtains the port to access the {@link Registry} containing the
@@ -70,8 +81,11 @@ public interface ProcessManagerMBean {
 	 * 
 	 * @return Port to access the {@link Registry} containing the
 	 *         {@link MBeanServer} for this {@link Process}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link ProcessManagerMBean}.
 	 */
-	int getProcessPort();
+	int getProcessPort() throws IOException;
 
 	/**
 	 * <p>
@@ -80,20 +94,30 @@ public interface ProcessManagerMBean {
 	 * This is a non-blocking call to allow a timeout on graceful shutdown.
 	 * 
 	 * @throws ProcessException
-	 *             If fails to communicate with {@link Process}.
+	 *             If fails to stop the {@link Process}.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link ProcessManagerMBean}.
 	 */
-	void triggerStopProcess() throws ProcessException;
+	void triggerStopProcess() throws ProcessException, IOException;
 
 	/**
 	 * Forcibly destroys the {@link Process}.
+	 * 
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link ProcessManagerMBean}.
 	 */
-	void destroyProcess();
+	void destroyProcess() throws IOException;
 
 	/**
 	 * Indicates if the {@link ManagedProcess} is complete.
 	 * 
 	 * @return <code>true</code> if the {@link ManagedProcess} is complete.
+	 * @throws IOException
+	 *             If fails communication with the remote
+	 *             {@link ProcessManagerMBean}.
 	 */
-	boolean isProcessComplete();
+	boolean isProcessComplete() throws IOException;
 
 }

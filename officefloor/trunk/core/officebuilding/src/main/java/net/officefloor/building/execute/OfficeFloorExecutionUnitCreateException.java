@@ -18,7 +18,7 @@
 package net.officefloor.building.execute;
 
 /**
- * Inidicates failure to create the {@link OfficeFloorExecutionUnit}.
+ * Indicates failure to create the {@link OfficeFloorExecutionUnit}.
  * 
  * @author Daniel Sagenschneider
  */

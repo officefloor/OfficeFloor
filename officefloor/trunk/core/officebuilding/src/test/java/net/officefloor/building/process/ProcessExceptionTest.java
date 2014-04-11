@@ -41,6 +41,39 @@ public class ProcessExceptionTest extends OfficeFrameTestCase {
 	private static String PROPAGATION_PATH_HEADER = "Propagation path:";
 
 	/**
+	 * Ensure can propagate {@link Throwable} appropriately.
+	 */
+	public void testPropagateNonProcessException() {
+
+		// Create the throwable
+		Throwable exception = new Throwable("TEST");
+
+		// Ensure wrap in process exception
+		ProcessException propagated = ProcessException.propagate("ANOTHER",
+				exception);
+
+		// Validate the propagate exception
+		assertEquals("Incorrect message", "ANOTHER", propagated.getMessage());
+		assertSame("Incorrect cause", exception, propagated.getCause());
+	}
+
+	/**
+	 * Ensure can propagate {@link ProcessException} appropriately.
+	 */
+	public void testPropagateProcessException() {
+
+		// Create the process exception
+		ProcessException exception = new ProcessException("TEST");
+
+		// Propagate to ensure same exception
+		ProcessException propagated = ProcessException.propagate("ANOTHER",
+				exception);
+		assertEquals("Incorrect message", "TEST", propagated.getMessage());
+		assertSame("Must be same exception", exception, propagated);
+		assertNull("Should be no cause", propagated.getCause());
+	}
+
+	/**
 	 * Ensure same exception on no serialise.
 	 */
 	public void testNoSerialise() throws Exception {
@@ -110,7 +143,7 @@ public class ProcessExceptionTest extends OfficeFrameTestCase {
 	public void testWithSerialisableCause() throws Exception {
 
 		// Create the exception
-		ProcessException exception = new ProcessException("TEST",
+		ProcessException exception = ProcessException.propagate("TEST",
 				new SerialisableException("CAUSE"));
 
 		// Serialise and deserilise to new exception
@@ -149,7 +182,7 @@ public class ProcessExceptionTest extends OfficeFrameTestCase {
 		}
 
 		// Create the exception
-		ProcessException exception = new ProcessException("TEST", cause);
+		ProcessException exception = ProcessException.propagate("TEST", cause);
 
 		// Serialise and deserilise to new exception
 		ProcessException serialised = serialise(exception);
