@@ -136,10 +136,10 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	 * 
 	 * @param arguments
 	 *            Arguments.
-	 * @throws Throwable
+	 * @throws IOException
 	 *             If failure in running the {@link ManagedProcess}.
 	 */
-	public static void main(String[] arguments) throws Throwable {
+	public static void main(String[] arguments) throws IOException {
 		main(System.in, arguments);
 	}
 
@@ -150,11 +150,11 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	 *            From parent pipe.
 	 * @param arguments
 	 *            Arguments.
-	 * @throws Throwable
+	 * @throws IOException
 	 *             If failure in running the {@link ManagedProcess}.
 	 */
 	static void main(InputStream fromParentPipe, String... arguments)
-			throws Throwable {
+			throws IOException {
 
 		// Obtain pipe from parent
 		ObjectInputStream fromParentObjectPipe = new ObjectInputStream(
@@ -281,7 +281,13 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 				// Notify Process Manager of failure
 				if (toParentPipe != null) {
 					try {
-						toParentPipe.writeObject(ex);
+
+						// Propagate process exception
+						ProcessException propagation = ProcessException
+								.propagate(ex);
+
+						// Propagate exception to Process Manager
+						toParentPipe.writeObject(propagation);
 						toParentPipe.flush();
 					} catch (Throwable notifyEx) {
 						// Indicate failure to notify

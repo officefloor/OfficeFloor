@@ -541,9 +541,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 			fail("Should fail to start");
 		} catch (ProcessException ex) {
 			// Ensure correct message
-			assertEquals("Incorrect failure message",
-					"Failed to start ProcessShell for " + managedProcess + " ["
-							+ FailInitProcess.class.getName() + "]",
+			assertEquals("Incorrect failure message", FAILURE_MESSAGE,
 					ex.getMessage());
 
 			// Ensure correct cause
