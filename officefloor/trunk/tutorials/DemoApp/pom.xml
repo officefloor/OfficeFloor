@@ -90,6 +90,7 @@
 					</httpConnector>
 					<stopPort>18281</stopPort>
 					<stopKey>officefloor</stopKey>
+					<stopWait>10</stopWait>
 				</configuration>
 				<executions>
 					<execution>
