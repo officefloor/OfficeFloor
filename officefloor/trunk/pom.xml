@@ -1213,6 +1213,7 @@
 					</httpConnector>
 					<stopKey>OfficeFloor</stopKey>
 					<stopPort>9966</stopPort>
+					<stopWait>10</stopWait>
 				</configuration>
 				<executions>
 					<execution>
