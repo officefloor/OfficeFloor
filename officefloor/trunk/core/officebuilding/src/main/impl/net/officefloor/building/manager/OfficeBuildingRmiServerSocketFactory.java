@@ -61,18 +61,28 @@ public class OfficeBuildingRmiServerSocketFactory implements
 	}
 
 	/**
-	 * Creates the server {@link SSLContext}.
-	 * 
-	 * @param keyStoreContent
-	 *            Content of the key store.
-	 * @param keyStorePassword
-	 *            Optional password to the key store. May be <code>null</code>.
-	 * @return Server {@link SSLContext}.
-	 * @throws Exception
-	 *             If fails to create the {@link SSLContext}.
+	 * {@link SSLSocketFactory}.
 	 */
-	public static SSLContext createServerSslContext(byte[] keyStoreContent,
-			String keyStorePassword) throws Exception {
+	private final SSLSocketFactory socketFactory;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param sslProtocol
+	 *            {@link SSLContext} protocol.
+	 * @param sslAlgorithm
+	 *            {@link KeyManager} algorithm.
+	 * @param keyStoreContent
+	 *            {@link KeyStore} content.
+	 * @param keyStorePassword
+	 *            {@link KeyStore} password. May be <code>null</code> if not
+	 *            required.
+	 * @throws Exception
+	 *             If fails to initiate.
+	 */
+	public OfficeBuildingRmiServerSocketFactory(String sslProtocol,
+			String sslAlgorithm, byte[] keyStoreContent, String keyStorePassword)
+			throws Exception {
 
 		// Obtain the key store
 		KeyStore keyStore = OfficeBuildingRmiClientSocketFactory
@@ -80,47 +90,17 @@ public class OfficeBuildingRmiServerSocketFactory implements
 
 		// Create the Key Managers
 		KeyManagerFactory keyManagerFactory = KeyManagerFactory
-				.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+				.getInstance(sslAlgorithm);
 		keyManagerFactory.init(keyStore, (keyStorePassword == null ? null
 				: keyStorePassword.toCharArray()));
 		KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
 
 		// Create and initialise the SSL context
-		SSLContext context = OfficeBuildingRmiClientSocketFactory
-				.createSslContext();
+		SSLContext context = SSLContext.getInstance(sslProtocol);
 		context.init(keyManagers, null, null);
 
-		// Return the context
-		return context;
-	}
-
-	/**
-	 * {@link KeyStore} content.
-	 */
-	private final byte[] keyStoreContent;
-
-	/**
-	 * {@link KeyStore} password.
-	 */
-	private final String keyStorePassword;
-
-	/**
-	 * {@link SSLSocketFactory}.
-	 */
-	private SSLSocketFactory socketFactory = null;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param keyStoreContent
-	 *            {@link KeyStore} content.
-	 * @param keyStorePassword
-	 *            {@link KeyStore} password.
-	 */
-	public OfficeBuildingRmiServerSocketFactory(byte[] keyStoreContent,
-			String keyStorePassword) {
-		this.keyStoreContent = keyStoreContent;
-		this.keyStorePassword = keyStorePassword;
+		// Create the socket factory
+		this.socketFactory = context.getSocketFactory();
 	}
 
 	/*
@@ -130,34 +110,12 @@ public class OfficeBuildingRmiServerSocketFactory implements
 	@Override
 	public ServerSocket createServerSocket(int port) throws IOException {
 
-		// Ensure have the server socket factory
-		SSLSocketFactory factory;
-		synchronized (this) {
-
-			// Lazy load the socket factory
-			if (this.socketFactory == null) {
-				try {
-					SSLContext context = createServerSslContext(
-							this.keyStoreContent, this.keyStorePassword);
-					factory = context.getSocketFactory();
-					this.socketFactory = context.getSocketFactory();
-				} catch (Exception ex) {
-					throw new IOException("Failed to create "
-							+ SSLSocketFactory.class.getSimpleName(), ex);
-				}
-			}
-
-			// Provide the factory for creating the socket
-			factory = this.socketFactory;
-		}
-
 		// Create and return the socket
-		final SSLSocketFactory sslSocketFactory = factory;
 		ServerSocket socket = new ServerSocket(port) {
 			@Override
 			public Socket accept() throws IOException {
 				Socket socket = super.accept();
-				SSLSocket sslSocket = (SSLSocket) sslSocketFactory
+				SSLSocket sslSocket = (SSLSocket) OfficeBuildingRmiServerSocketFactory.this.socketFactory
 						.createSocket(socket, socket.getInetAddress()
 								.getHostName(), socket.getPort(), true);
 				sslSocket.setUseClientMode(false);

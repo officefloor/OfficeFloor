@@ -3,6 +3,18 @@
 # Fail immediately
 set -e
 
-# TODO implement to call OfficeFloorConsoleMain with start
-echo "TODO implement to call OfficeFloorConsoleMain with start"
-exit 1
+# Default OFFICE_FLOOR_HOME to bin/..
+if [ -z ${OFFICE_FLOOR_HOME} ]; then
+	# Move to OFFICE_FLOOR_HOME directory
+	SCRIPT=`readlink -f $0`
+	BIN_DIR=`dirname $SCRIPT`
+
+	# Default the OFFICE_FLOOR_HOME location
+	export OFFICE_FLOOR_HOME=${BIN_DIR}/..
+fi
+
+# Load the properties (making SSL configuration available)
+. ${OFFICE_FLOOR_HOME}/config/OfficeFloor.properties
+
+# Run jconsole with SSL authentication
+echo "TODO configure to run OfficeConsole"

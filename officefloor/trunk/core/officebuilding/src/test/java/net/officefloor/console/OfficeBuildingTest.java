@@ -86,8 +86,9 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				.getOfficeBuildingManager(
 						null,
 						OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
-						getTrustStore(), TRUST_STORE_PASSWORD, MOCK_USER_NAME,
-						MOCK_PASSWORD);
+						OfficeBuildingTestUtil.getTrustStore(),
+						OfficeBuildingTestUtil.getTrustStorePassword(),
+						MOCK_USER_NAME, MOCK_PASSWORD);
 
 		// Ensure correct start time
 		long afterStartTime = System.currentTimeMillis();
@@ -292,8 +293,10 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 					.getProcessManager(
 							null,
 							OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
-							PROCESS_NAME, getTrustStore(),
-							TRUST_STORE_PASSWORD, MOCK_USER_NAME, MOCK_PASSWORD);
+							PROCESS_NAME,
+							OfficeBuildingTestUtil.getTrustStore(),
+							OfficeBuildingTestUtil.getTrustStorePassword(),
+							MOCK_USER_NAME, MOCK_PASSWORD);
 			OfficeBuildingTestUtil.waitUntilProcessComplete(manager, this);
 		} catch (UndeclaredThrowableException ex) {
 			// May have already finished and unregistered before check

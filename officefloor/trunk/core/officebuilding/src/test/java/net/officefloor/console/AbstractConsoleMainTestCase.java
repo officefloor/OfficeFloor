@@ -19,14 +19,13 @@ package net.officefloor.console;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.console.AbstractConsoleTestCase;
 import net.officefloor.building.console.OfficeFloorConsoleFactory;
 import net.officefloor.building.console.OfficeFloorConsoleMain;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.building.util.OfficeBuildingTestUtil;
 
 /**
  * Abstract functionality for testing {@link OfficeFloorConsoleMain}.
@@ -46,19 +45,6 @@ public abstract class AbstractConsoleMainTestCase extends
 	 * setup.
 	 */
 	private final boolean isEnsureOfficeBuildingNotRunningForTest;
-
-	/**
-	 * Trust store {@link File}.
-	 */
-	public static File getTrustStore() throws FileNotFoundException {
-		return new OfficeFrameTestCase() {
-		}.findFile("src/main/resources/config/keystore.jks");
-	}
-
-	/**
-	 * Password to the trust store {@link File}.
-	 */
-	public static final String TRUST_STORE_PASSWORD = "changeit";
 
 	/**
 	 * Mock user name.
@@ -143,8 +129,8 @@ public abstract class AbstractConsoleMainTestCase extends
 	protected void doSecureMain(String arguments) throws Throwable {
 
 		// Obtain the key store details
-		File keyStore = this.findFile("src/main/resources/config/keystore.jks");
-		String keyStorePassword = "changeit";
+		File keyStore = OfficeBuildingTestUtil.getKeyStore();
+		String keyStorePassword = OfficeBuildingTestUtil.getKeyStorePassword();
 		String keyStoreArguments = "--key_store " + keyStore.getAbsolutePath()
 				+ " --key_store_password " + keyStorePassword + " --username "
 				+ MOCK_USER_NAME + " --password " + MOCK_PASSWORD;

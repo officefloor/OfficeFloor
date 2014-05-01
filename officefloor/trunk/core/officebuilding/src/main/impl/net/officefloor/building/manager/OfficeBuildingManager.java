@@ -24,13 +24,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
-import java.rmi.ConnectException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
-import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,6 +51,7 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.management.remote.rmi.RMIConnectorServer;
+import javax.net.ssl.KeyManagerFactory;
 
 import mx4j.tools.remote.PasswordAuthenticator;
 import net.officefloor.building.classpath.ClassPathFactory;
@@ -101,6 +101,13 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	public static final String OFFICE_BUILDING_ARTIFACT_ID = "officebuilding";
 
 	/**
+	 * Prefix to property names from {@link System#getProperties()} for
+	 * configuration.
+	 */
+	public static final String OFFICE_BUILDING_PROPERTY_PREFIX = OFFICE_BUILDING_GROUP_ID
+			+ "." + OFFICE_BUILDING_ARTIFACT_ID;
+
+	/**
 	 * Name of the {@link OfficeBuilding} within the {@link Registry}.
 	 */
 	private static final String OFFICE_BUILDING_REGISTERED_NAME = "OfficeBuilding";
@@ -108,16 +115,19 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	/**
 	 * {@link ObjectName} for the {@link OfficeBuildingManagerMBean}.
 	 */
-	static ObjectName OFFICE_BUILDING_MANAGER_OBJECT_NAME;
+	private static final ObjectName OFFICE_BUILDING_MANAGER_OBJECT_NAME;
 
 	static {
+		// Load the Office Building Manager Object Name
+		ObjectName officeBuildingManagerObjectName = null;
 		try {
-			OFFICE_BUILDING_MANAGER_OBJECT_NAME = new ObjectName(
+			officeBuildingManagerObjectName = new ObjectName(
 					OFFICE_BUILDING_REGISTERED_NAME, "type",
 					"OfficeBuildingManager");
 		} catch (MalformedObjectNameException ex) {
 			// This should never be the case
 		}
+		OFFICE_BUILDING_MANAGER_OBJECT_NAME = officeBuildingManagerObjectName;
 	}
 
 	/**
@@ -127,6 +137,29 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 */
 	public static ObjectName getOfficeBuildingManagerObjectName() {
 		return OFFICE_BUILDING_MANAGER_OBJECT_NAME;
+	}
+
+	/**
+	 * Obtains the SSL protocol being used.
+	 * 
+	 * @return SSL protocol being used.
+	 */
+	public static String getSslProtocol() {
+		String sslProtocol = System.getProperty(OFFICE_BUILDING_PROPERTY_PREFIX
+				+ ".ssl.protocol", "SSLv3");
+		return sslProtocol;
+	}
+
+	/**
+	 * Obtains the SSL algorithm being used.
+	 * 
+	 * @return SSL algorithm being used.
+	 */
+	public static String getSslAlgorithm() {
+		String sslAlgorithm = System.getProperty(
+				OFFICE_BUILDING_PROPERTY_PREFIX + ".ssl.algorithm",
+				KeyManagerFactory.getDefaultAlgorithm());
+		return sslAlgorithm;
 	}
 
 	/**
@@ -217,23 +250,25 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		}
 
 		// Create the socket factories
+		String sslProtocol = getSslProtocol();
+		String sslAlgorithm = getSslAlgorithm();
 		byte[] keyStoreContent = OfficeBuildingRmiServerSocketFactory
 				.getKeyStoreContent(keyStore);
+		OfficeBuildingRmiServerSocketFactory serverSocketFactory = new OfficeBuildingRmiServerSocketFactory(
+				sslProtocol, sslAlgorithm, keyStoreContent, keyStorePassword);
 		RMIClientSocketFactory clientSocketFactory = new OfficeBuildingRmiClientSocketFactory(
-				keyStoreContent, keyStorePassword);
-		RMIServerSocketFactory serverSocketFactory = new OfficeBuildingRmiServerSocketFactory(
-				keyStoreContent, keyStorePassword);
+				sslProtocol, sslAlgorithm, keyStoreContent, keyStorePassword);
 
 		// Ensure have Registry on the port
-		Registry registry = LocateRegistry.getRegistry(null, port,
-				clientSocketFactory);
+		Registry registry;
 		try {
-			// Attempt to communicate to validate if registry exists
-			registry.list();
-		} catch (ConnectException ex) {
-			// Registry not exist, so create it
+			// Attempt to create on port
 			registry = LocateRegistry.createRegistry(port, clientSocketFactory,
 					serverSocketFactory);
+		} catch (RemoteException ex) {
+			// Registry already on port, so obtain it
+			registry = LocateRegistry.getRegistry(null, port,
+					clientSocketFactory);
 		}
 
 		// Determine if already running the Office Building
@@ -274,10 +309,13 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				.newJMXConnectorServer(serviceUrl, serverEnv, mbeanServer);
 		connectorServer.start();
 
+		// Obtain the address of the connector server
+		JMXServiceURL connectorServerAddress = connectorServer.getAddress();
+
 		// Create the Office Building Manager
 		OfficeBuildingManager manager = new OfficeBuildingManager(startTime,
-				serviceUrl, connectorServer, registry, mbeanServer, workspace,
-				isIsolateProcesses, environment, jvmOptions,
+				connectorServerAddress, connectorServer, registry, mbeanServer,
+				workspace, isIsolateProcesses, environment, jvmOptions,
 				isAllowClassPathEntries, remoteRepositoryUrls);
 
 		// Register the Office Building Manager
@@ -606,10 +644,13 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			throws IOException {
 
 		// Create the client socket factory
+		String sslProtocol = getSslProtocol();
+		String sslAlgorithm = getSslAlgorithm();
 		byte[] trustStoreContent = OfficeBuildingRmiServerSocketFactory
 				.getKeyStoreContent(trustStore);
 		RMIClientSocketFactory clientSocketFactory = new OfficeBuildingRmiClientSocketFactory(
-				trustStoreContent, trustStorePassword);
+				sslProtocol, sslAlgorithm, trustStoreContent,
+				trustStorePassword);
 
 		// Obtain the MBean Server connection
 		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(hostName,
