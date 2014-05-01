@@ -18,11 +18,18 @@
 package net.officefloor.building.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.Properties;
+
+import javax.management.MBeanServer;
 
 import junit.framework.TestCase;
 import net.officefloor.building.classpath.ClassPathFactoryImpl;
+import net.officefloor.building.manager.OfficeBuildingManager;
+import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -44,6 +51,125 @@ public class OfficeBuildingTestUtil {
 	 * Index to obtain a unique local repository for testing.
 	 */
 	private static int localRepositoryTestIndex = 1;
+
+	/**
+	 * Ensures the {@link OfficeBuildingManagerMBean} on the port is stopped.
+	 * 
+	 * @param port
+	 *            Port.
+	 */
+	public static void ensureOfficeBuildingStopped(int port) {
+
+		OfficeBuildingManagerMBean manager = null;
+		try {
+			// Attempt to connect to Office Building
+			manager = OfficeBuildingManager.getOfficeBuildingManager(null,
+					port, getTrustStore(), getTrustStorePassword(),
+					getLoginUsername(), getLoginPassword());
+
+		} catch (Exception ex) {
+			// Assume not running
+		}
+
+		// Connected, so stop the Office Building
+		if (manager != null) {
+			try {
+				manager.stopOfficeBuilding(1000);
+			} catch (Exception ex) {
+				throw OfficeFrameTestCase.fail(ex);
+			}
+		}
+	}
+
+	/**
+	 * Convenience method to start the {@link OfficeBuildingManagerMBean} using
+	 * details of this utility class.
+	 * 
+	 * @param port
+	 *            Port.
+	 * @return {@link OfficeBuildingManagerMBean}.
+	 * @throws Exception
+	 *             If fails to start the {@link OfficeBuildingManager}.
+	 */
+	public static OfficeBuildingManagerMBean startOfficeBuilding(int port)
+			throws Exception {
+
+		// Obtain the details for the Office Building
+		File keyStore = getKeyStore();
+		String keyStorePassword = getKeyStorePassword();
+		String username = getLoginUsername();
+		String password = getLoginPassword();
+		MBeanServer mbeanServer = ManagementFactory.getPlatformMBeanServer();
+		String[] remoteRepositoryUrls = new String[] { "file://"
+				+ OfficeBuildingTestUtil.getUserLocalRepository()
+						.getAbsolutePath() };
+
+		// Start the office building
+		return OfficeBuildingManager.startOfficeBuilding(null, port, keyStore,
+				keyStorePassword, username, password, null, false,
+				new Properties(), mbeanServer, new String[0], false,
+				remoteRepositoryUrls);
+	}
+
+	/**
+	 * Obtains the login username.
+	 */
+	public static String getLoginUsername() {
+		return "admin";
+	}
+
+	/**
+	 * Obtains the login password.
+	 */
+	public static String getLoginPassword() {
+		return "password";
+	}
+
+	/**
+	 * Key store {@link File}.
+	 */
+	public static File getKeyStore() throws FileNotFoundException {
+		return new OfficeFrameTestCase() {
+		}.findFile("src/main/resources/config/keystore.jks");
+	}
+
+	/**
+	 * Password to the key store {@link File}.
+	 */
+	public static String getKeyStorePassword() {
+		return "changeit";
+	}
+
+	/**
+	 * Trust store {@link File}.
+	 */
+	public static File getTrustStore() throws FileNotFoundException {
+		return new OfficeFrameTestCase() {
+		}.findFile("src/main/resources/config/keystore.jks");
+	}
+
+	/**
+	 * Password to the trust store {@link File}.
+	 */
+	public static String getTrustStorePassword() {
+		return "changeit";
+	}
+
+	/**
+	 * access.properties file as per JMX specification.
+	 */
+	public static File getAccessPropertiesFile() throws FileNotFoundException {
+		return new OfficeFrameTestCase() {
+		}.findFile("src/main/resources/config/access.properties");
+	}
+
+	/**
+	 * password.properties file as per JMX specification.
+	 */
+	public static File getPasswordPropertiesFile() throws FileNotFoundException {
+		return new OfficeFrameTestCase() {
+		}.findFile("src/main/resources/config/password.properties");
+	}
 
 	/**
 	 * Obtains the test local repository for testing.

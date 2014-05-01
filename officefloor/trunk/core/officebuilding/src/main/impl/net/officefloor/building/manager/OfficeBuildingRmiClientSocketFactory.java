@@ -29,45 +29,20 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 
 /**
+ * <p>
  * {@link OfficeBuildingManager} {@link RMIClientSocketFactory}.
+ * <p>
+ * Extends {@link SslRMIClientSocketFactory} to enable use in JConsole
+ * connections.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingRmiClientSocketFactory implements
-		RMIClientSocketFactory, Serializable {
-
-	/**
-	 * Creates the client {@link SSLContext}.
-	 * 
-	 * @param keyStoreContent
-	 *            Content of the key store.
-	 * @param keyStorePassword
-	 *            Optional password to the key store. May be <code>null</code>.
-	 * @return Client {@link SSLContext}.
-	 * @throws Exception
-	 *             If fails to create the {@link SSLContext}.
-	 */
-	public static SSLContext createClientSslContext(byte[] keyStoreContent,
-			String keyStorePassword) throws Exception {
-
-		// Obtain the key store
-		KeyStore keyStore = createKeyStore(keyStoreContent, keyStorePassword);
-
-		// Create the Trust Managers
-		TrustManagerFactory trustManagerFactory = TrustManagerFactory
-				.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-		trustManagerFactory.init(keyStore);
-		TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-
-		// Create and initialise the SSL context
-		SSLContext context = createSslContext();
-		context.init(null, trustManagers, null);
-
-		// Return the context
-		return context;
-	}
+public class OfficeBuildingRmiClientSocketFactory extends
+		SslRMIClientSocketFactory implements RMIClientSocketFactory,
+		Serializable {
 
 	/**
 	 * Creates the {@link KeyStore}.
@@ -95,41 +70,24 @@ public class OfficeBuildingRmiClientSocketFactory implements
 	}
 
 	/**
-	 * Creates a new uninitialised {@link SSLContext}.
-	 * 
-	 * @return {@link SSLContext}.
-	 * @throws Exception
-	 *             If fails to create the {@link SSLContext}.
+	 * {@link SSLContext} protocol.
 	 */
-	public static SSLContext createSslContext() throws Exception {
+	private final String sslProtocol;
 
-		// Try finding an available protocol from default protocols
-		String[] protocols = SSLContext.getDefault()
-				.getSupportedSSLParameters().getProtocols();
-		if (protocols != null) {
-			for (String protocol : protocols) {
-				try {
-					// Attempt to create and return using SSL protocol
-					return SSLContext.getInstance(protocol);
-				} catch (Exception ex) {
-					// Ignore and try next protocol
-				}
-			}
-		}
-
-		// As here, no SSL protocols available
-		throw new IllegalStateException("No SSL protocols available");
-	}
+	/**
+	 * {@link TrustManager} algorithm.
+	 */
+	private final String sslAlgorithm;
 
 	/**
 	 * {@link KeyStore} content.
 	 */
-	private final byte[] keyStoreContent;
+	private final byte[] trustStoreContent;
 
 	/**
 	 * {@link KeyStore} password.
 	 */
-	private final String keyStorePassword;
+	private final String trustStorePassword;
 
 	/**
 	 * {@link SocketFactory}.
@@ -139,15 +97,22 @@ public class OfficeBuildingRmiClientSocketFactory implements
 	/**
 	 * Initiate.
 	 * 
-	 * @param keyStoreContent
+	 * @param sslProtocol
+	 *            {@link SSLContext} protocol.
+	 * @param sslAlgorithm
+	 *            {@link TrustManager} algorithm.
+	 * @param trustStoreContent
 	 *            {@link KeyStore} content.
-	 * @param keyStorePassword
+	 * @param trustStorePassword
 	 *            {@link KeyStore} password.
 	 */
-	public OfficeBuildingRmiClientSocketFactory(byte[] keyStoreContent,
-			String keyStorePassword) {
-		this.keyStoreContent = keyStoreContent;
-		this.keyStorePassword = keyStorePassword;
+	public OfficeBuildingRmiClientSocketFactory(String sslProtocol,
+			String sslAlgorithm, byte[] trustStoreContent,
+			String trustStorePassword) {
+		this.sslProtocol = sslProtocol;
+		this.sslAlgorithm = sslAlgorithm;
+		this.trustStoreContent = trustStoreContent;
+		this.trustStorePassword = trustStorePassword;
 	}
 
 	/*
@@ -164,9 +129,25 @@ public class OfficeBuildingRmiClientSocketFactory implements
 			// Lazy load the socket factory
 			if (this.socketFactory == null) {
 				try {
-					SSLContext context = createClientSslContext(
-							this.keyStoreContent, this.keyStorePassword);
+					// Obtain the trust store
+					KeyStore trustStore = createKeyStore(
+							this.trustStoreContent, this.trustStorePassword);
+
+					// Create the Trust Managers
+					TrustManagerFactory trustManagerFactory = TrustManagerFactory
+							.getInstance(this.sslAlgorithm);
+					trustManagerFactory.init(trustStore);
+					TrustManager[] trustManagers = trustManagerFactory
+							.getTrustManagers();
+
+					// Create and initialise the SSL context
+					SSLContext context = SSLContext
+							.getInstance(this.sslProtocol);
+					context.init(null, trustManagers, null);
+
+					// Create the socket factory
 					this.socketFactory = context.getSocketFactory();
+
 				} catch (Exception ex) {
 					throw new IOException("Failed to create "
 							+ SSLSocketFactory.class.getSimpleName(), ex);
