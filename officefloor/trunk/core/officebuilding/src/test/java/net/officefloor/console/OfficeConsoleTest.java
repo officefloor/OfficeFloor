@@ -17,13 +17,12 @@
  */
 package net.officefloor.console;
 
+import java.io.File;
+
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-
-import org.junit.Ignore;
-
 import sun.tools.jconsole.OfficeConsole;
 
 /**
@@ -32,7 +31,6 @@ import sun.tools.jconsole.OfficeConsole;
  * 
  * @author Daniel Sagenschneider
  */
-@Ignore("TODO tidy up OfficeConsole and provide automated test")
 public class OfficeConsoleTest extends OfficeFrameTestCase {
 
 	/**
@@ -51,15 +49,30 @@ public class OfficeConsoleTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link OfficeConsole} can connect.
 	 */
-	public void _testOfficeConsole() throws Exception {
+	public void testOfficeConsole() throws Exception {
+
+		// Connection details
+		int port = 13778;
+		String username = OfficeBuildingTestUtil.getLoginUsername();
+		String password = OfficeBuildingTestUtil.getLoginPassword();
+		File trustStoreFile = OfficeBuildingTestUtil.getTrustStore();
+		String trustStorePassword = OfficeBuildingTestUtil
+				.getTrustStorePassword();
 
 		// Start the Office Building
-		this.manager = OfficeBuildingTestUtil.startOfficeBuilding(13778);
+		this.manager = OfficeBuildingTestUtil.startOfficeBuilding(port);
 
 		// Start the console connected to the Office Building
-		OfficeConsole.main(null);
+		OfficeConsole console = new OfficeConsole();
+		try {
+			console.run(null, port, username, password, trustStoreFile,
+					trustStorePassword);
 
-		// TODO validate connected
+		} finally {
+			// Ensure shutdown the console
+			console.setVisible(false);
+			console.dispose();
+		}
 	}
 
 }

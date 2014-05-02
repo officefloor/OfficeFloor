@@ -47,16 +47,6 @@ public abstract class AbstractConsoleMainTestCase extends
 	private final boolean isEnsureOfficeBuildingNotRunningForTest;
 
 	/**
-	 * Mock user name.
-	 */
-	public static final String MOCK_USER_NAME = "username";
-
-	/**
-	 * Mock password.
-	 */
-	public static final String MOCK_PASSWORD = "password";
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param consoleFactoryClass
@@ -129,11 +119,13 @@ public abstract class AbstractConsoleMainTestCase extends
 	protected void doSecureMain(String arguments) throws Throwable {
 
 		// Obtain the key store details
+		String username = OfficeBuildingTestUtil.getLoginUsername();
+		String password = OfficeBuildingTestUtil.getLoginPassword();
 		File keyStore = OfficeBuildingTestUtil.getKeyStore();
 		String keyStorePassword = OfficeBuildingTestUtil.getKeyStorePassword();
 		String keyStoreArguments = "--key_store " + keyStore.getAbsolutePath()
 				+ " --key_store_password " + keyStorePassword + " --username "
-				+ MOCK_USER_NAME + " --password " + MOCK_PASSWORD;
+				+ username + " --password " + password;
 
 		// Execure the secure command
 		this.doMain(keyStoreArguments + " " + arguments);

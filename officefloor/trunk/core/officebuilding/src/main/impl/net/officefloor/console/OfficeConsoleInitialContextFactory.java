@@ -71,7 +71,7 @@ public class OfficeConsoleInitialContextFactory implements
 
 			// Add in the credentials
 			officeBuildingEnvironment.put(JMXConnector.CREDENTIALS,
-					new String[] { "admin", "password" });
+					environment.get(JMXConnector.CREDENTIALS));
 
 			// Return the initial context
 			return new com.sun.jndi.url.rmi.rmiURLContext(
