@@ -1010,10 +1010,14 @@
 						</goals>
 						<configuration>
 							<target>
-								<!-- Obtain the raw test class path which has greatest number of 
-									dependencies (plus ensure a property is always available for replacefilterfile 
-									functionality to not fail) -->
-								<property name="maven_classpath" refid="maven.test.classpath" />
+								<!-- Obtain the all project class paths (plus ensure a property is 
+									always available for replacefilterfile functionality to not fail) -->
+								<property name="maven_compile_classpath" refid="maven.compile.classpath" />
+								<property name="maven_runtime_classpath" refid="maven.runtime.classpath" />
+								<property name="maven_test_classpath" refid="maven.test.classpath" />
+								<property name="maven_classpath"
+									value="${maven_compile_classpath}${path.separator}${maven_runtime_classpath}${path.separator}${maven_test_classpath}" />
+
 								<echo file="${project.build.directory}/verifier/dependencies.raw"
 									message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
 
