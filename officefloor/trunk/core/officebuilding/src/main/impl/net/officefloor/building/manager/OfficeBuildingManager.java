@@ -321,6 +321,34 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		// Register the Office Building Manager
 		mbeanServer.registerMBean(manager, OFFICE_BUILDING_MANAGER_OBJECT_NAME);
 
+		// Ensure the Office Building is available
+		boolean isOfficeBuildingAvailable = false;
+		long timeoutTimestamp = System.currentTimeMillis();
+		do {
+
+			// Ensure time out to not keep checking forever
+			if ((System.currentTimeMillis() - timeoutTimestamp) > 10000) {
+				System.err
+						.println("WARNING: Timed out waiting for confirmation of "
+								+ OfficeBuildingManager.class.getSimpleName()
+								+ " starting.  Allowing use as is.");
+
+				// Return the (possibly not ready) Office Building Manager.
+				// (Best chance has been given for it to start)
+				return manager;
+			}
+
+			// Determine if office building is available
+			isOfficeBuildingAvailable = OfficeBuildingManager
+					.isOfficeBuildingAvailable(hostName, port, keyStore,
+							keyStorePassword, userName, password);
+
+			// Sleep some time if not available
+			if (!isOfficeBuildingAvailable) {
+				Thread.sleep(100);
+			}
+		} while (!isOfficeBuildingAvailable);
+
 		// Return the Office Building Manager
 		return manager;
 	}

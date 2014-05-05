@@ -155,27 +155,12 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		assertFalse("Should not be proxy MBean",
 				Proxy.isProxyClass(manager.getClass()));
 
-		// Make call to ensure up and running for tests
-		boolean isOfficeBuildingAvailable = false;
-		long startTime = System.currentTimeMillis();
-		do {
-
-			// Ensure time out to not keep checking forever
-			if ((System.currentTimeMillis() - startTime) > 10000) {
-				fail("Timed out starting OfficeBuilding.  Failing test");
-			}
-
-			// Determine if office building is available
-			isOfficeBuildingAvailable = OfficeBuildingManager
-					.isOfficeBuildingAvailable(null, nextPort, keyStore,
-							keyStorePassword, this.username, this.password);
-			
-			// Sleep some time if not available
-			if (!isOfficeBuildingAvailable) {
-				Thread.sleep(100);
-			}
-			
-		} while (!isOfficeBuildingAvailable);
+		// Ensure office building is available
+		boolean isOfficeBuildingAvailable = OfficeBuildingManager
+				.isOfficeBuildingAvailable(null, nextPort, keyStore,
+						keyStorePassword, this.username, this.password);
+		assertTrue("OfficeBuilding should be available",
+				isOfficeBuildingAvailable);
 
 		// Return the manager
 		return manager;
