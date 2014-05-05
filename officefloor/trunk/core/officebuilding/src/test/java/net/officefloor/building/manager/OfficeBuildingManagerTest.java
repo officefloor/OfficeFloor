@@ -21,6 +21,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Proxy;
 import java.net.InetAddress;
 import java.rmi.ConnectException;
 import java.rmi.NoSuchObjectException;
@@ -106,8 +107,9 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		OfficeBuildingTestUtil.ensureOfficeBuildingStopped(this.port);
 
 		// Obtain the trust store for SSL to work
-		this.trustStore = OfficeBuildingTestUtil.getKeyStore();
-		this.trustStorePassword = OfficeBuildingTestUtil.getKeyStorePassword();
+		this.trustStore = OfficeBuildingTestUtil.getTrustStore();
+		this.trustStorePassword = OfficeBuildingTestUtil
+				.getTrustStorePassword();
 
 		// Obtain the credentials
 		this.username = OfficeBuildingTestUtil.getLoginUsername();
@@ -121,17 +123,13 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 				+ OfficeBuildingTestUtil.getUserLocalRepository()
 						.getAbsolutePath() };
 	}
-	
-	
 
 	@Override
 	protected void tearDown() throws Exception {
-		
+
 		// Ensure stop office building
 		OfficeBuildingTestUtil.ensureOfficeBuildingStopped(this.port);
 	}
-
-
 
 	/**
 	 * Starts the Office Building for testing.
@@ -145,10 +143,36 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		String keyStorePassword = OfficeBuildingTestUtil.getKeyStorePassword();
 
 		// Start the office building
-		return OfficeBuildingManager.startOfficeBuilding(null, this.port,
-				keyStore, keyStorePassword, this.username, this.password, null,
-				false, new Properties(), this.mbeanServer, new String[0],
-				false, this.remoteRepositoryUrls);
+		OfficeBuildingManagerMBean manager = OfficeBuildingManager
+				.startOfficeBuilding(null, this.port, keyStore,
+						keyStorePassword, this.username, this.password, null,
+						false, new Properties(), this.mbeanServer,
+						new String[0], false, this.remoteRepositoryUrls);
+
+		// Ensure not a proxy implementation on starting
+		assertTrue("Should be the manager (not proxy MBean)",
+				manager.getClass() == OfficeBuildingManager.class);
+		assertFalse("Should not be proxy MBean",
+				Proxy.isProxyClass(manager.getClass()));
+
+		// Make call to ensure up and running for tests
+		boolean isOfficeBuildingAvailable = false;
+		long startTime = System.currentTimeMillis();
+		do {
+
+			// Ensure time out to not keep checking forever
+			if ((System.currentTimeMillis() - startTime) > 10000) {
+				fail("Timed out starting OfficeBuilding.  Failing test");
+			}
+
+			// Determine if office building is available
+			isOfficeBuildingAvailable = OfficeBuildingManager
+					.isOfficeBuildingAvailable(null, nextPort, keyStore,
+							keyStorePassword, this.username, this.password);
+		} while (!isOfficeBuildingAvailable);
+
+		// Return the manager
+		return manager;
 	}
 
 	/**
