@@ -169,6 +169,12 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 			isOfficeBuildingAvailable = OfficeBuildingManager
 					.isOfficeBuildingAvailable(null, nextPort, keyStore,
 							keyStorePassword, this.username, this.password);
+			
+			// Sleep some time if not available
+			if (!isOfficeBuildingAvailable) {
+				Thread.sleep(100);
+			}
+			
 		} while (!isOfficeBuildingAvailable);
 
 		// Return the manager
