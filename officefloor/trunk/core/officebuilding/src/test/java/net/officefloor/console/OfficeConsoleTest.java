@@ -75,11 +75,30 @@ public class OfficeConsoleTest extends OfficeFrameTestCase {
 			console.run(null, port, username, password, trustStoreFile,
 					trustStorePassword);
 
+			// Ensure is connected (may take some time to come up)
+			boolean isConnected = false;
+			long startTime = System.currentTimeMillis();
+			do {
+
+				// Determine if connected
+				isConnected = console.isConnected();
+
+				// Ensure not time out
+				if ((System.currentTimeMillis() - startTime) > 10000) {
+					// Timed out
+					fail("Timed out attempting to ensure connected.  Should be connected by now.");
+					
+				} else if (!isConnected) {
+					// Allow some time to connect
+					Thread.sleep(100);
+				}
+
+			} while (!isConnected);
+
 		} finally {
 			// Ensure shutdown the console
 			console.setVisible(false);
 			console.dispose();
 		}
 	}
-
 }

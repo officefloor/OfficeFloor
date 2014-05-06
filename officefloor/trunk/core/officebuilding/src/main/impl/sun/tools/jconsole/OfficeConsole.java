@@ -96,10 +96,25 @@ public class OfficeConsole extends JConsole {
 	}
 
 	/**
+	 * {@link ProxyClient}.
+	 */
+	private ProxyClient proxyClient = null;
+
+	/**
 	 * Initiate.
 	 */
 	public OfficeConsole() {
 		super(false); // Do not need hotspot
+	}
+
+	/**
+	 * Indicates if connected to the {@link OfficeBuildingManager}.
+	 * 
+	 * @return <code>true</code> if connected.
+	 */
+	public boolean isConnected() {
+		return (this.proxyClient == null ? false : this.proxyClient
+				.isConnected());
 	}
 
 	/**
@@ -123,6 +138,12 @@ public class OfficeConsole extends JConsole {
 	public void run(String host, int port, final String username,
 			final String password, File trustStoreFile,
 			String trustStorePassword) {
+
+		// Ensure not already running
+		if (this.proxyClient != null) {
+			throw new IllegalStateException(this.getClass().getSimpleName()
+					+ " has already run");
+		}
 
 		// Specify Office Console InitialContextFactory setup
 		OfficeConsole.trustStoreFile = trustStoreFile;
@@ -150,10 +171,12 @@ public class OfficeConsole extends JConsole {
 			return; // Must have JMX Service URL to run
 		}
 
-		// Attempt to start OfficeConsole connected to OfficeBuilding
-		// Always create Swing GUI on the Event Dispatching Thread
-		// SwingUtilities.invokeLater(new Runnable() {
-		// public void run() {
+		/*
+		 * ======= Following code copied from JConsole mainInit ============
+		 * 
+		 * (Code is not accessible without creating an instance of JConsole
+		 * rather than this class. Therefore, unfortunately duplicated here.)
+		 */
 
 		// Center the window on screen, taking into account screen
 		// size and insets.
@@ -176,12 +199,12 @@ public class OfficeConsole extends JConsole {
 			this.invoke(this.superMethod("createMDI"));
 
 			// Create Proxy Client to Office Building
-			ProxyClient proxyClient = ProxyClient.getProxyClient(
+			this.proxyClient = ProxyClient.getProxyClient(
 					officeBuildingJmxServiceUrl, username, password);
 
 			// Create the VMPanel
 			int updateInterval = 60 * 1000; // 60 seconds
-			VMPanel vmPanel = new VMPanel(proxyClient, updateInterval);
+			VMPanel vmPanel = new VMPanel(this.proxyClient, updateInterval);
 
 			// Flag not check SSL (as configured differently)
 			this.setFieldValue(vmPanel, "shouldUseSSL", Boolean.FALSE);
@@ -202,8 +225,6 @@ public class OfficeConsole extends JConsole {
 			this.setVisible(false);
 			this.dispose();
 		}
-		// }
-		// });
 	}
 
 	/**
