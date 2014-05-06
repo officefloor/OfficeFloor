@@ -400,10 +400,26 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 		}
 
 		// Obtain the actual output
-		String actual = this.getPipeContent(console, pipe);
+		String actualOutput = this.getPipeContent(console, pipe);
+
+		// Ignore any log lines
+		StringBuilder actual = new StringBuilder();
+		if (!"".equals(actualOutput)) {
+			for (String line : actualOutput.split(EOLN)) {
+
+				// Ignore log lines
+				if (line.startsWith("SLF4J:")) {
+					continue;
+				}
+
+				// Append the actual line
+				actual.append(line);
+				actual.append(EOLN);
+			}
+		}
 
 		// Validate output
-		assertEquals("Incorrect output", expected.toString(), actual);
+		assertEquals("Incorrect output", expected.toString(), actual.toString());
 	}
 
 	/**
