@@ -40,6 +40,13 @@ public class OfficeConsoleTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
+
+		// Clean up system properties
+		for (String setupPropertyName : OfficeConsole.SETUP_SYSTEM_PROPERTIES
+				.keySet()) {
+			System.clearProperty(setupPropertyName);
+		}
+
 		// Stop the office building
 		if (this.manager != null) {
 			this.manager.stopOfficeBuilding(1000);
