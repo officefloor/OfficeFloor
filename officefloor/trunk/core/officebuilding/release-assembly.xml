@@ -26,6 +26,7 @@
 				<excludes>
 					<!-- Exclude class code and META-INF information -->
 					<exclude>net/**</exclude>
+					<exclude>sun/**</exclude>
 					<exclude>META-INF/**</exclude>
 				</excludes>
 			</unpackOptions>

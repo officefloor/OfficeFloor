@@ -23,6 +23,7 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -204,7 +205,11 @@ public class OfficeConsole extends JConsole {
 
 			// Create the VMPanel
 			int updateInterval = 60 * 1000; // 60 seconds
-			VMPanel vmPanel = new VMPanel(this.proxyClient, updateInterval);
+			Constructor<VMPanel> constructor = VMPanel.class
+					.getDeclaredConstructor(ProxyClient.class, int.class);
+			constructor.setAccessible(true);
+			VMPanel vmPanel = constructor.newInstance(this.proxyClient,
+					updateInterval);
 
 			// Flag not check SSL (as configured differently)
 			this.setFieldValue(vmPanel, "shouldUseSSL", Boolean.FALSE);
