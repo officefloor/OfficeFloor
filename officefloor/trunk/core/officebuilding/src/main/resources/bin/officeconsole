@@ -13,10 +13,19 @@ if [ -z ${OFFICE_FLOOR_HOME} ]; then
 	export OFFICE_FLOOR_HOME=${BIN_DIR}/..
 fi
 
+# Ensure have JAVA_HOME specified
+if [ -z ${JAVA_HOME} ]; then
+	# No Java Home
+	echo "ERROR: Must specify JAVA_HOME"
+	exit 1;
+fi
+
+# TODO ensure have JConsole jar available
+
 # Run OfficeFloor
 java \
 	${OFFICE_FLOOR_JVM_OPTIONS} \
-	-cp ${OFFICE_FLOOR_HOME}/lib/boot.jar \
+	-cp ${JAVA_HOME}/lib/jconsole.jar:${OFFICE_FLOOR_HOME}/lib/boot.jar \
 	net.officefloor.bootstrap.Bootstrap \
 	net.officefloor.building.console.OfficeFloorConsoleMain \
 	$0 \
