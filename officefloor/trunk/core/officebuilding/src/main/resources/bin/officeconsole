@@ -13,8 +13,13 @@ if [ -z ${OFFICE_FLOOR_HOME} ]; then
 	export OFFICE_FLOOR_HOME=${BIN_DIR}/..
 fi
 
-# Load the properties (making SSL configuration available)
-. ${OFFICE_FLOOR_HOME}/config/OfficeFloor.properties
-
-# Run jconsole with SSL authentication
-echo "TODO configure to run OfficeConsole"
+# Run OfficeFloor
+java \
+	${OFFICE_FLOOR_JVM_OPTIONS} \
+	-cp ${OFFICE_FLOOR_HOME}/lib/boot.jar \
+	net.officefloor.bootstrap.Bootstrap \
+	net.officefloor.building.console.OfficeFloorConsoleMain \
+	$0 \
+	net.officefloor.console.OpenOfficeConsole \
+	run \
+	$@
