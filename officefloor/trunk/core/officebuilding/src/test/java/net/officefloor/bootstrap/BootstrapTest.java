@@ -142,7 +142,12 @@ public class BootstrapTest extends TestCase {
 		// Bootstrap the mock main
 		Bootstrap.main(CLASS_NAME, "test", temporaryFile.getAbsolutePath());
 
-		// Ensure main invoked
+		// Ensure MockMain was loaded by different class loader
+		assertFalse(
+				"MockMain should be invoked in another class loader, hence class within this class loader not invoked",
+				MockMain.isMainInvoked);
+
+		// Ensure main was actually invoked (within another class loader)
 		OfficeBuildingTestUtil.validateFileContent(
 				"Bootstrapped file should write content to file", "TEST",
 				temporaryFile);
@@ -152,6 +157,11 @@ public class BootstrapTest extends TestCase {
 	 * Provides mock class to be bootstrapped.
 	 */
 	public static class MockMain {
+
+		/**
+		 * Indicates if the main method is invoked.
+		 */
+		private static boolean isMainInvoked = false;
 
 		/**
 		 * Specified from the extending class only available via bootstrapping.
@@ -164,6 +174,7 @@ public class BootstrapTest extends TestCase {
 		 * Resets for testing.
 		 */
 		public static void reset() {
+			isMainInvoked = false;
 			classLoaderObject = null;
 		}
 
@@ -176,6 +187,9 @@ public class BootstrapTest extends TestCase {
 		 *             If fails.
 		 */
 		public static void main(String[] arguments) throws Throwable {
+
+			// Flag that main invoked
+			isMainInvoked = true;
 
 			// Ensure correct command line arguments
 			assertEquals("Incorrect number of command line arguments", 2,
