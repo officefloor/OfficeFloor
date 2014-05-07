@@ -45,6 +45,7 @@ import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
+import org.codehaus.plexus.PlexusContainerException;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -92,6 +93,20 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 
 		// Return the class path
 		return classPath.toString();
+	}
+
+	/**
+	 * Creates a {@link PlexusContainer}.
+	 * 
+	 * @return {@link PlexusContainer}.
+	 * @throws PlexusContainerException
+	 *             If fails to create the {@link PlexusContainer}.
+	 */
+	public static PlexusContainer createPlexusContainer()
+			throws PlexusContainerException {
+		DefaultContainerConfiguration configuration = new DefaultContainerConfiguration();
+		configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
+		return new DefaultPlexusContainer(configuration);
 	}
 
 	/**
@@ -174,9 +189,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		// Obtain the plexus container
 		if (plexusContainer == null) {
 			// Create the plexus container
-			DefaultContainerConfiguration configuration = new DefaultContainerConfiguration();
-			configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
-			this.plexusContainer = new DefaultPlexusContainer(configuration);
+			this.plexusContainer = createPlexusContainer();
 		} else {
 			// Use the specified plexus container
 			this.plexusContainer = plexusContainer;

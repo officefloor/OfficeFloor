@@ -38,7 +38,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Repository;
 import org.apache.maven.model.io.ModelReader;
-import org.codehaus.plexus.DefaultPlexusContainer;
 
 /**
  * Utility methods for testing the {@link OfficeBuilding} functionality.
@@ -241,7 +240,7 @@ public class OfficeBuildingTestUtil {
 		}
 
 		// Not found, likely running in Eclipse with project import
-		ModelReader reader = new DefaultPlexusContainer()
+		ModelReader reader = ClassPathFactoryImpl.createPlexusContainer()
 				.lookup(ModelReader.class);
 		for (String entry : classPathEntries) {
 

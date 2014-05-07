@@ -271,9 +271,21 @@ public class Bootstrap {
 				urls.add(url);
 			}
 
-			// Create the class loader
-			URLClassLoader classLoader = new URLClassLoader(urls
-					.toArray(new URL[0]));
+			/*
+			 * The class loader needs to be top level, as certain Java libraries
+			 * obtain the class loader from the class (eg InitialContext). In
+			 * this case, the InitialContext is obtained from the parent class
+			 * loader and therefore the parent class loader is used. This
+			 * results in the created class loader here not being used (search
+			 * is only upwards through parents and not downwards through child
+			 * class loaders). Subsequently, the bootstrapped class path of this
+			 * child class loader is not used.
+			 */
+
+			// Create the class loader (at top level, no parent)
+			URL[] urlArray = urls.toArray(new URL[0]);
+			URLClassLoader classLoader = URLClassLoader.newInstance(urlArray,
+					null);
 
 			// Return the class loader
 			return classLoader;
