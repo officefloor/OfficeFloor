@@ -1033,8 +1033,13 @@
 									tofile="${project.build.directory}/verifier/dependencies.properties">
 									<filterchain>
 										<tokenfilter>
+											<!-- Split into tokens for each class path entry -->
 											<stringtokenizer delims="${path.separator}"
 												suppressdelims="true" />
+											<!-- Ignore class path entries without a version (eg system dependencies) -->
+											<containsregex
+												pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)" />
+											<!-- Transform class path entry into property for its version -->
 											<replaceregex
 												pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)"
 												replace="@{\2_version}=\3${line.separator}" />
