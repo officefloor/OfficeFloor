@@ -22,10 +22,13 @@ fi
 
 # TODO ensure have JConsole jar available
 
-# Run OfficeFloor
+# OfficeFloor version (necessary to find officebuilding jar)
+OFFICE_FLOOR_VERSION=2.15.0
+
+# Run OfficeFloor (must include officebuilding jar on class path for OfficeConsoleInitialContextFactory to work)
 java \
 	${OFFICE_FLOOR_JVM_OPTIONS} \
-	-cp ${JAVA_HOME}/lib/jconsole.jar:${OFFICE_FLOOR_HOME}/lib/boot.jar \
+	-cp ${JAVA_HOME}/lib/jconsole.jar:${OFFICE_FLOOR_HOME}/lib/boot.jar:${OFFICE_FLOOR_HOME}/lib/officebuilding-${OFFICE_FLOOR_VERSION}.jar \
 	net.officefloor.bootstrap.Bootstrap \
 	net.officefloor.building.console.OfficeFloorConsoleMain \
 	$0 \
