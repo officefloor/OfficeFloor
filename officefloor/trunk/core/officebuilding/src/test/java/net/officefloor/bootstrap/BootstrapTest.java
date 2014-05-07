@@ -49,8 +49,24 @@ import net.officefloor.building.util.OfficeBuildingTestUtil;
  */
 public class BootstrapTest extends TestCase {
 
+	/**
+	 * Initial {@link ClassLoader}.
+	 */
+	private ClassLoader initialContextClassLoader;
+
+	/**
+	 * Initial java class path.
+	 */
+	private String initialJavaClassPath;
+
 	@Override
 	protected void setUp() throws Exception {
+
+		// Keep track of details changed by boot strap (for clean up)
+		this.initialContextClassLoader = Thread.currentThread()
+				.getContextClassLoader();
+		this.initialJavaClassPath = System.getProperty("java.class.path");
+
 		// Flag testing
 		Bootstrap.isTesting = true;
 
@@ -68,6 +84,12 @@ public class BootstrapTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
+
+		// Reset the initial context class loader
+		Thread.currentThread().setContextClassLoader(
+				this.initialContextClassLoader);
+		System.setProperty("java.class.path", this.initialJavaClassPath);
+
 		// Clear the OFFICE_FLOOR_HOME
 		System.clearProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME);
 	}
@@ -104,8 +126,7 @@ public class BootstrapTest extends TestCase {
 		PrintWriter s = new PrintWriter(source);
 		s.println("import " + this.getClass().getName() + ".MockMain;");
 		s.println("public class " + CLASS_NAME + " extends MockMain {");
-		s
-				.println("  public static void main(String[] arguments) throws Throwable {");
+		s.println("  public static void main(String[] arguments) throws Throwable {");
 		s.println("    classLoaderObject = new " + CLASS_NAME + "();");
 		s.println("    MockMain.main(arguments);");
 		s.println("  }");
@@ -115,22 +136,22 @@ public class BootstrapTest extends TestCase {
 		// Compile the source
 		this.compileSourceToClass(CLASS_NAME, source.toString());
 
+		// Create temporary file
+		File temporaryFile = OfficeBuildingTestUtil.createTempFile(this);
+
 		// Bootstrap the mock main
-		Bootstrap.main(CLASS_NAME, "test");
+		Bootstrap.main(CLASS_NAME, "test", temporaryFile.getAbsolutePath());
 
 		// Ensure main invoked
-		assertTrue("Main method should be invoked", MockMain.isMainInvoked);
+		OfficeBuildingTestUtil.validateFileContent(
+				"Bootstrapped file should write content to file", "TEST",
+				temporaryFile);
 	}
 
 	/**
 	 * Provides mock class to be bootstrapped.
 	 */
 	public static class MockMain {
-
-		/**
-		 * Flag indicating if <code>main</code> method invoked.
-		 */
-		public static boolean isMainInvoked = false;
 
 		/**
 		 * Specified from the extending class only available via bootstrapping.
@@ -143,7 +164,6 @@ public class BootstrapTest extends TestCase {
 		 * Resets for testing.
 		 */
 		public static void reset() {
-			isMainInvoked = false;
 			classLoaderObject = null;
 		}
 
@@ -157,14 +177,12 @@ public class BootstrapTest extends TestCase {
 		 */
 		public static void main(String[] arguments) throws Throwable {
 
-			// Flag invoked
-			isMainInvoked = true;
-
 			// Ensure correct command line arguments
-			assertEquals("Incorrect number of command line arguments", 1,
+			assertEquals("Incorrect number of command line arguments", 2,
 					arguments.length);
 			assertEquals("Incorrect command line argument", "test",
 					arguments[0]);
+			String temporaryFilePath = arguments[1];
 
 			// Ensure able to obtain file from class path directory.
 			// (Both from thread and class ClassLoaders)
@@ -179,9 +197,14 @@ public class BootstrapTest extends TestCase {
 			// (Both from thread and class ClassLoaders)
 			assertStreamContent("Jar File", "Jar File", Thread.currentThread()
 					.getContextClassLoader().getResourceAsStream("JarFile.txt"));
-			assertStreamContent("Jar File", "Jar File", classLoaderObject
-					.getClass().getClassLoader().getResourceAsStream(
-							"JarFile.txt"));
+			assertStreamContent("Jar File", "Jar File",
+					classLoaderObject.getClass().getClassLoader()
+							.getResourceAsStream("JarFile.txt"));
+
+			// Write that invoked
+			Writer writer = new FileWriter(temporaryFilePath);
+			writer.write("TEST");
+			writer.close();
 		}
 	}
 
@@ -201,8 +224,7 @@ public class BootstrapTest extends TestCase {
 		s.println("import " + FileWriter.class.getName() + ";");
 		s.println("import " + File.class.getName() + ";");
 		s.println("public class " + CLASS_NAME + " {");
-		s
-				.println("  public static void main(String[] args) throws Throwable {");
+		s.println("  public static void main(String[] args) throws Throwable {");
 		s.println("    Writer writer = new FileWriter(new File(\""
 				+ temporaryFile.getAbsolutePath() + "\"));");
 		s.println("    writer.write(\"test\");");
@@ -252,8 +274,8 @@ public class BootstrapTest extends TestCase {
 		String destDir = System.getProperty(Bootstrap.OFFICE_FLOOR_HOME)
 				+ "/lib/directory";
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
-		CompilationTask task = compiler.getTask(null, null, diagnostics, Arrays
-				.asList("-d", destDir), null, Arrays.asList(sourceFile));
+		CompilationTask task = compiler.getTask(null, null, diagnostics,
+				Arrays.asList("-d", destDir), null, Arrays.asList(sourceFile));
 		assertTrue("Failed to compile source class", task.call());
 	}
 
@@ -281,8 +303,8 @@ public class BootstrapTest extends TestCase {
 		}
 
 		// Assert the content
-		assertEquals(message + ": incorrect content", expectedContent, content
-				.toString());
+		assertEquals(message + ": incorrect content", expectedContent,
+				content.toString());
 	}
 
 }
