@@ -13,8 +13,9 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<packageProperties>
-			officefloorsource=net.officefloor.plugin.woof.WoofOfficeFloorSource
-			officefloor=WoOF
+# Run as WoOF applications
+officefloorsource=net.officefloor.plugin.woof.WoofOfficeFloorSource
+officefloor=WoOF
 		</packageProperties>
 	</properties>
 	<build>
