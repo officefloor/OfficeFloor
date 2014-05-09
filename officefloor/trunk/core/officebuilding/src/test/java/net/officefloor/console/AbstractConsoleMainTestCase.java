@@ -63,9 +63,6 @@ public abstract class AbstractConsoleMainTestCase extends
 	@Override
 	protected void setUp() throws Exception {
 
-		// Flag verbose
-		this.setVerbose(true);
-
 		// Testing
 		OfficeFloorConsoleMain.isExit = false;
 

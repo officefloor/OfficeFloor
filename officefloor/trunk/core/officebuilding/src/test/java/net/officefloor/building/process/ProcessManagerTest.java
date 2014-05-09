@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
@@ -175,6 +176,11 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	public static class WriteToFileProcess implements ManagedProcess {
 
 		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Path to the {@link File}.
 		 */
 		private final String filePath;
@@ -294,6 +300,11 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	public static class OutputProcess implements ManagedProcess {
 
 		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * <code>stdout</code> content.
 		 */
 		private final String stdoutContent;
@@ -403,6 +414,11 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	 * {@link ManagedProcess} to validate class path.
 	 */
 	public static class ClassPathProcess implements ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * Path on class path to find {@link File}.
@@ -599,6 +615,11 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	private static class FailInitProcess implements ManagedProcess {
 
 		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Failure to propagate from the init method.
 		 */
 		private final Throwable failure;
@@ -662,6 +683,11 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	 * {@link ManagedProcess} to check that JVM options available.
 	 */
 	private static class JvmOptionsProcess implements ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * Location of file to write System property value.
@@ -728,6 +754,11 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	 * {@link ManagedProcess} to loop until informed to stop.
 	 */
 	public static class LoopUntilStopProcess implements ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * {@link ManagedProcessContext}.
@@ -846,6 +877,11 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	 * {@link ManagedProcess} to register the MBean.
 	 */
 	public static class MBeanProcess extends LoopUntilStopProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * {@link ObjectName}.
@@ -993,6 +1029,11 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 	 * As {@link ManagedProcess} is serialised then must use files as flags.
 	 */
 	public static class LocalMBeanProcess extends MBeanProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * Start {@link File} path.

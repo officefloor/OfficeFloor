@@ -18,6 +18,7 @@
 package net.officefloor.console;
 
 import java.io.File;
+import java.io.Serializable;
 
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
@@ -134,6 +135,11 @@ public class OpenOfficeConsoleCommand implements OfficeFloorCommandFactory,
 	 */
 	public static class OpenOfficeConsoleManagedProcess implements
 			ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * {@link OfficeBuilding} host.

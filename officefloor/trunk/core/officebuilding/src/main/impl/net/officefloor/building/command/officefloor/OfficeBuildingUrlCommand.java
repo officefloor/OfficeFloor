@@ -17,6 +17,8 @@
  */
 package net.officefloor.building.command.officefloor;
 
+import java.io.Serializable;
+
 import javax.management.remote.JMXServiceURL;
 
 import net.officefloor.building.command.OfficeFloorCommand;
@@ -104,6 +106,11 @@ public class OfficeBuildingUrlCommand implements OfficeFloorCommandFactory,
 	 */
 	public static class OfficeBuildingUrlManagedProcess implements
 			ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * {@link OfficeBuilding} host.

@@ -18,6 +18,7 @@
 package net.officefloor.building.manager;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Properties;
 
 import net.officefloor.building.process.ManagedProcess;
@@ -30,6 +31,11 @@ import net.officefloor.console.OfficeBuilding;
  * @author Daniel Sagenschneider
  */
 public class OfficeBuildingManagedProcess implements ManagedProcess {
+
+	/**
+	 * {@link Serializable} version.
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Host name for the {@link OfficeBuilding}.

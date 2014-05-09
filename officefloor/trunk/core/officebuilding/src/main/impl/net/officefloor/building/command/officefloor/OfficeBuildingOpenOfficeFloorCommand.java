@@ -18,6 +18,7 @@
 package net.officefloor.building.command.officefloor;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -347,6 +348,11 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	 * {@link OfficeBuilding}.
 	 */
 	public static class OpenManagedProcess implements ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * {@link OfficeBuilding} host.

@@ -54,6 +54,11 @@ public class OfficeFloorManager implements ManagedProcess,
 		OfficeFloorManagerMBean {
 
 	/**
+	 * {@link Serializable} version.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * {@link Logger}.
 	 */
 	private static final Logger LOGGER = Logger
@@ -392,6 +397,11 @@ public class OfficeFloorManager implements ManagedProcess,
 	 * {@link OfficeFloor}.
 	 */
 	private static class WorkState implements Serializable {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * Name of the {@link Office} containing the {@link Work}.

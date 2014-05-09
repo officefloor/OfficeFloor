@@ -135,27 +135,10 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 	 *            {@link Exception}.
 	 */
 	private void writeErr(PrintStream err, Exception ex) {
-
-		// Write the error
-		err.print("ERROR: ");
-		err.println(ex.getMessage());
-
-		// Output all the causes
-		Throwable error = ex;
-		Throwable cause = ex.getCause();
-		while ((cause != null) && (error != cause)) {
-
-			// Provide cause
-			err.print("    Caused by ");
-			err.print(cause.getMessage());
-			err.print(" [");
-			err.print(cause.getClass().getSimpleName());
-			err.println("]");
-
-			// Set up for next iteration
-			error = cause;
-			cause = cause.getCause();
-		}
+		
+		// Provide error
+		err.println("ERROR:" + ex.getMessage());
+		ex.printStackTrace(err);
 	}
 
 	/*

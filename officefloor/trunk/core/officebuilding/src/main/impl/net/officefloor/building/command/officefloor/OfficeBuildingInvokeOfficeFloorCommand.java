@@ -18,6 +18,7 @@
 package net.officefloor.building.command.officefloor;
 
 import java.io.File;
+import java.io.Serializable;
 
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
@@ -176,6 +177,11 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 	 * {@link ManagedProcess} to invoke a {@link Task}.
 	 */
 	public static class InvokeManagedProcess implements ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * {@link OfficeBuilding} host.

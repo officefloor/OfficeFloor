@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -122,6 +123,11 @@ public class ProcessShellTest extends TestCase {
 	 * {@link ManagedProcess} to test running the {@link ProcessShell}.
 	 */
 	public static class RunManagedProcess implements ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * {@link ObjectName} for the {@link Mock}.

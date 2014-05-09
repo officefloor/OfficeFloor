@@ -46,20 +46,43 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Generate the boot jar -->
+				<!-- Create class path -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>test-script-directory-classpath</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>build-classpath</goal>
+						</goals>
+						<configuration>
+							<includeScope>runtime</includeScope>
+							<prefix>lib</prefix>
+							<outputFilterFile>true</outputFilterFile>
+							<outputFile>${project.build.directory}/dependencies.classpath</outputFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Append officebuilding to class path -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>boot-jar</id>
+						<id>append-officebuilding-to-classpath</id>
 						<phase>prepare-package</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
 						<configuration>
 							<target>
-								<jar basedir="${project.build.outputDirectory}" destFile="${project.build.directory}/boot.jar"
-									includes="net/officefloor/bootstrap/*" />
+								<concat destfile="${project.build.directory}/artifact.classpath">:lib/${project.artifactId}-${project.version}.jar</concat>
+								<concat destfile="${project.build.directory}/classpath.properties">
+									<filelist dir="${project.build.directory}"
+										files="dependencies.classpath,artifact.classpath" />
+								</concat>
 							</target>
 						</configuration>
 					</execution>
@@ -71,7 +94,7 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>release</id>
+						<id>test-script-directory</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
@@ -135,7 +158,7 @@
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-embedder</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.sun</groupId>
 			<artifactId>jconsole</artifactId>
@@ -143,6 +166,6 @@
 			<scope>system</scope>
 			<systemPath>${jconsole_path}</systemPath>
 		</dependency>
-		
+
 	</dependencies>
 </project>

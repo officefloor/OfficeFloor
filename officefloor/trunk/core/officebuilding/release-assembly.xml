@@ -1,19 +1,17 @@
 <assembly>
-	<id>release</id>
+	<id>test</id>
 	<formats>
-		<!-- Raw content ready for packaging -->
-		<format>zip</format>
-		<!-- Provide directory for testing -->
+		<!-- Provide directory for testing scripts -->
 		<format>dir</format>
 	</formats>
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
 		<fileSet>
-			<!-- boot.jar -->
+			<!-- classpath.properties -->
 			<outputDirectory>lib</outputDirectory>
 			<directory>${project.build.directory}</directory>
 			<includes>
-				<include>boot.jar</include>
+				<include>classpath.properties</include>
 			</includes>
 		</fileSet>
 	</fileSets>

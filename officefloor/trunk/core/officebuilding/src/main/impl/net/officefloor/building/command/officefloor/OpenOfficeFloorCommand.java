@@ -17,6 +17,7 @@
  */
 package net.officefloor.building.command.officefloor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -296,6 +297,11 @@ public class OpenOfficeFloorCommand implements OfficeFloorCommandFactory,
 	 * {@link OfficeFloorManager} {@link ManagedProcess}.
 	 */
 	public static class ReportManagedProcess implements ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * Delegate {@link ManagedProcess}.
