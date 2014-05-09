@@ -12,13 +12,33 @@
 	<description>Server for running OfficeFloor application</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<packageProperties>WoOF
+		<packageProperties>
 			officefloorsource=net.officefloor.plugin.woof.WoofOfficeFloorSource
 			officefloor=WoOF
 		</packageProperties>
 	</properties>
 	<build>
 		<plugins>
+			<plugin>
+				<!-- Create class path -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>test-script-directory-classpath</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>build-classpath</goal>
+						</goals>
+						<configuration>
+							<includeScope>runtime</includeScope>
+							<prefix>lib</prefix>
+							<outputFilterFile>true</outputFilterFile>
+							<outputFile>${project.build.directory}/classpath.properties</outputFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<!-- Generates the release -->
 				<groupId>org.apache.maven.plugins</groupId>
@@ -146,8 +166,6 @@
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
 			<artifactId>officebuilding</artifactId>
-			<classifier>release</classifier>
-			<type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.plugin</groupId>
@@ -156,6 +174,11 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.plugin</groupId>
+			<artifactId>officeplugin_socket</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
