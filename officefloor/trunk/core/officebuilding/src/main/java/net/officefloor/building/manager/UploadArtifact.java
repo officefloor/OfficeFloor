@@ -34,6 +34,11 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public final class UploadArtifact implements Serializable {
 
 	/**
+	 * {@link Serializable} version.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Name of the artifact.
 	 */
 	private final String name;

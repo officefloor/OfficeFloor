@@ -19,13 +19,17 @@ package net.officefloor.building.manager;
 
 import java.io.Serializable;
 
-
 /**
  * Reference to an Artifact.
  * 
  * @author Daniel Sagenschneider
  */
 public class ArtifactReference implements Serializable {
+
+	/**
+	 * {@link Serializable} version.
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Group Id.

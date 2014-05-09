@@ -10,13 +10,6 @@
 			<!-- Ensure testing with latest version -->
 			<location>${basedir}/src/test/resources/net/officefloor/building/classpath/pom.test.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-
-		<file>
-			<!-- Ensure OfficeConsole using latest version -->
-			<location>${basedir}/src/main/resources/bin/officeconsole</location>
-			<contains><![CDATA[OFFICE_FLOOR_VERSION=${project.version}]]></contains>
-		</file>
-		
+		</file>		
 	</files>
 </verifications>

@@ -19,6 +19,7 @@ package net.officefloor.building.console;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -36,6 +37,11 @@ import net.officefloor.building.process.ManagedProcessContext;
  * @author Daniel Sagenschneider
  */
 public final class HelpManagedProcess implements ManagedProcess {
+
+	/**
+	 * {@link Serializable} version.
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Write out the help.

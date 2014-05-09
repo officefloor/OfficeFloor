@@ -18,6 +18,7 @@
 package net.officefloor.building.command.officefloor;
 
 import java.io.File;
+import java.io.Serializable;
 
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
@@ -152,6 +153,11 @@ public class OfficeBuildingCloseOfficeFloorCommand implements
 	 * {@link ManagedProcess} to close the {@link OfficeFloor}.
 	 */
 	public static class CloseManagedProcess implements ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * {@link OfficeBuilding} host.

@@ -37,6 +37,11 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public final class OpenOfficeFloorConfiguration implements Serializable {
 
 	/**
+	 * {@link Serializable} version.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Name of the {@link Process} to run the {@link OfficeFloor}.
 	 */
 	private String processName = null;

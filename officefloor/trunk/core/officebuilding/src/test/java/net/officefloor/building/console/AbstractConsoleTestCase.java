@@ -29,6 +29,7 @@ import java.io.PipedWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
@@ -219,6 +220,11 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 	 * Mock {@link ManagedProcess}.
 	 */
 	private static class MockManagedProcess implements ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * Run {@link File} path.
