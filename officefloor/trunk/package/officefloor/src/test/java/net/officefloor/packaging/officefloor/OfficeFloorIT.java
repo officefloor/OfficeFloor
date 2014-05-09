@@ -22,11 +22,12 @@ import java.io.Reader;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Integration test to invoke the opened OfficeFloor.
@@ -40,14 +41,15 @@ public class OfficeFloorIT extends TestCase {
 	 */
 	public void testRequestLandingPage() throws Exception {
 
-		final HttpClient client = new DefaultHttpClient();
+		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
-		// Request the landing page
-		String landingPage = this.doRequest(client, "");
+			// Request the landing page
+			String landingPage = this.doRequest(client, "");
 
-		// Ensure appropriate landing page
-		assertTrue("Incorrect landing page:\n" + landingPage,
-				landingPage.contains("OfficeFloor"));
+			// Ensure appropriate landing page
+			assertTrue("Incorrect landing page:\n" + landingPage,
+					landingPage.contains("OfficeFloor"));
+		}
 	}
 
 	/**
