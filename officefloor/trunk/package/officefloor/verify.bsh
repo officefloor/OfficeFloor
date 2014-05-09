@@ -39,5 +39,5 @@ void verifyFileExists(String fileName, boolean isExecutable) {
 verifyFileExists( "bin/officebuilding", true );
 verifyFileExists( "bin/officefloor", true );
 verifyFileExists( "config/OfficeFloor.properties", false );
-verifyFileExists( "lib/boot.jar", false );
+verifyFileExists( "lib/classpath.properties", false );
 // others but enough checked to ensure installation for test

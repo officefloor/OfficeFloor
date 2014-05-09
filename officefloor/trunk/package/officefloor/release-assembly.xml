@@ -19,8 +19,28 @@
 	</fileSets>
 	<dependencySets>
 		<dependencySet>
-			<!-- OfficeBuilding Layout -->
+			<!-- OfficeFloor.properties (to include package properties with filtering) -->
 			<outputDirectory>/</outputDirectory>
+			<outputFileNameMapping>/</outputFileNameMapping>
+			<unpack>true</unpack>
+			<unpackOptions>
+				<includes>
+					<include>**/*.properties</include>
+				</includes>
+				<excludes>
+					<!-- Don't include pom.properties -->
+					<exclude>META-INF/**</exclude>
+				</excludes>
+				<filtered>true</filtered>
+			</unpackOptions>
+			<includes>
+				<include>net.officefloor.core:officebuilding</include>
+			</includes>
+		</dependencySet>
+		<dependencySet>
+			<!-- OfficeBuilding Layout (minus properties without filtering) -->
+			<outputDirectory>/</outputDirectory>
+			<outputFileNameMapping>/</outputFileNameMapping>
 			<unpack>true</unpack>
 			<unpackOptions>
 				<excludes>
@@ -28,6 +48,7 @@
 					<exclude>net/**</exclude>
 					<exclude>sun/**</exclude>
 					<exclude>META-INF/**</exclude>
+					<exclude>**/*.properties</exclude>
 				</excludes>
 			</unpackOptions>
 			<includes>
