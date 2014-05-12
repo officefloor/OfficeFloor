@@ -233,6 +233,19 @@ public class OfficeConsole extends JConsole {
 	}
 
 	/**
+	 * Stops the {@link OfficeConsole}.
+	 */
+	public void close() {
+
+		// Disconnect from OfficeBuilding
+		this.proxyClient.disconnect();
+
+		// Ensure shutdown the console
+		this.setVisible(false);
+		this.dispose();
+	}
+
+	/**
 	 * Invokes the method with the parameters.
 	 * 
 	 * @param method
