@@ -20,7 +20,6 @@ package net.officefloor.plugin.woof;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.logging.LogRecord;
 
 import net.officefloor.autowire.AutoWire;
@@ -155,17 +154,15 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testUnitTestMethods() throws Exception {
 
-		String loopbackAddress = InetAddress.getLoopbackAddress()
-				.getHostAddress();
-		final String connectionMessage = "Connect to localhost:7878 [localhost/"
-				+ loopbackAddress + "] failed: Connection refused";
+		final String connectionMessageSuffix = "failed: Connection refused";
 
 		// Should not successfully connect
 		try {
 			this.doRequest("/test");
 			fail("Should not be successful");
 		} catch (HttpHostConnectException ex) {
-			assertEquals("Incorrect cause", connectionMessage, ex.getMessage());
+			assertTrue("Incorrect cause: " + ex.getMessage(), ex.getMessage()
+					.endsWith(connectionMessageSuffix));
 		}
 
 		// Run the application
@@ -183,7 +180,8 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 			refreshedClient.execute(new HttpGet("http://localhost:7878/test"));
 			fail("Should not be successful");
 		} catch (HttpHostConnectException ex) {
-			assertEquals("Incorrect cause", connectionMessage, ex.getMessage());
+			assertTrue("Incorrect cause: " + ex.getMessage(), ex.getMessage()
+					.endsWith(connectionMessageSuffix));
 		} finally {
 			refreshedClient.close();
 		}
