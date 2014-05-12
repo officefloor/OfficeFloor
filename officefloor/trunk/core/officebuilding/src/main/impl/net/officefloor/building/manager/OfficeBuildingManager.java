@@ -1301,8 +1301,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					}
 
 					// Determine if time out waiting
-					long currentTime = System.currentTimeMillis();
-					if ((currentTime - startTime) > waitTime) {
+					if ((System.currentTimeMillis() - startTime) > waitTime) {
 						// Timed out waiting, so destroy processes
 						status.append("\nStop timeout, destroying processes:\n");
 						for (ProcessManagerMBean processManager : this.processManagers) {
@@ -1343,7 +1342,26 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				this.connectorServer.stop();
 
 				// Unregister the registry (closes its port)
-				UnicastRemoteObject.unexportObject(this.registry, true);
+				boolean isUnexported = false;
+				long startTime = System.currentTimeMillis();
+				do {
+
+					// Determine if time out
+					if ((System.currentTimeMillis() - startTime) > waitTime) {
+						throw new ProcessException(
+								"Timed out waiting to stop OfficeBuilding");
+					}
+
+					// Attempt to unexport the object again
+					isUnexported = UnicastRemoteObject.unexportObject(
+							this.registry, false);
+					
+					// Wait some time if not unexported
+					if (!isUnexported) {
+						this.wait(100);
+					}
+					
+				} while (!isUnexported);
 
 				// Unregister the Office Building Manager MBean
 				this.mbeanServer

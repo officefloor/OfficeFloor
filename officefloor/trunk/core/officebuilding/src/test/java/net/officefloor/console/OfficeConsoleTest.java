@@ -87,7 +87,7 @@ public class OfficeConsoleTest extends OfficeFrameTestCase {
 				if ((System.currentTimeMillis() - startTime) > 10000) {
 					// Timed out
 					fail("Timed out attempting to ensure connected.  Should be connected by now.");
-					
+
 				} else if (!isConnected) {
 					// Allow some time to connect
 					Thread.sleep(100);
@@ -97,8 +97,7 @@ public class OfficeConsoleTest extends OfficeFrameTestCase {
 
 		} finally {
 			// Ensure shutdown the console
-			console.setVisible(false);
-			console.dispose();
+			console.close();
 		}
 	}
 }
