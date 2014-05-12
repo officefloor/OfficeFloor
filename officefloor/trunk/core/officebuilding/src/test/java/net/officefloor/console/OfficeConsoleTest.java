@@ -56,6 +56,7 @@ public class OfficeConsoleTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link OfficeConsole} can connect.
 	 */
+	@GuiTest
 	public void testOfficeConsole() throws Exception {
 
 		// Connection details
