@@ -18,6 +18,7 @@
 package net.officefloor.plugin.war.integrate;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
@@ -62,6 +63,19 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * {@link OfficeBuildingManagerMBean}.
+	 */
+	private OfficeBuildingManagerMBean officeBuildingManager = null;
+
+	@Override
+	protected void tearDown() throws Exception {
+		// Ensure stop the OfficeBuilding (and subsequently OfficeFloor)
+		if (this.officeBuildingManager != null) {
+			this.officeBuildingManager.stopOfficeBuilding(10000);
+		}
+	}
+
+	/**
 	 * Ensure can start the WAR and have it service a {@link HttpRequest}.
 	 * 
 	 * @param officeFloorClass
@@ -87,7 +101,7 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 		File passwordFile = this.findFile(this.getClass(), "../password.txt");
 
 		// Open the OfficeBuilding
-		OfficeBuildingManagerMBean officeBuildingManager = OfficeBuildingManager
+		this.officeBuildingManager = OfficeBuildingManager
 				.startOfficeBuilding(
 						null,
 						OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
@@ -121,10 +135,35 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 							String.valueOf(PORT));
 			configuration.addOfficeFloorProperty("password.file.location",
 					passwordFile.getAbsolutePath());
-			officeBuildingManager.openOfficeFloor(configuration);
-			
-			// Allow some time to start
-			Thread.sleep(1000);
+			this.officeBuildingManager.openOfficeFloor(configuration);
+
+			// Allow to start
+			boolean isStarted = false;
+			long startTime = System.currentTimeMillis();
+			do {
+
+				// Determine if time out
+				if ((System.currentTimeMillis() - startTime) > 10000) {
+					fail("Timed out waiting for OfficeFloor to start");
+				}
+
+				// Check whether started
+				try {
+					HttpGet request = new HttpGet("http://localhost:" + PORT);
+					HttpResponse response = client.execute(request);
+					if (response.getStatusLine().getStatusCode() == 200) {
+						isStarted = true;
+					}
+				} catch (IOException ex) {
+					// Allow trying again
+				}
+
+				// Allow some time to start
+				if (!isStarted) {
+					Thread.sleep(1000);
+				}
+
+			} while (!isStarted);
 
 			// Request data from servlet
 			HttpGet request = new HttpGet("http://localhost:" + PORT);
@@ -135,10 +174,6 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 					.getStatusLine().getStatusCode());
 			String body = HttpTestUtil.getEntityBody(response);
 			assertEquals("Incorrect response body", "WAR", body);
-
-		} finally {
-			// Ensure stop the OfficeBuilding (and subsequently OfficeFloor)
-			officeBuildingManager.stopOfficeBuilding(10000);
 		}
 	}
 }

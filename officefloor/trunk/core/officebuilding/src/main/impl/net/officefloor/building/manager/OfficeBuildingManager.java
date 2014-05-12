@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
+import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -259,55 +260,86 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		RMIClientSocketFactory clientSocketFactory = new OfficeBuildingRmiClientSocketFactory(
 				sslProtocol, sslAlgorithm, keyStoreContent, keyStorePassword);
 
-		// Ensure have Registry on the port
+		// Loop attempting to start
+		boolean isStarted = false;
+		final int START_ATTEMPTS = 2;
+		int attemptsToStart = 0;
 		Registry registry;
-		try {
-			// Attempt to create on port
-			registry = LocateRegistry.createRegistry(port, clientSocketFactory,
-					serverSocketFactory);
-		} catch (RemoteException ex) {
-			// Registry already on port, so obtain it
-			registry = LocateRegistry.getRegistry(null, port,
+		JMXConnectorServer connectorServer = null;
+		do {
+
+			// Ensure have Registry on the port
+			try {
+				// Attempt to create on port
+				registry = LocateRegistry.createRegistry(port,
+						clientSocketFactory, serverSocketFactory);
+			} catch (RemoteException ex) {
+				// Registry already on port, so obtain it
+				registry = LocateRegistry.getRegistry(null, port,
+						clientSocketFactory);
+			}
+
+			// Determine if already running the Office Building
+			Remote officeBuildingRemote = null;
+			try {
+				// Determine if Office Building Manager in registry
+				officeBuildingRemote = registry
+						.lookup(OFFICE_BUILDING_REGISTERED_NAME);
+			} catch (NotBoundException | NoSuchObjectException ex) {
+				// Not available, so carry on to start
+			}
+			if (officeBuildingRemote != null) {
+				// Return the already running Office Building Manager
+				return getOfficeBuildingManager(hostName, port, keyStore,
+						keyStorePassword, userName, password);
+			}
+
+			// Provide secure server environment
+			Map<String, Object> serverEnv = new HashMap<String, Object>();
+
+			// Configure authenticated communication
+			InputStream passwordStream = new ByteArrayInputStream((userName
+					+ "=" + password).getBytes());
+			serverEnv.put(RMIConnectorServer.AUTHENTICATOR,
+					new PasswordAuthenticator(passwordStream));
+
+			// Configure encrypted communication
+			serverEnv.put(
+					RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE,
 					clientSocketFactory);
-		}
+			serverEnv.put(
+					RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
+					serverSocketFactory);
+			serverEnv.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY,
+					clientSocketFactory);
 
-		// Determine if already running the Office Building
-		Remote officeBuildingRemote = null;
-		try {
-			// Determine if Office Building Manager in registry
-			officeBuildingRemote = registry
-					.lookup(OFFICE_BUILDING_REGISTERED_NAME);
-		} catch (NotBoundException ex) {
-			// Not available, so carry on to start
-		}
-		if (officeBuildingRemote != null) {
-			// Return the already running Office Building Manager
-			return getOfficeBuildingManager(hostName, port, keyStore,
-					keyStorePassword, userName, password);
-		}
+			// Start the JMX connector server (on local host)
+			try {
+				JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(
+						hostName, port);
+				connectorServer = JMXConnectorServerFactory
+						.newJMXConnectorServer(serviceUrl, serverEnv,
+								mbeanServer);
+				connectorServer.start();
 
-		// Provide secure server environment
-		Map<String, Object> serverEnv = new HashMap<String, Object>();
+				// As here, flag that started
+				isStarted = true;
 
-		// Configure authenticated communication
-		InputStream passwordStream = new ByteArrayInputStream(
-				(userName + "=" + password).getBytes());
-		serverEnv.put(RMIConnectorServer.AUTHENTICATOR,
-				new PasswordAuthenticator(passwordStream));
+			} catch (IOException ex) {
+				// Failed to start on this attempt
+				attemptsToStart++;
 
-		// Configure encrypted communication
-		serverEnv.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE,
-				clientSocketFactory);
-		serverEnv.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
-				serverSocketFactory);
-		serverEnv.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY, clientSocketFactory);
+				// Stop trying after so many attempts
+				if (attemptsToStart >= START_ATTEMPTS) {
+					// Propagate the failure
+					throw ex;
+				}
 
-		// Start the JMX connector server (on local host)
-		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(hostName,
-				port);
-		JMXConnectorServer connectorServer = JMXConnectorServerFactory
-				.newJMXConnectorServer(serviceUrl, serverEnv, mbeanServer);
-		connectorServer.start();
+				// Allow some time before trying again
+				Thread.sleep(1000);
+			}
+
+		} while (!isStarted);
 
 		// Obtain the address of the connector server
 		JMXServiceURL connectorServerAddress = connectorServer.getAddress();
@@ -1353,14 +1385,19 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					}
 
 					// Attempt to unexport the object again
-					isUnexported = UnicastRemoteObject.unexportObject(
-							this.registry, false);
-					
+					try {
+						isUnexported = UnicastRemoteObject.unexportObject(
+								this.registry, false);
+					} catch (NoSuchObjectException ex) {
+						// Already unexported
+						isUnexported = true;
+					}
+
 					// Wait some time if not unexported
 					if (!isUnexported) {
 						this.wait(100);
 					}
-					
+
 				} while (!isUnexported);
 
 				// Unregister the Office Building Manager MBean
