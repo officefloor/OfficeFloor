@@ -26,12 +26,15 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.naming.Context;
 
+import sun.tools.jconsole.VMPanel.TabInfo;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.console.OfficeConsoleInitialContextFactory;
 
@@ -136,6 +139,7 @@ public class OfficeConsole extends JConsole {
 	 *            Password to the trust store {@link File}. May be
 	 *            <code>null</code> if no password is required.
 	 */
+	@SuppressWarnings("unchecked")
 	public void run(String host, int port, final String username,
 			final String password, File trustStoreFile,
 			String trustStorePassword) {
@@ -198,6 +202,17 @@ public class OfficeConsole extends JConsole {
 		// Accessing privates of JConsole
 		try {
 			this.invoke(this.superMethod("createMDI"));
+
+			// Remove all tabs except MBeans
+			ArrayList<TabInfo> tabList = (ArrayList<TabInfo>) this
+					.getStaticFieldValue(VMPanel.class, "tabInfos");
+			for (Iterator<TabInfo> iterator = tabList.iterator(); iterator
+					.hasNext();) {
+				TabInfo tabInfo = iterator.next();
+				if (tabInfo.tabClass != MBeansTab.class) {
+					iterator.remove();
+				}
+			}
 
 			// Create Proxy Client to Office Building
 			this.proxyClient = ProxyClient.getProxyClient(
@@ -308,6 +323,28 @@ public class OfficeConsole extends JConsole {
 		// Specify the field value
 		field.setAccessible(true);
 		field.set(instance, fieldValue);
+	}
+
+	/**
+	 * Obtains the field value from an object.
+	 * 
+	 * @param clazz
+	 *            {@link Class}.
+	 * @param fieldName
+	 *            Name of the {@link Field}.
+	 * @return Value for the {@link Field}.
+	 * @throws Exception
+	 *             If fails to obtain.
+	 */
+	private Object getStaticFieldValue(Class<?> clazz, String fieldName)
+			throws Exception {
+
+		// Obtain the field
+		Field field = clazz.getDeclaredField(fieldName);
+
+		// Return the field value
+		field.setAccessible(true);
+		return field.get(null);
 	}
 
 }

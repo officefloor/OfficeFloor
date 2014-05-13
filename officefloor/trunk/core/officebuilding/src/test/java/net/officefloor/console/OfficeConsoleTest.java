@@ -34,6 +34,33 @@ import sun.tools.jconsole.OfficeConsole;
 public class OfficeConsoleTest extends OfficeFrameTestCase {
 
 	/**
+	 * Runs {@link OfficeConsole} for manual testing.
+	 * 
+	 * @param args
+	 *            Command line arguments.
+	 * @throws Exception
+	 *             If fails to run
+	 */
+	public static void main(String[] args) throws Exception {
+
+		// Connection details
+		int port = 13778;
+		String username = OfficeBuildingTestUtil.getLoginUsername();
+		String password = OfficeBuildingTestUtil.getLoginPassword();
+		File trustStoreFile = OfficeBuildingTestUtil.getTrustStore();
+		String trustStorePassword = OfficeBuildingTestUtil
+				.getTrustStorePassword();
+
+		// Start the Office Building
+		OfficeBuildingTestUtil.startOfficeBuilding(port);
+
+		// Start the console connected to the Office Building
+		OfficeConsole console = new OfficeConsole();
+		console.run(null, port, username, password, trustStoreFile,
+				trustStorePassword);
+	}
+
+	/**
 	 * {@link OfficeBuildingManagerMBean}.
 	 */
 	private OfficeBuildingManagerMBean manager;

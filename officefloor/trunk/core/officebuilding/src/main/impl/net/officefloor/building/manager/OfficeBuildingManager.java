@@ -262,7 +262,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 		// Loop attempting to start
 		boolean isStarted = false;
-		final int START_ATTEMPTS = 2;
+		final int START_ATTEMPTS = 3;
 		int attemptsToStart = 0;
 		Registry registry;
 		JMXConnectorServer connectorServer = null;
