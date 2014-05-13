@@ -21,11 +21,16 @@ import java.awt.Label;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.management.JMX;
+import javax.management.MBeanServerConnection;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
+import net.officefloor.building.manager.OfficeBuildingManager;
+import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import sun.tools.jconsole.OfficeConsole;
 
+import com.sun.tools.jconsole.JConsoleContext;
 import com.sun.tools.jconsole.JConsolePlugin;
 
 /**
@@ -41,8 +46,15 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 
 	@Override
 	public Map<String, JPanel> getTabs() {
+
+		// Obtain the JConsole context
+		JConsoleContext context = this.getContext();
+
+		// Create the tabs
 		Map<String, JPanel> tabs = new HashMap<>();
-		tabs.put("OfficeBuilding", new OfficePanel());
+		tabs.put("OfficeBuilding", new OfficePanel(context));
+
+		// Return the tabs
 		return tabs;
 	}
 
@@ -58,10 +70,46 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 	private static class OfficePanel extends JPanel {
 
 		/**
-		 * Initiate.
+		 * {@link JConsoleContext}.
 		 */
-		public OfficePanel() {
-			this.add(new Label("TODO"));
+		private final JConsoleContext context;
+
+		/**
+		 * {@link OfficeBuildingManagerMBean}.
+		 */
+		private final OfficeBuildingManagerMBean officeBuildingManager;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param context
+		 *            {@link JConsoleContext}.
+		 */
+		public OfficePanel(JConsoleContext context) {
+			this.context = context;
+
+			// Obtain the OfficeBuilding Manager
+			MBeanServerConnection connection = this.context
+					.getMBeanServerConnection();
+			this.officeBuildingManager = JMX.newMBeanProxy(connection,
+					OfficeBuildingManager.getOfficeBuildingManagerObjectName(),
+					OfficeBuildingManagerMBean.class);
+
+			// Obtain the connection details
+			String hostname;
+			int port;
+			try {
+				hostname = this.officeBuildingManager
+						.getOfficeBuildingHostName();
+				port = this.officeBuildingManager.getOfficeBuildingPort();
+			} catch (Exception ex) {
+				port = -1;
+				hostname = "";
+			}
+
+			// TODO create panel contents
+			this.add(new Label("TODO (running at " + hostname + ":" + port
+					+ ")"));
 		}
 	}
 
