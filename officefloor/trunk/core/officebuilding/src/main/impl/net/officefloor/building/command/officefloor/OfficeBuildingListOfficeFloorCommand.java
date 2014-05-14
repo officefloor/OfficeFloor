@@ -36,6 +36,7 @@ import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
+import net.officefloor.building.process.officefloor.ListedTask;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -230,7 +231,10 @@ public class OfficeBuildingListOfficeFloorCommand implements
 		@Override
 		public void main() throws Throwable {
 
-			String listing;
+			// Capture output
+			StringBuilder output = new StringBuilder();
+
+			// Handle based on whether looking at particular process
 			if (this.processNamespace == null) {
 				// List the processes
 				OfficeBuildingManagerMBean officeBuildingManager = OfficeBuildingManager
@@ -239,7 +243,15 @@ public class OfficeBuildingListOfficeFloorCommand implements
 										this.trustStoreLocation),
 								this.trustStorePassword, this.userName,
 								this.password);
-				listing = officeBuildingManager.listProcessNamespaces();
+				String[] processNamespaces = officeBuildingManager
+						.listProcessNamespaces();
+
+				// Format the output
+				for (String processNamespace : processNamespaces) {
+					output.append(processNamespace);
+					output.append("\n");
+				}
+
 			} else {
 				// List the tasks of the process name space
 				OfficeFloorManagerMBean officeFloorManager = OfficeBuildingManager
@@ -248,11 +260,21 @@ public class OfficeBuildingListOfficeFloorCommand implements
 								new File(this.trustStoreLocation),
 								this.trustStorePassword, this.userName,
 								this.password);
-				listing = officeFloorManager.listTasks();
+				ListedTask[] listedTasks = officeFloorManager.listTasks();
+
+				// Format the output
+				for (ListedTask listedTask : listedTasks) {
+					String parameterType = listedTask.getParameterType();
+					output.append(listedTask.getOfficeName() + " "
+							+ listedTask.getWorkName() + " "
+							+ listedTask.getTaskName() + "("
+							+ (parameterType == null ? "" : parameterType)
+							+ ")\n");
+				}
 			}
 
 			// Output the listing
-			System.out.println(listing);
+			System.out.print(output.toString());
 		}
 	}
 

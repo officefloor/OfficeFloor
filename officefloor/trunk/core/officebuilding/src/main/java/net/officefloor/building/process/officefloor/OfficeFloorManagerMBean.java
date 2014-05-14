@@ -46,13 +46,15 @@ public interface OfficeFloorManagerMBean {
 	 * Obtains the listing of the {@link Task} instances within the
 	 * {@link OfficeFloor}.
 	 * 
-	 * @return Listing of the {@link Task} instances within the
+	 * @return Listing of the {@link ListedTask} instances within the
 	 *         {@link OfficeFloor}.
+	 * @throws ProcessException
+	 *             If fails to obtain the listing.
 	 * @throws IOException
 	 *             If fails communication with the remote
 	 *             {@link OfficeFloorManagerMBean}.
 	 */
-	String listTasks() throws IOException;
+	ListedTask[] listTasks() throws ProcessException, IOException;
 
 	/**
 	 * Invokes {@link Work} within the {@link OfficeFloor}.

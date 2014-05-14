@@ -139,7 +139,7 @@ public interface OfficeBuildingManagerMBean {
 	 *             If fails communication with the remote
 	 *             {@link OfficeBuildingManagerMBean}.
 	 */
-	String listProcessNamespaces() throws ProcessException, IOException;
+	String[] listProcessNamespaces() throws ProcessException, IOException;
 
 	/**
 	 * Closes the {@link OfficeFloor}.
@@ -149,8 +149,6 @@ public interface OfficeBuildingManagerMBean {
 	 * @param waitTime
 	 *            Time to wait for {@link OfficeFloor} to stop before being
 	 *            destroyed.
-	 * @return <code>&quot;Closed&quot;</code> or text explaining why not
-	 *         closed.
 	 * @throws ProcessException
 	 *             If fails to close the {@link OfficeFloor}.
 	 * @throws IOException
@@ -158,7 +156,7 @@ public interface OfficeBuildingManagerMBean {
 	 *             {@link OfficeBuildingManagerMBean}.
 	 * @see ProcessManagerMBean#getProcessNamespace()
 	 */
-	String closeOfficeFloor(String processNamespace, long waitTime)
+	void closeOfficeFloor(String processNamespace, long waitTime)
 			throws ProcessException, IOException;
 
 	/**

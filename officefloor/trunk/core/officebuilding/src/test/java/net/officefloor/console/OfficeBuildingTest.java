@@ -173,9 +173,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// List the tasks for the OfficeFloor
 		this.doSecureMain("--process_name " + PROCESS_NAME + " list");
-		out.add("OFFICE");
-		out.add("\tSECTION.WORK");
-		out.add("\t\twriteMessage (String)");
+		out.add("OFFICE SECTION.WORK writeMessage(java.lang.String)");
 
 		// Validate the MockCore.jar is available
 		assertTrue("MockCore.jar should be uploaded", mockJar.exists());

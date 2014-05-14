@@ -32,6 +32,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -1203,27 +1204,22 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	@Override
-	public synchronized String listProcessNamespaces() throws ProcessException {
+	public synchronized String[] listProcessNamespaces()
+			throws ProcessException {
 		try {
 
 			// Create listing of process name spaces
-			StringBuilder namespaces = new StringBuilder();
-			boolean isFirst = true;
+			List<String> namespaces = new ArrayList<>(
+					this.processManagers.size());
 			for (ProcessManagerMBean manager : this.processManagers) {
 
-				// Separate name spaces by end of line
-				if (!isFirst) {
-					namespaces.append("\n");
-				}
-				isFirst = false;
-
-				// Output the name space
+				// Include the name space
 				String namespace = manager.getProcessNamespace();
-				namespaces.append(namespace);
+				namespaces.add(namespace);
 			}
 
 			// Return the listing of process name spaces
-			return namespaces.toString();
+			return namespaces.toArray(new String[namespaces.size()]);
 
 		} catch (Throwable ex) {
 			throw ProcessException.propagate(ex);
@@ -1231,7 +1227,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	@Override
-	public synchronized String closeOfficeFloor(String processNamespace,
+	public synchronized void closeOfficeFloor(String processNamespace,
 			long waitTime) throws ProcessException {
 		try {
 
@@ -1244,8 +1240,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			}
 			if (processManager == null) {
 				// OfficeFloor not running
-				return "OfficeFloor by process name space '" + processNamespace
-						+ "' not running";
+				throw new ProcessException(
+						"OfficeFloor by process name space '"
+								+ processNamespace + "' not running");
 			}
 
 			// Close the OfficeFloor
@@ -1260,7 +1257,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 				// Determine if OfficeFloor closed
 				if (processManager.isProcessComplete()) {
-					return "Closed"; // OfficeFloor closed
+					return; // OfficeFloor closed
 				}
 
 				// Determine if time out waiting
@@ -1270,9 +1267,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					processManager.destroyProcess();
 
 					// Indicate failure in closing OfficeFloor
-					return "Destroyed OfficeFloor '" + processNamespace
+					throw new ProcessException("Destroyed OfficeFloor '"
+							+ processNamespace
 							+ "' as timed out waiting for close of " + waitTime
-							+ " milliseconds";
+							+ " milliseconds");
 				}
 			}
 
@@ -1334,9 +1332,16 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 					// Determine if time out waiting
 					if ((System.currentTimeMillis() - startTime) > waitTime) {
-						// Timed out waiting, so destroy processes
+						// Timed out waiting, so destroy still running processes
 						status.append("\nStop timeout, destroying processes:\n");
 						for (ProcessManagerMBean processManager : this.processManagers) {
+
+							// Ignore if already complete
+							if (processManager.isProcessComplete()) {
+								continue;
+							}
+
+							// Destroy the process
 							try {
 								status.append("\t"
 										+ processManager.getProcessName()
