@@ -254,11 +254,11 @@ public class OfficeBuildingCloseOfficeFloorCommand implements
 							this.password);
 
 			// Close the OfficeFloor
-			String result = officeBuildingManager.closeOfficeFloor(
-					this.processNamespace, this.stopMaxWaitTime);
+			officeBuildingManager.closeOfficeFloor(this.processNamespace,
+					this.stopMaxWaitTime);
 
 			// Output result of closing
-			System.out.println(result);
+			System.out.println("Closed");
 		}
 	}
 

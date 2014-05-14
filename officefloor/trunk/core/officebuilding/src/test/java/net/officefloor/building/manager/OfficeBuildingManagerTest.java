@@ -42,6 +42,7 @@ import net.officefloor.building.process.ProcessManager;
 import net.officefloor.building.process.ProcessManagerMBean;
 import net.officefloor.building.process.ProcessShell;
 import net.officefloor.building.process.ProcessShellMBean;
+import net.officefloor.building.process.officefloor.ListedTask;
 import net.officefloor.building.process.officefloor.MockWork;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
@@ -215,8 +216,9 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect MBean port", this.port, mbeanReportedPort);
 
 		// Ensure no processes running
-		String processNamespaces = managerMBean.listProcessNamespaces();
-		assertEquals("Should be no processes running", "", processNamespaces);
+		String[] processNamespaces = managerMBean.listProcessNamespaces();
+		assertEquals("Should be no processes running", 0,
+				processNamespaces.length);
 
 		// OfficeBuilding should still be available
 		assertTrue("OfficeBuilding should still be available",
@@ -356,9 +358,11 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 				officeFloorLocation, buildingManager);
 
 		// Ensure process running
-		String processNamespaces = buildingManager.listProcessNamespaces();
-		assertEquals("Should be process running", processNamespace,
-				processNamespaces);
+		String[] processNamespaces = buildingManager.listProcessNamespaces();
+		assertEquals("Incorrect number of processes running", 1,
+				processNamespaces.length);
+		assertEquals("Incorrect process running", processNamespace,
+				processNamespaces[0]);
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
 		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
@@ -394,13 +398,17 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		this.validateRemoteProcessRunning(remoteServiceUrl);
 
 		// Ensure the tasks are available
-		StringBuilder taskListing = new StringBuilder();
-		taskListing.append("OFFICE\n");
-		taskListing.append("\tSECTION.WORK\n");
-		taskListing.append("\t\twriteMessage (" + String.class.getSimpleName()
-				+ ")");
-		assertEquals("Incorrect task listing", taskListing.toString(),
-				localFloorManager.listTasks());
+		ListedTask[] listedTasks = localFloorManager.listTasks();
+		assertEquals("Incorrect number of taks", 1, listedTasks.length);
+		ListedTask listedTask = listedTasks[0];
+		assertEquals("Incorrect listed task office name", "OFFICE",
+				listedTask.getOfficeName());
+		assertEquals("Incorrect listed task work name", "SECTION.WORK",
+				listedTask.getWorkName());
+		assertEquals("Incorrect listed task task name", "writeMessage",
+				listedTask.getTaskName());
+		assertEquals("Incorrect listed task parameter type",
+				String.class.getName(), listedTask.getParameterType());
 
 		// Invoke the work
 		File file = OfficeBuildingTestUtil.createTempFile(this);
@@ -472,9 +480,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		this.validateRemoteProcessRunning(remoteServiceUrl);
 
 		// Close the OfficeFloor
-		String closeText = buildingManager.closeOfficeFloor(processNamespace,
-				3000);
-		assertEquals("Should be closed", "Closed", closeText);
+		buildingManager.closeOfficeFloor(processNamespace, 3000);
 
 		// Ensure the OfficeFloor process is closed
 		this.validateRemoteProcessStopped(remoteServiceUrl);

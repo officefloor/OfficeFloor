@@ -95,21 +95,26 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 					OfficeBuildingManager.getOfficeBuildingManagerObjectName(),
 					OfficeBuildingManagerMBean.class);
 
-			// Obtain the connection details
-			String hostname;
-			int port;
+			// Setup the panel
 			try {
-				hostname = this.officeBuildingManager
-						.getOfficeBuildingHostName();
-				port = this.officeBuildingManager.getOfficeBuildingPort();
-			} catch (Exception ex) {
-				port = -1;
-				hostname = "";
-			}
 
-			// TODO create panel contents
-			this.add(new Label("TODO (running at " + hostname + ":" + port
-					+ ")"));
+				// Obtain the host/port details
+				String hostname = this.officeBuildingManager
+						.getOfficeBuildingHostName();
+				int port = this.officeBuildingManager.getOfficeBuildingPort();
+				this.add(new Label("Connected to " + hostname + ":" + port));
+
+				// Provide list of running processes
+				String[] existingProcesses = this.officeBuildingManager
+						.listProcessNamespaces();
+				// TODO display within list
+
+			} catch (Exception ex) {
+				// Provide the failure
+				Label errorLabel = new Label("FAILURE: " + ex.getMessage()
+						+ " [" + ex.getClass().getName() + "]");
+				this.add(errorLabel);
+			}
 		}
 	}
 

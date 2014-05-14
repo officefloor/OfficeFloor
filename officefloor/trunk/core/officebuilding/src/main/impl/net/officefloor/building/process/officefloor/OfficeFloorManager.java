@@ -17,9 +17,7 @@
  */
 package net.officefloor.building.process.officefloor;
 
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -152,59 +150,50 @@ public class OfficeFloorManager implements ManagedProcess,
 	}
 
 	@Override
-	public String listTasks() {
-
-		OfficeFloor officeFloor;
-		synchronized (this) {
-			officeFloor = this.officeFloor;
-
-			// Ensure open
-			if (!this.isOpen) {
-				return "OfficeFloor not open";
-			}
-		}
-
-		// Create the listing of tasks
-		StringBuilder tasks = new StringBuilder();
+	public ListedTask[] listTasks() throws ProcessException {
 		try {
-			boolean isFirst = true;
-			for (String officeName : officeFloor.getOfficeNames()) {
 
-				// Separator
-				if (!isFirst) {
-					tasks.append("\n");
+			OfficeFloor officeFloor;
+			synchronized (this) {
+				officeFloor = this.officeFloor;
+
+				// Ensure open
+				if (!this.isOpen) {
+					throw new ProcessException("OfficeFloor not open");
 				}
-				isFirst = false;
+			}
 
-				// Listing offices
-				tasks.append(officeName);
+			// Create the listing of tasks
+			List<ListedTask> tasks = new LinkedList<>();
+			for (String officeName : officeFloor.getOfficeNames()) {
 
 				// List work of the office
 				Office office = officeFloor.getOffice(officeName);
 				for (String workName : office.getWorkNames()) {
-					tasks.append("\n\t" + workName);
 
 					// List tasks of work
 					WorkManager work = office.getWorkManager(workName);
 					for (String taskName : work.getTaskNames()) {
+
+						// Obtain parameter of task
 						TaskManager task = work.getTaskManager(taskName);
 						Class<?> parameterType = task.getParameterType();
-						tasks.append("\n\t\t"
-								+ taskName
-								+ " ("
-								+ (parameterType == null ? "" : parameterType
-										.getSimpleName() + ")"));
+						String parameterTypeName = parameterType == null ? null
+								: parameterType.getName();
+
+						// Add the listed task
+						tasks.add(new ListedTaskImpl(officeName, workName,
+								taskName, parameterTypeName));
 					}
 				}
 			}
-		} catch (Exception ex) {
-			StringWriter trace = new StringWriter();
-			ex.printStackTrace(new PrintWriter(trace));
-			tasks.append("\n" + trace.toString());
-		}
 
-		// Return the listing of tasks
-		return tasks.toString();
+			// Return the listing of tasks
+			return tasks.toArray(new ListedTask[tasks.size()]);
+
+		} catch (Throwable ex) {
+			throw ProcessException.propagate(ex);
+		}
 	}
 
 	@Override
