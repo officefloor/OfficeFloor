@@ -93,9 +93,11 @@ public class SpawnDemoAppTest extends AbstractDemoAppTestCase {
 				.openOfficeFloor(configuration);
 
 		// Ensure the OfficeFloor is listed as open
-		String listedProcessName = this.manager.listProcessNamespaces();
+		String[] listedProcessNames = this.manager.listProcessNamespaces();
+		assertEquals("Should only be one process running", 1,
+				listedProcessNames.length);
 		assertEquals("OfficeFloor should be running", officeFloorProcessName,
-				listedProcessName);
+				listedProcessNames[0]);
 
 		// Return the application port
 		return applicationPort;
