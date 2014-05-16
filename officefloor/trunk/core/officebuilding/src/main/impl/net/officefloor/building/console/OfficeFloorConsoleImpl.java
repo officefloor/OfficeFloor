@@ -18,7 +18,6 @@
 package net.officefloor.building.console;
 
 import java.io.PrintStream;
-import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -135,7 +134,7 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 	 *            {@link Exception}.
 	 */
 	private void writeErr(PrintStream err, Exception ex) {
-		
+
 		// Provide error
 		err.println("ERROR:" + ex.getMessage());
 		ex.printStackTrace(err);
@@ -254,14 +253,6 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 
 		// Successfully run all commands
 		return true;
-	}
-
-	@Override
-	public void start(Reader in, PrintStream out, PrintStream err,
-			String... prefixArguments) {
-		// TODO implement OfficeFloorConsole.start
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorConsole.start");
 	}
 
 }

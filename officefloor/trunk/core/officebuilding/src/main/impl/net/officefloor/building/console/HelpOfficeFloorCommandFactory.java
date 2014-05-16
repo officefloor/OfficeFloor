@@ -32,6 +32,11 @@ import net.officefloor.building.process.ManagedProcess;
 public class HelpOfficeFloorCommandFactory implements OfficeFloorCommandFactory {
 
 	/**
+	 * Help {@link OfficeFloorCommand} name.
+	 */
+	private static final String COMMAND_HELP = "help";
+
+	/**
 	 * Delegate {@link OfficeFloorCommandFactory} for single
 	 * {@link OfficeFloorCommand}.
 	 */
@@ -59,7 +64,7 @@ public class HelpOfficeFloorCommandFactory implements OfficeFloorCommandFactory 
 			return this.delegate.getCommandName();
 		} else {
 			// Multiple commands (so use help command)
-			return OfficeFloorConsole.COMMAND_HELP;
+			return COMMAND_HELP;
 		}
 	}
 
@@ -194,12 +199,12 @@ public class HelpOfficeFloorCommandFactory implements OfficeFloorCommandFactory 
 
 		@Override
 		public String getName() {
-			return OfficeFloorConsole.COMMAND_HELP;
+			return COMMAND_HELP;
 		}
 
 		@Override
 		public String getShortName() {
-			return OfficeFloorConsole.COMMAND_HELP.substring(0, 1);
+			return COMMAND_HELP.substring(0, 1);
 		}
 
 		@Override

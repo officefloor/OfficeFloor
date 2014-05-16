@@ -18,7 +18,6 @@
 package net.officefloor.building.console;
 
 import java.io.PrintStream;
-import java.io.Reader;
 
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.process.ProcessCompletionListener;
@@ -31,32 +30,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloorConsole {
-
-	/**
-	 * Help {@link OfficeFloorCommand} name.
-	 */
-	String COMMAND_HELP = "help";
-
-	/**
-	 * Exit {@link OfficeFloorCommand} name.
-	 */
-	String COMMAND_EXIT = "exit";
-
-	/**
-	 * This is a blocking method that starts reading {@link OfficeFloorCommand}
-	 * instances from the console in and executing them.
-	 * 
-	 * @param in
-	 *            Console in.
-	 * @param out
-	 *            Console out.
-	 * @param err
-	 *            Console err.
-	 * @param prefixArguments
-	 *            Arguments that are prefixed to every run of arguments.
-	 */
-	void start(Reader in, PrintStream out, PrintStream err,
-			String... prefixArguments);
 
 	/**
 	 * Runs the {@link OfficeFloorCommand} for the arguments.

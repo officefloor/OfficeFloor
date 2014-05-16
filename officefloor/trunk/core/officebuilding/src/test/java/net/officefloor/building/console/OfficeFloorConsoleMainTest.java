@@ -20,7 +20,6 @@ package net.officefloor.building.console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.io.Reader;
 import java.util.Properties;
 
 import net.officefloor.building.process.ProcessCompletionListener;
@@ -66,8 +65,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure error regarding no OFFICE_FLOOR_HOME
 		this.assertOut();
-		this
-				.assertErr("ERROR: OFFICE_FLOOR_HOME not specified. Must be an environment variable pointing to the OfficeFloor install directory.");
+		this.assertErr("ERROR: OFFICE_FLOOR_HOME not specified. Must be an environment variable pointing to the OfficeFloor install directory.");
 	}
 
 	/**
@@ -82,8 +80,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure error regarding no OFFICE_FLOOR_HOME
 		this.assertOut();
-		this
-				.assertErr("ERROR: Can not find OFFICE_FLOOR_HOME directory <OFFICE_FLOOR_HOME not exists>");
+		this.assertErr("ERROR: Can not find OFFICE_FLOOR_HOME directory <OFFICE_FLOOR_HOME not exists>");
 	}
 
 	/**
@@ -96,11 +93,10 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure error regarding no script name
 		this.assertOut();
-		this
-				.assertErr(
-						"ERROR: Invalid call from script.                                ",
-						"                                                                ",
-						"usage: java ... net.officefloor.building.console.OfficeFloorConsoleMain <script> <factory> <\"run\"|\"start\"> <args>");
+		this.assertErr(
+				"ERROR: Invalid call from script.                                ",
+				"                                                                ",
+				"usage: java ... net.officefloor.building.console.OfficeFloorConsoleMain <script> <factory> <args>");
 	}
 
 	/**
@@ -113,29 +109,10 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure error regarding no script name
 		this.assertOut();
-		this
-				.assertErr(
-						"ERROR: Invalid call from script.                                ",
-						"                                                                ",
-						"usage: java ... net.officefloor.building.console.OfficeFloorConsoleMain <script> <factory> <\"run\"|\"start\"> <args>");
-	}
-
-	/**
-	 * Ensure issue if no flag to run/start.
-	 */
-	public void testNoRunStart() throws Throwable {
-
-		// Run without run/start (third argument)
-		this.failMain("Simple", false, "script "
-				+ MockConsoleFactory.class.getName());
-
-		// Ensure error regarding no script name
-		this.assertOut();
-		this
-				.assertErr(
-						"ERROR: Invalid call from script.                                ",
-						"                                                                ",
-						"usage: java ... net.officefloor.building.console.OfficeFloorConsoleMain <script> <factory> <\"run\"|\"start\"> <args>");
+		this.assertErr(
+				"ERROR: Invalid call from script.                                ",
+				"                                                                ",
+				"usage: java ... net.officefloor.building.console.OfficeFloorConsoleMain <script> <factory> <args>");
 	}
 
 	/**
@@ -148,26 +125,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure error regarding no script name
 		this.assertOut();
-		this
-				.assertErr("ERROR: Invalid OfficeFloorConsoleFactory InvalidFactoryClass : InvalidFactoryClass [ClassNotFoundException]");
-	}
-
-	/**
-	 * Ensure issue if unknown flag to run/start.
-	 */
-	public void testUnknownRunStart() throws Throwable {
-
-		// Run with unknown run/start argument
-		this.failMain("Simple", false, "script "
-				+ MockConsoleFactory.class.getName() + " unknown");
-
-		// Ensure error regarding no script name
-		this.assertOut();
-		this
-				.assertErr(
-						"ERROR: Invalid call from script.                                ",
-						"                                                                ",
-						"usage: java ... net.officefloor.building.console.OfficeFloorConsoleMain <script> <factory> <\"run\"|\"start\"> <args>");
+		this.assertErr("ERROR: Invalid OfficeFloorConsoleFactory InvalidFactoryClass : InvalidFactoryClass [ClassNotFoundException]");
 	}
 
 	/**
@@ -180,8 +138,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure run
 		this.assertOut("run");
-		this
-				.assertErr("WARNING: Can not find OFFICE_FLOOR_HOME properties file.");
+		this.assertErr("WARNING: Can not find OFFICE_FLOOR_HOME properties file.");
 	}
 
 	/**
@@ -238,34 +195,6 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Ensure run with arguments
 		this.assertOut("run ONE TWO THREE");
-		this.assertErr();
-	}
-
-	/**
-	 * Ensure start with no arguments from command line.
-	 */
-	public void testStartNoArguments() throws Throwable {
-
-		// Run with no arguments
-		this.runMain("Simple", false, "script "
-				+ MockConsoleFactory.class.getName() + " start");
-
-		// Ensure start with no arguments
-		this.assertOut("start");
-		this.assertErr();
-	}
-
-	/**
-	 * Ensure start with arguments from command line.
-	 */
-	public void testStartArguments() throws Throwable {
-
-		// Run with arguments
-		this.runMain("Simple", false, "script "
-				+ MockConsoleFactory.class.getName() + " start ONE TWO THREE");
-
-		// Ensure start with arguments
-		this.assertOut("start ONE TWO THREE");
 		this.assertErr();
 	}
 
@@ -340,7 +269,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Determine arguments
 		String argumentLine = (isPrefix ? "script "
-				+ MockConsoleFactory.class.getName() + " run " : "")
+				+ MockConsoleFactory.class.getName() + " " : "")
 				+ commandLine;
 
 		// Run office floor console main
@@ -392,11 +321,11 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 			env.putAll(expectedEnvironment);
 
 			// Validate the environment
-			assertEquals("Incorrect number of environment properties", env
-					.size(), environment.size());
+			assertEquals("Incorrect number of environment properties",
+					env.size(), environment.size());
 			for (String name : env.stringPropertyNames()) {
-				assertEquals("Incorrect value for property " + name, env
-						.getProperty(name), environment.getProperty(name));
+				assertEquals("Incorrect value for property " + name,
+						env.getProperty(name), environment.getProperty(name));
 			}
 
 			// Return this for testing
@@ -423,19 +352,6 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 			// Return whether successful
 			return isSuccessful;
-		}
-
-		@Override
-		public void start(Reader in, PrintStream out, PrintStream err,
-				String... prefixArguments) {
-
-			// Flag start console
-			out.print("start");
-			for (String argument : prefixArguments) {
-				out.print(" ");
-				out.print(argument);
-			}
-			out.println();
 		}
 	}
 

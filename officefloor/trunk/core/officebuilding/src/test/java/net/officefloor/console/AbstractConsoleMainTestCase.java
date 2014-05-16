@@ -123,7 +123,7 @@ public abstract class AbstractConsoleMainTestCase extends
 
 		// Create the command line
 		String commandLine = "script " + this.consoleFactoryClass.getName()
-				+ " run " + arguments;
+				+ " " + arguments;
 
 		// Obtain the arguments
 		String[] executeArguments = commandLine.split("\\s+");
