@@ -17,17 +17,30 @@
  */
 package net.officefloor.console;
 
+import java.awt.Color;
+import java.awt.GridLayout;
 import java.awt.Label;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
+import net.officefloor.building.manager.UploadArtifact;
 import sun.tools.jconsole.OfficeConsole;
 
 import com.sun.tools.jconsole.JConsoleContext;
@@ -95,27 +108,145 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 					OfficeBuildingManager.getOfficeBuildingManagerObjectName(),
 					OfficeBuildingManagerMBean.class);
 
+			// Provide layout manager
+			this.setLayout(new GridLayout(3, 1));
+
+			// Provide header for errors
+			JPanel panelError = (JPanel) this.add(new JPanel());
+			final JLabel labelError = (JLabel) panelError.add(new JLabel());
+			labelError.setForeground(Color.RED);
+
 			// Setup the panel
 			try {
 
-				// Obtain the host/port details
+				// Detail the host/port
+				JPanel panelHostPort = (JPanel) this.add(new JPanel());
 				String hostname = this.officeBuildingManager
 						.getOfficeBuildingHostName();
 				int port = this.officeBuildingManager.getOfficeBuildingPort();
-				this.add(new Label("Connected to " + hostname + ":" + port));
+				panelHostPort.add(new Label("Connected to " + hostname + ":"
+						+ port));
 
 				// Provide list of running processes
 				String[] existingProcesses = this.officeBuildingManager
 						.listProcessNamespaces();
-				// TODO display within list
+				// TODO display within table (with buttons to stop, trigger
+				// tasks)
+
+				// Simple start
+				this.add(this.createSimpleStartPanel(labelError));
+
+				// Advanced start OfficeFloor
+				this.add(this.createAdvancedStartPanel(labelError));
 
 			} catch (Exception ex) {
 				// Provide the failure
-				Label errorLabel = new Label("FAILURE: " + ex.getMessage()
-						+ " [" + ex.getClass().getName() + "]");
-				this.add(errorLabel);
+				labelError.setText("FAILURE: " + ex.getMessage() + " ["
+						+ ex.getClass().getName() + "]");
 			}
 		}
+
+		/**
+		 * Creates the simple start {@link JPanel}.
+		 * 
+		 * @param labelError
+		 *            To write errors.
+		 * @return Simple start {@link JPanel}.
+		 */
+		private JPanel createSimpleStartPanel(final JLabel labelError) {
+
+			// Simple start panel
+			JPanel panelSimpleStart = new JPanel();
+
+			// Select application file
+			panelSimpleStart.add(new Label("Application file"));
+			final JTextField textFileName = (JTextField) panelSimpleStart
+					.add(new JTextField(20));
+			panelSimpleStart.add(new JButton(new AbstractAction("...") {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					JFileChooser fileChooser = new JFileChooser();
+					FileNameExtensionFilter filter = new FileNameExtensionFilter(
+							"Applications", "jar", "war");
+					fileChooser.setFileFilter(filter);
+					int returnVal = fileChooser
+							.showOpenDialog(OfficePanel.this);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						textFileName.setText(fileChooser.getSelectedFile()
+								.getAbsolutePath());
+					}
+				}
+			}));
+
+			// Start button
+			panelSimpleStart.add(new JButton(new AbstractAction("start") {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// Obtain the OfficeFloor location
+					String officeFloorLocation = null;
+
+					// Create the OfficeFloor configuration
+					OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
+							officeFloorLocation);
+
+					// Load the simple file
+					String artifactFilePath = textFileName.getText();
+					if ((artifactFilePath == null)
+							|| (artifactFilePath.trim().length() == 0)) {
+						labelError.setText("Please select a file");
+						return;
+					}
+
+					// Configure the upload artifact
+					try {
+						UploadArtifact uploadArtifact = new UploadArtifact(
+								new File(artifactFilePath));
+						configuration.addUploadArtifact(uploadArtifact);
+					} catch (IOException ex) {
+						labelError.setText("FAILURE: " + ex.getMessage() + " ("
+								+ ex.getClass().getName() + ")");
+					}
+
+					// Start the OfficeFloor
+					String processName;
+					try {
+						processName = OfficePanel.this.officeBuildingManager
+								.openOfficeFloor(configuration);
+					} catch (Exception ex) {
+						// Provide failure
+						labelError.setText("FAILURE opening: "
+								+ ex.getMessage() + " ["
+								+ ex.getClass().getName() + "]");
+						return;
+					}
+
+					// Provide notification that opened
+					labelError.setText("TODO: notify opened: " + processName);
+				}
+			}));
+
+			// Return the simple start panel
+			return panelSimpleStart;
+		}
+
+		/**
+		 * Creates the advanced start {@link JPanel}.
+		 * 
+		 * @param labelError
+		 *            To write errors.
+		 * @return Advanced start {@link JPanel}.
+		 */
+		private JPanel createAdvancedStartPanel(JLabel labelError) {
+
+			// Simple advanced panel
+			JPanel panelAdvancedStart = new JPanel();
+
+			panelAdvancedStart.add(new Label("Application file"));
+
+			// Return the advanced start panel
+			return panelAdvancedStart;
+		}
+
 	}
 
 }

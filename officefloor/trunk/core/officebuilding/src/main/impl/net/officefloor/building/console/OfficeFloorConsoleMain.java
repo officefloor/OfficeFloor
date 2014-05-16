@@ -20,7 +20,6 @@ package net.officefloor.building.console;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -50,12 +49,53 @@ public final class OfficeFloorConsoleMain {
 	public static final String PROPERTIES_FILE_RELATIVE_PATH = "config/OfficeFloor.properties";
 
 	/**
+	 * Message for invalid call from script.
+	 */
+	private static final String[] INVALID_CALL_FROM_SCRIPT = new String[] {
+			"Invalid call from script.",
+			"",
+			"usage: java ... " + OfficeFloorConsoleMain.class.getName()
+					+ " <script> <factory> <args>" };
+
+	/**
+	 * Default {@link OfficeFloorConsoleMainErrorHandler}.
+	 */
+	private static final OfficeFloorConsoleMainErrorHandler DEFAULT_ERROR_HANDLER = new OfficeFloorConsoleMainErrorHandler() {
+		@Override
+		public void warning(String warning) {
+			System.err.print("WARNING: ");
+			System.err.println(warning);
+		}
+
+		@Override
+		public void errorAndExit(String... lines) {
+			// Write the lines
+			if (lines.length > 0) {
+				System.err.print("ERROR: ");
+			}
+			for (String line : lines) {
+				System.err.println(line);
+			}
+
+			// Determine if exit
+			if (!isExit) {
+				// Provide error rather than exit.
+				// This is typically for unit test to not exit the process.
+				throw new Error("See stderr");
+			}
+
+			// Notify to calling script of failure
+			System.exit(1);
+		}
+	};
+
+	/**
 	 * <p>
 	 * Flags that {@link System#exit(int)} is called on an error to indicate
 	 * failure to calling script.
 	 * <p>
 	 * This is typically only used for testing to not cause the JVM to exit
-	 * while running tests.
+	 * while running tests that are expected to error.
 	 */
 	public static boolean isExit = true;
 
@@ -69,6 +109,63 @@ public final class OfficeFloorConsoleMain {
 	 */
 	public static void main(String[] arguments) throws Throwable {
 
+		// Obtain the error handler
+		OfficeFloorConsoleMainErrorHandler errorHandler = DEFAULT_ERROR_HANDLER;
+
+		// Ensure appropriate number of arguments to run/start console
+		final int SCRIPT_INDEX = 0;
+		final int FACTORY_CLASS_INDEX = 1;
+		final int REQUIRED_NUMBER_OF_ARGUMENTS = 2;
+		if (arguments.length < REQUIRED_NUMBER_OF_ARGUMENTS) {
+			errorHandler.errorAndExit(INVALID_CALL_FROM_SCRIPT);
+		}
+
+		// Obtain the console run/start arguments
+		String scriptName = arguments[SCRIPT_INDEX];
+		String factoryClassName = arguments[FACTORY_CLASS_INDEX];
+
+		// Obtain arguments for execution
+		String[] executeArguments = new String[arguments.length
+				- REQUIRED_NUMBER_OF_ARGUMENTS];
+		System.arraycopy(arguments, REQUIRED_NUMBER_OF_ARGUMENTS,
+				executeArguments, 0, executeArguments.length);
+
+		// Instantiate the factory
+		OfficeFloorConsoleFactory factory;
+		try {
+			factory = (OfficeFloorConsoleFactory) Thread.currentThread()
+					.getContextClassLoader().loadClass(factoryClassName)
+					.newInstance();
+		} catch (Exception ex) {
+			errorHandler.errorAndExit("Invalid "
+					+ OfficeFloorConsoleFactory.class.getSimpleName() + " "
+					+ factoryClassName + " : " + ex.getMessage() + " ["
+					+ ex.getClass().getSimpleName() + "]");
+			return; // required for compilation
+		}
+
+		// Run the command
+		run(scriptName, executeArguments, factory, errorHandler);
+	}
+
+	/**
+	 * Runs the {@link OfficeFloorConsole}.
+	 * 
+	 * @param scriptName
+	 *            Name of script.
+	 * @param executeArguments
+	 *            Execute arguments for the {@link OfficeFloorConsole}.
+	 * @param factory
+	 *            {@link OfficeFloorConsoleFactory}.
+	 * @param errorHandler
+	 *            {@link OfficeFloorConsoleMainErrorHandler}.
+	 * @throws Exception
+	 *             If fails to run.
+	 */
+	public static void run(String scriptName, String[] executeArguments,
+			OfficeFloorConsoleFactory factory,
+			OfficeFloorConsoleMainErrorHandler errorHandler) throws Exception {
+
 		// Obtain the environment properties.
 		// Reverse load order so allow over writing for more specific values.
 		Properties environment = new Properties();
@@ -78,49 +175,16 @@ public final class OfficeFloorConsoleMain {
 		// Obtain the OFFICE_FLOOR_HOME
 		String officeFloorHome = environment.getProperty(OFFICE_FLOOR_HOME);
 		if (officeFloorHome == null) {
-			writeErrAndExit("ERROR: OFFICE_FLOOR_HOME not specified. Must be an environment variable pointing to the OfficeFloor install directory.");
+			errorHandler
+					.errorAndExit("OFFICE_FLOOR_HOME not specified. Must be an environment variable pointing to the OfficeFloor install directory.");
 		}
 
 		// Ensure OFFICE_FLOOR_HOME exists
 		File officeFloorHomeDir = new File(officeFloorHome);
 		if (!officeFloorHomeDir.isDirectory()) {
-			writeErrAndExit("ERROR: Can not find OFFICE_FLOOR_HOME directory "
-					+ officeFloorHome);
-		}
-
-		// Message for invalid call from script
-		final String[] INVALID_CALL_FROM_SCRIPT = new String[] {
-				"ERROR: Invalid call from script.",
-				"",
-				"usage: java ... " + OfficeFloorConsoleMain.class.getName()
-						+ " <script> <factory> <\"run\"|\"start\"> <args>" };
-
-		// Ensure appropriate number of arguments to run/start console
-		final int SCRIPT_INDEX = 0;
-		final int FACTORY_CLASS_INDEX = 1;
-		final int CONSOLE_INDEX = 2;
-		final int REQUIRED_NUMBER_OF_ARGUMENTS = 3;
-		if (arguments.length < REQUIRED_NUMBER_OF_ARGUMENTS) {
-			writeErrAndExit(INVALID_CALL_FROM_SCRIPT);
-		}
-
-		// Obtain the console run/start arguments
-		String scriptName = arguments[SCRIPT_INDEX];
-		String factoryClassName = arguments[FACTORY_CLASS_INDEX];
-		String consoleRunStart = arguments[CONSOLE_INDEX];
-
-		// Instantiate the factory
-		OfficeFloorConsoleFactory factory;
-		try {
-			factory = (OfficeFloorConsoleFactory) Thread.currentThread()
-					.getContextClassLoader().loadClass(factoryClassName)
-					.newInstance();
-		} catch (Exception ex) {
-			writeErrAndExit("ERROR: Invalid "
-					+ OfficeFloorConsoleFactory.class.getSimpleName() + " "
-					+ factoryClassName + " : " + ex.getMessage() + " ["
-					+ ex.getClass().getSimpleName() + "]");
-			return; // required for compilation
+			errorHandler
+					.errorAndExit("Can not find OFFICE_FLOOR_HOME directory "
+							+ officeFloorHome);
 		}
 
 		// Obtain the OFFICE_FLOOR_HOME properties
@@ -141,8 +205,7 @@ public final class OfficeFloorConsoleMain {
 					propertiesFileReader.close();
 				} catch (IOException ex) {
 					// Warn failed to close but carry on
-					System.err
-							.println("WARNING: Failed to close properties file.");
+					errorHandler.warning("Failed to close properties file.");
 				}
 			}
 
@@ -159,63 +222,44 @@ public final class OfficeFloorConsoleMain {
 
 		} else {
 			// Warn no properties file available
-			System.err
-					.println("WARNING: Can not find OFFICE_FLOOR_HOME properties file.");
+			errorHandler
+					.warning("Can not find OFFICE_FLOOR_HOME properties file.");
 		}
 
 		// Create the console
 		OfficeFloorConsole console = factory.createOfficeFloorConsole(
 				scriptName, environment);
 
-		// Obtain arguments for execution
-		String[] executeArguments = new String[arguments.length
-				- REQUIRED_NUMBER_OF_ARGUMENTS];
-		System.arraycopy(arguments, REQUIRED_NUMBER_OF_ARGUMENTS,
-				executeArguments, 0, executeArguments.length);
+		// Run the console
+		boolean isSuccessful = console.run(System.out, System.err, null, null,
+				executeArguments);
 
-		// Execute console
-		if ("run".equalsIgnoreCase(consoleRunStart)) {
-			// Run the console
-			boolean isSuccessful = console.run(System.out, System.err, null,
-					null, executeArguments);
-
-			// Flag failure if not successful
-			if (!isSuccessful) {
-				writeErrAndExit();
-			}
-
-		} else if ("start".equalsIgnoreCase(consoleRunStart)) {
-			// Start the console
-			console.start(new InputStreamReader(System.in), System.out,
-					System.err, executeArguments);
-
-		} else {
-			// Unknown execution mode
-			writeErrAndExit(INVALID_CALL_FROM_SCRIPT);
+		// Flag failure if not successful
+		if (!isSuccessful) {
+			errorHandler.errorAndExit();
 		}
 	}
 
 	/**
-	 * Write output to err and exit.
-	 * 
-	 * @param lines
-	 *            Lines to write to err.
+	 * Interface to error handler for {@link OfficeFloorConsoleMain}.
 	 */
-	private static void writeErrAndExit(String... lines) {
+	public static interface OfficeFloorConsoleMainErrorHandler {
 
-		// Write the lines
-		for (String line : lines) {
-			System.err.println(line);
-		}
+		/**
+		 * Handles a warning.
+		 * 
+		 * @param warning
+		 *            Warning.
+		 */
+		void warning(String warning);
 
-		// Determine if exit
-		if (!isExit) {
-			// Provide error rather than exit
-			throw new Error("See stderr");
-		}
-
-		// Notify to calling script of failure
-		System.exit(1);
+		/**
+		 * Handles error and need to exit as can not proceed.
+		 * 
+		 * @param lines
+		 *            Error lines.
+		 */
+		void errorAndExit(String... lines);
 	}
 
 }

@@ -26,5 +26,4 @@ java \
 	net.officefloor.building.console.OfficeFloorConsoleMain \
 	$0 \
 	net.officefloor.console.OpenOfficeFloor \
-	run \
 	$@
