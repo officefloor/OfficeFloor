@@ -23,7 +23,7 @@ import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;
 
-import net.officefloor.console.OfficeConsoleInitialContextFactory;
+import net.officefloor.console.command.OfficeConsoleInitialContextFactory;
 
 /**
  * <p>

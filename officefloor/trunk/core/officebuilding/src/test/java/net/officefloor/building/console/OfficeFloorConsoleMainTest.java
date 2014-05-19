@@ -19,11 +19,14 @@ package net.officefloor.building.console;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Properties;
 
+import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
 import net.officefloor.building.process.ProcessCompletionListener;
 import net.officefloor.building.process.ProcessStartListener;
+import net.officefloor.console.ConfigureOfficeFloor;
 
 /**
  * Tests the {@link OfficeFloorConsoleMain}.
@@ -161,7 +164,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 	/**
 	 * Ensure failure status on failing command.
 	 */
-	public void testFailingRunConsole() throws Throwable {
+	public void testFailingConsole() throws Throwable {
 
 		// Run with failing command
 		MockConsoleFactory.isSuccessful = false;
@@ -175,7 +178,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 	/**
 	 * Ensure run with no arguments.
 	 */
-	public void testRunNoArguments() throws Throwable {
+	public void testNoArguments() throws Throwable {
 
 		// Run with no arguments
 		this.runMain("Simple", true, "");
@@ -188,7 +191,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 	/**
 	 * Ensure loads arguments from command line.
 	 */
-	public void testRunArguments() throws Throwable {
+	public void testArguments() throws Throwable {
 
 		// Run with arguments
 		this.runMain("Simple", true, "ONE TWO THREE");
@@ -196,6 +199,59 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 		// Ensure run with arguments
 		this.assertOut("run ONE TWO THREE");
 		this.assertErr();
+	}
+
+	/**
+	 * Ensure can load the open OfficeFloor configuration.
+	 */
+	public void testLoadOfficeBuildingOpenOfficeFloorConfiguration()
+			throws Throwable {
+
+		// Provides means to obtain the open OfficeFloor configuration
+		ConfigureOfficeFloor configure = new ConfigureOfficeFloor();
+
+		// Load the OfficFloor home
+		this.loadOfficeFloorHomeSystemProperty("Configure");
+
+		// Run the OfficeFloor console
+		OfficeFloorConsoleMain.run("TEST", new String[0], configure,
+				OfficeFloorConsoleMain.DEFAULT_ERROR_HANDLER);
+
+		// Ensure no errors
+		this.assertOut();
+		this.assertErr();
+
+		// Validate the configuration
+		OpenOfficeFloorConfiguration configuration = configure
+				.getOpenOfficeFloorConfiguration();
+		assertEquals(
+				"Should have OfficeFloor location loaded from properties file",
+				"net.officefloor.test.TestOfficeFloor",
+				configuration.getOfficeFloorLocation());
+	}
+
+	/**
+	 * Ensure able to load {@link OpenOfficeFloorConfiguration} via
+	 * {@link ConfigureOfficeFloor} convenience method.
+	 */
+	public void testConfigureOpenOfficeFloorConfiguration() throws Throwable {
+
+		// Load the OfficeFloor home
+		this.loadOfficeFloorHomeSystemProperty("Configure");
+
+		// Obtain the open OfficeFloor configuration
+		OpenOfficeFloorConfiguration configuration = ConfigureOfficeFloor
+				.newOpenOfficeFloorConfiguration(OfficeFloorConsoleMain.DEFAULT_ERROR_HANDLER);
+
+		// Ensure no errors
+		this.assertOut();
+		this.assertErr();
+
+		// Validate the configuration
+		assertEquals(
+				"Should have OfficeFloor location loaded from properties file",
+				"net.officefloor.test.TestOfficeFloor",
+				configuration.getOfficeFloorLocation());
 	}
 
 	/**
@@ -237,34 +293,7 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 
 		// Determine if specify the OFFICE_FLOOR_HOME
 		if (officeFloorHome != null) {
-
-			// Attempt to find the OfficeFloor home directory
-			File officeFloorHomeDir = null;
-			try {
-				// Attempt to find by properties file first.
-				File propertiesFile = this
-						.findFile(
-								this.getClass(),
-								officeFloorHome
-										+ "/"
-										+ OfficeFloorConsoleMain.PROPERTIES_FILE_RELATIVE_PATH);
-
-				// Obtain the OFFICE_FLOOR_HOME (home/config/properties-file)
-				officeFloorHomeDir = propertiesFile.getParentFile()
-						.getParentFile();
-
-			} catch (FileNotFoundException ex) {
-				// Obtain by marker file
-				File markerFile = this.findFile(this.getClass(),
-						officeFloorHome + "/OfficeFloorHome.marker");
-
-				// Obtain the OFFICE_FLOOR_HOME (home/marker-file)
-				officeFloorHomeDir = markerFile.getParentFile();
-			}
-
-			// Specify the OFFICE_FLOOR_HOME property for testing
-			System.setProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME,
-					officeFloorHomeDir.getAbsolutePath());
+			this.loadOfficeFloorHomeSystemProperty(officeFloorHome);
 		}
 
 		// Determine arguments
@@ -275,6 +304,44 @@ public class OfficeFloorConsoleMainTest extends AbstractConsoleTestCase {
 		// Run office floor console main
 		String[] arguments = argumentLine.split("\\s+");
 		OfficeFloorConsoleMain.main(arguments);
+	}
+
+	/**
+	 * Loads the {@link OfficeFloorConsoleMain#OFFICE_FLOOR_HOME} {@link System}
+	 * property.
+	 * 
+	 * @param officeFloorHome
+	 *            Relative OfficeFloor home.
+	 */
+	private void loadOfficeFloorHomeSystemProperty(String officeFloorHome)
+			throws IOException {
+
+		// Attempt to find the OfficeFloor home directory
+		File officeFloorHomeDir = null;
+		try {
+			// Attempt to find by properties file first.
+			File propertiesFile = this
+					.findFile(
+							this.getClass(),
+							officeFloorHome
+									+ "/"
+									+ OfficeFloorConsoleMain.PROPERTIES_FILE_RELATIVE_PATH);
+
+			// Obtain the OFFICE_FLOOR_HOME (home/config/properties-file)
+			officeFloorHomeDir = propertiesFile.getParentFile().getParentFile();
+
+		} catch (FileNotFoundException ex) {
+			// Obtain by marker file
+			File markerFile = this.findFile(this.getClass(), officeFloorHome
+					+ "/OfficeFloorHome.marker");
+
+			// Obtain the OFFICE_FLOOR_HOME (home/marker-file)
+			officeFloorHomeDir = markerFile.getParentFile();
+		}
+
+		// Specify the OFFICE_FLOOR_HOME property for testing
+		System.setProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME,
+				officeFloorHomeDir.getAbsolutePath());
 	}
 
 	/**

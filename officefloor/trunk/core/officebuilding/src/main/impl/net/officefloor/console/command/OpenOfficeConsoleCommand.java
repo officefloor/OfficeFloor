@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.console;
+package net.officefloor.console.command;
 
 import java.io.File;
 import java.io.Serializable;
@@ -33,6 +33,7 @@ import net.officefloor.building.command.parameters.PasswordOfficeFloorCommandPar
 import net.officefloor.building.command.parameters.UsernameOfficeFloorCommandParameter;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
+import net.officefloor.console.OfficeBuilding;
 import sun.tools.jconsole.OfficeConsole;
 
 /**

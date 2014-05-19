@@ -25,6 +25,7 @@ import net.officefloor.building.console.OfficeFloorConsoleFactory;
 import net.officefloor.building.console.OfficeFloorConsoleImpl;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorServiceLoader;
+import net.officefloor.console.command.OpenOfficeConsoleCommand;
 import sun.tools.jconsole.OfficeConsole;
 
 /**

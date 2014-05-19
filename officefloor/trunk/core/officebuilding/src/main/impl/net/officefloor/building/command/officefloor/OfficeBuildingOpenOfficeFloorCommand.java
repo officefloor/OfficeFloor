@@ -75,6 +75,12 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	private final boolean isRemote;
 
 	/**
+	 * Flags indicating whether to only configure the
+	 * {@link OpenOfficeFloorCommand}. Will not open the {@link OfficeFloor}.
+	 */
+	private final boolean isConfigureOnly;
+
+	/**
 	 * {@link OfficeBuilding} host.
 	 */
 	private final OfficeBuildingHostOfficeFloorCommandParameter officeBuildingHost = new OfficeBuildingHostOfficeFloorCommandParameter();
@@ -168,10 +174,17 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	 * Initiate.
 	 * 
 	 * @param isRemote
-	 *            <true> to remotely invoke opening the {@link OfficeFloor}.
+	 *            <code>true</code> to remotely invoke opening the
+	 *            {@link OfficeFloor}.
+	 * @param isConfigureOnly
+	 *            <code>true</code> to only configure
+	 *            {@link OpenOfficeFloorCommand}. This will not open the
+	 *            {@link OfficeFloor}.
 	 */
-	public OfficeBuildingOpenOfficeFloorCommand(boolean isRemote) {
+	public OfficeBuildingOpenOfficeFloorCommand(boolean isRemote,
+			boolean isConfigureOnly) {
 		this.isRemote = isRemote;
+		this.isConfigureOnly = isConfigureOnly;
 	}
 
 	/**
@@ -244,7 +257,15 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 
 	@Override
 	public OfficeFloorCommand createCommand() {
-		return new OfficeBuildingOpenOfficeFloorCommand(this.isRemote);
+		// Determine if configuring
+		if (this.isConfigureOnly) {
+			// Return this to receive the configuration
+			return this;
+		} else {
+			// Create new instance to open the OfficeFloor
+			return new OfficeBuildingOpenOfficeFloorCommand(this.isRemote,
+					this.isConfigureOnly);
+		}
 	}
 
 	/*
@@ -298,6 +319,11 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 	public ManagedProcess createManagedProcess(
 			OfficeFloorCommandEnvironment environment) throws Exception {
 
+		// Do nothing if only configuring
+		if (this.isConfigureOnly) {
+			return new NoopManagedProcess();
+		}
+
 		// Obtain details to open OfficeFloor
 		String officeBuildingHost = this.officeBuildingHost
 				.getOfficeBuildingHost();
@@ -341,6 +367,31 @@ public class OfficeBuildingOpenOfficeFloorCommand implements
 		return new OpenManagedProcess(officeBuildingHost, officeBuildingPort,
 				trustStore, trustStorePassword, userName, password,
 				openOfficeFloorConfiguration, outputSuffix.toString());
+	}
+
+	/**
+	 * No operation {@link ManagedProcess}.
+	 */
+	public static class NoopManagedProcess implements ManagedProcess {
+
+		/**
+		 * {@link Serializable} version.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/*
+		 * ================= ManagedProcess ==========================
+		 */
+
+		@Override
+		public void init(ManagedProcessContext context) throws Throwable {
+			// No operation
+		}
+
+		@Override
+		public void main() throws Throwable {
+			// No operation
+		}
 	}
 
 	/**

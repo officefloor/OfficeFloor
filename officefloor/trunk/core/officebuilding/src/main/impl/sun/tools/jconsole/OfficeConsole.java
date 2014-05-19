@@ -36,7 +36,7 @@ import javax.naming.Context;
 
 import sun.tools.jconsole.VMPanel.TabInfo;
 import net.officefloor.building.manager.OfficeBuildingManager;
-import net.officefloor.console.OfficeConsoleInitialContextFactory;
+import net.officefloor.console.command.OfficeConsoleInitialContextFactory;
 
 /**
  * {@link JConsole} implementation for {@link OfficeBuildingManager}.

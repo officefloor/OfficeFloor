@@ -937,7 +937,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 			// Parse the parameters (always the one command)
 			OfficeFloorCommandParser parser = new OfficeFloorCommandParserImpl(
-					new OfficeBuildingOpenOfficeFloorCommand(false));
+					new OfficeBuildingOpenOfficeFloorCommand(false, false));
 			OfficeFloorCommand[] commands = parser
 					.parseCommands(argumentEntries);
 			OfficeBuildingOpenOfficeFloorCommand command = (OfficeBuildingOpenOfficeFloorCommand) commands[0];
