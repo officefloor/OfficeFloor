@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.console;
+package net.officefloor.console.command;
 
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -37,10 +37,12 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import net.officefloor.building.console.OfficeFloorConsoleMain.OfficeFloorConsoleMainErrorHandler;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
 import net.officefloor.building.manager.UploadArtifact;
+import net.officefloor.console.ConfigureOfficeFloor;
 import sun.tools.jconsole.OfficeConsole;
 
 import com.sun.tools.jconsole.JConsoleContext;
@@ -80,7 +82,8 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 	/**
 	 * {@link JPanel} for the {@link OfficeConsole}.
 	 */
-	private static class OfficePanel extends JPanel {
+	private static class OfficePanel extends JPanel implements
+			OfficeFloorConsoleMainErrorHandler {
 
 		/**
 		 * {@link JConsoleContext}.
@@ -182,12 +185,17 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 			panelSimpleStart.add(new JButton(new AbstractAction("start") {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// Obtain the OfficeFloor location
-					String officeFloorLocation = null;
 
-					// Create the OfficeFloor configuration
-					OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
-							officeFloorLocation);
+					// Run to obtain open OfficeFloor configuration
+					OpenOfficeFloorConfiguration configuration;
+					try {
+						configuration = OfficePanel.this
+								.createOpenOfficeFloorConfiguration();
+					} catch (Exception ex) {
+						labelError.setText("FAILURE: " + ex.getMessage() + " ("
+								+ ex.getClass().getName() + ")");
+						return; // can not proceed
+					}
 
 					// Load the simple file
 					String artifactFilePath = textFileName.getText();
@@ -205,6 +213,7 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 					} catch (IOException ex) {
 						labelError.setText("FAILURE: " + ex.getMessage() + " ("
 								+ ex.getClass().getName() + ")");
+						return; // can not proceed
 					}
 
 					// Start the OfficeFloor
@@ -217,7 +226,7 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 						labelError.setText("FAILURE opening: "
 								+ ex.getMessage() + " ["
 								+ ex.getClass().getName() + "]");
-						return;
+						return; // failed to open
 					}
 
 					// Provide notification that opened
@@ -247,6 +256,40 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 			return panelAdvancedStart;
 		}
 
+		/**
+		 * Creates the {@link OpenOfficeFloorConfiguration}.
+		 * 
+		 * @return {@link OpenOfficeFloorConfiguration}.
+		 * @throws Exception
+		 *             If fails to create the
+		 *             {@link OpenOfficeFloorConfiguration}.
+		 */
+		private OpenOfficeFloorConfiguration createOpenOfficeFloorConfiguration()
+				throws Exception {
+
+			// Create the open OfficeFloor configuration
+			OpenOfficeFloorConfiguration configuration = ConfigureOfficeFloor
+					.newOpenOfficeFloorConfiguration(this);
+
+			// Return the open OfficeFloor configuration
+			return configuration;
+		}
+
+		/*
+		 * =============== OfficeFloorConsoleMainErrorHandler ================
+		 */
+
+		@Override
+		public void warning(String warning) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void errorAndExit(String... lines) {
+			// TODO Auto-generated method stub
+
+		}
 	}
 
 }

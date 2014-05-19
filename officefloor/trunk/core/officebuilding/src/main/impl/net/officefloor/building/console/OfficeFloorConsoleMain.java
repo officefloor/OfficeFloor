@@ -60,7 +60,7 @@ public final class OfficeFloorConsoleMain {
 	/**
 	 * Default {@link OfficeFloorConsoleMainErrorHandler}.
 	 */
-	private static final OfficeFloorConsoleMainErrorHandler DEFAULT_ERROR_HANDLER = new OfficeFloorConsoleMainErrorHandler() {
+	public static final OfficeFloorConsoleMainErrorHandler DEFAULT_ERROR_HANDLER = new OfficeFloorConsoleMainErrorHandler() {
 		@Override
 		public void warning(String warning) {
 			System.err.print("WARNING: ");
