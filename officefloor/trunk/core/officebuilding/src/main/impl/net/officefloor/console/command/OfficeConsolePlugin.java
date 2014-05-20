@@ -17,32 +17,12 @@
  */
 package net.officefloor.console.command;
 
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.Label;
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.management.JMX;
-import javax.management.MBeanServerConnection;
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingWorker;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
-import net.officefloor.building.console.OfficeFloorConsoleMain.OfficeFloorConsoleMainErrorHandler;
-import net.officefloor.building.manager.OfficeBuildingManager;
-import net.officefloor.building.manager.OfficeBuildingManagerMBean;
-import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
-import net.officefloor.building.manager.UploadArtifact;
-import net.officefloor.console.ConfigureOfficeFloor;
 import sun.tools.jconsole.OfficeConsole;
 
 import com.sun.tools.jconsole.JConsoleContext;
@@ -67,7 +47,7 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 
 		// Create the tabs
 		Map<String, JPanel> tabs = new HashMap<>();
-		tabs.put("OfficeBuilding", new OfficePanel(context));
+		tabs.put("OfficeBuilding", new OfficeBuildingConsolePanel(context));
 
 		// Return the tabs
 		return tabs;
@@ -77,219 +57,6 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 	public SwingWorker<?, ?> newSwingWorker() {
 		// No refreshing required
 		return null;
-	}
-
-	/**
-	 * {@link JPanel} for the {@link OfficeConsole}.
-	 */
-	private static class OfficePanel extends JPanel implements
-			OfficeFloorConsoleMainErrorHandler {
-
-		/**
-		 * {@link JConsoleContext}.
-		 */
-		private final JConsoleContext context;
-
-		/**
-		 * {@link OfficeBuildingManagerMBean}.
-		 */
-		private final OfficeBuildingManagerMBean officeBuildingManager;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param context
-		 *            {@link JConsoleContext}.
-		 */
-		public OfficePanel(JConsoleContext context) {
-			this.context = context;
-
-			// Obtain the OfficeBuilding Manager
-			MBeanServerConnection connection = this.context
-					.getMBeanServerConnection();
-			this.officeBuildingManager = JMX.newMBeanProxy(connection,
-					OfficeBuildingManager.getOfficeBuildingManagerObjectName(),
-					OfficeBuildingManagerMBean.class);
-
-			// Provide layout manager
-			this.setLayout(new GridLayout(3, 1));
-
-			// Provide header for errors
-			JPanel panelError = (JPanel) this.add(new JPanel());
-			final JLabel labelError = (JLabel) panelError.add(new JLabel());
-			labelError.setForeground(Color.RED);
-
-			// Setup the panel
-			try {
-
-				// Detail the host/port
-				JPanel panelHostPort = (JPanel) this.add(new JPanel());
-				String hostname = this.officeBuildingManager
-						.getOfficeBuildingHostName();
-				int port = this.officeBuildingManager.getOfficeBuildingPort();
-				panelHostPort.add(new Label("Connected to " + hostname + ":"
-						+ port));
-
-				// Provide list of running processes
-				String[] existingProcesses = this.officeBuildingManager
-						.listProcessNamespaces();
-				// TODO display within table (with buttons to stop, trigger
-				// tasks)
-
-				// Simple start
-				this.add(this.createSimpleStartPanel(labelError));
-
-				// Advanced start OfficeFloor
-				this.add(this.createAdvancedStartPanel(labelError));
-
-			} catch (Exception ex) {
-				// Provide the failure
-				labelError.setText("FAILURE: " + ex.getMessage() + " ["
-						+ ex.getClass().getName() + "]");
-			}
-		}
-
-		/**
-		 * Creates the simple start {@link JPanel}.
-		 * 
-		 * @param labelError
-		 *            To write errors.
-		 * @return Simple start {@link JPanel}.
-		 */
-		private JPanel createSimpleStartPanel(final JLabel labelError) {
-
-			// Simple start panel
-			JPanel panelSimpleStart = new JPanel();
-
-			// Select application file
-			panelSimpleStart.add(new Label("Application file"));
-			final JTextField textFileName = (JTextField) panelSimpleStart
-					.add(new JTextField(20));
-			panelSimpleStart.add(new JButton(new AbstractAction("...") {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					JFileChooser fileChooser = new JFileChooser();
-					FileNameExtensionFilter filter = new FileNameExtensionFilter(
-							"Applications", "jar", "war");
-					fileChooser.setFileFilter(filter);
-					int returnVal = fileChooser
-							.showOpenDialog(OfficePanel.this);
-					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						textFileName.setText(fileChooser.getSelectedFile()
-								.getAbsolutePath());
-					}
-				}
-			}));
-
-			// Start button
-			panelSimpleStart.add(new JButton(new AbstractAction("start") {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-
-					// Run to obtain open OfficeFloor configuration
-					OpenOfficeFloorConfiguration configuration;
-					try {
-						configuration = OfficePanel.this
-								.createOpenOfficeFloorConfiguration();
-					} catch (Exception ex) {
-						labelError.setText("FAILURE: " + ex.getMessage() + " ("
-								+ ex.getClass().getName() + ")");
-						return; // can not proceed
-					}
-
-					// Load the simple file
-					String artifactFilePath = textFileName.getText();
-					if ((artifactFilePath == null)
-							|| (artifactFilePath.trim().length() == 0)) {
-						labelError.setText("Please select a file");
-						return;
-					}
-
-					// Configure the upload artifact
-					try {
-						UploadArtifact uploadArtifact = new UploadArtifact(
-								new File(artifactFilePath));
-						configuration.addUploadArtifact(uploadArtifact);
-					} catch (IOException ex) {
-						labelError.setText("FAILURE: " + ex.getMessage() + " ("
-								+ ex.getClass().getName() + ")");
-						return; // can not proceed
-					}
-
-					// Start the OfficeFloor
-					String processName;
-					try {
-						processName = OfficePanel.this.officeBuildingManager
-								.openOfficeFloor(configuration);
-					} catch (Exception ex) {
-						// Provide failure
-						labelError.setText("FAILURE opening: "
-								+ ex.getMessage() + " ["
-								+ ex.getClass().getName() + "]");
-						return; // failed to open
-					}
-
-					// Provide notification that opened
-					labelError.setText("TODO: notify opened: " + processName);
-				}
-			}));
-
-			// Return the simple start panel
-			return panelSimpleStart;
-		}
-
-		/**
-		 * Creates the advanced start {@link JPanel}.
-		 * 
-		 * @param labelError
-		 *            To write errors.
-		 * @return Advanced start {@link JPanel}.
-		 */
-		private JPanel createAdvancedStartPanel(JLabel labelError) {
-
-			// Simple advanced panel
-			JPanel panelAdvancedStart = new JPanel();
-
-			panelAdvancedStart.add(new Label("Application file"));
-
-			// Return the advanced start panel
-			return panelAdvancedStart;
-		}
-
-		/**
-		 * Creates the {@link OpenOfficeFloorConfiguration}.
-		 * 
-		 * @return {@link OpenOfficeFloorConfiguration}.
-		 * @throws Exception
-		 *             If fails to create the
-		 *             {@link OpenOfficeFloorConfiguration}.
-		 */
-		private OpenOfficeFloorConfiguration createOpenOfficeFloorConfiguration()
-				throws Exception {
-
-			// Create the open OfficeFloor configuration
-			OpenOfficeFloorConfiguration configuration = ConfigureOfficeFloor
-					.newOpenOfficeFloorConfiguration(this);
-
-			// Return the open OfficeFloor configuration
-			return configuration;
-		}
-
-		/*
-		 * =============== OfficeFloorConsoleMainErrorHandler ================
-		 */
-
-		@Override
-		public void warning(String warning) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void errorAndExit(String... lines) {
-			// TODO Auto-generated method stub
-
-		}
 	}
 
 }
