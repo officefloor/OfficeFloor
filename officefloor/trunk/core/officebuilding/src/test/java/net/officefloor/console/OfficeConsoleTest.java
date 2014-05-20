@@ -19,6 +19,7 @@ package net.officefloor.console;
 
 import java.io.File;
 
+import net.officefloor.building.console.OfficeFloorConsoleMain;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
@@ -54,6 +55,13 @@ public class OfficeConsoleTest extends OfficeFrameTestCase {
 		// Start the Office Building
 		OfficeBuildingTestUtil.startOfficeBuilding(port);
 
+		// Provide OfficeFloor home (necessary for default configuration)
+		String officeFloorHome = new OfficeFrameTestCase() {
+		}.findFile(OfficeConsoleTest.class, "config/OfficeFloor.properties")
+				.getParentFile().getParentFile().getAbsolutePath();
+		System.setProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME,
+				officeFloorHome);
+
 		// Start the console connected to the Office Building
 		OfficeConsole console = new OfficeConsole();
 		console.run(null, port, username, password, trustStoreFile,
@@ -73,6 +81,9 @@ public class OfficeConsoleTest extends OfficeFrameTestCase {
 				.keySet()) {
 			System.clearProperty(setupPropertyName);
 		}
+
+		// Clear OfficeFloor home property
+		System.clearProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME);
 
 		// Stop the office building
 		if (this.manager != null) {
@@ -96,6 +107,13 @@ public class OfficeConsoleTest extends OfficeFrameTestCase {
 
 		// Start the Office Building
 		this.manager = OfficeBuildingTestUtil.startOfficeBuilding(port);
+
+		// Provide OfficeFloor home (necessary for default configuration)
+		String officeFloorHome = this
+				.findFile(this.getClass(), "config/OfficeFloor.properties")
+				.getParentFile().getParentFile().getAbsolutePath();
+		System.setProperty(OfficeFloorConsoleMain.OFFICE_FLOOR_HOME,
+				officeFloorHome);
 
 		// Start the console connected to the Office Building
 		OfficeConsole console = new OfficeConsole();

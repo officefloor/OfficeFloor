@@ -54,7 +54,7 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	/**
 	 * Location of the {@link OfficeFloor}.
 	 */
-	private final String officeFloorLocation;
+	private String officeFloorLocation;
 
 	/**
 	 * {@link Properties} for the {@link OfficeFloor}.
@@ -260,6 +260,16 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	 */
 	public String getOfficeFloorSourceClassName() {
 		return this.officeFloorSourceClassName;
+	}
+
+	/**
+	 * Specifies the {@link OfficeFloor} location.
+	 * 
+	 * @param officeFloorLocation
+	 *            {@link OfficeFloor} location.
+	 */
+	public void setOfficeFloorLocation(String officeFloorLocation) {
+		this.officeFloorLocation = officeFloorLocation;
 	}
 
 	/**

@@ -146,11 +146,11 @@ public class OfficeBuildingConsolePanel extends JPanel {
 			@Override
 			public void doAction() throws Exception {
 
-				// Run to obtain open OfficeFloor configuration
+				// Obtain default open OfficeFloor configuration
 				OpenOfficeFloorConfiguration configuration = OfficeBuildingConsolePanel.this
-						.createOpenOfficeFloorConfiguration();
+						.createDefaultOpenOfficeFloorConfiguration();
 
-				// Load the simple file
+				// Load the artifact
 				String artifactFilePath = textFileName.getText();
 				if ((artifactFilePath == null)
 						|| (artifactFilePath.trim().length() == 0)) {
@@ -183,25 +183,41 @@ public class OfficeBuildingConsolePanel extends JPanel {
 	 *            To write errors.
 	 * @return Advanced start {@link JPanel}.
 	 */
-	private JPanel createAdvancedStartPanel() {
+	private JPanel createAdvancedStartPanel() throws Exception {
 
-		// Simple advanced panel
+		// Advanced panel
 		JPanel panelAdvancedStart = new JPanel();
 
-		panelAdvancedStart.add(new Label("Application file"));
+		// Provide open OfficeFloor configuration
+		OpenOfficeFloorConfiguration configuration = this
+				.createDefaultOpenOfficeFloorConfiguration();
+
+		// Configuration methods
+		if (false) {
+		configuration.setOfficeFloorSourceClassName(null); // text
+		configuration.setOfficeFloorLocation(null); // text
+		configuration.setProcessName(null); // text
+		configuration.addArtifactReference(null); // list
+		configuration.addClassPathEntry(null); // list
+		configuration.addJvmOption(null); // list
+		configuration.addOfficeFloorProperty(null, null); // table
+		configuration.addRemoteRepositoryUrl(null); // list
+		configuration.addUploadArtifact(null); // list (of file selections)
+		configuration.setOpenTask(null, null, null, null); // text fields
+		}
 
 		// Return the advanced start panel
 		return panelAdvancedStart;
 	}
 
 	/**
-	 * Creates the {@link OpenOfficeFloorConfiguration}.
+	 * Creates the default {@link OpenOfficeFloorConfiguration}.
 	 * 
 	 * @return {@link OpenOfficeFloorConfiguration}.
 	 * @throws Exception
 	 *             If fails to create the {@link OpenOfficeFloorConfiguration}.
 	 */
-	private OpenOfficeFloorConfiguration createOpenOfficeFloorConfiguration()
+	private OpenOfficeFloorConfiguration createDefaultOpenOfficeFloorConfiguration()
 			throws Exception {
 
 		// Create the open OfficeFloor configuration
@@ -209,14 +225,22 @@ public class OfficeBuildingConsolePanel extends JPanel {
 				.newOpenOfficeFloorConfiguration(new OfficeFloorConsoleMainErrorHandler() {
 					@Override
 					public void warning(String warning) {
-						// TODO Auto-generated method stub
-
+						// Should be no warnings
+						throw new ErrorMessageException(warning);
 					}
 
 					@Override
 					public void errorAndExit(String... lines) {
-						// TODO Auto-generated method stub
 
+						// Create the message
+						StringBuilder message = new StringBuilder();
+						for (String line : lines) {
+							message.append(line);
+							message.append("\n");
+						}
+
+						// Propagate the message
+						throw new ErrorMessageException(message.toString());
 					}
 				});
 
@@ -311,7 +335,7 @@ public class OfficeBuildingConsolePanel extends JPanel {
 	/**
 	 * Provides means to propagate an error message.
 	 */
-	private static class ErrorMessageException extends Exception {
+	private static class ErrorMessageException extends RuntimeException {
 
 		/**
 		 * Initiate.
