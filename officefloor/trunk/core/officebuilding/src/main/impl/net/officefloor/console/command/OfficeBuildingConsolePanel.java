@@ -23,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Properties;
 
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;
@@ -39,6 +40,7 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.officefloor.building.console.OfficeFloorConsoleMain.OfficeFloorConsoleMainErrorHandler;
+import net.officefloor.building.manager.ArtifactReference;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
@@ -186,25 +188,100 @@ public class OfficeBuildingConsolePanel extends JPanel {
 	private JPanel createAdvancedStartPanel() throws Exception {
 
 		// Advanced panel
-		JPanel panelAdvancedStart = new JPanel();
+		JPanel panelAdvancedStart = new JPanel(new GridLayout(10, 2));
 
-		// Provide open OfficeFloor configuration
+		// Obtain default open OfficeFloor configuration
 		OpenOfficeFloorConfiguration configuration = this
 				.createDefaultOpenOfficeFloorConfiguration();
 
-		// Configuration methods
-		if (false) {
-		configuration.setOfficeFloorSourceClassName(null); // text
-		configuration.setOfficeFloorLocation(null); // text
-		configuration.setProcessName(null); // text
-		configuration.addArtifactReference(null); // list
-		configuration.addClassPathEntry(null); // list
-		configuration.addJvmOption(null); // list
-		configuration.addOfficeFloorProperty(null, null); // table
-		configuration.addRemoteRepositoryUrl(null); // list
-		configuration.addUploadArtifact(null); // list (of file selections)
-		configuration.setOpenTask(null, null, null, null); // text fields
+		// OfficeFloor source
+		panelAdvancedStart.add(new Label("OfficeFloor Source Class"));
+		JTextField officeFloorSource = (JTextField) panelAdvancedStart
+				.add(new JTextField(30));
+		officeFloorSource
+				.setText(configuration.getOfficeFloorSourceClassName());
+
+		// OfficeFloor location
+		panelAdvancedStart.add(new Label("OfficeFloor location"));
+		JTextField officeFloorLocation = (JTextField) panelAdvancedStart
+				.add(new JTextField(30));
+		officeFloorLocation.setText(configuration.getOfficeFloorLocation());
+
+		// Process name
+		panelAdvancedStart.add(new Label("Process name"));
+		JTextField processName = (JTextField) panelAdvancedStart
+				.add(new JTextField(30));
+		processName.setText(configuration.getProcessName());
+
+		// Artifact references
+		panelAdvancedStart.add(new Label("Artifact references"));
+		OfficeTablePanel artifactReferences = (OfficeTablePanel) panelAdvancedStart
+				.add(new OfficeTablePanel("Group ID", "Artifact Id", "Type",
+						"Version", "Classifier"));
+		for (ArtifactReference reference : configuration
+				.getArtifactReferences()) {
+			artifactReferences.addRow(reference.getGroupId(),
+					reference.getArtifactId(), reference.getType(),
+					reference.getVersion(), reference.getClassifier());
 		}
+
+		// Class path entries
+		panelAdvancedStart.add(new Label("Class path"));
+		OfficeTablePanel classPathEntries = (OfficeTablePanel) panelAdvancedStart
+				.add(new OfficeTablePanel("Class path entry"));
+		for (String classPathEntry : configuration.getClassPathEntries()) {
+			classPathEntries.addRow(classPathEntry);
+		}
+
+		// JVM options
+		panelAdvancedStart.add(new Label("JVM options"));
+		OfficeTablePanel jvmOptions = (OfficeTablePanel) panelAdvancedStart
+				.add(new OfficeTablePanel("JVM option"));
+		for (String jvmOption : configuration.getJvmOptions()) {
+			jvmOptions.addRow(jvmOption);
+		}
+
+		// OfficeFloor properties
+		panelAdvancedStart.add(new Label("OfficeFloor properties"));
+		OfficeTablePanel officeFloorProperties = (OfficeTablePanel) panelAdvancedStart
+				.add(new OfficeTablePanel("Name", "Value"));
+		Properties properties = configuration.getOfficeFloorProperties();
+		for (String propertyName : properties.stringPropertyNames()) {
+			String propertyValue = properties.getProperty(propertyName);
+			officeFloorProperties.addRow(propertyName, propertyValue);
+		}
+
+		// Remove repository URLs
+		panelAdvancedStart.add(new Label("Remote repository URLs"));
+		OfficeTablePanel remoteRepositoryUrls = (OfficeTablePanel) panelAdvancedStart
+				.add(new OfficeTablePanel("Remote repository URL"));
+		for (String remoteRepositoryUrl : configuration
+				.getRemoteRepositoryUrls()) {
+			remoteRepositoryUrls.addRow(remoteRepositoryUrl);
+		}
+
+		// Upload artifacts
+		panelAdvancedStart.add(new Label("Upload artifact"));
+		OfficeTablePanel uploadArtifacts = (OfficeTablePanel) panelAdvancedStart
+				.add(new OfficeTablePanel("Upload Artifact"));
+		for (UploadArtifact artifact : configuration.getUploadArtifacts()) {
+			uploadArtifacts.addRow(artifact.getName());
+		}
+
+		// Open task
+		panelAdvancedStart.add(new Label("Open task"));
+		JTextField openTaskOfficeName = (JTextField) panelAdvancedStart
+				.add(new JTextField(10));
+		openTaskOfficeName.setText(configuration.getOfficeName());
+		JTextField openTaskWorkName = (JTextField) panelAdvancedStart
+				.add(new JTextField(10));
+		openTaskWorkName.setText(configuration.getWorkName());
+		JTextField openTaskTaskName = (JTextField) panelAdvancedStart
+				.add(new JTextField(10));
+		openTaskTaskName.setText(configuration.getTaskName());
+		JTextField openTaskParameter = (JTextField) panelAdvancedStart
+				.add(new JTextField(10));
+		openTaskParameter.setText(configuration.getParameter());
 
 		// Return the advanced start panel
 		return panelAdvancedStart;
