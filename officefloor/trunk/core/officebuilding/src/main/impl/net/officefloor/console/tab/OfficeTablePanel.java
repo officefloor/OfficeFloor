@@ -15,13 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.console.command;
+package net.officefloor.console.tab;
 
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -47,6 +48,8 @@ public class OfficeTablePanel extends JPanel {
 	 * Initiate.
 	 */
 	public OfficeTablePanel(String... columnNames) {
+
+		this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
 		// Create the model
 		this.model = new OfficeTableModel(columnNames.length);

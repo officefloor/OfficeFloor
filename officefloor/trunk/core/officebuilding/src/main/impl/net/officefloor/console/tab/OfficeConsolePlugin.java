@@ -15,14 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.console.command;
+package net.officefloor.console.tab;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.management.JMX;
+import javax.management.MBeanServerConnection;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
+import net.officefloor.building.manager.OfficeBuildingManager;
+import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import sun.tools.jconsole.OfficeConsole;
 
 import com.sun.tools.jconsole.JConsoleContext;
@@ -45,9 +49,22 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 		// Obtain the JConsole context
 		JConsoleContext context = this.getContext();
 
+		// Obtain the OfficeBuilding Manager
+		MBeanServerConnection connection = context.getMBeanServerConnection();
+		OfficeBuildingManagerMBean officeBuildingManager = JMX.newMBeanProxy(
+				connection,
+				OfficeBuildingManager.getOfficeBuildingManagerObjectName(),
+				OfficeBuildingManagerMBean.class);
+
 		// Create the tabs
 		Map<String, JPanel> tabs = new HashMap<>();
-		tabs.put("OfficeBuilding", new OfficeBuildingConsolePanel(context));
+		OfficeBuildingManageTabPanel manageTab = new OfficeBuildingManageTabPanel(
+				officeBuildingManager);
+		tabs.put("OfficeBuilding", manageTab);
+		tabs.put("Simple Deploy", new OfficeBuildingSimpleDeployTabPanel(
+				officeBuildingManager));
+		tabs.put("Advanced Deploy", new OfficeBuildingAdvancedDeployTabPanel(
+				officeBuildingManager));
 
 		// Return the tabs
 		return tabs;
