@@ -18,8 +18,10 @@
 package net.officefloor.console.tab;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Label;
 import java.util.Properties;
 
@@ -170,11 +172,11 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 		this.addAdvancedEntry(panelAdvancedStart, "Open Task", panelOpenTask,
 				constraint);
 
-		// Wrap in scroll pane
-		JScrollPane scrollPane = new JScrollPane(panelAdvancedStart);
+		// Add wrapped in a scroll pane
+		this.add(new JScrollPane(panelAdvancedStart));
 
-		// Add the scroll pane
-		this.add(scrollPane);
+		// Layout to full width
+		this.setLayout(new GridLayout(0, 1));
 	}
 
 	/**
