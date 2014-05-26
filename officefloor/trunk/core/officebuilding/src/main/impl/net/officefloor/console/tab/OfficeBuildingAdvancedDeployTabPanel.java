@@ -18,13 +18,13 @@
 package net.officefloor.console.tab;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Label;
 import java.util.Properties;
 
+import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -96,17 +96,14 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 		this.addAdvancedEntry(panelAdvancedStart, "Process name", processName,
 				constraint);
 
-		// Artifact references
-		OfficeTablePanel artifactReferences = new OfficeTablePanel("Group ID",
-				"Artifact Id", "Type", "Version", "Classifier");
-		for (ArtifactReference reference : configuration
-				.getArtifactReferences()) {
-			artifactReferences.addRow(reference.getGroupId(),
-					reference.getArtifactId(), reference.getType(),
-					reference.getVersion(), reference.getClassifier());
+		// Upload artifacts
+		OfficeTablePanel uploadArtifacts = new OfficeTablePanel(
+				"Upload Artifact");
+		for (UploadArtifact artifact : configuration.getUploadArtifacts()) {
+			uploadArtifacts.addRow(artifact.getName());
 		}
-		this.addAdvancedEntry(panelAdvancedStart, "Artifact references",
-				artifactReferences, constraint);
+		this.addAdvancedEntry(panelAdvancedStart, "Upload artifact",
+				uploadArtifacts, constraint);
 
 		// Class path entries
 		OfficeTablePanel classPathEntries = new OfficeTablePanel(
@@ -116,14 +113,6 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 		}
 		this.addAdvancedEntry(panelAdvancedStart, "Class path",
 				classPathEntries, constraint);
-
-		// JVM options
-		OfficeTablePanel jvmOptions = new OfficeTablePanel("JVM option");
-		for (String jvmOption : configuration.getJvmOptions()) {
-			jvmOptions.addRow(jvmOption);
-		}
-		this.addAdvancedEntry(panelAdvancedStart, "JVM options", jvmOptions,
-				constraint);
 
 		// OfficeFloor properties
 		OfficeTablePanel officeFloorProperties = new OfficeTablePanel("Name",
@@ -136,6 +125,18 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 		this.addAdvancedEntry(panelAdvancedStart, "OfficeFloor properties",
 				officeFloorProperties, constraint);
 
+		// Artifact references
+		OfficeTablePanel artifactReferences = new OfficeTablePanel("Group ID",
+				"Artifact Id", "Type", "Version", "Classifier");
+		for (ArtifactReference reference : configuration
+				.getArtifactReferences()) {
+			artifactReferences.addRow(reference.getGroupId(),
+					reference.getArtifactId(), reference.getType(),
+					reference.getVersion(), reference.getClassifier());
+		}
+		this.addAdvancedEntry(panelAdvancedStart, "Artifact references",
+				artifactReferences, constraint);
+
 		// Remove repository URLs
 		OfficeTablePanel remoteRepositoryUrls = new OfficeTablePanel(
 				"Remote repository URL");
@@ -146,28 +147,33 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 		this.addAdvancedEntry(panelAdvancedStart, "Remote repository URLs",
 				remoteRepositoryUrls, constraint);
 
-		// Upload artifacts
-		OfficeTablePanel uploadArtifacts = new OfficeTablePanel(
-				"Upload Artifact");
-		for (UploadArtifact artifact : configuration.getUploadArtifacts()) {
-			uploadArtifacts.addRow(artifact.getName());
+		// JVM options
+		OfficeTablePanel jvmOptions = new OfficeTablePanel("JVM option");
+		for (String jvmOption : configuration.getJvmOptions()) {
+			jvmOptions.addRow(jvmOption);
 		}
-		this.addAdvancedEntry(panelAdvancedStart, "Upload artifact",
-				uploadArtifacts, constraint);
+		this.addAdvancedEntry(panelAdvancedStart, "JVM options", jvmOptions,
+				constraint);
 
 		// Open task
 		JPanel panelOpenTask = new JPanel();
+		panelOpenTask.setLayout(new BoxLayout(panelOpenTask,
+				BoxLayout.LINE_AXIS));
+		panelOpenTask.add(new Label("Office"));
 		JTextField openTaskOfficeName = (JTextField) panelOpenTask
-				.add(new JTextField(10));
+				.add(new JTextField(5));
 		openTaskOfficeName.setText(configuration.getOfficeName());
+		panelOpenTask.add(new Label("Work"));
 		JTextField openTaskWorkName = (JTextField) panelOpenTask
-				.add(new JTextField(10));
+				.add(new JTextField(5));
 		openTaskWorkName.setText(configuration.getWorkName());
+		panelOpenTask.add(new Label("Task"));
 		JTextField openTaskTaskName = (JTextField) panelOpenTask
-				.add(new JTextField(10));
+				.add(new JTextField(5));
 		openTaskTaskName.setText(configuration.getTaskName());
+		panelOpenTask.add(new Label("Parameter"));
 		JTextField openTaskParameter = (JTextField) panelOpenTask
-				.add(new JTextField(10));
+				.add(new JTextField(5));
 		openTaskParameter.setText(configuration.getParameter());
 		this.addAdvancedEntry(panelAdvancedStart, "Open Task", panelOpenTask,
 				constraint);
