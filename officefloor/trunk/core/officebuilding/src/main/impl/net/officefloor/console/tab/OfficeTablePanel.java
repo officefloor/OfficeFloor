@@ -17,15 +17,16 @@
  */
 package net.officefloor.console.tab;
 
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
@@ -49,31 +50,44 @@ public class OfficeTablePanel extends JPanel {
 	 */
 	public OfficeTablePanel(String... columnNames) {
 
-		this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+		// Advanced panel
+		GridBagLayout layoutManager = new GridBagLayout();
+		this.setLayout(layoutManager);
+
+		// Grid constraints
+		GridBagConstraints constraint = new GridBagConstraints();
+		constraint.gridx = 0;
+		constraint.gridy = 0;
+		constraint.weightx = 0.99;
+		constraint.fill = GridBagConstraints.HORIZONTAL;
 
 		// Create the model
 		this.model = new OfficeTableModel(columnNames.length);
 
-		// Add the table
+		// Add the table (including its header)
 		JTable table = new JTable(this.model, new DefaultTableColumnModel());
 		for (String columnName : columnNames) {
 			TableColumn column = new TableColumn();
 			column.setHeaderValue(columnName);
 			table.addColumn(column);
 		}
-
-		// Provide scroll pane around table
-		this.add(new JScrollPane(table));
-		table.setFillsViewportHeight(true);
+		JPanel tablePanel = new JPanel();
+		tablePanel.setLayout(new BorderLayout());
+		tablePanel.add(table.getTableHeader(), BorderLayout.NORTH);
+		tablePanel.add(table, BorderLayout.CENTER);
+		this.add(tablePanel, constraint);
 
 		// Provide button to add a row
+		constraint.gridx++;
+		constraint.weightx = 0.01;
+		constraint.fill = GridBagConstraints.NONE;
 		this.add(new JButton(new AbstractAction("add") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// Add a row to the table
 				OfficeTablePanel.this.model.addRow();
 			}
-		}));
+		}), constraint);
 	}
 
 	/**
