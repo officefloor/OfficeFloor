@@ -18,18 +18,23 @@
 package net.officefloor.console.tab;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.EventObject;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.event.CellEditorListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
@@ -64,13 +69,22 @@ public class OfficeTablePanel extends JPanel {
 		// Create the model
 		this.model = new OfficeTableModel(columnNames.length);
 
-		// Add the table (including its header)
+		// Create the table
 		JTable table = new JTable(this.model, new DefaultTableColumnModel());
+		int columnIndex = 0;
 		for (String columnName : columnNames) {
-			TableColumn column = new TableColumn();
+			TableColumn column = new TableColumn(columnIndex++,
+					600 / columnNames.length);
 			column.setHeaderValue(columnName);
 			table.addColumn(column);
 		}
+		ButtonTableCellEditor buttonCellEditor = new ButtonTableCellEditor();
+		TableColumn deleteColumn = new TableColumn(columnIndex++, 10,
+				buttonCellEditor, buttonCellEditor);
+		deleteColumn.setHeaderValue("");
+		table.addColumn(deleteColumn);
+
+		// Add the table (including its header)
 		JPanel tablePanel = new JPanel();
 		tablePanel.setLayout(new BorderLayout());
 		tablePanel.add(table.getTableHeader(), BorderLayout.NORTH);
@@ -98,6 +112,16 @@ public class OfficeTablePanel extends JPanel {
 	 */
 	public void addRow(String... values) {
 		this.model.addRow(values);
+	}
+
+	/**
+	 * Removes a particular row.
+	 * 
+	 * @param rowIndex
+	 *            Index of the row to remove.
+	 */
+	public void removeRow(int rowIndex) {
+		this.model.removeRow(rowIndex);
 	}
 
 	/**
@@ -154,6 +178,21 @@ public class OfficeTablePanel extends JPanel {
 			this.fireTableRowsInserted(rowIndex, rowIndex);
 		}
 
+		/**
+		 * Removes the row.
+		 * 
+		 * @param rowIndex
+		 *            Index of row to remove.
+		 */
+		public void removeRow(int rowIndex) {
+
+			// Remove the row
+			this.rows.remove(rowIndex);
+
+			// Fire rows changed
+			this.fireTableRowsDeleted(rowIndex, rowIndex);
+		}
+
 		/*
 		 * ================== TableModel =========================
 		 */
@@ -167,6 +206,12 @@ public class OfficeTablePanel extends JPanel {
 		public int getColumnCount() {
 			// Entry value size plus column to delete
 			return this.entryValueSize + 1;
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			// All cells editable
+			return true;
 		}
 
 		@Override
@@ -190,8 +235,95 @@ public class OfficeTablePanel extends JPanel {
 
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-			// TODO Auto-generated method stub
-			super.setValueAt(aValue, rowIndex, columnIndex);
+
+			// Obtain the value
+			String value = (aValue == null ? "" : aValue.toString());
+
+			// Obtain the row
+			if (rowIndex >= this.rows.size()) {
+				return; // Unknown row
+			}
+			String[] row = this.rows.get(rowIndex);
+
+			// Set the value
+			if (columnIndex >= this.entryValueSize) {
+				return; // Delete button or no column
+			}
+			row[columnIndex] = value;
+		}
+	}
+
+	/**
+	 * {@link TableCellEditor} for a {@link JButton}.
+	 */
+	private class ButtonTableCellEditor implements TableCellRenderer,
+			TableCellEditor {
+
+		/*
+		 * ================ TableCellRenderer ========================
+		 */
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table,
+				Object value, boolean isSelected, boolean hasFocus, int row,
+				int column) {
+			return this.getTableCellEditorComponent(table, value, isSelected,
+					row, column);
+		}
+
+		/*
+		 * ================ TableCellEditor ==========================
+		 */
+
+		@Override
+		public Component getTableCellEditorComponent(JTable table,
+				Object value, boolean isSelected, final int row, int column) {
+			return new JButton(new AbstractAction("x") {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// Remove the row
+					OfficeTablePanel.this.removeRow(row);
+				}
+			});
+		}
+
+		@Override
+		public Object getCellEditorValue() {
+			// No value as button to trigger an action
+			return null;
+		}
+
+		@Override
+		public boolean isCellEditable(EventObject anEvent) {
+			// Always editable as a button
+			return true;
+		}
+
+		@Override
+		public boolean stopCellEditing() {
+			// Always allow editing
+			return true;
+		}
+
+		@Override
+		public void cancelCellEditing() {
+			// Button so nothing to cancel
+		}
+
+		@Override
+		public boolean shouldSelectCell(EventObject anEvent) {
+			// Never able to select the cell
+			return true;
+		}
+
+		@Override
+		public void removeCellEditorListener(CellEditorListener l) {
+			// No listeners required
+		}
+
+		@Override
+		public void addCellEditorListener(CellEditorListener l) {
+			// No listeners required
 		}
 	}
 
