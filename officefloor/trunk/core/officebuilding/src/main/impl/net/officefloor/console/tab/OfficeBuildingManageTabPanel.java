@@ -60,8 +60,11 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 		// Provide list of running processes
 		String[] existingProcesses = this.officeBuildingManager
 				.listProcessNamespaces();
-		// TODO display within table (with buttons to stop, trigger
-		// tasks)
+		OfficeTablePanel table = new OfficeTablePanel(false, false, "Process");
+		for (String existingProcess : existingProcesses) {
+			table.addRow(existingProcess);
+		}
+		this.add(table);
 	}
 
 }

@@ -22,15 +22,18 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
@@ -52,8 +55,27 @@ public class OfficeTablePanel extends JPanel {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param columnNames
+	 *            Names of the columns.
 	 */
 	public OfficeTablePanel(String... columnNames) {
+		this(true, false, columnNames);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param isEditCells
+	 *            <code>true</code> to allow editing the cells.
+	 * @param isIncludeFileChooser
+	 *            <code>true</code> to include the
+	 *            {@link FileChooserTableCellEditor}.
+	 * @param columnNames
+	 *            Names of the columns.
+	 */
+	public OfficeTablePanel(boolean isEditCells, boolean isIncludeFileChooser,
+			String... columnNames) {
 
 		// Advanced panel
 		GridBagLayout layoutManager = new GridBagLayout();
@@ -67,9 +89,9 @@ public class OfficeTablePanel extends JPanel {
 		constraint.fill = GridBagConstraints.HORIZONTAL;
 
 		// Create the model
-		this.model = new OfficeTableModel(columnNames.length);
+		this.model = new OfficeTableModel(isEditCells, columnNames.length);
 
-		// Create the table
+		// Create the table with specified columns
 		JTable table = new JTable(this.model, new DefaultTableColumnModel());
 		int columnIndex = 0;
 		for (String columnName : columnNames) {
@@ -78,6 +100,18 @@ public class OfficeTablePanel extends JPanel {
 			column.setHeaderValue(columnName);
 			table.addColumn(column);
 		}
+
+		// Add the file chooser button (if required)
+		if (isIncludeFileChooser) {
+			FileChooserTableCellEditor fileChooserCellEditor = new FileChooserTableCellEditor(
+					this.model);
+			TableColumn fileChooserColumn = new TableColumn(columnIndex++, 10,
+					fileChooserCellEditor, fileChooserCellEditor);
+			fileChooserColumn.setHeaderValue("");
+			table.addColumn(fileChooserColumn);
+		}
+
+		// Add the delete button
 		ButtonTableCellEditor buttonCellEditor = new ButtonTableCellEditor();
 		TableColumn deleteColumn = new TableColumn(columnIndex++, 10,
 				buttonCellEditor, buttonCellEditor);
@@ -125,9 +159,36 @@ public class OfficeTablePanel extends JPanel {
 	}
 
 	/**
+	 * Obtains the rows.
+	 * 
+	 * @return List of rows.
+	 */
+	public List<String[]> getRows() {
+		return this.model.getRows();
+	}
+
+	/**
+	 * <p>
+	 * Handles triggering of deleting the row.
+	 * <p>
+	 * By default it removes the row.
+	 * 
+	 * @param rowIndex
+	 *            Index of the row being deleted.
+	 */
+	protected void handleDeleteRow(int rowIndex) {
+		this.removeRow(rowIndex);
+	}
+
+	/**
 	 * {@link TableModel} for the {@link OfficeTablePanel}.
 	 */
 	private static class OfficeTableModel extends AbstractTableModel {
+
+		/**
+		 * Flag indicating if can edit the cells.
+		 */
+		private final boolean isEditCells;
 
 		/**
 		 * Entry value size.
@@ -142,10 +203,13 @@ public class OfficeTablePanel extends JPanel {
 		/**
 		 * Initiate.
 		 * 
+		 * @param isEditCells
+		 *            Flag indicating if can edit the cells.
 		 * @param entryValueSize
 		 *            Number of values per entry.
 		 */
-		public OfficeTableModel(int entryValueSize) {
+		public OfficeTableModel(boolean isEditCells, int entryValueSize) {
+			this.isEditCells = isEditCells;
 			this.entryValueSize = entryValueSize;
 			this.rows = new ArrayList<>();
 		}
@@ -191,6 +255,34 @@ public class OfficeTablePanel extends JPanel {
 
 			// Fire rows changed
 			this.fireTableRowsDeleted(rowIndex, rowIndex);
+		}
+
+		/**
+		 * Obtains the rows.
+		 * 
+		 * @return List of rows.
+		 */
+		public List<String[]> getRows() {
+			return this.rows;
+		}
+
+		/**
+		 * Specifies the value, triggering an update to the view.
+		 * 
+		 * @param rowIndex
+		 *            Index of the row.
+		 * @param columnIndex
+		 *            Index of the column.
+		 * @param value
+		 *            Value.
+		 */
+		public void setValue(int rowIndex, int columnIndex, String value) {
+
+			// Specify the value
+			this.setValueAt(value, rowIndex, columnIndex);
+
+			// Notify the value has changed
+			this.fireTableCellUpdated(rowIndex, columnIndex);
 		}
 
 		/*
@@ -281,8 +373,110 @@ public class OfficeTablePanel extends JPanel {
 			return new JButton(new AbstractAction("x") {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// Remove the row
-					OfficeTablePanel.this.removeRow(row);
+					// Handle deleting the row
+					OfficeTablePanel.this.handleDeleteRow(row);
+				}
+			});
+		}
+
+		@Override
+		public Object getCellEditorValue() {
+			// No value as button to trigger an action
+			return null;
+		}
+
+		@Override
+		public boolean isCellEditable(EventObject anEvent) {
+			// Always editable as a button
+			return true;
+		}
+
+		@Override
+		public boolean stopCellEditing() {
+			// Always allow editing
+			return true;
+		}
+
+		@Override
+		public void cancelCellEditing() {
+			// Button so nothing to cancel
+		}
+
+		@Override
+		public boolean shouldSelectCell(EventObject anEvent) {
+			// Never able to select the cell
+			return true;
+		}
+
+		@Override
+		public void removeCellEditorListener(CellEditorListener l) {
+			// No listeners required
+		}
+
+		@Override
+		public void addCellEditorListener(CellEditorListener l) {
+			// No listeners required
+		}
+	}
+
+	/**
+	 * {@link TableCellEditor} for choosing a {@link File}.
+	 */
+	private class FileChooserTableCellEditor implements TableCellRenderer,
+			TableCellEditor {
+
+		/**
+		 * {@link OfficeTableModel}.
+		 */
+		private final OfficeTableModel model;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param model
+		 *            {@link OfficeTableModel}.
+		 */
+		public FileChooserTableCellEditor(OfficeTableModel model) {
+			this.model = model;
+		}
+
+		/*
+		 * ================ TableCellRenderer ========================
+		 */
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table,
+				Object value, boolean isSelected, boolean hasFocus, int row,
+				int column) {
+			return this.getTableCellEditorComponent(table, value, isSelected,
+					row, column);
+		}
+
+		/*
+		 * ================ TableCellEditor ==========================
+		 */
+
+		@Override
+		public Component getTableCellEditorComponent(JTable table,
+				Object value, boolean isSelected, final int row,
+				final int column) {
+			return new JButton(new AbstractAction("...") {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					JFileChooser fileChooser = new JFileChooser();
+					FileNameExtensionFilter filter = new FileNameExtensionFilter(
+							"Applications", "jar", "war");
+					fileChooser.setFileFilter(filter);
+					int returnVal = fileChooser
+							.showOpenDialog(OfficeTablePanel.this);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						String filePath = fileChooser.getSelectedFile()
+								.getAbsolutePath();
+
+						// Change the value (in column to left, -1)
+						FileChooserTableCellEditor.this.model.setValue(row,
+								column - 1, filePath);
+					}
 				}
 			});
 		}

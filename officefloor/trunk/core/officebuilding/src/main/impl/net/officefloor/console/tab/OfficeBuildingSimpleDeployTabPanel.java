@@ -80,7 +80,7 @@ public class OfficeBuildingSimpleDeployTabPanel extends
 		}));
 
 		// Start button
-		this.add(new JButton(new OfficeAction("start") {
+		this.add(new JButton(new OfficeAction("deploy") {
 			@Override
 			public void doAction() throws Exception {
 
@@ -106,7 +106,8 @@ public class OfficeBuildingSimpleDeployTabPanel extends
 
 				// Provide notification that opened
 				OfficeBuildingSimpleDeployTabPanel.this
-						.notifyUser("Opened under process name: " + processName);
+						.notifyUser("Opened under process name space: "
+								+ processName);
 			}
 		}));
 	}
