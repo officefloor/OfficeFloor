@@ -18,7 +18,6 @@
 package net.officefloor.console.tab;
 
 import java.awt.Label;
-import java.awt.event.ActionEvent;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -55,42 +54,36 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 	public void refreshOfficeFloorProcesses() throws Exception {
 
 		// Run the refresh within an asynchronous action
-		new OfficeAction<String[]>("Refresh OfficeFloor proceses") {
+		this.doAsyncAction(new OfficeAsyncAction<String[]>(
+				"Refreshing OfficeFloor processes") {
 			@Override
-			public OfficeAsyncAction<String[]> doAction() throws Exception {
-				return new OfficeAsyncAction<String[]>(
-						"Refreshing OfficeFloor processes") {
-					@Override
-					public String[] doAction() throws Exception {
+			public String[] doAction() throws Exception {
 
-						// Obtain the existing processes
-						String[] existingProcesses = OfficeBuildingManageTabPanel.this.officeBuildingManager
-								.listProcessNamespaces();
+				// Obtain the existing processes
+				String[] existingProcesses = OfficeBuildingManageTabPanel.this.officeBuildingManager
+						.listProcessNamespaces();
 
-						// Return the existing processes
-						return existingProcesses;
-					}
-
-					@Override
-					public void done(String[] result) throws Exception {
-						// Remove all the rows
-						int rowCount = OfficeBuildingManageTabPanel.this.processesTable
-								.getRows().size();
-						for (int i = 0; i < rowCount; i++) {
-							OfficeBuildingManageTabPanel.this.processesTable
-									.removeRow(0);
-						}
-
-						// Add the refreshed OfficeFloor processes
-						for (String existingProcess : result) {
-							OfficeBuildingManageTabPanel.this.processesTable
-									.addRow(existingProcess);
-						}
-					}
-
-				};
+				// Return the existing processes
+				return existingProcesses;
 			}
-		}.actionPerformed(new ActionEvent(this, -1, ""));
+
+			@Override
+			public void done(String[] result) throws Exception {
+				// Remove all the rows
+				int rowCount = OfficeBuildingManageTabPanel.this.processesTable
+						.getRows().size();
+				for (int i = 0; i < rowCount; i++) {
+					OfficeBuildingManageTabPanel.this.processesTable
+							.removeRow(0);
+				}
+
+				// Add the refreshed OfficeFloor processes
+				for (String existingProcess : result) {
+					OfficeBuildingManageTabPanel.this.processesTable
+							.addRow(existingProcess);
+				}
+			}
+		});
 	}
 
 	/*
@@ -133,11 +126,11 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 		 */
 
 		@Override
-		protected void handleDeleteRow(int rowIndex) {
+		protected void handleDeleteRow(final int rowIndex) {
 			try {
 				// Obtain the process to close
 				String[] row = this.getRows().get(rowIndex);
-				String processNameSpace = row[0];
+				final String processNameSpace = row[0];
 
 				// Confirm want to close OfficeFloor
 				int result = JOptionPane.showConfirmDialog(
@@ -148,13 +141,29 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 					return; // Not confirmed
 				}
 
-				// Close the OfficeFloor
-				final int waitTime = 10 * 1000; // 10 seconds
-				OfficeBuildingManageTabPanel.this.officeBuildingManager
-						.closeOfficeFloor(processNameSpace, waitTime);
+				// Close the OfficeFloor within an asynchronous action
+				OfficeBuildingManageTabPanel.this
+						.doAsyncAction(new OfficeAsyncAction<Void>(
+								"Close OfficeFloor") {
+							@Override
+							public Void doAction() throws Exception {
+								// Close the OfficeFloor
+								final int waitTime = 10 * 1000; // 10 seconds
+								OfficeBuildingManageTabPanel.this.officeBuildingManager
+										.closeOfficeFloor(processNameSpace,
+												waitTime);
 
-				// Remove the row
-				super.handleDeleteRow(rowIndex);
+								// Nothing to return
+								return null;
+							}
+
+							@Override
+							public void done(Void result) throws Exception {
+								// Remove the row
+								ProcessTablePanel.super
+										.handleDeleteRow(rowIndex);
+							}
+						});
 
 			} catch (Exception ex) {
 				OfficeBuildingManageTabPanel.this.handleError(ex);

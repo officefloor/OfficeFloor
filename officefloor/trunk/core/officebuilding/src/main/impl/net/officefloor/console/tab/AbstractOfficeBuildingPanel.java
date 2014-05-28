@@ -270,6 +270,22 @@ public abstract class AbstractOfficeBuildingPanel extends JPanel {
 	}
 
 	/**
+	 * Undertakes an {@link OfficeAsyncAction}.
+	 * 
+	 * @param asyncAction
+	 *            {@link OfficeAsyncAction}.
+	 */
+	protected <T> void doAsyncAction(final OfficeAsyncAction<T> asyncAction) {
+		// Run the asynchronous action
+		new OfficeAction<T>("ignored") {
+			@Override
+			public OfficeAsyncAction<T> doAction() throws Exception {
+				return asyncAction;
+			}
+		}.actionPerformed(new ActionEvent(this, -1, ""));
+	}
+
+	/**
 	 * {@link AbstractAction} that handles failures.
 	 */
 	protected abstract class OfficeAction<T> extends AbstractAction {
