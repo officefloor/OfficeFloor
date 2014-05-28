@@ -18,6 +18,7 @@
 package net.officefloor.console.tab;
 
 import java.awt.Label;
+import java.awt.event.ActionEvent;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -53,18 +54,43 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 	 */
 	public void refreshOfficeFloorProcesses() throws Exception {
 
-		// Remove all the rows
-		int rowCount = this.processesTable.getRows().size();
-		for (int i = 0; i < rowCount; i++) {
-			this.processesTable.removeRow(0);
-		}
+		// Run the refresh within an asynchronous action
+		new OfficeAction<String[]>("Refresh OfficeFloor proceses") {
+			@Override
+			public OfficeAsyncAction<String[]> doAction() throws Exception {
+				return new OfficeAsyncAction<String[]>(
+						"Refreshing OfficeFloor processes") {
+					@Override
+					public String[] doAction() throws Exception {
 
-		// Add the refreshed OfficeFloor processes
-		String[] existingProcesses = this.officeBuildingManager
-				.listProcessNamespaces();
-		for (String existingProcess : existingProcesses) {
-			this.processesTable.addRow(existingProcess);
-		}
+						// Obtain the existing processes
+						String[] existingProcesses = OfficeBuildingManageTabPanel.this.officeBuildingManager
+								.listProcessNamespaces();
+
+						// Return the existing processes
+						return existingProcesses;
+					}
+
+					@Override
+					public void done(String[] result) throws Exception {
+						// Remove all the rows
+						int rowCount = OfficeBuildingManageTabPanel.this.processesTable
+								.getRows().size();
+						for (int i = 0; i < rowCount; i++) {
+							OfficeBuildingManageTabPanel.this.processesTable
+									.removeRow(0);
+						}
+
+						// Add the refreshed OfficeFloor processes
+						for (String existingProcess : result) {
+							OfficeBuildingManageTabPanel.this.processesTable
+									.addRow(existingProcess);
+						}
+					}
+
+				};
+			}
+		}.actionPerformed(new ActionEvent(this, -1, ""));
 	}
 
 	/*
