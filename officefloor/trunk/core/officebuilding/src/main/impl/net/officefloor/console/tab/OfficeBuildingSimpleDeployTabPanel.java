@@ -42,14 +42,23 @@ public class OfficeBuildingSimpleDeployTabPanel extends
 		AbstractOfficeBuildingPanel {
 
 	/**
+	 * {@link OfficeBuildingManageTabPanel}.
+	 */
+	private final OfficeBuildingManageTabPanel manageTab;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeBuildingManager
 	 *            {@link OfficeBuildingManagerMBean}.
+	 * @param manageTab
+	 *            {@link OfficeBuildingManageTabPanel}.
 	 */
 	public OfficeBuildingSimpleDeployTabPanel(
-			OfficeBuildingManagerMBean officeBuildingManager) {
+			OfficeBuildingManagerMBean officeBuildingManager,
+			OfficeBuildingManageTabPanel manageTab) {
 		super(officeBuildingManager);
+		this.manageTab = manageTab;
 	}
 
 	/*
@@ -63,9 +72,11 @@ public class OfficeBuildingSimpleDeployTabPanel extends
 		this.add(new Label("Application file"));
 		final JTextField textFileName = (JTextField) this
 				.add(new JTextField(20));
-		this.add(new JButton(new OfficeAction("...") {
+		this.add(new JButton(new OfficeAction<Void>("...") {
 			@Override
-			public void doAction() {
+			public OfficeAsyncAction<Void> doAction() {
+
+				// Select the file
 				JFileChooser fileChooser = new JFileChooser();
 				FileNameExtensionFilter filter = new FileNameExtensionFilter(
 						"Applications", "jar", "war");
@@ -76,38 +87,58 @@ public class OfficeBuildingSimpleDeployTabPanel extends
 					textFileName.setText(fileChooser.getSelectedFile()
 							.getAbsolutePath());
 				}
+
+				// No asynchronous operation
+				return null;
 			}
 		}));
 
 		// Start button
-		this.add(new JButton(new OfficeAction("deploy") {
+		this.add(new JButton(new OfficeAction<String>("deploy") {
 			@Override
-			public void doAction() throws Exception {
-
-				// Obtain default open OfficeFloor configuration
-				OpenOfficeFloorConfiguration configuration = OfficeBuildingSimpleDeployTabPanel.this
-						.createDefaultOpenOfficeFloorConfiguration();
+			public OfficeAsyncAction<String> doAction() throws Exception {
 
 				// Load the artifact
-				String artifactFilePath = textFileName.getText();
+				final String artifactFilePath = textFileName.getText();
 				if ((artifactFilePath == null)
 						|| (artifactFilePath.trim().length() == 0)) {
 					throw new ErrorMessageException("Please select a file");
 				}
 
-				// Configure the upload artifact
-				UploadArtifact uploadArtifact = new UploadArtifact(new File(
-						artifactFilePath));
-				configuration.addUploadArtifact(uploadArtifact);
+				// Return the async action to open the OfficeFloor
+				return new OfficeAsyncAction<String>("Deploying") {
+					@Override
+					public String doAction() throws Exception {
 
-				// Start the OfficeFloor
-				String processName = OfficeBuildingSimpleDeployTabPanel.this.officeBuildingManager
-						.openOfficeFloor(configuration);
+						// Obtain default open OfficeFloor configuration
+						OpenOfficeFloorConfiguration configuration = OfficeBuildingSimpleDeployTabPanel.this
+								.createDefaultOpenOfficeFloorConfiguration();
 
-				// Provide notification that opened
-				OfficeBuildingSimpleDeployTabPanel.this
-						.notifyUser("Opened under process name space: "
-								+ processName);
+						// Configure the upload artifact
+						UploadArtifact uploadArtifact = new UploadArtifact(
+								new File(artifactFilePath));
+						configuration.addUploadArtifact(uploadArtifact);
+
+						// Start the OfficeFloor
+						String processNameSpace = OfficeBuildingSimpleDeployTabPanel.this.officeBuildingManager
+								.openOfficeFloor(configuration);
+
+						// Return the process name space
+						return processNameSpace;
+					}
+
+					@Override
+					public void done(String result) throws Exception {
+						// Provide notification that opened
+						OfficeBuildingSimpleDeployTabPanel.this
+								.notifyUser("Opened under process name space: "
+										+ result);
+
+						// Refresh the OfficeFloor processes
+						OfficeBuildingSimpleDeployTabPanel.this.manageTab
+								.refreshOfficeFloorProcesses();
+					}
+				};
 			}
 		}));
 	}

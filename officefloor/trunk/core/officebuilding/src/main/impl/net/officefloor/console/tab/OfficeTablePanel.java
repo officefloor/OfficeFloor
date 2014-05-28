@@ -125,17 +125,19 @@ public class OfficeTablePanel extends JPanel {
 		tablePanel.add(table, BorderLayout.CENTER);
 		this.add(tablePanel, constraint);
 
-		// Provide button to add a row
-		constraint.gridx++;
-		constraint.weightx = 0.01;
-		constraint.fill = GridBagConstraints.NONE;
-		this.add(new JButton(new AbstractAction("add") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// Add a row to the table
-				OfficeTablePanel.this.model.addRow();
-			}
-		}), constraint);
+		// Provide button to add a row (if editing)
+		if (isEditCells) {
+			constraint.gridx++;
+			constraint.weightx = 0.01;
+			constraint.fill = GridBagConstraints.NONE;
+			this.add(new JButton(new AbstractAction("add") {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// Add a row to the table
+					OfficeTablePanel.this.model.addRow();
+				}
+			}), constraint);
+		}
 	}
 
 	/**
@@ -302,8 +304,15 @@ public class OfficeTablePanel extends JPanel {
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			// All cells editable
-			return true;
+
+			// Determine if can edit cell
+			if (this.isEditCells) {
+				// All cells editable
+				return true;
+			} else {
+				// Stop editing content cells (still able to delete row)
+				return (columnIndex >= this.entryValueSize);
+			}
 		}
 
 		@Override

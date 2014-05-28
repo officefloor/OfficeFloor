@@ -19,6 +19,7 @@ package net.officefloor.console.tab;
 
 import java.awt.Label;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
@@ -32,6 +33,11 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 
 	/**
+	 * {@link OfficeTablePanel} displaying the processes.
+	 */
+	private OfficeTablePanel processesTable;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeBuildingManager
@@ -40,6 +46,25 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 	public OfficeBuildingManageTabPanel(
 			OfficeBuildingManagerMBean officeBuildingManager) {
 		super(officeBuildingManager);
+	}
+
+	/**
+	 * Refreshes the {@link OfficeFloor} processes.
+	 */
+	public void refreshOfficeFloorProcesses() throws Exception {
+
+		// Remove all the rows
+		int rowCount = this.processesTable.getRows().size();
+		for (int i = 0; i < rowCount; i++) {
+			this.processesTable.removeRow(0);
+		}
+
+		// Add the refreshed OfficeFloor processes
+		String[] existingProcesses = this.officeBuildingManager
+				.listProcessNamespaces();
+		for (String existingProcess : existingProcesses) {
+			this.processesTable.addRow(existingProcess);
+		}
 	}
 
 	/*
@@ -58,13 +83,57 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 		panelHostPort.add(new Label("Connected to " + hostname + ":" + port));
 
 		// Provide list of running processes
-		String[] existingProcesses = this.officeBuildingManager
-				.listProcessNamespaces();
-		OfficeTablePanel table = new OfficeTablePanel(false, false, "Process");
-		for (String existingProcess : existingProcesses) {
-			table.addRow(existingProcess);
+		this.processesTable = new ProcessTablePanel();
+		this.add(this.processesTable);
+
+		// Load processes to table
+		this.refreshOfficeFloorProcesses();
+	}
+
+	/**
+	 * {@link OfficeTablePanel} for the {@link OfficeFloor} processes.
+	 */
+	private class ProcessTablePanel extends OfficeTablePanel {
+
+		/**
+		 * Initiate.
+		 */
+		public ProcessTablePanel() {
+			super(false, false, "Processes");
 		}
-		this.add(table);
+
+		/*
+		 * ================ ProcessTablePanel ======================
+		 */
+
+		@Override
+		protected void handleDeleteRow(int rowIndex) {
+			try {
+				// Obtain the process to close
+				String[] row = this.getRows().get(rowIndex);
+				String processNameSpace = row[0];
+
+				// Confirm want to close OfficeFloor
+				int result = JOptionPane.showConfirmDialog(
+						OfficeBuildingManageTabPanel.this,
+						"Please confirm closing " + processNameSpace, "Close",
+						JOptionPane.YES_NO_OPTION);
+				if (result != JOptionPane.YES_OPTION) {
+					return; // Not confirmed
+				}
+
+				// Close the OfficeFloor
+				final int waitTime = 10 * 1000; // 10 seconds
+				OfficeBuildingManageTabPanel.this.officeBuildingManager
+						.closeOfficeFloor(processNameSpace, waitTime);
+
+				// Remove the row
+				super.handleDeleteRow(rowIndex);
+
+			} catch (Exception ex) {
+				OfficeBuildingManageTabPanel.this.handleError(ex);
+			}
+		}
 	}
 
 }

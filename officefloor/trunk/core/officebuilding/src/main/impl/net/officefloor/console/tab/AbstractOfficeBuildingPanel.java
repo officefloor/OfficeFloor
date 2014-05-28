@@ -18,17 +18,22 @@
 package net.officefloor.console.tab;
 
 import java.awt.Component;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingWorker;
 
 import net.officefloor.building.console.OfficeFloorConsoleMain.OfficeFloorConsoleMainErrorHandler;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
@@ -213,9 +218,61 @@ public abstract class AbstractOfficeBuildingPanel extends JPanel {
 	}
 
 	/**
+	 * Asynchronous {@link OfficeAction}.
+	 */
+	protected abstract class OfficeAsyncAction<T> {
+
+		/**
+		 * Wait message.
+		 */
+		private final String waitMessage;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param waitMessage
+		 *            Wait message.
+		 */
+		public OfficeAsyncAction(String waitMessage) {
+			this.waitMessage = waitMessage;
+		}
+
+		/**
+		 * Obtains the wait message.
+		 * 
+		 * @return Wait message.
+		 */
+		public String getWaitMessage() {
+			return this.waitMessage;
+		}
+
+		/**
+		 * Undertakes the asynchronous action.
+		 * 
+		 * @return Results of asynchronous action.
+		 * @throws Exception
+		 *             If action fails.
+		 */
+		public abstract T doAction() throws Exception;
+
+		/**
+		 * Handles updating the view based on the results of the asynchronous
+		 * action.
+		 * 
+		 * @param result
+		 *            Result of the asynchronous action.
+		 * @throws Exception
+		 *             If fails to update view.
+		 * 
+		 * @see #doAction()
+		 */
+		public abstract void done(T result) throws Exception;
+	}
+
+	/**
 	 * {@link AbstractAction} that handles failures.
 	 */
-	protected abstract class OfficeAction extends AbstractAction {
+	protected abstract class OfficeAction<T> extends AbstractAction {
 
 		/**
 		 * Initiate.
@@ -230,20 +287,25 @@ public abstract class AbstractOfficeBuildingPanel extends JPanel {
 		/**
 		 * Undertakes the {@link Action}.
 		 * 
+		 * @return {@link OfficeAsyncAction} if a further asynchronous (long
+		 *         running) action needs to be undertaken.
 		 * @throws Exception
 		 *             If {@link Action} fails.
 		 */
-		public abstract void doAction() throws Exception;
+		public abstract OfficeAsyncAction<T> doAction() throws Exception;
 
 		/*
 		 * ================== AbstractAction =================
 		 */
 
 		@Override
+		@SuppressWarnings("rawtypes")
 		public void actionPerformed(ActionEvent e) {
+
+			// Undertake the action
+			OfficeAsyncAction asyncAction = null;
 			try {
-				// Undertake the action
-				this.doAction();
+				asyncAction = this.doAction();
 
 			} catch (ErrorMessageException ex) {
 				// Handle error message
@@ -252,6 +314,63 @@ public abstract class AbstractOfficeBuildingPanel extends JPanel {
 			} catch (Throwable ex) {
 				// Handle failure
 				AbstractOfficeBuildingPanel.this.handleError(ex);
+			}
+
+			// Undertake asynchronous action (with progress)
+			if (asyncAction != null) {
+
+				// Show the progress dialog
+				JPanel progressPanel = new JPanel();
+				progressPanel.setLayout(new BoxLayout(progressPanel,
+						BoxLayout.Y_AXIS));
+				JPanel progressBarPanel = (JPanel) progressPanel
+						.add(new JPanel());
+				progressBarPanel.add(new JLabel(asyncAction.getWaitMessage()));
+				JProgressBar progressBar = (JProgressBar) progressBarPanel
+						.add(new JProgressBar());
+				progressBar.setIndeterminate(true);
+				progressPanel.add(new JLabel(" ")); // blank line spacing
+				progressPanel.add(new JLabel("Run in background"));
+				JOptionPane pane = new JOptionPane(progressPanel,
+						JOptionPane.INFORMATION_MESSAGE);
+				final JDialog progressDialog = pane.createDialog(
+						AbstractOfficeBuildingPanel.this, "Running");
+				progressDialog.setModalityType(ModalityType.MODELESS);
+				progressDialog.setVisible(true);
+
+				// Do the asynchronous action
+				final OfficeAsyncAction finalAsyncAction = asyncAction;
+				new SwingWorker<Object, Object>() {
+					@Override
+					protected Object doInBackground() throws Exception {
+						// Undertake asynchronous action
+						return finalAsyncAction.doAction();
+					}
+
+					@Override
+					@SuppressWarnings("unchecked")
+					protected void done() {
+						// Handle completion
+						try {
+							// Hide progress dialog
+							progressDialog.setVisible(false);
+
+							// Obtain the result
+							Object result = this.get();
+
+							// Handle completion
+							finalAsyncAction.done(result);
+
+						} catch (ErrorMessageException ex) {
+							// Handle error message
+							AbstractOfficeBuildingPanel.this.handleError(ex
+									.getMessage());
+						} catch (Throwable ex) {
+							// Handle failure
+							AbstractOfficeBuildingPanel.this.handleError(ex);
+						}
+					}
+				}.execute();
 			}
 		}
 	}

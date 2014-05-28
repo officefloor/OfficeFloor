@@ -62,9 +62,9 @@ public class OfficeConsolePlugin extends JConsolePlugin {
 				officeBuildingManager);
 		tabs.put("OfficeBuilding", manageTab);
 		tabs.put("Simple Deploy", new OfficeBuildingSimpleDeployTabPanel(
-				officeBuildingManager));
+				officeBuildingManager, manageTab));
 		tabs.put("Advanced Deploy", new OfficeBuildingAdvancedDeployTabPanel(
-				officeBuildingManager));
+				officeBuildingManager, manageTab));
 
 		// Return the tabs
 		return tabs;
