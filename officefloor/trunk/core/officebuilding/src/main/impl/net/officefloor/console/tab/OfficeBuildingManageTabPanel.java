@@ -19,6 +19,7 @@ package net.officefloor.console.tab;
 
 import java.awt.Label;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -38,6 +39,11 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 	private OfficeTablePanel processesTable;
 
 	/**
+	 * {@link OfficeAsyncAction} to refresh the {@link OfficeFloor} processes.
+	 */
+	private OfficeAsyncAction<String[]> refreshOfficeAsyncAction;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeBuildingManager
@@ -52,9 +58,30 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 	 * Refreshes the {@link OfficeFloor} processes.
 	 */
 	public void refreshOfficeFloorProcesses() throws Exception {
+		this.doAsyncAction(this.refreshOfficeAsyncAction);
+	}
 
-		// Run the refresh within an asynchronous action
-		this.doAsyncAction(new OfficeAsyncAction<String[]>(
+	/*
+	 * ================= AbstractOfficeBuildingPanel ================
+	 */
+
+	@Override
+	protected void init() throws Exception {
+
+		// Detail the host/port
+		JPanel panelHostPort = (JPanel) new JPanel();
+		this.add(panelHostPort);
+		String hostname = this.officeBuildingManager
+				.getOfficeBuildingHostName();
+		int port = this.officeBuildingManager.getOfficeBuildingPort();
+		panelHostPort.add(new Label("Connected to " + hostname + ":" + port));
+
+		// Provide list of running processes
+		this.processesTable = new ProcessTablePanel();
+		this.add(this.processesTable);
+
+		// Action to refresh the OfficeFloor
+		this.refreshOfficeAsyncAction = new OfficeAsyncAction<String[]>(
 				"Refreshing OfficeFloor processes") {
 			@Override
 			public String[] doAction() throws Exception {
@@ -83,27 +110,15 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 							.addRow(existingProcess);
 				}
 			}
-		});
-	}
+		};
 
-	/*
-	 * ================= AbstractOfficeBuildingPanel ================
-	 */
-
-	@Override
-	protected void init() throws Exception {
-
-		// Detail the host/port
-		JPanel panelHostPort = (JPanel) new JPanel();
-		this.add(panelHostPort);
-		String hostname = this.officeBuildingManager
-				.getOfficeBuildingHostName();
-		int port = this.officeBuildingManager.getOfficeBuildingPort();
-		panelHostPort.add(new Label("Connected to " + hostname + ":" + port));
-
-		// Provide list of running processes
-		this.processesTable = new ProcessTablePanel();
-		this.add(this.processesTable);
+		// Button to refresh the OfficeFloor processes
+		this.add(new JButton(new OfficeAction<String[]>("Refresh") {
+			@Override
+			public OfficeAsyncAction<String[]> doAction() throws Exception {
+				return OfficeBuildingManageTabPanel.this.refreshOfficeAsyncAction;
+			}
+		}));
 
 		// Load processes to table
 		this.refreshOfficeFloorProcesses();
