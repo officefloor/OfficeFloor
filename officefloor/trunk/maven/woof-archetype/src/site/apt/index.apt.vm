@@ -54,6 +54,14 @@ Running the WoOF project from Maven
     mvn woof:run
 +-----------------------------------------+
 
+  The following may be needed to add to your maven settings.xml file to default the group:
+  
++-----------------------------------------+
+  <pluginGroups>
+    <pluginGroup>net.officefloor.maven</pluginGroup>
+  </pluginGroups>
++-----------------------------------------+  
+
   The application will now be available at <<<http://localhost:7878/static.woof>>>  and look as follows:
   
 [./images/woof-archetype-static-screenshot.png] WoOF Archetype Static Page Screen Shot
