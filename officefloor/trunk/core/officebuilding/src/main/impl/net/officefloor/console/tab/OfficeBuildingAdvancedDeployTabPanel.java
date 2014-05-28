@@ -50,14 +50,23 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 		AbstractOfficeBuildingPanel {
 
 	/**
+	 * {@link OfficeBuildingManageTabPanel}.
+	 */
+	private final OfficeBuildingManageTabPanel manageTab;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeBuildingManager
 	 *            {@link OfficeBuildingManager}.
+	 * @param manageTab
+	 *            {@link OfficeBuildingManageTabPanel}.
 	 */
 	public OfficeBuildingAdvancedDeployTabPanel(
-			OfficeBuildingManagerMBean officeBuildingManager) {
+			OfficeBuildingManagerMBean officeBuildingManager,
+			OfficeBuildingManageTabPanel manageTab) {
 		super(officeBuildingManager);
+		this.manageTab = manageTab;
 	}
 
 	/*
@@ -187,14 +196,14 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 				constraint);
 
 		// Deploy button
-		JButton deployButton = new JButton(new OfficeAction("Deploy") {
+		JButton deployButton = new JButton(new OfficeAction<String>("deploy") {
 			@Override
-			public void doAction() throws Exception {
+			public OfficeAsyncAction<String> doAction() throws Exception {
 
 				// Create the OfficeFloor configuration
 				// (Clean instance as defaults loaded to components)
 				String officeFloorLocationText = officeFloorLocation.getText();
-				OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
+				final OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
 						officeFloorLocationText);
 
 				// Load the OfficeFloor Source
@@ -291,14 +300,32 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 							taskNameText, parameterText);
 				}
 
-				// Open the OfficeFloor
-				String processNameSpace = OfficeBuildingAdvancedDeployTabPanel.this.officeBuildingManager
-						.openOfficeFloor(configuration);
+				// Return asynchronous action to open the OfficeFloor
+				return new OfficeAsyncAction<String>("Deploying") {
+					@Override
+					public String doAction() throws Exception {
 
-				// Provide notification that opened
-				OfficeBuildingAdvancedDeployTabPanel.this
-						.notifyUser("Opened under process name space: "
-								+ processNameSpace);
+						// Open the OfficeFloor
+						String processNameSpace = OfficeBuildingAdvancedDeployTabPanel.this.officeBuildingManager
+								.openOfficeFloor(configuration);
+
+						// Return the process name space
+						return processNameSpace;
+					}
+
+					@Override
+					public void done(String result) throws Exception {
+
+						// Provide notification that opened
+						OfficeBuildingAdvancedDeployTabPanel.this
+								.notifyUser("Opened under process name space: "
+										+ result);
+
+						// Refresh the OfficeFloor processes
+						OfficeBuildingAdvancedDeployTabPanel.this.manageTab
+								.refreshOfficeFloorProcesses();
+					}
+				};
 			}
 		});
 
