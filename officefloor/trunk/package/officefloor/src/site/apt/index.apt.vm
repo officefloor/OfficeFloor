@@ -1,11 +1,100 @@
                                                -----------------------
                                                  OfficeFloor Package 
                                                -----------------------
-					        Daniel Sagenschneider
+					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<Landing page demo applications>>
+  <<Deploy Tutorial>>
 
-  This module provides the package of the OfficeFloor server (OfficeBuilding) for running deployed applications.
+  This tutorial looks at deploying a WoOF application.
+
+
+Deployment Architecture
+
+  The deployment architecture of WoOF is based on OfficeFloor.
   
-  Details of running an OfficeFloor within the OfficeBuilding are available on the {{{../../download.html}download page}}.
+  OfficeFloor has an agent process, OfficeBuilding, that is run on the server.  The OfficeBuilding agent process is responsible for spawning and managing the OfficeFloor applications on the server.  As WoOF applications are just OfficeFloor applications with predefined plug-ins, WoOF applications are deployed similar to OfficeFloor applications.
+  
+  Once the OfficeBuilding agent is started it may be connected to by the OfficeConsole.  The OfficeConsole is run locally to the user and connects to the OfficeBuilding agent on the server.  The OfficeConsole provides a GUI tool to deploy applications.  For scripting, command line tools are also available.
+
+
+Running and connecting to the OfficeBuilding agent   
+  
+  Both the OfficeBuilding agent and OfficeConsole are packaged together.  
+  
+  To download the OfficeBuilding agent and connect to it with the OfficeConsole:
+  
+   [[1]] << {{{http://sourceforge.net/projects/officefloor/files/latest/download}Download OfficeFloor}} >>
+  
+   [[1]] Extract the downloaded file and change into the extracted <<<bin>>> folder
+  
+   [[1]] Run: <<<officebuilding start &>>>
+  
+   [[1]] Run: <<<officeconsole>>>
+   
+  The resulting OfficeConsole should be displayed:
+
+[./images/OfficeConsole-screenshot.png] OfficeConsole screen shot.
+
+  This has started OfficeBuilding with the default configuration.  Note, do <<NOT>> use the default configuration for production.  The default configuration is only to run up local test servers that are not publicly available.
+
+
+*Convenient install via Maven
+
+  Should {{{http://maven.apache.org}Maven}} be installed, the following commands provide a convenient means to install OfficeFloor:
+  
++----------------------------
+        wget http://www.officefloor.net/pom.xml
+        mvn install
++----------------------------
+
+  If <<<wget>>> is not available download this {{{/pom.xml}pom.xml}} (right click and save as) and then run <<<mvn install>>> in same directory.
+
+
+Configuring OfficeBuilding / OfficeConsole
+
+  Within the <<<config>>> directory, the <<<OfficeFloor.properties>>> file provides the configuration for both the OfficeBuilding and the OfficeConsole.  Please see this file for the various options.  The important properties however are:
+  
+   [office_building_host] Specifies the host the OfficeBuilding is running on.  For running the OfficeBuilding agent this should always be commented out to start locally on the server.  For the OfficeConsole, this property is specified to connect to an OfficeBuilding running on a remote server.
+   
+   [key_store] Specifies the location of the Key Store.  The OfficeConsole communicates via a secure connection to the OfficeBuilding and uses the key store specified by this property.  Note, for production (or any publicly available OfficeBuilding agent) a Key Store file should be generated for your purposes.  The Key Store file provided with the default OfficeFloor install is not secure (only useful for insecure test servers).
+   
+   [username / password] Specifies the username and password to connect to the OfficeBuilding agent.
+  
+
+*Securing the OfficeBuilding agent
+
+  To secure the OfficeBuilding agent, the following is to be done:
+  
+   * Generate a Key Store file that is secure.
+  
+   * Change the <<<username>>> / <<<password>>> properties.
+   
+   * Restrict the file read permissions of <<<config/OfficeFloor.properties>>> to users only allowed access to this information.
+
+
+*Cloud
+
+  As the OfficeBuilding agent is accessed via a secured connection, it can be run on Cloud server instances.
+
+
+Deploying a WoOF application
+
+  The default installation is configured ready to install a WoOF application.
+  
+  To deploy the WoOF application:
+  
+   [[1]] Select the simple deploy tab of the OfficeConsole.
+   
+   [[1]] Select the packaged WoOF application.
+   
+   [[1]] Click deploy.
+   
+  The OfficeConsole will then transfer the WoOF application to the OfficeBuilding agent.  The OfficeBuilding agent will then subsequently start the WoOF application on the server.
+  
+  For more control, the advanced deploy tab provides finer grained control over deploying an application.
+
+
+Next
+
+  Please see the {{{../../tutorials/index.html}other tutorials}} for further features.
