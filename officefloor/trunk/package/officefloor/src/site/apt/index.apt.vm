@@ -11,11 +11,13 @@
 
 Deployment Architecture
 
-  The deployment architecture of WoOF is based on OfficeFloor.
+  The deployment architecture of a WoOF application is based on OfficeFloor.
   
-  OfficeFloor has an agent process, OfficeBuilding, that is run on the server.  The OfficeBuilding agent process is responsible for spawning and managing the OfficeFloor applications on the server.  As WoOF applications are just OfficeFloor applications with predefined plug-ins, WoOF applications are deployed similar to OfficeFloor applications.
+  OfficeFloor has an agent process, OfficeBuilding, that is run on the server.  The OfficeBuilding agent process is responsible for spawning and managing the OfficeFloor applications on the server.  Note each OfficeFloor application is run in its own process.  As WoOF applications are just OfficeFloor applications with predefined plug-ins, WoOF applications are deployed similar to OfficeFloor applications.
   
   Once the OfficeBuilding agent is started it may be connected to by the OfficeConsole.  The OfficeConsole is run locally to the user and connects to the OfficeBuilding agent on the server.  The OfficeConsole provides a GUI tool to deploy applications.  For scripting, command line tools are also available.
+  
+  Note the term OfficeBuilding comes from an OfficeBuilding having many OfficeFloors - as more than one OfficeFloor application may be deployed to a server with an OfficeBuilding agent.
 
 
 Running and connecting to the OfficeBuilding agent   
@@ -70,7 +72,7 @@ Configuring OfficeBuilding / OfficeConsole
   
    * Change the <<<username>>> / <<<password>>> properties.
    
-   * Restrict the file read permissions of <<<config/OfficeFloor.properties>>> to users only allowed access to this information.
+   * Restrict the file access of <<<config/OfficeFloor.properties>>> (on both the server and deploying user's machine) to users only allowed access to this information.
 
 
 *Cloud
@@ -90,9 +92,20 @@ Deploying a WoOF application
    
    [[1]] Click deploy.
    
-  The OfficeConsole will then transfer the WoOF application to the OfficeBuilding agent.  The OfficeBuilding agent will then subsequently start the WoOF application on the server.
+  The OfficeConsole will then transfer the WoOF application to the OfficeBuilding agent.  The OfficeBuilding agent will then subsequently spawn the WoOF application in its own process on the server.
   
   For more control, the advanced deploy tab provides finer grained control over deploying an application.
+
+
+Scripting
+
+  For scripting purposes, run the following from the <<<bin>>> directory:
+
++----------------------------
+    officebuilding help
++----------------------------
+  
+  This will detail the various commands able to be run from the command line.
 
 
 Next
