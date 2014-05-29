@@ -20,6 +20,7 @@
 			<item name="Secure Link" href="./SecureLinkHttpServer/index.html" />
 			<item name="Authentication" href="./AuthenticationHttpServer/index.html" />
 			<item name="Test" href="./TestHttpServer/index.html" />
+			<item name="Deploy" href="../package/officefloor/index.html" />
 		</menu>
 		<menu name="WoOF Extensions">
 			<item name="AJAX / JSON" href="./JavaScriptApp/index.html" />
