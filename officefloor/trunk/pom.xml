@@ -443,7 +443,7 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-simple</artifactId>
-				<version>1.7.6</version>
+				<version>1.7.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tomcat</groupId>
@@ -1216,7 +1216,7 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<inherited>false</inherited> <!-- run only at top level (not each module) -->
 				<configuration>
-					<webAppSourceDirectory>${basedir}/target/staging/shell.sourceforge.net/home/project-web/officefloor/htdocs</webAppSourceDirectory>
+					<webAppSourceDirectory>${basedir}/target/staging/</webAppSourceDirectory>
 					<httpConnector>
 						<port>9999</port>
 					</httpConnector>
@@ -1294,7 +1294,7 @@
 								<!-- Check staged content (jetty started for absolute HTTP paths) -->
 								<baseURL>http://localhost:9999</baseURL>
 								<timeout>10000</timeout>
-								<outputDirectory>${basedir}/target/staging/shell.sourceforge.net/home/project-web/officefloor/htdocs</outputDirectory>
+								<outputDirectory>${basedir}/target/staging/</outputDirectory>
 								<!-- Not generating as site is being generated/staged -->
 								<forceSite>false</forceSite>
 								<excludedPages>
@@ -1316,10 +1316,6 @@
 								</excludedLinks>
 							</configuration>
 						</plugin>
-						<!-- <plugin> - Generate the sitemap.xml file - <groupId>com.github.s4u.plugins</groupId> 
-							<artifactId>sitemapxml-maven-plugin</artifactId> <version>1.0.0</version> 
-							<executions> <execution> <goals> <goal>gen</goal> </goals> </execution> </executions> 
-							</plugin> -->
 					</reportPlugins>
 				</configuration>
 			</plugin>
