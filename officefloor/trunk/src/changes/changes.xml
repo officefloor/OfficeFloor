@@ -2,8 +2,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="2.15.0" date="In SVN" description="Bayeux protocol WoOF template extension">
-			<action type="add" dev="sagenschneider">Bayeux protocol WoOF template extension</action>
+		<release version="2.15.0" date="2014-06-02" description="Deploy">
+			<action type="add" dev="sagenschneider">Deploy</action>
 		</release>
 		<release version="2.14.0" date="2013-08-25" description="POJO dependency injection">
 			<action type="add" dev="sagenschneider">POJO dependency injection</action>
