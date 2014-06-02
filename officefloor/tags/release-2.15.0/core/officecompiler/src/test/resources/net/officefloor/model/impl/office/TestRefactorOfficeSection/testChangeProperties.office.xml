@@ -1,0 +1,10 @@
+<office>
+	<sections>
+		<section name="NAME" source="net.example.ExampleSectionSource"
+			location="LOCATION">
+			<properties>
+				<property name="ANOTHER_NAME" value="ANOTHER_VALUE" />
+			</properties>
+		</section>
+	</sections>
+</office>

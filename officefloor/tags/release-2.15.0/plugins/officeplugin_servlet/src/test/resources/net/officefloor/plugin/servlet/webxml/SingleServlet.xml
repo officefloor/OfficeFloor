@@ -1,0 +1,19 @@
+<web-app>
+	<servlet>
+		<servlet-name>Test</servlet-name>
+		<servlet-class>net.officefloor.plugin.servlet.webxml.MockHttpServlet
+		</servlet-class>
+		<init-param>
+			<param-name>one</param-name>
+			<param-value>A</param-value>
+		</init-param>
+		<init-param>
+			<param-name>two</param-name>
+			<param-value>B</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Test</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+</web-app>

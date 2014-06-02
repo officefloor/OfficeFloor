@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module rename-to="root">
+	<inherits name="com.google.gwt.user.User" />
+	<inherits name="net.officefloor.plugin.comet.OfficeFloorComet" />
+	<inherits name="com.google.gwt.user.theme.standard.Standard" />
+
+	<entry-point
+		class="net.officefloor.plugin.comet.client.OfficeFloorCometEntryPoint" />	
+	<source path="client" />
+	
+	<!-- Including only for performance of compilation -->
+	<set-property name="user.agent" value="gecko1_8" />
+</module>

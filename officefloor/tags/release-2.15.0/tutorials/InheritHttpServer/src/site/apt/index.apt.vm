@@ -1,0 +1,131 @@
+                                               -----------------------
+                                            Template Inheritance Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Template Inheritance Tutorial>>
+  
+  This tutorial demonstrates the inheritance of both HTML and logic for templates.
+      
+  The following are the example pages for this tutorial.  The parent, child and grand child pages inherit from each other as their name suggests.
+  
+[./images/InheritHttpServer-parent-screenshot.png] InheritHttpServer parent screen shot.
+
+[./images/InheritHttpServer-child-screenshot.png] InheritHttpServer child screen shot.
+
+[./images/InheritHttpServer-grandchild-screenshot.png] InheritHttpServer grand child screenshot.
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/InheritHttpServer/${projectVersion}/InheritHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Parent
+
+  For the parent that does not inherit from a template, it is just a normal template.  It however does specify sections for overriding when inherited from.  The HTML for the parent page is as follows:
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/parent.woof.html}
+
+  And the logic for the page is as follows:
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/ParentLogic.java}
+
+  When rendered, the page results in the following:
+  
+%{code-snippet|brush=xml|file=${basedir}/src/test/resources/parent-expected.html}
+
+
+
+\<!-- \{:section\} --\>
+
+  Template inheritance occurs by the child template overriding sections within the parent template.  To specify which sections are being overridden by the child template, the child template prefixes the section name with ':'.
+  
+  The child template may introduce further sections after the overriding section by not prefixing them with ':'.  The introduced sections are included immediately after the overriding section but before the corresponding next section in the parent template.
+
+  
+
+\<!-- \{!\} --\>
+
+  To continue to allow the child template to be rendered in a web browser for easy editing, sections named '!' are ignored.  These ignored sections allow including HTML tags for correctly rendering the child raw template content.
+  
+  Note that the first section within the child template is also ignored.
+
+
+
+Child
+
+  The child template of this tutorial demonstrates overriding a section, introducing a section and ignoring sections.  
+  
+  The configuration of the child is as follows (note the extension of the template):
+  
+[./images/InheritWizard-screenshot.png] InheritHttpServer child wizard screenshot.
+
+  The HTML for the child page is as follows:
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/child.woof.html}
+
+  The sections, have the following effect:
+  
+   * first section: ignored by default (but necessary for HTML tags)
+   
+   * <<<:content>>> section: overrides the parent's <<<content>>> section
+   
+   * <<<introduced>>> section: included immediately after the child's <<<content>>> section
+   
+   * <<<!>>> section: ignored (but necessary for HTML tags)
+
+  As the <<<introduced>>> section has a $\{property\}, it requires a corresponding data method in the logic class.  The following is the logic class for the child template.  Note that it extends the parent logic class to inherit the required data methods from the parent.
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/ChildLogic.java}
+
+  When rendered, the page results in the following:
+  
+%{code-snippet|brush=xml|file=${basedir}/src/test/resources/child-expected.html}
+
+
+
+Grand Child
+
+  The grand child template of this tutorial demonstrates overriding the first section, overriding an introduced section and overriding a data method.
+
+  The HTML for the grand child page is as follows:
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/grandchild.woof.html}
+
+  The sections, have the following effect:
+  
+   * <<<:template>>> section: overrides the first section of the parent template
+   
+   * <<<precontent>>> section: included immediately after the first section
+   
+   * <<<:introduced>>> section: overrides the child's <<<introduced>>> section
+   
+   * <<<!>>> section: ignored
+   
+  The overriding of the first section also introduces a different property.  This requires the corresponding data method to return a different type (one containing the new property rather than the old property).  To enable overriding data methods of the parent and continue to abide by Java compiler rules, template inheritance for logic classes have methods override each other by name only (not by the entire method signature).  This allows changing the method signature (e.g. adding an additional parameter) and then override the data method by name to return a different type.
+
+  In the case of this tutorial, the following logic class shows overriding the method by name.  The additional parameter is only to create a different method signature to avoid Java compiler issues of returning a different type.
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/GrandChildLogic.java}
+
+  When rendered, the page results in the following:
+  
+%{code-snippet|brush=xml|file=${basedir}/src/test/resources/grandchild-expected.html}
+
+
+
+Configuration Inheritance
+
+  The link configuration of the template is also inherited.  The below configuration for this tutorial shows that only the parent configures the link while the other templates inherit the link configuration.  This is especially useful to reduce lines in configuration for headers and footers of a web site by including this configuration in a single parent template that all other templates inherit from.
+
+[./images/InheritConfiguration-screenshot.png] InheritHttpServer configuration.
+
+  Along with the output link configuration being inherited, the link secure configuration is also inherited.
+  
+  In both output link and link secure, the inheritance may be overridden by the child template by setting the configuration in the child template.
+
+
+Next
+
+  The {{{../SecurePageHttpServer/index.html}next tutorial}} covers securing a page.
+

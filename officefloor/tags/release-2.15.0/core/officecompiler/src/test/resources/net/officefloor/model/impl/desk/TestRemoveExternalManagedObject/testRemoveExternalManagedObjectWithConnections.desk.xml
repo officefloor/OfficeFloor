@@ -1,0 +1,10 @@
+<desk>
+	<external-managed-objects />
+	<works>
+		<work name="WORK" source="net.example.ExampleWorkSource">
+			<work-task name="WORK_TASK">
+				<task-object name="TASK_OBJECT" object-type="java.lang.Object" />
+			</work-task>
+		</work>
+	</works>
+</desk>

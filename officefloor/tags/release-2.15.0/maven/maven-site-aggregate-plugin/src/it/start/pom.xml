@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>@project.groupId@.test</groupId>
+	<artifactId>@project.artifactId@-test</artifactId>
+	<version>@project.version@</version>
+	<packaging>pom</packaging>
+	<name>Test for the Site Aggregate maven plugin</name>
+	<description>Tests the Site Aggregate maven plugin</description>
+	<properties>
+		<testTag>PARENT</testTag>
+		<basedir>${basedir}</basedir>
+	</properties>
+	<modules>
+		<module>child</module>
+	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<!-- Aggregate the Site content -->
+				<groupId>@project.groupId@</groupId>
+				<artifactId>@project.artifactId@</artifactId>
+				<version>@project.version@</version>
+				<inherited>false</inherited>
+				<configuration>
+					<title>OfficeFloor</title>
+					<author>Daniel Sagenschneider</author>
+					<version>1.2.3</version>
+					<projectLogo>./images/Image.png</projectLogo>
+					<baseUrl>http://www.officefloor.net</baseUrl>
+					<ignores>
+						<ignore>ignore</ignore>
+					</ignores>
+					<order>
+						<order>index</order>
+					</order>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>aggregate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<!-- Ensure can generate PDF from aggregated Site -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pdf-plugin</artifactId>
+				<version>1.1</version>
+				<inherited>false</inherited>
+				<executions>
+					<execution>
+						<id>pdf</id>
+						<phase>test</phase>
+						<goals>
+							<goal>pdf</goal>
+						</goals>
+						<configuration>
+							<docDescriptor>${project.basedir}/target/site-aggregate/pdf.xml</docDescriptor>
+							<siteDirectory>${project.basedir}/target/site-aggregate</siteDirectory>
+							<outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
+							<includeReports>false</includeReports>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

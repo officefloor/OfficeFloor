@@ -1,0 +1,13 @@
+                                         --------------------
+                                            OfficeCompiler
+                                         --------------------
+                                         Daniel Sagenschneider
+                                         --------------------
+
+  <<OfficeCompiler>>
+
+  OfficeCompiler compiles the Sources of OfficeFloor for execution by the OfficeFrame.
+
+[images/OfficeCompiler.png] OfficeCompiler
+
+  OfficeCompiler compilation units are Sources that are the building blocks of OfficeFloor.  Each type of Source has its purpose and they are compiled together into the OfficeFrame to provide the application functionality.
