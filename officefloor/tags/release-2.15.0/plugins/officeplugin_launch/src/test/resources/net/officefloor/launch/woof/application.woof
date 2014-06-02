@@ -1,0 +1,45 @@
+<woof>
+	<templates>
+		<template name="TEMPLATE_A" uri="templateA" path="Template.html"
+			class="net.officefloor.launch.woof.MockTemplateLogic">
+			<extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
+				<property name="gwt.entry.point.class.name"
+					value="net.officefloor.launch.woof.client.MockEntryPoint" />
+			</extension>
+			<!-- Same GWT Module -->
+			<extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
+				<property name="gwt.entry.point.class.name"
+					value="net.officefloor.launch.woof.client.MockEntryPoint" />
+			</extension>			
+		</template>
+		<template name="TEMPLATE_B" uri="templateB" path="Template.html"
+			class="net.officefloor.launch.woof.MockTemplateLogic">
+			<!-- No GWT for template -->
+		</template>
+		<template name="TEMPLATE_C" uri="templateC" path="Template.html"
+			class="net.officefloor.launch.woof.MockTemplateLogic">
+			<extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
+				<!-- Same GWT EntryPoint class -->
+				<property name="gwt.entry.point.class.name"
+					value="net.officefloor.launch.woof.client.MockEntryPoint" />
+			</extension>
+		</template>
+		<template name="TEMPLATE_D" uri="templateD" path="Template.html"
+			class="net.officefloor.launch.woof.MockTemplateLogic">
+			<extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
+				<property name="gwt.entry.point.class.name"
+					value="net.officefloor.launch.woof.client.MockEntryPoint" />
+			</extension>
+		</template>
+	</templates>
+	<sections>
+		<section name="SECTION_A" source="DESK" location="DESK_LOCATION">
+			<input name="INPUT_NO_URI" parameter-type="java.lang.Integer" />
+			<input name="INPUT" uri="sectionA" />
+		</section>
+		<section name="SECTION_B" source="DESK" location="DESK_LOCATION">
+			<input name="INPUT_NO_URI" parameter-type="java.lang.Integer" />
+			<input name="INPUT" uri="sectionB" />
+		</section>
+	</sections>
+</woof>

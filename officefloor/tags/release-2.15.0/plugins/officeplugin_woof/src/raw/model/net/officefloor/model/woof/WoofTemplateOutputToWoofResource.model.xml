@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="resource name" />
+	<field type="WoofTemplateOutputModel" name="woof template output"
+		end-field="woof resource" />
+	<field type="WoofResourceModel" name="woof resource" end-list="woof template output" />
+</model>

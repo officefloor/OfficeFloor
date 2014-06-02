@@ -1,0 +1,85 @@
+<woof>
+
+	<templates>
+		<template name="TEMPLATE" path="example/Template.ofp" class="net.example.LogicClass">
+			<output name="OUTPUT_1">
+				<input section="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_2">
+				<template name="TEMPLATE_LINK" />
+			</output>
+			<output name="OUTPUT_3">
+				<access input="Authenticate" />
+			</output>
+			<output name="OUTPUT_4">
+				<resource name="RESOURCE" />
+			</output>
+		</template>
+		<template name="TEMPLATE_CHILD" path="example/Child.ofp"
+			extends="TEMPLATE" />
+		<template name="TEMPLATE_LINK" path="example/Link.ofp">
+			<output name="OUTPUT">
+				<template name="TEMPLATE" />
+			</output>
+		</template>
+	</templates>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource"
+			location="SECTION_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT_A">
+				<input section="SECTION_LINK" input="INPUT" />
+			</output>
+			<output name="OUTPUT_B">
+				<template name="TEMPLATE" />
+			</output>
+			<output name="OUTPUT_C">
+				<access input="Authenticate" />
+			</output>
+			<output name="OUTPUT_D">
+				<resource name="RESOURCE" />
+			</output>
+		</section>
+		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
+			location="LINK_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<input section="SECTION" input="INPUT" />
+			</output>
+		</section>
+	</sections>
+
+	<access source="net.example.HttpSecuritySource">
+		<input name="Authenticate" />
+		<output name="OUTPUT_A1">
+			<input section="SECTION" input="INPUT" />
+		</output>
+		<output name="OUTPUT_A2">
+			<template name="TEMPLATE" />
+		</output>
+		<output name="OUTPUT_A3">
+			<resource name="RESOURCE" />
+		</output>
+	</access>
+
+	<resources>
+		<resource name="RESOURCE" path="Example.html" />
+	</resources>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<template name="TEMPLATE" />
+		</exception>
+		<exception class="java.sql.SQLException">
+			<resource name="RESOURCE" />
+		</exception>
+	</exceptions>
+
+	<starting>
+		<start>
+			<flow section="SECTION" input="INPUT" />
+		</start>
+	</starting>
+
+</woof>

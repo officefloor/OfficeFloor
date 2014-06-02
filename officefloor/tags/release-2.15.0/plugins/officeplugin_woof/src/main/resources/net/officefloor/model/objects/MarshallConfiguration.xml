@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marshall type="net.officefloor.model.objects.AutoWireObjectsModel"
+	element="objects">
+
+	<!-- OBJECT SOURCES -->
+	<collection method="getAutoWireObjectSources">
+
+		<!-- MANAGED OBJECT -->
+		<item type="net.officefloor.model.objects.AutoWireManagedObjectModel"
+			element="managed-object">
+			<attributes>
+				<attribute method="getManagedObjectSourceClassName"
+					attribute="source" />
+				<attribute method="getClassManagedObjectSourceClass"
+					attribute="class" />
+				<attribute method="getTimeout" attribute="timeout" />
+				<attribute method="getQualifier" attribute="qualifier" />
+				<attribute method="getType" attribute="type" />
+			</attributes>
+			<collection method="getPropertySources">
+				<item type="net.officefloor.model.objects.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+				<item type="net.officefloor.model.objects.PropertyFileModel"
+					element="property-file">
+					<attributes>
+						<attribute method="getPath" attribute="path" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getAutoWiring">
+				<item type="net.officefloor.model.objects.AutoWireModel"
+					element="auto-wire">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getFlows">
+				<item type="net.officefloor.model.objects.AutoWireFlowModel"
+					element="flow">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getSection" attribute="section" />
+						<attribute method="getInput" attribute="input" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getTeams">
+				<item type="net.officefloor.model.objects.AutoWireTeamModel"
+					element="team">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getDependencies">
+				<item type="net.officefloor.model.objects.AutoWireDependencyModel"
+					element="dependency">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+
+		<!-- SUPPLIER -->
+		<item type="net.officefloor.model.objects.AutoWireSupplierModel"
+			element="supplier">
+			<attributes>
+				<attribute method="getSupplierSourceClassName" attribute="source" />
+			</attributes>
+			<collection method="getPropertySources">
+				<item type="net.officefloor.model.objects.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+				<item type="net.officefloor.model.objects.PropertyFileModel"
+					element="property-file">
+					<attributes>
+						<attribute method="getPath" attribute="path" />
+					</attributes>
+				</item>
+			</collection>
+		</item>
+
+	</collection>
+
+</marshall>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="section managed object source name" />
+	<field type="String" name="managed object source class name" />
+	<field type="String" name="object type" />
+	<field type="String" name="timeout" />
+	<list type="PropertyModel" name="property" plural="properties" />
+	<list type="SectionManagedObjectToSectionManagedObjectSourceModel"
+		name="section managed object" />
+	<list type="SectionManagedObjectSourceFlowModel" name="section managed object source flow" />
+</model>

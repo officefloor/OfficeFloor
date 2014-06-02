@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# Fail immediately
+set -e
+
+# Default OFFICE_FLOOR_HOME to bin/..
+if [ -z ${OFFICE_FLOOR_HOME} ]; then
+	# Move to OFFICE_FLOOR_HOME directory
+	SCRIPT=`readlink -f $0`
+	BIN_DIR=`dirname $SCRIPT`
+
+	# Default the OFFICE_FLOOR_HOME location
+	export OFFICE_FLOOR_HOME=${BIN_DIR}/..
+fi
+
+# Ensure have JAVA_HOME specified
+if [ -z ${JAVA_HOME} ]; then
+	# No Java Home
+	echo "ERROR: Must specify JAVA_HOME"
+	exit 1;
+fi
+
+# TODO ensure have JConsole jar available
+
+# Change to OFFICE_FLOOR_HOME (resources and classpath relative to this directory)
+cd ${OFFICE_FLOOR_HOME}
+
+# Load the classpath
+. lib/classpath.properties
+
+# Run OfficeFloor (must include officebuilding jar on class path for OfficeConsoleInitialContextFactory to work)
+java \
+	${OFFICE_FLOOR_JVM_OPTIONS} \
+	-cp ${JAVA_HOME}/lib/jconsole.jar:${classpath} \
+	net.officefloor.building.console.OfficeFloorConsoleMain \
+	$0 \
+	net.officefloor.console.OpenOfficeConsole \
+	$@

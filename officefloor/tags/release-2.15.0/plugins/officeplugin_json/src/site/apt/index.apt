@@ -1,0 +1,9 @@
+                                       ---------------------------
+                                              JSON Plug-in
+                                       ---------------------------
+                                          Daniel Sagenschneider
+                                       ---------------------------
+
+  <<JSON Plug-in>>
+
+  This module provides support for JSON content within HTTP request and HTTP response.

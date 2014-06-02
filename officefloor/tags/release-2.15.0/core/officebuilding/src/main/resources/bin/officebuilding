@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# Fail immediately
+set -e
+
+# Default OFFICE_FLOOR_HOME to bin/..
+if [ -z ${OFFICE_FLOOR_HOME} ]; then
+	# Move to OFFICE_FLOOR_HOME directory
+	SCRIPT=`readlink -f $0`
+	BIN_DIR=`dirname $SCRIPT`
+
+	# Default the OFFICE_FLOOR_HOME location
+	export OFFICE_FLOOR_HOME=${BIN_DIR}/..
+fi
+
+# Change to OFFICE_FLOOR_HOME (resources and classpath relative to this directory)
+cd ${OFFICE_FLOOR_HOME}
+
+# Load the classpath
+. lib/classpath.properties
+
+# Run the OfficeBuilding command
+java \
+	${OFFICE_FLOOR_JVM_OPTIONS} \
+	-cp ${classpath} \
+	net.officefloor.building.console.OfficeFloorConsoleMain \
+	$0 \
+	net.officefloor.console.OfficeBuilding \
+	$@
