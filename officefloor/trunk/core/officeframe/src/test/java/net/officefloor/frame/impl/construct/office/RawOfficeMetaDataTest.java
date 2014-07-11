@@ -1513,7 +1513,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * Ensure able to create a {@link ProcessState} and obtain the
 	 * {@link OfficeFloor} {@link EscalationFlow}
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testCreateProcessAndOfficeFloorEscalation() {
 
 		final FlowMetaData<?> flowMetaData = this
@@ -1525,7 +1525,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final WorkMetaData<?> workMetaData = MetaDataTestInstanceFactory
 				.createWorkMetaData(work);
-		final TaskMetaData<?, ?, ?> taskMetaData = MetaDataTestInstanceFactory
+		final TaskMetaData taskMetaData = MetaDataTestInstanceFactory
 				.createTaskMetaData(task, workMetaData);
 
 		// Record creating a process
@@ -1561,6 +1561,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Enable able to include {@link ProcessContextListener} instances.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void testRegisteredProcessContextListener() {
 
 		final ProcessContextListener listener = this
@@ -1573,7 +1574,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final WorkMetaData<?> workMetaData = MetaDataTestInstanceFactory
 				.createWorkMetaData(work);
-		final TaskMetaData<?, ?, ?> taskMetaData = MetaDataTestInstanceFactory
+		final TaskMetaData taskMetaData = MetaDataTestInstanceFactory
 				.createTaskMetaData(task, workMetaData);
 
 		// Record registering Process Context Listener

@@ -373,6 +373,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures a {@link JobNode} does not wait on its {@link ThreadState}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void testJobNodeNotWaitOnItsOwnThread() {
 
 		final Work work = this.createMock(Work.class);
@@ -381,7 +382,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 
 		final WorkMetaData<Work> workMetaData = MetaDataTestInstanceFactory
 				.createWorkMetaData(work);
-		final TaskMetaData<?, ?, ?> taskMetaData = MetaDataTestInstanceFactory
+		final TaskMetaData taskMetaData = MetaDataTestInstanceFactory
 				.createTaskMetaData(task, workMetaData);
 
 		// Record initialising ThreadState and create a JobNode from it

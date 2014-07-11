@@ -88,8 +88,9 @@ public class ManagedObjectSourceInstigateProcessTest extends
 
 		// Provide task for managed object source input
 		this.constructWork("WORK", this.inputTask, "TASK");
-		TaskBuilder<?, ?, ?> taskBuilder = this.constructTask("TASK",
-				this.inputTask, "TEAM", "INPUT", Object.class, null, null);
+		TaskBuilder<Work, Indexed, Indexed> taskBuilder = this.constructTask(
+				"TASK", this.inputTask, "TEAM", "INPUT", Object.class, null,
+				null);
 		taskBuilder.linkParameter(1, Object.class);
 
 		// Register the team

@@ -938,10 +938,9 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			// Escalates if timed out
 			if (isTimedOut) {
 				// Record setting into a failed state
-				this.record_setFailedState(
-						((!isSourced) ? SourceManagedObjectTimedOutEscalation.class
-								: ManagedObjectOperationTimedOutEscalation.class),
-						this.jobActivateSet);
+				Class<? extends ManagedObjectEscalation> escalationClass = (!isSourced) ? SourceManagedObjectTimedOutEscalation.class
+						: ManagedObjectOperationTimedOutEscalation.class;
+				this.record_setFailedState(escalationClass, this.jobActivateSet);
 				return;
 			}
 		}

@@ -41,8 +41,8 @@ public interface RawTaskMetaDataFactory {
 	 *            {@link Task}.
 	 * @return {@link RawTaskMetaData}.
 	 */
-	<W extends Work, D extends Enum<D>, F extends Enum<F>> RawTaskMetaData<W, D, F> constructRawTaskMetaData(
-			TaskConfiguration<W, D, F> configuration,
+	<W extends Work> RawTaskMetaData<W, ?, ?> constructRawTaskMetaData(
+			TaskConfiguration<W, ?, ?> configuration,
 			OfficeFloorIssues issues, RawWorkMetaData<W> rawWorkMetaData);
 
 }

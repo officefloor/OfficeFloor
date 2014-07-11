@@ -258,6 +258,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 */
 
 	@Override
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public RawOfficeMetaData constructRawOfficeMetaData(
 			OfficeConfiguration configuration, SourceContext sourceContext,
 			OfficeFloorIssues issues,
@@ -350,7 +351,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		List<RawGovernanceMetaData<?, ?>> rawGovernanceMetaDataList = new LinkedList<RawGovernanceMetaData<?, ?>>();
 		Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData<?, ?>>();
 		NEXT_GOVERNANCE: for (int i = 0; i < governanceConfigurations.length; i++) {
-			GovernanceConfiguration<?, ?> governanceConfiguration = governanceConfigurations[i];
+			GovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
 
 			// Create the raw governance
 			RawGovernanceMetaData<?, ?> rawGovernance = rawGovernanceMetaDataFactory
