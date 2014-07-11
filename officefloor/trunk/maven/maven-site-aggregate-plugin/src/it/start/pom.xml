@@ -33,6 +33,8 @@
 					</ignores>
 					<order>
 						<order>index</order>
+						<order>section-name</order>
+						<order>code-snippet</order>
 					</order>
 				</configuration>
 				<executions>
