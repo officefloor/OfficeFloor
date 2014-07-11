@@ -183,7 +183,7 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public TaskConfiguration<W, ?, ?>[] getTaskConfiguration() {
+	public <D extends Enum<D>, F extends Enum<F>> TaskConfiguration<W, D, F>[] getTaskConfiguration() {
 		return this.tasks.toArray(new TaskConfiguration[0]);
 	}
 

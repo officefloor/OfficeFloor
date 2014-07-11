@@ -2210,11 +2210,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 *            If expected to be constructed.
 	 * @return {@link RawTaskMetaData}.
 	 */
+	@SuppressWarnings("unchecked")
 	private RawTaskMetaData<W, D, F> constructRawTaskMetaData(
 			boolean isExpectConstruct) {
 
 		// Construct the raw task meta-data
-		RawTaskMetaData<W, D, F> metaData = RawTaskMetaDataImpl.getFactory()
+		RawTaskMetaData<W, ?, ?> metaData = RawTaskMetaDataImpl.getFactory()
 				.constructRawTaskMetaData(this.configuration, this.issues,
 						this.rawWorkMetaData);
 		if (isExpectConstruct) {
@@ -2224,7 +2225,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		}
 
 		// Return the meta-data
-		return metaData;
+		return (RawTaskMetaData<W, D, F>) metaData;
 	}
 
 	/**

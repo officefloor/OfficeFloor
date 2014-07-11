@@ -523,13 +523,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ManagedObjectBuilder<?> constructManagedObject(
 			String managedObjectName, ManagedObject managedObject,
 			String managingOffice) {
 
 		// Create the mock Managed Object Source meta-data
-		ManagedObjectSourceMetaData<?, ?> metaData = new MockManagedObjectSourceMetaData(
+		ManagedObjectSourceMetaData metaData = new MockManagedObjectSourceMetaData(
 				managedObject);
 
 		// Register the Managed Object

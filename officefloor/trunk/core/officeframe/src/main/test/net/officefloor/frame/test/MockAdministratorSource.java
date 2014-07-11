@@ -69,8 +69,8 @@ public class MockAdministratorSource implements
 			OfficeBuilder officeBuilder) {
 
 		// Create the administrator builder
-		AdministratorBuilder<?> builder = officeBuilder.addThreadAdministrator(
-				name, MockAdministratorSource.class);
+		AdministratorBuilder<Indexed> builder = officeBuilder
+				.addThreadAdministrator(name, MockAdministratorSource.class);
 
 		// Provide task administrator link to meta-data
 		builder.addProperty(TASK_ADMINISTRATOR_PROPERTY, name);

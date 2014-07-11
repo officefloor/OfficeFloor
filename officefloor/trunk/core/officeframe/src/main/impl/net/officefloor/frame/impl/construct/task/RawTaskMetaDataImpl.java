@@ -144,8 +144,9 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 */
 
 	@Override
-	public <w extends Work, d extends Enum<d>, f extends Enum<f>> RawTaskMetaData<w, d, f> constructRawTaskMetaData(
-			TaskConfiguration<w, d, f> configuration, OfficeFloorIssues issues,
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <w extends Work> RawTaskMetaData<w, ?, ?> constructRawTaskMetaData(
+			TaskConfiguration<w, ?, ?> configuration, OfficeFloorIssues issues,
 			final RawWorkMetaData<w> rawWorkMetaData) {
 
 		// Obtain the task name
@@ -160,7 +161,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		String jobName = rawWorkMetaData.getWorkName() + "." + taskName;
 
 		// Obtain the task factory
-		TaskFactory<w, d, f> taskFactory = configuration.getTaskFactory();
+		TaskFactory<w, ?, ?> taskFactory = configuration.getTaskFactory();
 		if (taskFactory == null) {
 			issues.addIssue(AssetType.TASK, taskName,
 					"No " + TaskFactory.class.getSimpleName() + " provided");
@@ -195,12 +196,12 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 		// Obtain the managed objects used directly by this task.
 		// Also obtain the parameter type for the task if specified.
-		TaskObjectConfiguration<d>[] objectConfigurations = configuration
+		TaskObjectConfiguration<?>[] objectConfigurations = configuration
 				.getObjectConfiguration();
 		ManagedObjectIndex[] taskToWorkMoTranslations = new ManagedObjectIndex[objectConfigurations.length];
 		Class<?> parameterType = null;
 		NEXT_OBJECT: for (int i = 0; i < objectConfigurations.length; i++) {
-			TaskObjectConfiguration<d> objectConfiguration = objectConfigurations[i];
+			TaskObjectConfiguration<?> objectConfiguration = objectConfigurations[i];
 
 			// Ensure have configuration
 			if (objectConfiguration == null) {
@@ -408,15 +409,15 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		}
 
 		// Create the task meta-data
-		TaskMetaDataImpl<w, d, f> taskMetaData = new TaskMetaDataImpl<w, d, f>(
+		TaskMetaDataImpl<w, ?, ?> taskMetaData = new TaskMetaDataImpl(
 				jobName, taskName, taskFactory, differentiator, parameterType,
 				responsibleTeam, continueTeam, requiredManagedObjectIndexes,
 				taskToWorkMoTranslations, requiredGovernance, preTaskDuties,
 				postTaskDuties);
 
 		// Return the raw task meta-data
-		return new RawTaskMetaDataImpl<w, d, f>(taskName, configuration,
-				taskMetaData, rawWorkMetaData);
+		return new RawTaskMetaDataImpl(taskName, configuration, taskMetaData,
+				rawWorkMetaData);
 	}
 
 	/**

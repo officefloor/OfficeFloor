@@ -70,7 +70,7 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 			OfficeFloorBuilder officeFloorBuilder) {
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder<?> builder = officeFloorBuilder.addManagedObject(
+		ManagedObjectBuilder<None> builder = officeFloorBuilder.addManagedObject(
 				name, MockManagedObjectSource.class);
 
 		// Provide managed object link to meta-data

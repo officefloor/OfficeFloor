@@ -64,7 +64,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		String officeName = this.getOfficeName();
 
 		// Construct the managed object
-		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject("MO",
+		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject("MO",
 				TestManagedObjectSource.class, officeName);
 		moBuilder.setTimeout(1000);
 
