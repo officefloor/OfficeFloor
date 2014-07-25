@@ -430,11 +430,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
+			@SuppressWarnings("rawtypes")
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<ObjectKey, ?> task = work.addTaskType("TASK",
-						taskFactory, ObjectKey.class, null);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						ObjectKey.class, null);
 
 				// Add task without key
 				task.addObject(Connection.class);
@@ -543,11 +544,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
-						taskFactory, null, null);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						null, null);
 
 				// Add task wit no object type
 				task.addObject(null);
@@ -567,11 +569,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
-						taskFactory, null, null);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						null, null);
 
 				// Add objects with same name
 				task.addObject(Connection.class).setLabel("SAME");
@@ -595,11 +598,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		WorkType<Work> workType = this.loadWorkType(true, new Loader() {
 			@Override
+			@SuppressWarnings("rawtypes")
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<ObjectKey, ?> task = work.addTaskType("TASK",
-						taskFactory, ObjectKey.class, null);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						ObjectKey.class, null);
 
 				// Add in wrong order
 				task.addObject(twoType).setKey(ObjectKey.TWO);
@@ -650,11 +654,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		WorkType<Work> workType = this.loadWorkType(true, new Loader() {
 			@Override
+			@SuppressWarnings("rawtypes")
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
-						taskFactory, null, null);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						null, null);
 
 				// Add objects with type qualified for on
 				task.addObject(Connection.class).setTypeQualifier("QUALIFIED");
@@ -720,11 +725,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
+			@SuppressWarnings("rawtypes")
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ObjectKey> task = work.addTaskType("TASK",
-						taskFactory, null, ObjectKey.class);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						null, ObjectKey.class);
 
 				// Add task without key
 				task.addFlow();
@@ -833,11 +839,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
+			@SuppressWarnings("rawtypes")
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
-						taskFactory, null, null);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						null, null);
 
 				// Add flows with same name
 				task.addFlow().setLabel("SAME");
@@ -860,11 +867,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		WorkType<Work> workType = this.loadWorkType(true, new Loader() {
 			@Override
+			@SuppressWarnings("rawtypes")
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, FlowKey> task = work.addTaskType("TASK",
-						taskFactory, null, FlowKey.class);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						null, FlowKey.class);
 
 				// Add in wrong order
 				task.addFlow().setKey(FlowKey.TWO);
@@ -918,11 +926,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
-						taskFactory, null, null);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						null, null);
 
 				// Add no escalation type
 				task.addEscalation(null);
@@ -942,11 +951,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
-						taskFactory, null, null);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						null, null);
 
 				// Add duplicate escalation names
 				task.addEscalation(Exception.class).setLabel("SAME");
@@ -963,11 +973,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		WorkType<Work> workType = this.loadWorkType(true, new Loader() {
 			@Override
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
-						taskFactory, null, null);
+				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+						null, null);
 
 				// Add escalations
 				task.addEscalation(Error.class);
@@ -1003,11 +1014,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		WorkType<Work> work = this.loadWorkType(true, new Loader() {
 			@Override
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?> task = work.addTaskType(TASK_NAME,
-						taskFactory, null, null);
+				TaskTypeBuilder task = work.addTaskType(TASK_NAME, taskFactory,
+						null, null);
 
 				// Add object, flow, escalation labels
 				task.addObject(Connection.class).setLabel(OBJECT_NAME);

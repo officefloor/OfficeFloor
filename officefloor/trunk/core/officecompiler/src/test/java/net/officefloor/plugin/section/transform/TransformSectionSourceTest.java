@@ -397,9 +397,10 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 	public SectionDesigner createExpectedType(boolean isTransform, String prefix) {
 
 		// Create the expected type
+		Class<? extends SectionSource> sectionSourceClass = isTransform ? TransformSectionSource.class
+				: ClassSectionSource.class;
 		SectionDesigner type = SectionLoaderUtil
-				.createSectionDesigner(isTransform ? TransformSectionSource.class
-						: ClassSectionSource.class);
+				.createSectionDesigner(sectionSourceClass);
 
 		// Inputs
 		type.addSectionInput(prefix + "inputOne", null);

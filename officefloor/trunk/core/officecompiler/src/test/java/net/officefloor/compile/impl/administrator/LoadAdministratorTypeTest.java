@@ -548,6 +548,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	 *            {@link Property} name value pairs.
 	 * @return Loaded {@link AdministratorType}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public AdministratorType<?, ?> loadAdministratorType(
 			boolean isExpectedToLoad, Init init,
 			String... propertyNameValuePairs) {
@@ -569,7 +570,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		AdministratorLoader adminLoader = compiler.getAdministratorLoader();
 		MockAdministratorSource.init = init;
-		AdministratorType<?, ?> adminType = adminLoader.loadAdministrator(
+		AdministratorType adminType = adminLoader.loadAdministrator(
 				MockAdministratorSource.class, propertyList);
 
 		// Verify the mock objects

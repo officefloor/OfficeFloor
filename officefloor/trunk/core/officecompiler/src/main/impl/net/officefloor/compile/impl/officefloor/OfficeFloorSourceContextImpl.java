@@ -88,6 +88,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public ManagedObjectType<?> loadManagedObjectType(
 			ManagedObjectSource<?, ?> managedObjectSource,
 			PropertyList properties) {
@@ -96,7 +97,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 		ManagedObjectLoader managedObjectLoader = this.context
 				.getManagedObjectLoader(LocationType.OFFICE_FLOOR,
 						this.officeFloorLocation, "loadManagedObjectType");
-		ManagedObjectType<?> managedObjectType = managedObjectLoader
+		ManagedObjectType managedObjectType = managedObjectLoader
 				.loadManagedObjectType(managedObjectSource, properties);
 
 		// Ensure have the managed object type

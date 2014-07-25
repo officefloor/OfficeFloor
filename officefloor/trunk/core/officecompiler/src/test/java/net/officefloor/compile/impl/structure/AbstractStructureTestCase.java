@@ -81,6 +81,7 @@ import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
@@ -1511,7 +1512,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			/**
 			 * {@link TaskTypeBuilder}.
 			 */
-			private final TaskTypeBuilder<?, ?> taskTypeBuilder;
+			@SuppressWarnings("rawtypes")
+			private final TaskTypeBuilder taskTypeBuilder;
 
 			/**
 			 * Initiate.
@@ -1549,6 +1551,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			}
 
 			@Override
+			@SuppressWarnings("unchecked")
 			public TaskObjectTypeBuilder<?> addObject(String objectName,
 					Class<?> objectType, String typeQualifier) {
 				// Create and return the task object type builder
@@ -1562,6 +1565,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			}
 
 			@Override
+			@SuppressWarnings("unchecked")
 			public <E extends Throwable> TaskEscalationTypeBuilder addEscalation(
 					String escalationName, Class<E> escalationType) {
 				// Create and return the task escalation type builder

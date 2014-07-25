@@ -140,6 +140,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if dependency with multiple qualifiers.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void testMultipleQualifiersOnDependency() {
 
 		final CompilerIssues issues = this.createMock(CompilerIssues.class);
@@ -192,7 +193,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 				MockMultipleQualifiedClass.class.getName());
 
 		// Validate the managed object type
-		ManagedObjectType<?> type = compiler.getManagedObjectLoader()
+		ManagedObjectType type = compiler.getManagedObjectLoader()
 				.loadManagedObjectType(ClassManagedObjectSource.class,
 						properties);
 		assertNull("Should not load type", type);

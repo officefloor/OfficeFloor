@@ -219,9 +219,10 @@ public abstract class AbstractDeskChangesTestCase extends
 		 */
 
 		@Override
+		@SuppressWarnings("rawtypes")
 		public TaskTypeConstructor addTask(String taskName) {
 			// Add the task
-			TaskTypeBuilder<?, ?> taskTypeBuilder = this.workTypeBuilder
+			TaskTypeBuilder taskTypeBuilder = this.workTypeBuilder
 					.addTaskType(taskName, null, (Class<Indexed>) null,
 							(Class<Indexed>) null);
 
