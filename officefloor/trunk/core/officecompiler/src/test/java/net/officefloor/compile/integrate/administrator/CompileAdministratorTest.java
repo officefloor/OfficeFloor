@@ -60,6 +60,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	/**
 	 * Tests {@link Administrator} pre-administering a {@link Task}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void testPreAdministerTask() {
 
 		// Record building the office floor
@@ -71,7 +72,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkPreTaskAdministration("ADMIN", "duty");
-		AdministratorBuilder<?> admin = this
+		AdministratorBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
 						"OFFICE_TEAM", ClassAdministratorSource.class,
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
@@ -85,6 +86,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	/**
 	 * Tests {@link Administrator} post-administering a {@link Task}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void testPostAdministerTask() {
 
 		// Record building the office floor
@@ -96,7 +98,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkPostTaskAdministration("ADMIN", "duty");
-		AdministratorBuilder<?> admin = this
+		AdministratorBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
 						"OFFICE_TEAM", ClassAdministratorSource.class,
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
@@ -110,6 +112,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	/**
 	 * Tests administering an {@link OfficeFloorManagedObject}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void testAdministerOfficeFloorManagedObject() {
 
 		// Record building the office floor
@@ -121,7 +124,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		AdministratorBuilder<?> admin = this
+		AdministratorBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
 						"OFFICE_TEAM", ClassAdministratorSource.class,
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
@@ -139,6 +142,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	/**
 	 * Tests administering an {@link OfficeManagedObject}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void testAdministerOfficeManagedObject() {
 
 		// Record building the office floor
@@ -154,7 +158,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_addThreadManagedObject(
 				"OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
-		AdministratorBuilder<?> admin = this
+		AdministratorBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
 						"OFFICE_TEAM", ClassAdministratorSource.class,
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,

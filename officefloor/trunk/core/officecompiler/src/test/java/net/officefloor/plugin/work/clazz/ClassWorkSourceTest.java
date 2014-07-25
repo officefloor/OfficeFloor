@@ -70,6 +70,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provider {@link Qualifier} to dependency name.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testQualifiedDependency() throws Exception {
 
 		// Create the work type builder
@@ -78,8 +79,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 						MockQualifiedClass.class));
 
 		// task
-		TaskTypeBuilder<?, ?> task = work.addTaskType("task",
-				new ClassTaskFactory(null, false, null), null, null);
+		TaskTypeBuilder task = work.addTaskType("task", new ClassTaskFactory(
+				null, false, null), null, null);
 		TaskObjectTypeBuilder<?> objectOne = task.addObject(String.class);
 		objectOne.setTypeQualifier(MockQualification.class.getName());
 		objectOne.setLabel(MockQualification.class.getName() + "-"
@@ -112,6 +113,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if provide multiple {@link Qualifier} to dependency name.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testMultipleQualifiedDependency() throws Exception {
 
 		final CompilerIssues issues = this.createMock(CompilerIssues.class);
@@ -162,8 +164,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 						MockMultipleQualifiedClass.class));
 
 		// task
-		TaskTypeBuilder<?, ?> task = work.addTaskType("task",
-				new ClassTaskFactory(null, false, null), null, null);
+		TaskTypeBuilder task = work.addTaskType("task", new ClassTaskFactory(
+				null, false, null), null, null);
 		task.addObject(String.class)
 				.setLabel(MockQualification.class.getName());
 
@@ -200,6 +202,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to load {@link WorkType} for the {@link ClassWorkSource}.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testWorkType() throws Exception {
 
 		// Create the work type builder
@@ -207,9 +210,8 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 				.createWorkTypeBuilder(new ClassWorkFactory(MockClass.class));
 
 		// taskInstanceMethod
-		TaskTypeBuilder<?, ?> instanceMethod = work.addTaskType(
-				"taskInstanceMethod", new ClassTaskFactory(null, false, null),
-				null, null);
+		TaskTypeBuilder instanceMethod = work.addTaskType("taskInstanceMethod",
+				new ClassTaskFactory(null, false, null), null, null);
 		instanceMethod.setReturnType(String.class);
 		instanceMethod.addObject(String.class).setLabel(String.class.getName());
 		TaskFlowTypeBuilder<?> asynchronous = instanceMethod.addFlow();
@@ -222,14 +224,13 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		instanceMethod.addEscalation(IOException.class);
 
 		// taskFailMethod
-		TaskTypeBuilder<?, ?> failMethod = work.addTaskType("taskFailMethod",
+		TaskTypeBuilder failMethod = work.addTaskType("taskFailMethod",
 				new ClassTaskFactory(null, false, null), null, null);
 		failMethod.addEscalation(SQLException.class);
 
 		// taskStaticMethod
-		TaskTypeBuilder<?, ?> staticMethod = work.addTaskType(
-				"taskStaticMethod", new ClassTaskFactory(null, false, null),
-				null, null);
+		TaskTypeBuilder staticMethod = work.addTaskType("taskStaticMethod",
+				new ClassTaskFactory(null, false, null), null, null);
 		staticMethod.setReturnType(Object.class);
 
 		// Validate the work type
@@ -492,6 +493,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to inherit by method name for the {@link ClassWorkSource}.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testWorkInheritance() throws Exception {
 
 		// Invalid test if not inheriting
@@ -503,7 +505,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 				.createWorkTypeBuilder(new ClassWorkFactory(ChildClass.class));
 
 		// task
-		TaskTypeBuilder<?, ?> taskMethod = work.addTaskType("task",
+		TaskTypeBuilder taskMethod = work.addTaskType("task",
 				new ClassTaskFactory(null, false, null), null, null);
 		taskMethod.setReturnType(Integer.class);
 		taskMethod.addObject(Integer.class).setLabel(Integer.class.getName());

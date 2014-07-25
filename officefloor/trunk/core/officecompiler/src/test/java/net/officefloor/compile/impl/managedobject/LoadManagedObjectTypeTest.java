@@ -102,6 +102,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * Ensure can load {@link SimpleManagedObject} via
 	 * {@link ClassManagedObjectSource} {@link Class}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void testLoadByClass() {
 
 		// Configure test
@@ -117,7 +118,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Load the managed object type
 		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
-		ManagedObjectType<?> moType = moLoader.loadManagedObjectType(
+		ManagedObjectType moType = moLoader.loadManagedObjectType(
 				ClassManagedObjectSource.class, properties);
 		MockLoadManagedObject.assertManagedObjectType(moType);
 	}
@@ -126,6 +127,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * Ensure can load {@link SimpleManagedObject} via
 	 * {@link ClassManagedObjectSource} instance.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void testLoadByInstance() {
 
 		// Configure test
@@ -141,7 +143,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Load the managed object type
 		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
-		ManagedObjectType<?> moType = moLoader.loadManagedObjectType(
+		ManagedObjectType moType = moLoader.loadManagedObjectType(
 				new ClassManagedObjectSource(), properties);
 		MockLoadManagedObject.assertManagedObjectType(moType);
 	}
@@ -1215,9 +1217,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
 			@Override
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void init(ManagedObjectSourceContext<None> context,
 					InitUtil util) {
-				ManagedObjectTaskBuilder<?, ?> task = context.addWork("WORK",
+				ManagedObjectTaskBuilder task = context.addWork("WORK",
 						util.getWorkFactory()).addTask("TASK",
 						util.getTaskFactory());
 				task.setTeam("TEAM");
@@ -1239,9 +1242,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
 			@Override
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void init(ManagedObjectSourceContext<None> context,
 					InitUtil util) {
-				ManagedObjectTaskBuilder<?, ?> task = context.addWork("WORK",
+				ManagedObjectTaskBuilder task = context.addWork("WORK",
 						util.getWorkFactory()).addTask("TASK",
 						util.getTaskFactory());
 				task.setTeam("TEAM");
@@ -1264,9 +1268,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
 			@Override
+			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void init(ManagedObjectSourceContext<None> context,
 					InitUtil util) {
-				ManagedObjectTaskBuilder<?, ?> task = context.addWork("WORK",
+				ManagedObjectTaskBuilder task = context.addWork("WORK",
 						util.getWorkFactory()).addTask("TASK",
 						util.getTaskFactory());
 				task.setTeam("TEAM");
@@ -1289,20 +1294,21 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		ManagedObjectType<?> moType = this.loadManagedObjectType(true,
 				new Init<None>() {
 					@Override
+					@SuppressWarnings({ "rawtypes", "unchecked" })
 					public void init(ManagedObjectSourceContext<None> context,
 							InitUtil util) {
 						// Add task that links to other task
-						ManagedObjectTaskBuilder<?, ?> linkTask = context
-								.addWork("WORK", util.getWorkFactory())
-								.addTask("TASK", util.getTaskFactory());
+						ManagedObjectTaskBuilder linkTask = context.addWork(
+								"WORK", util.getWorkFactory()).addTask("TASK",
+								util.getTaskFactory());
 						linkTask.setTeam("TEAM");
 						linkTask.linkFlow(0, "LINK_WORK", "LINK_TASK",
 								FlowInstigationStrategyEnum.SEQUENTIAL, null);
 
 						// Add task being linked too
-						ManagedObjectTaskBuilder<?, ?> targetTask = context
-								.addWork("LINK_WORK", util.getWorkFactory())
-								.addTask("LINK_TASK", util.getTaskFactory());
+						ManagedObjectTaskBuilder targetTask = context.addWork(
+								"LINK_WORK", util.getWorkFactory()).addTask(
+								"LINK_TASK", util.getTaskFactory());
 						targetTask.setTeam("TEAM");
 					}
 				});
@@ -1327,12 +1333,13 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		ManagedObjectType<?> moType = this.loadManagedObjectType(true,
 				new Init<None>() {
 					@Override
+					@SuppressWarnings({ "rawtypes", "unchecked" })
 					public void init(ManagedObjectSourceContext<None> context,
 							InitUtil util) {
 						// Add task that links to other task
-						ManagedObjectTaskBuilder<?, ?> linkTask = context
-								.addWork("WORK", util.getWorkFactory())
-								.addTask("TASK", util.getTaskFactory());
+						ManagedObjectTaskBuilder linkTask = context.addWork(
+								"WORK", util.getWorkFactory()).addTask("TASK",
+								util.getTaskFactory());
 						linkTask.setTeam("TEAM");
 						linkTask.linkFlow(0, null,
 								FlowInstigationStrategyEnum.SEQUENTIAL,
@@ -1655,6 +1662,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 *            {@link Property} name value pairs.
 	 * @return Loaded {@link ManagedObjectType}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public <F extends Enum<F>> ManagedObjectType<?> loadManagedObjectType(
 			boolean isExpectedToLoad, Init<F> init,
 			String... propertyNameValuePairs) {
@@ -1676,7 +1684,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
 		MockManagedObjectSource.init = init;
-		ManagedObjectType<?> moType = moLoader.loadManagedObjectType(
+		ManagedObjectType moType = moLoader.loadManagedObjectType(
 				MockManagedObjectSource.class, propertyList);
 
 		// Verify the mock objects

@@ -101,7 +101,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * overrides the {@link Class}. Will be <code>null</code> if not to
 	 * override.
 	 */
-	private final ManagedObjectSource<?, ?> managedObjectSource;
+	@SuppressWarnings("rawtypes")
+	private final ManagedObjectSource managedObjectSource;
 
 	/**
 	 * Class name of the {@link ManagedObjectSource}.
@@ -595,7 +596,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Obtain the Managed Object Builder
-		ManagedObjectBuilder<?> moBuilder;
+		ManagedObjectBuilder moBuilder;
 		Set<String> suppliedTeamNames = new HashSet<String>();
 		if (this.suppliedManagedObjectNode != null) {
 			// Obtain the supplied managed object for managed object builder

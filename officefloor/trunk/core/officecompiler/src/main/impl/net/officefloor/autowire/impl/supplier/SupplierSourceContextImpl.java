@@ -228,7 +228,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 							this.officeFloorLocation, managedObjectName);
 
 			// Load the managed object type
-			ManagedObjectType<?> moType = managedObjectLoader
+			ManagedObjectType moType = managedObjectLoader
 					.loadManagedObjectType(object.managedObjectSource,
 							object.properties);
 			if (moType == null) {

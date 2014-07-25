@@ -652,6 +652,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 *            {@link OfficeConfiguration}.
 	 * @return {@link ManagedObjectTeamType} instances.
 	 */
+	@SuppressWarnings("rawtypes")
 	private ManagedObjectTeamType[] getTeamsEnsuringHaveWorkAndTaskNames(
 			OfficeConfiguration office) {
 
@@ -667,7 +668,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			}
 
 			// Ensure have tasks for the work
-			TaskConfiguration<?, ?, ?>[] tasks = work.getTaskConfiguration();
+			TaskConfiguration[] tasks = work.getTaskConfiguration();
 			if (tasks.length == 0) {
 				this.addIssue("No tasks added for work (work=" + workName + ")");
 				return null; // must have at least one task
