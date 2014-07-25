@@ -102,8 +102,8 @@ public class HttpSecurityTypeRunnable implements
 		}
 
 		// Load the type
-		HttpSecurityType<?, ?, ?, ?> type = httpSecurityLoader
-				.loadHttpSecurityType(httpSecuritySource, properties);
+		HttpSecurityType type = httpSecurityLoader.loadHttpSecurityType(
+				httpSecuritySource, properties);
 
 		// Return the type
 		return type;

@@ -898,6 +898,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 *            {@link Property} name value pairs.
 	 * @return Loaded {@link HttpSecurityType}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public HttpSecurityType<?, ?, ?, ?> loadHttpSecurityType(
 			boolean isExpectedToLoad, Init init,
 			String... propertyNameValuePairs) {
@@ -922,9 +923,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(
 				managedObjectLoader);
 		MockHttpSecuritySource.init = init;
-		HttpSecurityType<?, ?, ?, ?> securityType = securityLoader
-				.loadHttpSecurityType(new MockHttpSecuritySource(),
-						propertyList);
+		HttpSecurityType securityType = securityLoader.loadHttpSecurityType(
+				new MockHttpSecuritySource(), propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();
