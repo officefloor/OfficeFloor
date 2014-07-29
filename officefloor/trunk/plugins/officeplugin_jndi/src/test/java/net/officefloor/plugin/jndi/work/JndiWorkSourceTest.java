@@ -135,6 +135,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensure can execute the JNDI Object {@link Task}.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testExecuteJndiObjectTask() throws Throwable {
 
 		final String JNDI_NAME = "mock/JndiObject";
@@ -186,8 +187,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		workBuilder.setInitialTask("TASK");
 		TaskFactory<JndiWork, ?, ?> taskFactory = work.getTaskTypes()[0]
 				.getTaskFactory();
-		TaskBuilder<JndiWork, ?, ?> task = this.constructTask("TASK",
-				taskFactory, "TEAM");
+		TaskBuilder task = this.constructTask("TASK", taskFactory, "TEAM");
 		task.linkManagedObject(0, "CONTEXT_MO", Context.class);
 		task.linkManagedObject(1, "XML_MO", String.class);
 		task.linkManagedObject(2, "UNMARSHALLER_MO", XmlUnmarshaller.class);
@@ -202,6 +202,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensure can execute the facade {@link Task}.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testExecuteJndiFacadeTask() throws Throwable {
 
 		final String JNDI_NAME = "mock/JndiObject";
@@ -259,8 +260,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		workBuilder.setInitialTask("TASK");
 		TaskFactory<JndiWork, ?, ?> taskFactory = work.getTaskTypes()[0]
 				.getTaskFactory();
-		TaskBuilder<JndiWork, ?, ?> task = this.constructTask("TASK",
-				taskFactory, "TEAM");
+		TaskBuilder task = this.constructTask("TASK", taskFactory, "TEAM");
 		task.linkManagedObject(0, "CONTEXT_MO", Context.class);
 		task.linkManagedObject(1, "XML_MO", String.class);
 		task.linkManagedObject(2, "IDENTIFIER_MO", Integer.class);

@@ -102,7 +102,8 @@ public abstract class AbstractHttpResourceFactoryTestCase extends
 
 				// Obtain the next expected description
 				assertTrue(
-						"Unexpexted file description",
+						"Unexpexted file description: "
+								+ description.getResource().getPath(),
 						AbstractHttpResourceFactoryTestCase.this.expectedDescriptions
 								.size() > 0);
 				RecordedFileDescription expectedDescription = AbstractHttpResourceFactoryTestCase.this.expectedDescriptions

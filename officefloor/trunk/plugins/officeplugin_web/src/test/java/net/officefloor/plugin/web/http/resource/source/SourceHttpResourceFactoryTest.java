@@ -33,6 +33,8 @@ import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFileDescriber;
 import net.officefloor.plugin.web.http.resource.HttpResource;
 import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
+import net.officefloor.plugin.web.http.resource.classpath.ClasspathHttpResourceFactory;
+import net.officefloor.plugin.web.http.resource.war.WarHttpResourceFactory;
 
 /**
  * Tests the {@link SourceHttpResourceFactory}.
@@ -348,6 +350,10 @@ public class SourceHttpResourceFactoryTest extends OfficeFrameTestCase {
 	 */
 	private void createSourceHttpResourceFactory(String warDirectory,
 			String classpathPrefix, boolean isDirect) throws IOException {
+		
+		// Clear the factories
+		ClasspathHttpResourceFactory.clearHttpResourceFactories();
+		WarHttpResourceFactory.clearHttpResourceFactories();
 
 		// Record the creation
 		this.recordReturn(this.context, this.context.getProperty(
