@@ -25,6 +25,7 @@ import java.util.List;
 import javax.sql.PooledConnection;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.pool.PassiveManagedObjectPool;
@@ -66,8 +67,8 @@ public class JdbcManagedObjectSourceTest extends
 		MockConnectionPoolDataSource.setPooledConnection(this.pooledConnection);
 
 		// Configure the JDBC managed object
-		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject("JDBC",
-				JdbcManagedObjectSource.class, officeName);
+		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(
+				"JDBC", JdbcManagedObjectSource.class, officeName);
 		moBuilder.setManagedObjectPool(new PassiveManagedObjectPool(1));
 		moBuilder
 				.addProperty(
@@ -104,11 +105,11 @@ public class JdbcManagedObjectSourceTest extends
 		this.pooledConnection.addConnectionEventListener(null);
 		this.control(this.pooledConnection).setMatcher(
 				new TypeMatcher(JdbcManagedObject.class));
-		this.recordReturn(this.pooledConnection, this.pooledConnection
-				.getConnection(), this.connection);
+		this.recordReturn(this.pooledConnection,
+				this.pooledConnection.getConnection(), this.connection);
 		this.connection.close();
-		this.recordReturn(this.pooledConnection, this.pooledConnection
-				.getConnection(), this.connection);
+		this.recordReturn(this.pooledConnection,
+				this.pooledConnection.getConnection(), this.connection);
 		this.connection.close();
 
 		// Replay mocks
@@ -121,18 +122,18 @@ public class JdbcManagedObjectSourceTest extends
 		// Verify properties were loaded onto connection pool data source
 		MockConnectionPoolDataSource dataSource = MockConnectionPoolDataSource
 				.getInstance();
-		assertEquals("Incorrect driver", Driver.class.getName(), dataSource
-				.getDriver());
+		assertEquals("Incorrect driver", Driver.class.getName(),
+				dataSource.getDriver());
 		assertEquals("Incorrect url", "server:10000", dataSource.getUrl());
 		assertEquals("Incorrect server", "server", dataSource.getServerName());
 		assertEquals("Incorrect port", 10000, dataSource.getPort());
-		assertEquals("Incorrect database", "database", dataSource
-				.getDatabaseName());
+		assertEquals("Incorrect database", "database",
+				dataSource.getDatabaseName());
 		assertEquals("Incorrect username", "user", dataSource.getUsername());
-		assertEquals("Incorrect password", "not telling", dataSource
-				.getPassword());
-		assertEquals("Incorrect login timeout", 15, dataSource
-				.getLoginTimeout());
+		assertEquals("Incorrect password", "not telling",
+				dataSource.getPassword());
+		assertEquals("Incorrect login timeout", 15,
+				dataSource.getLoginTimeout());
 
 		// Obtain the work manager with task to use the connection
 		WorkManager workManager = officeFloor.getOffice(officeName)
@@ -152,8 +153,8 @@ public class JdbcManagedObjectSourceTest extends
 
 		// Verify task invoked twice with connection
 		assertEquals("Incorrect times task invoked", 2, connections.size());
-		assertEquals("Incorrect first connection", this.connection, connections
-				.get(0));
+		assertEquals("Incorrect first connection", this.connection,
+				connections.get(0));
 		assertEquals("Incorrect second connection", this.connection,
 				connections.get(1));
 	}

@@ -25,6 +25,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -79,7 +80,7 @@ public class DataSourceManagedObjectSourceTest extends
 		this.replayMockObjects();
 
 		// Configure the DataSource managed object
-		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject(
+		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(
 				"DATA_SOURCE", DataSourceManagedObjectSource.class, officeName);
 		moBuilder.addProperty(
 				DataSourceManagedObjectSource.PROPERTY_DATA_SOURCE_CLASS_NAME,
@@ -98,16 +99,16 @@ public class DataSourceManagedObjectSourceTest extends
 
 		// Verify properties were loaded onto connection pool data source
 		MockDataSource dataSource = MockDataSource.getInstance();
-		assertEquals("Incorrect driver", Driver.class.getName(), dataSource
-				.getDriver());
+		assertEquals("Incorrect driver", Driver.class.getName(),
+				dataSource.getDriver());
 		assertEquals("Incorrect url", "server:10000", dataSource.getUrl());
 		assertEquals("Incorrect server", "server", dataSource.getServerName());
 		assertEquals("Incorrect port", 10000, dataSource.getPort());
-		assertEquals("Incorrect database", "database", dataSource
-				.getDatabaseName());
+		assertEquals("Incorrect database", "database",
+				dataSource.getDatabaseName());
 		assertEquals("Incorrect username", "user", dataSource.getUsername());
-		assertEquals("Incorrect password", "not telling", dataSource
-				.getPassword());
+		assertEquals("Incorrect password", "not telling",
+				dataSource.getPassword());
 
 		// Obtain the work manager with task to use the connection
 		WorkManager workManager = officeFloor.getOffice(officeName)
@@ -127,8 +128,8 @@ public class DataSourceManagedObjectSourceTest extends
 
 		// Verify task invoked twice with connection
 		assertEquals("Incorrect times task invoked", 2, connections.size());
-		assertEquals("Incorrect first connection", this.connection, connections
-				.get(0));
+		assertEquals("Incorrect first connection", this.connection,
+				connections.get(0));
 		assertEquals("Incorrect second connection", this.connection,
 				connections.get(1));
 	}

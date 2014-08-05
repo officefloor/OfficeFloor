@@ -134,7 +134,7 @@ public class AggregateGoal extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-
+		
 		// Ensure have base directory
 		if (this.basedir == null) {
 			throw new MojoFailureException("Must have basedir");
