@@ -76,7 +76,7 @@
 		<jetty-version>9.2.0.M0</jetty-version>
 		<gwt-version>2.6.0</gwt-version>
 		<syncrpc-version>0.3</syncrpc-version>
-		<datanucleus-version>4.0.0-m1</datanucleus-version>
+		<datanucleus-version>4.0.0-release</datanucleus-version>
 		<failsafe-version>2.16</failsafe-version>
 		<compiler-version>3.1</compiler-version>
 		<ant-jsch-version>1.8.4</ant-jsch-version>
@@ -653,7 +653,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-invoker-plugin</artifactId>
-					<version>1.5</version>
+					<version>1.9</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

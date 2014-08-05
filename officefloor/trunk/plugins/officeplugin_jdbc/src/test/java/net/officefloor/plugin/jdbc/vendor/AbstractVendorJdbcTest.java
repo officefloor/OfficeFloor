@@ -27,6 +27,7 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -160,8 +161,8 @@ public abstract class AbstractVendorJdbcTest extends
 		String officeName = this.getOfficeName();
 
 		// Configure the JDBC managed object
-		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject("JDBC",
-				JdbcManagedObjectSource.class, officeName);
+		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(
+				"JDBC", JdbcManagedObjectSource.class, officeName);
 		Properties properties = this.getDataSourceProperties();
 		System.out.println("Loading "
 				+ JdbcManagedObjectSource.class.getSimpleName()

@@ -40,6 +40,7 @@ import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.jms.AbstractJmsManagedObjectTest;
 import net.officefloor.plugin.jms.JmsUtil;
 import net.officefloor.plugin.jms.activemq.VmJmsAdminObjectFactory;
+import net.officefloor.plugin.jms.server.JmsServerManagedObjectSource.JmsServerFlows;
 import net.officefloor.plugin.jms.server.OnMessageTask.OnMessageFlows;
 
 /**
@@ -69,8 +70,9 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 
 		// Configure the JMS Server Managed Object
-		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject(
-				"JMS_SERVER", JmsServerManagedObjectSource.class, officeName);
+		ManagedObjectBuilder<JmsServerFlows> moBuilder = this
+				.constructManagedObject("JMS_SERVER",
+						JmsServerManagedObjectSource.class, officeName);
 		moBuilder.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
 				VmJmsAdminObjectFactory.class.getName());
 		moBuilder.addProperty(

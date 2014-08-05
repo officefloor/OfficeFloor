@@ -1,6 +1,5 @@
 import java.io.*;
 
-
 // Deletes a directory
 deleteDirectory( dir ) {
 	if (!(dir.exists())) {
