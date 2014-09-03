@@ -4,7 +4,7 @@ Bundle-Name: Eclipse UI
 Bundle-SymbolicName: net.officefloor.ui;singleton:=true
 Bundle-Version: 2.15.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
 Eclipse-RegisterBuddy: net.officefloor.core
 Import-Package: junit.framework,

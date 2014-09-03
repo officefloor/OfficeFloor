@@ -38,7 +38,7 @@ public class BeanDialogTest extends OfficeFrameTestCase {
 	 */
 	@Test
 	@GuiTest
-	public void testPopulateBean() {
+	public void testPopulateBean() throws Exception {
 
 		// Do not test if no GUI
 		if (!this.isGuiAvailable()) {
@@ -61,12 +61,17 @@ public class BeanDialogTest extends OfficeFrameTestCase {
 		// Specify property values
 		Composite dialogArea = (Composite) dialog.getDialogArea();
 		Control[] children = dialogArea.getChildren();
+		
+		// TODO remove
+		for (Control child : children) {
+			System.out.println(child.getClass().getName() + ": " + child);
+		}
 
 		// Name
-		((Text) children[1]).setText("name");
+		((Text) children[1]).setText(MockBean.class.getName());
 		((Text) children[4]).setText("1");
-		((Text) children[7]).setText(MockBean.class.getName());
-
+		((Text) children[7]).setText("name");
+				
 		// Flag close
 		dialog.okPressed();
 

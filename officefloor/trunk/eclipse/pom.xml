@@ -57,8 +57,8 @@
 						<configuration>
 							<excludeScope>provided</excludeScope>
 							<outputDirectory>${basedir}</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
 						</configuration>
 					</execution>
@@ -84,12 +84,12 @@
 			</plugin>
 			<plugin>
 				<!-- Use Tycho to build eclipse components -->
-				<groupId>org.sonatype.tycho</groupId>
+				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
 				<extensions>true</extensions>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.tycho</groupId>
+				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
 				<configuration>
 					<resolver>p2</resolver>
@@ -177,9 +177,9 @@
 			<repositories>
 				<repository>
 					<!-- Eclipse -->
-					<id>eclipse-kepler</id>
+					<id>eclipse-luna</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/releases/kepler</url>
+					<url>http://download.eclipse.org/releases/luna</url>
 				</repository>
 			</repositories>
 		</profile>
