@@ -81,7 +81,6 @@ import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;

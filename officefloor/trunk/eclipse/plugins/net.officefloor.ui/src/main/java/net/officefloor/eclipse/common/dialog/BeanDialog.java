@@ -20,6 +20,7 @@ package net.officefloor.eclipse.common.dialog;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -242,9 +243,13 @@ public class BeanDialog extends Dialog {
 		// Create the composite
 		Composite composite = (Composite) super.createDialogArea(parent);
 
+		// Sort the properties, so consistent order of display
+		List<String> sortedProperties = new ArrayList<String>(properties);
+		Collections.sort(sortedProperties, String.CASE_INSENSITIVE_ORDER);
+
 		// Populate the list of properties
 		this.beanProperties = new ArrayList<BeanProperty>(properties.size());
-		for (String propertyName : properties) {
+		for (String propertyName : sortedProperties) {
 
 			// Label the property
 			Label label = new Label(composite, SWT.WRAP);
