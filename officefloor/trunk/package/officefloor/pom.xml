@@ -13,9 +13,9 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<packageProperties>
-# Run as WoOF applications
-officefloorsource=net.officefloor.plugin.woof.WoofOfficeFloorSource
-officefloor=WoOF
+			# Run as WoOF applications
+			officefloorsource=net.officefloor.plugin.woof.WoofOfficeFloorSource
+			officefloor=WoOF
 		</packageProperties>
 	</properties>
 	<build>
@@ -78,8 +78,12 @@ officefloor=WoOF
 								<property name="runApplicationArtifact"
 									value="net.officefloor.tutorial:DemoApp:war:${project.version}" />
 
-								<echo>Starting OfficeBuilding</echo>
+								<!-- Make the scripts executable -->
 								<chmod file="${binDir}/officebuilding" perm="555" />
+								<chmod file="${binDir}/officeconsole" perm="555" />
+								<chmod file="${binDir}/officefloor" perm="555" />
+								
+								<echo>Starting OfficeBuilding</echo>
 								<exec dir="${binDir}" executable="${binDir}/officebuilding"
 									spawn="true">
 									<arg value="start" />

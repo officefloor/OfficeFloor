@@ -5,24 +5,34 @@ import java.io.*;
 // Log verifying installation
 System.out.println("Verifying install from basedir " + basedir.getAbsolutePath());
 
+// Method to obtain a child directory
+File getChildDirectory(File parent, String directoryName) {
+
+	// Find the child directory
+	File directory = null;
+	for (File checkFile : parent.listFiles()) {
+		if (checkFile.getName().startsWith(directoryName)) {
+			directory = checkFile;
+		}
+	}
+	if ( directory == null ) {
+		throw new FileNotFoundException("Unable to find directory '" + directoryName + "' under parent directory " + basedir.getAbsolutePath());
+	}
+	return directory;
+}
+
 // Method to simplify verifying files exist
 void verifyFileExists(String fileName, boolean isExecutable) {
 
 	// Find the OfficeFloor extracted directory
-	File extractDir = null;
-	for (File checkFile : basedir.listFiles()) {
-		if (checkFile.getName().startsWith("OfficeFloor-")) {
-			extractDir = checkFile;
-		}
-	}
-	if ( extractDir == null ) {
-		throw new FileNotFoundException("Unable to find OfficeFloor extracted directory");
-	}
+	File targetDirectory = getChildDirectory(basedir, "target");
+	File officeFloorReleaseDirectory = getChildDirectory(targetDirectory, "OfficeFloor-");
+	File officeFloorDirectory = getChildDirectory(officeFloorReleaseDirectory, "OfficeFloor-");
 
 	// Verify file exists
 	System.out.print("    " + fileName);
 	System.out.flush();
-	File file = new File(extractDir, fileName); 
+	File file = new File(officeFloorDirectory, fileName); 
 	if ( !file.isFile() ) {
 		throw new FileNotFoundException("Missing expected file: " + file.getName() + "  [" + file.getPath() + "]");
 	}
