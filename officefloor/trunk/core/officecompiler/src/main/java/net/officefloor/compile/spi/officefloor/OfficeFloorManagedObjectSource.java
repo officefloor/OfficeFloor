@@ -56,8 +56,7 @@ public interface OfficeFloorManagedObjectSource extends PropertyConfigurable {
 	 * Obtains the {@link ManagingOffice} for this
 	 * {@link OfficeFloorManagedObjectSource}.
 	 * 
-	 * @param office
-	 *            {@link ManagingOffice}.
+	 * @return {@link ManagingOffice}.
 	 */
 	ManagingOffice getManagingOffice();
 

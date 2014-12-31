@@ -33,7 +33,7 @@ public interface JobExecuteContext {
 	 * Specifies whether the job is complete.
 	 * 
 	 * @param isComplete
-	 *            <code>true<code> if complete.
+	 *            <code>true</code> if complete.
 	 */
 	void setJobComplete(boolean isComplete);
 

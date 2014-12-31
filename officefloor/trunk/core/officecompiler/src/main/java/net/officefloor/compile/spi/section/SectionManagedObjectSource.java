@@ -17,17 +17,17 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * {@link ManagedObjectSource} within an {@link OfficeSection}.
+ * {@link ManagedObjectSource} within an {@link SectionNode}.
  * 
  * @author Daniel Sagenschneider
  */

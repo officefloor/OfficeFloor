@@ -122,7 +122,13 @@ public class ManagedObjectSourceStandAlone {
 
 	/**
 	 * Starts the {@link ManagedObjectSource}.
-	 * 
+	 *
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource}.
 	 * @throws Exception
@@ -138,6 +144,8 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Loads (init and start) the {@link ManagedObjectSource}.
 	 * 
+	 * @param managedObjectSourceClass
+	 *            {@link ManagedObjectSource} class.
 	 * @return Loaded {@link ManagedObjectSource}.
 	 * @throws Exception
 	 *             If fails to init and start the {@link ManagedObjectSource}.

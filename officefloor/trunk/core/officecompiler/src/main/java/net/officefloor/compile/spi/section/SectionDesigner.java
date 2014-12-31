@@ -17,10 +17,10 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.TaskEscalationType;
@@ -30,14 +30,14 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Designer to design the {@link OfficeSection}.
+ * Designer to design the {@link SectionNode}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface SectionDesigner {
 
 	/**
-	 * Adds a {@link SectionInput} to the {@link OfficeSection} being built.
+	 * Adds a {@link SectionInput} to the {@link SectionNode} being built.
 	 * 
 	 * @param inputName
 	 *            Name of the {@link SectionInput}.
@@ -48,7 +48,7 @@ public interface SectionDesigner {
 	SectionInput addSectionInput(String inputName, String parameterType);
 
 	/**
-	 * Adds a {@link SectionOutput} to the {@link OfficeSection} being built.
+	 * Adds a {@link SectionOutput} to the {@link SectionNode} being built.
 	 * 
 	 * @param outputName
 	 *            Name of the {@link SectionOutput}.
@@ -63,7 +63,7 @@ public interface SectionDesigner {
 			boolean isEscalationOnly);
 
 	/**
-	 * Adds a {@link SectionObject} to the {@link OfficeSection} being built.
+	 * Adds a {@link SectionObject} to the {@link SectionNode} being built.
 	 * 
 	 * @param objectName
 	 *            Name of the {@link SectionObject}.
@@ -74,7 +74,7 @@ public interface SectionDesigner {
 	SectionObject addSectionObject(String objectName, String objectType);
 
 	/**
-	 * Adds a {@link SectionWork} to the {@link OfficeSection} being built.
+	 * Adds a {@link SectionWork} to the {@link SectionNode} being built.
 	 * 
 	 * @param workName
 	 *            Name of the {@link SectionWork}.
@@ -87,7 +87,7 @@ public interface SectionDesigner {
 	SectionWork addSectionWork(String workName, String workSourceClassName);
 
 	/**
-	 * Adds a {@link SectionWork} to the {@link OfficeSection} being built.
+	 * Adds a {@link SectionWork} to the {@link SectionNode} being built.
 	 * 
 	 * @param workName
 	 *            Name of the {@link SectionWork}.
@@ -98,7 +98,7 @@ public interface SectionDesigner {
 	SectionWork addSectionWork(String workName, WorkSource<?> workSource);
 
 	/**
-	 * Adds a {@link SectionManagedObjectSource} to the {@link OfficeSection}
+	 * Adds a {@link SectionManagedObjectSource} to the {@link SectionNode}
 	 * being built.
 	 * 
 	 * @param managedObjectSourceName
@@ -114,7 +114,7 @@ public interface SectionDesigner {
 			String managedObjectSourceName, String managedObjectSourceClassName);
 
 	/**
-	 * Adds a {@link SectionManagedObjectSource} to the {@link OfficeSection}
+	 * Adds a {@link SectionManagedObjectSource} to the {@link SectionNode}
 	 * being built.
 	 * 
 	 * @param managedObjectSourceName
@@ -128,7 +128,7 @@ public interface SectionDesigner {
 			ManagedObjectSource<?, ?> managedObjectSource);
 
 	/**
-	 * Adds a {@link SubSection} to the {@link OfficeSection} being built.
+	 * Adds a {@link SubSection} to the {@link SectionNode} being built.
 	 * 
 	 * @param subSectionName
 	 *            Name of the {@link SubSection}.
@@ -148,7 +148,7 @@ public interface SectionDesigner {
 			String sectionSourceClassName, String location);
 
 	/**
-	 * Adds a {@link SubSection} to the {@link OfficeSection} being built.
+	 * Adds a {@link SubSection} to the {@link SectionNode} being built.
 	 * 
 	 * @param subSectionName
 	 *            Name of the {@link SubSection}.
@@ -403,29 +403,29 @@ public interface SectionDesigner {
 	/**
 	 * <p>
 	 * Allows the {@link SectionSource} to add an issue in attempting to design
-	 * the {@link OfficeSection}.
+	 * the {@link SectionNode}.
 	 * <p>
 	 * This is available to report invalid configuration but continue to design
-	 * the rest of the {@link OfficeSection}.
+	 * the rest of the {@link SectionNode}.
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param assetType
 	 *            {@link AssetType}. May be <code>null</code> if
-	 *            {@link OfficeSection} in general.
+	 *            {@link SectionNode} in general.
 	 * @param assetName
 	 *            Name of the {@link Asset}. May be <code>null</code> if
-	 *            {@link OfficeSection} in general.
+	 *            {@link SectionNode} in general.
 	 */
 	void addIssue(String issueDescription, AssetType assetType, String assetName);
 
 	/**
 	 * <p>
 	 * Allows the {@link SectionSource} to add an issue along with its cause in
-	 * attempting to design the {@link OfficeSection}.
+	 * attempting to design the {@link SectionNode}.
 	 * <p>
 	 * This is available to report an issue and continue designing the
-	 * {@link OfficeSection} rather than throwing the {@link Exception} which
+	 * {@link SectionNode} rather than throwing the {@link Exception} which
 	 * results in an incomplete design.
 	 * 
 	 * @param issueDescription
@@ -434,10 +434,10 @@ public interface SectionDesigner {
 	 *            Cause of the issue.
 	 * @param assetType
 	 *            {@link AssetType}. May be <code>null</code> if
-	 *            {@link OfficeSection} in general.
+	 *            {@link SectionNode} in general.
 	 * @param assetName
 	 *            Name of the {@link Asset}. May be <code>null</code> if
-	 *            {@link OfficeSection} in general.
+	 *            {@link SectionNode} in general.
 	 */
 	void addIssue(String issueDescription, Throwable cause,
 			AssetType assetType, String assetName);

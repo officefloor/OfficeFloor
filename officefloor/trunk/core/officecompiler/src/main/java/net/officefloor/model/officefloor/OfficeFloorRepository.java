@@ -43,7 +43,7 @@ public interface OfficeFloorRepository {
 	/**
 	 * Stores the {@link OfficeFloorModel} into the {@link ConfigurationItem}.
 	 * 
-	 * @param office
+	 * @param officeFloor
 	 *            {@link OfficeFloorModel}.
 	 * @param configuration
 	 *            {@link ConfigurationItem} to contain the

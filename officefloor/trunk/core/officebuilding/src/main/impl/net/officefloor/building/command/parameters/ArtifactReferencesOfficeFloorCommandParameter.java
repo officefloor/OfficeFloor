@@ -50,7 +50,7 @@ public class ArtifactReferencesOfficeFloorCommandParameter extends
 	 *            Type. May be <code>null</code>.
 	 * @param classifier
 	 *            Classifier. May be <code>null</code>.
-	 * @return Command line argument value for an {@link ArtifactArgument}.
+	 * @return Command line argument value for an {@link ArtifactReference}.
 	 */
 	public static String getArtifactArgumentValue(String groupId,
 			String artifactId, String version, String type, String classifier) {

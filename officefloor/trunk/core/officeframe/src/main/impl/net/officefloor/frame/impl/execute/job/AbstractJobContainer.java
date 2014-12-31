@@ -139,7 +139,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 *            parallel {@link Task} this will be the invoker. If not
 	 *            parallel then will be <code>null</code>.
 	 * @param requiredManagedObjects
-	 *            {@link work} {@link ManagedObjectIndex} instances to the
+	 *            {@link Work} {@link ManagedObjectIndex} instances to the
 	 *            {@link ManagedObject} instances that must be loaded before the
 	 *            {@link Task} may be executed.
 	 * @param requiredGovernance

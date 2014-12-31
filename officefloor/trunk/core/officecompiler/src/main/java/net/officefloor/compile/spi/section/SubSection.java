@@ -17,10 +17,11 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.properties.PropertyConfigurable;
 
 /**
- * {@link SubSection} of a {@link Section}.
+ * {@link SubSection} of an {@link SectionNode}.
  * 
  * @author Daniel Sagenschneider
  */

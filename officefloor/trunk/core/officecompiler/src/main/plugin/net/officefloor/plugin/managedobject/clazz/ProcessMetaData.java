@@ -30,25 +30,24 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 
 /**
- * Meta-data for a {@link ProcessInterface}.
+ * Meta-data for a process interface.
  * 
  * @author Daniel Sagenschneider
  */
 public class ProcessMetaData {
 
 	/**
-	 * {@link Field} to receive the injected {@link ProcessInterface}.
+	 * {@link Field} to receive the injected process interface.
 	 */
 	public final Field field;
 
 	/**
-	 * Indexes for the {@link Method} instances of the {@link ProcessInterface}.
+	 * Indexes for the {@link Method} instances of the process interface.
 	 */
 	private final Map<String, Integer> methodIndexes;
 
 	/**
-	 * {@link Constructor} to create the {@link ProcessInterface}
-	 * implementation.
+	 * {@link Constructor} to create the process interface implementation.
 	 */
 	private final Constructor<?> processInterfaceConstructor;
 
@@ -61,17 +60,15 @@ public class ProcessMetaData {
 	 * Initiate.
 	 * 
 	 * @param field
-	 *            {@link Field} receiving the injected {@link ProcessInterface}.
+	 *            {@link Field} receiving the injected process interface.
 	 * @param methodIndexes
-	 *            Indexes for the {@link Method} instances of the
-	 *            {@link ProcessInterface}.
+	 *            Indexes for the {@link Method} instances.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 * @throws Exception
-	 *             If fails to create the proxy as the {@link ProcessInterface}
-	 *             implementation.
+	 *             If fails to create the proxy for the process interface.
 	 */
 	public ProcessMetaData(Field field, Map<String, Integer> methodIndexes,
 			ClassLoader classLoader,
@@ -87,15 +84,14 @@ public class ProcessMetaData {
 	}
 
 	/**
-	 * Creates the implementation of the {@link ProcessInterface} field type for
-	 * the {@link ManagedObject} to be injected into the object.
+	 * Creates the implementation of the process interface field type for the
+	 * {@link ManagedObject} to be injected into the object.
 	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} for the invoked {@link ProcessState}.
 	 * @return Implementation to be injected into the object.
 	 * @throws Exception
-	 *             If fails to instantiate the {@link ProcessInterface}
-	 *             implementation.
+	 *             If fails to instantiate the process interface implementation.
 	 */
 	public Object createProcessInterfaceImplementation(
 			ManagedObject managedObject) throws Exception {
@@ -109,8 +105,7 @@ public class ProcessMetaData {
 	}
 
 	/**
-	 * {@link InvocationHandler} for the {@link ProcessInterface}
-	 * implementation.
+	 * {@link InvocationHandler} for the process interface implementation.
 	 */
 	private class ProcessInvocationHandler implements InvocationHandler {
 

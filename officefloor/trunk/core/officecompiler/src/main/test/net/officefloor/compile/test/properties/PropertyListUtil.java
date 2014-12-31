@@ -36,7 +36,7 @@ public class PropertyListUtil {
 	 * 
 	 * @param propertyList
 	 *            {@link PropertyList} to validate.
-	 * @param propertyNameLabelPairs
+	 * @param propertyNameLabels
 	 *            Name/Label pair listing of expected {@link Property} instances
 	 *            in the {@link PropertyList}.
 	 */
@@ -61,8 +61,8 @@ public class PropertyListUtil {
 			TestCase.assertEquals("Incorrect label for property " + i, label,
 					property.getLabel());
 			TestCase.assertNull(
-					"Should be blank value for property " + (i / 2), property
-							.getValue());
+					"Should be blank value for property " + (i / 2),
+					property.getValue());
 		}
 	}
 

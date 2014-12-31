@@ -32,7 +32,7 @@ public class PropertyKeyFactory {
 	/**
 	 * Initiate.
 	 * 
-	 * @param isisCaseInsensitive
+	 * @param isCaseInsensitive
 	 *            Indicates if case insensitive match.
 	 */
 	public PropertyKeyFactory(boolean isCaseInsensitive) {

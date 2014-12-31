@@ -46,8 +46,8 @@ public class XmlSpecificContext {
 	 * @param upperBoundType
 	 *            Upper bound type of the source object.
 	 * @param contextElementName
-	 *            Name of element or <code>null</code> if not output element
-	 *            for context.
+	 *            Name of element or <code>null</code> if not output element for
+	 *            context.
 	 * @param configuration
 	 *            Configuration of the context.
 	 * @param context
@@ -59,9 +59,9 @@ public class XmlSpecificContext {
 	 * @throws XmlMarshallException
 	 *             If fails to configure this context.
 	 */
-	public XmlSpecificContext(Class<?> upperBoundType, String contextElementName,
-			XmlMappingMetaData[] configuration, XmlContext context,
-			TranslatorRegistry translatorRegistry,
+	public XmlSpecificContext(Class<?> upperBoundType,
+			String contextElementName, XmlMappingMetaData[] configuration,
+			XmlContext context, TranslatorRegistry translatorRegistry,
 			ReferencedXmlMappingRegistry referenceRegistry)
 			throws XmlMarshallException {
 
@@ -97,8 +97,9 @@ public class XmlSpecificContext {
 					}
 
 					// Load the attributes
-					this.loadAttributes(upperBoundType, mappingMetaData
-							.getObjectMappings(), translatorRegistry);
+					this.loadAttributes(upperBoundType,
+							mappingMetaData.getObjectMappings(),
+							translatorRegistry);
 
 				} else {
 
@@ -202,8 +203,8 @@ public class XmlSpecificContext {
 					case OBJECT:
 						// Object XML mapping
 						xmlMapping = new ObjectXmlMapping(elementName,
-								getMethod, returnType, objectMappings, String
-										.valueOf(mappingIndex), context,
+								getMethod, returnType, objectMappings,
+								String.valueOf(mappingIndex), context,
 								translatorRegistry, referenceRegistry);
 						break;
 
@@ -279,9 +280,9 @@ public class XmlSpecificContext {
 	 *            The first instance of the object.
 	 * @param sourceType
 	 *            {@link Class} of the object.
-	 * @param contextElementName
-	 *            Name of element or <code>null</code> if not output element
-	 *            for context.
+	 * @param elementName
+	 *            Name of element or <code>null</code> if not output element for
+	 *            context.
 	 * @param configuration
 	 *            Configuration of the context.
 	 * @param context
@@ -385,10 +386,8 @@ public class XmlSpecificContext {
 						boolean isUseRaw = attributeMetaData.isUseRaw();
 
 						// Attribute dynamic mapping
-						this
-								.addXmlMapping(new AttributeXmlMapping(
-										attributeName, getMethod, translator,
-										isUseRaw));
+						this.addXmlMapping(new AttributeXmlMapping(
+								attributeName, getMethod, translator, isUseRaw));
 					}
 					break;
 

@@ -69,6 +69,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.plugin.section.work.WorkSectionSource;
 
@@ -152,7 +153,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClass
+	 * @param sectionSourceClassName
 	 *            {@link SectionSource} class name.
 	 * @param sectionLocation
 	 *            {@link OfficeSection} location.
@@ -328,7 +329,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 *            alias.
 	 * @return {@link AutoWireGovernance}.
 	 * 
-	 * @see #addObjectExtension(Class, Class...)
+	 * @see ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
 	 */
 	public AutoWireGovernance addGovernance(String governanceName,
 			String governanceSourceClassName) {
@@ -607,8 +608,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 							.iterator(); iterator.hasNext();) {
 						hierarchyLog.append(iterator.next() + " : ");
 					}
-					architect.addIssue("Cyclic section inheritance hierarchy ( "
-							+ hierarchyLog.toString() + "... )", null, null);
+					architect.addIssue(
+							"Cyclic section inheritance hierarchy ( "
+									+ hierarchyLog.toString() + "... )", null,
+							null);
 				}
 
 				// Provide issue if no link

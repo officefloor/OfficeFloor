@@ -56,7 +56,7 @@ public interface HttpUrlContinuationDifferentiator {
 	 *         <li><code>null</code> will service regardless of whether there is
 	 *         a secure {@link ServerHttpConnection} or not (no redirect will
 	 *         occur).</li>
-	 *         <ul>
+	 *         </ul>
 	 */
 	Boolean isSecure();
 

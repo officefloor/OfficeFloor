@@ -53,7 +53,7 @@ public class PasswordFileCredentialStore implements CredentialStore {
 	 * [algorithm] value would be <code>MD5</code>.
 	 * <p>
 	 * The may be many <code>UserId</code> entry lines with the user having many
-	 * <code>Role</code>&apos;s defined seperated by commas (,).
+	 * <code>Role</code>'s defined separated by commas (,).
 	 * <p>
 	 * The binary credentials must be <code>Base64</code> encoded.
 	 * 

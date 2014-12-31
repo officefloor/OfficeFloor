@@ -63,8 +63,6 @@ public class ServerWriter extends OutputStreamWriter {
 	 *            Encoded bytes.
 	 * @throws IOException
 	 *             If fails to write the bytes.
-	 * 
-	 * @see #isDefaultServerCharset
 	 */
 	public final void write(byte[] encodedBytes) throws IOException {
 
@@ -86,8 +84,6 @@ public class ServerWriter extends OutputStreamWriter {
 	 *            {@link ByteBuffer} containing the encoded bytes.
 	 * @throws IOException
 	 *             If fails to write the bytes.
-	 * 
-	 * @see #isDefaultServerCharset
 	 */
 	public final void write(ByteBuffer encodedBytes) throws IOException {
 

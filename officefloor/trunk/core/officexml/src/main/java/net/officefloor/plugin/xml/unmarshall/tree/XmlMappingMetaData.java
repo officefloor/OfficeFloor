@@ -63,8 +63,8 @@ public class XmlMappingMetaData {
 	protected String staticValue = null;
 
 	/**
-	 * The mappings of the loaded object, should the {@link #loadObjectClass} be
-	 * specified.
+	 * The mappings of the loaded object, should the
+	 * {@link #loadObjectClassName} be specified.
 	 */
 	protected List<XmlMappingMetaData> loadObjectConfiguration = null;
 
@@ -90,7 +90,8 @@ public class XmlMappingMetaData {
 	 * @param targetObjectConfiguration
 	 *            Configuration of the target object.
 	 */
-	public XmlMappingMetaData(Class<?> targetObjectType, String rootElementName,
+	public XmlMappingMetaData(Class<?> targetObjectType,
+			String rootElementName,
 			XmlMappingMetaData[] targetObjectConfiguration) {
 		// Specify state
 		this.type = XmlMappingType.ROOT;

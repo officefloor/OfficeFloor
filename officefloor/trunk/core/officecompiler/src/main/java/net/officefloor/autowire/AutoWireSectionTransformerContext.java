@@ -38,7 +38,7 @@ public interface AutoWireSectionTransformerContext {
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link AutoWireSection}.
-	 * @param sectionSourceClassNames
+	 * @param sectionSourceClassName
 	 *            {@link SectionSource} {@link Class} name.
 	 * @param sectionLocation
 	 *            {@link SectionSource} location.

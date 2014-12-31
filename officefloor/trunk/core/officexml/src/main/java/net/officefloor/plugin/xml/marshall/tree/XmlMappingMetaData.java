@@ -122,7 +122,8 @@ public class XmlMappingMetaData {
 	/**
 	 * Convenience constructor for creating attributes mapping.
 	 * 
-	 * @parma type {@link XmlMappingType#ATTRIBUTES}.
+	 * @param type
+	 *            {@link XmlMappingType#ATTRIBUTES}.
 	 * @param attributes
 	 *            Mapping for the attributes of element.
 	 */

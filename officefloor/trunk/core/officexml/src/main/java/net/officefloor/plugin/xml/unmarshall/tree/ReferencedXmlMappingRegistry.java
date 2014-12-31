@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Registry of {@link net.officefloor.plugin.xml.unmarshall.tree.RecursiveXmlMapping}
- * instances.
+ * Registry of {@link ReferenceXmlMapping} instances.
  * 
  * @author Daniel Sagenschneider
  */

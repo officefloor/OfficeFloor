@@ -483,7 +483,7 @@ public interface OfficeChanges {
 	/**
 	 * Removes the {@link OfficeSectionObjectToOfficeManagedObjectModel}.
 	 * 
-	 * @param officeSectionObjectToExternalManagedObject
+	 * @param officeSectionObjectToOfficeManagedObject
 	 *            {@link OfficeSectionObjectToOfficeManagedObjectModel} to
 	 *            remove.
 	 * @return {@link Change} to remove the

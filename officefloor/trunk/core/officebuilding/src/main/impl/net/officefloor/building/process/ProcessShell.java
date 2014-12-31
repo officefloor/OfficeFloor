@@ -350,7 +350,7 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	 * @param processNamespace
 	 *            {@link ManagedProcess} name space.
 	 * @param connectorServer
-	 *            {@link JMXConnectorServers}.
+	 *            {@link JMXConnectorServer}.
 	 * @param toParentPipe
 	 *            {@link ObjectOutputStream} to send the notifications.
 	 */

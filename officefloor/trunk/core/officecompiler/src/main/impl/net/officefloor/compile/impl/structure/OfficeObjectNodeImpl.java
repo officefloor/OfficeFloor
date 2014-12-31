@@ -128,7 +128,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	}
 
 	/**
-	 * Allow obtaining {@link office} from the {@link DeployedOffice}.
+	 * Allow obtaining {@link Office} from the {@link DeployedOffice}.
 	 * 
 	 * @param objectName
 	 *            Name of the {@link OfficeObject}.

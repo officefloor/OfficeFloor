@@ -19,9 +19,8 @@ package net.officefloor.compile.spi.governance.source.impl;
 
 import net.officefloor.compile.spi.governance.source.GovernanceSourceProperty;
 
-
 /**
- * {@link GoveranceSourceProperty} implementation.
+ * {@link GovernanceSourceProperty} implementation.
  * 
  * @author Daniel Sagenschneider
  */

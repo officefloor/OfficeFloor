@@ -107,7 +107,7 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 	 * Example use could be the landing page may be insecure but the login form
 	 * submission link on the page is to be secure.
 	 * 
-	 * @param linkeName
+	 * @param linkName
 	 *            Name of link to secure.
 	 * @param isSecure
 	 *            <code>true</code> should the link require a secure

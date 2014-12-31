@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.section;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -55,7 +56,7 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 	 * @param isLoadingType
 	 *            Indicates if loading type.
 	 * @param sectionLocation
-	 *            Location of the {@link section}.
+	 *            Location of the {@link SectionNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */

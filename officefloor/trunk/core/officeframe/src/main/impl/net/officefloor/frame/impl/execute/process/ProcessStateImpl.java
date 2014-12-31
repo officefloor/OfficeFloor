@@ -211,7 +211,7 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link Team} to enable worker ({@link Thread}) of responsible
 	 *            {@link Team} to continue on to handle {@link Escalation} of
 	 *            {@link ManagedObject}.
-	 * @param escalationRequiredGovernance
+	 * @param escalationHandlerRequiredGovernance
 	 *            {@link EscalationHandler} required {@link Governance}.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData,

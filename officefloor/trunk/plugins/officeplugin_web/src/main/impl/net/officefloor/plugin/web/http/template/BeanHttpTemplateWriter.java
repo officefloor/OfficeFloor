@@ -27,7 +27,7 @@ import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
 
 /**
- * {@link BeanTemplateWriter} to write a bean.
+ * {@link HttpTemplateWriter} to write a bean.
  * 
  * @author Daniel Sagenschneider
  */

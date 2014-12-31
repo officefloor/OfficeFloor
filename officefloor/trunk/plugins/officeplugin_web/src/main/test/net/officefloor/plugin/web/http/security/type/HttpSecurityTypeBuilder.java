@@ -54,15 +54,15 @@ public interface HttpSecurityTypeBuilder {
 	 * Adds a {@link HttpSecurityDependencyType}.
 	 * 
 	 * @param name
-	 *            Name of the {@link HttpSecurityDependency}.
+	 *            Name of the {@link HttpSecurityDependencyType}.
 	 * @param type
-	 *            Type of the {@link HttpSecurityDependency}.
+	 *            Type of the {@link HttpSecurityDependencyType}.
 	 * @param typeQualifier
-	 *            Qualifier for the type of {@link HttpSecurityDependency}.
+	 *            Qualifier for the type of {@link HttpSecurityDependencyType}.
 	 * @param index
-	 *            Index of the {@link HttpSecurityDependency}.
+	 *            Index of the {@link HttpSecurityDependencyType}.
 	 * @param key
-	 *            Key identifying the {@link HttpSecurityDependency}.
+	 *            Key identifying the {@link HttpSecurityDependencyType}.
 	 */
 	void addDependency(String name, Class<?> type, String typeQualifier,
 			int index, Enum<?> key);
@@ -76,11 +76,11 @@ public interface HttpSecurityTypeBuilder {
 	 * key.
 	 * 
 	 * @param key
-	 *            Key identifying the {@link HttpSecurityDependency}.
+	 *            Key identifying the {@link HttpSecurityDependencyType}.
 	 * @param type
-	 *            Type of the {@link HttpSecurityDependency}.
+	 *            Type of the {@link HttpSecurityDependencyType}.
 	 * @param typeQualifier
-	 *            Qualifier for the type of {@link HttpSecurityDependency}.
+	 *            Qualifier for the type of {@link HttpSecurityDependencyType}.
 	 */
 	void addDependency(Enum<?> key, Class<?> type, String typeQualifier);
 

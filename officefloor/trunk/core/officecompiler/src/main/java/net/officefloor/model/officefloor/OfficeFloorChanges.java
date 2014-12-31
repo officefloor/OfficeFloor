@@ -433,10 +433,9 @@ public interface OfficeFloorChanges {
 	 * Removes the
 	 * {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}.
 	 * 
-	 * @param officeFloorManagedObjectSourceFlow
-	 *            {@link OfficeFloorManagedObjectSourceFlowModel}.
-	 * @param deployedOfficeInput
-	 *            {@link DeployedOfficeInputModel}.
+	 * @param officeFloorManagedObjectSourceFlowToDeployedOfficeInput
+	 *            {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}
+	 *            .
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}
 	 */
@@ -518,7 +517,7 @@ public interface OfficeFloorChanges {
 	 * Removes the
 	 * {@link OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel}
 	 * 
-	 * @param officeFloorManagedObjectDependencyToOfficeFloorManagedObject
+	 * @param officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject
 	 *            {@link OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel}
 	 *            to remove.
 	 * @return {@link Change} to remove the
