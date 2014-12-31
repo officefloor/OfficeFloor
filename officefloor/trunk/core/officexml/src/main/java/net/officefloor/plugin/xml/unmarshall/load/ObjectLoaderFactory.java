@@ -77,8 +77,8 @@ public class ObjectLoaderFactory {
 	 *            Class to identify the method from.
 	 * @param methodName
 	 *            Name of method to find.
-	 * @param Class
-	 *            of parameter to method.
+	 * @param parameterClass
+	 *            {@link Class} of parameter to method.
 	 * @return Method of class.
 	 * @throws XmlMarshallException
 	 *             If failed to find method to load.

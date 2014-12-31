@@ -18,7 +18,7 @@
 package net.officefloor.compile.spi.office.source;
 
 /**
- * Property of the {@ink OfficeSourceSpecification}.
+ * Property of the {@link OfficeSourceSpecification}.
  * 
  * @author Daniel Sagenschneider
  */

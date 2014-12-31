@@ -39,8 +39,8 @@ public interface HttpRequestParser {
 	 * @param startIndex
 	 *            Index within the data to start parsing.
 	 * @return <code>true</code> if the {@link HttpRequest} has been fully
-	 *         parsed. <false>false</false> indicates this method should be
-	 *         called again when further data is available to obtain the full
+	 *         parsed. <code>false</code> indicates this method should be called
+	 *         again when further data is available to obtain the full
 	 *         {@link HttpRequest}.
 	 * @throws IOException
 	 *             If fails to read bytes.

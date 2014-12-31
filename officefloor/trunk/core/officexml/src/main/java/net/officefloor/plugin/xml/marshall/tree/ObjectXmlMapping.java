@@ -55,7 +55,7 @@ public class ObjectXmlMapping extends AbstractXmlMapping {
 	 * @param contextReference
 	 *            Reference by which to register the context as a child context.
 	 * @param context
-	 *            Current context to register the object&apos;s child context.
+	 *            Current context to register the object's child context.
 	 * @param referenceRegistry
 	 *            Registry of {@link XmlMapping} that may be referenced.
 	 * @param translatorRegistry
@@ -90,12 +90,7 @@ public class ObjectXmlMapping extends AbstractXmlMapping {
 		this.context = childContext;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.xml.marshall.tree.AbstractXmlMapping#writeXml(java.lang.Object,
-	 *      net.officefloor.plugin.xml.XmlOutput)
-	 */
+	@Override
 	public void writeXml(Object object, XmlOutput output)
 			throws XmlMarshallException {
 

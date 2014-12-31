@@ -31,7 +31,7 @@ import net.officefloor.plugin.xml.unmarshall.translate.TranslatorRegistry;
 public class ValueLoaderFactory {
 
 	/**
-	 * Registry of {@link Transator}objects.
+	 * Registry of {@link Translator} objects.
 	 */
 	protected final TranslatorRegistry translatorRegistry;
 

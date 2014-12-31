@@ -17,14 +17,14 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.TypeQualification;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * {@link ManagedObject} within the {@link OfficeSection}.
+ * {@link ManagedObject} within the {@link SectionNode}.
  * 
  * @author Daniel Sagenschneider
  */

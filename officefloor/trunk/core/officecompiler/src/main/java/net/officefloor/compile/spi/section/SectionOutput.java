@@ -17,8 +17,10 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.compile.internal.structure.SectionNode;
+
 /**
- * Output of a {@link Section}.
+ * Output of a {@link SectionNode}.
  * 
  * @author Daniel Sagenschneider
  */

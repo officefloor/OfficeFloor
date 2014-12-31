@@ -127,7 +127,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	 * 
 	 * @param administratorName
 	 *            Name of this {@link OfficeAdministrator}.
-	 * @param administratorSourceClassName
+	 * @param administratorSource
 	 *            {@link AdministratorSource} instance to use.
 	 * @param officeLocation
 	 *            Location of the {@link Office} containing this

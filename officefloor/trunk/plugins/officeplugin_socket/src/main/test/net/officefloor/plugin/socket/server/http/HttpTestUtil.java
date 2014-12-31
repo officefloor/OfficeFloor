@@ -44,7 +44,6 @@ import org.apache.http.ProtocolException;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
@@ -128,8 +127,8 @@ public class HttpTestUtil {
 	/**
 	 * Creates a {@link CloseableHttpClient} ready for use.
 	 * 
-	 * @param httpsPort
-	 *            HTTPS port.
+	 * @param isSecure
+	 *            Indicate if require secure connection.
 	 * @return {@link CloseableHttpClient}.
 	 */
 	public static CloseableHttpClient createHttpClient(boolean isSecure) {
@@ -144,7 +143,7 @@ public class HttpTestUtil {
 
 		// Create the client
 		CloseableHttpClient client = builder.build();
-		
+
 		// Return the client
 		return client;
 	}
@@ -223,7 +222,7 @@ public class HttpTestUtil {
 	 * 
 	 * @return {@link SslEngineSource} for the corresponding configured HTTPS.
 	 * 
-	 * @see #configureHttps(HttpClient, int)
+	 * @see #configureHttps(HttpClientBuilder)
 	 */
 	public static Class<? extends SslEngineSource> getSslEngineSourceClass() {
 		return OfficeFloorDefaultSslEngineSource.class;

@@ -47,7 +47,6 @@ import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
@@ -89,7 +88,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * {@link OfficeNode} implementation.
@@ -210,14 +208,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 *            Name of this {@link DeployedOffice}.
 	 * @param officeSourceClassName
 	 *            Class name of the {@link OfficeSource}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public OfficeNodeImpl(String officeName, String officeSourceClassName,
 			String officeLocation, NodeContext context) {
@@ -235,14 +229,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 *            Name of this {@link DeployedOffice}.
 	 * @param officeSource
 	 *            {@link OfficeSource} instance.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public OfficeNodeImpl(String officeName, OfficeSource officeSource,
 			String officeLocation, NodeContext context) {

@@ -349,7 +349,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @param methodNames
 	 *            Order that the reflective methods should be invoked.
-	 * @see #setRecordReflectiveTaskMethodInvoked(boolean)
+	 * @see #setRecordReflectiveTaskMethodsInvoked(boolean)
 	 */
 	public void validateReflectiveMethodOrder(String... methodNames) {
 		synchronized (this.reflectiveTaskInvokedMethods) {

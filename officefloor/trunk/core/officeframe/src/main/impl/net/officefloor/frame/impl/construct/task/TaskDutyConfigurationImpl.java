@@ -51,7 +51,7 @@ public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
 	 * @param scopeAdministratorName
 	 *            Name of the {@link Administrator} within the
 	 *            {@link AdministratorScope}.
-	 * @param dutyKey
+	 * @param dutyName
 	 *            Name identifying {@link Duty} of the {@link Administrator}.
 	 */
 	public TaskDutyConfigurationImpl(String scopeAdministratorName,

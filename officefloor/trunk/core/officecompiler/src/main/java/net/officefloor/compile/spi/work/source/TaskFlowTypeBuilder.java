@@ -24,8 +24,8 @@ import net.officefloor.frame.internal.structure.JobSequence;
 
 /**
  * Provides means for the {@link WorkSource} to provide a
- * <code>type definition</code> of a possible {@link JobSequence} instigated by the
- * {@link Task}.
+ * <code>type definition</code> of a possible {@link JobSequence} instigated by
+ * the {@link Task}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -48,7 +48,7 @@ public interface TaskFlowTypeBuilder<F extends Enum<F>> {
 	 * <p>
 	 * Should there be no argument, do not call this method.
 	 * 
-	 * @param parameterType
+	 * @param argumentType
 	 *            Type of argument passed to {@link JobSequence}.
 	 */
 	void setArgumentType(Class<?> argumentType);

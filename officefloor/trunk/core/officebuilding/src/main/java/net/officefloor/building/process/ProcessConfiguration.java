@@ -80,7 +80,7 @@ public final class ProcessConfiguration {
 	/**
 	 * Specifies the name to identify the {@link Process}.
 	 * 
-	 * @param domain
+	 * @param processName
 	 *            Name to identify the {@link Process}.
 	 */
 	public void setProcessName(String processName) {

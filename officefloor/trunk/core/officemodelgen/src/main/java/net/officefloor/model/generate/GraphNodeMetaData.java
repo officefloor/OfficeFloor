@@ -156,8 +156,6 @@ public class GraphNodeMetaData {
 	/**
 	 * Lazily obtains the {@link XmlUnmarshaller} for the {@link ModelMetaData}.
 	 *
-	 * @param modelClass
-	 *            Class of the model.
 	 * @return {@link XmlUnmarshaller} for the Model.
 	 * @throws Exception
 	 *             If fails to obtain the {@link XmlUnmarshaller}.

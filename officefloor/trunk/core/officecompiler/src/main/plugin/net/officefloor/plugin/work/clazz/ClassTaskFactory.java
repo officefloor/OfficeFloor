@@ -53,7 +53,7 @@ public class ClassTaskFactory implements
 	 *            {@link Method} to invoke on the {@link Work} class.
 	 * @param isStaticMethod
 	 *            Indicates if the {@link Method} is <code>static</code>.
-	 * @param parameterFactories
+	 * @param parameters
 	 *            {@link ParameterFactory} instances.
 	 */
 	public ClassTaskFactory(Method method, boolean isStaticMethod,

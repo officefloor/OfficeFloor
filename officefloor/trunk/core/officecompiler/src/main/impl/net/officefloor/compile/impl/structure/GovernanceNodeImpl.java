@@ -121,7 +121,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 * 
 	 * @param governanceName
 	 *            Name of this {@link OfficeGovernance}.
-	 * @param governanceSourceClassName
+	 * @param governanceSource
 	 *            {@link GovernanceSource} instance to use.
 	 * @param officeLocation
 	 *            Location of the {@link Office} containing this

@@ -62,7 +62,7 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 	 *            Meta-data of the mappings.
 	 * @param translatorRegistry
 	 *            Registry of translators.
-	 * @param referencedRegistry
+	 * @param referenceRegistry
 	 *            Registry of referenced {@link XmlMapping} instances.
 	 * @throws XmlMarshallException
 	 *             If fail to configure.
@@ -85,8 +85,8 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 
 		// Initiate handler
 		this.handler = new HandlerImpl(new XmlState(new XmlContext(
-				targetObjectClass, metaData.getElementName(), metaData
-						.getLoadObjectConfiguration(), translatorRegistry,
+				targetObjectClass, metaData.getElementName(),
+				metaData.getLoadObjectConfiguration(), translatorRegistry,
 				referenceRegistry)));
 
 		// Create the parser
@@ -101,8 +101,9 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.xml.XmlUnmarshaller#unmarshall(java.io.InputStream,
-	 *      java.lang.Object)
+	 * @see
+	 * net.officefloor.plugin.xml.XmlUnmarshaller#unmarshall(java.io.InputStream
+	 * , java.lang.Object)
 	 */
 	public void unmarshall(InputStream xml, Object target)
 			throws XmlMarshallException {

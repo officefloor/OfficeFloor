@@ -43,7 +43,7 @@ public class ObjectXmlMapping implements XmlMapping {
 	 * 
 	 * @param loader
 	 *            Loads the object onto the target object.
-	 * @param loadObjectXmlContext
+	 * @param loadObjectContext
 	 *            {@link XmlContext} for this {@link XmlMapping}.
 	 */
 	public ObjectXmlMapping(ObjectLoader loader, XmlContext loadObjectContext) {
@@ -55,8 +55,9 @@ public class ObjectXmlMapping implements XmlMapping {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.xml.tree.XmlMapping#startMapping(net.officefloor.plugin.xml.tree.XmlState,
-	 *      java.lang.String)
+	 * @see
+	 * net.officefloor.plugin.xml.tree.XmlMapping#startMapping(net.officefloor
+	 * .plugin.xml.tree.XmlState, java.lang.String)
 	 */
 	public void startMapping(XmlState state, String elementName)
 			throws XmlMarshallException {
@@ -72,8 +73,9 @@ public class ObjectXmlMapping implements XmlMapping {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.xml.tree.XmlMapping#endMapping(net.officefloor.plugin.xml.tree.XmlState,
-	 *      java.lang.String)
+	 * @see
+	 * net.officefloor.plugin.xml.tree.XmlMapping#endMapping(net.officefloor
+	 * .plugin.xml.tree.XmlState, java.lang.String)
 	 */
 	public void endMapping(XmlState state, String value)
 			throws XmlMarshallException {

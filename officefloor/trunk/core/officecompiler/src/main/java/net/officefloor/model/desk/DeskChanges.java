@@ -532,7 +532,7 @@ public interface DeskChanges {
 	 *
 	 * @param task
 	 *            {@link TaskModel}.
-	 * @param next
+	 * @param nextTask
 	 *            Next {@link TaskModel}.
 	 * @return {@link Change} to add a {@link TaskToNextTaskModel}.
 	 */

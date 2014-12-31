@@ -508,7 +508,7 @@ public class ProcessManager implements ProcessManagerMBean {
 	 * 
 	 * @param processNamespace
 	 *            Name space of the {@link Process}.
-	 * @param objectName
+	 * @param remoteObjectName
 	 *            {@link ObjectName} of the remote MBean.
 	 * @return Local {@link ObjectName} for the remote MBean in the
 	 *         {@link Process} being managed.

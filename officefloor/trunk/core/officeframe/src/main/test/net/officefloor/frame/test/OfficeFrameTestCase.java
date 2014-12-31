@@ -512,7 +512,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Creates the platform independent text for comparing.
 	 * 
-	 * @param text
+	 * @param rawText
 	 *            Raw text.
 	 * @return Platform independent text.
 	 */
@@ -584,8 +584,6 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Assets that the input graph is as expected.
 	 * 
-	 * @param O
-	 *            Type of root object for graph.
 	 * @param expectedRoot
 	 *            Expected root.
 	 * @param actualRoot
@@ -599,8 +597,6 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Assets that the input graph is as expected.
 	 * 
-	 * @param O
-	 *            Type of root object for graph.
 	 * @param expectedRoot
 	 *            Expected root.
 	 * @param actualRoot
@@ -1229,9 +1225,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Registers the object and its {@link MockControl}to be managed.
+	 * Registers the object and its {@link MockControl} to be managed.
 	 * 
-	 * @param object
+	 * @param mockObject
 	 *            Mock object.
 	 * @param mockControl
 	 *            {@link MockControl} of the mock object.
@@ -1644,8 +1640,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * 
 	 * @param startTime
 	 *            Start time from {@link System#currentTimeMillis()}.
-	 * @param millisecondsToRun
-	 *            Milliseconds to run before timeout.
+	 * @param secondsToRun
+	 *            Seconds to run before timeout.
 	 */
 	public void timeout(long startTime, int secondsToRun) {
 		if ((System.currentTimeMillis() - startTime) > (secondsToRun * 1000)) {

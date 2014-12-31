@@ -35,7 +35,6 @@ import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.internal.structure.JobSequence;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * Utility class for testing the {@link GovernanceSource}.
@@ -48,8 +47,8 @@ public class GovernanceLoaderUtil {
 	 * Validates the {@link GovernanceSourceSpecification} for the
 	 * {@link GovernanceSource}.
 	 * 
-	 * @param administratorSourceClass
-	 *            {@link AdministratorSource} class.
+	 * @param governanceSourceClass
+	 *            {@link GovernanceSource} class.
 	 * @param propertyNameLabels
 	 *            Listing of name/label pairs for the {@link Property}
 	 *            instances.

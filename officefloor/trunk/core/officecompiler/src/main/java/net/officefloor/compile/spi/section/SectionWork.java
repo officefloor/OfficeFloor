@@ -17,14 +17,14 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.Office;
 
 /**
- * {@link Work} within the {@link Section} of the {@link Office}.
+ * {@link Work} within the {@link SectionNode}.
  * 
  * @author Daniel Sagenschneider
  */

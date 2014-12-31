@@ -19,6 +19,7 @@ package net.officefloor.building.process;
 
 import java.io.IOException;
 
+import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXServiceURL;
 
 /**

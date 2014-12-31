@@ -40,9 +40,9 @@ public interface ProcessOutputStreamFactory {
 	 *            Name space for the {@link ManagedProcess}.
 	 * @param command
 	 *            Command to start the {@link ManagedProcess}.
-	 * @return {@link ProcessLogger}.
+	 * @return {@link OutputStream}.
 	 * @throws IOException
-	 *             If fails to create the {@link ProcessLogger}.
+	 *             If fails to create the {@link OutputStream}.
 	 */
 	OutputStream createStandardProcessOutputStream(String processNamespace,
 			String[] command) throws IOException;
@@ -57,9 +57,9 @@ public interface ProcessOutputStreamFactory {
 	 * 
 	 * @param processNamespace
 	 *            Name space for the {@link ManagedProcess}.
-	 * @return {@link ProcessLogger}.
+	 * @return {@link OutputStream}.
 	 * @throws IOException
-	 *             If fails to create the {@link ProcessLogger}.
+	 *             If fails to create the {@link OutputStream}.
 	 */
 	OutputStream createErrorProcessOutputStream(String processNamespace)
 			throws IOException;

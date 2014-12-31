@@ -40,8 +40,8 @@ public interface ManagedObjectPoolLoader {
 	 *            Class of the {@link ManagedObjectPoolSource}.
 	 * @return {@link PropertyList} of the
 	 *         {@link ManagedObjectPoolSourceProperty} instances of the
-	 *         {@link ManagedObjectPoolSpecification} or <code>null</code> if
-	 *         issues, which are reported to the {@link CompilerIssues}.
+	 *         {@link ManagedObjectPoolSourceSpecification} or <code>null</code>
+	 *         if issues, which are reported to the {@link CompilerIssues}.
 	 */
 	<PS extends ManagedObjectPoolSource> PropertyList loadSpecification(
 			Class<PS> managedObjectPoolSourceClass);

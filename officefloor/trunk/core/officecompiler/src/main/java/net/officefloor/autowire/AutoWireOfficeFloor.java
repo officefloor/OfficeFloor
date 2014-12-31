@@ -58,7 +58,6 @@ public interface AutoWireOfficeFloor {
 	 *            Name of the {@link Task}.
 	 * @param parameter
 	 *            Parameter for the {@link Task}. May be <code>null</code>.
-	 * @return {@link AutoWireOfficeFloor}.
 	 * @throws Exception
 	 *             If fails invoking the {@link Task}.
 	 */

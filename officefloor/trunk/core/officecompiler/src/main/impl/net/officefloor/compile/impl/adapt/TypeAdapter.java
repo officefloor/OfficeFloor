@@ -458,7 +458,7 @@ public class TypeAdapter implements InvocationHandler {
 	 *            {@link ClassLoader} for the client.
 	 * @param implClassLoader
 	 *            {@link ClassLoader} for the implementation.
-	 * @param interfaceType
+	 * @param interfaceTypes
 	 *            Interfaces for the {@link Proxy}.
 	 * @return {@link Proxy}.
 	 * @throws ClassNotFoundException
