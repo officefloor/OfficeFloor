@@ -230,7 +230,9 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		/**
 		 * Adds a required {@link JobSequence} identified by the key.
-		 * 
+		 *
+		 * @param <F>
+		 *            Flow key type.
 		 * @param key
 		 *            {@link Enum} to identify the {@link JobSequence}.
 		 * @param argumentType
@@ -240,8 +242,8 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		<F extends Enum<F>> Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link JobSequence} identified by an index into the order
-		 * the {@link JobSequence} was added.
+		 * Adds a required {@link JobSequence} identified by an index into the
+		 * order the {@link JobSequence} was added.
 		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link JobSequence}.

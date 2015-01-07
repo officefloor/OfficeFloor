@@ -25,6 +25,7 @@ import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 
@@ -55,6 +56,12 @@ public class AdministratorSourceStandAlone {
 	/**
 	 * Loads the {@link AdministratorSource}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type of {@link ManagedObject}.
+	 * @param <A>
+	 *            {@link Duty} key type.
+	 * @param <AS>
+	 *            {@link AdministratorSource} type.
 	 * @param administratorSourceClass
 	 *            Class of the {@link AdministratorSource}.
 	 * @return Initialised {@link AdministratorSource}.
@@ -83,6 +90,10 @@ public class AdministratorSourceStandAlone {
 	/**
 	 * Obtains the {@link Duty} from the {@link Administrator}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type of {@link ManagedObject}.
+	 * @param <A>
+	 *            {@link Duty} key type.
 	 * @param administrator
 	 *            {@link Administrator}.
 	 * @param dutyKey
@@ -96,7 +107,9 @@ public class AdministratorSourceStandAlone {
 
 	/**
 	 * Obtains the {@link Duty} from the {@link Administrator}.
-	 * 
+	 *
+	 * @param <I>
+	 *            Extension interface type of {@link ManagedObject}.
 	 * @param administrator
 	 *            {@link Administrator}.
 	 * @param dutyIndex

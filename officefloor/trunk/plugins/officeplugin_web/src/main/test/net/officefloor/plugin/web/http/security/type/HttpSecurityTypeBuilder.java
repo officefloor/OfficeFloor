@@ -88,13 +88,13 @@ public interface HttpSecurityTypeBuilder {
 	 * Adds a {@link HttpSecurityFlowType}.
 	 * 
 	 * @param name
-	 *            Name of the {@link HttpSecurityFlow}.
+	 *            Name of the {@link HttpSecurityFlowType}.
 	 * @param argumentType
-	 *            Type of argument passed from the {@link HttpSecurityFlow}.
+	 *            Type of argument passed to the {@link HttpSecurityFlowType}.
 	 * @param index
-	 *            Index of the {@link HttpSecurityFlow}.
+	 *            Index of the {@link HttpSecurityFlowType}.
 	 * @param key
-	 *            Key identifying the {@link HttpSecurityFlow}.
+	 *            Key identifying the {@link HttpSecurityFlowType}.
 	 * @param workName
 	 *            Name of {@link Work} instigating the {@link JobSequence} or
 	 *            <code>null</code> if done directly by
@@ -116,9 +116,9 @@ public interface HttpSecurityTypeBuilder {
 	 * key.
 	 * 
 	 * @param key
-	 *            Key identifying the {@link HttpSecurityFlow}.
+	 *            Key identifying the {@link HttpSecurityFlowType}.
 	 * @param argumentType
-	 *            Type of argument passed from the {@link HttpSecurityFlow}.
+	 *            Type of argument passed to the {@link HttpSecurityFlowType}.
 	 * @param workName
 	 *            Name of {@link Work} instigating the {@link JobSequence} or
 	 *            <code>null</code> if done directly by

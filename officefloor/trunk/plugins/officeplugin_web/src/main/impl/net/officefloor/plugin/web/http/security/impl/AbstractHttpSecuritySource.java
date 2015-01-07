@@ -63,7 +63,7 @@ public abstract class AbstractHttpSecuritySource<S, C, D extends Enum<D>, F exte
 	protected abstract void loadSpecification(SpecificationContext context);
 
 	/**
-	 * Context for the {@link HttpSecurityObjectSource#getSpecification()}.
+	 * Context for the {@link HttpSecuritySource#getSpecification()}.
 	 */
 	public static interface SpecificationContext {
 

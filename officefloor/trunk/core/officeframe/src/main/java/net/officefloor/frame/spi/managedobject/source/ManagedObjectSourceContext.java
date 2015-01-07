@@ -77,7 +77,9 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends
 	 * <p>
 	 * The initial {@link Task} will be used as the recycle starting point for
 	 * this {@link ManagedObject}.
-	 * 
+	 *
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workFactory
 	 *            {@link WorkFactory} to create the recycle {@link Work}.
 	 * @return {@link WorkBuilder} to recycle this {@link ManagedObject}.
@@ -88,7 +90,9 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends
 	/**
 	 * Adds {@link ManagedObjectWorkBuilder} for {@link Work} of the
 	 * {@link ManagedObjectSource}.
-	 * 
+	 *
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param workFactory

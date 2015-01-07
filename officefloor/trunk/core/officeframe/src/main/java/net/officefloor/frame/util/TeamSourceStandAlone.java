@@ -42,6 +42,8 @@ public class TeamSourceStandAlone {
 	/**
 	 * Initialises and returns the {@link TeamSource} instance.
 	 * 
+	 * @param <TS>
+	 *            {@link TeamSource} type.
 	 * @param teamSourceClass
 	 *            {@link Class} of the {@link TeamSource}.
 	 * @return Initialised {@link TeamSource}.
@@ -74,6 +76,8 @@ public class TeamSourceStandAlone {
 	/**
 	 * Returns a {@link Team} from the loaded {@link TeamSource}.
 	 * 
+	 * @param <TS>
+	 *            {@link TeamSource} type.
 	 * @param teamSourceClass
 	 *            {@link Class} of the {@link TeamSource}.
 	 * @return {@link Team} from the loaded {@link TeamSource}.

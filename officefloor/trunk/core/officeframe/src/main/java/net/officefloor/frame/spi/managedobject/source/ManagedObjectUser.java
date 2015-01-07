@@ -31,7 +31,7 @@ public interface ManagedObjectUser {
 	 * Specifies the {@link ManagedObject} to be used.
 	 * <p>
 	 * This will be called by the
-	 * {@link ManagedObjectSource#sourceManagedObject(ManagedObjectUser) method
+	 * {@link ManagedObjectSource#sourceManagedObject(ManagedObjectUser)} method
 	 * to provide the {@link ManagedObject} to this {@link ManagedObjectUser}.
 	 * 
 	 * @param managedObject

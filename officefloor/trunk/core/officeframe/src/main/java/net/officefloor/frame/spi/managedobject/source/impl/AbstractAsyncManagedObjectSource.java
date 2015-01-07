@@ -245,6 +245,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		/**
 		 * Adds a {@link ManagedObjectExtensionInterfaceMetaData} instance.
 		 * 
+		 * @param <I>
+		 *            Extension interface type.
 		 * @param interfaceType
 		 *            Type of the extension interface supported by the
 		 *            {@link ManagedObject} instances.

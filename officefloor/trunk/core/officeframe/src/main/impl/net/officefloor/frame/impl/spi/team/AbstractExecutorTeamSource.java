@@ -51,6 +51,8 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	 *            {@link ThreadFactory} to use for the creation of the
 	 *            {@link Thread} instances.
 	 * @return {@link ExecutorServiceFactory}.
+	 * @throws Exception
+	 *             If fails to create the {@link ExecutorServiceFactory}.
 	 */
 	protected abstract ExecutorServiceFactory createExecutorServiceFactory(
 			TeamSourceContext context, ThreadFactory threadFactory)

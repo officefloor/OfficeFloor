@@ -21,7 +21,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * Creates the parameter for the {@link JndiObjectTask}.
+ * Creates the parameter for the {@link JndiObjectTaskFactory}.
  * 
  * @author Daniel Sagenschneider
  */

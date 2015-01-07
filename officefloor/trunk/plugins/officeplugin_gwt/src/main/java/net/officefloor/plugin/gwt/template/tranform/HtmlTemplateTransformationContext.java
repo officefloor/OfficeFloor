@@ -27,7 +27,7 @@ public interface HtmlTemplateTransformationContext {
 	/**
 	 * Obtains the type of tag.
 	 * 
-	 * @return {@link TagType}.
+	 * @return {@link HtmlTagType}.
 	 */
 	HtmlTagType getTagType();
 

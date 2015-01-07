@@ -82,7 +82,7 @@ public class JdbcManagedObjectSource extends
 	}
 
 	/**
-	 * Obtains the {@link DataSourceFactory}from the input properties.
+	 * Obtains the {@link ConnectionPoolDataSource} from the input properties.
 	 * 
 	 * @param context
 	 *            {@link ManagedObjectSourceContext}.
