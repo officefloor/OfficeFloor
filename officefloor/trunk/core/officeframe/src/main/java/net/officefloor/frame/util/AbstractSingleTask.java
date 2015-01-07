@@ -138,12 +138,12 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 
 	/**
 	 * Registers this {@link Task} to recycle the {@link ManagedObject}.
-	 * 
+	 *
 	 * @param context
 	 *            {@link ManagedObjectSourceContext}.
 	 * @param teamName
 	 *            Name of the {@link Team} to recycle the {@link ManagedObject}.
-	 * @see #getRecycleManagedObjectParameter(TaskContext)
+	 * @see #getRecycleManagedObjectParameter(TaskContext, Class)
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void registerAsRecycleTask(ManagedObjectSourceContext context,
@@ -162,8 +162,12 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	/**
 	 * Obtains the {@link RecycleManagedObjectParameter}.
 	 * 
+	 * @param <MO>
+	 *            {@link ManagedObject} type.
 	 * @param context
 	 *            {@link TaskContext}.
+	 * @param managedObjectClass
+	 *            {@link Class} of the {@link ManagedObject}.
 	 * @return {@link RecycleManagedObjectParameter}.
 	 */
 	@SuppressWarnings("unchecked")

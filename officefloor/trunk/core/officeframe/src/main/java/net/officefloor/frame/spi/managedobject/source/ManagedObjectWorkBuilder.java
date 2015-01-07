@@ -32,6 +32,10 @@ public interface ManagedObjectWorkBuilder<W extends Work> {
 	 * Creates the {@link ManagedObjectTaskBuilder} to build a {@link Task} for
 	 * this {@link Work}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @param taskName
 	 *            Name of task local to this {@link Work}.
 	 * @param taskFactory

@@ -39,19 +39,20 @@ public interface DutyContext<I extends Object, F extends Enum<F>, G extends Enum
 	List<I> getExtensionInterfaces();
 
 	/**
-	 * Instigates a {@link JobSequence} to be run in parallel to the {@link Task} being
-	 * administered.
+	 * Instigates a {@link JobSequence} to be run in parallel to the
+	 * {@link Task} being administered.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter for the first {@link Task} of the {@link JobSequence}.
+	 *            Parameter for the first {@link Task} of the
+	 *            {@link JobSequence}.
 	 */
 	void doFlow(F key, Object parameter);
 
 	/**
 	 * <p>
-	 * Similar to {@link #doFlow(F, Object)} except that allows dynamic
+	 * Similar to {@link #doFlow(Enum, Object)} except that allows dynamic
 	 * instigation of flows.
 	 * <p>
 	 * In other words, an {@link Enum} is not required to define the possible
@@ -60,7 +61,8 @@ public interface DutyContext<I extends Object, F extends Enum<F>, G extends Enum
 	 * @param flowIndex
 	 *            Index identifying the {@link JobSequence} to instigate.
 	 * @param parameter
-	 *            Parameter for the first {@link Task} of the {@link JobSequence}.
+	 *            Parameter for the first {@link Task} of the
+	 *            {@link JobSequence}.
 	 */
 	void doFlow(int flowIndex, Object parameter);
 

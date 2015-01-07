@@ -83,6 +83,12 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Instantiates and initialises the {@link ManagedObjectSource}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
 	 *            Class of the {@link ManagedObjectSource}.
 	 * @return Initialised {@link ManagedObjectSource}.
@@ -143,7 +149,13 @@ public class ManagedObjectSourceStandAlone {
 
 	/**
 	 * Loads (init and start) the {@link ManagedObjectSource}.
-	 * 
+	 *
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @return Loaded {@link ManagedObjectSource}.

@@ -173,8 +173,8 @@ public class CometSectionSource extends AbstractSectionSource {
 		 * {@link CometSubscriptionService} or timed out waiting on a
 		 * {@link CometEvent}.
 		 * 
-		 * @param service
-		 *            {@link CometService}.
+		 * @param servicer
+		 *            {@link CometRequestServicer}.
 		 */
 		public void postSubscribe(CometRequestServicer servicer) {
 			// Waits for CometEvent to be available for subscription

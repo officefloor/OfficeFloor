@@ -47,7 +47,7 @@ public class HttpFileWorkSource extends
 		AbstractWorkSource<HttpFileWorkSource.SendHttpFileTask> {
 
 	/**
-	 * Dependency keys for the {@link ClasspathHttpFileTask}.
+	 * Dependency keys for the {@link HttpFileFactoryTask}.
 	 */
 	public static enum DependencyKeys {
 		SERVER_HTTP_CONNECTION

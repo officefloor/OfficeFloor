@@ -18,7 +18,6 @@
 package net.officefloor.frame.spi.administration.source;
 
 import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.DutyContext;
 
 /**
  * <p>
@@ -58,8 +57,8 @@ public interface AdministratorSource<I, A extends Enum<A>> {
 	 * <p>
 	 * Obtains the meta-data to describe this.
 	 * <p>
-	 * This is called after the {@link #init(DutyContext)} method and therefore
-	 * may use the configuration.
+	 * This is called after the {@link #init(AdministratorSourceContext)} method
+	 * and therefore may use the configuration.
 	 * <p>
 	 * This should always return non-null. If there is a problem due to
 	 * incorrect configuration, the {@link #init(AdministratorSourceContext)}

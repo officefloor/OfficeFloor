@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.spi.managedobject.pool;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**

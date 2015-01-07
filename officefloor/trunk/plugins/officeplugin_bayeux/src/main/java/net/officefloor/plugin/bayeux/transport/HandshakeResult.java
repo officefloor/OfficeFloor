@@ -21,8 +21,6 @@ package net.officefloor.plugin.bayeux.transport;
  * Details of the handshake.
  * 
  * @author Daniel Sagenschneider
- * 
- * @see HandshakeCallback
  */
 public interface HandshakeResult extends TransportResult {
 }

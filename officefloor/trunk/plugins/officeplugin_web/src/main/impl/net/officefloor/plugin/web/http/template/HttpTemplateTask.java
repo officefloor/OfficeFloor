@@ -396,7 +396,7 @@ public class HttpTemplateTask extends
 	 * 
 	 * @param contentWriters
 	 *            {@link HttpTemplateWriter} instances to write the content.
-	 * @param isBeans
+	 * @param isBean
 	 *            Flag indicating if a bean.
 	 */
 	public HttpTemplateTask(HttpTemplateWriter[] contentWriters, boolean isBean) {

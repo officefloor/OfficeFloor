@@ -50,30 +50,30 @@ import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
  * <p>
  * 
  * <pre>
- * &lt;ejb-jar>
+ * &lt;ejb-jar&gt;
  *     ...
- *     &lt;enterprise-beans>
+ *     &lt;enterprise-beans&gt;
  *         ...
- *         &lt;session>
- *             &lt;ejb-name>[EJB Name]&lt;/ejb-name>
- *             &lt;ejb-class>net.officefloor.plugin.ejb.OfficeFloorEjb&lt;/ejb-class>
- *             &lt;env-entry>
- *                 &lt;env-entry-name>officeFloorJndiName&lt;/env-entry-name>
- *                 &lt;env-entry-value>[JNDI resource path to OfficeFloor configuration]&lt;/env-entry-value>
- *             &lt;/env-entry>
- *             &lt;env-entry>
- *                 &lt;env-entry-name>officeName&lt;/env-entry-name>
- *                 &lt;env-entry-value>[Name of Office]&lt;/env-entry-value>
- *             &lt;/env-entry>
- *             &lt;env-entry>
- *                 &lt;env-entry-name>workName&lt;/env-entry-name>
- *                 &lt;env-entry-value>[Name of Work]&lt;/env-entry-value>
- *             &lt;/env-entry>
- *         &lt;/session>
+ *         &lt;session&gt;
+ *             &lt;ejb-name&gt;[EJB Name]&lt;/ejb-name&gt;
+ *             &lt;ejb-class&gt;net.officefloor.plugin.ejb.OfficeFloorEjb&lt;/ejb-class&gt;
+ *             &lt;env-entry&gt;
+ *                 &lt;env-entry-name&gt;officeFloorJndiName&lt;/env-entry-name&gt;
+ *                 &lt;env-entry-value&gt;[JNDI resource path to OfficeFloor configuration]&lt;/env-entry-value&gt;
+ *             &lt;/env-entry&gt;
+ *             &lt;env-entry&gt;
+ *                 &lt;env-entry-name&gt;officeName&lt;/env-entry-name&gt;
+ *                 &lt;env-entry-value&gt;[Name of Office]&lt;/env-entry-value&gt;
+ *             &lt;/env-entry&gt;
+ *             &lt;env-entry&gt;
+ *                 &lt;env-entry-name&gt;workName&lt;/env-entry-name&gt;
+ *                 &lt;env-entry-value&gt;[Name of Work]&lt;/env-entry-value&gt;
+ *             &lt;/env-entry&gt;
+ *         &lt;/session&gt;
  *         ...
- *     &lt;/enterprise-beans>
+ *     &lt;/enterprise-beans&gt;
  *     ...
- * &lt;/ejb-jar>
+ * &lt;/ejb-jar&gt;
  * </pre>
  * 
  * <p>

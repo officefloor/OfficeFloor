@@ -277,8 +277,6 @@ public class CometHttpTemplateSectionExtension implements
 		 * @param connection
 		 *            {@link ServerGwtRpcConnection} to notify client that
 		 *            published.
-		 * @param service
-		 *            {@link CometService}.
 		 * @param flow
 		 *            {@link PublishFlow}.
 		 */

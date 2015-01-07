@@ -41,7 +41,7 @@ public interface CometService {
 	/**
 	 * Publishes an event.
 	 * 
-	 * @param listenerType
+	 * @param listenerTypeName
 	 *            Listener type name.
 	 * @param event
 	 *            Event.
@@ -63,7 +63,7 @@ public interface CometService {
 	 * 
 	 * @param eventSequenceNumber
 	 *            {@link PublishedEvent} sequence number.
-	 * @param listenerType
+	 * @param listenerTypeName
 	 *            Listener type name.
 	 * @param event
 	 *            Event.

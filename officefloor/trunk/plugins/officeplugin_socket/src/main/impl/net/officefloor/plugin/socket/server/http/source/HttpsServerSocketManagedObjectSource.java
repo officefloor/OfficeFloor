@@ -93,7 +93,7 @@ public class HttpsServerSocketManagedObjectSource extends
 	 * {@link AutoWireApplication}.
 	 * 
 	 * @param source
-	 *            {@link WebAutoWireApplication}.
+	 *            {@link AutoWireApplication}.
 	 * @param port
 	 *            Port to listen for HTTPS requests.
 	 * @param sslEngineSourceClass
