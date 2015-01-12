@@ -466,8 +466,8 @@ public class ClasspathUtil {
 	/**
 	 * Obtains the class name of the input {@link IJavaElement}.
 	 * 
-	 * @param classFile
-	 *            {@link IClassFile}.
+	 * @param javaElement
+	 *            {@link IJavaElement}.
 	 * @return Class name or <code>null</code> if {@link IJavaElement} not a
 	 *         class or contained within a class.
 	 */

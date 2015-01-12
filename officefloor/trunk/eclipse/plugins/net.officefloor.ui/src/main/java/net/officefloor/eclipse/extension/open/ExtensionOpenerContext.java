@@ -36,7 +36,7 @@ public interface ExtensionOpenerContext {
 	/**
 	 * Opens the resource on the class path.
 	 * 
-	 * @param resourceName
+	 * @param resourcePath
 	 *            Path of the resource on the class path.
 	 */
 	void openClasspathResource(String resourcePath);

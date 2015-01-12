@@ -26,8 +26,7 @@ import net.officefloor.admin.transaction.Transaction;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link net.officefloor.core.spi.managedobject.ManagedObject} for a JMS
- * {@link javax.jms.Session}.
+ * {@link ManagedObject} for a JMS {@link Session}.
  * 
  * TODO close the session on disposing of managed object.
  * 

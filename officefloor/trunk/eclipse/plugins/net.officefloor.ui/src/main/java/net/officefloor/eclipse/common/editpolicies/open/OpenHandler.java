@@ -24,7 +24,7 @@ import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.commands.Command;
 
 /**
- * {@link Command} factory for an open {@link {@link Request} (
+ * {@link Command} factory for an open {@link Request} (
  * {@link RequestConstants#REQ_OPEN}).
  * 
  * @author Daniel Sagenschneider

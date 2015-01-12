@@ -228,8 +228,6 @@ public class TeamSourceInstance implements TeamSourceExtensionContext,
 	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
-	 * @param context
-	 *            {@link TeamSourceInstanceContext}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void createControls(Composite page) {

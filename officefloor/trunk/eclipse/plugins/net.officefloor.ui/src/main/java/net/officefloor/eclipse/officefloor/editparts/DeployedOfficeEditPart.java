@@ -41,7 +41,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the {@link OfficeFloorOfficeModel}.
+ * {@link EditPart} for the {@link DeployedOfficeModel}.
  * 
  * @author Daniel Sagenschneider
  */

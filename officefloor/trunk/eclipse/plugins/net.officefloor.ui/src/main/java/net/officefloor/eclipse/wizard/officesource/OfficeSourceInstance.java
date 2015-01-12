@@ -23,6 +23,7 @@ import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.office.source.OfficeSourceProperty;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
@@ -249,12 +250,10 @@ public class OfficeSourceInstance implements OfficeSourceExtensionContext,
 
 	/**
 	 * Creates the {@link Control} instances to populate the
-	 * {@link OfficeLoaderProperty} instances.
+	 * {@link OfficeSourceProperty} instances.
 	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
-	 * @param context
-	 *            {@link OfficeSourceInstanceContext}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void createControls(Composite page) {

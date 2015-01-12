@@ -26,7 +26,7 @@ import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 
 /**
- * Adds an {@link OfficeFloorOfficeModel} to a {@link OfficeFloorModel}.
+ * Adds an {@link DeployedOfficeModel} to a {@link OfficeFloorModel}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -49,19 +49,19 @@ public class AddDeployedOfficeOperation extends
 
 	@Override
 	protected Change<?> getChange(OfficeFloorChanges changes, Context context) {
-		
+
 		// Obtain the office instance
-		OfficeInstance office = OfficeSourceWizard.getOfficeInstance(context
-				.getEditPart(), null);
+		OfficeInstance office = OfficeSourceWizard.getOfficeInstance(
+				context.getEditPart(), null);
 		if (office == null) {
 			return null; // must have office
 		}
 
 		// Create change to add the office
-		Change<DeployedOfficeModel> change = changes.addDeployedOffice(office
-				.getOfficeName(), office.getOfficeSourceClassName(), office
-				.getOfficeLocation(), office.getPropertylist(), office
-				.getOfficeType());
+		Change<DeployedOfficeModel> change = changes.addDeployedOffice(
+				office.getOfficeName(), office.getOfficeSourceClassName(),
+				office.getOfficeLocation(), office.getPropertylist(),
+				office.getOfficeType());
 
 		// Position the office
 		context.positionModel(change.getTarget());

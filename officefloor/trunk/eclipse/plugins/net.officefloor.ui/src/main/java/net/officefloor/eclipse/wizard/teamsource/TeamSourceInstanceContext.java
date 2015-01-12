@@ -45,7 +45,7 @@ public interface TeamSourceInstanceContext {
 	/**
 	 * Flags if {@link TeamType} is loaded.
 	 * 
-	 * @param isTeamTypeLoaded
+	 * @param isTeamLoaded
 	 *            <code>true</code> {@link TeamType} loaded.
 	 */
 	void setTeamTypeLoaded(boolean isTeamLoaded);

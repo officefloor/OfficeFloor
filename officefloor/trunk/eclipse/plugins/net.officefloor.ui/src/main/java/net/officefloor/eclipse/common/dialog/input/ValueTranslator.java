@@ -27,7 +27,7 @@ public interface ValueTranslator {
 	/**
 	 * Translates the {@link Input} value to the value for use.
 	 * 
-	 * @param value
+	 * @param inputValue
 	 *            {@link Input} value.
 	 * @return Translated value.
 	 * @throws InvalidValueException

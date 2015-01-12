@@ -82,8 +82,8 @@ public class MovePositionalModelCommand extends Command {
 	/**
 	 * Moves the edit part.
 	 * 
-	 * @param constraints
-	 *            Constraints for the edit part.
+	 * @param location
+	 *            Location for the edit part.
 	 */
 	protected void move(Point location) {
 		// Specify location for edit part

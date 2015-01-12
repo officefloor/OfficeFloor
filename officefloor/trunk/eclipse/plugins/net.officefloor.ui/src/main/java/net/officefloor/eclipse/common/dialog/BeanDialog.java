@@ -49,7 +49,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * Popuates the input bean by user entered information via a dialog window.
+ * Populates the input bean by user entered information via a dialog window.
  * 
  * @author Daniel Sagenschneider
  */
@@ -134,7 +134,7 @@ public class BeanDialog extends Dialog {
 	/**
 	 * Populates the bean.
 	 * 
-	 * @return <code>true<code> if bean is populated.
+	 * @return <code>true</code> if bean is populated.
 	 */
 	public boolean populate() {
 		// Block on open
@@ -160,7 +160,7 @@ public class BeanDialog extends Dialog {
 	 * 
 	 * @param propertyName
 	 *            Name of property.
-	 * @param builder
+	 * @param input
 	 *            Specialised {@link Input}.
 	 */
 	public void registerPropertyInput(String propertyName, Input<?> input) {

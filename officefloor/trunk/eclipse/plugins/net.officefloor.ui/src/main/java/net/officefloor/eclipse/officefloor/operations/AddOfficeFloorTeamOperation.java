@@ -26,7 +26,7 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 
 /**
- * Adds a {@link TeamModel} to the {@link OfficeFloorModel}.
+ * Adds a {@link OfficeFloorTeamModel} to the {@link OfficeFloorModel}.
  * 
  * @author Daniel Sagenschneider
  */

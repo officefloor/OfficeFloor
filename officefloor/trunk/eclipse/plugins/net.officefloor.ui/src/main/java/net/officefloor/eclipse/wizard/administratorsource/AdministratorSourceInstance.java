@@ -32,6 +32,7 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
@@ -255,12 +256,10 @@ public class AdministratorSourceInstance implements
 
 	/**
 	 * Creates the {@link Control} instances to populate the
-	 * {@link AdministratorLoaderProperty} instances.
+	 * {@link AdministratorSourceProperty} instances.
 	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
-	 * @param context
-	 *            {@link AdministratorSourceInstanceContext}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void createControls(Composite page) {

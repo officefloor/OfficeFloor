@@ -24,7 +24,7 @@ import org.eclipse.draw2d.FreeformViewport;
 import org.eclipse.draw2d.IFigure;
 
 /**
- * {@link WrappingFigure} for a {@link FreeformViewport}.
+ * Wrapping {@link Figure} for a {@link FreeformViewport}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -46,7 +46,7 @@ public class FreeformWrapperFigure extends Figure {
 		this.wrappedFigure = figure;
 		this.setLayoutManager(new NoSpacingToolbarLayout(true));
 		this.setOpaque(false);
-		
+
 		// Add to this (not wrapped figure)
 		super.add(this.wrappedFigure, null, -1);
 	}
@@ -78,7 +78,7 @@ public class FreeformWrapperFigure extends Figure {
 	 * (non-Javadoc)
 	 * 
 	 * @see org.eclipse.draw2d.IFigure#add(org.eclipse.draw2d.IFigure,
-	 *      java.lang.Object, int)
+	 * java.lang.Object, int)
 	 */
 	@Override
 	public void add(IFigure figure, Object constraint, int index) {

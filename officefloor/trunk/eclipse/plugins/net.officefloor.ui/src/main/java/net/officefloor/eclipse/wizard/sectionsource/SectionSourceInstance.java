@@ -337,8 +337,6 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
-	 * @param context
-	 *            {@link SectionSourceInstanceContext}.
 	 */
 	public void createControls(Composite page) {
 

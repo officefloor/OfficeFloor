@@ -22,6 +22,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
@@ -219,12 +220,10 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 
 	/**
 	 * Creates the {@link Control} instances to populate the
-	 * {@link WorkLoaderProperty} instances.
+	 * {@link WorkSourceProperty} instances.
 	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
-	 * @param context
-	 *            {@link WorkSourceInstanceContext}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void createControls(Composite page) {

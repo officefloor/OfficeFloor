@@ -45,7 +45,7 @@ public interface GovernanceSourceInstanceContext {
 	/**
 	 * Flags if {@link GovernanceType} is loaded.
 	 * 
-	 * @param isGovernanceTypeLoaded
+	 * @param isGovernanceLoaded
 	 *            <code>true</code> {@link GovernanceType} loaded.
 	 */
 	void setGovernanceTypeLoaded(boolean isGovernanceLoaded);
