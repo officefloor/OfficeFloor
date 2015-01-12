@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -64,7 +65,7 @@ public class ExtensionUtil {
 	/**
 	 * Obtains the extension id for the input extension name.
 	 * 
-	 * @param extensionName
+	 * @param name
 	 *            Name of the extension.
 	 * @return Id for the extension.
 	 */

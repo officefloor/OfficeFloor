@@ -67,8 +67,8 @@ public class JavaUtil {
 	 * 
 	 * @param project
 	 *            {@link IProject}.
-	 * @param type
-	 *            Type.
+	 * @param typeName
+	 *            Type name.
 	 * @return Listing of {@link IType} that represent the classes of the input
 	 *         type.
 	 * @throws JavaModelException

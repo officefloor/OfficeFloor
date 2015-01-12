@@ -247,8 +247,6 @@ public class GovernanceSourceInstance implements
 	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
-	 * @param context
-	 *            {@link GovernanceSourceInstanceContext}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void createControls(Composite page) {

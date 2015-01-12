@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.skin.standard.figure;
 
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
@@ -25,7 +26,7 @@ import org.eclipse.draw2d.Label;
 import org.eclipse.swt.graphics.Color;
 
 /**
- * {@link Figure} for an item of the {@link OfficeFloorOfficeModel}.
+ * {@link Figure} for an item of the {@link DeployedOfficeModel}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -45,7 +46,7 @@ public class OfficeItemFigure extends Figure {
 	 * Initiate.
 	 * 
 	 * @param itemName
-	 *            Name of the {@link OfficeFloorOfficeModel} item.
+	 *            Name of the {@link DeployedOfficeModel} item.
 	 * @param connectorDirection
 	 *            {@link ConnectorDirection} that is either
 	 *            {@link ConnectorDirection#WEST} or
@@ -111,10 +112,10 @@ public class OfficeItemFigure extends Figure {
 	}
 
 	/**
-	 * Specifies the name of the {@link OfficeFloorOfficeModel} item.
+	 * Specifies the name of the {@link DeployedOfficeModel} item.
 	 * 
 	 * @param itemName
-	 *            Name of the {@link OfficeFloorOfficeModel} item.
+	 *            Name of the {@link DeployedOfficeModel} item.
 	 */
 	public void setItemName(String itemName) {
 		this.itemName.setText(itemName);

@@ -27,6 +27,7 @@ import net.officefloor.model.section.SectionManagedObjectModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToExternalFlowModel;
 import net.officefloor.model.section.SectionManagedObjectSourceFlowToSubSectionInputModel;
+import net.officefloor.model.section.SectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionManagedObjectToSectionManagedObjectSourceModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
@@ -72,7 +73,7 @@ public interface SectionFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ManagedObjectSourceModel}.
+	 * {@link SectionManagedObjectSourceModel}.
 	 *
 	 * @param context
 	 *            {@link SectionManagedObjectSourceFigureContext}.

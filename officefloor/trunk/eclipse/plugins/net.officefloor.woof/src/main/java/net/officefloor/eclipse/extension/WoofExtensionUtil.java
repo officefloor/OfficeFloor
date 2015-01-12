@@ -36,7 +36,7 @@ public class WoofExtensionUtil extends ExtensionUtil {
 	/**
 	 * Obtains the extension id for the input extension name.
 	 * 
-	 * @param extensionName
+	 * @param name
 	 *            Name of the extension.
 	 * @return Id for the extension.
 	 */

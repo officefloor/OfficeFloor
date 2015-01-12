@@ -55,7 +55,7 @@ public interface SectionSourceInstanceContext {
 	/**
 	 * Flags if {@link SectionType} or {@link OfficeSection} is loaded.
 	 * 
-	 * @param isSectionTypeLoade
+	 * @param isSectionLoaded
 	 *            <code>true</code> {@link SectionType} or {@link OfficeSection}
 	 *            loaded.
 	 */

@@ -45,7 +45,7 @@ public interface OfficeSourceInstanceContext {
 	/**
 	 * Flags if {@link OfficeType} is loaded.
 	 * 
-	 * @param isOfficeTypeLoaded
+	 * @param isOfficeLoaded
 	 *            <code>true</code> {@link OfficeType} loaded.
 	 */
 	void setOfficeLoaded(boolean isOfficeLoaded);

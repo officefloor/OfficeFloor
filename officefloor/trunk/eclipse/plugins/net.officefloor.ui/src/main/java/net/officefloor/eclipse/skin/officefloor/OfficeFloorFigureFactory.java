@@ -26,12 +26,16 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
@@ -51,7 +55,7 @@ public interface OfficeFloorFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ManagedObjectSourceModel}.
+	 * {@link OfficeFloorManagedObjectSourceModel}.
 	 * 
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceFigureContext}.
@@ -61,8 +65,8 @@ public interface OfficeFloorFigureFactory {
 			OfficeFloorManagedObjectSourceFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ManagedObjectTaskFlowModel}.
+	 * Creates the {@link OfficeFloorManagedObjectSourceFlowFigure} for the
+	 * {@link OfficeFloorManagedObjectSourceFlowModel}.
 	 * 
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceFlowFigureContext}.
@@ -72,8 +76,8 @@ public interface OfficeFloorFigureFactory {
 			OfficeFloorManagedObjectSourceFlowFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ManagedObjectTeamModel}.
+	 * Creates the {@link OfficeFloorManagedObjectSourceTeamFigure} for the
+	 * {@link OfficeFloorManagedObjectSourceTeamModel}.
 	 * 
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectSourceTeamFigureContext}.
@@ -118,7 +122,7 @@ public interface OfficeFloorFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ManagedObjectDependencyModel}.
+	 * {@link OfficeFloorManagedObjectDependencyModel}.
 	 * 
 	 * @param context
 	 *            {@link OfficeFloorManagedObjectDependencyFigureContext}.
@@ -169,7 +173,7 @@ public interface OfficeFloorFigureFactory {
 			DeployedOfficeTeamFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link TeamModel}.
+	 * Creates the {@link OfficeFloorTeamFigure} for the {@link TeamModel}.
 	 * 
 	 * @param context
 	 *            {@link OfficeFloorTeamFigureContext}.
@@ -266,7 +270,8 @@ public interface OfficeFloorFigureFactory {
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 * @param context
-	 *            {@link OfficeFloorManagedObjectSourceToDeployedOffice}.
+	 *            {@link OfficeFloorManagedObjectSourceToDeployedOfficeFigureContext}
+	 *            .
 	 */
 	void decorateOfficeFloorManagedObjectSourceToDeployedOfficeFigure(
 			PolylineConnection figure,

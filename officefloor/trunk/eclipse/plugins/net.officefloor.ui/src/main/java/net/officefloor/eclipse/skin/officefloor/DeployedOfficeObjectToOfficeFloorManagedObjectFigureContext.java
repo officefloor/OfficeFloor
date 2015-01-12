@@ -17,10 +17,8 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
-
 /**
- * Context to decorate the {@link link
- * DeployedOfficeObjectToOfficeFloorManagedObjectModel} connection.
+ * Context to decorate the connection.
  * 
  * @author Daniel Sagenschneider
  */

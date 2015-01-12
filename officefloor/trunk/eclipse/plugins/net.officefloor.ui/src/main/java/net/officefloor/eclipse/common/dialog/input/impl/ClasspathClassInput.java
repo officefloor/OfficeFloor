@@ -48,7 +48,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
@@ -89,12 +88,10 @@ public class ClasspathClassInput implements Input<Composite> {
 
 	/**
 	 * Convenience constructor to use the {@link IProject} and {@link Shell} of
-	 * the {@link IEditorInput}.
+	 * the {@link IEditorPart}.
 	 * 
 	 * @param editor
-	 *            {@link IEditorInput}.
-	 * @param shell
-	 *            {@link Shell}.
+	 *            {@link IEditorPart}.
 	 */
 	public ClasspathClassInput(IEditorPart editor) {
 		this(ProjectConfigurationContext.getProject(editor.getEditorInput()),

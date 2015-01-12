@@ -45,7 +45,7 @@ public interface AdministratorSourceInstanceContext {
 	/**
 	 * Flags if {@link AdministratorType} is loaded.
 	 * 
-	 * @param isAdministratorTypeLoaded
+	 * @param isAdministratorLoaded
 	 *            <code>true</code> {@link AdministratorType} loaded.
 	 */
 	void setAdministratorTypeLoaded(boolean isAdministratorLoaded);

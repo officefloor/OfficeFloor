@@ -44,12 +44,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 
 /**
- * {@link Input} to obtain an file from the class path.
+ * {@link Input} to obtain a file from the class path.
  * 
  * @author Daniel Sagenschneider
  */
@@ -85,12 +84,10 @@ public class ClasspathFileInput implements Input<Composite> {
 
 	/**
 	 * Convenience constructor to use the {@link IProject} and {@link Shell} of
-	 * the {@link IEditorInput}.
+	 * the {@link IEditorPart}.
 	 * 
 	 * @param editor
-	 *            {@link IEditorInput}.
-	 * @param shell
-	 *            {@link Shell}.
+	 *            {@link IEditorPart}.
 	 */
 	public ClasspathFileInput(IEditorPart editor) {
 		this(ProjectConfigurationContext.getProject(editor.getEditorInput()),

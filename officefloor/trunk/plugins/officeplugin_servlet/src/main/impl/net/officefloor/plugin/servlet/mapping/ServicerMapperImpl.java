@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokenHandler;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
@@ -93,8 +91,6 @@ public class ServicerMapperImpl implements ServicerMapper {
 	 * @param servicers
 	 *            {@link HttpServletServicer} instances for this
 	 *            {@link ServicerMapper}.
-	 * @throws ServletException
-	 *             If fails to create the mappings.
 	 */
 	public ServicerMapperImpl(HttpServletServicer... servicers) {
 
@@ -426,8 +422,8 @@ public class ServicerMapperImpl implements ServicerMapper {
 		public void loadServicer(String mapping, HttpServletServicer servicer) {
 
 			// Remove the trailing wild card
-			mapping = mapping.substring(0, (mapping.length() - WILDCARD
-					.length()));
+			mapping = mapping.substring(0,
+					(mapping.length() - WILDCARD.length()));
 
 			// Remove starting separator (if starts with separator)
 			if (mapping.startsWith(PATH_SEPARATOR)) {

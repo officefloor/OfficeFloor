@@ -502,7 +502,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	/**
 	 * Populates the {@link EditPart} types for their respective model.
 	 * 
-	 * @param mapping
+	 * @param map
 	 *            Registry to load the mappings.
 	 */
 	protected abstract void populateEditPartTypes(

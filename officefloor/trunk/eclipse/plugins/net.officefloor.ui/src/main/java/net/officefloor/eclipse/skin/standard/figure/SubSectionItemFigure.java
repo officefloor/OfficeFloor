@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.skin.standard.figure;
 
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.section.SubSectionModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Ellipse;
@@ -26,7 +27,7 @@ import org.eclipse.draw2d.Label;
 import org.eclipse.swt.graphics.Color;
 
 /**
- * {@link Figure} for an item of the {@link SubRoomModel}.
+ * {@link Figure} for an item of the {@link SubSectionModel}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -43,7 +44,7 @@ public class SubSectionItemFigure extends Figure {
 	private final ConnectorFigure connector;
 
 	/**
-	 * Name of the {@link SubRoomModel} item.
+	 * Name of the {@link SubSectionModel} item.
 	 */
 	private final Label itemName;
 
@@ -51,7 +52,7 @@ public class SubSectionItemFigure extends Figure {
 	 * Initiate.
 	 * 
 	 * @param itemName
-	 *            Name of the {@link SubRoomModel} item.
+	 *            Name of the {@link SubSectionModel} item.
 	 * @param isPublic
 	 *            Indicates if public.
 	 * @param connectorDirection
@@ -126,7 +127,7 @@ public class SubSectionItemFigure extends Figure {
 	}
 
 	/**
-	 * Flags whether this {@link SubRoomModel} item is public.
+	 * Flags whether this {@link SubSectionModel} item is public.
 	 * 
 	 * @param isPublic
 	 *            <code>true</code> if public.
@@ -145,10 +146,10 @@ public class SubSectionItemFigure extends Figure {
 	}
 
 	/**
-	 * Specifies the name of the {@link SubRoomModel} item.
+	 * Specifies the name of the {@link SubSectionModel} item.
 	 * 
 	 * @param itemName
-	 *            Name of the {@link SubRoomModel} item.
+	 *            Name of the {@link SubSectionModel} item.
 	 */
 	public void setItemName(String itemName) {
 		this.itemName.setText(itemName);

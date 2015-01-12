@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.officefloor.editparts;
 
 import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.gef.EditPart;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;

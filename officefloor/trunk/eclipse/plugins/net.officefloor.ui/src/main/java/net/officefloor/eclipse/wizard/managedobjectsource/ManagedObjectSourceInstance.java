@@ -32,6 +32,7 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
@@ -221,12 +222,10 @@ public class ManagedObjectSourceInstance implements
 
 	/**
 	 * Creates the {@link Control} instances to populate the
-	 * {@link ManagedObjectLoaderProperty} instances.
+	 * {@link ManagedObjectSourceProperty} instances.
 	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
-	 * @param context
-	 *            {@link ManagedObjectSourceInstanceContext}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void createControls(Composite page) {
