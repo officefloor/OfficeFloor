@@ -48,7 +48,6 @@ import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.eclipse.util.JavaUtil;
 import net.officefloor.eclipse.util.LogUtil;
-import net.officefloor.eclipse.wizard.access.HttpSecuritySourceInstanceContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.model.woof.WoofTemplateInheritance;
@@ -109,8 +108,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 *            {@link ClassLoader}.
 	 * @param project
 	 *            {@link IProject}.
-	 * @param context
-	 *            {@link HttpSecuritySourceInstanceContext}.
 	 * @return Mapping of {@link WoofTemplateExtensionSource} class name to its
 	 *         {@link HttpTemplateExtensionInstance}.
 	 */

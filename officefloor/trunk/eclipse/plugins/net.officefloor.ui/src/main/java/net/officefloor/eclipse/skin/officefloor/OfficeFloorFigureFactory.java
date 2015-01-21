@@ -41,6 +41,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeploye
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PolylineConnection;
@@ -173,7 +174,8 @@ public interface OfficeFloorFigureFactory {
 			DeployedOfficeTeamFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorTeamFigure} for the {@link TeamModel}.
+	 * Creates the {@link OfficeFloorTeamFigure} for the
+	 * {@link OfficeFloorTeamModel}.
 	 * 
 	 * @param context
 	 *            {@link OfficeFloorTeamFigureContext}.

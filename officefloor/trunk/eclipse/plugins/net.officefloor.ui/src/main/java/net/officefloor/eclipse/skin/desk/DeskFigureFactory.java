@@ -42,6 +42,7 @@ import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToDeskManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
@@ -283,7 +284,8 @@ public interface DeskFigureFactory {
 	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
-	 * @param workToInitialTaskEditPart
+	 * @param context
+	 *            {@link WorkToInitialTaskFigureContext}
 	 */
 	void decorateWorkToInitialTaskFigure(PolylineConnection figure,
 			WorkToInitialTaskFigureContext context);

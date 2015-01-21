@@ -17,6 +17,9 @@
  */
 package net.officefloor.eclipse.skin.woof;
 
+import net.officefloor.model.woof.WoofAccessOutputToWoofResourceModel;
+import net.officefloor.model.woof.WoofAccessOutputToWoofSectionInputModel;
+import net.officefloor.model.woof.WoofAccessOutputToWoofTemplateModel;
 import net.officefloor.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.model.woof.WoofExceptionToWoofTemplateModel;

@@ -33,6 +33,7 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -159,6 +160,9 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Validates that no top level escalation occurred.
 	 * <p>
 	 * This method will clear the escalation on exit.
+	 * 
+	 * @throws Throwable
+	 *             If top level {@link Escalation}.
 	 */
 	public void validateNoTopLevelEscalation() throws Throwable {
 		synchronized (this.exceptionLock) {
@@ -246,6 +250,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link Work}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @return {@link WorkBuilder} for the {@link Work}.
 	 */
 	public <W extends Work> WorkBuilder<W> constructWork(String workName,
@@ -265,6 +271,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link Work}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @return {@link WorkBuilder} for the {@link Work}.
 	 */
 	public <W extends Work> WorkBuilder<W> constructWork(String workName,
@@ -377,6 +385,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link Task}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -396,7 +410,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to register a {@link Task}.
-	 * 
+	 *
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })

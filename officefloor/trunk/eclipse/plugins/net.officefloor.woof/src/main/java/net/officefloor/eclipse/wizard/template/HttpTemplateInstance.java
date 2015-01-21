@@ -158,7 +158,7 @@ public class HttpTemplateInstance {
 	 * @param renderRedirectHttpMethods
 	 *            HTTP methods that trigger a redirect on rendering the
 	 *            {@link HttpTemplate}.
-	 * @param iscContinueRendering
+	 * @param isContinueRendering
 	 *            Indicates if allow to continue rendering.
 	 * @param extensionInstances
 	 *            {@link HttpTemplateExtensionInstance} listing to extend the

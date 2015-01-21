@@ -671,7 +671,7 @@ public class DeskEditor extends
 	/**
 	 * Obtains the {@link FlowInstigationStrategyEnum}.
 	 * 
-	 * @param instigationType
+	 * @param instigationStrategy
 	 *            Instigation type.
 	 * @return {@link FlowInstigationStrategyEnum} or <code>null</code> if
 	 *         unknown instigation strategy.

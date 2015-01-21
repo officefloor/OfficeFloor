@@ -51,7 +51,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * {@link WorkSourceExtension} for the {@link HttpHtmlTemplateWorkSource}.
+ * {@link WorkSourceExtension} for the {@link HttpTemplateWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */

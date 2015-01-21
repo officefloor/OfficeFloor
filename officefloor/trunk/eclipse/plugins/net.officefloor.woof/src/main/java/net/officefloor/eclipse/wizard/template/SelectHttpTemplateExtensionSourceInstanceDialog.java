@@ -67,7 +67,7 @@ public class SelectHttpTemplateExtensionSourceInstanceDialog extends ListDialog 
 	/**
 	 * Initiate.
 	 * 
-	 * @param parent
+	 * @param shell
 	 *            {@link Shell}.
 	 * @param instances
 	 *            {@link HttpTemplateExtensionSourceInstance} listing to select

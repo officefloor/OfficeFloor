@@ -252,8 +252,6 @@ public class HttpSecuritySourceInstance implements
 	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.
-	 * @param context
-	 *            {@link HttpSecuritySourceInstanceContext}.
 	 */
 	public void createControls(Composite page) {
 

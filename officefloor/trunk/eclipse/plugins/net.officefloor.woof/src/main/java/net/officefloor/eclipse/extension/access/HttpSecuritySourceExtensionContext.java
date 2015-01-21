@@ -20,6 +20,7 @@ package net.officefloor.eclipse.extension.access;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 import org.eclipse.core.resources.IProject;
@@ -48,7 +49,7 @@ public interface HttpSecuritySourceExtensionContext {
 	 * The {@link PropertyList} may be in any state:
 	 * <ol>
 	 * <li>no value {@link PropertyList} populated from the
-	 * {@link HttpSecuritySourceSourceSpecification} (creating a
+	 * {@link HttpSecuritySourceSpecification} (creating a
 	 * {@link HttpSecuritySource})</li>
 	 * <li>any changed state based on editing of the {@link HttpSecuritySource}</li>
 	 * </ol>

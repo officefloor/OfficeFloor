@@ -194,9 +194,18 @@ public class HttpTemplateExtensionSourceInstance {
 	 * Validate the change to configuration for the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param properties
-	 *            {@link PropertyList} to configure the
-	 *            {@link WoofTemplateExtensionSource}.
+	 * @param oldUri
+	 *            Old URI.
+	 * @param oldProperties
+	 *            Old {@link PropertyList}.
+	 * @param newUri
+	 *            New URI.
+	 * @param newProperties
+	 *            New {@link PropertyList}.
+	 * @param resourceSources
+	 *            {@link ResourceSource} instances.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
 	public void validateChange(String oldUri, PropertyList oldProperties,
 			String newUri, PropertyList newProperties,

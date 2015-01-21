@@ -25,7 +25,7 @@ import net.officefloor.eclipse.skin.standard.StandardOfficeFloorColours;
 import org.eclipse.draw2d.Ellipse;
 
 /**
- * Standard {@link StartFigure}.
+ * Standard {@link OfficeStartFigure}.
  * 
  * @author Daniel Sagenschneider
  */

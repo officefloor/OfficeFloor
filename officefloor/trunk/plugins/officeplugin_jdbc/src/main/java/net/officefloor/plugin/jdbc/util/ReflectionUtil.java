@@ -70,7 +70,7 @@ public class ReflectionUtil {
 	/**
 	 * Creates the Bean with properties populated.
 	 * 
-	 * @param BeanClass
+	 * @param beanClass
 	 *            {@link Class} of the Bean.
 	 * @param properties
 	 *            Properties to configure the Bean.

@@ -74,7 +74,8 @@ public interface WoofTemplateExtensionSourceExtensionContext {
 	 * Obtains the {@link IProject} that is adding the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @return {@link IProject} that is adding the {@link WoofTemplateExtensionSourceF}.
+	 * @return {@link IProject} that is adding the
+	 *         {@link WoofTemplateExtensionSource}.
 	 */
 	IProject getProject();
 
