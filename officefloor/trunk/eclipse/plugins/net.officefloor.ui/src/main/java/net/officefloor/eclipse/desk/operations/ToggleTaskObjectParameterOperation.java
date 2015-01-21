@@ -23,7 +23,7 @@ import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.WorkTaskObjectModel;
 
 /**
- * Toggles whether the {@link DeskTaskObjectModel} is a parameter.
+ * Toggles whether the {@link WorkTaskObjectModel} is a parameter.
  * 
  * @author Daniel Sagenschneider
  */

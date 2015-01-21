@@ -45,7 +45,7 @@ public interface WorkSourceInstanceContext {
 	/**
 	 * Flags if {@link WorkType} is loaded.
 	 * 
-	 * @param isWorkTypeLoade
+	 * @param isWorkTypeLoaded
 	 *            <code>true</code> {@link WorkType} loaded.
 	 */
 	void setWorkTypeLoaded(boolean isWorkTypeLoaded);

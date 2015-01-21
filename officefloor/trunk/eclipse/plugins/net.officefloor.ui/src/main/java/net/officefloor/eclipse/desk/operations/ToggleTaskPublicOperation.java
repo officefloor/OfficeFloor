@@ -23,7 +23,7 @@ import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.TaskModel;
 
 /**
- * Toggles {@link FlowItemModel} being public.
+ * Toggles {@link TaskModel} being public.
  * 
  * @author Daniel Sagenschneider
  */

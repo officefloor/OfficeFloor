@@ -29,7 +29,7 @@ import net.officefloor.plugin.web.http.parameters.source.HttpParametersLoaderWor
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * {@link WorkSourceExtension} for the {@link HttpHtmlFormToBeanWorkSource}.
+ * {@link WorkSourceExtension} for the {@link HttpParametersLoaderWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */

@@ -25,6 +25,7 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
@@ -333,7 +334,7 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 
 	/**
 	 * Creates the {@link Control} instances to populate the
-	 * {@link SectionLoaderProperty} instances.
+	 * {@link SectionSourceProperty} instances.
 	 * 
 	 * @param page
 	 *            {@link Composite} to add {@link Control} instances.

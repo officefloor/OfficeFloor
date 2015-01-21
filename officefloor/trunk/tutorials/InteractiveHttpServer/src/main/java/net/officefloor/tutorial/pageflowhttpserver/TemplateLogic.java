@@ -54,7 +54,7 @@ public class TemplateLogic {
 	 * 
 	 * @param submittedParameters
 	 *            Same {@link Parameters} that was constructed for
-	 *            {@link #handleSubmission(Parmeters)}. This allows the page to
+	 *            {@link #handleSubmission(Parameters)}. This allows the page to
 	 *            be rendered with the values provided by the client.
 	 * @return {@link Parameters} for rendering to page.
 	 */

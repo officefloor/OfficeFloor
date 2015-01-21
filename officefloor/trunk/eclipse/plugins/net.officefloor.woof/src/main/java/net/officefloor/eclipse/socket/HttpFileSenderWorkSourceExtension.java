@@ -32,7 +32,7 @@ import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * {@link WorkSourceExtension} for {@link ClasspathHttpFileSenderWorkSource}.
+ * {@link WorkSourceExtension} for {@link HttpFileSenderWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */
