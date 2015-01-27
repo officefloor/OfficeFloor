@@ -147,6 +147,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/**
 	 * Initiate the container.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
 	 * @param metaData
 	 *            Meta-data of the {@link ManagedObject}.
 	 * @param processState
@@ -180,6 +182,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/**
 	 * Initiate the container with a provided {@link ManagedObject}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
 	 * @param managedObject
 	 *            {@link ManagedObject} triggering the {@link ProcessState}.
 	 * @param metaData

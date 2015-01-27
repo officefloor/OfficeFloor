@@ -61,7 +61,8 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	private final AdministratorMetaData<?, ?>[] administratorMetaData;
 
 	/**
-	 * {@link FlowMetaData} for the initial {@link JobSequence} of the {@link Work} .
+	 * {@link FlowMetaData} for the initial {@link JobSequence} of the
+	 * {@link Work} .
 	 */
 	private final FlowMetaData<W> initialFlowMetaData;
 
@@ -73,6 +74,8 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	/**
 	 * Initiate.
 	 * 
+	 * @param workName
+	 *            Name of the {@link Work}.
 	 * @param workFactory
 	 *            {@link WorkFactory}.
 	 * @param moMetaData
@@ -82,8 +85,8 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 *            {@link AdministratorMetaData} of the {@link Administrator}
 	 *            instances bound to this {@link Work}.
 	 * @param initialFlowMetaData
-	 *            {@link FlowMetaData} for the initial {@link JobSequence} of the
-	 *            {@link Work}.
+	 *            {@link FlowMetaData} for the initial {@link JobSequence} of
+	 *            the {@link Work}.
 	 * @param taskMetaData
 	 *            {@link TaskMetaData} of the {@link Task} instances of this
 	 *            {@link Work}.

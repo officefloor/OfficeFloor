@@ -21,6 +21,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Meta-data for a {@link Work} instance.
@@ -54,12 +55,12 @@ public interface WorkMetaData<W extends Work> {
 	WorkFactory<W> getWorkFactory();
 
 	/**
-	 * Obtain the {@link FlowMetaData} for the initial {@link JobSequence} of the
-	 * {@link Work}.
+	 * Obtain the {@link FlowMetaData} for the initial {@link JobSequence} of
+	 * the {@link Work}.
 	 * 
 	 * @return {@link FlowMetaData} for the initial {@link JobSequence} of the
-	 *         {@link Work} or <code>null</code> if no initial {@link JobSequence} for
-	 *         the {@link Work}.
+	 *         {@link Work} or <code>null</code> if no initial
+	 *         {@link JobSequence} for the {@link Work}.
 	 */
 	FlowMetaData<W> getInitialFlowMetaData();
 

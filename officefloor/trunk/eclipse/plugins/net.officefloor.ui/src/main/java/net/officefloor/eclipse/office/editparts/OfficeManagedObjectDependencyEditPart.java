@@ -31,7 +31,7 @@ import net.officefloor.model.office.OfficeManagedObjectDependencyModel.OfficeMan
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the {@link ManagedObjectDependencyModel}.
+ * {@link EditPart} for the {@link OfficeManagedObjectDependencyModel}.
  * 
  * @author Daniel Sagenschneider
  */

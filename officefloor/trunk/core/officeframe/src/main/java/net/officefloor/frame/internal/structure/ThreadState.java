@@ -133,7 +133,7 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	/**
 	 * Flags the {@link Governance} has completed.
 	 * 
-	 * @param container
+	 * @param governanceContainer
 	 *            {@link GovernanceContainer} of the completed
 	 *            {@link Governance}.
 	 */

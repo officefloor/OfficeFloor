@@ -59,6 +59,7 @@ public class TaskObjectConfigurationImpl<D extends Enum<D>> implements
 	 * Initiate.
 	 * 
 	 * @param isParameter
+	 *            Indicates if a parameter.
 	 * @param scopeManagedObjectName
 	 *            Name of {@link ManagedObject} within the
 	 *            {@link ManagedObjectScope}.

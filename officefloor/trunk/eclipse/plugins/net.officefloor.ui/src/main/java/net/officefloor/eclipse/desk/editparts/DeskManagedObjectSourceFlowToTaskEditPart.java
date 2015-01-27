@@ -27,8 +27,7 @@ import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the
- * {@link DeskManagedObjectSourceFlowToSubDeskInputModel}.
+ * {@link EditPart} for the {@link DeskManagedObjectSourceFlowToTaskModel}.
  *
  * @author Daniel Sagenschneider
  */

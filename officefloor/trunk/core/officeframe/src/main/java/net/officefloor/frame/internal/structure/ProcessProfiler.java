@@ -27,6 +27,8 @@ public interface ProcessProfiler {
 	/**
 	 * Adds a {@link ThreadState} to be profiled.
 	 * 
+	 * @param thread
+	 *            {@link ThreadState}.
 	 * @return {@link ThreadState} to be profiled.
 	 */
 	ThreadProfiler addThread(ThreadState thread);
