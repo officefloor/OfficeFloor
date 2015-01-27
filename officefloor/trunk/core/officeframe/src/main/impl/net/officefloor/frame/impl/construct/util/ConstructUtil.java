@@ -59,6 +59,10 @@ public class ConstructUtil {
 	 * constructor. If fails to instantiate, then reports issue via
 	 * {@link OfficeFloorIssues}.
 	 * 
+	 * @param <T>
+	 *            Type of object to instantiate.
+	 * @param <E>
+	 *            Expected type that object is assignable.
 	 * @param clazz
 	 *            {@link Class} to instantiate.
 	 * @param expectedType
@@ -83,10 +87,10 @@ public class ConstructUtil {
 			// Ensure the instance is of the expected type
 			if (!expectedType.isInstance(instance)) {
 				// Indicate issue
-				issues.addIssue(assetType, assetName, creatingAssetName
-						+ " class must implement "
-						+ expectedType.getSimpleName() + " (class="
-						+ clazz.getName() + ")");
+				issues.addIssue(assetType, assetName,
+						creatingAssetName + " class must implement "
+								+ expectedType.getSimpleName() + " (class="
+								+ clazz.getName() + ")");
 				return null; // instance not of type
 			}
 
@@ -105,6 +109,8 @@ public class ConstructUtil {
 	 * Transforms the input {@link Map} into an array by the <code>type</code>
 	 * from indexes of the {@link Map}.
 	 * 
+	 * @param <O>
+	 *            Element type.
 	 * @param map
 	 *            {@link Map} to be transformed into an array.
 	 * @param type
@@ -143,6 +149,8 @@ public class ConstructUtil {
 	 * Convenience method for {@link List#toArray(Object[])} to pass compiler
 	 * warnings for generic typed array.
 	 * 
+	 * @param <T>
+	 *            Element type.
 	 * @param list
 	 *            List to transform into an array.
 	 * @param type
@@ -263,6 +271,8 @@ public class ConstructUtil {
 	 * <p>
 	 * This provides generic type safe creation.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param taskMetaData

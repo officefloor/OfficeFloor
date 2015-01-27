@@ -252,6 +252,10 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @param workFactory
+	 *            {@link WorkFactory}.
 	 * @return {@link WorkBuilder} for the {@link Work}.
 	 */
 	public <W extends Work> WorkBuilder<W> constructWork(String workName,
@@ -273,6 +277,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @param work
+	 *            {@link Work}.
+	 * @param initialTaskName
+	 *            Name of the initial {@link Task}.
 	 * @return {@link WorkBuilder} for the {@link Work}.
 	 */
 	public <W extends Work> WorkBuilder<W> constructWork(String workName,
@@ -391,6 +401,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param taskFactory
+	 *            {@link TaskFactory}.
+	 * @param teamName
+	 *            Name of the {@link Team}.
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -417,6 +433,20 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param taskFactory
+	 *            {@link TaskFactory}.
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @param moName
+	 *            Name of the {@link ManagedObject}.
+	 * @param moType
+	 *            Type of the {@link ManagedObject}.
+	 * @param nextTaskName
+	 *            Name of the next {@link Task}.
+	 * @param nextTaskArgumentType
+	 *            Type of argument to the next {@link Task}.
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })

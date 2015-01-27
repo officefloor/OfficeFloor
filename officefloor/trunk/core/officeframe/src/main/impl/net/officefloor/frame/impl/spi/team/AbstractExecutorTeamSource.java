@@ -207,6 +207,8 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		 * 
 		 * @param factory
 		 *            {@link ExecutorServiceFactory}.
+		 * @param teamIdentifier
+		 *            Identifier of the {@link Team}.
 		 */
 		public ExecutorTeam(ExecutorServiceFactory factory,
 				TeamIdentifier teamIdentifier) {

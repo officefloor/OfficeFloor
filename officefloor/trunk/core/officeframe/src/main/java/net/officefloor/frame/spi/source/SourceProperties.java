@@ -63,9 +63,9 @@ public interface SourceProperties {
 	String getProperty(String name, String defaultValue);
 
 	/**
-	 * Properties to configure the {@link OfficeFloorSource}.
+	 * Properties to configure the source.
 	 * 
-	 * @return Properties specific for the {@link OfficeFloorSource}.
+	 * @return Properties specific for the source.
 	 */
 	Properties getProperties();
 

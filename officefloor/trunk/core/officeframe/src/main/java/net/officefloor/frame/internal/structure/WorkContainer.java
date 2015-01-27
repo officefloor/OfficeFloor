@@ -157,6 +157,8 @@ public interface WorkContainer<W extends Work> {
 	 * @param managedObjectIndex
 	 *            {@link ManagedObjectIndex} identifying the
 	 *            {@link ManagedObject}.
+	 * @param threadState
+	 *            {@link ThreadState}.
 	 * @return Object of the particular {@link ManagedObject}.
 	 */
 	Object getObject(ManagedObjectIndex managedObjectIndex,
