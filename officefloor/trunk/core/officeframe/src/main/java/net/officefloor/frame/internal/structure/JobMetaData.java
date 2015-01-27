@@ -64,8 +64,6 @@ public interface JobMetaData {
 	 * Obtains the {@link TaskMetaData} of the next {@link Task} within
 	 * {@link JobSequence} that this {@link Task} is involved within.
 	 * 
-	 * @param key
-	 *            Key of the {@link JobSequence}.
 	 * @return {@link TaskMetaData} of the first {@link Task} within the
 	 *         specified {@link JobSequence}.
 	 */

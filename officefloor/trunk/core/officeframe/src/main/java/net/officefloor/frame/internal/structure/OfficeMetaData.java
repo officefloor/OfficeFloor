@@ -81,6 +81,8 @@ public interface OfficeMetaData {
 	 * Creates a new {@link ProcessState} within the {@link Office} returning
 	 * the starting {@link JobNode} to be executed.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
 	 *            {@link ProcessState}.
@@ -125,6 +127,8 @@ public interface OfficeMetaData {
 	 * Creates a new {@link ProcessState} that is not triggered by a
 	 * {@link ManagedObject}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
 	 *            {@link ProcessState}.

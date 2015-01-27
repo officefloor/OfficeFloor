@@ -42,7 +42,7 @@ public interface AdministratorContext {
 	 *            {@link FlowMetaData} of the {@link JobSequence} to instigate.
 	 * @param parameter
 	 *            Parameter that will be available from the
-	 *            {@link TaskContext#getParameter()} of the first {@link Task}
+	 *            {@link TaskContext#getObject(int)} of the first {@link Task}
 	 *            of the flow to be run.
 	 */
 	void doFlow(FlowMetaData<?> flowMetaData, Object parameter);

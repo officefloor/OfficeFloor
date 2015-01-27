@@ -17,26 +17,27 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.spi.team.Job;
+
 /**
- * Instigation strategies of a
- * {@link net.officefloor.frame.internal.structure.JobSequence}.
+ * Instigation strategies of a {@link JobSequence}.
  * 
  * @author Daniel Sagenschneider
  */
 public enum FlowInstigationStrategyEnum {
 
 	/**
-	 * Asynchronous invocation of a {@link Flow} within a {@link ThreadState}.
+	 * Asynchronous invocation of the {@link Job} within a {@link ThreadState}.
 	 */
 	ASYNCHRONOUS,
 
 	/**
-	 * Parallel invocation of a {@link Flow}.
+	 * Parallel invocation of the {@link Job}.
 	 */
 	PARALLEL,
 
 	/**
-	 * Sequential invocation of {@link Flow}.
+	 * Sequential invocation of the {@link Job}..
 	 */
 	SEQUENTIAL
 
