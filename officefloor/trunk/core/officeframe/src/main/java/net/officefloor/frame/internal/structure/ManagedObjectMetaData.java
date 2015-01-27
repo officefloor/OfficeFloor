@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -25,6 +24,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
@@ -163,6 +163,8 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * Indicates if dependency {@link ManagedObject} instances are ready.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param jobContext
@@ -183,7 +185,9 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 
 	/**
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.
-	 * 
+	 *
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workContainer
 	 *            {@link WorkContainer} to obtain the coordinating
 	 *            {@link ManagedObject} instances.
@@ -201,7 +205,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} to be recycled. Obtained by the
-	 *            {@link TaskContext#getParameter()} within the {@link JobNode}.
+	 *            {@link RecycleManagedObjectParameter#getManagedObject()}.
 	 * @return {@link JobNode} for the recycling this {@link ManagedObject} or
 	 *         <code>null</code> if no recycling is required for this
 	 *         {@link ManagedObject}.

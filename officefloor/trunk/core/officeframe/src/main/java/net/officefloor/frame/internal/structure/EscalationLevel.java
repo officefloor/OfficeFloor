@@ -22,6 +22,7 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Job;
 
 /**
  * <p>
@@ -34,8 +35,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public enum EscalationLevel {
 
 	/**
-	 * {@link ThreadState} executing the {@link Flow} instances with all
-	 * {@link Escalation} instances handled by {@link Flow}.
+	 * {@link ThreadState} executing the {@link Job} instances with all
+	 * {@link Escalation} instances handled by {@link Job}.
 	 */
 	FLOW,
 
@@ -47,7 +48,7 @@ public enum EscalationLevel {
 
 	/**
 	 * {@link ThreadState} invoking {@link EscalationHandler} provided by the
-	 * {@link ManagedObjectSource} instigating a {@link Flow}.
+	 * {@link ManagedObjectSource} instigating a {@link JobSequence}.
 	 */
 	MANAGED_OBJECT_SOURCE_HANDLER,
 

@@ -474,6 +474,16 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link Task}.
 	 * 
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param task
+	 *            {@link Task}.
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @param nextTaskName
+	 *            Name of the next {@link Task}.
+	 * @param nextTaskArgumentType
+	 *            {@link Class} of the argument to the next {@link Task}.
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -495,15 +505,26 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to register a {@link ManagedObject}.
+	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param managedObjectSourceClass
+	 *            {@link ManagedObjectSource} {@link Class}.
 	 */
-	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> constructManagedObject(
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
 			String managedObjectName, Class<MS> managedObjectSourceClass) {
 
 		// Obtain the managed object source name
 		String managedObjectSourceName = "of-" + managedObjectName;
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder<H> managedObjectBuilder = this
+		ManagedObjectBuilder<F> managedObjectBuilder = this
 				.getOfficeFloorBuilder().addManagedObject(
 						managedObjectSourceName, managedObjectSourceClass);
 
@@ -517,8 +538,21 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to register a {@link ManagedObject}.
+	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param managedObjectSourceClass
+	 *            {@link ManagedObjectSource} {@link Class}.
+	 * @param managingOffice
+	 *            Name of the managing {@link Office}.
 	 */
-	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> constructManagedObject(
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
 			String managedObjectName, Class<MS> managedObjectSourceClass,
 			String managingOffice) {
 
@@ -526,7 +560,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 		String managedObjectSourceName = "of-" + managedObjectName;
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder<H> managedObjectBuilder = this
+		ManagedObjectBuilder<F> managedObjectBuilder = this
 				.getOfficeFloorBuilder().addManagedObject(
 						managedObjectSourceName, managedObjectSourceClass);
 
@@ -544,17 +578,30 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to register a {@link ManagedObject}.
+	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param metaData
+	 *            {@link ManagedObjectSourceMetaData}.
+	 * @param managedObject
+	 *            {@link ManagedObject}.
+	 * @param managingOffice
+	 *            Name of the managing {@link Office}.
 	 */
-	public <D extends Enum<D>, H extends Enum<H>> ManagedObjectBuilder<H> constructManagedObject(
+	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectBuilder<F> constructManagedObject(
 			String managedObjectName,
-			ManagedObjectSourceMetaData<D, H> metaData,
+			ManagedObjectSourceMetaData<D, F> metaData,
 			ManagedObject managedObject, String managingOffice) {
 
 		// Obtain managed object source name
 		String managedObjectSourceName = "of-" + managedObjectName;
 
 		// Bind Managed Object
-		ManagedObjectBuilder<H> managedObjectBuilder = MockManagedObjectSource
+		ManagedObjectBuilder<F> managedObjectBuilder = MockManagedObjectSource
 				.bindManagedObject(managedObjectSourceName, managedObject,
 						metaData, this.getOfficeFloorBuilder());
 
@@ -572,6 +619,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to register a {@link ManagedObject}.
+	 * 
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param managedObject
+	 *            {@link ManagedObject}.
+	 * @param managingOffice
+	 *            Name of the managing {@link Office}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ManagedObjectBuilder<?> constructManagedObject(

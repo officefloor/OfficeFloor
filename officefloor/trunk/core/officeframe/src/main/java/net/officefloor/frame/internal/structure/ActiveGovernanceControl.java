@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -32,9 +31,16 @@ public interface ActiveGovernanceControl<F extends Enum<F>> {
 
 	/**
 	 * Provides the {@link Governance} over the {@link ManagedObject}.
-	 * 
-	 * @param taskContext
-	 *            {@link TaskContext}.
+	 *
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
+	 * @param context
+	 *            {@link ContainerContext}.
+	 * @return <code>true</code> if complete.
 	 * @throws Throwable
 	 *             If fails to provide {@link Governance} over the
 	 *             {@link ManagedObject}.

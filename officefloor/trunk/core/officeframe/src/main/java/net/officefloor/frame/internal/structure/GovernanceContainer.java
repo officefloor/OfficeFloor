@@ -70,8 +70,6 @@ public interface GovernanceContainer<I, F extends Enum<F>> {
 	 *            as require checking {@link ManagedObject} is ready which may
 	 *            trigger coordination which requires the {@link WorkContainer}.
 	 * @return {@link ActiveGovernance}.
-	 * @throws Exception
-	 *             If fails to govern the {@link ManagedObject}.
 	 */
 	ActiveGovernance<I, F> createActiveGovernance(I extensionInterface,
 			ManagedObjectContainer managedobjectContainer,

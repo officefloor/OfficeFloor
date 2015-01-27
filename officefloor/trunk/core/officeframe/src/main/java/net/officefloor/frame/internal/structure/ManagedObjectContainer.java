@@ -56,6 +56,8 @@ public interface ManagedObjectContainer {
 	/**
 	 * Provides any active {@link Governance} over the {@link ManagedObject}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workContainer
 	 *            {@link WorkContainer} to possibly source the
 	 *            {@link Governance}.
@@ -83,6 +85,8 @@ public interface ManagedObjectContainer {
 	 * {@link ManagedObject} instances. Also handles completion of loading the
 	 * {@link ManagedObject} and obtaining the {@link Object}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workContainer
 	 *            {@link WorkContainer} to source the other
 	 *            {@link ManagedObject} instances.
@@ -110,7 +114,9 @@ public interface ManagedObjectContainer {
 	 * {@link ManagedObject} is not currently involved within an asynchronous
 	 * operation (in other words the {@link AsynchronousManagedObject} completed
 	 * execution and ready for another operation).
-	 * 
+	 *
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workContainer
 	 *            {@link WorkContainer} to source the other
 	 *            {@link ManagedObject} instances. This may be required should
@@ -148,6 +154,8 @@ public interface ManagedObjectContainer {
 	 * Extracts the extension interface from the {@link ManagedObject} within
 	 * this {@link ManagedObjectContainer}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
 	 * @param extractor
 	 *            {@link ExtensionInterfaceExtractor} to extract the extension
 	 *            interface from the {@link ManagedObject}.
