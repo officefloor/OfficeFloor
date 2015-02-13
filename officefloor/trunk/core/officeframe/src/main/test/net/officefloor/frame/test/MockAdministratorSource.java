@@ -53,6 +53,8 @@ public class MockAdministratorSource implements
 	 * Convenience method to bind the {@link Administrator} instance to the
 	 * {@link AdministratorBuilder}.
 	 * 
+	 * @param <A>
+	 *            Administration key.
 	 * @param name
 	 *            Name to bind under.
 	 * @param administrator
@@ -61,6 +63,7 @@ public class MockAdministratorSource implements
 	 *            {@link AdministratorSourceMetaData} to bind.
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder}.
+	 * @return {@link AdministratorBuilder} for additional configuration.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <A extends Enum<A>> AdministratorBuilder<A> bindAdministrator(

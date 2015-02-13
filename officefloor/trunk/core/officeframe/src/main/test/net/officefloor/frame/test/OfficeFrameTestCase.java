@@ -197,6 +197,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * 
 	 * @param ex
 	 *            {@link Throwable} to propagate as an {@link Exception}.
+	 * @throws Exception
+	 *             The failure.
 	 */
 	public static void throwException(Throwable ex) throws Exception {
 		if (ex instanceof Exception) {
@@ -249,6 +251,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * 
 	 * @param root
 	 *            Root of graph to display.
+	 * @throws Exception
+	 *             If fails.
 	 */
 	public static void displayGraph(Object root) throws Exception {
 		displayGraph(root, new String[0]);
@@ -262,6 +266,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Root of graph to display.
 	 * @param ignoreMethodNames
 	 *            Method names to ignore.
+	 * @throws Exception
+	 *             If fails.
 	 */
 	public static void displayGraph(Object root, String... ignoreMethodNames)
 			throws Exception {
@@ -400,7 +406,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts the failure.
-	 * 
+	 *
+	 * @param <F>
+	 *            Failure type.
 	 * @param operation
 	 *            {@link FailOperation} that is expected fail.
 	 * @param expectedFailureType
@@ -429,7 +437,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Provides simplified facade to verify {@link Method} will fail.
-	 * 
+	 *
+	 * @param <F>
+	 *            Failure type.
 	 * @param expectedFailureType
 	 *            Expected failure of method.
 	 * @param object
@@ -464,7 +474,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Provides simplified facade to verify {@link Method} will fail.
-	 * 
+	 *
+	 * @param <F>
+	 *            Failure type.
 	 * @param expectedFailureType
 	 *            Expected failure of method.
 	 * @param object
@@ -583,7 +595,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Assets that the input graph is as expected.
-	 * 
+	 *
+	 * @param <O>
+	 *            Type.
 	 * @param expectedRoot
 	 *            Expected root.
 	 * @param actualRoot
@@ -596,13 +610,17 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Assets that the input graph is as expected.
-	 * 
+	 *
+	 * @param <O>
+	 *            Type.
 	 * @param expectedRoot
 	 *            Expected root.
 	 * @param actualRoot
 	 *            Actual root.
 	 * @param ignoreMethodNames
 	 *            Listing of methods to be ignored in checking.
+	 * @throws Exception
+	 *             If fails.
 	 */
 	public synchronized static <O> void assertGraph(O expectedRoot,
 			O actualRoot, String... ignoreMethodNames) throws Exception {
@@ -892,7 +910,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts that the input list is as expected.
-	 * 
+	 *
+	 * @param <O>
+	 *            Type.
 	 * @param matcher
 	 *            Matches the items of the list.
 	 * @param list
@@ -916,7 +936,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts that the input list equals the expected.
-	 * 
+	 *
+	 * @param <O>
+	 *            Type.
 	 * @param list
 	 *            List to be checked.
 	 * @param expectedItems
@@ -933,7 +955,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts that properties on items within list match.
-	 * 
+	 *
+	 * @param <O>
+	 *            Type.
 	 * @param methods
 	 *            Method names to specify the properties on the items to match.
 	 * @param list
@@ -958,7 +982,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	/**
 	 * Asserts that properties on items within the array match.
-	 * 
+	 *
+	 * @param <O>
+	 *            Type.
 	 * @param methods
 	 *            Method names to specify the properties on the items to match.
 	 * @param array
@@ -976,6 +1002,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Asserts that properties on items within list match after the list is
 	 * sorted.
 	 * 
+	 * @param <O>
+	 *            Type.
 	 * @param sortMethod
 	 *            Name of method on the items to sort the list by to ensure
 	 *            match in order.
@@ -1014,6 +1042,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Asserts that properties on the input objects match for the specified
 	 * methods.
 	 * 
+	 * @param <O>
+	 *            Type.
 	 * @param expected
 	 *            Expected item.
 	 * @param actual
@@ -1079,6 +1109,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Obtains the item within the items whose property by methodName matches
 	 * the input value.
 	 * 
+	 * @param <T>
+	 *            Item type.
 	 * @param items
 	 *            Items to search.
 	 * @param methodName
@@ -1156,6 +1188,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Creates a mock object registering the {@link MockControl}of the mock
 	 * object with registry for management.
 	 * 
+	 * @param <M>
+	 *            Interface type.
 	 * @param classToMock
 	 *            {@link Class} to be mocked.
 	 * @return Mock object.
@@ -1186,6 +1220,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Creates a mock object that synchronises on its {@link MockControl} before
 	 * making any method calls.
 	 * 
+	 * @param <M>
+	 *            Interface type.
 	 * @param interfaceToMock
 	 *            {@link Class} to mock.
 	 * @return Mock object.
@@ -1251,6 +1287,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Convenience method to record a method and its return on a mock object.
 	 * 
+	 * @param <T>
+	 *            Expected result type.
 	 * @param mockObject
 	 *            Mock object.
 	 * @param ignore
@@ -1291,7 +1329,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Convenience method to record a method, an {@link ArgumentsMatcher} and
 	 * return value.
-	 * 
+	 *
+	 * @param <T>
+	 *            Expected result type.
 	 * @param mockObject
 	 *            Mock object.
 	 * @param ignore

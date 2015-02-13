@@ -81,11 +81,21 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 
 	/**
 	 * Initiate.
-	 * 
+	 *
+	 * @param <MO>
+	 *            {@link ManagedObject} type.
 	 * @param managedObjectClass
 	 *            Class of the {@link ManagedObject}.
 	 * @param objectClass
 	 *            Class of the object being managed.
+	 * @param dependencyKeys
+	 *            Dependency key {@link Enum}.
+	 * @param dependencyClasses
+	 *            {@link Class} types for the dependency keys.
+	 * @param flowKeys
+	 *            Flow key {@link Enum}.
+	 * @param flowClasses
+	 *            {@link Class} types for the arguments of the flow keys.
 	 */
 	@SuppressWarnings("unchecked")
 	public <MO extends ManagedObject> MockManagedObjectSourceMetaData(

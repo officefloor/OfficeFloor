@@ -53,7 +53,9 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	/**
 	 * Convenience method to bind the {@link ManagedObject} instance to the
 	 * {@link ManagedObjectBuilder}.
-	 * 
+	 *
+	 * @param <F>
+	 *            Flow type.
 	 * @param name
 	 *            Name to bind under.
 	 * @param managedObject
@@ -62,16 +64,17 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	 *            {@link ManagedObjectSourceMetaData} to bind.
 	 * @param officeFloorBuilder
 	 *            {@link OfficeFloorBuilder} to bind {@link ManagedObject}.
+	 * @return {@link ManagedObjectBuilder} for additional configuration.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <H extends Enum<H>> ManagedObjectBuilder<H> bindManagedObject(
+	public static <F extends Enum<F>> ManagedObjectBuilder<F> bindManagedObject(
 			String name, ManagedObject managedObject,
-			ManagedObjectSourceMetaData<?, H> sourceMetaData,
+			ManagedObjectSourceMetaData<?, F> sourceMetaData,
 			OfficeFloorBuilder officeFloorBuilder) {
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder<None> builder = officeFloorBuilder.addManagedObject(
-				name, MockManagedObjectSource.class);
+		ManagedObjectBuilder<None> builder = officeFloorBuilder
+				.addManagedObject(name, MockManagedObjectSource.class);
 
 		// Provide managed object link to meta-data
 		builder.addProperty(MANAGED_OBJECT_PROPERTY, name);
@@ -85,7 +88,7 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 		REGISTRY.put(name, state);
 
 		// Return the builder
-		return (ManagedObjectBuilder<H>) builder;
+		return (ManagedObjectBuilder<F>) builder;
 	}
 
 	/**
