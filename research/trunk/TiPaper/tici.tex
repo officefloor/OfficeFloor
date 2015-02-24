@@ -86,9 +86,14 @@ code for Agile methodologies.
 \terms{Design, Performance, Standardization}
 \keywords{Inversion of Control, Responsible Thread Pool, Task Orchestration}
 
-\acmformat{Sagenschneider, D. 2013. OfficeFloor: using office patterns to improve software design.}
+%\acmformat{Sagenschneider, D. 2013. OfficeFloor: using office patterns to
+% improve software design.}
 
-\copyr{Copyright 2013 is held by the author}
+\copyr{
+EuroPLoP '13, July 10 - 14, 2013, Irsee, Germany\\
+Copyright 2013 ACM 978-1-4503-3465-5/13/07\$15.00\\
+http://dx.doi.org/10.1145/2739011.2739013\\
+}
 
 \begin{document}
 
@@ -104,17 +109,7 @@ code for Agile methodologies.
 
 
 \begin{bottomstuff}
-This work is the result of the author's development of OfficeFloor.\\
-Author: D. Sagenschneider; email: daniel@officefloor.net\\
-
-Permission to make digital or hard copies of all or part of this work for
-personal or classroom use is granted without fee provided that copies are not
-made or distributed for profit or commercial advantage and that copies bear this
-notice and the full citation on the first page. To copy otherwise, to republish,
-to post on servers or to redistribute to lists, requires prior specific
-permission. A preliminary version of this paper was presented in a writers'
-workshop at the 18th European Conference on Pattern Languages of Programs
-(PLoP).
+Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. Copyrights for components of this work owned by others than ACM must be honored. Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or to redistribute to lists, requires prior specific permission and/or a fee. Request permissions from Permissions@acm.org.
 \end{bottomstuff}
 
 \maketitle
@@ -533,9 +528,9 @@ The prioritisation tuning is achieved by use of responsible thread pools.  The
 developer configures thread pools that are each responsible for \texttt{Task}s
 with a particular type of dependency\footnote{Thread pools may be associated
 with more than one dependency type.}.  To execute the \texttt{Task}, the
-\texttt{Task} is matched by its dependency types to a thread pool responsible
-for the dependency type\footnote{OfficeFloor also enables the use of the
-\texttt{taskId} for very fine grained responsibility.} (\textsc{responsible
+\texttt{Task} is matched by its dependency types\footnote{Dependency types also
+include the transitive dependencies.} to a thread pool responsible for the
+dependency type\footnote{OfficeFloor also enables the use of the \texttt{taskId} for very fine grained responsibility.} (\textsc{responsible
 team}).  The \texttt{execute()} method (Listing
 \ref{lst:TaskExecutionInterfaces}) is then invoked by a thread from the matching
 thread pool to execute the \texttt{Task}.  This provides isolation of differing
@@ -544,7 +539,9 @@ of the server\footnote{The task execution patterns are collectively identified
 as the software pattern \textsc{thread injection}.  This is because the thread
 being chosen to execute the method is undertaken in a similar way to the
 selection of dependencies by the \textsc{dependency injection}~\cite{ioc}
-pattern.}.
+pattern. The thread can actually be considered a parameter to the
+method that is determined as a transitive dependency of the method's
+\textsc{dependency injection} dependencies.}.
 
 For \texttt{Task}s not having dependencies (nor dependencies of any performance
 significance), a default thread pool is used for their execution.  This ensures
@@ -941,8 +938,8 @@ providing the state for the picked up again task, is similar to the
 \subsection{\textsc{\textbf{record information}}}
 
 \subsubsection*{Context} Within an office, information is recorded for retrieval
-and use in subsequent tasks.  For example, the sales team records the customer's
-details that the finance team later use to raise an invoice for the customer.
+and use in subsequent tasks.  For example, the sales team records the
+customer's details that the finance team later use to raise an invoice for the customer.
 
 Within software, methods (tasks) only use the arguments (information) supplied
 from the calling method (task)\footnote{The method may also access implicit
@@ -1789,9 +1786,6 @@ Matthew Brown for being a sounding board to many of my ideas.
 I am also grateful for the wise shepherding by Veli-Pekka Eloranta and the
 feedback from the participants of EuroPlop 2013, especially the very informative
 feedback by the participants of the Design and Architecture writer's workshop.
-
-I would also like to thank the following additional reviewers for their
-feedback; Mark Hawkins and Brian Tombleson.
 
 
 \bibliographystyle{style/acmlarge}
