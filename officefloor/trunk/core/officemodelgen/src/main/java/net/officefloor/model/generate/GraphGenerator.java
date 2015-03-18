@@ -31,6 +31,13 @@ public class GraphGenerator {
 	/**
 	 * Generates the models from the configuration in the raw directory and puts
 	 * them in the output directory.
+	 * 
+	 * @param rawDir
+	 *            Raw directory containing the model files.
+	 * @param outputDir
+	 *            Directory to write the resulting models.
+	 * @throws Exception
+	 *             If fails to generate the models.
 	 */
 	public void generate(File rawDir, File outputDir) throws Exception {
 

@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -579,6 +580,9 @@ public class ModelGenerator {
 
 	/**
 	 * Remove connection method.
+	 * 
+	 * @throws Exception
+	 *             If fails to create the remove connection {@link Method}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void removeConnectionMethod() throws Exception {

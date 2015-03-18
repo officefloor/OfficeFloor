@@ -50,6 +50,8 @@ public class GraphNodeMetaData {
 	/**
 	 * Returns the input text in camel case.
 	 *
+	 * @param text
+	 *            Text to be transformed to camel case.
 	 * @return Camel case text.
 	 */
 	public static String camelCase(String text) {
@@ -262,6 +264,8 @@ public class GraphNodeMetaData {
 	 *            Name of the type.
 	 * @return {@link ModelMetaData} for the type or <code>null</code> if not
 	 *         model generation type.
+	 * @throws Exception
+	 *             If fails to obtain the {@link ModelMetaData}.
 	 */
 	public ModelMetaData getModelMetaData(String typeName) throws Exception {
 
@@ -303,6 +307,8 @@ public class GraphNodeMetaData {
 	 *            {@link ModelMetaData}.
 	 * @return {@link ModelMetaData} or <code>null</code> if file is not a
 	 *         {@link ModelMetaData} configuration file.
+	 * @throws Exception
+	 *             If fails to obtain {@link ModelMetaData}.
 	 */
 	public ModelMetaData getModelMetaData(File modelFile) throws Exception {
 

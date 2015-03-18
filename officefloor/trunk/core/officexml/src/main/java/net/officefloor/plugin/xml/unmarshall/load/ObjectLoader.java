@@ -59,6 +59,8 @@ public class ObjectLoader {
 	 * @param targetObject
 	 *            Target object to have object loaded onto it.
 	 * @return Object created and loaded onto the target object.
+	 * @throws XmlMarshallException
+	 *             If fails to marshal the data onto the {@link Object}.
 	 */
 	public Object loadObject(Object targetObject) throws XmlMarshallException {
 
@@ -92,8 +94,8 @@ public class ObjectLoader {
 					+ this.loadMethod.getName() + "'", ex);
 		} catch (InvocationTargetException ex) {
 			// Propagate failure
-			throw new XmlMarshallException("Invoked load method failed.", ex
-					.getCause());
+			throw new XmlMarshallException("Invoked load method failed.",
+					ex.getCause());
 		}
 
 		// Return load object
