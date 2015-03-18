@@ -771,6 +771,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to create the {@link OfficeFloor}.
 	 * 
 	 * @return {@link OfficeFloor}.
+	 * @throws Exception
+	 *             If fails to construct the {@link OfficeFloor}.
 	 */
 	protected OfficeFloor constructOfficeFloor() throws Exception {
 

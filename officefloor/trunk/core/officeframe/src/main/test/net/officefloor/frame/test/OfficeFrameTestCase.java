@@ -602,6 +602,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Expected root.
 	 * @param actualRoot
 	 *            Actual root.
+	 * @throws Exception
+	 *             If fails to compare graphs.
 	 */
 	public synchronized static <O> void assertGraph(O expectedRoot, O actualRoot)
 			throws Exception {

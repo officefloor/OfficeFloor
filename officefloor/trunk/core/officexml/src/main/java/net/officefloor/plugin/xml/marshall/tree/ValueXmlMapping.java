@@ -32,18 +32,22 @@ public class ValueXmlMapping extends AbstractValueXmlMapping {
 
 	/**
 	 * From super.
+	 * 
+	 * @param tagName
+	 *            Name of the XML tag.
+	 * @param getMethod
+	 *            {@link Method} to obtain the value.
+	 * @param translator
+	 *            {@link Translator}.
+	 * @param isUseRaw
+	 *            Indicates to use raw.
 	 */
 	public ValueXmlMapping(String tagName, Method getMethod,
 			Translator translator, boolean isUseRaw) {
 		super(tagName, getMethod, translator, isUseRaw);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.xml.marshall.tree.AbstractXmlMapping#writeXml(java.lang.String,
-	 *      java.lang.String, net.officefloor.plugin.xml.XmlOutput)
-	 */
+	@Override
 	protected void writeXml(String tagName, String value, XmlOutput output)
 			throws XmlMarshallException {
 

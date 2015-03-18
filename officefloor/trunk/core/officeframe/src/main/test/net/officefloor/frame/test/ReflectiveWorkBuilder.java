@@ -37,6 +37,7 @@ import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Reflective {@link Work} meta-data.
@@ -110,6 +111,8 @@ public class ReflectiveWorkBuilder implements Work,
 	 * 
 	 * @param methodName
 	 *            Name of the method to invoke.
+	 * @param teamName
+	 *            Name of the {@link Team}.
 	 * @return {@link ReflectiveTaskBuilder} for the method.
 	 */
 	public ReflectiveTaskBuilder buildTask(String methodName, String teamName) {
@@ -292,6 +295,7 @@ public class ReflectiveWorkBuilder implements Work,
 		 *            {@link Office} name of the {@link ManagedObject}.
 		 * @param managedObjectScope
 		 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
+		 * @return {@link DependencyMappingBuilder}.
 		 */
 		public DependencyMappingBuilder buildObject(
 				String officeManagedObjectName,

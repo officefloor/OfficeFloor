@@ -19,6 +19,8 @@ package net.officefloor.model.generate;
 
 import java.io.File;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
+
 /**
  * Generates the OfficeFloor model.
  *
@@ -28,6 +30,12 @@ public class GenerateOfficeFloorModel {
 
 	/**
 	 * Allow invoking.
+	 * 
+	 * @param args
+	 *            Command line arguments.
+	 * @throws If
+	 *             fails to generate the {@link OfficeFloor} models.
+	 * 
 	 */
 	public static void main(String[] args) throws Exception {
 

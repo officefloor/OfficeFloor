@@ -50,6 +50,8 @@ public abstract class AbstractPropertyMetaData {
 
 	/**
 	 * Obtains the capitalised name.
+	 * 
+	 * @return Prpoerty name capitalised.
 	 */
 	public String getCapitalisedName() {
 		return GraphNodeMetaData.capitalise(this.name);
@@ -57,6 +59,8 @@ public abstract class AbstractPropertyMetaData {
 
 	/**
 	 * Obtains the camel case name.
+	 * 
+	 * @return Property name in camel case.
 	 */
 	public String getCamelCaseName() {
 		return GraphNodeMetaData.camelCase(this.name);
@@ -64,6 +68,8 @@ public abstract class AbstractPropertyMetaData {
 
 	/**
 	 * Obtains the property name.
+	 * 
+	 * @return Property name.
 	 */
 	public String getPropertyName() {
 		return GraphNodeMetaData.propertyCase(this.name);
@@ -94,20 +100,20 @@ public abstract class AbstractPropertyMetaData {
 	public void setType(String type) {
 		this.type = type;
 	}
-	
+
 	/**
 	 * Flag indicating to cascade remove.
 	 */
 	private String cascadeRemove;
-	
+
 	public String getCascadeRemove() {
 		return this.cascadeRemove;
 	}
-	
+
 	public void setCascadeRemove(String cascadeRemove) {
 		this.cascadeRemove = cascadeRemove;
 	}
-	
+
 	public boolean isCascadeRemove() {
 		return new Boolean(this.cascadeRemove).booleanValue();
 	}

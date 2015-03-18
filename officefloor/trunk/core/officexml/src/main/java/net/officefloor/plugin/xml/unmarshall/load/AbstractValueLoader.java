@@ -37,7 +37,8 @@ public abstract class AbstractValueLoader {
 	/**
 	 * Initiate with ability to load value onto target object.
 	 * 
-	 * 
+	 * @param loadMethod
+	 *            {@link Method} to load the value.
 	 */
 	public AbstractValueLoader(Method loadMethod) {
 		// Store state
@@ -70,8 +71,8 @@ public abstract class AbstractValueLoader {
 					+ this.loadMethod.getName() + "'", ex);
 		} catch (InvocationTargetException ex) {
 			// Propagate failure
-			throw new XmlMarshallException("Invoked load method failed.", ex
-					.getCause());
+			throw new XmlMarshallException("Invoked load method failed.",
+					ex.getCause());
 		}
 	}
 

@@ -48,6 +48,10 @@ public class ObjectLoaderFactory {
 	 * Creates the {@link ObjectLoader} for the load method of the target
 	 * object.
 	 * 
+	 * @param loadMethodName
+	 *            {@link Method} name that loads the {@link Object}.
+	 * @param loadObjectType
+	 *            Type of {@link Object} being loaded.
 	 * @return {@link ObjectLoader} to load the object to the target object.
 	 * @throws XmlMarshallException
 	 *             Should there be a failure to create the {@link ObjectLoader}.
