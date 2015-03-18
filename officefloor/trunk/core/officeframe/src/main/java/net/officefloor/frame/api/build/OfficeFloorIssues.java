@@ -37,7 +37,7 @@ public interface OfficeFloorIssues {
 	/**
 	 * Adds an issue about an asset of the {@link OfficeFloor}.
 	 * 
-	 * @param asset
+	 * @param assetType
 	 *            {@link AssetType}.
 	 * @param assetName
 	 *            Name of the asset.

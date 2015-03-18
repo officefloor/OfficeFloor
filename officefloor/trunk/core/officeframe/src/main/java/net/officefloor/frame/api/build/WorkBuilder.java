@@ -49,6 +49,7 @@ public interface WorkBuilder<W extends Work> {
 	 * @param officeManagedObjectName
 	 *            Name of the {@link ManagedObject} referenced locally within
 	 *            the {@link Office}.
+	 * @return {@link DependencyMappingBuilder}.
 	 */
 	DependencyMappingBuilder addWorkManagedObject(String workManagedObjectName,
 			String officeManagedObjectName);
@@ -56,6 +57,12 @@ public interface WorkBuilder<W extends Work> {
 	/**
 	 * Adds a {@link Work} bound {@link Administrator}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} type.
+	 * @param <AS>
+	 *            {@link AdministratorSource} type.
 	 * @param workAdministratorName
 	 *            Name of the {@link Administrator} to be referenced locally by
 	 *            this {@link Work}.
@@ -69,7 +76,7 @@ public interface WorkBuilder<W extends Work> {
 	/**
 	 * Specifies the initial {@link Task} of the {@link Work}.
 	 * 
-	 * @param initialTask
+	 * @param initialTaskName
 	 *            Initial {@link Task}.
 	 */
 	void setInitialTask(String initialTaskName);
@@ -78,6 +85,10 @@ public interface WorkBuilder<W extends Work> {
 	 * Creates the {@link TaskBuilder} to build a {@link Task} for this
 	 * {@link Work}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @param taskName
 	 *            Name of task local to this {@link Work}.
 	 * @param taskFactory

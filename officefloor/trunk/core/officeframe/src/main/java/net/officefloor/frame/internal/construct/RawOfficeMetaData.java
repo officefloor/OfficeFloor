@@ -37,6 +37,8 @@ public interface RawOfficeMetaData {
 
 	/**
 	 * Name of the {@link Office}.
+	 * 
+	 * @return Name of the {@link Office}.
 	 */
 	String getOfficeName();
 

@@ -70,7 +70,7 @@ public interface WorkManager {
 	/**
 	 * Obtains the {@link TaskManager} for the named {@link Task}.
 	 * 
-	 * @param name
+	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @return {@link TaskManager} for the named {@link Task}.
 	 * @throws UnknownTaskException

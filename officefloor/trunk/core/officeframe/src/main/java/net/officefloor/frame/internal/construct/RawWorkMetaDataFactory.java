@@ -32,6 +32,8 @@ public interface RawWorkMetaDataFactory {
 	/**
 	 * Constructs the {@link RawWorkMetaData}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param configuration
 	 *            {@link WorkConfiguration}.
 	 * @param sourceContext

@@ -108,6 +108,8 @@ public interface TaskBuilder<W extends Work, D extends Enum<D>, F extends Enum<F
 	/**
 	 * Links in a {@link Duty} to be executed before the {@link Task}.
 	 * 
+	 * @param <A>
+	 *            {@link Administrator} key type.
 	 * @param scopeAdministratorName
 	 *            Name of the {@link Administrator} within the
 	 *            {@link AdministratorScope}.
@@ -133,6 +135,8 @@ public interface TaskBuilder<W extends Work, D extends Enum<D>, F extends Enum<F
 	/**
 	 * Links in a {@link Duty} to be executed after the {@link Task}.
 	 * 
+	 * @param <A>
+	 *            {@link Administrator} key type.
 	 * @param scopeAdministratorName
 	 *            Name of the {@link Administrator} within the
 	 *            {@link AdministratorScope}.

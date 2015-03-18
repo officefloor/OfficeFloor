@@ -60,6 +60,8 @@ public interface ModelRepository {
 	/**
 	 * Configures the {@link Model} from the {@link ConfigurationItem}.
 	 * 
+	 * @param <O>
+	 *            Model type.
 	 * @param model
 	 *            {@link Model} to be configured.
 	 * @param configuration

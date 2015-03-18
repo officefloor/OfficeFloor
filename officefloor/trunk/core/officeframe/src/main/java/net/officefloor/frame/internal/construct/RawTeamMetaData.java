@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.construct;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
+import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Raw meta-data for a {@link Team}.

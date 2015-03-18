@@ -54,10 +54,17 @@ public interface OfficeFloorBuilder {
 	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClass
 	 *            Class of the {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectBuilder}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> addManagedObject(
 			String managedObjectSourceName, Class<MS> managedObjectSourceClass);
@@ -65,6 +72,10 @@ public interface OfficeFloorBuilder {
 	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSource
@@ -78,6 +89,8 @@ public interface OfficeFloorBuilder {
 	 * Adds a {@link Team} which will execute {@link JobNode} instances within
 	 * this {@link OfficeFloor}.
 	 * 
+	 * @param <TS>
+	 *            {@link TeamSource} type.
 	 * @param teamName
 	 *            Name to register the {@link Team} under.
 	 * @param teamSourceClass

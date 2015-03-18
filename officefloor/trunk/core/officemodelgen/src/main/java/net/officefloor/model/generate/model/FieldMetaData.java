@@ -41,6 +41,10 @@ public class FieldMetaData extends AbstractPropertyMetaData {
 	 *            Type.
 	 * @param description
 	 *            Description.
+	 * @param endField
+	 *            End field.
+	 * @param endList
+	 *            End list.
 	 */
 	public FieldMetaData(String name, String type, String description,
 			String endField, String endList) {
@@ -51,10 +55,13 @@ public class FieldMetaData extends AbstractPropertyMetaData {
 
 	/**
 	 * End point connect.
+	 * 
+	 * @return End point connect.
 	 */
 	public String getEndPointConnect() {
 		if (this.endField != null) {
-			return "set" + GraphNodeMetaData.camelCase(this.endField) + "(this)";
+			return "set" + GraphNodeMetaData.camelCase(this.endField)
+					+ "(this)";
 		} else if (this.endList != null) {
 			return "add" + GraphNodeMetaData.camelCase(this.endList) + "(this)";
 		} else {
@@ -65,10 +72,13 @@ public class FieldMetaData extends AbstractPropertyMetaData {
 
 	/**
 	 * End point remove.
+	 * 
+	 * @return End point remove.
 	 */
 	public String getEndPointRemove() {
 		if (this.endField != null) {
-			return "set" + GraphNodeMetaData.camelCase(this.endField) + "(null)";
+			return "set" + GraphNodeMetaData.camelCase(this.endField)
+					+ "(null)";
 		} else if (this.endList != null) {
 			return "remove" + GraphNodeMetaData.camelCase(this.endList)
 					+ "(this)";

@@ -72,6 +72,10 @@ public interface WorkConfiguration<W extends Work> {
 	 * Obtains the configuration for the {@link Task} instances for the
 	 * {@link Work}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @return Configuration for the {@link Task} instances of the {@link Work}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>> TaskConfiguration<W, D, F>[] getTaskConfiguration();

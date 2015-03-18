@@ -99,6 +99,8 @@ public class RemoveConnectionsAction<M extends Model> {
 	 * Removes the {@link ConnectionModel} instances within the input
 	 * {@link Collection}.
 	 * 
+	 * @param <C>
+	 *            {@link ConnectionModel} type.
 	 * @param connectionModels
 	 *            {@link ConnectionModel} instances.
 	 */
@@ -124,6 +126,8 @@ public class RemoveConnectionsAction<M extends Model> {
 	 * Added cascade {@link Model} instances are reconnected on this being
 	 * reconnected.
 	 * 
+	 * @param <R>
+	 *            Model type.
 	 * @param child
 	 *            Cascade {@link Model}.
 	 */

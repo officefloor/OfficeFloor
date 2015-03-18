@@ -32,6 +32,8 @@ public interface RawTaskMetaDataFactory {
 	/**
 	 * Constructs the {@link RawTaskMetaData}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param configuration
 	 *            {@link TaskConfiguration}.
 	 * @param issues
@@ -42,7 +44,7 @@ public interface RawTaskMetaDataFactory {
 	 * @return {@link RawTaskMetaData}.
 	 */
 	<W extends Work> RawTaskMetaData<W, ?, ?> constructRawTaskMetaData(
-			TaskConfiguration<W, ?, ?> configuration,
-			OfficeFloorIssues issues, RawWorkMetaData<W> rawWorkMetaData);
+			TaskConfiguration<W, ?, ?> configuration, OfficeFloorIssues issues,
+			RawWorkMetaData<W> rawWorkMetaData);
 
 }

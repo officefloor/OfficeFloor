@@ -72,6 +72,8 @@ public class ModelMetaData {
 
 	/**
 	 * Class name.
+	 * 
+	 * @return Class name.
 	 */
 	public String getClassName() {
 		return this.name + "Model";
@@ -79,6 +81,8 @@ public class ModelMetaData {
 
 	/**
 	 * Event name.
+	 * 
+	 * @return Event name.
 	 */
 	public String getEventName() {
 		return this.name + "Event";
@@ -86,6 +90,8 @@ public class ModelMetaData {
 
 	/**
 	 * <code>true</code> if is a connection model.
+	 * 
+	 * @return Indicating if a connection model.
 	 */
 	public boolean isConnectionModel() {
 		// Determine if end field/list

@@ -32,6 +32,8 @@ public interface ActiveGovernanceControl<F extends Enum<F>> {
 	/**
 	 * Provides the {@link Governance} over the {@link ManagedObject}.
 	 *
+	 * @param governanceContext
+	 *            {@link GovernanceContext}.
 	 * @param jobContext
 	 *            {@link JobContext}.
 	 * @param jobNode

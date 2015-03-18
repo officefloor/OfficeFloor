@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.internal.construct;
 
-import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
@@ -73,8 +72,6 @@ public interface RawOfficeFloorMetaData {
 	/**
 	 * Obtains the {@link OfficeFloorMetaData}.
 	 * 
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
 	 * @return {@link OfficeFloorMetaData}.
 	 */
 	OfficeFloorMetaData getOfficeFloorMetaData();
