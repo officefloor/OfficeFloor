@@ -68,7 +68,7 @@ public interface RawBoundManagedObjectMetaDataFactory {
 	 *            {@link ManagedObject} instances bound to the same name.
 	 *            Mapping is of input {@link ManagedObject} name to the default
 	 *            {@link ManagedObjectSource} name.
-	 * @param governanceMetaData
+	 * @param rawGovernanceMetaData
 	 *            {@link RawGovernanceMetaData} by its {@link Office} registered
 	 *            name.
 	 * @return {@link RawBoundManagedObjectMetaData} instances for the bound

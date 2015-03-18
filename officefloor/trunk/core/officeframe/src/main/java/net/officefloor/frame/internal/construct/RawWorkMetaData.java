@@ -53,7 +53,7 @@ public interface RawWorkMetaData<W extends Work> {
 	RawOfficeMetaData getRawOfficeMetaData();
 
 	/**
-	 * Constructs the {@link RawWorkManagedObjectMetaData} for the
+	 * Constructs the {@link RawBoundManagedObjectMetaData} for the
 	 * {@link ManagedObject} of the {@link Work}.
 	 * 
 	 * @param scopeManagedObjectName

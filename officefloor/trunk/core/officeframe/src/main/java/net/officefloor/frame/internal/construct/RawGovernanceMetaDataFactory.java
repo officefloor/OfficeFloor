@@ -39,6 +39,10 @@ public interface RawGovernanceMetaDataFactory {
 	/**
 	 * Creates the {@link RawGovernanceMetaData}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @param configuration
 	 *            {@link GovernanceConfiguration}.
 	 * @param governanceIndex

@@ -32,6 +32,8 @@ public interface RawTeamMetaDataFactory {
 	/**
 	 * Constructs the {@link RawTeamMetaData}.
 	 * 
+	 * @param <TS>
+	 *            {@link TeamSource} type.
 	 * @param configuration
 	 *            {@link TeamConfiguration}.
 	 * @param sourceContext

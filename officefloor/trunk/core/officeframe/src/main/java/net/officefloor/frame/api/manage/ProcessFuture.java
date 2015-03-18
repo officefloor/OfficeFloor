@@ -24,15 +24,17 @@ import net.officefloor.frame.internal.structure.ProcessState;
  * <p>
  * Future token to indicate a {@link ProcessState} has completed.
  * <p>
- * On completion of the {@link ProcessState} a <code>{@link #notifyAll()}</code>
- * will also be invoked on the object implementing this interface to allow
- * &quot;immediate&quot; awareness of the completion of the {@link ProcessState}.
+ * On completion of the {@link ProcessState} a
+ * <code>{@link Thread#notifyAll()}</code> will also be invoked on the object
+ * implementing this interface to allow &quot;immediate&quot; awareness of the
+ * completion of the {@link ProcessState}.
  * <p>
- * The reason for the <code>{@link #notifyAll()}</code> is to allow blocking
- * {@link Thread} instances waiting on the {@link ProcessState} to be complete
- * to be notified rather than having to poll the {@link #isComplete()} method.
+ * The reason for the <code>{@link Thread#notifyAll()}</code> is to allow
+ * blocking {@link Thread} instances waiting on the {@link ProcessState} to be
+ * complete to be notified rather than having to poll the {@link #isComplete()}
+ * method.
  * <p>
- * Please note that <code>{@link #notifyAll()}</code> is only run once on
+ * Please note that <code>{@link Thread#notifyAll()}</code> is only run once on
  * completion of the {@link ProcessState} and blocking {@link Thread} instances
  * should not wait indefinitely for this to occur.
  * 

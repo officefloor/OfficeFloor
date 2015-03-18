@@ -127,11 +127,11 @@ public abstract class OfficeFrame {
 	 */
 
 	/**
-	 * Obtains the {@link BuilderFactory}.
+	 * Obtains the {@link OfficeFloorBuilder}.
 	 * 
 	 * @param officeFloorName
 	 *            Name of the {@link OfficeFloor}.
-	 * @return {@link BuilderFactory}.
+	 * @return {@link OfficeFloorBuilder}.
 	 */
 	public abstract OfficeFloorBuilder createOfficeFloorBuilder(
 			String officeFloorName);

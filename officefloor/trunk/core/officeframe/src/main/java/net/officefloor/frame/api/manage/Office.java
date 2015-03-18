@@ -41,7 +41,7 @@ public interface Office {
 	/**
 	 * Obtains the {@link WorkManager} for the named {@link Work}.
 	 * 
-	 * @param name
+	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @return {@link WorkManager} for the named {@link Work}.
 	 * @throws UnknownWorkException

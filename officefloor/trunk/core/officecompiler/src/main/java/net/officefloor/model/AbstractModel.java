@@ -65,6 +65,8 @@ public class AbstractModel implements Model {
 	/**
 	 * Helper method to add an Item to a List.
 	 * 
+	 * @param <T>
+	 *            Item type.
 	 * @param item
 	 *            Item to add to list.
 	 * @param list
@@ -84,6 +86,8 @@ public class AbstractModel implements Model {
 	/**
 	 * Helper method to remove an Item from a List.
 	 * 
+	 * @param <T>
+	 *            Item type.
 	 * @param item
 	 *            Item to remove from list.
 	 * @param list
@@ -104,6 +108,8 @@ public class AbstractModel implements Model {
 	/**
 	 * Helper method to change a field.
 	 * 
+	 * @param <T>
+	 *            Value type.
 	 * @param oldValue
 	 *            Old value of field.
 	 * @param newValue

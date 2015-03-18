@@ -33,9 +33,8 @@ public class GenerateOfficeFloorModel {
 	 * 
 	 * @param args
 	 *            Command line arguments.
-	 * @throws If
-	 *             fails to generate the {@link OfficeFloor} models.
-	 * 
+	 * @throws Exception
+	 *             If fails to generate the {@link OfficeFloor} models.
 	 */
 	public static void main(String[] args) throws Exception {
 

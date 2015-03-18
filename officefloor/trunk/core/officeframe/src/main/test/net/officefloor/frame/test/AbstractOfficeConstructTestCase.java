@@ -474,6 +474,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link Task}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @param task
@@ -516,6 +522,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            Name of the {@link ManagedObject}.
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} {@link Class}.
+	 * @return {@link ManagedObjectBuilder}.
 	 */
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
 			String managedObjectName, Class<MS> managedObjectSourceClass) {
@@ -551,6 +558,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            {@link ManagedObjectSource} {@link Class}.
 	 * @param managingOffice
 	 *            Name of the managing {@link Office}.
+	 * @return {@link ManagedObjectBuilder}.
 	 */
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
 			String managedObjectName, Class<MS> managedObjectSourceClass,
@@ -591,6 +599,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            {@link ManagedObject}.
 	 * @param managingOffice
 	 *            Name of the managing {@link Office}.
+	 * @return {@link ManagedObjectBuilder}.
 	 */
 	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectBuilder<F> constructManagedObject(
 			String managedObjectName,
@@ -626,6 +635,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            {@link ManagedObject}.
 	 * @param managingOffice
 	 *            Name of the managing {@link Office}.
+	 * @return {@link ManagedObjectBuilder}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ManagedObjectBuilder<?> constructManagedObject(
@@ -643,6 +653,14 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 	/**
 	 * Facade method to register a {@link ManagedObject}.
+	 * 
+	 * @param object
+	 *            Object for the {@link ManagedObject}.
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param managingOffice
+	 *            Name of the mananaging {@link Office}.
+	 * @return {@link ManagedObjectBuilder}.
 	 */
 	public ManagedObjectBuilder<?> constructManagedObject(final Object object,
 			String managedObjectName, String managingOffice) {
@@ -687,6 +705,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to create a {@link Team}.
 	 * 
+	 * @param <TS>
+	 *            {@link TeamSource} type.
 	 * @param teamName
 	 *            Name of the {@link Team}.
 	 * @param teamSourceClass
@@ -713,6 +733,10 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to create a {@link Administrator}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} type.
 	 * @param adminName
 	 *            Name of the {@link Administrator}.
 	 * @param administrator
@@ -744,6 +768,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to construct an {@link Administrator}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} type.
+	 * @param <AS>
+	 *            {@link AdministratorSource} type.
 	 * @param adminName
 	 *            Name of the {@link Administrator}.
 	 * @param adminSource

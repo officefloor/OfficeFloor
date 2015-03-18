@@ -35,6 +35,12 @@ public interface RawManagedObjectMetaDataFactory {
 	/**
 	 * Creates the {@link RawManagedObjectMetaDataImpl}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
 	 * @param configuration
 	 *            {@link ManagedObjectSourceConfiguration}.
 	 * @param sourceContext

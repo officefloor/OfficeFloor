@@ -149,6 +149,8 @@ public interface OfficeConfiguration {
 	/**
 	 * Obtains the configuration of the {@link Work} instances.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @return {@link Work} configuration for the input name.
 	 */
 	<W extends Work> WorkConfiguration<W>[] getWorkConfiguration();
