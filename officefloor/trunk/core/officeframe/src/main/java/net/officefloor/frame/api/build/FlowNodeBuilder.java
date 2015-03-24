@@ -27,8 +27,8 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Builds a node of a {@link JobSequence} and provides linking to other {@link JobSequence}
- * instances.
+ * Builds a node of a {@link JobSequence} and provides linking to other
+ * {@link JobSequence} instances.
  * 
  * @author Daniel Sagenschneider
  */
@@ -44,8 +44,8 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	void setTeam(String officeTeamName);
 
 	/**
-	 * Specifies the next {@link Task} in the {@link JobSequence} ({@link Task} will
-	 * reside on the same {@link Work}).
+	 * Specifies the next {@link Task} in the {@link JobSequence} ({@link Task}
+	 * will reside on the same {@link Work}).
 	 * 
 	 * @param taskName
 	 *            Name of the next {@link Task} in the {@link JobSequence}.
@@ -56,8 +56,8 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	void setNextTaskInFlow(String taskName, Class<?> argumentType);
 
 	/**
-	 * Specifies the next {@link Task} in the {@link JobSequence} ({@link Task} may
-	 * reside on another {@link Work}).
+	 * Specifies the next {@link Task} in the {@link JobSequence} ({@link Task}
+	 * may reside on another {@link Work}).
 	 * 
 	 * @param workName
 	 *            Name of {@link Work} containing the {@link Task}.
@@ -71,8 +71,8 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 			Class<?> argumentType);
 
 	/**
-	 * Links in a {@link JobSequence} by specifying the first {@link Task} of the
-	 * {@link JobSequence}.
+	 * Links in a {@link JobSequence} by specifying the first {@link Task} of
+	 * the {@link JobSequence}.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link JobSequence}.
@@ -82,15 +82,15 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * @param strategy
 	 *            Strategy to instigate the {@link JobSequence}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link JobSequence}. May be
-	 *            <code>null</code> to indicate no argument.
+	 *            Type of argument passed to the instigated {@link JobSequence}.
+	 *            May be <code>null</code> to indicate no argument.
 	 */
 	void linkFlow(F key, String taskName, FlowInstigationStrategyEnum strategy,
 			Class<?> argumentType);
 
 	/**
-	 * Links in a {@link JobSequence} by specifying the first {@link Task} of the
-	 * {@link JobSequence}.
+	 * Links in a {@link JobSequence} by specifying the first {@link Task} of
+	 * the {@link JobSequence}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link JobSequence}.
@@ -100,15 +100,15 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * @param strategy
 	 *            Strategy to instigate the {@link JobSequence}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link JobSequence}. May be
-	 *            <code>null</code> to indicate no argument.
+	 *            Type of argument passed to the instigated {@link JobSequence}.
+	 *            May be <code>null</code> to indicate no argument.
 	 */
 	void linkFlow(int flowIndex, String taskName,
 			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
 
 	/**
-	 * Links in a {@link JobSequence} by specifying the first {@link Task} of the
-	 * {@link JobSequence}.
+	 * Links in a {@link JobSequence} by specifying the first {@link Task} of
+	 * the {@link JobSequence}.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link JobSequence}.
@@ -121,15 +121,15 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * @param strategy
 	 *            Strategy to instigate the {@link JobSequence}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link JobSequence}. May be
-	 *            <code>null</code> to indicate no argument.
+	 *            Type of argument passed to the instigated {@link JobSequence}.
+	 *            May be <code>null</code> to indicate no argument.
 	 */
 	void linkFlow(F key, String workName, String taskName,
 			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
 
 	/**
-	 * Links in a {@link JobSequence} by specifying the first {@link Task} of the
-	 * {@link JobSequence}.
+	 * Links in a {@link JobSequence} by specifying the first {@link Task} of
+	 * the {@link JobSequence}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link JobSequence}.
@@ -142,8 +142,8 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * @param strategy
 	 *            Strategy to instigate the {@link JobSequence}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link JobSequence}. May be
-	 *            <code>null</code> to indicate no argument.
+	 *            Type of argument passed to the instigated {@link JobSequence}.
+	 *            May be <code>null</code> to indicate no argument.
 	 */
 	void linkFlow(int flowIndex, String workName, String taskName,
 			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
@@ -163,7 +163,8 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * @param taskName
 	 *            Name of the {@link Task} that resides on the same {@link Work}
 	 *            as this {@link Task}.
-	 * @see #addEscalation(Class, boolean, String, String)
+	 * 
+	 * @see #addEscalation(Class, String, String)
 	 */
 	void addEscalation(Class<? extends Throwable> typeOfCause, String taskName);
 
@@ -179,7 +180,8 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * @param taskName
 	 *            Name of {@link Task} that resides on a different {@link Work}
 	 *            as this {@link Task}.
-	 * @see #addEscalation(Class, boolean, String)
+	 * 
+	 * @see #addEscalation(Class, String)
 	 */
 	void addEscalation(Class<? extends Throwable> typeOfCause, String workName,
 			String taskName);

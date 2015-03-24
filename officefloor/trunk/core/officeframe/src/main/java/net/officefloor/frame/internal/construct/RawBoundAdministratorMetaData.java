@@ -96,8 +96,6 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	 *            {@link OfficeMetaDataLocator}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
-	 * @param rawGovernanceMetaData
-	 *            {@link RawGovernanceMetaData} instances.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
