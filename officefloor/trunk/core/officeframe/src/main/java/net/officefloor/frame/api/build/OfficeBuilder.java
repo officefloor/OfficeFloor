@@ -151,6 +151,10 @@ public interface OfficeBuilder {
 	/**
 	 * Adds {@link Governance} within the {@link Office}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @param governanceName
 	 *            Name of the {@link Governance} to be referenced locally by
 	 *            this {@link Office}.
@@ -175,6 +179,13 @@ public interface OfficeBuilder {
 	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
 	 * </ol>
 	 * 
+	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} key type.
+	 * @param <AS>
+	 *            {@link AdministratorSource} type.
 	 * @param processAdministratorName
 	 *            Name to link the {@link Administrator} into {@link Work}.
 	 * @param adminsistratorSource
@@ -195,6 +206,12 @@ public interface OfficeBuilder {
 	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
 	 * </ol>
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} key type.
+	 * @param <AS>
+	 *            {@link AdministratorSource} type.
 	 * @param threadAdministratorName
 	 *            Name to link the {@link Administrator} into {@link Work}.
 	 * @param adminsistratorSource
@@ -207,6 +224,8 @@ public interface OfficeBuilder {
 	/**
 	 * Adds {@link Work} to be done within this {@link Office}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workName
 	 *            Name identifying the {@link Work}.
 	 * @param workFactory

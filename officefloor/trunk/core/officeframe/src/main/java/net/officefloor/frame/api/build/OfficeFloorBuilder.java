@@ -80,6 +80,7 @@ public interface OfficeFloorBuilder {
 	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource} instance to use.
+	 * @return {@link ManagedObjectBuilder}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>> ManagedObjectBuilder<F> addManagedObject(
 			String managedObjectSourceName,

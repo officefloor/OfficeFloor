@@ -57,7 +57,7 @@ public interface DependencyMappingBuilder {
 	void mapDependency(int index, String scopeManagedObjectName);
 
 	/**
-	 * Specifies the {@link governance} for the {@link ManagedObject}.
+	 * Specifies the {@link Governance} for the {@link ManagedObject}.
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance} within the {@link Office}.

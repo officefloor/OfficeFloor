@@ -1095,6 +1095,17 @@
 							<goal>aggregate</goal>
 						</goals>
 						<configuration>
+							<!-- Ignore maven plugin tags -->
+							<tags>
+								<tag>
+									<name>goal</name>
+									<placement>X</placement>
+								</tag>
+								<tag>
+									<name>requiresDependencyResolution</name>
+									<placement>X</placement>
+								</tag>
+							</tags>
 							<!-- Include Google Analytics and Woopra -->
 							<header>
 							<![CDATA[

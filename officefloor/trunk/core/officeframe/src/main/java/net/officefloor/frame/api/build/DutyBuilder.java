@@ -34,9 +34,11 @@ import net.officefloor.frame.spi.governance.Governance;
 public interface DutyBuilder {
 
 	/**
-	 * Links in a {@link JobSequence} by specifying the first {@link Task} of the
-	 * {@link JobSequence}.
+	 * Links in a {@link JobSequence} by specifying the first {@link Task} of
+	 * the {@link JobSequence}.
 	 * 
+	 * @param <F>
+	 *            Flow key type.
 	 * @param key
 	 *            Key identifying the {@link JobSequence}.
 	 * @param workName
@@ -45,15 +47,15 @@ public interface DutyBuilder {
 	 * @param taskName
 	 *            Name of {@link Task} that resides on the {@link Work}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link JobSequence}. May be
-	 *            <code>null</code> to indicate no argument.
+	 *            Type of argument passed to the instigated {@link JobSequence}.
+	 *            May be <code>null</code> to indicate no argument.
 	 */
 	<F extends Enum<F>> void linkFlow(F key, String workName, String taskName,
 			Class<?> argumentType);
 
 	/**
-	 * Links in a {@link JobSequence} by specifying the first {@link Task} of the
-	 * {@link JobSequence}.
+	 * Links in a {@link JobSequence} by specifying the first {@link Task} of
+	 * the {@link JobSequence}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link JobSequence}.
@@ -63,8 +65,8 @@ public interface DutyBuilder {
 	 * @param taskName
 	 *            Name of {@link Task} that resides on the {@link Work}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link JobSequence}. May be
-	 *            <code>null</code> to indicate no argument.
+	 *            Type of argument passed to the instigated {@link JobSequence}.
+	 *            May be <code>null</code> to indicate no argument.
 	 */
 	void linkFlow(int flowIndex, String workName, String taskName,
 			Class<?> argumentType);
@@ -72,6 +74,8 @@ public interface DutyBuilder {
 	/**
 	 * Links a {@link Governance}.
 	 * 
+	 * @param <G>
+	 *            {@link Governance} key type.
 	 * @param key
 	 *            Key for the {@link Duty} to identify the {@link Governance}.
 	 * @param governanceName
