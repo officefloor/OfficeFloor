@@ -36,6 +36,8 @@ public interface DependencyMappingBuilder {
 	/**
 	 * Specifies the {@link ManagedObject} for the dependency key.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
 	 * @param key
 	 *            Key of the dependency.
 	 * @param scopeManagedObjectName

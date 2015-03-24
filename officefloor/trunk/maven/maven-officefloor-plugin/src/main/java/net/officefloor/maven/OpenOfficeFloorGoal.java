@@ -26,6 +26,7 @@ import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
 import net.officefloor.building.manager.UploadArtifact;
+import net.officefloor.building.process.ProcessShell;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -54,6 +55,8 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	/**
 	 * Creates the {@link OpenOfficeFloorGoal} with the required parameters.
 	 * 
+	 * @param defaultProcessName
+	 *            Default {@link ProcessShell} name.
 	 * @param project
 	 *            {@link MavenProject}.
 	 * @param pluginDependencies

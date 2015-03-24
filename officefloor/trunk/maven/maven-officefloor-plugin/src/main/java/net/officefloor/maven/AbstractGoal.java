@@ -48,6 +48,8 @@ public abstract class AbstractGoal extends AbstractMojo {
 	/**
 	 * Defaults the value.
 	 * 
+	 * @param <T>
+	 *            Value type.
 	 * @param value
 	 *            Value to check if blank.
 	 * @param defaultValue
@@ -83,8 +85,8 @@ public abstract class AbstractGoal extends AbstractMojo {
 	 *            Cause.
 	 * @return {@link MojoExecutionException}.
 	 */
-	public static MojoExecutionException newMojoExecutionException(String message,
-			Throwable cause) {
+	public static MojoExecutionException newMojoExecutionException(
+			String message, Throwable cause) {
 
 		// Create the message
 		StringBuilder msg = new StringBuilder();
