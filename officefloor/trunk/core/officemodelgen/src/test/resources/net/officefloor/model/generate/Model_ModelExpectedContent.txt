@@ -10,6 +10,7 @@ import net.officefloor.test.SpecialType;
 import javax.annotation.Generated;
 
 import net.officefloor.model.AbstractModel;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
@@ -28,6 +29,11 @@ public class ClassModel extends AbstractModel implements ItemModel<ClassModel>, 
 
     /**
      * Convenience constructor.
+     *
+     * @param fieldOne Field one.
+     * @param fieldTwo Field two.
+     * @param listOne List one.
+     * @param listTwo List two.
      */
     public ClassModel(
       int fieldOne
@@ -51,6 +57,13 @@ public class ClassModel extends AbstractModel implements ItemModel<ClassModel>, 
 
     /**
      * Convenience constructor allowing XY initialising.
+     *
+     * @param fieldOne Field one.
+     * @param fieldTwo Field two.
+     * @param listOne List one.
+     * @param listTwo List two.
+     * @param x Horizontal location.
+     * @param y Vertical location.
      */
     public ClassModel(
       int fieldOne
@@ -76,30 +89,44 @@ public class ClassModel extends AbstractModel implements ItemModel<ClassModel>, 
         this.setY(y);
     }
 
+
     /**
      * Field one.
      */
     private int fieldOne;
 
+    /**
+     * @return Field one.
+     */
     public int getFieldOne() {
         return this.fieldOne;
     }
 
+    /**
+     * @param fieldOne Field one.
+     */
     public void setFieldOne(int fieldOne) {
         int oldValue = this.fieldOne;
         this.fieldOne = fieldOne;
         this.changeField(oldValue, this.fieldOne, ClassEvent.CHANGE_FIELD_ONE);
     }
 
+
     /**
      * Field two.
      */
     private String fieldTwo;
 
+    /**
+     * @return Field two.
+     */
     public String getFieldTwo() {
         return this.fieldTwo;
     }
 
+    /**
+     * @param fieldTwo Field two.
+     */
     public void setFieldTwo(String fieldTwo) {
         String oldValue = this.fieldTwo;
         this.fieldTwo = fieldTwo;
@@ -112,31 +139,50 @@ public class ClassModel extends AbstractModel implements ItemModel<ClassModel>, 
      */
     private List<Integer> listOne = new LinkedList<Integer>();
 
+    /**
+     * @return List one.
+     */
     public List<Integer> getListOnes() {
         return this.listOne;
     }
 
+    /**
+     * @param listOne List one.
+     */
     public void addListOne(Integer listOne) {
         this.addItemToList(listOne, this.listOne, ClassEvent.ADD_LIST_ONE);
     }
 
+    /**
+     * @param listOne List one.
+     */
     public void removeListOne(Integer listOne) {
         this.removeItemFromList(listOne, this.listOne, ClassEvent.REMOVE_LIST_ONE);
     }
+
 
     /**
      * List two.
      */
     private List<SpecialType> listTwo = new LinkedList<SpecialType>();
 
+    /**
+     * @return List two.
+     */
     public List<SpecialType> getListTwos() {
         return this.listTwo;
     }
 
+    /**
+     * @param listTwo List two.
+     */
     public void addListTwo(SpecialType listTwo) {
         this.addItemToList(listTwo, this.listTwo, ClassEvent.ADD_LIST_TWO);
     }
 
+    /**
+     * @param listTwo List two.
+     */
     public void removeListTwo(SpecialType listTwo) {
         this.removeItemFromList(listTwo, this.listTwo, ClassEvent.REMOVE_LIST_TWO);
     }
@@ -144,6 +190,8 @@ public class ClassModel extends AbstractModel implements ItemModel<ClassModel>, 
 
     /**
      * Remove Connections.
+     *
+     * @return {@link RemoveConnectionsAction} to remove the {@link ConnectionModel} instances.
      */
     public RemoveConnectionsAction<ClassModel> removeConnections() {
         RemoveConnectionsAction<ClassModel> _action = new RemoveConnectionsAction<ClassModel>(this);

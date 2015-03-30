@@ -6,6 +6,7 @@ package graph.test;
 import javax.annotation.Generated;
 
 import net.officefloor.model.AbstractModel;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
@@ -24,6 +25,9 @@ public class CascadeModel extends AbstractModel implements ItemModel<CascadeMode
 
     /**
      * Convenience constructor allowing XY initialising.
+     *
+     * @param x Horizontal location.
+     * @param y Vertical location.
      */
     public CascadeModel(
       int x
@@ -34,9 +38,10 @@ public class CascadeModel extends AbstractModel implements ItemModel<CascadeMode
     }
 
 
-
     /**
      * Remove Connections.
+     *
+     * @return {@link RemoveConnectionsAction} to remove the {@link ConnectionModel} instances.
      */
     public RemoveConnectionsAction<CascadeModel> removeConnections() {
         RemoveConnectionsAction<CascadeModel> _action = new RemoveConnectionsAction<CascadeModel>(this);

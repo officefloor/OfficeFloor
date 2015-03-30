@@ -134,9 +134,8 @@ public class ModelGenerator {
 		writeLine("import javax.annotation.Generated;");
 		writeLine();
 		writeLine("import net.officefloor.model.AbstractModel;");
-		if (this.metaData.isConnectionModel()) {
-			writeLine("import net.officefloor.model.ConnectionModel;");
-		} else {
+		writeLine("import net.officefloor.model.ConnectionModel;");
+		if (!this.metaData.isConnectionModel()) {
 			writeLine("import net.officefloor.model.ItemModel;");
 			writeLine("import net.officefloor.model.RemoveConnectionsAction;");
 		}
@@ -190,7 +189,6 @@ public class ModelGenerator {
 		this.convenienceXyConstructor();
 		writeLine();
 		this.fields();
-		writeLine();
 		this.lists();
 		writeLine();
 		if (this.metaData.isConnectionModel()) {
@@ -277,6 +275,22 @@ public class ModelGenerator {
 		// Write the non-linked construct
 		writeLine("    /**");
 		writeLine("     * Convenience constructor for new non-linked instance.");
+		writeLine("     *");
+
+		// Parameters
+		for (FieldMetaData field : this.metaData.getFields()) {
+			if (!field.getType().endsWith(MODEL_TYPE_SUFFIX)) {
+				writeLine("     * @param " + field.getPropertyName() + " "
+						+ field.getDescription());
+			}
+		}
+		for (ListMetaData list : this.metaData.getLists()) {
+			if (!list.getType().endsWith(MODEL_TYPE_SUFFIX)) {
+				writeLine("     * @param " + list.getPropertyName() + " "
+						+ list.getDescription());
+			}
+		}
+
 		writeLine("     */");
 		writeLine("    public " + this.metaData.getClassName() + "(");
 
@@ -342,6 +356,19 @@ public class ModelGenerator {
 	private void convenienceConstructor() throws Exception {
 		writeLine("    /**");
 		writeLine("     * Convenience constructor.");
+		writeLine("     *");
+		write("     * ");
+		writeListing("     * ", new WriteAction() {
+			protected void writeField(FieldMetaData field) {
+				writeLine("@param " + field.getPropertyName() + " "
+						+ field.getDescription());
+			}
+
+			protected void writeList(ListMetaData list) {
+				writeLine("@param " + list.getPropertyName() + " "
+						+ list.getDescription());
+			}
+		}, this.metaData.getFields(), this.metaData.getLists());
 		writeLine("     */");
 		writeLine("    public " + this.metaData.getClassName() + "(");
 
@@ -388,6 +415,23 @@ public class ModelGenerator {
 	private void convenienceXyConstructor() throws Exception {
 		writeLine("    /**");
 		writeLine("     * Convenience constructor allowing XY initialising.");
+		writeLine("     *");
+		if (this.isStateForObject()) {
+			write("     * ");
+			writeListing("     * ", new WriteAction() {
+				protected void writeField(FieldMetaData field) {
+					writeLine("@param " + field.getPropertyName() + " "
+							+ field.getDescription());
+				}
+
+				protected void writeList(ListMetaData list) {
+					writeLine("@param " + list.getPropertyName() + " "
+							+ list.getDescription());
+				}
+			}, this.metaData.getFields(), this.metaData.getLists());
+		}
+		writeLine("     * @param x Horizontal location.");
+		writeLine("     * @param y Vertical location.");
 		writeLine("     */");
 		writeLine("    public " + this.metaData.getClassName() + "(");
 
@@ -448,17 +492,22 @@ public class ModelGenerator {
 	private void fields() throws Exception {
 		writeListing("", new WriteAction() {
 			protected void writeField(FieldMetaData field) {
-				// Description
+
+				// Blank line separator
+				writeLine();
+
+				// Variable
 				writeLine("    /**");
 				writeLine("     * " + field.getDescription());
 				writeLine("     */");
-
-				// Variable
 				writeLine("    private " + field.getType() + " "
 						+ field.getPropertyName() + ";");
 				writeLine();
 
 				// Accessor
+				writeLine("    /**");
+				writeLine("     * @return " + field.getDescription());
+				writeLine("     */");
 				writeLine("    public " + field.getType() + " get"
 						+ field.getCamelCaseName() + "() {");
 				writeLine("        return this." + field.getPropertyName()
@@ -467,6 +516,10 @@ public class ModelGenerator {
 				writeLine();
 
 				// Mutator
+				writeLine("    /**");
+				writeLine("     * @param " + field.getPropertyName() + " "
+						+ field.getDescription());
+				writeLine("     */");
 				writeLine("    public void set" + field.getCamelCaseName()
 						+ "(" + field.getType() + " " + field.getPropertyName()
 						+ ") {");
@@ -491,18 +544,23 @@ public class ModelGenerator {
 	private void lists() throws Exception {
 		writeListing("", new WriteAction() {
 			protected void writeList(ListMetaData list) {
-				// Description
+
+				// Blank line separator
+				writeLine();
+
+				// Variable
 				writeLine("    /**");
 				writeLine("     * " + list.getDescription());
 				writeLine("     */");
-
-				// Variable
 				writeLine("    private List<" + list.getType() + "> "
 						+ list.getPropertyName() + " = new LinkedList<"
 						+ list.getType() + ">();");
 				writeLine();
 
 				// Accessor
+				writeLine("    /**");
+				writeLine("     * @return " + list.getDescription());
+				writeLine("     */");
 				writeLine("    public List<" + list.getType() + "> get"
 						+ list.getPluralName() + "() {");
 				writeLine("        return this." + list.getPropertyName() + ";");
@@ -510,6 +568,10 @@ public class ModelGenerator {
 				writeLine();
 
 				// Add method
+				writeLine("    /**");
+				writeLine("     * @param " + list.getPropertyName() + " "
+						+ list.getDescription());
+				writeLine("     */");
 				writeLine("    public void add" + list.getCamelCaseName() + "("
 						+ list.getType() + " " + list.getPropertyName() + ") {");
 				writeLine("        this.addItemToList("
@@ -521,6 +583,10 @@ public class ModelGenerator {
 				writeLine();
 
 				// Remove method
+				writeLine("    /**");
+				writeLine("     * @param " + list.getPropertyName() + " "
+						+ list.getDescription());
+				writeLine("     */");
 				writeLine("    public void remove" + list.getCamelCaseName()
 						+ "(" + list.getType() + " " + list.getPropertyName()
 						+ ") {");
@@ -541,8 +607,8 @@ public class ModelGenerator {
 	@SuppressWarnings("unchecked")
 	private void connectionMethods() throws Exception {
 		// Is remove
-		writeLine("    /*");
-		writeLine("     * ConnectionModel");
+		writeLine("    /**");
+		writeLine("     * @return Indicates if removable.");
 		writeLine("     */");
 		writeLine("    public boolean isRemovable() {");
 		writeLine("        return true;");
@@ -550,6 +616,9 @@ public class ModelGenerator {
 		writeLine();
 
 		// Connect
+		writeLine("    /**");
+		writeLine("     * Connects to the {@link AbstractModel} instances.");
+		writeLine("     */");
 		writeLine("    public void connect() {");
 		writeListing("", new WriteAction() {
 			protected void writeField(FieldMetaData field) {
@@ -564,6 +633,9 @@ public class ModelGenerator {
 		writeLine();
 
 		// Remove
+		writeLine("    /**");
+		writeLine("     * Removes connection to the {@link AbstractModel} instances.");
+		writeLine("     */");
 		writeLine("    public void remove() {");
 		writeListing("", new WriteAction() {
 			protected void writeField(FieldMetaData field) {
@@ -589,6 +661,8 @@ public class ModelGenerator {
 		// Method signature
 		writeLine("    /**");
 		writeLine("     * Remove Connections.");
+		writeLine("     *");
+		writeLine("     * @return {@link RemoveConnectionsAction} to remove the {@link ConnectionModel} instances.");
 		writeLine("     */");
 		writeLine("    public RemoveConnectionsAction<"
 				+ this.metaData.getClassName() + "> removeConnections() {");

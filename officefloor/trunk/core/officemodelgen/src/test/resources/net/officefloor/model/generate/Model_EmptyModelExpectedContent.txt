@@ -6,6 +6,7 @@ package net.officefloor;
 import javax.annotation.Generated;
 
 import net.officefloor.model.AbstractModel;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
@@ -24,6 +25,9 @@ public class EmptyModel extends AbstractModel implements ItemModel<EmptyModel> {
 
     /**
      * Convenience constructor allowing XY initialising.
+     *
+     * @param x Horizontal location.
+     * @param y Vertical location.
      */
     public EmptyModel(
       int x
@@ -34,9 +38,10 @@ public class EmptyModel extends AbstractModel implements ItemModel<EmptyModel> {
     }
 
 
-
     /**
      * Remove Connections.
+     *
+     * @return {@link RemoveConnectionsAction} to remove the {@link ConnectionModel} instances.
      */
     public RemoveConnectionsAction<EmptyModel> removeConnections() {
         RemoveConnectionsAction<EmptyModel> _action = new RemoveConnectionsAction<EmptyModel>(this);
