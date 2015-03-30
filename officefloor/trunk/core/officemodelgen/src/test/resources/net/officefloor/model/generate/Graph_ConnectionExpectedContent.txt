@@ -23,6 +23,9 @@ public class ConnectionModel extends AbstractModel implements ConnectionModel {
 
     /**
      * Convenience constructor.
+     *
+     * @param one One.
+     * @param two Two.
      */
     public ConnectionModel(
       OneModel one
@@ -34,6 +37,11 @@ public class ConnectionModel extends AbstractModel implements ConnectionModel {
 
     /**
      * Convenience constructor allowing XY initialising.
+     *
+     * @param one One.
+     * @param two Two.
+     * @param x Horizontal location.
+     * @param y Vertical location.
      */
     public ConnectionModel(
       OneModel one
@@ -47,30 +55,44 @@ public class ConnectionModel extends AbstractModel implements ConnectionModel {
         this.setY(y);
     }
 
+
     /**
      * One.
      */
     private OneModel one;
 
+    /**
+     * @return One.
+     */
     public OneModel getOne() {
         return this.one;
     }
 
+    /**
+     * @param one One.
+     */
     public void setOne(OneModel one) {
         OneModel oldValue = this.one;
         this.one = one;
         this.changeField(oldValue, this.one, ConnectionEvent.CHANGE_ONE);
     }
 
+
     /**
      * Two.
      */
     private TwoModel two;
 
+    /**
+     * @return Two.
+     */
     public TwoModel getTwo() {
         return this.two;
     }
 
+    /**
+     * @param two Two.
+     */
     public void setTwo(TwoModel two) {
         TwoModel oldValue = this.two;
         this.two = two;
@@ -78,19 +100,24 @@ public class ConnectionModel extends AbstractModel implements ConnectionModel {
     }
 
 
-
-    /*
-     * ConnectionModel
+    /**
+     * @return Indicates if removable.
      */
     public boolean isRemovable() {
         return true;
     }
 
+    /**
+     * Connects to the {@link AbstractModel} instances.
+     */
     public void connect() {
         this.one.setTwoField(this);
         this.two.addOneList(this);
     }
 
+    /**
+     * Removes connection to the {@link AbstractModel} instances.
+     */
     public void remove() {
         this.one.setTwoField(null);
         this.two.removeOneList(this);

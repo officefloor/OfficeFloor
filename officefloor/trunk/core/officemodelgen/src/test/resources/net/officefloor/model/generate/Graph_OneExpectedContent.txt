@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import javax.annotation.Generated;
 
 import net.officefloor.model.AbstractModel;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
@@ -27,6 +28,8 @@ public class OneModel extends AbstractModel implements ItemModel<OneModel> {
 
     /**
      * Convenience constructor for new non-linked instance.
+     *
+     * @param nonModelField Non model field.
      */
     public OneModel(
       String nonModelField
@@ -36,6 +39,11 @@ public class OneModel extends AbstractModel implements ItemModel<OneModel> {
 
     /**
      * Convenience constructor.
+     *
+     * @param nonModelField Non model field.
+     * @param twoField Two field.
+     * @param cascadeField Cascade field.
+     * @param cascadeList Cascade list.
      */
     public OneModel(
       String nonModelField
@@ -55,6 +63,13 @@ public class OneModel extends AbstractModel implements ItemModel<OneModel> {
 
     /**
      * Convenience constructor allowing XY initialising.
+     *
+     * @param nonModelField Non model field.
+     * @param twoField Two field.
+     * @param cascadeField Cascade field.
+     * @param cascadeList Cascade list.
+     * @param x Horizontal location.
+     * @param y Vertical location.
      */
     public OneModel(
       String nonModelField
@@ -76,45 +91,66 @@ public class OneModel extends AbstractModel implements ItemModel<OneModel> {
         this.setY(y);
     }
 
+
     /**
      * Non model field.
      */
     private String nonModelField;
 
+    /**
+     * @return Non model field.
+     */
     public String getNonModelField() {
         return this.nonModelField;
     }
 
+    /**
+     * @param nonModelField Non model field.
+     */
     public void setNonModelField(String nonModelField) {
         String oldValue = this.nonModelField;
         this.nonModelField = nonModelField;
         this.changeField(oldValue, this.nonModelField, OneEvent.CHANGE_NON_MODEL_FIELD);
     }
 
+
     /**
      * Two field.
      */
     private ConnectionModel twoField;
 
+    /**
+     * @return Two field.
+     */
     public ConnectionModel getTwoField() {
         return this.twoField;
     }
 
+    /**
+     * @param twoField Two field.
+     */
     public void setTwoField(ConnectionModel twoField) {
         ConnectionModel oldValue = this.twoField;
         this.twoField = twoField;
         this.changeField(oldValue, this.twoField, OneEvent.CHANGE_TWO_FIELD);
     }
 
+
     /**
      * Cascade field.
      */
     private CascadeModel cascadeField;
 
+    /**
+     * @return Cascade field.
+     */
     public CascadeModel getCascadeField() {
         return this.cascadeField;
     }
 
+    /**
+     * @param cascadeField Cascade field.
+     */
     public void setCascadeField(CascadeModel cascadeField) {
         CascadeModel oldValue = this.cascadeField;
         this.cascadeField = cascadeField;
@@ -127,14 +163,23 @@ public class OneModel extends AbstractModel implements ItemModel<OneModel> {
      */
     private List<CascadeModel> cascadeList = new LinkedList<CascadeModel>();
 
+    /**
+     * @return Cascade list.
+     */
     public List<CascadeModel> getCascadeLists() {
         return this.cascadeList;
     }
 
+    /**
+     * @param cascadeList Cascade list.
+     */
     public void addCascadeList(CascadeModel cascadeList) {
         this.addItemToList(cascadeList, this.cascadeList, OneEvent.ADD_CASCADE_LIST);
     }
 
+    /**
+     * @param cascadeList Cascade list.
+     */
     public void removeCascadeList(CascadeModel cascadeList) {
         this.removeItemFromList(cascadeList, this.cascadeList, OneEvent.REMOVE_CASCADE_LIST);
     }
@@ -142,6 +187,8 @@ public class OneModel extends AbstractModel implements ItemModel<OneModel> {
 
     /**
      * Remove Connections.
+     *
+     * @return {@link RemoveConnectionsAction} to remove the {@link ConnectionModel} instances.
      */
     public RemoveConnectionsAction<OneModel> removeConnections() {
         RemoveConnectionsAction<OneModel> _action = new RemoveConnectionsAction<OneModel>(this);
