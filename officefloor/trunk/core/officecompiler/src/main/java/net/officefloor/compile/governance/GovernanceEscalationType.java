@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.governance;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 
@@ -39,6 +40,8 @@ public interface GovernanceEscalationType {
 	 * Obtains the type of {@link EscalationFlow} by the
 	 * {@link GovernanceActivity}.
 	 * 
+	 * @param <E>
+	 *            {@link Escalation} type.
 	 * @return Type of {@link EscalationFlow} by the {@link GovernanceActivity}.
 	 */
 	<E extends Throwable> Class<E> getEscalationType();

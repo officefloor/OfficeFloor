@@ -35,6 +35,8 @@ public interface OfficeLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link OfficeSourceSpecification} for the {@link OfficeSource}.
 	 * 
+	 * @param <O>
+	 *            {@link OfficeSource} type.
 	 * @param officeSourceClass
 	 *            Class of the {@link OfficeSource}.
 	 * @return {@link PropertyList} of the {@link OfficeSourceProperty}
@@ -48,6 +50,8 @@ public interface OfficeLoader {
 	/**
 	 * Loads and returns the {@link OfficeType} from the {@link OfficeSource}.
 	 * 
+	 * @param <O>
+	 *            {@link OfficeSource} type.
 	 * @param officeSourceClass
 	 *            Class of the {@link OfficeSource}.
 	 * @param officeLocation

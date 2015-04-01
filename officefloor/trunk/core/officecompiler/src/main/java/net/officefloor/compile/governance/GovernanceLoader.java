@@ -34,6 +34,12 @@ public interface GovernanceLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link GovernanceSourceSpecification} for the {@link GovernanceSource}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <GS>
+	 *            {@link GovernanceSource} type.
 	 * @param governanceSourceClass
 	 *            Class of the {@link GovernanceSource}.
 	 * @return {@link PropertyList} of the {@link GovernanceSourceProperty}
@@ -48,6 +54,12 @@ public interface GovernanceLoader {
 	 * Loads and returns the {@link GovernanceType} from the
 	 * {@link GovernanceSource} class.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <GS>
+	 *            {@link GovernanceSource} type.
 	 * @param governanceSourceClass
 	 *            Class of the {@link GovernanceSource}.
 	 * @param properties

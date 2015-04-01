@@ -36,6 +36,8 @@ public interface ManagedObjectPoolLoader {
 	 * {@link ManagedObjectPoolSourceSpecification} for the
 	 * {@link ManagedObjectPoolSource}.
 	 * 
+	 * @param <PS>
+	 *            {@link ManagedObjectPoolSource} type.
 	 * @param managedObjectPoolSourceClass
 	 *            Class of the {@link ManagedObjectPoolSource}.
 	 * @return {@link PropertyList} of the
@@ -50,6 +52,8 @@ public interface ManagedObjectPoolLoader {
 	 * Loads and returns the {@link ManagedObjectPoolType} sourced from the
 	 * {@link ManagedObjectPoolSource}.
 	 * 
+	 * @param <PS>
+	 *            {@link ManagedObjectPoolSource} type.
 	 * @param managedObjectPoolSourceClass
 	 *            Class of the {@link ManagedObjectPoolSource}.
 	 * @param propertyList

@@ -570,7 +570,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		AdministratorLoader adminLoader = compiler.getAdministratorLoader();
 		MockAdministratorSource.init = init;
-		AdministratorType adminType = adminLoader.loadAdministrator(
+		AdministratorType adminType = adminLoader.loadAdministratorType(
 				MockAdministratorSource.class, propertyList);
 
 		// Verify the mock objects

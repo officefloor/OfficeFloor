@@ -34,6 +34,8 @@ public interface TeamLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link TeamSourceSpecification} for the {@link TeamSource}.
 	 * 
+	 * @param <TS>
+	 *            {@link TeamSource} type.
 	 * @param teamSourceClass
 	 *            Class of the {@link TeamSource}.
 	 * @return {@link PropertyList} of the {@link TeamSourceProperty} instances
@@ -47,6 +49,8 @@ public interface TeamLoader {
 	 * Loads and returns the {@link TeamType} sourced from the
 	 * {@link TeamSource}.
 	 * 
+	 * @param <TS>
+	 *            {@link TeamSource} type.
 	 * @param teamSourceClass
 	 *            Class of the {@link TeamSource}.
 	 * @param propertyList

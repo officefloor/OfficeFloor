@@ -39,6 +39,8 @@ public class LinkUtil {
 	/**
 	 * Finds the furtherest target link by the specified type.
 	 * 
+	 * @param <T>
+	 *            Target type.
 	 * @param link
 	 *            Starting {@link LinkFlowNode}.
 	 * @param targetType
@@ -53,6 +55,8 @@ public class LinkUtil {
 	 *            {@link AssetType}.
 	 * @param assetName
 	 *            Name of the {@link Asset}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 * @return Furtherest target {@link LinkFlowNode} or <code>null</code> if no
 	 *         targets found.
 	 */
@@ -341,7 +345,11 @@ public class LinkUtil {
 
 		// Run out of links (or no starting link), so could not find target
 		if (isIssueOnNoTarget) {
-			issues.addIssue(locationType, location, assetType, assetName,
+			issues.addIssue(
+					locationType,
+					location,
+					assetType,
+					assetName,
 					startingLinkName + " is not linked to a "
 							+ targetType.getSimpleName());
 		}

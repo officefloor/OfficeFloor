@@ -120,6 +120,8 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	 * Loads the {@link SupplierType} from the added {@link ManagedObject}
 	 * instances, along with filling {@link SupplyOrder} instances.
 	 * 
+	 * @param <S>
+	 *            {@link SupplierSource} type.
 	 * @param supplierSourceClass
 	 *            {@link SupplierSource} class.
 	 * @param propertyList

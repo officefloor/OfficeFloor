@@ -68,6 +68,8 @@ public class CompileUtil {
 	 * that passes compiler warnings for generic typed array along with handling
 	 * <code>null</code> <code>compareTo</code> values.
 	 * 
+	 * @param <T>
+	 *            Collection element type.
 	 * @param collection
 	 *            Collection to transform into a sorted array.
 	 * @param type
@@ -102,6 +104,8 @@ public class CompileUtil {
 	/**
 	 * Obtains the {@link Class}.
 	 * 
+	 * @param <T>
+	 *            Expected type.
 	 * @param className
 	 *            Fully qualified name of the {@link Class} to obtain.
 	 * @param expectedType
@@ -161,6 +165,10 @@ public class CompileUtil {
 	 * constructor. If fails to instantiate, then reports issue via
 	 * {@link CompilerIssues}.
 	 * 
+	 * @param <T>
+	 *            Type of instance.
+	 * @param <E>
+	 *            Expected type.
 	 * @param clazz
 	 *            {@link Class} to instantiate.
 	 * @param expectedType
@@ -210,6 +218,8 @@ public class CompileUtil {
 	 * Convenience method to instantiate and instance of a {@link Class} from
 	 * its fully qualified name.
 	 * 
+	 * @param <T>
+	 *            Expected type.
 	 * @param className
 	 *            Fully qualified name of the {@link Class}.
 	 * @param expectedType

@@ -62,6 +62,7 @@ public class AutoWireEscalationCauseRouteWorkSource
 	 *            containing the {@link AutoWireEscalationCauseRouteWorkSource}
 	 *            being configured.
 	 * @param causeType
+	 *            Type of cause.
 	 */
 	public static void configureEscalationCause(AutoWireSection section,
 			Class<? extends Throwable> causeType) {

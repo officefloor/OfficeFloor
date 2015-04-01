@@ -172,7 +172,7 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 				.getAdministratorLoader(this.officeLocation,
 						"loadAdministratorType");
 		AdministratorType<?, ?> administratorType = administratorLoader
-				.loadAdministrator(administratorSourceClass, properties);
+				.loadAdministratorType(administratorSourceClass, properties);
 
 		// Ensure have the administrator type
 		if (administratorType == null) {

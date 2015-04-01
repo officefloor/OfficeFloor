@@ -230,7 +230,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	}
 
 	@Override
-	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorType<I, A> loadAdministrator(
+	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorType<I, A> loadAdministratorType(
 			Class<AS> administratorSourceClass, PropertyList propertyList) {
 
 		// Create an instance of the administrator source

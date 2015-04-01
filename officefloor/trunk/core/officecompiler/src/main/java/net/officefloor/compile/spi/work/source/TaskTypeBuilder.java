@@ -19,6 +19,7 @@ package net.officefloor.compile.spi.work.source;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.JobSequence;
@@ -29,7 +30,7 @@ import net.officefloor.frame.internal.structure.JobSequence;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskTypeBuilder<M extends Enum<M>, F extends Enum<F>> {
+public interface TaskTypeBuilder<D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * Specifies the differentiator.
@@ -64,15 +65,15 @@ public interface TaskTypeBuilder<M extends Enum<M>, F extends Enum<F>> {
 	 *         <code>type definition</code> of the added dependent
 	 *         {@link Object}.
 	 */
-	TaskObjectTypeBuilder<M> addObject(Class<?> objectType);
+	TaskObjectTypeBuilder<D> addObject(Class<?> objectType);
 
 	/**
 	 * <p>
 	 * Adds a {@link TaskFlowTypeBuilder} to the {@link TaskTypeBuilder}
 	 * definition.
 	 * <p>
-	 * Should the {@link JobSequence} instigation be {@link Indexed}, the order they
-	 * are added is the order of indexing (starting at 0).
+	 * Should the {@link JobSequence} instigation be {@link Indexed}, the order
+	 * they are added is the order of indexing (starting at 0).
 	 * 
 	 * @return {@link TaskFlowTypeBuilder} to provide the
 	 *         <code>type definition</code> of the possible instigated
@@ -84,6 +85,8 @@ public interface TaskTypeBuilder<M extends Enum<M>, F extends Enum<F>> {
 	 * Adds a {@link TaskEscalationTypeBuilder} to the {@link TaskTypeBuilder}
 	 * definition.
 	 * 
+	 * @param <E>
+	 *            {@link Escalation} type.
 	 * @param escalationType
 	 *            Type to be handled by an {@link EscalationFlow}.
 	 * @return {@link TaskEscalationTypeBuilder} to provide the

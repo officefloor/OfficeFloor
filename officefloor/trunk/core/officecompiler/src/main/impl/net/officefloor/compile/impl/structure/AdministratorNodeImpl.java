@@ -212,7 +212,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 			// Load the administrator type
 			AdministratorLoader loader = this.context.getAdministratorLoader(
 					this.officeLocation, this.administratorName);
-			this.administratorType = loader.loadAdministrator(
+			this.administratorType = loader.loadAdministratorType(
 					administratorSourceClass, this.properties);
 		}
 
