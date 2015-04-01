@@ -44,6 +44,10 @@ public interface WorkTypeBuilder<W extends Work> {
 	 * Adds a {@link TaskTypeBuilder} to this {@link WorkTypeBuilder}
 	 * definition.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @param taskFactory
@@ -55,15 +59,16 @@ public interface WorkTypeBuilder<W extends Work> {
 	 *            {@link TaskTypeBuilder} requires no dependent {@link Object}
 	 *            instances or they are {@link Indexed}.
 	 * @param flowKeysClass
-	 *            {@link Enum} providing the keys of the {@link JobSequence} instigated
-	 *            by the {@link TaskTypeBuilder}. This may be <code>null</code>
-	 *            if the {@link TaskTypeBuilder} does not instigate {@link JobSequence}
-	 *            instances or they are {@link Indexed}.
+	 *            {@link Enum} providing the keys of the {@link JobSequence}
+	 *            instigated by the {@link TaskTypeBuilder}. This may be
+	 *            <code>null</code> if the {@link TaskTypeBuilder} does not
+	 *            instigate {@link JobSequence} instances or they are
+	 *            {@link Indexed}.
 	 * @return {@link TaskTypeBuilder} to provide <code>type definition</code>
 	 *         of the added {@link Task}.
 	 */
-	<M extends Enum<M>, F extends Enum<F>> TaskTypeBuilder<M, F> addTaskType(
-			String taskName, TaskFactory<? super W, M, F> taskFactory,
-			Class<M> objectKeysClass, Class<F> flowKeysClass);
+	<D extends Enum<D>, F extends Enum<F>> TaskTypeBuilder<D, F> addTaskType(
+			String taskName, TaskFactory<? super W, D, F> taskFactory,
+			Class<D> objectKeysClass, Class<F> flowKeysClass);
 
 }

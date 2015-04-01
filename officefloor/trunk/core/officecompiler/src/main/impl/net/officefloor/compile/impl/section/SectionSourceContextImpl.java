@@ -57,6 +57,8 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 	 *            Indicates if loading type.
 	 * @param sectionLocation
 	 *            Location of the {@link SectionNode}.
+	 * @param propertyList
+	 *            {@link PropertyList}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */

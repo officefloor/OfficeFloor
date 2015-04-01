@@ -166,7 +166,7 @@ public class AdministratorLoaderUtil {
 
 		// Load and return the administrator type
 		return getOfficeFloorCompiler().getAdministratorLoader()
-				.loadAdministrator(administratorSourceClass,
+				.loadAdministratorType(administratorSourceClass,
 						new PropertyListImpl(propertyNameValues));
 	}
 

@@ -80,6 +80,8 @@ public class XmlConfigurationContext implements ConfigurationContext,
 	 *            This is typically the {@link TestCase} class.
 	 * @param singleXmlFileName
 	 *            Name of the XML file.
+	 * @throws Exception
+	 *             If fails to initialise.
 	 */
 	public XmlConfigurationContext(Object offsetObject, String singleXmlFileName)
 			throws Exception {

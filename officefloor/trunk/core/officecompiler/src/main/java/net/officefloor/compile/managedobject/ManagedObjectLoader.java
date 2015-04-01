@@ -36,6 +36,12 @@ public interface ManagedObjectLoader {
 	 * {@link ManagedObjectSourceSpecification} for the
 	 * {@link ManagedObjectSource}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @return {@link PropertyList} of the {@link ManagedObjectSourceProperty}
@@ -50,6 +56,12 @@ public interface ManagedObjectLoader {
 	 * Loads and returns the {@link ManagedObjectType} for the
 	 * {@link ManagedObjectSource}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
 	 *            Class of the {@link ManagedObjectSource}.
 	 * @param propertyList
@@ -65,6 +77,10 @@ public interface ManagedObjectLoader {
 	 * Loads and returns the {@link ManagedObjectType} for the
 	 * {@link ManagedObjectSource}.
 	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource} instance to use.
 	 * @param propertyList

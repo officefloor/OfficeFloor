@@ -35,6 +35,10 @@ public interface WorkLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link WorkSourceSpecification} for the {@link WorkSource}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <WS>
+	 *            {@link WorkSource} type.
 	 * @param workSourceClass
 	 *            Class of the {@link WorkSource}.
 	 * @return {@link PropertyList} of the {@link WorkSourceProperty} instances
@@ -47,6 +51,10 @@ public interface WorkLoader {
 	/**
 	 * Loads and returns the {@link WorkType} from the {@link WorkSource} class.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <WS>
+	 *            {@link WorkSource} type.
 	 * @param workSourceClass
 	 *            Class of the {@link WorkSource}.
 	 * @param properties

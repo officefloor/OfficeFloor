@@ -36,6 +36,8 @@ public interface SectionLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link SectionSourceSpecification} for the {@link SectionSource}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource}.
 	 * @return {@link PropertyList} of the {@link SectionSourceProperty}
@@ -49,6 +51,8 @@ public interface SectionLoader {
 	/**
 	 * Loads and returns the {@link SectionType} from the {@link SectionSource}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource}.
 	 * @param sectionLocation
@@ -71,6 +75,8 @@ public interface SectionLoader {
 	 * Unlike loading the {@link SectionType} this will recursively load the
 	 * {@link SubSection} instances to fully construct the {@link OfficeSection}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClass

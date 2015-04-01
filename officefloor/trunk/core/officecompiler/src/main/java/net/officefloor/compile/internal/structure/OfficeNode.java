@@ -47,6 +47,10 @@ public interface OfficeNode extends OfficeType, OfficeArchitect,
 	/**
 	 * Loads this {@link Office} into this {@link OfficeNode}.
 	 * 
+	 * @param officeSource
+	 *            {@link OfficeSource}.
+	 * @param properties
+	 *            {@link PropertyList}.
 	 * @return <code>true</code> if successfully loaded.
 	 */
 	boolean loadOffice(OfficeSource officeSource, PropertyList properties);

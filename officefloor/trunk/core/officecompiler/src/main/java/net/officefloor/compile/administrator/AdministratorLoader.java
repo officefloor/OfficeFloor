@@ -19,6 +19,7 @@ package net.officefloor.compile.administrator;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
@@ -35,6 +36,12 @@ public interface AdministratorLoader {
 	 * {@link AdministratorSourceSpecification} for the
 	 * {@link AdministratorSource}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} key type.
+	 * @param <AS>
+	 *            {@link AdministratorSource} type.
 	 * @param administratorSourceClass
 	 *            {@link AdministratorSource} class.
 	 * @return {@link PropertyList} of the {@link AdministratorSourceProperty}
@@ -49,6 +56,12 @@ public interface AdministratorLoader {
 	 * Loads and returns the {@link AdministratorType} sourced from the
 	 * {@link AdministratorSource}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} key type.
+	 * @param <AS>
+	 *            {@link AdministratorSource} type.
 	 * @param administratorSourceClass
 	 *            Class of the {@link AdministratorSource}.
 	 * @param propertyList
@@ -57,8 +70,7 @@ public interface AdministratorLoader {
 	 * @return {@link AdministratorType} or <code>null</code> if issues, which
 	 *         are reported to the {@link CompilerIssues}.
 	 */
-	// TODO rename to loadAdministratorType
-	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorType<I, A> loadAdministrator(
+	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorType<I, A> loadAdministratorType(
 			Class<AS> administratorSourceClass, PropertyList propertyList);
 
 }

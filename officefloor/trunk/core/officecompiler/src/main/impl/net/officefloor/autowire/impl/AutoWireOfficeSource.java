@@ -151,6 +151,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	/**
 	 * Adds an {@link OfficeSection}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
+	 * @param <A>
+	 *            {@link AutoWireSection} type.
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClassName
@@ -190,6 +194,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * Adds an {@link OfficeSection} allowing to override the
 	 * {@link AutoWireSection}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClassName

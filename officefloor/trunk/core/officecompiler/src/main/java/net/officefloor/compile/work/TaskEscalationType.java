@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.work;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 
@@ -38,6 +39,8 @@ public interface TaskEscalationType {
 	/**
 	 * Obtains the type of {@link EscalationFlow} by the {@link Task}.
 	 * 
+	 * @param <E>
+	 *            {@link Escalation} type.
 	 * @return Type of {@link EscalationFlow} by the {@link Task}.
 	 */
 	<E extends Throwable> Class<E> getEscalationType();
