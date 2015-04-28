@@ -56,6 +56,16 @@ public class HttpResponseImpl implements HttpResponse {
 	private static final String EOL = "\r\n";
 
 	/**
+	 * Name of the header Server.
+	 */
+	private static final String HEADER_NAME_SERVER = "Server";
+
+	/**
+	 * Name of the header Date.
+	 */
+	private static final String HEADER_NAME_DATE = "Date";
+
+	/**
 	 * Name of the header Content-Type.
 	 */
 	private static final String HEADER_NAME_CONTENT_TYPE = "Content-Type";
@@ -309,17 +319,6 @@ public class HttpResponseImpl implements HttpResponse {
 		ServerOutputStream header = new ServerOutputStreamImpl(this.receiver,
 				this.conversation.getSendBufferSize());
 
-		// Provide the Content-Type HTTP header
-		if (this.contentType != null) {
-			this.addHeader(HEADER_NAME_CONTENT_TYPE, this.contentType
-					+ (this.charsetName == null ? "" : "; charset="
-							+ this.charsetName));
-		}
-
-		// Provide Content-Length HTTP header
-		this.headers.add(new HttpHeaderImpl(HEADER_NAME_CONTENT_LENGTH, String
-				.valueOf(contentLength)));
-
 		// Ensure appropriate successful status for no content
 		if ((contentLength == 0) && (this.status == HttpStatus.SC_OK)) {
 			this.setStatus(HttpStatus.SC_NO_CONTENT);
@@ -329,7 +328,25 @@ public class HttpResponseImpl implements HttpResponse {
 		writeUsAscii(this.version + " " + String.valueOf(this.status) + " "
 				+ this.statusMessage + EOL, header);
 
-		// Write the headers
+		// Write the managed headers
+		writeUsAscii(
+				HEADER_NAME_SERVER + ": " + this.conversation.getServerName()
+						+ EOL, header);
+		writeUsAscii(HEADER_NAME_DATE + ": "
+				+ this.conversation.getHttpServerClock().getDateHeaderValue()
+				+ EOL, header);
+		if (this.contentType != null) {
+			// Content type provided, so provide header
+			writeUsAscii(HEADER_NAME_CONTENT_TYPE
+					+ ": "
+					+ this.contentType
+					+ (this.charsetName == null ? "" : "; charset="
+							+ this.charsetName) + EOL, header);
+		}
+		writeUsAscii(HEADER_NAME_CONTENT_LENGTH + ": " + contentLength + EOL,
+				header);
+
+		// Write the unmanaged headers
 		for (HttpHeader httpHeader : this.headers) {
 			String name = httpHeader.getName();
 			String value = httpHeader.getValue();
@@ -424,8 +441,11 @@ public class HttpResponseImpl implements HttpResponse {
 		// Create the HTTP header
 		HttpHeader header = new HttpHeaderImpl(name, value);
 
-		// Ignore specifying content length
-		if (HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(name)) {
+		// Ignore specifying managed headers
+		if (HEADER_NAME_SERVER.equalsIgnoreCase(name)
+				|| HEADER_NAME_DATE.equalsIgnoreCase(name)
+				|| HEADER_NAME_CONTENT_TYPE.equalsIgnoreCase(name)
+				|| HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(name)) {
 			return header;
 		}
 

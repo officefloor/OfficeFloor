@@ -26,6 +26,7 @@ import java.util.Queue;
 
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.clock.HttpServerClock;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
@@ -51,6 +52,11 @@ public class HttpConversationImpl implements HttpConversation {
 	private final Queue<HttpManagedObjectImpl> managedObjects = new LinkedList<HttpManagedObjectImpl>();
 
 	/**
+	 * Server name.
+	 */
+	private final String serverName;
+
+	/**
 	 * Size of the send buffers.
 	 */
 	private final int sendBufferSize;
@@ -66,23 +72,44 @@ public class HttpConversationImpl implements HttpConversation {
 	private final boolean isSendStackTraceOnFailure;
 
 	/**
+	 * {@link HttpServerClock}.
+	 */
+	private final HttpServerClock clock;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param connection
 	 *            {@link Connection}.
+	 * @param serverName
+	 *            Server name.
 	 * @param sendBufferSize
 	 *            Size of the send buffers.
 	 * @param defaultCharset
 	 *            Default {@link Charset} for the {@link HttpResponse} entity.
 	 * @param isSendStackTraceOnFailure
 	 *            Flags whether to send the stack trace on failure.
+	 * @param clock
+	 *            {@link HttpServerClock}.
 	 */
-	public HttpConversationImpl(Connection connection, int sendBufferSize,
-			Charset defaultCharset, boolean isSendStackTraceOnFailure) {
+	public HttpConversationImpl(Connection connection, String serverName,
+			int sendBufferSize, Charset defaultCharset,
+			boolean isSendStackTraceOnFailure, HttpServerClock clock) {
 		this.connection = connection;
+		this.serverName = serverName;
 		this.sendBufferSize = sendBufferSize;
 		this.defaultCharset = defaultCharset;
 		this.isSendStackTraceOnFailure = isSendStackTraceOnFailure;
+		this.clock = clock;
+	}
+
+	/**
+	 * Obtains the server name.
+	 * 
+	 * @return Server name.
+	 */
+	String getServerName() {
+		return this.serverName;
 	}
 
 	/**
@@ -101,6 +128,15 @@ public class HttpConversationImpl implements HttpConversation {
 	 */
 	Charset getDefaultCharset() {
 		return this.defaultCharset;
+	}
+
+	/**
+	 * Obtains the {@link HttpServerClock}.
+	 * 
+	 * @return {@link HttpServerClock}.
+	 */
+	HttpServerClock getHttpServerClock() {
+		return this.clock;
 	}
 
 	/**

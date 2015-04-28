@@ -17,6 +17,10 @@
  */
 package net.officefloor.plugin.socket.server.http.protocol;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 
 import net.officefloor.frame.api.build.Indexed;
@@ -28,6 +32,9 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedO
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.http.clock.HttpServerClock;
+import net.officefloor.plugin.socket.server.http.clock.HttpServerClockImpl;
+import net.officefloor.plugin.socket.server.http.clock.HttpServerClockSource;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpConversationImpl;
@@ -138,6 +145,11 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 	private Charset defaultCharset;
 
 	/**
+	 * Server name.
+	 */
+	private String serverName;
+
+	/**
 	 * Flow index to handle processing {@link HttpRequest}.
 	 */
 	private int requestHandlingFlowIndex;
@@ -146,6 +158,16 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 	 * {@link ManagedObjectExecuteContext}.
 	 */
 	private ManagedObjectExecuteContext<Indexed> executeContext;
+
+	/**
+	 * Property name for the {@link HttpServerClockSource} class.
+	 */
+	public static String PROPERTY_HTTP_SERVER_CLOCK_SOURCE = "http.server.clock.source";
+
+	/**
+	 * {@link HttpServerClock}.
+	 */
+	private HttpServerClock httpServerClock;
 
 	/**
 	 * Services the {@link HttpRequest}.
@@ -198,6 +220,28 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 				PROPERTY_MAXIMUM_TEXT_PART_LENGTH,
 				String.valueOf(DEFAULT_VALUE_MAXIMUM_TEXT_PART_LENGTH)));
 
+		// Obtain the server name
+		InputStream serverNameInput = mosContext
+				.getResource(HttpCommunicationProtocol.class.getPackage()
+						.getName().replace('.', '/')
+						+ "/Server.txt");
+		Reader reader = new InputStreamReader(serverNameInput);
+		StringWriter serverName = new StringWriter();
+		for (int character = reader.read(); character != -1; character = reader
+				.read()) {
+			serverName.write(character);
+		}
+		this.serverName = serverName.toString();
+
+		// Obtain the HTTP server clock
+		String httpServerClockSourceClassName = mosContext.getProperty(
+				PROPERTY_HTTP_SERVER_CLOCK_SOURCE,
+				HttpServerClockImpl.class.getName());
+		HttpServerClockSource httpServerClockSource = (HttpServerClockSource) mosContext
+				.loadClass(httpServerClockSourceClassName).newInstance();
+		this.httpServerClock = httpServerClockSource
+				.createHttpServerClock(configurationContext);
+
 		// Obtain context details
 		this.sendBufferSize = protocolContext.getSendBufferSize();
 		this.defaultCharset = protocolContext.getDefaultCharset();
@@ -231,8 +275,8 @@ public class HttpCommunicationProtocol implements CommunicationProtocolSource,
 	@Override
 	public HttpConnectionHandler createConnectionHandler(Connection connection) {
 		HttpConversation conversation = new HttpConversationImpl(connection,
-				this.sendBufferSize, this.defaultCharset,
-				this.isSendStackTraceOnFailure);
+				this.serverName, this.sendBufferSize, this.defaultCharset,
+				this.isSendStackTraceOnFailure, this.httpServerClock);
 		HttpRequestParser parser = new HttpRequestParserImpl(
 				this.maximumHttpRequestHeaders, this.maxTextPartLength,
 				this.maximumRequestBodyLength);

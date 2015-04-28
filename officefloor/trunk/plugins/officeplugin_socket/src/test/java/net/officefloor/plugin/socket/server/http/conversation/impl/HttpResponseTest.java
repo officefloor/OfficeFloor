@@ -30,6 +30,7 @@ import java.util.Map;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.clock.HttpServerClock;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
@@ -80,8 +81,9 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		ServerOutputStream entity = response.getEntity();
 		entity.write("TEST".getBytes(DEFAULT_CHARSET));
 		entity.close();
-		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4", "TEST",
-				DEFAULT_CHARSET);
+		this.assertWireContent(
+				"HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock Time]\nContent-Length: 4",
+				"TEST", DEFAULT_CHARSET);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
 
@@ -93,8 +95,9 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		ServerOutputStream entity = response.getEntity();
 		entity.write(ByteBuffer.wrap("TEST".getBytes(DEFAULT_CHARSET)));
 		entity.close();
-		this.assertWireContent("HTTP/1.1 200 OK\nContent-Length: 4", "TEST",
-				DEFAULT_CHARSET);
+		this.assertWireContent(
+				"HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock Time]\nContent-Length: 4",
+				"TEST", DEFAULT_CHARSET);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
 
@@ -104,7 +107,8 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	public void testNoContent() throws IOException {
 		HttpResponse response = this.createHttpResponse();
 		response.getEntity().close();
-		this.assertWireContent("HTTP/1.1 204 No Content\nContent-Length: 0",
+		this.assertWireContent(
+				"HTTP/1.1 204 No Content\nServer: TEST\nDate: [Mock Time]\nContent-Length: 0",
 				null, null);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
@@ -116,8 +120,27 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		HttpResponse response = this.createHttpResponse();
 		response.addHeader("null", null);
 		response.send();
-		this.assertWireContent("HTTP/1.1 204 No Content\n" + "null: \n"
-				+ "Content-Length: 0", null, null);
+		this.assertWireContent(
+				"HTTP/1.1 204 No Content\nServer: TEST\nDate: [Mock Time]\nContent-Length: 0\nnull: ",
+				null, null);
+		assertFalse("Connection should not be closed", this.isConnectionClosed);
+	}
+
+	/**
+	 * Ensure ignore managed headers being added.
+	 */
+	public void testIngoreManagedHeaders() throws IOException {
+		HttpResponse response = this.createHttpResponse();
+		response.addHeader("SERVER", "Server should be ignored");
+		response.addHeader("date", "Date should be ignored");
+		response.addHeader("Content-Length", "Content-Length should be ignored");
+		response.addHeader("Content-Type", "Content-Type should be ignored");
+		ServerOutputStream entity = response.getEntity();
+		entity.write("TEST".getBytes(DEFAULT_CHARSET));
+		entity.close();
+		this.assertWireContent(
+				"HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock Time]\nContent-Length: 4",
+				"TEST", DEFAULT_CHARSET);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
 	}
 
@@ -172,6 +195,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 400 Bad Request\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
 				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 42", FAILURE.getClass().getSimpleName()
 				+ ": Fail Parse Test", DEFAULT_CHARSET);
@@ -187,6 +211,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
 				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 23", FAILURE.getClass().getSimpleName()
 				+ ": Failure Test", DEFAULT_CHARSET);
@@ -202,6 +227,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
 				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 15", Exception.class.getSimpleName()
 				+ ": null", DEFAULT_CHARSET);
@@ -231,6 +257,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		// Run test
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
 				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: " + contentLength, content,
 				DEFAULT_CHARSET);
@@ -253,6 +280,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		final Throwable FAILURE = new Exception("Failure Test");
 		((HttpResponseImpl) response).sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
 				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 23", FAILURE.getClass().getSimpleName()
 				+ ": Failure Test", DEFAULT_CHARSET);
@@ -277,6 +305,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		final Throwable FAILURE = new Exception("Failure Test");
 		((HttpResponseImpl) response).sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
 				+ "Content-Type: text/html; charset=UTF-8\n"
 				+ "Content-Length: 23", FAILURE.getClass().getSimpleName()
 				+ ": Failure Test", charset);
@@ -349,6 +378,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		entity.write("TEST");
 		entity.close();
 		this.assertWireContent("HTTP/1.1 200 OK\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
 				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 4", "TEST", DEFAULT_CHARSET);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
@@ -374,6 +404,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		entity.write("TEST");
 		entity.close();
 		this.assertWireContent("HTTP/1.1 200 OK\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
 				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 4", "TEST", DEFAULT_CHARSET);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
@@ -408,8 +439,9 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 				entity.write("TEST");
 				entity.close();
 				this.assertWireContent(
-						"HTTP/1.1 200 OK\nContent-Type: text/html; charset="
-								+ charset.name() + "\nContent-Length: "
+						"HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock Time]\nContent-Type: text/html; charset="
+								+ charset.name()
+								+ "\nContent-Length: "
 								+ ("TEST".getBytes(charset).length), "TEST",
 						charset);
 				assertFalse("Connection should not be closed",
@@ -462,7 +494,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		// Validate reset content
 		response.send();
 		this.assertWireContent(
-				"HTTP/1.1 204 No Content\nContent-Type: text/html; charset=US-ASCII\nContent-Length: 0",
+				"HTTP/1.1 204 No Content\nServer: TEST\nDate: [Mock Time]\nContent-Type: text/html; charset=US-ASCII\nContent-Length: 0",
 				null, null);
 	}
 
@@ -478,8 +510,13 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	 */
 	private HttpConversation createHttpConversation(
 			boolean isSendStackTraceOnFailure) {
-		return new HttpConversationImpl(this, 1024, DEFAULT_CHARSET,
-				isSendStackTraceOnFailure);
+		return new HttpConversationImpl(this, "TEST", 1024, DEFAULT_CHARSET,
+				isSendStackTraceOnFailure, new HttpServerClock() {
+					@Override
+					public String getDateHeaderValue() {
+						return "[Mock Time]";
+					}
+				});
 	}
 
 	/**

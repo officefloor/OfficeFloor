@@ -385,13 +385,14 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 
 		// Receive the bytes from the server
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		assertEquals("Incorrect number of bytes", (expectedBytes == null ? -1
-				: expectedBytes.length), this.writeClientReceivedData(bytes));
+		int bytesReceived = this.writeClientReceivedData(bytes);
 
 		// Ensure correct data received
 		assertEquals("Incorrect data received", new String(
 				expectedBytes == null ? new byte[0] : expectedBytes),
 				new String(bytes.toByteArray()));
+		assertEquals("Incorrect number of bytes", (expectedBytes == null ? -1
+				: expectedBytes.length), bytesReceived);
 	}
 
 	/**
