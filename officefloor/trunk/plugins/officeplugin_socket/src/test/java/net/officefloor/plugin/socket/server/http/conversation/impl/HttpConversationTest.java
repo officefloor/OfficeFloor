@@ -30,6 +30,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
+import net.officefloor.plugin.socket.server.http.clock.HttpServerClock;
 import net.officefloor.plugin.socket.server.http.conversation.HttpConversation;
 import net.officefloor.plugin.socket.server.http.conversation.HttpEntity;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
@@ -61,7 +62,13 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 	 * {@link HttpConversation} to test.
 	 */
 	private final HttpConversation conversation = new HttpConversationImpl(
-			this.connection, 1024, US_ASCII, false);
+			this.connection, "TEST", 1024, US_ASCII, false,
+			new HttpServerClock() {
+				@Override
+				public String getDateHeaderValue() {
+					return "[Mock time]";
+				}
+			});
 
 	/**
 	 * Ensure no data on the wire until {@link HttpResponse} is closed.
@@ -87,7 +94,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
 		writeUsAscii(response.getEntity(), "TEST");
 		response.send();
-		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
+		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 4\n\nTEST");
 	}
 
 	/**
@@ -103,7 +110,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 
 		// Close entity as should trigger sending response
 		entity.close();
-		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
+		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 4\n\nTEST");
 	}
 
 	/**
@@ -119,7 +126,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 
 		// Close entity as should trigger sending response
 		entity.close();
-		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
+		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 4\n\nTEST");
 	}
 
 	/**
@@ -132,7 +139,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
 		writeUsAscii(response.getEntity(), "TEST");
 		mo.cleanup();
-		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST");
+		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 4\n\nTEST");
 	}
 
 	/**
@@ -150,14 +157,14 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 				.getHttpResponse();
 		writeUsAscii(responseOne.getEntity(), "ONE");
 		responseOne.send();
-		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 3\n\nONE");
+		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 3\n\nONE");
 
 		// Ensure responds immediately to second request (as first sent)
 		HttpResponse responseTwo = moTwo.getServerHttpConnection()
 				.getHttpResponse();
 		writeUsAscii(responseTwo.getEntity(), "TWO");
 		responseTwo.send();
-		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 3\n\nTWO");
+		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 3\n\nTWO");
 	}
 
 	/**
@@ -182,8 +189,8 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 				.getHttpResponse();
 		writeUsAscii(responseOne.getEntity(), "ONE");
 		responseOne.send();
-		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 3\n\nONE"
-				+ "HTTP/1.1 200 OK\nContent-Length: 3\n\nTWO");
+		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 3\n\nONE"
+				+ "HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 3\n\nTWO");
 	}
 
 	/**
@@ -195,7 +202,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		this.conversation.parseFailure(failure, true);
 		String message = failure.getClass().getSimpleName() + ": "
 				+ failure.getMessage();
-		this.assertWireData("HTTP/1.0 400 Bad Request\nContent-Type: text/html; charset="
+		this.assertWireData("HTTP/1.0 400 Bad Request\nServer: TEST\nDate: [Mock time]\nContent-Type: text/html; charset="
 				+ US_ASCII.name()
 				+ "\nContent-Length: "
 				+ message.length()
@@ -232,9 +239,11 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		// Both request and parse failure responses should be sent
 		String message = failure.getClass().getSimpleName() + ": "
 				+ failure.getMessage();
-		this.assertWireData("HTTP/1.1 200 OK\nContent-Length: 4\n\nTEST"
-				+ "HTTP/1.0 414 Request-URI Too Large\nContent-Type: text/html; charset="
-				+ US_ASCII.name() + "\nContent-Length: " + message.length()
+		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 4\n\nTEST"
+				+ "HTTP/1.0 414 Request-URI Too Large\nServer: TEST\nDate: [Mock time]\nContent-Type: text/html; charset="
+				+ US_ASCII.name()
+				+ "\nContent-Length: "
+				+ message.length()
 				+ "\n\n" + message);
 
 		// Ensure the connection is closed
@@ -262,9 +271,11 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		// Ensure failure written as response
 		String message = failure.getClass().getSimpleName() + ": "
 				+ failure.getMessage();
-		this.assertWireData("HTTP/1.1 500 Internal Server Error"
-				+ "\nContent-Type: text/html; charset=" + US_ASCII.name()
-				+ "\nContent-Length: " + message.length() + "\n\n" + message);
+		this.assertWireData("HTTP/1.1 500 Internal Server Error\nServer: TEST\nDate: [Mock time]\nContent-Type: text/html; charset="
+				+ US_ASCII.name()
+				+ "\nContent-Length: "
+				+ message.length()
+				+ "\n\n" + message);
 	}
 
 	/**

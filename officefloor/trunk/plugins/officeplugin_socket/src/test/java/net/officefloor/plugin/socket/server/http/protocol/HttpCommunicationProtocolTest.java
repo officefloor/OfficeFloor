@@ -20,6 +20,8 @@ package net.officefloor.plugin.socket.server.http.protocol;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -41,6 +43,19 @@ import net.officefloor.plugin.stream.ServerOutputStream;
 public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase {
 
 	/**
+	 * Server name.
+	 */
+	private final String defaultServerName;
+
+	/**
+	 * Initiate the server name.
+	 */
+	public HttpCommunicationProtocolTest() throws IOException {
+		this.defaultServerName = this.getFileContents(this.findFile(
+				HttpCommunicationProtocol.class, "Server.txt"));
+	}
+
+	/**
 	 * {@link ServerHttpConnection}.
 	 */
 	private ServerHttpConnection serverHttpConnection;
@@ -55,6 +70,19 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	}
 
 	@Override
+	protected Properties getCommunicationProtocolProperties() {
+		Properties properties = super.getCommunicationProtocolProperties();
+
+		// Mock the date
+		properties.setProperty(
+				HttpCommunicationProtocol.PROPERTY_HTTP_SERVER_CLOCK_SOURCE,
+				MockHttpServerClock.class.getName());
+
+		// Return the properties
+		return properties;
+	}
+
+	@Override
 	protected void handleInvokeProcess(Object parameter,
 			ManagedObject managedObject, EscalationHandler escalationHandler) {
 		try {
@@ -63,6 +91,18 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 		} catch (Throwable ex) {
 			throw fail(ex);
 		}
+	}
+
+	/**
+	 * Ensure the server name has a version (rather than the version tag).
+	 * 
+	 * Note: this should be replaced within the Maven build.
+	 */
+	public void testEnsureServerVersionTagReplaced() {
+		Pattern pattern = Pattern.compile("^WoOF (\\d)+.(\\d)+.(\\d)+$");
+		assertTrue("Should have version tag replaced ("
+				+ this.defaultServerName + ")",
+				pattern.matcher(this.defaultServerName).matches());
 	}
 
 	/**
@@ -100,7 +140,8 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 
 		// Validate received response
 		this.runServerSelect();
-		this.assertHttpResponse(200, "OK", "TEST");
+		this.assertHttpResponse(200, "OK", "TEST", "Server",
+				this.defaultServerName, "Date", "[Mock Date]");
 	}
 
 	/**
