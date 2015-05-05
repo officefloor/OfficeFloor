@@ -23,6 +23,7 @@ import java.net.Socket;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -78,6 +79,11 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	 * Name of property to obtain the default {@link Charset}.
 	 */
 	public static final String PROPERTY_DEFAULT_CHARSET = "default.charset";
+
+	/**
+	 * Default {@link Charset} to use if one is not configured.
+	 */
+	public static final String DEFAULT_CHARSET = "UTF-8";
 
 	/**
 	 * Singleton {@link ConnectionManager} for all {@link Connection} instances.
@@ -343,8 +349,21 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 
 		// Obtain the default charset
 		String defaultCharsetName = mosContext.getProperty(
-				PROPERTY_DEFAULT_CHARSET, "ISO-8859-1");
-		this.defaultCharset = Charset.forName(defaultCharsetName);
+				PROPERTY_DEFAULT_CHARSET, null);
+		if (defaultCharsetName != null) {
+			// Use the configured charset
+			this.defaultCharset = Charset.forName(defaultCharsetName);
+		} else {
+			// Not configured, use default for flexibility, fall back to system
+			defaultCharsetName = DEFAULT_CHARSET;
+			try {
+				this.defaultCharset = Charset.forName(defaultCharsetName);
+			} catch (IllegalCharsetNameException ex) {
+				// Use default charset
+				this.defaultCharset = Charset.defaultCharset();
+				defaultCharsetName = this.defaultCharset.name();
+			}
+		}
 
 		// Obtain the server socket backlog
 		int serverSocketBackLog = 25000; // TODO make configurable

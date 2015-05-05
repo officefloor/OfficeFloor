@@ -18,6 +18,7 @@
 package net.officefloor.plugin.socket.server.http.protocol;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -142,6 +143,69 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 		this.runServerSelect();
 		this.assertHttpResponse(200, "OK", "TEST", "Server",
 				this.defaultServerName, "Date", "[Mock Date]");
+	}
+
+	/**
+	 * Ensure use default {@link Charset}.
+	 */
+	public void testHttpResponseDefaultCharset() throws Exception {
+
+		// Obtain the HTTP response
+		HttpResponse response = this.getHttpResponse();
+		response.setContentType("text/plain");
+
+		// Send HTTP response
+		ServerOutputStream entity = response.getEntity();
+		entity.write(UsAsciiUtil.convertToUsAscii("TEST"));
+		entity.close();
+
+		// Validate received response
+		this.runServerSelect();
+		this.assertHttpResponse(200, "OK", "TEST", "Server",
+				this.defaultServerName, "Date", "[Mock Date]", "Content-Type",
+				"text/plain; charset=UTF-8");
+	}
+
+	/**
+	 * Ensure use no {@link Charset} for non-text Content-Type.
+	 */
+	public void testHttpResponseNoCharset() throws Exception {
+
+		// Obtain the HTTP response
+		HttpResponse response = this.getHttpResponse();
+		response.setContentType("another/type");
+
+		// Send HTTP response
+		ServerOutputStream entity = response.getEntity();
+		entity.write(UsAsciiUtil.convertToUsAscii("TEST"));
+		entity.close();
+
+		// Validate received response
+		this.runServerSelect();
+		this.assertHttpResponse(200, "OK", "TEST", "Server",
+				this.defaultServerName, "Date", "[Mock Date]", "Content-Type",
+				"another/type");
+	}
+
+	/**
+	 * Ensure able to server short Content-Type.
+	 */
+	public void testHttpResponseShortContentType() throws Exception {
+
+		// Obtain the HTTP response
+		HttpResponse response = this.getHttpResponse();
+		response.setContentType("s");
+
+		// Send HTTP response
+		ServerOutputStream entity = response.getEntity();
+		entity.write(UsAsciiUtil.convertToUsAscii("TEST"));
+		entity.close();
+
+		// Validate received response
+		this.runServerSelect();
+		this.assertHttpResponse(200, "OK", "TEST", "Server",
+				this.defaultServerName, "Date", "[Mock Date]", "Content-Type",
+				"s");
 	}
 
 	/**

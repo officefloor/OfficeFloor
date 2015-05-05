@@ -337,11 +337,16 @@ public class HttpResponseImpl implements HttpResponse {
 				+ EOL, header);
 		if (this.contentType != null) {
 			// Content type provided, so provide header
-			writeUsAscii(HEADER_NAME_CONTENT_TYPE
-					+ ": "
-					+ this.contentType
-					+ (this.charsetName == null ? "" : "; charset="
-							+ this.charsetName) + EOL, header);
+			boolean isTextContentType = ("text"
+					.equalsIgnoreCase(this.contentType.substring(0, Math.min(
+							"text".length(), this.contentType.length()))));
+			writeUsAscii(
+					HEADER_NAME_CONTENT_TYPE
+							+ ": "
+							+ this.contentType
+							+ (isTextContentType && (this.charsetName != null) ? "; charset="
+									+ this.charsetName
+									: "") + EOL, header);
 		}
 		writeUsAscii(HEADER_NAME_CONTENT_LENGTH + ": " + contentLength + EOL,
 				header);

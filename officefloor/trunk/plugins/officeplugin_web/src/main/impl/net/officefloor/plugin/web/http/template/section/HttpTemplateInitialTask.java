@@ -18,6 +18,7 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -78,6 +79,22 @@ public class HttpTemplateInitialTask
 	private final Set<String> renderRedirectHttpMethods;
 
 	/**
+	 * Content-type for the {@link HttpTemplate}. May be <code>null</code>.
+	 */
+	private final String contentType;
+
+	/**
+	 * {@link Charset} for the {@link HttpTemplate}. May be <code>null</code>.
+	 */
+	private final Charset charset;
+
+	/**
+	 * Name of the {@link Charset} for the {@link HttpTemplate}. Provided only
+	 * if {@link #charset} provided, otherwise <code>null</code>.
+	 */
+	private final String charsetName;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param templateUriPath
@@ -88,11 +105,24 @@ public class HttpTemplateInitialTask
 	 * @param renderRedirectHttpMethods
 	 *            Listing of HTTP methods that require a redirect before
 	 *            rendering the {@link HttpTemplate}.
+	 * @param contentType
+	 *            Content-type for the {@link HttpTemplate}. May be
+	 *            <code>null</code>.
+	 * @param charset
+	 *            Charset for {@link HttpTemplate}. May be <code>null</code>.
+	 * @param charsetName
+	 *            Name of the {@link Charset} for the {@link HttpTemplate}.
+	 *            Provided only if {@link #charset} provided, otherwise
+	 *            <code>null</code>.
 	 */
 	public HttpTemplateInitialTask(String templateUriPath,
-			boolean isRequireSecure, String[] renderRedirectHttpMethods) {
+			boolean isRequireSecure, String[] renderRedirectHttpMethods,
+			String contentType, Charset charset, String charsetName) {
 		this.templateUriPath = templateUriPath;
 		this.isRequireSecure = isRequireSecure;
+		this.contentType = contentType;
+		this.charset = charset;
+		this.charsetName = charsetName;
 
 		// Add the render redirect HTTP methods
 		Set<String> methods = new HashSet<String>();
@@ -160,6 +190,15 @@ public class HttpTemplateInitialTask
 					this.isRequireSecure, connection, location, requestState,
 					session);
 			return null; // redirected, do not render template
+		}
+
+		// Configure the response
+		if (this.contentType != null) {
+			connection.getHttpResponse().setContentType(this.contentType);
+		}
+		if (this.charset != null) {
+			connection.getHttpResponse().setContentCharset(this.charset,
+					this.charsetName);
 		}
 
 		// Render the template

@@ -18,6 +18,7 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -52,6 +53,16 @@ public class HttpTemplateInitialWorkSource extends
 	 * trigger a redirect before rendering the {@link HttpTemplate}.
 	 */
 	public static final String PROPERTY_RENDER_REDIRECT_HTTP_METHODS = "http.template.render.redirect.methods";
+
+	/**
+	 * Property name for the Content-Type of the {@link HttpTemplate}.
+	 */
+	public static final String PROPERTY_CONTENT_TYPE = "http.template.render.content.type";
+
+	/**
+	 * Property name for the {@link Charset} of the {@link HttpTemplate}.
+	 */
+	public static final String PROPERTY_CHARSET = "http.template.render.charset";
 
 	/**
 	 * Name of the {@link HttpTemplateInitialTask}.
@@ -99,9 +110,18 @@ public class HttpTemplateInitialWorkSource extends
 			}
 		}
 
+		// Obtain the content type and charset
+		String contentType = context.getProperty(PROPERTY_CONTENT_TYPE, null);
+		String charsetName = context.getProperty(PROPERTY_CHARSET, null);
+		Charset charset = null;
+		if (charsetName != null) {
+			charset = Charset.forName(charsetName);
+		}
+
 		// Create the HTTP Template initial task
 		HttpTemplateInitialTask factory = new HttpTemplateInitialTask(
-				templateUriPath, isSecure, renderRedirectHttpMethods);
+				templateUriPath, isSecure, renderRedirectHttpMethods,
+				contentType, charset, charsetName);
 
 		// Configure the task
 		workTypeBuilder.setWorkFactory(factory);

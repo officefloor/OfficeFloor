@@ -43,7 +43,6 @@ import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolContext;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
@@ -441,7 +440,8 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 
 	@Override
 	public Charset getDefaultCharset() {
-		return UsAsciiUtil.US_ASCII;
+		return Charset
+				.forName(AbstractServerSocketManagedObjectSource.DEFAULT_CHARSET);
 	}
 
 	/*

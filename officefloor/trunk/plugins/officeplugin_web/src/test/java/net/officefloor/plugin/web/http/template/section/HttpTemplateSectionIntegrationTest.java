@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.template.section;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 
 import net.officefloor.autowire.AutoWire;
@@ -113,6 +114,16 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	private int httpsPort;
 
 	/**
+	 * Content-Type of response.
+	 */
+	private String contentType = null;
+
+	/**
+	 * {@link Charset} of response.
+	 */
+	private Charset charset = null;
+
+	/**
 	 * Indicates if non-method link is provided.
 	 */
 	private boolean isNonMethodLink = false;
@@ -173,6 +184,55 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		String rendering = this.doHttpRequest("/uri", false);
 		this.assertRenderedResponse("", LinkQualify.NONE, LinkQualify.NONE,
 				LinkQualify.NONE, LinkQualify.NONE, null, rendering);
+	}
+
+	/**
+	 * Ensure can render template with default Content-Type and {@link Charset}.
+	 */
+	public void testRenderTemplateWithDefaultContentTypeAndCharset()
+			throws Exception {
+
+		// Start the server
+		this.isNonMethodLink = true;
+		this.contentType = "text/html";
+		this.charset = Charset.forName("UTF-8");
+		this.startHttpServer("Template.ofp", TemplateLogic.class);
+
+		// Create the expected Content-Type header value
+		String expectedContentType = this.contentType + "; charset="
+				+ this.charset.name();
+
+		// Ensure correct rendering (with headers)
+		HttpResponse response = this.doRawHttpRequest("/uri", false);
+		Header header = response.getFirstHeader("Content-Type");
+		assertEquals("Incorrect Content-Type", expectedContentType,
+				header.getValue());
+	}
+
+	/**
+	 * Ensure can render template specifying the Content-Type and
+	 * {@link Charset}.
+	 */
+	public void testRenderTemplateWithConfiguredContentTypeAndCharset()
+			throws Exception {
+
+		// Start the server
+		this.isNonMethodLink = true;
+		this.contentType = "text/plain";
+		this.charset = Charset.forName("UTF-16");
+		this.startHttpServer("Template.ofp", TemplateLogic.class,
+				HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE, "text/plain",
+				HttpTemplateSectionSource.PROPERTY_CHARSET, "UTF-16");
+
+		// Create the expected Content-Type header value
+		String expectedContentType = this.contentType + "; charset="
+				+ this.charset.name();
+
+		// Ensure correct rendering (with headers)
+		HttpResponse response = this.doRawHttpRequest("/uri", false);
+		Header header = response.getFirstHeader("Content-Type");
+		assertEquals("Incorrect Content-Type", expectedContentType,
+				header.getValue());
 	}
 
 	/**
