@@ -339,7 +339,7 @@ public class HttpTemplateWorkSource extends
 		// Obtain the charset
 		String charsetName = properties.getProperty(PROPERTY_CHARSET, null);
 		Charset charset = (charsetName != null ? Charset.forName(charsetName)
-				: Charset.forName("ISO-8859-1"));
+				: Charset.defaultCharset());
 
 		// Return the charset
 		return charset;

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -97,6 +98,16 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	 * order of templates listed is the order of inheritance.
 	 */
 	public static final String PROPERTY_INHERITED_TEMPLATES = "inherited.templates";
+
+	/**
+	 * Property name for the Content-Type for the {@link HttpTemplate}.
+	 */
+	public static final String PROPERTY_CONTENT_TYPE = HttpTemplateInitialWorkSource.PROPERTY_CONTENT_TYPE;
+
+	/**
+	 * Property name for the {@link Charset} for the {@link HttpTemplate}.
+	 */
+	public static final String PROPERTY_CHARSET = HttpTemplateInitialWorkSource.PROPERTY_CHARSET;
 
 	/**
 	 * Prefix on a {@link HttpTemplateSection} name to indicate it is an
@@ -532,7 +543,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 						HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
 						HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
 						HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-						HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS);
+						HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+						HttpTemplateInitialWorkSource.PROPERTY_CONTENT_TYPE,
+						HttpTemplateInitialWorkSource.PROPERTY_CHARSET);
 		SectionTask initialTask = initialWork.addSectionTask("_INITIAL_TASK_",
 				HttpTemplateInitialWorkSource.TASK_NAME);
 		designer.link(initialTask.getTaskObject("SERVER_HTTP_CONNECTION"),

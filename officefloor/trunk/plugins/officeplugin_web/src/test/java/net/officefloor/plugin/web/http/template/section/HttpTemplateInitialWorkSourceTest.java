@@ -18,6 +18,7 @@
 package net.officefloor.plugin.web.http.template.section;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +32,7 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiator;
@@ -121,7 +123,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 
 		// Factory
 		HttpTemplateInitialTask factory = new HttpTemplateInitialTask(null,
-				false, null);
+				false, null, null, null, null);
 
 		// Create the expected type
 		WorkTypeBuilder<HttpTemplateInitialTask> type = WorkLoaderUtil
@@ -177,7 +179,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * Ensure service as not required to be secure.
 	 */
 	public void testNonSecureService() {
-		this.doServiceTest(false, false, "GET", null, null);
+		this.doServiceTest(false, false, "GET", null, null, null, null);
 	}
 
 	/**
@@ -188,21 +190,21 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * when already received the request.
 	 */
 	public void testIgnoreSecureService() {
-		this.doServiceTest(false, false, "GET", null, null);
+		this.doServiceTest(false, false, "GET", null, null, null, null);
 	}
 
 	/**
 	 * Ensure service as appropriately secure.
 	 */
 	public void testSecureService() {
-		this.doServiceTest(true, true, "GET", null, null);
+		this.doServiceTest(true, true, "GET", null, null, null, null);
 	}
 
 	/**
 	 * Ensure redirect as not secure.
 	 */
 	public void testSecureRedirect() {
-		this.doServiceTest(true, false, null, null, "/redirect");
+		this.doServiceTest(true, false, null, null, "/redirect", null, null);
 	}
 
 	/**
@@ -210,28 +212,28 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * allow back button to work.
 	 */
 	public void testSecurePostRedirect() {
-		this.doServiceTest(true, true, "POST", null, "/redirect");
+		this.doServiceTest(true, true, "POST", null, "/redirect", null, null);
 	}
 
 	/**
 	 * Ensure follow POST/redirect/GET pattern to allow back button to work.
 	 */
 	public void testPostRedirect() {
-		this.doServiceTest(false, false, "POST", null, "/redirect");
+		this.doServiceTest(false, false, "POST", null, "/redirect", null, null);
 	}
 
 	/**
 	 * Ensure follow post/redirect/GET pattern to allow back button to work.
 	 */
 	public void testPostRedirectCaseInsensitive() {
-		this.doServiceTest(false, false, "post", null, "/redirect");
+		this.doServiceTest(false, false, "post", null, "/redirect", null, null);
 	}
 
 	/**
 	 * Ensure follow PUT/redirect/GET pattern to allow back button to work.
 	 */
 	public void testPutRedirect() {
-		this.doServiceTest(false, false, "PUT", null, "/redirect");
+		this.doServiceTest(false, false, "PUT", null, "/redirect", null, null);
 	}
 
 	/**
@@ -239,7 +241,8 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * work.
 	 */
 	public void testAlternateRedirect() {
-		this.doServiceTest(false, false, "OTHER", "POST, OTHER", "/redirect");
+		this.doServiceTest(false, false, "OTHER", "POST, OTHER", "/redirect",
+				null, null);
 	}
 
 	/**
@@ -247,7 +250,16 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	 * work.
 	 */
 	public void testAlternateRedirectCaseInsensitive() {
-		this.doServiceTest(false, false, "other", "Post, Other", "/redirect");
+		this.doServiceTest(false, false, "other", "Post, Other", "/redirect",
+				null, null);
+	}
+
+	/**
+	 * Ensure able to specify the Content-Type and {@link Charset}.
+	 */
+	public void testContentTypeAndCharset() {
+		this.doServiceTest(false, false, "GET", null, null, "text/plain",
+				Charset.defaultCharset());
 	}
 
 	/**
@@ -256,7 +268,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void doServiceTest(boolean isRequireSecure,
 			boolean isConnectionSecure, String method, String redirectMethods,
-			String redirectUriPath) {
+			String redirectUriPath, String contentType, Charset charset) {
 		try {
 
 			final TaskContext context = this.createMock(TaskContext.class);
@@ -284,6 +296,16 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 						.addAll(Arrays
 								.asList(HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
 										redirectMethods));
+			}
+			if (contentType != null) {
+				properties.addAll(Arrays.asList(
+						HttpTemplateInitialWorkSource.PROPERTY_CONTENT_TYPE,
+						contentType));
+			}
+			if (charset != null) {
+				properties.addAll(Arrays.asList(
+						HttpTemplateInitialWorkSource.PROPERTY_CHARSET,
+						charset.name()));
 			}
 			WorkType<HttpTemplateInitialTask> work = WorkLoaderUtil
 					.loadWorkType(HttpTemplateInitialWorkSource.class,
@@ -328,6 +350,19 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 						flowFuture);
 			}
 
+			// Record content type and charset
+			final HttpResponse response = this.createMock(HttpResponse.class);
+			if (contentType != null) {
+				this.recordReturn(connection, connection.getHttpResponse(),
+						response);
+				response.setContentType(contentType);
+			}
+			if (charset != null) {
+				this.recordReturn(connection, connection.getHttpResponse(),
+						response);
+				response.setContentCharset(charset, charset.name());
+			}
+
 			// Test
 			this.replayMockObjects();
 			task.doTask(context);
@@ -337,4 +372,5 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 			fail(ex);
 		}
 	}
+
 }
