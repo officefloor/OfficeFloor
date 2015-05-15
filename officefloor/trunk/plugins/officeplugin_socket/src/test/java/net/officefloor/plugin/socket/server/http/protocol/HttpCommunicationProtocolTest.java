@@ -33,6 +33,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.impl.AbstractClientServerTestCase;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.stream.ServerOutputStream;
 
@@ -150,9 +151,13 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 	 */
 	public void testHttpResponseDefaultCharset() throws Exception {
 
+		// Obtain the default charset
+		final Charset defaultCharset = AbstractServerSocketManagedObjectSource
+				.getCharset(null);
+
 		// Obtain the HTTP response
 		HttpResponse response = this.getHttpResponse();
-		response.setContentType("text/plain");
+		response.setContentType("text/plain", null);
 
 		// Send HTTP response
 		ServerOutputStream entity = response.getEntity();
@@ -163,7 +168,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 		this.runServerSelect();
 		this.assertHttpResponse(200, "OK", "TEST", "Server",
 				this.defaultServerName, "Date", "[Mock Date]", "Content-Type",
-				"text/plain; charset=UTF-8");
+				"text/plain; charset=" + defaultCharset.name());
 	}
 
 	/**
@@ -173,7 +178,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 
 		// Obtain the HTTP response
 		HttpResponse response = this.getHttpResponse();
-		response.setContentType("another/type");
+		response.setContentType("another/type", null);
 
 		// Send HTTP response
 		ServerOutputStream entity = response.getEntity();
@@ -194,7 +199,7 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 
 		// Obtain the HTTP response
 		HttpResponse response = this.getHttpResponse();
-		response.setContentType("s");
+		response.setContentType("s", null);
 
 		// Send HTTP response
 		ServerOutputStream entity = response.getEntity();

@@ -123,7 +123,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 
 		// Factory
 		HttpTemplateInitialTask factory = new HttpTemplateInitialTask(null,
-				false, null, null, null, null);
+				false, null, null, null);
 
 		// Create the expected type
 		WorkTypeBuilder<HttpTemplateInitialTask> type = WorkLoaderUtil
@@ -355,12 +355,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 			if (contentType != null) {
 				this.recordReturn(connection, connection.getHttpResponse(),
 						response);
-				response.setContentType(contentType);
-			}
-			if (charset != null) {
-				this.recordReturn(connection, connection.getHttpResponse(),
-						response);
-				response.setContentCharset(charset, charset.name());
+				response.setContentType(contentType, charset);
 			}
 
 			// Test

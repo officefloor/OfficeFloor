@@ -73,8 +73,8 @@ public class HttpTemplateTask extends
 	 * 
 	 * @param section
 	 *            {@link HttpTemplateSection}.
-	 * @param serverDefaultCharset
-	 *            Default {@link Charset} for Server.
+	 * @param charset
+	 *            {@link Charset} for the template.
 	 * @param templateUriPath
 	 *            URI path for the {@link HttpTemplate}.
 	 * @param templateUriSuffix
@@ -92,8 +92,8 @@ public class HttpTemplateTask extends
 	 *             If fails to prepare the template.
 	 */
 	public static String[] loadTaskType(HttpTemplateSection section,
-			Charset serverDefaultCharset, String templateUriPath,
-			String templateUriSuffix, boolean isTemplateSecure,
+			Charset charset, String templateUriPath, String templateUriSuffix,
+			boolean isTemplateSecure,
 			WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
 			WorkSourceContext context) throws Exception {
 
@@ -109,15 +109,15 @@ public class HttpTemplateTask extends
 		// Create the content writers for the section
 		SectionWriterStruct writerStruct = createHttpTemplateWriters(
 				section.getContent(), beanClass, sectionAndTaskName,
-				linkTaskNames, serverDefaultCharset, templateUriPath,
-				templateUriSuffix, isTemplateSecure, context);
+				linkTaskNames, charset, templateUriPath, templateUriSuffix,
+				isTemplateSecure, context);
 
 		// Determine if bean
 		boolean isBean = (writerStruct.beanClass != null);
 
 		// Create the task factory
 		HttpTemplateTask task = new HttpTemplateTask(writerStruct.writers,
-				isBean);
+				isBean, charset);
 
 		// Define the task to write the section
 		TaskTypeBuilder<Indexed, None> taskBuilder = workTypeBuilder
@@ -200,8 +200,8 @@ public class HttpTemplateTask extends
 	 *            Section and task name.
 	 * @param linkTaskNames
 	 *            List task names.
-	 * @param serverDefaultCharset
-	 *            Default {@link Charset} for the Server.
+	 * @param charset
+	 *            {@link Charset} for the template.
 	 * @param templateUriPath
 	 *            URI path for the {@link HttpTemplate}.
 	 * @param templateUriSuffix
@@ -218,9 +218,9 @@ public class HttpTemplateTask extends
 	private static SectionWriterStruct createHttpTemplateWriters(
 			HttpTemplateSectionContent[] contents, Class<?> beanClass,
 			String sectionAndTaskName, Set<String> linkTaskNames,
-			Charset serverDefaultCharset, String templateUriPath,
-			String templateUriSuffix, boolean isTemplateSecure,
-			WorkSourceContext context) throws Exception {
+			Charset charset, String templateUriPath, String templateUriSuffix,
+			boolean isTemplateSecure, WorkSourceContext context)
+			throws Exception {
 
 		// Create the content writers for the section
 		List<HttpTemplateWriter> contentWriterList = new LinkedList<HttpTemplateWriter>();
@@ -232,7 +232,7 @@ public class HttpTemplateTask extends
 				// Add the static template writer
 				StaticHttpTemplateSectionContent staticContent = (StaticHttpTemplateSectionContent) content;
 				contentWriterList.add(new StaticHttpTemplateWriter(
-						staticContent, serverDefaultCharset));
+						staticContent, charset));
 
 			} else if (content instanceof BeanHttpTemplateSectionContent) {
 				// Add the bean template writer
@@ -269,7 +269,7 @@ public class HttpTemplateTask extends
 				// Obtain the writers for the bean
 				SectionWriterStruct beanStruct = createHttpTemplateWriters(
 						beanContent.getContent(), beanType, null,
-						linkTaskNames, serverDefaultCharset, templateUriPath,
+						linkTaskNames, charset, templateUriPath,
 						templateUriSuffix, isTemplateSecure, context);
 
 				// Add the content writer
@@ -392,16 +392,25 @@ public class HttpTemplateTask extends
 	private final boolean isBean;
 
 	/**
+	 * Default {@link Charset} for the template.
+	 */
+	private final Charset defaultCharset;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param contentWriters
 	 *            {@link HttpTemplateWriter} instances to write the content.
 	 * @param isBean
 	 *            Flag indicating if a bean.
+	 * @param charset
+	 *            Default {@link Charset} for the template.
 	 */
-	public HttpTemplateTask(HttpTemplateWriter[] contentWriters, boolean isBean) {
+	public HttpTemplateTask(HttpTemplateWriter[] contentWriters,
+			boolean isBean, Charset charset) {
 		this.contentWriters = contentWriters;
 		this.isBean = isBean;
+		this.defaultCharset = charset;
 	}
 
 	/*
@@ -438,9 +447,13 @@ public class HttpTemplateTask extends
 		HttpResponse response = connection.getHttpResponse();
 		ServerWriter writer = response.getEntityWriter();
 
+		// Determine if using default charset
+		boolean isDefaultCharset = (this.defaultCharset.name().equals(response
+				.getContentCharset().name()));
+
 		// Write the contents
 		for (HttpTemplateWriter contentWriter : this.contentWriters) {
-			contentWriter.write(writer, bean, location);
+			contentWriter.write(writer, isDefaultCharset, bean, location);
 		}
 
 		// Flush contents
@@ -449,5 +462,4 @@ public class HttpTemplateTask extends
 		// Template written, nothing to return
 		return null;
 	}
-
 }

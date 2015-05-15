@@ -733,6 +733,52 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 						inheritedTemplates.toString());
 			}
 
+			// Determine the Content-Type
+			String contentType = httpTemplate.getTemplateContentType();
+			if (contentType != null) {
+
+				// Determine if require providing charset
+				if (contentType.trim().toLowerCase().startsWith("text/")) {
+
+					// Text, so obtain charset parameter (if provided)
+					StringBuilder contentTypeBuilder = new StringBuilder();
+					String[] contentTypeEntries = contentType.split(";");
+					contentTypeBuilder.append(contentTypeEntries[0]);
+					for (int i = 1; i < contentTypeEntries.length; i++) {
+						String contentTypeParameter = contentTypeEntries[i];
+						String[] parameterNameValues = contentTypeParameter
+								.split("=");
+						if ("charset".equalsIgnoreCase(parameterNameValues[0]
+								.trim())) {
+							// Load the charset for the template
+							StringBuilder charset = new StringBuilder();
+							for (int c = 1; c < parameterNameValues.length; c++) {
+								if (c > 1) {
+									charset.append("=");
+								}
+								charset.append(parameterNameValues[c]);
+							}
+							httpTemplate.addProperty(
+									HttpTemplateSectionSource.PROPERTY_CHARSET,
+									charset.toString());
+
+						} else {
+							// Include the parameter (as is)
+							contentTypeBuilder.append(";");
+							contentTypeBuilder.append(contentTypeParameter);
+						}
+					}
+
+					// Provide the content-type (without charset parameter)
+					contentType = contentTypeBuilder.toString();
+				}
+
+				// Provide the content type
+				httpTemplate.addProperty(
+						HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE,
+						contentType);
+			}
+
 			// Determine if template is secure
 			boolean isTemplateSecure = httpTemplate.isTemplateSecure();
 

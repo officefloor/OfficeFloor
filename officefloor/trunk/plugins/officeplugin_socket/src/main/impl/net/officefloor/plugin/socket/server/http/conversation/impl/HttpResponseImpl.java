@@ -132,11 +132,6 @@ public class HttpResponseImpl implements HttpResponse {
 	private Charset charset;
 
 	/**
-	 * Name of the {@link Charset} to use in the {@link HttpResponse}.
-	 */
-	private String charsetName;
-
-	/**
 	 * Cache the {@link ServerWriter}. Also indicates if using the
 	 * {@link ServerWriter}.
 	 */
@@ -167,7 +162,6 @@ public class HttpResponseImpl implements HttpResponse {
 		this.status = HttpStatus.SC_OK;
 		this.statusMessage = HttpStatus.getStatusMessage(this.status);
 		this.charset = this.conversation.getDefaultCharset();
-		this.charsetName = this.charset.name();
 		this.entity = new ServerOutputStreamImpl(this.receiver,
 				this.conversation.getSendBufferSize());
 	}
@@ -203,7 +197,6 @@ public class HttpResponseImpl implements HttpResponse {
 		this.headers.addAll(state.headers);
 		this.contentType = state.contentType;
 		this.charset = Charset.forName(state.charset);
-		this.charsetName = state.charsetName;
 		this.entity = new ServerOutputStreamImpl(this.receiver,
 				this.conversation.getSendBufferSize(), state.entityState);
 	}
@@ -241,7 +234,7 @@ public class HttpResponseImpl implements HttpResponse {
 			// Create and return the state momento
 			return new StateMomento(this.status, this.statusMessage,
 					httpHeaders, entityMomento, this.contentType,
-					charsetSerializeName, this.charsetName);
+					charsetSerializeName);
 		}
 	}
 
@@ -335,18 +328,10 @@ public class HttpResponseImpl implements HttpResponse {
 		writeUsAscii(HEADER_NAME_DATE + ": "
 				+ this.conversation.getHttpServerClock().getDateHeaderValue()
 				+ EOL, header);
-		if (this.contentType != null) {
-			// Content type provided, so provide header
-			boolean isTextContentType = ("text"
-					.equalsIgnoreCase(this.contentType.substring(0, Math.min(
-							"text".length(), this.contentType.length()))));
-			writeUsAscii(
-					HEADER_NAME_CONTENT_TYPE
-							+ ": "
-							+ this.contentType
-							+ (isTextContentType && (this.charsetName != null) ? "; charset="
-									+ this.charsetName
-									: "") + EOL, header);
+		String contentType = this.getContentTypeThreadUnsafe();
+		if (contentType != null) {
+			writeUsAscii(HEADER_NAME_CONTENT_TYPE + ": " + contentType + EOL,
+					header);
 		}
 		writeUsAscii(HEADER_NAME_CONTENT_LENGTH + ": " + contentLength + EOL,
 				header);
@@ -410,6 +395,16 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	@Override
+	public String getVersion() {
+
+		synchronized (this.connection.getLock()) {
+
+			// Return the version
+			return this.version;
+		}
+	}
+
+	@Override
 	public void setStatus(int status) {
 
 		// Obtain the status message
@@ -420,6 +415,16 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	@Override
+	public int getStatus() {
+
+		synchronized (this.connection.getLock()) {
+
+			// Return the current status
+			return this.status;
+		}
+	}
+
+	@Override
 	public void setStatus(int status, String statusMessage) {
 
 		synchronized (this.connection.getLock()) {
@@ -427,6 +432,16 @@ public class HttpResponseImpl implements HttpResponse {
 			// Specify the status
 			this.status = status;
 			this.statusMessage = statusMessage;
+		}
+	}
+
+	@Override
+	public String getStatusMessage() {
+
+		synchronized (this.connection.getLock()) {
+
+			// Return the current status message
+			return this.statusMessage;
 		}
 	}
 
@@ -443,16 +458,18 @@ public class HttpResponseImpl implements HttpResponse {
 	@Override
 	public HttpHeader addHeader(String name, String value) {
 
-		// Create the HTTP header
-		HttpHeader header = new HttpHeaderImpl(name, value);
-
 		// Ignore specifying managed headers
 		if (HEADER_NAME_SERVER.equalsIgnoreCase(name)
 				|| HEADER_NAME_DATE.equalsIgnoreCase(name)
 				|| HEADER_NAME_CONTENT_TYPE.equalsIgnoreCase(name)
 				|| HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			return header;
+			throw new IllegalArgumentException(HttpHeader.class.getSimpleName()
+					+ " '" + name + "' can not be set, as is managed by the "
+					+ HttpResponse.class.getSimpleName());
 		}
+
+		// Create the HTTP header
+		HttpHeader header = new HttpHeaderImpl(name, value);
 
 		// Add the header
 		synchronized (this.connection.getLock()) {
@@ -544,17 +561,7 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	@Override
-	public void setContentType(String contentType) {
-
-		synchronized (this.receiver.getLock()) {
-
-			// Specify the content type
-			this.contentType = contentType;
-		}
-	}
-
-	@Override
-	public void setContentCharset(Charset charset, String charsetName)
+	public void setContentType(String contentType, Charset charset)
 			throws IOException {
 
 		synchronized (this.receiver.getLock()) {
@@ -565,10 +572,53 @@ public class HttpResponseImpl implements HttpResponse {
 						"getEntityWriter() has already been invoked");
 			}
 
-			// Specify the charset
-			this.charset = charset;
-			this.charsetName = charsetName;
+			// Specify the content type
+			this.contentType = contentType;
+
+			// Specify the charset (or use default if none provided)
+			this.charset = (charset == null ? this.conversation
+					.getDefaultCharset() : charset);
 		}
+	}
+
+	@Override
+	public String getContentType() {
+
+		synchronized (this.receiver.getLock()) {
+
+			// Return the content type
+			return this.getContentTypeThreadUnsafe();
+		}
+	}
+
+	@Override
+	public Charset getContentCharset() {
+
+		synchronized (this.receiver.getLock()) {
+
+			// Return the charset
+			return this.charset;
+		}
+	}
+
+	/**
+	 * Obtains the <code>Content-Type</code> header value.
+	 * 
+	 * @return <code>Content-Type</code> header value. May be <code>null</code>
+	 *         if no <code>Content-Type</code> specified.
+	 */
+	private String getContentTypeThreadUnsafe() {
+		// Determine if have content type
+		if (this.contentType == null) {
+			return null; // No content type
+		}
+
+		// Provide the content type (appending charset if necessary)
+		boolean isTextContentType = ("text/".equalsIgnoreCase(this.contentType
+				.substring(0,
+						Math.min("text/".length(), this.contentType.length()))));
+		return this.contentType
+				+ (isTextContentType ? "; charset=" + this.charset.name() : "");
 	}
 
 	@Override
@@ -780,11 +830,6 @@ public class HttpResponseImpl implements HttpResponse {
 		private final String charset;
 
 		/**
-		 * Name of the {@link Charset} to use in the {@link HttpResponse}.
-		 */
-		private final String charsetName;
-
-		/**
 		 * Initiate.
 		 * 
 		 * @param status
@@ -799,20 +844,16 @@ public class HttpResponseImpl implements HttpResponse {
 		 *            Content-Type.
 		 * @param charset
 		 *            {@link Charset} for the {@link ServerWriter}.
-		 * @param charsetName
-		 *            Name of the {@link Charset} to use in the
-		 *            {@link HttpResponse}.
 		 */
 		public StateMomento(int status, String statusMessage,
 				List<HttpHeader> headers, Serializable entityState,
-				String contentType, String charset, String charsetName) {
+				String contentType, String charset) {
 			this.status = status;
 			this.statusMessage = statusMessage;
 			this.headers = headers;
 			this.entityState = entityState;
 			this.contentType = contentType;
 			this.charset = charset;
-			this.charsetName = charsetName;
 		}
 	}
 

@@ -43,6 +43,13 @@ public interface HttpResponse {
 	void setVersion(String version);
 
 	/**
+	 * Obtains the HTTP version.
+	 * 
+	 * @return HTTP version.
+	 */
+	String getVersion();
+
+	/**
 	 * <p>
 	 * Specifies the status of the response with the default status message.
 	 * <p>
@@ -52,6 +59,18 @@ public interface HttpResponse {
 	 *            Status of the response.
 	 */
 	void setStatus(int status);
+
+	/**
+	 * <p>
+	 * Obtains the status.
+	 * <p>
+	 * This is the current status. The status may changed based on particular
+	 * HTTP rules (e.g. 200 becoming 204 due to no entity) or there being a
+	 * failure in processing the message.
+	 * 
+	 * @return Current status.
+	 */
+	int getStatus();
 
 	/**
 	 * Specifies the status of the response including specifying the status
@@ -64,6 +83,15 @@ public interface HttpResponse {
 	 * @see #setStatus(int)
 	 */
 	void setStatus(int status, String statusMessage);
+
+	/**
+	 * Obtains the current status message.
+	 * 
+	 * @return Current status message.
+	 * 
+	 * @see #getStatus()
+	 */
+	String getStatusMessage();
 
 	/**
 	 * Resets the {@link HttpResponse} by clearing {@link HttpHeader} instances
@@ -86,8 +114,12 @@ public interface HttpResponse {
 	 * @param value
 	 *            Value of {@link HttpHeader}.
 	 * @return {@link HttpHeader} instance added.
+	 * @throws IllegalArgumentException
+	 *             Should the {@link HttpHeader} be managed by the
+	 *             {@link HttpResponse}.
 	 */
-	HttpHeader addHeader(String name, String value);
+	HttpHeader addHeader(String name, String value)
+			throws IllegalArgumentException;
 
 	/**
 	 * Obtains the first {@link HttpHeader} by the name.
@@ -126,30 +158,45 @@ public interface HttpResponse {
 	void removeHeaders(String name);
 
 	/**
-	 * Specifies the content type.
+	 * <p>
+	 * Specifies the <code>Content-Type</code> and optionally the
+	 * {@link Charset}. The <code>charset</code> parameter will automatically be
+	 * added to <code>text/*</code> <code>Content-Type</code>s.
+	 * <p>
+	 * This must be specified before calling (@link {@link #getEntityWriter()}.
 	 * 
 	 * @param contentType
-	 *            Content type.
-	 */
-	void setContentType(String contentType);
-
-	/**
-	 * <p>
-	 * Specifies the {@link Charset} for the {@link #getEntityWriter()}.
-	 * <p>
-	 * This must be specified before calling {@link #getEntityWriter()}.
-	 * 
+	 *            <code>Content-Type</code>. May be <code>null</code> to unset
+	 *            the <code>Content-Type</code>.
 	 * @param charset
-	 *            {@link Charset} for the {@link #getEntityWriter()}.
-	 * @param charsetName
-	 *            Name used in the {@link HttpHeader}. <code>null</code> will
-	 *            result in no <code>charset</code> being provided.
+	 *            {@link Charset} for the <code>Content-Type</code>. This may be
+	 *            <code>null</code> to use the default {@link Charset}. Also use
+	 *            <code>null</code> for <code>Content-Type</code>s that do not
+	 *            require character encoding.
 	 * @throws IOException
 	 *             If attempting to specify after calling
 	 *             {@link #getEntityWriter()}.
 	 */
-	void setContentCharset(Charset charset, String charsetName)
-			throws IOException;
+	void setContentType(String contentType, Charset charset) throws IOException;
+
+	/**
+	 * Obtains the <code>Content-Type</code>.
+	 * 
+	 * @return <code>Content-Type</code>. May be <code>null</code> if no
+	 *         <code>Content-Type</code> has been specified.
+	 */
+	String getContentType();
+
+	/**
+	 * <p>
+	 * Obtains the {@link Charset} for the content.
+	 * <p>
+	 * If no {@link Charset} has been specified, the default {@link Charset}
+	 * will be returned.
+	 * 
+	 * @return {@link Charset}.
+	 */
+	Charset getContentCharset();
 
 	/**
 	 * <p>

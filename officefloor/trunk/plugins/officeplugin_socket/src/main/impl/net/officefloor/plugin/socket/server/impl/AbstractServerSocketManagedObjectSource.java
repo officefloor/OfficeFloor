@@ -39,6 +39,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocol;
@@ -94,6 +95,34 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 	 * Registered {@link AbstractServerSocketManagedObjectSource} instances.
 	 */
 	private static Set<AbstractServerSocketManagedObjectSource> registeredServerSockets = new HashSet<AbstractServerSocketManagedObjectSource>();
+
+	/**
+	 * Obtains the {@link Charset}.
+	 * 
+	 * @param properties
+	 *            {@link SourceProperties}. May be <code>null</code> if no
+	 *            {@link SourceProperties} are available.
+	 * @return {@link Charset}.
+	 */
+	public static Charset getCharset(SourceProperties properties) {
+
+		// Attempt to obtain configured charset
+		String charsetName = (properties == null) ? null : properties
+				.getProperty(PROPERTY_DEFAULT_CHARSET, null);
+		if (charsetName != null) {
+			// Use the configured charset
+			return Charset.forName(charsetName);
+
+		} else {
+			try {
+				// Not configured, use default for flexibility
+				return Charset.forName(DEFAULT_CHARSET);
+			} catch (IllegalCharsetNameException ex) {
+				// Fall back to system default
+				return Charset.defaultCharset();
+			}
+		}
+	}
 
 	/**
 	 * Obtains the {@link ConnectionManager}.
@@ -348,22 +377,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 				String.valueOf(osReceiveBufferSize)));
 
 		// Obtain the default charset
-		String defaultCharsetName = mosContext.getProperty(
-				PROPERTY_DEFAULT_CHARSET, null);
-		if (defaultCharsetName != null) {
-			// Use the configured charset
-			this.defaultCharset = Charset.forName(defaultCharsetName);
-		} else {
-			// Not configured, use default for flexibility, fall back to system
-			defaultCharsetName = DEFAULT_CHARSET;
-			try {
-				this.defaultCharset = Charset.forName(defaultCharsetName);
-			} catch (IllegalCharsetNameException ex) {
-				// Use default charset
-				this.defaultCharset = Charset.defaultCharset();
-				defaultCharsetName = this.defaultCharset.name();
-			}
-		}
+		this.defaultCharset = getCharset(mosContext);
 
 		// Obtain the server socket backlog
 		int serverSocketBackLog = 25000; // TODO make configurable

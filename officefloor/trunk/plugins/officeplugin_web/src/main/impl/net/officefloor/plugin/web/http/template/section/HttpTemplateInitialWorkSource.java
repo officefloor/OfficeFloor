@@ -26,6 +26,7 @@ import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationDifferentiatorImpl;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -62,7 +63,7 @@ public class HttpTemplateInitialWorkSource extends
 	/**
 	 * Property name for the {@link Charset} of the {@link HttpTemplate}.
 	 */
-	public static final String PROPERTY_CHARSET = "http.template.render.charset";
+	public static final String PROPERTY_CHARSET = AbstractServerSocketManagedObjectSource.PROPERTY_DEFAULT_CHARSET;
 
 	/**
 	 * Name of the {@link HttpTemplateInitialTask}.
@@ -112,16 +113,13 @@ public class HttpTemplateInitialWorkSource extends
 
 		// Obtain the content type and charset
 		String contentType = context.getProperty(PROPERTY_CONTENT_TYPE, null);
-		String charsetName = context.getProperty(PROPERTY_CHARSET, null);
-		Charset charset = null;
-		if (charsetName != null) {
-			charset = Charset.forName(charsetName);
-		}
+		Charset charset = AbstractServerSocketManagedObjectSource
+				.getCharset(context);
 
 		// Create the HTTP Template initial task
 		HttpTemplateInitialTask factory = new HttpTemplateInitialTask(
 				templateUriPath, isSecure, renderRedirectHttpMethods,
-				contentType, charset, charsetName);
+				contentType, charset);
 
 		// Configure the task
 		workTypeBuilder.setWorkFactory(factory);

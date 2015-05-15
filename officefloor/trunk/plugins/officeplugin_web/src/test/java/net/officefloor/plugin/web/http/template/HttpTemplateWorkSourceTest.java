@@ -20,6 +20,7 @@ package net.officefloor.plugin.web.http.template;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -107,7 +108,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create the task factory
 		HttpTemplateTask httpTemplateTaskFactory = new HttpTemplateTask(null,
-				false);
+				false, Charset.defaultCharset());
 
 		// 'template' task
 		TaskTypeBuilder<Indexed, None> template = work.addTaskType("template",

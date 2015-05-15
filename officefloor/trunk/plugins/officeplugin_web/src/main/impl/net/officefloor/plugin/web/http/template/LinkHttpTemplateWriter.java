@@ -76,8 +76,8 @@ public class LinkHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(ServerWriter writer, Object bean,
-			HttpApplicationLocation location) throws IOException {
+	public void write(ServerWriter writer, boolean isDefaultCharset,
+			Object bean, HttpApplicationLocation location) throws IOException {
 
 		// Obtain the link path
 		String clientLinkPath = location.transformToClientPath(

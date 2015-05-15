@@ -79,7 +79,7 @@ public class CredentialStoreTest extends AbstractLdapTest {
 		for (NamingEnumeration<?> enumeration = passwordAttribute.getAll(); enumeration
 				.hasMore();) {
 			byte[] credentials = (byte[]) enumeration.next();
-			String text = new String(credentials, Charset.forName("ASCII"));
+			String text = new String(credentials, ASCII);
 
 			// Determine if MD5 credential
 			if (text.toUpperCase().startsWith("{MD5}")) {
@@ -112,8 +112,8 @@ public class CredentialStoreTest extends AbstractLdapTest {
 				"(&(objectClass=inetOrgPerson)(uid=daniel))", null);
 		assertTrue("Expecting to find daniel entry", personResults.hasMore());
 		SearchResult daniel = personResults.next();
-		assertFalse("Should only have the daniel entry", personResults
-				.hasMore());
+		assertFalse("Should only have the daniel entry",
+				personResults.hasMore());
 
 		// Obtain the Groups context
 		DirContext groups = (DirContext) context

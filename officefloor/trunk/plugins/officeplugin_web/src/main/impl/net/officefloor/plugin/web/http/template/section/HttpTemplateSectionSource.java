@@ -61,6 +61,7 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.HttpSessionStateful;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
@@ -107,7 +108,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * Property name for the {@link Charset} for the {@link HttpTemplate}.
 	 */
-	public static final String PROPERTY_CHARSET = HttpTemplateInitialWorkSource.PROPERTY_CHARSET;
+	public static final String PROPERTY_CHARSET = AbstractServerSocketManagedObjectSource.PROPERTY_DEFAULT_CHARSET;
 
 	/**
 	 * Prefix on a {@link HttpTemplateSection} name to indicate it is an
@@ -576,7 +577,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		PropertiesUtil.copyProperties(context, templateWork,
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE);
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				HttpTemplateWorkSource.PROPERTY_CHARSET);
 		PropertiesUtil.copyPrefixedProperties(context,
 				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX,
 				templateWork);

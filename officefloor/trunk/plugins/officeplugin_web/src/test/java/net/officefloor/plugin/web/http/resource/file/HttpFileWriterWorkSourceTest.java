@@ -106,9 +106,8 @@ public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(response,
 				response.addHeader("Content-Encoding", contentEncoding), header);
 		this.recordReturn(httpFile, httpFile.getContentType(), contentType);
-		response.setContentType(contentType);
 		this.recordReturn(httpFile, httpFile.getCharset(), charset);
-		response.setContentCharset(charset, charset.name());
+		response.setContentType(contentType, charset);
 		this.recordReturn(httpFile, httpFile.getContents(), contents);
 		this.recordReturn(response, response.getEntityWriter(),
 				entity.getServerWriter());
