@@ -18,6 +18,7 @@
 package net.officefloor.plugin.web.http.template;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -34,6 +35,14 @@ public interface HttpTemplateWriter {
 	 * 
 	 * @param writer
 	 *            {@link ServerWriter} to receive the template content.
+	 * @param isDefaultCharset
+	 *            Indicates if the default {@link Charset} for outputting the
+	 *            template is being used. While the {@link Charset} may be
+	 *            programmatically changed, it is expected in the majority of
+	 *            cases to be using the default {@link Charset} configured for
+	 *            the template. This flag allows static content to be cached in
+	 *            bytes (using default {@link Charset}) for improved
+	 *            performance.
 	 * @param bean
 	 *            Bean to potentially obtain data. May be <code>null</code> if
 	 *            template contents does not require a bean.
@@ -43,7 +52,7 @@ public interface HttpTemplateWriter {
 	 * @throws IOException
 	 *             If fails to write content.
 	 */
-	void write(ServerWriter writer, Object bean,
+	void write(ServerWriter writer, boolean isDefaultCharset, Object bean,
 			HttpApplicationLocation location) throws IOException;
 
 }

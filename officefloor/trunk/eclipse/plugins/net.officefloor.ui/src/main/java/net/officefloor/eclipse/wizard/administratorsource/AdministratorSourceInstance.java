@@ -181,8 +181,9 @@ public class AdministratorSourceInstance implements
 		}
 
 		// Attempt to load the administrator type
-		this.administratorType = this.administratorLoader.loadAdministrator(
-				this.administratorSourceClass, this.properties);
+		this.administratorType = this.administratorLoader
+				.loadAdministratorType(this.administratorSourceClass,
+						this.properties);
 	}
 
 	/**

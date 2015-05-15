@@ -60,6 +60,11 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	private String templateUriSuffix = null;
 
 	/**
+	 * Content-type for the template.
+	 */
+	private String contentType = null;
+
+	/**
 	 * Indicates if the template is to be secure.
 	 */
 	private boolean isTemplateSecure = false;
@@ -129,6 +134,16 @@ public class HttpTemplateAutoWireSectionImpl extends AutoWireSectionImpl
 	@Override
 	public String getTemplateUriSuffix() {
 		return this.templateUriSuffix;
+	}
+
+	@Override
+	public void setTemplateContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	@Override
+	public String getTemplateContentType() {
+		return this.contentType;
 	}
 
 	@Override

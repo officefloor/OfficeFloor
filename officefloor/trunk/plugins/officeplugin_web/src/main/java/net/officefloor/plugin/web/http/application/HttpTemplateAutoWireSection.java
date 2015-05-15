@@ -75,6 +75,26 @@ public interface HttpTemplateAutoWireSection extends AutoWireSection {
 
 	/**
 	 * <p>
+	 * Specifies the Content-Type for the template.
+	 * <p>
+	 * Note for <code>text/*</code> values, the <code>charset</code> parameter
+	 * will be respected in generating the template.
+	 * 
+	 * @param contentType
+	 *            Content-Type for the template.
+	 */
+	void setTemplateContentType(String contentType);
+
+	/**
+	 * Obtains the Content-Type for the template.
+	 * 
+	 * @return Content-Type for the template. May be <code>null</code> to use
+	 *         the default encoding.
+	 */
+	String getTemplateContentType();
+
+	/**
+	 * <p>
 	 * Indicate whether a secure {@link ServerHttpConnection} is required for
 	 * the template. This applies to:
 	 * <ul>

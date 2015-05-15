@@ -71,33 +71,6 @@ public class MockHttpResponse implements HttpResponse {
 	private boolean isSent = false;
 
 	/**
-	 * Obtains the HTTP status.
-	 * 
-	 * @return HTTP status.
-	 */
-	public int getStatus() {
-		return this.status;
-	}
-
-	/**
-	 * Obtains the HTTP status message.
-	 * 
-	 * @return HTTP status message.
-	 */
-	public String getStatusMessage() {
-		return this.statusMessage;
-	}
-
-	/**
-	 * Obtains the HTTP version.
-	 * 
-	 * @return HTTP version.
-	 */
-	public String getVersion() {
-		return this.version;
-	}
-
-	/**
 	 * Obtains the header value.
 	 * 
 	 * @param name
@@ -131,8 +104,23 @@ public class MockHttpResponse implements HttpResponse {
 	 */
 
 	@Override
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	@Override
+	public String getVersion() {
+		return this.version;
+	}
+
+	@Override
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+	@Override
+	public int getStatus() {
+		return this.status;
 	}
 
 	@Override
@@ -142,15 +130,14 @@ public class MockHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public void setVersion(String version) {
-		this.version = version;
+	public String getStatusMessage() {
+		return this.statusMessage;
 	}
 
 	@Override
 	public void reset() throws IOException {
-		// TODO implement HttpResponse.reset
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.reset");
+		throw new IllegalStateException("Can not reset "
+				+ MockHttpResponse.class.getSimpleName());
 	}
 
 	@Override
@@ -196,17 +183,20 @@ public class MockHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public void setContentType(String contentType) {
-		// TODO implement HttpResponse.setContentType
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.setContentType");
+	public void setContentType(String contentType, Charset charset)
+			throws IOException {
+		throw new IllegalStateException("Can not change Content-Type for "
+				+ MockHttpResponse.class.getSimpleName());
 	}
 
 	@Override
-	public void setContentCharset(Charset charset, String charsetName) {
-		// TODO implement HttpResponse.setContentCharset
-		throw new UnsupportedOperationException(
-				"TODO implement HttpResponse.setContentCharset");
+	public String getContentType() {
+		return null;
+	}
+
+	@Override
+	public Charset getContentCharset() {
+		return UsAsciiUtil.US_ASCII;
 	}
 
 	@Override

@@ -33,6 +33,7 @@ import net.officefloor.plugin.socket.server.http.conversation.impl.HttpEntityImp
 import net.officefloor.plugin.socket.server.http.conversation.impl.HttpRequestImpl;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
 import net.officefloor.plugin.socket.server.http.server.MockHttpServer;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.ssl.OfficeFloorDefaultSslEngineSource;
 import net.officefloor.plugin.socket.server.ssl.SslEngineSource;
 import net.officefloor.plugin.stream.impl.ServerInputStreamImpl;
@@ -249,13 +250,17 @@ public class HttpTestUtil {
 			String... headerNameValues) throws Exception {
 
 		// Obtain the entity data
+		final Charset charset = AbstractServerSocketManagedObjectSource
+				.getCharset(null);
 		byte[] entityData = (entity == null ? new byte[0] : entity
-				.getBytes(Charset.forName("UTF-8")));
+				.getBytes(charset));
 
 		// Create the headers
 		List<HttpHeader> headers = new LinkedList<HttpHeader>();
 		if (entity != null) {
-			// Include content length if entity
+			// Include content type and content length if entity
+			headers.add(new HttpHeaderImpl("content-type",
+					"text/plain; charset=" + charset.name()));
 			headers.add(new HttpHeaderImpl("content-length", String
 					.valueOf(entityData.length)));
 		}

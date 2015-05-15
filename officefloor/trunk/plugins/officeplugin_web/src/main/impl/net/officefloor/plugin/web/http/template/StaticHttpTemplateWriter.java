@@ -32,6 +32,11 @@ import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionC
 public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 
 	/**
+	 * Static content as text.
+	 */
+	private final String textContent;
+
+	/**
 	 * Encoded content to write to the {@link ServerWriter}.
 	 */
 	private final byte[] encodedContent;
@@ -41,18 +46,18 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 	 * 
 	 * @param staticContent
 	 *            {@link StaticHttpTemplateSectionContent} to write.
-	 * @param serverDefaultCharset
-	 *            Default {@link Charset} for the Server.
+	 * @param charset
+	 *            {@link Charset} for the template.
 	 * @throws IOException
 	 *             If fails to prepare the static content.
 	 */
 	public StaticHttpTemplateWriter(
-			StaticHttpTemplateSectionContent staticContent,
-			Charset serverDefaultCharset) throws IOException {
-		String content = staticContent.getStaticContent();
+			StaticHttpTemplateSectionContent staticContent, Charset charset)
+			throws IOException {
+		this.textContent = staticContent.getStaticContent();
 
 		// Pre-encode the static content for faster I/O
-		this.encodedContent = content.getBytes(serverDefaultCharset);
+		this.encodedContent = this.textContent.getBytes(charset);
 	}
 
 	/*
@@ -60,11 +65,18 @@ public class StaticHttpTemplateWriter implements HttpTemplateWriter {
 	 */
 
 	@Override
-	public void write(ServerWriter writer, Object bean,
-			HttpApplicationLocation location) throws IOException {
+	public void write(ServerWriter writer, boolean isDefaultCharset,
+			Object bean, HttpApplicationLocation location) throws IOException {
 
-		// Provide pre-encoded content
-		writer.write(this.encodedContent);
+		// Use pre-encoded content if using default charset
+		if (isDefaultCharset) {
+			// Provide pre-encoded content
+			writer.write(this.encodedContent);
+
+		} else {
+			// Provide the content (with appropriate charset)
+			writer.write(this.textContent);
+		}
 	}
 
 }

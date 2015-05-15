@@ -221,8 +221,7 @@ public class HttpStateMomentoTest extends OfficeFrameTestCase {
 		response.setStatus(203, "Another status");
 		response.addHeader("HEADER_ONE", "VALUE_ONE");
 		response.addHeader("HEADER_TWO", "VALUE_TWO");
-		response.setContentType("zip");
-		response.setContentCharset(HttpRequestParserImpl.US_ASCII, "ASCII");
+		response.setContentType("zip", HttpRequestParserImpl.US_ASCII);
 		response.getEntity().write("TEST".getBytes());
 		ServerHttpConnection connection = this.doResponseStateMomentoTest();
 

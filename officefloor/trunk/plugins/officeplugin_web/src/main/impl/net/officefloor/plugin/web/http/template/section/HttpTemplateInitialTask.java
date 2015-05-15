@@ -84,15 +84,9 @@ public class HttpTemplateInitialTask
 	private final String contentType;
 
 	/**
-	 * {@link Charset} for the {@link HttpTemplate}. May be <code>null</code>.
+	 * {@link Charset} for the {@link HttpTemplate}.
 	 */
 	private final Charset charset;
-
-	/**
-	 * Name of the {@link Charset} for the {@link HttpTemplate}. Provided only
-	 * if {@link #charset} provided, otherwise <code>null</code>.
-	 */
-	private final String charsetName;
 
 	/**
 	 * Initiate.
@@ -109,20 +103,15 @@ public class HttpTemplateInitialTask
 	 *            Content-type for the {@link HttpTemplate}. May be
 	 *            <code>null</code>.
 	 * @param charset
-	 *            Charset for {@link HttpTemplate}. May be <code>null</code>.
-	 * @param charsetName
-	 *            Name of the {@link Charset} for the {@link HttpTemplate}.
-	 *            Provided only if {@link #charset} provided, otherwise
-	 *            <code>null</code>.
+	 *            {@link Charset} for {@link HttpTemplate}.
 	 */
 	public HttpTemplateInitialTask(String templateUriPath,
 			boolean isRequireSecure, String[] renderRedirectHttpMethods,
-			String contentType, Charset charset, String charsetName) {
+			String contentType, Charset charset) {
 		this.templateUriPath = templateUriPath;
 		this.isRequireSecure = isRequireSecure;
 		this.contentType = contentType;
 		this.charset = charset;
-		this.charsetName = charsetName;
 
 		// Add the render redirect HTTP methods
 		Set<String> methods = new HashSet<String>();
@@ -194,11 +183,8 @@ public class HttpTemplateInitialTask
 
 		// Configure the response
 		if (this.contentType != null) {
-			connection.getHttpResponse().setContentType(this.contentType);
-		}
-		if (this.charset != null) {
-			connection.getHttpResponse().setContentCharset(this.charset,
-					this.charsetName);
+			connection.getHttpResponse().setContentType(this.contentType,
+					this.charset);
 		}
 
 		// Render the template

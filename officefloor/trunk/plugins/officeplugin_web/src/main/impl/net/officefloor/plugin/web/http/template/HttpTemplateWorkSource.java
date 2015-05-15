@@ -25,7 +25,6 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import net.officefloor.compile.WorkSourceService;
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -35,6 +34,7 @@ import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 import net.officefloor.plugin.web.http.template.parse.BeanHttpTemplateSectionContent;
@@ -83,15 +83,20 @@ public class HttpTemplateWorkSource extends
 	public static final String PROPERTY_TEMPLATE_SECURE = "template.secure";
 
 	/**
+	 * Property to specify the {@link Charset} for reading in the template.
+	 */
+	public static final String PROPERTY_TEMPLATE_FILE_CHARSET = "template.file.charset";
+
+	/**
 	 * Property prefix to obtain whether a specific link requires a secure
 	 * {@link ServerHttpConnection}.
 	 */
 	public static final String PROPERTY_LINK_SECURE_PREFIX = HttpTemplateTask.PROPERTY_LINK_SECURE_PREFIX;
 
 	/**
-	 * Property to specify the {@link Charset} for the template.
+	 * Property to specify the {@link Charset} for outputting the template.
 	 */
-	public static final String PROPERTY_CHARSET = "content.charset";
+	public static final String PROPERTY_CHARSET = AbstractServerSocketManagedObjectSource.PROPERTY_DEFAULT_CHARSET;
 
 	/**
 	 * Property prefix to obtain the bean for the {@link HttpTemplateSection}.
@@ -147,13 +152,20 @@ public class HttpTemplateWorkSource extends
 
 		// Not in property, so obtain details from file
 		String templateFilePath = context.getProperty(PROPERTY_TEMPLATE_FILE);
-		Charset charset = getCharset(context);
+		String templateFileCharsetName = context.getProperty(
+				PROPERTY_TEMPLATE_FILE_CHARSET, null);
+		Charset templateFileCharset = null;
+		if (templateFileCharsetName != null) {
+			templateFileCharset = Charset.forName(templateFileCharsetName);
+		}
 
 		// Obtain the configuration
 		InputStream configuration = context.getResource(templateFilePath);
 
 		// Return the reader to the template content
-		return new InputStreamReader(configuration, charset);
+		return (templateFileCharset == null ? new InputStreamReader(
+				configuration) : new InputStreamReader(configuration,
+				templateFileCharset));
 	}
 
 	/**
@@ -327,24 +339,6 @@ public class HttpTemplateWorkSource extends
 		}
 	}
 
-	/**
-	 * Obtains the {@link Charset} from the {@link Properties}.
-	 * 
-	 * @param properties
-	 *            {@link SourceProperties}.
-	 * @return {@link Charset}.
-	 */
-	private static Charset getCharset(SourceProperties properties) {
-
-		// Obtain the charset
-		String charsetName = properties.getProperty(PROPERTY_CHARSET, null);
-		Charset charset = (charsetName != null ? Charset.forName(charsetName)
-				: Charset.defaultCharset());
-
-		// Return the charset
-		return charset;
-	}
-
 	/*
 	 * ====================== WorkSourceService ===========================
 	 */
@@ -377,7 +371,8 @@ public class HttpTemplateWorkSource extends
 		HttpTemplate template = getHttpTemplate(context);
 
 		// Obtain the details of the template
-		Charset charset = getCharset(context);
+		Charset charset = AbstractServerSocketManagedObjectSource
+				.getCharset(context);
 
 		// Obtain the URI path and URI suffix for the template
 		String templateUriPath = context.getProperty(PROPERTY_TEMPLATE_URI);

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 
 import net.officefloor.autowire.AutoWire;
@@ -42,6 +43,7 @@ import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.source.HttpServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.http.source.HttpsServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.resource.source.SourceHttpResourceFactory;
 import net.officefloor.plugin.web.http.route.HttpRouteTask;
@@ -220,6 +222,84 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure template available
 		this.assertHttpRequest("/uri", isSecure, 200, SUBMIT_URI);
+	}
+
+	/**
+	 * Ensure able to provide the Content-Type.
+	 */
+	public void testTemplateTextContentType() throws Exception {
+
+		Charset charset = Charset.defaultCharset();
+		if (AbstractServerSocketManagedObjectSource.DEFAULT_CHARSET
+				.equalsIgnoreCase(charset.name())) {
+			charset = Charset.forName("UTF-16");
+		}
+
+		// Create the content type
+		String contentType = "text/plain; one=1; charset=" + charset.name()
+				+ "; another";
+
+		// Add HTTP template with Content-Type
+		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
+				"uri", "PUBLIC/resource.html", null);
+		section.setTemplateContentType(contentType);
+		this.source.openOfficeFloor();
+
+		// Ensure correct Content-Type
+		assertEquals("Incorrect Content-Type", contentType,
+				section.getTemplateContentType());
+
+		// Ensure template correct (charset appended as handled specifically)
+		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
+		assertEquals("Incorrect Content-Type on response",
+				"text/plain; one=1; another; charset=" + charset.name(),
+				response.getFirstHeader("Content-Type").getValue());
+	}
+
+	/**
+	 * Ensure able to provide the Content-Type.
+	 */
+	public void testTemplateTextContentTypeDefaultCharset() throws Exception {
+
+		// Add HTTP template with Content-Type
+		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
+				"uri", "PUBLIC/resource.html", null);
+		section.setTemplateContentType("text/plain");
+		this.source.openOfficeFloor();
+
+		// Ensure correct Content-Type
+		assertEquals("Incorrect Content-Type", "text/plain",
+				section.getTemplateContentType());
+
+		// Ensure template correct
+		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
+		assertEquals(
+				"Incorrect Content-Type on response",
+				"text/plain; charset="
+						+ AbstractServerSocketManagedObjectSource.DEFAULT_CHARSET,
+				response.getFirstHeader("Content-Type").getValue());
+	}
+
+	/**
+	 * Ensure not use <code>charset</code> parameter if not text Content-Type.
+	 */
+	public void testTemplateNonTextContentType() throws Exception {
+
+		// Add HTTP template with Content-Type
+		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
+				"uri", "PUBLIC/resource.html", null);
+		section.setTemplateContentType("x-test/non-text");
+		this.source.openOfficeFloor();
+
+		// Ensure correct Content-Type
+		assertEquals("Incorrect Content-Type", "x-test/non-text",
+				section.getTemplateContentType());
+
+		// Ensure template correct
+		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
+		assertEquals("Incorrect Content-Type on response", "x-test/non-text",
+				response.getFirstHeader("Content-Type").getValue());
+
 	}
 
 	/**
@@ -1693,10 +1773,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 *            Expected response status.
 	 * @param expectedResponseEntity
 	 *            Expected response entity.
+	 * @return {@link HttpResponse}.
 	 */
-	private void assertHttpRequest(String uri, int expectedResponseStatus,
-			String expectedResponseEntity) {
-		assertHttpRequest(uri, false, expectedResponseStatus,
+	private HttpResponse assertHttpRequest(String uri,
+			int expectedResponseStatus, String expectedResponseEntity) {
+		return this.assertHttpRequest(uri, false, expectedResponseStatus,
 				expectedResponseEntity);
 	}
 
@@ -1712,8 +1793,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 *            Expected response status.
 	 * @param expectedResponseEntity
 	 *            Expected response entity.
+	 * @return {@link HttpResponse}.
 	 */
-	private void assertHttpRequest(String uri, boolean isRedirect,
+	private HttpResponse assertHttpRequest(String uri, boolean isRedirect,
 			int expectedResponseStatus, String expectedResponseEntity) {
 
 		// Create the request
@@ -1728,8 +1810,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		}
 
 		// Assert HTTP request
-		this.assertHttpRequest(request, redirectUrl, expectedResponseStatus,
-				expectedResponseEntity);
+		return this.assertHttpRequest(request, redirectUrl,
+				expectedResponseStatus, expectedResponseEntity);
 	}
 
 	/**
@@ -1744,9 +1826,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 *            Expected response status.
 	 * @param expectedResponseEntity
 	 *            Expected response entity.
+	 * @return {@link HttpResponse}.
 	 */
-	private void assertHttpRequest(HttpUriRequest request, String redirectUrl,
-			int expectedResponseStatus, String expectedResponseEntity) {
+	private HttpResponse assertHttpRequest(HttpUriRequest request,
+			String redirectUrl, int expectedResponseStatus,
+			String expectedResponseEntity) {
 		try {
 
 			// Send the request
@@ -1782,6 +1866,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			// Ensure correct response status
 			assertEquals("Should be successful", expectedResponseStatus,
 					response.getStatusLine().getStatusCode());
+
+			// Return the response
+			return response;
 
 		} catch (Exception ex) {
 			throw fail(ex);

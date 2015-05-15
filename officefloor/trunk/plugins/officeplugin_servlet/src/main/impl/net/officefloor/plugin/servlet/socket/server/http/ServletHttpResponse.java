@@ -31,6 +31,8 @@ import javax.servlet.http.HttpServletResponse;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.parse.impl.HttpHeaderImpl;
+import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.stream.ServerOutputStream;
 import net.officefloor.plugin.stream.ServerWriter;
 import net.officefloor.plugin.stream.servlet.ServletServerOutputStream;
@@ -203,6 +205,36 @@ public class ServletHttpResponse implements HttpResponse {
 	}
 
 	@Override
+	public String getVersion() {
+		// Assume for now always HTTP/1.1
+		return "HTTP/1.1";
+	}
+
+	@Override
+	public int getStatus() {
+		return this.servletResponse.getStatus();
+	}
+
+	@Override
+	public String getStatusMessage() {
+		// Provide default message for status
+		return HttpStatus.getStatusMessage(this.getStatus());
+	}
+
+	@Override
+	public String getContentType() {
+		return this.servletResponse.getContentType();
+	}
+
+	@Override
+	public Charset getContentCharset() {
+		// Should always provide a charset
+		String charsetName = this.servletResponse.getCharacterEncoding();
+		return charsetName == null ? AbstractServerSocketManagedObjectSource
+				.getCharset(null) : Charset.forName(charsetName);
+	}
+
+	@Override
 	public synchronized ServletServerOutputStream getEntity()
 			throws IOException {
 
@@ -221,16 +253,11 @@ public class ServletHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public void setContentType(String contentType) {
+	public void setContentType(String contentType, Charset charset) {
 		this.servletResponse.setContentType(contentType);
-	}
-
-	@Override
-	public synchronized void setContentCharset(Charset charset,
-			String charsetName) {
-		this.charset = charset;
-		this.servletResponse.setCharacterEncoding(charsetName == null ? charset
-				.name() : charsetName);
+		if (charset != null) {
+			this.servletResponse.setCharacterEncoding(charset.name());
+		}
 	}
 
 	@Override

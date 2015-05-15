@@ -74,6 +74,57 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	private boolean isConnectionClosed = false;
 
 	/**
+	 * Ensure defaults for {@link HttpResponse} are correct.
+	 */
+	public void testDefaults() {
+		HttpResponse response = this.createHttpResponse();
+		assertEquals("Incorrect version", "HTTP/1.1", response.getVersion());
+		assertEquals("Incorrect status", 200, response.getStatus());
+		assertEquals("Incorrect status message", "OK",
+				response.getStatusMessage());
+		assertEquals("Incorrect content type", null, response.getContentType());
+		assertEquals("Incorrect charset", DEFAULT_CHARSET,
+				response.getContentCharset());
+	}
+
+	/**
+	 * Ensure can override the defaults.
+	 */
+	public void testOverrideDefaults() throws IOException {
+		HttpResponse response = this.createHttpResponse();
+
+		// Change version
+		response.setVersion("HTTP/1.0");
+		assertEquals("Incorrect version", "HTTP/1.0", response.getVersion());
+
+		// Change status (with message defaulted)
+		response.setStatus(204);
+		assertEquals("Incorrect status", 204, response.getStatus());
+		assertEquals("Incorrect status message",
+				HttpStatus.getStatusMessage(204), response.getStatusMessage());
+
+		// Change status and its message
+		response.setStatus(404, "Different status message");
+		assertEquals("Incorrect status", 404, response.getStatus());
+		assertEquals("Incorrect status message", "Different status message",
+				response.getStatusMessage());
+
+		// Change content type with default charset
+		response.setContentType("text/xml", null);
+		assertEquals("Incorrect content type", "text/xml; charset="
+				+ DEFAULT_CHARSET.name(), response.getContentType());
+		assertEquals("Incorrect default charset", DEFAULT_CHARSET,
+				response.getContentCharset());
+
+		// Change content type and charset
+		Charset charset = Charset.forName("UTF-16");
+		response.setContentType("text/json", charset);
+		assertEquals("Incorrect content type", "text/json; charset=UTF-16",
+				response.getContentType());
+		assertEquals("Incorrect charset", charset, response.getContentCharset());
+	}
+
+	/**
 	 * Ensure can send a simple response.
 	 */
 	public void testSimpleResponse() throws IOException {
@@ -129,12 +180,12 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	/**
 	 * Ensure ignore managed headers being added.
 	 */
-	public void testIngoreManagedHeaders() throws IOException {
+	public void testIgnoreManagedHeaders() throws IOException {
 		HttpResponse response = this.createHttpResponse();
-		response.addHeader("SERVER", "Server should be ignored");
-		response.addHeader("date", "Date should be ignored");
-		response.addHeader("Content-Length", "Content-Length should be ignored");
-		response.addHeader("Content-Type", "Content-Type should be ignored");
+		this.doAddManagedHeaderTest(response, "SERVER");
+		this.doAddManagedHeaderTest(response, "date");
+		this.doAddManagedHeaderTest(response, "Content-Length");
+		this.doAddManagedHeaderTest(response, "Content-Type");
 		ServerOutputStream entity = response.getEntity();
 		entity.write("TEST".getBytes(DEFAULT_CHARSET));
 		entity.close();
@@ -142,6 +193,25 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 				"HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock Time]\nContent-Length: 4",
 				"TEST", DEFAULT_CHARSET);
 		assertFalse("Connection should not be closed", this.isConnectionClosed);
+	}
+
+	/**
+	 * Ensures unable to set the managed {@link HttpHeader}.
+	 * 
+	 * @param response
+	 *            {@link HttpResponse}.
+	 * @param headerName
+	 *            {@link HttpHeader} name.
+	 */
+	private void doAddManagedHeaderTest(HttpResponse response, String headerName) {
+		try {
+			response.addHeader(headerName, "Should cause exception");
+			fail("Should not be successful in setting header " + headerName);
+		} catch (IllegalArgumentException ex) {
+			assertEquals("Incorrect cause", "HttpHeader '" + headerName
+					+ "' can not be set, as is managed by the HttpResponse",
+					ex.getMessage());
+		}
 	}
 
 	/**
@@ -296,7 +366,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		// Write some content
 		HttpResponse response = this.createHttpResponse();
-		response.setContentCharset(charset, charset.name());
+		response.setContentType(null, charset);
 		ServerWriter entityWriter = response.getEntityWriter();
 		entityWriter.write("TEST");
 		entityWriter.flush();
@@ -399,7 +469,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 	 */
 	public void testEntityWriterWithAlternateContentType() throws IOException {
 		HttpResponse response = this.createHttpResponse();
-		response.setContentType("text/plain");
+		response.setContentType("text/plain", null);
 		ServerWriter entity = response.getEntityWriter();
 		entity.write("TEST");
 		entity.close();
@@ -434,7 +504,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 			// Test with the charset if can use
 			if (canUse) {
 				HttpResponse response = this.createHttpResponse();
-				response.setContentCharset(charset, charset.name());
+				response.setContentType(null, charset);
 				ServerWriter entity = response.getEntityWriter();
 				entity.write("TEST");
 				entity.close();
@@ -461,7 +531,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		// Should now not be able to change charset
 		try {
-			response.setContentCharset(UsAsciiUtil.US_ASCII, null);
+			response.setContentType(null, UsAsciiUtil.US_ASCII);
 			fail("Should not be able to change the charset");
 		} catch (IOException ex) {
 			assertEquals("Incorrect cause",
@@ -471,7 +541,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		// Ensure can change after reset
 		response.reset();
-		response.setContentCharset(UsAsciiUtil.US_ASCII, null);
+		response.setContentType(null, UsAsciiUtil.US_ASCII);
 	}
 
 	/**

@@ -54,13 +54,8 @@ public abstract class AbstractHttpFile extends AbstractHttpResource implements
 			response.addHeader("Content-Encoding", contentEncoding);
 		}
 		String contentType = file.getContentType();
-		if ((contentType != null) && (contentType.length() > 0)) {
-			response.setContentType(contentType);
-		}
 		Charset charset = file.getCharset();
-		if (charset != null) {
-			response.setContentCharset(charset, charset.name());
-		}
+		response.setContentType(contentType, charset);
 
 		// Write the HTTP file content to response
 		response.getEntityWriter().write(file.getContents().duplicate());

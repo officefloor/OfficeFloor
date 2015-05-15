@@ -62,6 +62,9 @@ public interface WoofChanges {
 	 *            {@link SectionType} for the {@link WoofTemplateModel}.
 	 * @param superTemplate
 	 *            Super {@link WoofTemplateModel}. May be <code>null</code>.
+	 * @param contentType
+	 *            Content-Type for the {@link WoofTemplateModel}. May be
+	 *            <code>null</code>.
 	 * @param isTemplateSecure
 	 *            <code>true</code> for the {@link WoofTemplateModel} to require
 	 *            a secure {@link ServerHttpConnection}.
@@ -83,8 +86,8 @@ public interface WoofChanges {
 	 */
 	Change<WoofTemplateModel> addTemplate(String uri, String templatePath,
 			String templateLogicClass, SectionType sectionType,
-			WoofTemplateModel superTemplate, boolean isTemplateSecure,
-			Map<String, Boolean> linksSecure,
+			WoofTemplateModel superTemplate, String contentType,
+			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
 			WoofTemplateExtension[] extensions,
 			WoofTemplateChangeContext context);
@@ -103,15 +106,18 @@ public interface WoofChanges {
 	 * @param sectionType
 	 *            {@link SectionType} for the refactored
 	 *            {@link WoofTemplateModel}.
-	 * @param isTemplateSecure
-	 *            <code>true</code> for the {@link WoofTemplateModel} to require
-	 *            a secure {@link ServerHttpConnection}.
 	 * @param superTemplate
 	 *            Super {@link WoofTemplateModel}. May be <code>null</code>.
 	 * @param inheritedTemplateOutputNames
 	 *            Inherited {@link WoofTemplateOutputModel} configuration from
 	 *            the super {@link WoofTemplateModel} and its subsequent
 	 *            ancestors.
+	 * @param contentType
+	 *            Content-Type for the {@link WoofTemplateModel}. May be
+	 *            <code>null</code>.
+	 * @param isTemplateSecure
+	 *            <code>true</code> for the {@link WoofTemplateModel} to require
+	 *            a secure {@link ServerHttpConnection}.
 	 * @param linksSecure
 	 *            Link secure configuration overriding {@link WoofTemplateModel}
 	 *            secure.
@@ -135,8 +141,8 @@ public interface WoofChanges {
 	Change<WoofTemplateModel> refactorTemplate(WoofTemplateModel template,
 			String uri, String templatePath, String templateLogicClass,
 			SectionType sectionType, WoofTemplateModel superTemplate,
-			Set<String> inheritedTemplateOutputNames, boolean isTemplateSecure,
-			Map<String, Boolean> linksSecure,
+			Set<String> inheritedTemplateOutputNames, String contentType,
+			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
 			WoofTemplateExtension[] extensions,
 			Map<String, String> templateOutputNameMapping,

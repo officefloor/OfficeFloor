@@ -288,9 +288,8 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.connection, this.connection.getHttpResponse(),
 				this.response);
 		this.response.reset();
-		this.response.setContentType("text/html");
 		Charset charset = Charset.defaultCharset();
-		this.response.setContentCharset(charset, charset.name());
+		this.response.setContentType("text/html", charset);
 		this.recordReturn(this.response, this.response.getEntityWriter(),
 				this.entity.getServerWriter());
 		this.response.setStatus(status);
