@@ -9,6 +9,7 @@
 		<value method="setTemplatePath" node="template@path" />
 		<value method="setSuperTemplate" node="template@extends" />
 		<value method="setTemplateClassName" node="template@class" />
+		<value method="setTemplateContentType" node="template@content-type" />
 		<value method="setIsTemplateSecure" node="template@secure" />
 		<value method="setIsContinueRendering" node="template@continue-rendering" />
 		<value method="setX" node="template@x" />

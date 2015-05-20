@@ -132,6 +132,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		// Record loading templates
 		this.recordReturn(this.app, this.app.addHttpTemplate("example",
 				"WOOF/TemplateA.ofp", Template.class), templateA);
+		templateA.setTemplateContentType("text/html; charset=UTF-8");
 		templateA.setTemplateSecure(true);
 		templateA.setLinkSecure("LINK_1", true);
 		templateA.setLinkSecure("LINK_2", false);

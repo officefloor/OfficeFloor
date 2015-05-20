@@ -131,9 +131,10 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, TEMPLATE_URI, "example/Template.html",
 				"net.example.LogicClass", section, superTemplate,
-				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), true,
-				secureLinks, new String[] { "POST", "PUT", "OTHER" }, true,
-				extensions, this.templateOutputNameMapping,
+				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")),
+				"text/plain; charset=UTF-16", true, secureLinks, new String[] {
+						"POST", "PUT", "OTHER" }, true, extensions,
+				this.templateOutputNameMapping,
 				this.getWoofTemplateChangeContext());
 
 		// Validate change
@@ -209,9 +210,9 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, TEMPLATE_URI, "example/Change.html",
 				"net.example.ChangeClass", section, superTemplate,
-				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), false,
-				secureLinks, new String[] { "CHANGE" }, false, extensions,
-				this.templateOutputNameMapping,
+				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")),
+				"text/changed", false, secureLinks, new String[] { "CHANGE" },
+				false, extensions, this.templateOutputNameMapping,
 				this.getWoofTemplateChangeContext());
 
 		// Validate change
@@ -255,8 +256,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		// Refactor the template removing outputs and extensions
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, TEMPLATE_URI, "example/Remove.html", null,
-				section, null, null, false, null, null, false, null, null,
-				this.getWoofTemplateChangeContext());
+				section, null, null, null, false, null, null, false, null,
+				null, this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Refactor Template", true);
@@ -329,9 +330,10 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		Change<WoofTemplateModel> change = this.operations.refactorTemplate(
 				this.template, TEMPLATE_URI, "example/Add.html",
 				"net.example.AddClass", section, superTemplate,
-				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")), true,
-				secureLinks, new String[] { "POST", "OTHER" }, true,
-				extensions, this.templateOutputNameMapping,
+				new HashSet<String>(Arrays.asList("OUTPUT_INHERIT")),
+				"text/html; charset=UTF-8", true, secureLinks, new String[] {
+						"POST", "OTHER" }, true, extensions,
+				this.templateOutputNameMapping,
 				this.getWoofTemplateChangeContext());
 
 		// Validate change

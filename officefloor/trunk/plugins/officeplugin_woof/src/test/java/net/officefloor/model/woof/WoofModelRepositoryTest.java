@@ -58,19 +58,19 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the templates
 		// ----------------------------------------
-		assertList(
-				new String[] { "getWoofTemplateName", "getUri",
-						"getTemplatePath", "getSuperTemplate",
-						"getTemplateClassName", "getIsTemplateSecure",
-						"getIsContinueRendering", "getX", "getY" },
+		assertList(new String[] { "getWoofTemplateName", "getUri",
+				"getTemplatePath", "getSuperTemplate", "getTemplateClassName",
+				"getTemplateContentType", "getIsTemplateSecure",
+				"getIsContinueRendering", "getX", "getY" },
 				woof.getWoofTemplates(), new WoofTemplateModel("TEMPLATE_A",
 						"example", "example/TemplateA.ofp", "TEMPLATE_B",
-						"net.example.ExampleClassA", true, true, null, null,
+						"net.example.ExampleClassA",
+						"text/plain; charset=UTF-16", true, true, null, null,
 						null, null, null, null, null, null, 300, 301),
 				new WoofTemplateModel("TEMPLATE_B", "another",
-						"example/TemplateB.ofp", null, null, false, false,
-						null, null, null, null, null, null, null, null, 302,
-						303));
+						"example/TemplateB.ofp", null, null, null, false,
+						false, null, null, null, null, null, null, null, null,
+						302, 303));
 		WoofTemplateModel template = woof.getWoofTemplates().get(0);
 		assertList(new String[] { "getWoofTemplateOutputName",
 				"getArgumentType" }, template.getOutputs(),

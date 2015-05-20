@@ -2,7 +2,8 @@
 
 	<templates>
 		<template name="add" uri="add" path="example/Add.html" class="net.example.AddClass"
-			secure="true" continue-rendering="true" extends="TEMPLATE_PARENT">
+			content-type="text/html; charset=UTF-8" secure="true"
+			continue-rendering="true" extends="TEMPLATE_PARENT">
 			<output name="OUTPUT_1" argument-type="java.lang.Integer" />
 			<output name="OUTPUT_2" argument-type="java.lang.String" />
 			<output name="OUTPUT_3" />

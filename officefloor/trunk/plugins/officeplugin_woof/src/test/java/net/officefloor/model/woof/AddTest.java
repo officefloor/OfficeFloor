@@ -67,8 +67,43 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
 				"example/Template.ofp", "net.example.LogicClass", section,
-				null, false, null, null, false, null,
+				null, null, false, null, null, false, null,
 				this.getWoofTemplateChangeContext());
+		change.getTarget().setX(100);
+		change.getTarget().setY(101);
+
+		// Validate change
+		this.assertChange(change, null, "Add Template", true);
+
+		// Ensure appropriately added template
+		change.apply();
+		WoofTemplateModel template = this.model.getWoofTemplates().get(0);
+		assertSame("Incorrect template", template, change.getTarget());
+	}
+
+	/**
+	 * Ensure able to add {@link WoofTemplateModel} with a
+	 * <code>Content-Type</code>.
+	 */
+	public void testAddTemplateWithContentType() {
+
+		// Create the section type
+		SectionType section = this
+				.constructSectionType(new SectionTypeConstructor() {
+					@Override
+					public void construct(SectionTypeContext context) {
+						context.addSectionInput("renderTemplate", null);
+						context.addSectionOutput(
+								HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME,
+								null, false);
+					}
+				});
+
+		// Add the template
+		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
+				"example/Template.ofp", "net.example.LogicClass", section,
+				null, "text/html; charset=UTF-16", false, null, null, false,
+				null, this.getWoofTemplateChangeContext());
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
 
@@ -108,7 +143,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate("uri",
 				"example/Template.ofp", "net.example.LogicClass", section,
-				null, false, null, null, true, null,
+				null, null, false, null, null, true, null,
 				this.getWoofTemplateChangeContext());
 		change.getTarget().setX(100);
 		change.getTarget().setY(101);
@@ -137,8 +172,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the root template
 		Change<WoofTemplateModel> change = this.operations.addTemplate("/",
-				"root.ofp", null, section, null, false, null, null, false,
-				null, this.getWoofTemplateChangeContext());
+				"root.ofp", null, section, null, null, false, null, null,
+				false, null, this.getWoofTemplateChangeContext());
 
 		// Validate change
 		this.assertChange(change, null, "Add Template", true);
@@ -163,8 +198,8 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		secureLinks.put("LINK_2", Boolean.FALSE);
 		Change<WoofTemplateModel> change = this.operations.addTemplate(
 				"Template", "example/Template.ofp", "net.example.LogicClass",
-				section, null, true, secureLinks, new String[] { "POST", "PUT",
-						"OTHER" }, true, null,
+				section, null, null, true, secureLinks, new String[] { "POST",
+						"PUT", "OTHER" }, true, null,
 				this.getWoofTemplateChangeContext());
 
 		// Validate change
@@ -186,17 +221,17 @@ public class AddTest extends AbstractWoofChangesTestCase {
 
 		// Add the first template
 		this.operations.addTemplate("Template", "example/Template.ofp",
-				"Class1", section, null, false, null, null, false, null,
+				"Class1", section, null, null, false, null, null, false, null,
 				this.getWoofTemplateChangeContext()).apply();
 
 		// Add twice
 		this.operations.addTemplate("Template", "example/Template.ofp",
-				"Class2", section, null, false, null, null, false, null,
+				"Class2", section, null, null, false, null, null, false, null,
 				this.getWoofTemplateChangeContext()).apply();
 
 		// Add again with absolute URI
 		this.operations.addTemplate("/Template", "example/Template.ofp",
-				"Class3", section, null, false, null, null, false, null,
+				"Class3", section, null, null, false, null, null, false, null,
 				this.getWoofTemplateChangeContext()).apply();
 
 		// Ensure appropriately added templates
@@ -245,7 +280,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		// Add the template with extensions
 		Change<?> addChange = this.operations.addTemplate(TEMPLATE_URI,
 				"example/Template.ofp", "net.example.LogicClass", section,
-				null, false, null, null, false, extensions,
+				null, null, false, null, null, false, extensions,
 				this.getWoofTemplateChangeContext());
 		addChange.apply();
 

@@ -2,8 +2,8 @@
 
 	<templates>
 		<template name="TEMPLATE_A" uri="example" path="example/TemplateA.ofp"
-			extends="TEMPLATE_B" class="net.example.ExampleClassA" secure="true"
-			continue-rendering="true" x="300" y="301">
+			extends="TEMPLATE_B" class="net.example.ExampleClassA" content-type="text/plain; charset=UTF-16"
+			secure="true" continue-rendering="true" x="300" y="301">
 			<output name="OUTPUT_1" argument-type="java.lang.Integer">
 				<input section="SECTION_A" input="INPUT_A" />
 			</output>

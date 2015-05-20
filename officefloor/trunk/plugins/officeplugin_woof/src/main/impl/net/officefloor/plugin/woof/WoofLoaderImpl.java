@@ -198,6 +198,12 @@ public class WoofLoaderImpl implements WoofLoader {
 			HttpTemplateAutoWireSection template = application.addHttpTemplate(
 					uri, templatePath, templateLogicClass);
 
+			// Configure content type for template
+			String contentType = templateModel.getTemplateContentType();
+			if (!CompileUtil.isBlank(contentType)) {
+				template.setTemplateContentType(contentType);
+			}
+
 			// Configure secure for template
 			template.setTemplateSecure(templateModel.getIsTemplateSecure());
 			for (WoofTemplateLinkModel linkModel : templateModel.getLinks()) {

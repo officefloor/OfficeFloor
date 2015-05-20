@@ -839,7 +839,8 @@ public class WoofChangesImpl implements WoofChanges {
 	public Change<WoofTemplateModel> addTemplate(String uri,
 			String templatePath, String templateLogicClass,
 			SectionType section, WoofTemplateModel superTemplate,
-			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
+			String contentType, boolean isTemplateSecure,
+			Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
 			WoofTemplateExtension[] extensions,
 			WoofTemplateChangeContext context) {
@@ -855,7 +856,7 @@ public class WoofChangesImpl implements WoofChanges {
 		// Create the template
 		final WoofTemplateModel template = new WoofTemplateModel(templateName,
 				uri, templatePath, superTemplateName, templateLogicClass,
-				isTemplateSecure, isContinueRendering);
+				contentType, isTemplateSecure, isContinueRendering);
 
 		// Determine if have links
 		if (linksSecure != null) {
@@ -957,7 +958,7 @@ public class WoofChangesImpl implements WoofChanges {
 			final WoofTemplateModel template, final String uri,
 			final String templatePath, final String templateLogicClass,
 			SectionType sectionType, WoofTemplateModel superTemplate,
-			Set<String> inheritedTemplateOutputNames,
+			Set<String> inheritedTemplateOutputNames, String contentType,
 			final boolean isTemplateSecure,
 			final Map<String, Boolean> linksSecure,
 			final String[] renderRedirectHttpMethods,
@@ -997,6 +998,7 @@ public class WoofChangesImpl implements WoofChanges {
 		final String existingTemplateClassName = template
 				.getTemplateClassName();
 		final String existingSuperTemplateName = template.getSuperTemplate();
+		final String existingContentType = template.getTemplateContentType();
 		final boolean existingIsTemplateSecure = template.getIsTemplateSecure();
 		final List<WoofTemplateLinkModel> existingTemplateLinks = new ArrayList<WoofTemplateLinkModel>(
 				template.getLinks());
@@ -1020,6 +1022,7 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setTemplatePath(templatePath);
 				template.setTemplateClassName(templateLogicClass);
 				template.setSuperTemplate(newSuperTemplateName);
+				template.setTemplateContentType(contentType);
 				template.setIsTemplateSecure(isTemplateSecure);
 				template.setIsContinueRendering(isContinueRendering);
 
@@ -1059,6 +1062,7 @@ public class WoofChangesImpl implements WoofChanges {
 				template.setTemplatePath(existingTemplatePath);
 				template.setTemplateClassName(existingTemplateClassName);
 				template.setSuperTemplate(existingSuperTemplateName);
+				template.setTemplateContentType(existingContentType);
 				template.setIsTemplateSecure(existingIsTemplateSecure);
 				template.setIsContinueRendering(existingIsContinueRendering);
 
