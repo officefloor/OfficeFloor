@@ -139,7 +139,7 @@ public class InheritanceTest extends AbstractWoofChangesTestCase {
 		// Add the template
 		Change<WoofTemplateModel> change = this.operations.addTemplate(
 				"/child", "example/Child.ofp", null, section, superTemplate,
-				false, null, null, false, null,
+				null, false, null, null, false, null,
 				this.getWoofTemplateChangeContext());
 
 		// Validate change

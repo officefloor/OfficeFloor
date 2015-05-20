@@ -2,7 +2,8 @@
     
     <templates>
         <template name="TEMPLATE_A" uri="example" path="WOOF/TemplateA.ofp"
-         class="net.officefloor.plugin.woof.WoofLoaderTest$Template" secure="true" x="20" y="20">
+         class="net.officefloor.plugin.woof.WoofLoaderTest$Template" 
+         content-type="text/html; charset=UTF-8" secure="true" x="20" y="20">
             <output name="OUTPUT_1" argument-type="java.lang.Integer">
                 <input section="SECTION_A" input="INPUT_A"/>
             </output>

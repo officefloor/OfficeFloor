@@ -11,6 +11,7 @@
 				<attribute method="getTemplatePath" attribute="path" />
 				<attribute method="getSuperTemplate" attribute="extends" />
 				<attribute method="getTemplateClassName" attribute="class" />
+				<attribute method="getTemplateContentType" attribute="content-type" />
 				<attribute method="getIsTemplateSecure" attribute="secure" />
 				<attribute method="getIsContinueRendering" attribute="continue-rendering" />
 				<attribute method="getX" attribute="x" />

@@ -2,8 +2,8 @@
 
 	<templates>
 		<template name="change" uri="change" path="example/Change.html"
-			class="net.example.ChangeClass" secure="false" continue-rendering="false"
-			extends="TEMPLATE_LINK">
+			class="net.example.ChangeClass" content-type="text/changed" secure="false"
+			continue-rendering="false" extends="TEMPLATE_LINK">
 			<output name="OUTPUT_1" argument-type="java.lang.Integer">
 				<resource name="RESOURCE" />
 			</output>
