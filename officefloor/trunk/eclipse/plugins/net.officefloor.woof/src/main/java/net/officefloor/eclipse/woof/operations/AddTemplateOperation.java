@@ -83,6 +83,7 @@ public class AddTemplateOperation extends
 		String logicClassName = instance.getLogicClassName();
 		SectionType type = instance.getTemplateSectionType();
 		WoofTemplateModel superTemplate = instance.getSuperTemplate();
+		String contentType = instance.getContentType();
 		boolean isTemplateSecure = instance.isTemplateSecure();
 		Map<String, Boolean> linksSecure = instance.getLinksSecure();
 		String[] renderRedirectHttpMethods = instance
@@ -99,9 +100,9 @@ public class AddTemplateOperation extends
 
 		// Create change to add template
 		Change<WoofTemplateModel> change = changes.addTemplate(uri, path,
-				logicClassName, type, superTemplate, isTemplateSecure,
-				linksSecure, renderRedirectHttpMethods, isContinueRendering,
-				extensions, changeContext);
+				logicClassName, type, superTemplate, contentType,
+				isTemplateSecure, linksSecure, renderRedirectHttpMethods,
+				isContinueRendering, extensions, changeContext);
 
 		// Position template
 		context.positionModel(change.getTarget());

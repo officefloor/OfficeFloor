@@ -238,6 +238,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private final Property inheritedTemplatePaths;
 
 	/**
+	 * Content-Type for the {@link WoofTemplateModel}.
+	 */
+	private final Property contentType;
+
+	/**
 	 * Indicates if the template is secure.
 	 */
 	private final Property isTemplateSecure;
@@ -355,6 +360,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		String initialLogicClassName = null;
 		String initialSuperTemplateName = null;
 		String initialInheritedTemplatePaths = null;
+		String initialContentType = null;
 		String initialIsTemplateSecure = null;
 		String initialRenderRedirectHttpMethods = null;
 		String initialIsContinueRendering = null;
@@ -362,6 +368,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			// Provide initial values from existing configuration
 			initialUriPath = this.templateInstance.getUri();
 			initialLogicClassName = this.templateInstance.getLogicClassName();
+			initialContentType = this.templateInstance.getContentType();
 			initialIsTemplateSecure = String.valueOf(this.templateInstance
 					.isTemplateSecure());
 			initialIsContinueRendering = String.valueOf(this.templateInstance
@@ -433,6 +440,9 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.inheritedTemplatePaths = this.addProperty(
 				HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
 				initialInheritedTemplatePaths);
+		this.contentType = this.addProperty(
+				HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE,
+				initialContentType);
 		this.isTemplateSecure = this.addProperty(
 				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
 				initialIsTemplateSecure);
@@ -526,6 +536,15 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 */
 	public WoofTemplateInheritance getSuperTemplateInheritance() {
 		return this.superTemplateInheritance;
+	}
+
+	/**
+	 * Obtains the Content-Type for the {@link WoofTemplateModel}.
+	 * 
+	 * @return Content-Type for the {@link WoofTemplateModel}.
+	 */
+	public String getContentType() {
+		return this.contentType.getValue();
 	}
 
 	/**
@@ -691,6 +710,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		SourceExtensionUtil.createPropertyCombo("Extend template",
 				SUPER_TEMPLATE_NAME, initialSuperTemplateName,
 				inheritableSuperTemplateNames, page, this, null);
+
+		// Provide means to specify Content-Type
+		SourceExtensionUtil.createPropertyText("Content type",
+				HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE, null, page,
+				this, null);
 
 		// Provide means to specify if secure
 		SourceExtensionUtil.createPropertyCheckbox("Template secure",

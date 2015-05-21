@@ -93,6 +93,7 @@ public class RefactorTemplateOperation extends
 		WoofTemplateModel superTemplate = instance.getSuperTemplate();
 		Set<String> inheritedTemplateOutputNames = instance
 				.getInheritedTemplateOutputNames();
+		String contentType = instance.getContentType();
 		boolean isTemplateSecure = instance.isTemplateSecure();
 		Map<String, Boolean> linksSecure = instance.getLinksSecure();
 		String[] renderRedirectHttpMethods = instance
@@ -111,9 +112,9 @@ public class RefactorTemplateOperation extends
 		// Create change to refactor template
 		Change<WoofTemplateModel> change = changes.refactorTemplate(template,
 				uri, path, logicClassName, type, superTemplate,
-				inheritedTemplateOutputNames, isTemplateSecure, linksSecure,
-				renderRedirectHttpMethods, isContinueRendering, extensions,
-				outputNameMapping, changeContext);
+				inheritedTemplateOutputNames, contentType, isTemplateSecure,
+				linksSecure, renderRedirectHttpMethods, isContinueRendering,
+				extensions, outputNameMapping, changeContext);
 
 		// Return the change to refactor the template
 		return change;

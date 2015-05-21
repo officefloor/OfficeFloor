@@ -196,6 +196,7 @@ public class HttpTemplateWizard extends Wizard {
 		String templatePath = this.templatePage.getTemplatePath();
 		String logicClassName = this.templatePage.getLogicClassName();
 		SectionType sectionType = this.templatePage.getSectionType();
+		String contentType = this.templatePage.getContentType();
 		boolean isTemplateSecure = this.templatePage.isTemplateSecure();
 		Map<String, Boolean> linksSecure = this.templatePage.getLinksSecure();
 		String[] renderRedirectHttpMethods = this.templatePage
@@ -238,9 +239,9 @@ public class HttpTemplateWizard extends Wizard {
 		// Create HTTP Template Instance
 		this.httpTemplateInstance = new HttpTemplateInstance(woofTemplateName,
 				uriPath, templatePath, logicClassName, sectionType,
-				superTemplate, inheritedTemplateOutputNames, isTemplateSecure,
-				linksSecure, renderRedirectHttpMethods, isContinueRendering,
-				extensionInstances, outputNameMapping);
+				superTemplate, inheritedTemplateOutputNames, contentType,
+				isTemplateSecure, linksSecure, renderRedirectHttpMethods,
+				isContinueRendering, extensionInstances, outputNameMapping);
 
 		// Use the HTTP Template Instance
 		return true;
