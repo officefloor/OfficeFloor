@@ -88,6 +88,11 @@ public class HttpTemplateInstance {
 	private final Set<String> inheritedTemplateOutputNames;
 
 	/**
+	 * Content-Type for the {@link WoofTemplateModel}.
+	 */
+	private final String contentType;
+
+	/**
 	 * Indicates if the {@link HttpTemplate} requires a secure
 	 * {@link ServerHttpConnection}.
 	 */
@@ -149,6 +154,8 @@ public class HttpTemplateInstance {
 	 * @param inheritedTemplateOutputNames
 	 *            Names of the {@link WoofTemplateOutputModel} instances that
 	 *            are inheriting their configuration.
+	 * @param contentType
+	 *            Content-Type for the {@link WoofTemplateModel}.
 	 * @param isTemplateSecure
 	 *            Indicates if the {@link HttpTemplate} requires a secure
 	 *            {@link ServerHttpConnection}.
@@ -167,8 +174,8 @@ public class HttpTemplateInstance {
 	public HttpTemplateInstance(String woofTemplateName, String uri,
 			String templatePath, String logicClassName,
 			SectionType sectionType, WoofTemplateModel superTemplate,
-			Set<String> inheritedTemplateOutputNames, boolean isTemplateSecure,
-			Map<String, Boolean> linksSecure,
+			Set<String> inheritedTemplateOutputNames, String contentType,
+			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
 			HttpTemplateExtensionInstance[] extensionInstances) {
 		this.woofTemplateName = woofTemplateName;
@@ -178,6 +185,7 @@ public class HttpTemplateInstance {
 		this.sectionType = sectionType;
 		this.superTemplate = superTemplate;
 		this.inheritedTemplateOutputNames = inheritedTemplateOutputNames;
+		this.contentType = contentType;
 		this.isTemplateSecure = isTemplateSecure;
 		this.linksSecure = linksSecure;
 		this.renderRedirectHttpMethods = renderRedirectHttpMethods;
@@ -201,6 +209,7 @@ public class HttpTemplateInstance {
 		this.templatePath = template.getTemplatePath();
 		this.logicClassName = template.getTemplateClassName();
 		this.sectionType = null;
+		this.contentType = template.getTemplateContentType();
 		this.isTemplateSecure = template.getIsTemplateSecure();
 		this.isContinueRendering = template.getIsContinueRendering();
 
@@ -297,6 +306,8 @@ public class HttpTemplateInstance {
 	 * @param inheritedTemplateOutputNames
 	 *            Names of the {@link WoofTemplateOutputModel} instances that
 	 *            are inheriting their configuration.
+	 * @param contentType
+	 *            Content-Type for the {@link WoofTemplateModel}.
 	 * @param isTemplateSecure
 	 *            Indicates if the {@link HttpTemplate} requires a secure
 	 *            {@link ServerHttpConnection}.
@@ -318,8 +329,8 @@ public class HttpTemplateInstance {
 	HttpTemplateInstance(String woofTemplateName, String uri,
 			String templatePath, String logicClassName,
 			SectionType sectionType, WoofTemplateModel superTemplate,
-			Set<String> inheritedTemplateOutputNames, boolean isTemplateSecure,
-			Map<String, Boolean> linksSecure,
+			Set<String> inheritedTemplateOutputNames, String contentType,
+			boolean isTemplateSecure, Map<String, Boolean> linksSecure,
 			String[] renderRedirectHttpMethods, boolean isContinueRendering,
 			HttpTemplateExtensionInstance[] extensionInstances,
 			Map<String, String> outputNameMapping) {
@@ -330,6 +341,7 @@ public class HttpTemplateInstance {
 		this.sectionType = sectionType;
 		this.superTemplate = superTemplate;
 		this.inheritedTemplateOutputNames = inheritedTemplateOutputNames;
+		this.contentType = contentType;
 		this.isTemplateSecure = isTemplateSecure;
 		this.linksSecure = linksSecure;
 		this.renderRedirectHttpMethods = renderRedirectHttpMethods;
@@ -402,6 +414,15 @@ public class HttpTemplateInstance {
 	 */
 	public Set<String> getInheritedTemplateOutputNames() {
 		return this.inheritedTemplateOutputNames;
+	}
+
+	/**
+	 * Obtains the Content-Type for the {@link WoofTemplateModel}.
+	 * 
+	 * @return Content-Type for the {@link WoofTemplateModel}.
+	 */
+	public String getContentType() {
+		return this.contentType;
 	}
 
 	/**
