@@ -57,16 +57,6 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	private static final String CONTENT_LENGTH = "Content-Length";
 
 	/**
-	 * Content-Type header name.
-	 */
-	private static final String CONTENT_TYPE = "Content-Type";
-
-	/**
-	 * Default character encoding.
-	 */
-	private static final String DEFAULT_CHARACTER_ENCODING = "ISO-8859-1";
-
-	/**
 	 * {@link Pattern} to extract the {@link Charset} from the Content Type.
 	 */
 	private static final Pattern EXTRACT_CHARSET_PATTERN;
@@ -125,12 +115,6 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	 * Flag indicating if the {@link PrintWriter} has been retrieved.
 	 */
 	private boolean isPrintWriterRetrieved = false;
-
-	/**
-	 * Character encoding for the {@link HttpResponse}.
-	 */
-	private Charset characterEncoding = Charset
-			.forName(DEFAULT_CHARACTER_ENCODING);
 
 	/**
 	 * Initiate.
@@ -240,7 +224,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 
 		// Return the print writer (that auto flushes)
 		Writer writer = new OutputStreamWriter(this.outputStream,
-				this.characterEncoding);
+				this.response.getContentCharset());
 		return new HttpResponsePrintWriter(writer, this.outputStream);
 	}
 
@@ -274,23 +258,27 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 					"PrintWriter has already been retrieved");
 		}
 
-		// Specifies the content type
-		this.response.removeHeaders(CONTENT_TYPE);
-		this.response.addHeader(CONTENT_TYPE, type);
-
 		// Strip out the charset
 		Matcher matcher = EXTRACT_CHARSET_PATTERN.matcher(type);
+		Charset charset = null;
 		if (matcher.matches()) {
 			// Have charset so load to character encoding
 			String charsetName = matcher.group(1);
-			this.setCharacterEncoding(charsetName.trim());
+			charset = Charset.forName(charsetName);
+		}
+
+		// Specify the Content-Type (and charset if available)
+		try {
+			this.response.setContentType(type, charset);
+		} catch (IOException ex) {
+			// Should not occur
+			throw new IllegalStateException(ex);
 		}
 	}
 
 	@Override
 	public String getContentType() {
-		HttpHeader header = this.response.getHeader(CONTENT_TYPE);
-		return (header == null ? null : header.getValue());
+		return this.response.getContentType();
 	}
 
 	@Override
@@ -303,12 +291,18 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 		}
 
 		// Specify the charset
-		this.characterEncoding = Charset.forName(charset);
+		try {
+			this.response.setContentType(this.response.getContentType(),
+					Charset.forName(charset));
+		} catch (IOException ex) {
+			// Should not occur
+			throw new IllegalStateException(ex);
+		}
 	}
 
 	@Override
 	public String getCharacterEncoding() {
-		return this.characterEncoding.displayName();
+		return this.response.getContentCharset().name();
 	}
 
 	@Override
