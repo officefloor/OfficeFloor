@@ -1377,6 +1377,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	public void test_resp_Writer() {
 		final String DATA = "test";
 		this.record_init("/test");
+		this.recordReturn(this.response, this.response.getContentCharset(),
+				Charset.defaultCharset());
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
@@ -1407,6 +1409,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	public void test_resp_Buffer() {
 		final String DATA = "test data";
 		this.record_init("/test");
+		this.recordReturn(this.response, this.response.getContentCharset(),
+				Charset.defaultCharset());
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
@@ -1449,6 +1453,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	 */
 	public void test_resp_ResetBuffer() {
 		this.record_init("/test");
+		this.recordReturn(this.response, this.response.getContentCharset(),
+				Charset.defaultCharset());
 		this.doTest(new MockHttpServlet() {
 			@Override
 			protected void test(HttpServletRequest req, HttpServletResponse resp)
@@ -1490,6 +1496,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 
 		// Record obtaining the output streams
 		this.record_init("/test");
+		this.recordReturn(this.response, this.response.getContentCharset(),
+				Charset.forName("ASCII"));
 		this.recordReturn(this.response,
 				this.response.addHeader("test", "value"), header);
 		this.recordReturn(this.response, this.response.getHeaders(),
@@ -1537,9 +1545,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can specify the content details.
 	 */
-	public void test_resp_ContentDetails() {
+	public void test_resp_ContentDetails() throws IOException {
 		final String CONTENT_LENGTH = "Content-Length";
-		final String CONTENT_TYPE = "Content-Type";
 		final HttpHeader header = this.createMock(HttpHeader.class);
 
 		// Record
@@ -1551,27 +1558,36 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 				this.response.addHeader(CONTENT_LENGTH, "10"), header);
 
 		// Record specifying content type without charset
-		this.response.removeHeaders(CONTENT_TYPE);
-		this.recordReturn(this.response,
-				this.response.addHeader(CONTENT_TYPE, "text/html"), header);
-		this.recordReturn(this.response, this.response.getHeader(CONTENT_TYPE),
-				header);
-		this.recordReturn(header, header.getValue(), "text/html");
+		this.response.setContentType("text/html", null);
+		this.recordReturn(this.response, this.response.getContentType(),
+				"text/html");
+
+		// Default charset
+		this.recordReturn(this.response, this.response.getContentCharset(),
+				Charset.forName("ISO-8859-1"));
 
 		// Record specifying content type with charset
-		this.response.removeHeaders(CONTENT_TYPE);
-		this.recordReturn(this.response, this.response.addHeader(CONTENT_TYPE,
-				"text/html; charset=UTF-8; another=parameter"), header);
-		this.recordReturn(this.response, this.response.getHeader(CONTENT_TYPE),
-				header);
-		this.recordReturn(header, header.getValue(),
-				"text/html; charset=UTF-8; another=parameter");
+		final String contentType = "text/html; charset=UTF-8; another=parameter";
+		this.response.setContentType(contentType, Charset.forName("UTF-8"));
+		this.recordReturn(this.response, this.response.getContentType(),
+				contentType);
+		this.recordReturn(this.response, this.response.getContentCharset(),
+				Charset.forName("UTF-8"));
 
 		// Record specifying character encoding
-		this.recordReturn(this.response, this.response.getHeader(CONTENT_TYPE),
-				header);
-		this.recordReturn(header, header.getValue(),
-				"text/html; charset=UTF-8; another=parameter");
+		this.recordReturn(this.response, this.response.getContentType(),
+				contentType);
+		this.response.setContentType(contentType, Charset.forName("UTF-16"));
+		this.recordReturn(this.response, this.response.getContentCharset(),
+				Charset.forName("UTF-16"));
+
+		// Record content type not changing
+		this.recordReturn(this.response, this.response.getContentType(),
+				contentType);
+
+		// Record generating writter
+		this.recordReturn(this.response, this.response.getContentCharset(),
+				Charset.forName("UTF-16"));
 
 		// Test
 		this.doTest(new MockHttpServlet() {
@@ -1700,6 +1716,8 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 		// Record
 		this.record_init("/test");
 		this.response.setStatus(404, "test message");
+		this.recordReturn(this.response, this.response.getContentCharset(),
+				Charset.defaultCharset());
 		this.response.send();
 
 		// Test
