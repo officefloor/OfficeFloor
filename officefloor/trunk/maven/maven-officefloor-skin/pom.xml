@@ -71,7 +71,7 @@
 								<mkdir dir="${css.dir}" />
 
 								<!-- Setup URLs for download -->
-								<property name="css.url" value="http://maven.apache.org/css" />
+								<property name="css.url" value="http://maven.apache.org/plugins/maven-dependency-plugin/css" />
 
 								<!-- Download the maven css files -->
 								<echo>Download maven css files: ${project.build.outputDirectory}</echo>

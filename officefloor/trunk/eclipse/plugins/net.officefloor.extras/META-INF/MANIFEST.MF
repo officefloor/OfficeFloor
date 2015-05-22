@@ -77,4 +77,3 @@ Bundle-ClassPath: .,
  officeplugin_json-2.15.0.jar,
  officeplugin_launch-2.15.0.jar,
  javax.persistence-2.1.0.jar
- 
