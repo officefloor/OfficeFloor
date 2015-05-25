@@ -162,6 +162,7 @@ public class WoofTemplateEditPart
 		case CHANGE_TEMPLATE_CLASS_NAME:
 		case CHANGE_TEMPLATE_PATH:
 		case CHANGE_SUPER_TEMPLATE:
+		case CHANGE_TEMPLATE_CONTENT_TYPE:
 		case ADD_LINK:
 		case REMOVE_LINK:
 		case ADD_REDIRECT:
