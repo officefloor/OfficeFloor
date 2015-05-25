@@ -5,16 +5,16 @@
 
 	<description name="OfficeFloor" url="http://www.officefloor.net">Eclipse update site for OfficeFloor</description>
 
-	<feature url="features/net.officefloor.feature_2.15.0.jar" id="net.officefloor.feature"
-		version="2.15.0">
+	<feature url="features/net.officefloor.feature_2.16.0.jar" id="net.officefloor.feature"
+		version="2.16.0">
 		<category name="OfficeFloor" />
 	</feature>
-	<feature url="features/net.officefloor.woof.feature_2.15.0.jar"
-		id="net.officefloor.woof.feature" version="2.15.0">
+	<feature url="features/net.officefloor.woof.feature_2.16.0.jar"
+		id="net.officefloor.woof.feature" version="2.16.0">
 		<category name="OfficeFloor" />
 	</feature>
-	<feature url="features/net.officefloor.extras.feature_2.15.0.jar"
-		id="net.officefloor.extras.feature" version="2.15.0">
+	<feature url="features/net.officefloor.extras.feature_2.16.0.jar"
+		id="net.officefloor.extras.feature" version="2.16.0">
 		<category name="OfficeFloor" />
 	</feature>
 	
