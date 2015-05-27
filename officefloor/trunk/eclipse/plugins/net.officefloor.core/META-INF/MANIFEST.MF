@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Core
 Bundle-SymbolicName: net.officefloor.core;singleton:=true
 Bundle-Vendor: OfficeFloor
-Bundle-Version: 2.15.0
+Bundle-Version: 2.16.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
 Export-Package: com.google.common.annotations,
@@ -552,11 +552,11 @@ Export-Package: com.google.common.annotations,
  org.sonatype.plexus.components.sec.dispatcher.model.io.xpp3
 Import-Package: junit.framework
 Bundle-ClassPath: .,
- officebuilding-2.15.0.jar,
- officecompiler-2.15.0.jar,
- officeframe-2.15.0.jar,
- officemodelgen-2.15.0.jar,
- officexml-2.15.0.jar,
+ officebuilding-2.16.0.jar,
+ officecompiler-2.16.0.jar,
+ officeframe-2.16.0.jar,
+ officemodelgen-2.16.0.jar,
+ officexml-2.16.0.jar,
  aether-api-1.0.0.v20140518.jar,
  aether-connector-basic-1.0.0.v20140518.jar,
  aether-impl-1.0.0.v20140518.jar,
