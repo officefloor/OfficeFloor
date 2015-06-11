@@ -36,6 +36,7 @@ import net.officefloor.plugin.socket.server.impl.AbstractClientServerTestCase;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.protocol.CommunicationProtocolSource;
 import net.officefloor.plugin.stream.ServerOutputStream;
+import net.officefloor.plugin.stream.ServerWriter;
 
 /**
  * Tests the {@link HttpCommunicationProtocol}.
@@ -160,8 +161,8 @@ public class HttpCommunicationProtocolTest extends AbstractClientServerTestCase 
 		response.setContentType("text/plain", null);
 
 		// Send HTTP response
-		ServerOutputStream entity = response.getEntity();
-		entity.write(UsAsciiUtil.convertToUsAscii("TEST"));
+		ServerWriter entity = response.getEntityWriter();
+		entity.write("TEST");
 		entity.close();
 
 		// Validate received response

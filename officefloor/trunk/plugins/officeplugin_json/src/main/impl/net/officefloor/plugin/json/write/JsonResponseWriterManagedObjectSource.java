@@ -28,6 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.json.JsonResponseWriter;
+import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -119,8 +120,15 @@ public class JsonResponseWriterManagedObjectSource
 
 		@Override
 		public void writeResponse(Object jsonObject) throws IOException {
-			Writer responseWriter = this.connection.getHttpResponse()
-					.getEntityWriter();
+
+			// Obtain the response
+			HttpResponse response = this.connection.getHttpResponse();
+
+			// Specify JSON as Content-Type
+			response.setContentType("application/json", null);
+
+			// Send the JSON response
+			Writer responseWriter = response.getEntityWriter();
 			JsonResponseWriterManagedObjectSource.this.mapper.writeValue(
 					responseWriter, jsonObject);
 		}

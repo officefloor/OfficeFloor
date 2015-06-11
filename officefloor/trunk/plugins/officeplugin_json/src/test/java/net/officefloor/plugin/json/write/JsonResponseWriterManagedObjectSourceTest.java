@@ -30,6 +30,7 @@ import net.officefloor.plugin.json.write.JsonResponseWriterManagedObjectSource.D
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
@@ -123,6 +124,11 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 			HttpResponse response = client.execute(request);
 			assertEquals("Request should be successful", 200, response
 					.getStatusLine().getStatusCode());
+			assertEquals("Must specify content type",
+					"application/json; charset="
+							+ AbstractServerSocketManagedObjectSource
+									.getCharset(null).name(), response
+							.getFirstHeader("Content-Type").getValue());
 			assertEquals("Incorrect response entity", expectedJsonEntity,
 					EntityUtils.toString(response.getEntity()));
 

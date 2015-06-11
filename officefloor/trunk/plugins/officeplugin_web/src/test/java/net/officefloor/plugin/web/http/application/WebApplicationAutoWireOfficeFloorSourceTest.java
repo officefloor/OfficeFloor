@@ -225,10 +225,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	}
 
 	/**
-	 * Ensure able to provide the Content-Type.
+	 * Ensure able to provide the Content-Type with the {@link Charset}.
 	 */
-	public void testTemplateTextContentType() throws Exception {
+	public void testTemplateForContentTypeWithCharset() throws Exception {
 
+		// Obtain non-default charset
 		Charset charset = Charset.defaultCharset();
 		if (AbstractServerSocketManagedObjectSource.DEFAULT_CHARSET
 				.equalsIgnoreCase(charset.name())) {
@@ -259,7 +260,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	/**
 	 * Ensure able to provide the Content-Type.
 	 */
-	public void testTemplateTextContentTypeDefaultCharset() throws Exception {
+	public void testTemplateContentTypeWithDefaultCharset() throws Exception {
 
 		// Add HTTP template with Content-Type
 		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
@@ -276,12 +277,13 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		assertEquals(
 				"Incorrect Content-Type on response",
 				"text/plain; charset="
-						+ AbstractServerSocketManagedObjectSource.DEFAULT_CHARSET,
+						+ AbstractServerSocketManagedObjectSource.getCharset(
+								null).name(),
 				response.getFirstHeader("Content-Type").getValue());
 	}
 
 	/**
-	 * Ensure not use <code>charset</code> parameter if not text Content-Type.
+	 * Ensure <code>charset</code> parameter providing on unknown Content-Type.
 	 */
 	public void testTemplateNonTextContentType() throws Exception {
 
@@ -297,7 +299,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure template correct
 		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
-		assertEquals("Incorrect Content-Type on response", "x-test/non-text",
+		assertEquals(
+				"Incorrect Content-Type on response",
+				"x-test/non-text; charset="
+						+ AbstractServerSocketManagedObjectSource.getCharset(
+								null).name(),
 				response.getFirstHeader("Content-Type").getValue());
 
 	}

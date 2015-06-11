@@ -25,6 +25,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.json.HttpJson;
 import net.officefloor.plugin.json.JsonResponseWriter;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.woof.WoofLoader;
 import net.officefloor.plugin.woof.WoofLoaderImpl;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
@@ -107,6 +108,10 @@ public class WoofImplicitJsonTest extends OfficeFrameTestCase {
 		HttpResponse response = this.client.execute(request);
 		assertEquals("Should be successful", 200, response.getStatusLine()
 				.getStatusCode());
+		assertEquals("Must specify content type", "application/json; charset="
+				+ AbstractServerSocketManagedObjectSource.getCharset(null)
+						.name(), response.getFirstHeader("Content-Type")
+				.getValue());
 		assertEquals("Incorrect response", "{\"value\":\"RESPONSE\"}",
 				EntityUtils.toString(response.getEntity()));
 	}

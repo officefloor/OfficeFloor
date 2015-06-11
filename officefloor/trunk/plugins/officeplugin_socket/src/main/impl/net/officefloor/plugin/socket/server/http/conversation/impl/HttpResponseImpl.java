@@ -199,6 +199,10 @@ public class HttpResponseImpl implements HttpResponse {
 		this.charset = Charset.forName(state.charset);
 		this.entity = new ServerOutputStreamImpl(this.receiver,
 				this.conversation.getSendBufferSize(), state.entityState);
+		this.isOutputStream = state.isOutputStream;
+		if (state.isEntityWriter) {
+			this.loadEntityWriterThreadUnsafe();
+		}
 	}
 
 	/**
@@ -234,7 +238,8 @@ public class HttpResponseImpl implements HttpResponse {
 			// Create and return the state momento
 			return new StateMomento(this.status, this.statusMessage,
 					httpHeaders, entityMomento, this.contentType,
-					charsetSerializeName);
+					charsetSerializeName, this.isOutputStream,
+					(this.entityWriter != null));
 		}
 	}
 
@@ -266,6 +271,9 @@ public class HttpResponseImpl implements HttpResponse {
 
 			// Clear the response to write the failure
 			this.resetUnsafe();
+			
+			// Send failure as plain text
+			this.contentType = "text/plain";
 
 			// Write the failure header details
 			if (failure instanceof HttpRequestParseException) {
@@ -376,6 +384,8 @@ public class HttpResponseImpl implements HttpResponse {
 		this.headers.clear();
 		this.entity.clear();
 		this.receiver.entityBuffers.clear();
+		this.contentType = null;
+		this.charset = this.conversation.getDefaultCharset();
 		this.isOutputStream = false;
 		this.entityWriter = null;
 	}
@@ -608,17 +618,16 @@ public class HttpResponseImpl implements HttpResponse {
 	 *         if no <code>Content-Type</code> specified.
 	 */
 	private String getContentTypeThreadUnsafe() {
+
 		// Determine if have content type
 		if (this.contentType == null) {
 			return null; // No content type
 		}
 
-		// Provide the content type (appending charset if necessary)
-		boolean isTextContentType = ("text/".equalsIgnoreCase(this.contentType
-				.substring(0,
-						Math.min("text/".length(), this.contentType.length()))));
+		// Provide the content type (appending charset if using writer)
 		return this.contentType
-				+ (isTextContentType ? "; charset=" + this.charset.name() : "");
+				+ (this.entityWriter != null ? "; charset="
+						+ this.charset.name() : "");
 	}
 
 	@Override
@@ -638,13 +647,20 @@ public class HttpResponseImpl implements HttpResponse {
 
 			// Lazy create the entity writer
 			if (this.entityWriter == null) {
-				this.entityWriter = new ServerWriter(this.entity, this.charset,
-						this.receiver.getLock());
+				this.loadEntityWriterThreadUnsafe();
 			}
 
 			// Return the entity writer
 			return this.entityWriter;
 		}
+	}
+
+	/**
+	 * Loads the {@link ServerWriter}.
+	 */
+	private void loadEntityWriterThreadUnsafe() {
+		this.entityWriter = new ServerWriter(this.entity, this.charset,
+				this.receiver.getLock());
 	}
 
 	@Override
@@ -830,6 +846,16 @@ public class HttpResponseImpl implements HttpResponse {
 		private final String charset;
 
 		/**
+		 * Indicates if a {@link ServerOutputStream}.
+		 */
+		private final boolean isOutputStream;
+
+		/**
+		 * Indicates if a {@link ServerWriter}.
+		 */
+		private final boolean isEntityWriter;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param status
@@ -844,16 +870,23 @@ public class HttpResponseImpl implements HttpResponse {
 		 *            Content-Type.
 		 * @param charset
 		 *            {@link Charset} for the {@link ServerWriter}.
+		 * @param isOutputStream
+		 *            Indicates if a {@link ServerOutputStream}.
+		 * @param isEntityWriter
+		 *            Indicates if a {@link ServerWriter}.
 		 */
 		public StateMomento(int status, String statusMessage,
 				List<HttpHeader> headers, Serializable entityState,
-				String contentType, String charset) {
+				String contentType, String charset, boolean isOutputStream,
+				boolean isEntityWriter) {
 			this.status = status;
 			this.statusMessage = statusMessage;
 			this.headers = headers;
 			this.entityState = entityState;
 			this.contentType = contentType;
 			this.charset = charset;
+			this.isOutputStream = isOutputStream;
+			this.isEntityWriter = isEntityWriter;
 		}
 	}
 

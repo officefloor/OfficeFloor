@@ -202,7 +202,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		this.conversation.parseFailure(failure, true);
 		String message = failure.getClass().getSimpleName() + ": "
 				+ failure.getMessage();
-		this.assertWireData("HTTP/1.0 400 Bad Request\nServer: TEST\nDate: [Mock time]\nContent-Type: text/html; charset="
+		this.assertWireData("HTTP/1.0 400 Bad Request\nServer: TEST\nDate: [Mock time]\nContent-Type: text/plain; charset="
 				+ US_ASCII.name()
 				+ "\nContent-Length: "
 				+ message.length()
@@ -240,7 +240,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		String message = failure.getClass().getSimpleName() + ": "
 				+ failure.getMessage();
 		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 4\n\nTEST"
-				+ "HTTP/1.0 414 Request-URI Too Large\nServer: TEST\nDate: [Mock time]\nContent-Type: text/html; charset="
+				+ "HTTP/1.0 414 Request-URI Too Large\nServer: TEST\nDate: [Mock time]\nContent-Type: text/plain; charset="
 				+ US_ASCII.name()
 				+ "\nContent-Length: "
 				+ message.length()
@@ -271,7 +271,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 		// Ensure failure written as response
 		String message = failure.getClass().getSimpleName() + ": "
 				+ failure.getMessage();
-		this.assertWireData("HTTP/1.1 500 Internal Server Error\nServer: TEST\nDate: [Mock time]\nContent-Type: text/html; charset="
+		this.assertWireData("HTTP/1.1 500 Internal Server Error\nServer: TEST\nDate: [Mock time]\nContent-Type: text/plain; charset="
 				+ US_ASCII.name()
 				+ "\nContent-Length: "
 				+ message.length()
