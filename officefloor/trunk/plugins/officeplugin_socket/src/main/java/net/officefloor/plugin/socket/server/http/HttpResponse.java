@@ -161,9 +161,10 @@ public interface HttpResponse {
 	 * <p>
 	 * Specifies the <code>Content-Type</code> and optionally the
 	 * {@link Charset}. The <code>charset</code> parameter will automatically be
-	 * added to <code>text/*</code> <code>Content-Type</code>s.
+	 * added to the <code>Content-Type</code> on using the
+	 * {@link #getEntityWriter}.
 	 * <p>
-	 * This must be specified before calling (@link {@link #getEntityWriter()}.
+	 * This must be specified before calling {@link #getEntityWriter()}.
 	 * 
 	 * @param contentType
 	 *            <code>Content-Type</code>. May be <code>null</code> to unset

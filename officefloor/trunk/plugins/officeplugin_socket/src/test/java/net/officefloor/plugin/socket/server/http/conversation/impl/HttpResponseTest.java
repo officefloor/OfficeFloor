@@ -111,16 +111,20 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 
 		// Change content type with default charset
 		response.setContentType("text/xml", null);
+		response.getEntityWriter(); // to include charset
 		assertEquals("Incorrect content type", "text/xml; charset="
 				+ DEFAULT_CHARSET.name(), response.getContentType());
 		assertEquals("Incorrect default charset", DEFAULT_CHARSET,
 				response.getContentCharset());
 
 		// Change content type and charset
+		response = this.createHttpResponse(); // need new as entity writer
+												// specified
 		Charset charset = Charset.forName("UTF-16");
-		response.setContentType("text/json", charset);
-		assertEquals("Incorrect content type", "text/json; charset=UTF-16",
-				response.getContentType());
+		response.setContentType("application/json", charset);
+		response.getEntityWriter(); // to include charset
+		assertEquals("Incorrect content type",
+				"application/json; charset=UTF-16", response.getContentType());
 		assertEquals("Incorrect charset", charset, response.getContentCharset());
 	}
 
@@ -266,7 +270,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 400 Bad Request\n"
 				+ "Server: TEST\nDate: [Mock Time]\n"
-				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 42", FAILURE.getClass().getSimpleName()
 				+ ": Fail Parse Test", DEFAULT_CHARSET);
 		assertTrue("Connection should be closed", this.isConnectionClosed);
@@ -282,7 +286,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
 				+ "Server: TEST\nDate: [Mock Time]\n"
-				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 23", FAILURE.getClass().getSimpleName()
 				+ ": Failure Test", DEFAULT_CHARSET);
 		assertTrue("Connection should be closed", this.isConnectionClosed);
@@ -298,7 +302,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
 				+ "Server: TEST\nDate: [Mock Time]\n"
-				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 15", Exception.class.getSimpleName()
 				+ ": null", DEFAULT_CHARSET);
 		assertTrue("Connection should be closed", this.isConnectionClosed);
@@ -328,7 +332,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		this.sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
 				+ "Server: TEST\nDate: [Mock Time]\n"
-				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: " + contentLength, content,
 				DEFAULT_CHARSET);
 		assertTrue("Connection should be closed", this.isConnectionClosed);
@@ -351,7 +355,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		((HttpResponseImpl) response).sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
 				+ "Server: TEST\nDate: [Mock Time]\n"
-				+ "Content-Type: text/html; charset=" + DEFAULT_CHARSET.name()
+				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name()
 				+ "\nContent-Length: 23", FAILURE.getClass().getSimpleName()
 				+ ": Failure Test", DEFAULT_CHARSET);
 	}
@@ -376,7 +380,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		((HttpResponseImpl) response).sendFailure(FAILURE);
 		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
 				+ "Server: TEST\nDate: [Mock Time]\n"
-				+ "Content-Type: text/html; charset=UTF-8\n"
+				+ "Content-Type: text/plain; charset=US-ASCII\n"
 				+ "Content-Length: 23", FAILURE.getClass().getSimpleName()
 				+ ": Failure Test", charset);
 	}
@@ -564,7 +568,7 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 		// Validate reset content
 		response.send();
 		this.assertWireContent(
-				"HTTP/1.1 204 No Content\nServer: TEST\nDate: [Mock Time]\nContent-Type: text/html; charset=US-ASCII\nContent-Length: 0",
+				"HTTP/1.1 204 No Content\nServer: TEST\nDate: [Mock Time]\nContent-Length: 0",
 				null, null);
 	}
 
