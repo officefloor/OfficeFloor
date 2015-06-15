@@ -517,9 +517,9 @@
 				<version>1.12.4</version>
 			</dependency>
 			<dependency>
-				<groupId>commons-lang</groupId>
-				<artifactId>commons-lang</artifactId>
-				<version>2.6</version>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.4</version>
 			</dependency>
 			<!-- Following plug-ins are dependency managed to ensure available for 
 				woof-archetype to check using the latest. -->

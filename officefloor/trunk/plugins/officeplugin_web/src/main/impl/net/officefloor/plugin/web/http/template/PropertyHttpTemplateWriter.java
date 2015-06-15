@@ -26,7 +26,7 @@ import net.officefloor.plugin.value.retriever.ValueRetriever;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  * {@link HttpTemplateWriter} to write a bean property.
@@ -114,13 +114,14 @@ public class PropertyHttpTemplateWriter implements HttpTemplateWriter {
 			throw new IOException(ex);
 		}
 
-		// Escape the value for HTML
+		// Write out the value
 		if (this.isEscaped) {
-			propertyTextValue = StringEscapeUtils.escapeHtml(propertyTextValue);
+			// Write the escaped value
+			StringEscapeUtils.ESCAPE_HTML4.translate(propertyTextValue, writer);
+		} else {
+			// Write the raw value
+			writer.write(propertyTextValue);
 		}
-
-		// Write the text
-		writer.write(propertyTextValue);
 	}
 
 }
