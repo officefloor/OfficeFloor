@@ -51,6 +51,8 @@ public class CompileUtil {
 	 * Convenience method for {@link List#toArray(Object[])} to pass compiler
 	 * warnings for generic typed array.
 	 * 
+	 * @param <T>
+	 *            Element type.
 	 * @param list
 	 *            List to transform into an array.
 	 * @param type

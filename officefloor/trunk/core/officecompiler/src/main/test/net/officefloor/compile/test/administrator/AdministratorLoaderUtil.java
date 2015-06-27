@@ -33,6 +33,7 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
@@ -48,6 +49,12 @@ public class AdministratorLoaderUtil {
 	 * Validates the {@link AdministratorSourceSpecification} for the
 	 * {@link AdministratorSource}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} key type.
+	 * @param <S>
+	 *            {@link AdministratorSource} type.
 	 * @param administratorSourceClass
 	 *            {@link AdministratorSource} class.
 	 * @param propertyNameLabels
@@ -87,6 +94,18 @@ public class AdministratorLoaderUtil {
 	 * {@link AdministratorTypeBuilder} against the {@link AdministratorType}
 	 * loaded from the {@link AdministratorSource}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} key type.
+	 * @param <S>
+	 *            {@link AdministratorSource} type
+	 * @param expectedAdministratorType
+	 *            Expected {@link AdministratorType}.
+	 * @param administratorSourceClass
+	 *            {@link AdministratorSource} class.
+	 * @param propertyNameValues
+	 *            Properties to configure the {@link AdministratorSource}..
 	 * @return {@link AdministratorType} loaded from the
 	 *         {@link AdministratorSource}.
 	 */
@@ -155,6 +174,12 @@ public class AdministratorLoaderUtil {
 	/**
 	 * Loads the {@link AdministratorType} from the {@link AdministratorSource}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} key type.
+	 * @param <S>
+	 *            {@link AdministratorSource} type.
 	 * @param administratorSourceClass
 	 *            {@link AdministratorSource} class.
 	 * @param propertyNameValues

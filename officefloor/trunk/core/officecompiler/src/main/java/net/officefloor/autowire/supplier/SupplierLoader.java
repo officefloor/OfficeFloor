@@ -34,6 +34,8 @@ public interface SupplierLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link SupplierSourceSpecification} for the {@link SupplierSource}.
 	 * 
+	 * @param <S>
+	 *            {@link SupplierSource} type.
 	 * @param supplierSourceClass
 	 *            {@link SupplierSource} class.
 	 * @return {@link PropertyList} of the {@link SupplierSourceProperty}
@@ -47,6 +49,8 @@ public interface SupplierLoader {
 	/**
 	 * Loads and returns {@link SupplierType} for the {@link SupplierSource}.
 	 * 
+	 * @param <S>
+	 *            {@link SupplierSource} type.
 	 * @param supplierSourceClass
 	 *            Class of the {@link SupplierSource}.
 	 * @param propertyList
@@ -62,6 +66,8 @@ public interface SupplierLoader {
 	 * Fills the {@link SupplyOrder} instances with a
 	 * {@link SuppliedManagedObject}.
 	 * 
+	 * @param <S>
+	 *            {@link SupplierSource} type.
 	 * @param supplierSourceClass
 	 *            Class of the {@link SupplierSource}.
 	 * @param propertyList

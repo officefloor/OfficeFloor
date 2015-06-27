@@ -71,6 +71,8 @@ public interface AutoWireApplication {
 	 * Adds an {@link AutoWireSection} with the ability to override the
 	 * {@link AutoWireSection} used.
 	 * 
+	 * @param <A>
+	 *            {@link AutoWireSection} type.
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClassName

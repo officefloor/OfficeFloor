@@ -54,6 +54,8 @@ public class FlowParameterFactory implements ParameterFactory {
 	 * @param methodMetaDatas
 	 *            {@link FlowMethodMetaData} instances by its {@link Method}
 	 *            name.
+	 * @throws Exception
+	 *             If fails to create the {@link Proxy}.
 	 */
 	public FlowParameterFactory(ClassLoader classLoader,
 			Class<?> flowInterface,
@@ -125,8 +127,8 @@ public class FlowParameterFactory implements ParameterFactory {
 			Object parameter = (metaData.isParameter() ? args[0] : null);
 
 			// Invoke the flow
-			FlowFuture flowFuture = this.taskContext.doFlow(metaData
-					.getFlowIndex(), parameter);
+			FlowFuture flowFuture = this.taskContext.doFlow(
+					metaData.getFlowIndex(), parameter);
 
 			// Return the flow future if required
 			return (metaData.isReturnFlowFuture() ? flowFuture : null);

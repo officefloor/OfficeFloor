@@ -142,6 +142,8 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 	/**
 	 * Asserts the {@link Change} is correct.
 	 * 
+	 * @param <T>
+	 *            Expected target.
 	 * @param change
 	 *            {@link Change} to verify.
 	 * @param expectedTarget
@@ -281,6 +283,8 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends
 	 *            Expected model.
 	 * @param actual
 	 *            Actual model.
+	 * @throws Exception
+	 *             If fails.
 	 */
 	protected void assertModels(M expected, M actual) throws Exception {
 

@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedO
 /**
  * Sources the {@link HttpServerClock}.
  *
- * @authoer Daniel Sagenschneider
+ * @author Daniel Sagenschneider
  */
 public interface HttpServerClockSource {
 

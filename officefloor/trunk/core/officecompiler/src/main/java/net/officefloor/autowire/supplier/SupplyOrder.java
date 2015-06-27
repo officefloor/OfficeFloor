@@ -18,6 +18,7 @@
 package net.officefloor.autowire.supplier;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -49,6 +50,10 @@ public interface SupplyOrder {
 	 * {@link SuppliedManagedObject} matching the {@link AutoWire}) then this
 	 * method will not be invoked.
 	 * 
+	 * @param <D>
+	 *            Dependency type keys.
+	 * @param <F>
+	 *            {@link JobSequence} type keys.
 	 * @param suppliedManagedObject
 	 *            {@link SuppliedManagedObject}.
 	 */

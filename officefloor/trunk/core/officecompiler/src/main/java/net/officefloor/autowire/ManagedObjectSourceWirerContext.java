@@ -35,6 +35,8 @@ public interface ManagedObjectSourceWirerContext {
 	/**
 	 * Maps a {@link TeamSource} for the {@link ManagedObjectTeam}.
 	 * 
+	 * @param <S>
+	 *            {@link TeamSource} type.
 	 * @param managedObjectSourceTeamName
 	 *            Name of the {@link ManagedObjectTeam}.
 	 * @param teamSourceClassName

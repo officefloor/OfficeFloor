@@ -88,6 +88,8 @@ public class LinkUtil {
 	/**
 	 * Finds the target link by the specified type.
 	 * 
+	 * @param <T>
+	 *            Target type.
 	 * @param link
 	 *            Starting {@link LinkFlowNode}.
 	 * @param targetType
@@ -102,6 +104,8 @@ public class LinkUtil {
 	 *            {@link AssetType}.
 	 * @param assetName
 	 *            Name of the {@link Asset}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 * @return Target {@link LinkFlowNode} or <code>null</code> if target not
 	 *         found.
 	 */
@@ -127,6 +131,8 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
+	 * @param <T>
+	 *            Target type.
 	 * @param link
 	 *            Starting {@link LinkFlowNode}.
 	 * @param targetType
@@ -141,6 +147,8 @@ public class LinkUtil {
 	 *            {@link AssetType}.
 	 * @param assetName
 	 *            Name of the {@link Asset}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 * @return Target {@link LinkFlowNode} or <code>null</code> if issue
 	 *         obtaining which is reported to the {@link CompilerIssues}.
 	 */
@@ -166,6 +174,8 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
+	 * @param <T>
+	 *            Target type.
 	 * @param link
 	 *            Starting {@link LinkObjectNode}.
 	 * @param targetType
@@ -180,6 +190,8 @@ public class LinkUtil {
 	 *            {@link AssetType}.
 	 * @param assetName
 	 *            Name of the {@link Asset}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 * @return Target {@link LinkObjectNode} or <code>null</code> if issue
 	 *         obtaining which is reported to the {@link CompilerIssues}.
 	 */
@@ -205,6 +217,8 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
+	 * @param <T>
+	 *            Target type.
 	 * @param link
 	 *            Starting {@link LinkTeamNode}.
 	 * @param targetType
@@ -219,6 +233,8 @@ public class LinkUtil {
 	 *            {@link AssetType}.
 	 * @param assetName
 	 *            Name of the {@link Asset}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 * @return Target {@link LinkTeamNode} or <code>null</code> if issue
 	 *         obtaining which is reported to the {@link CompilerIssues}.
 	 */
@@ -244,6 +260,8 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
+	 * @param <T>
+	 *            Target type.
 	 * @param link
 	 *            Starting {@link LinkOfficeNode}.
 	 * @param targetType
@@ -258,6 +276,8 @@ public class LinkUtil {
 	 *            {@link AssetType}.
 	 * @param assetName
 	 *            Name of the {@link Asset}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 * @return Target {@link LinkOfficeNode} or <code>null</code> if issue
 	 *         obtaining which is reported to the {@link CompilerIssues}.
 	 */
