@@ -52,6 +52,8 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
@@ -275,6 +277,8 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 * This is typically used by graphical editors that need to use the project
 	 * class path rather than the editor's class path.
 	 * 
+	 * @param <T>
+	 *            Return type.
 	 * @param runnableClass
 	 *            {@link OfficeFloorCompilerRunnable} class.
 	 * @param parameters
@@ -464,6 +468,8 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 * the {@link OfficeFloorCompiler} implementation which
 	 * {@link OfficeFloorSource} implementation is being used.
 	 * 
+	 * @param <S>
+	 *            {@link OfficeFloorSource} type.
 	 * @param officeFloorSourceClass
 	 *            {@link OfficeFloorSource} {@link Class}.
 	 */
@@ -498,6 +504,8 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 * {@link OfficeSourceService} is the preferred means to provide
 	 * {@link OfficeSource} aliases.
 	 * 
+	 * @param <S>
+	 *            {@link OfficeSource} type.
 	 * @param alias
 	 *            Alias name for the {@link OfficeSource}.
 	 * @param officeSourceClass
@@ -520,6 +528,8 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 * {@link SectionSourceService} is the preferred means to provide
 	 * {@link SectionSource} aliases.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param alias
 	 *            Alias name for the {@link SectionSource}.
 	 * @param sectionSourceClass
@@ -542,6 +552,10 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 * {@link WorkSourceService} is the preferred means to provide
 	 * {@link WorkSource} aliases.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <S>
+	 *            {@link WorkSource} type.
 	 * @param alias
 	 *            Alias name for the {@link WorkSource}.
 	 * @param workSourceClass
@@ -564,6 +578,12 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 * {@link ManagedObjectSourceService} is the preferred means to provide
 	 * {@link ManagedObjectSource} aliases.
 	 * 
+	 * @param <D>
+	 *            Dependency type keys.
+	 * @param <F>
+	 *            {@link JobSequence} type keys.
+	 * @param <S>
+	 *            {@link ManagedObjectSource} type.
 	 * @param alias
 	 *            Alias name for the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClass
@@ -586,6 +606,8 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 * {@link SupplierSourceService} is the preferred means to provide
 	 * {@link SupplierSource} aliases.
 	 * 
+	 * @param <S>
+	 *            {@link SupplierSource} type.
 	 * @param alias
 	 *            Alias name for the {@link SupplierSource}.
 	 * @param supplierSourceClass
@@ -608,6 +630,12 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 * {@link AdministratorSourceService} is the preferred means to provide
 	 * {@link AdministratorSource} aliases.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Administrator} type keys.
+	 * @param <S>
+	 *            {@link AdministratorSource} type.
 	 * @param alias
 	 *            Alias name for the {@link AdministratorSource}.
 	 * @param administratorSourceClass
@@ -630,6 +658,12 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 * {@link GovernanceSourceService} is the preferred means to provide
 	 * {@link GovernanceSource} aliases.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            {@link JobSequence} type keys.
+	 * @param <S>
+	 *            {@link GovernanceSource} type.
 	 * @param alias
 	 *            Alias name for the {@link GovernanceSource}.
 	 * @param governanceSourceClass
@@ -652,6 +686,8 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 	 * {@link TeamSourceService} is the preferred means to provide
 	 * {@link TeamSource} aliases.
 	 * 
+	 * @param <S>
+	 *            {@link TeamSource} type.
 	 * @param alias
 	 *            Alias name for the {@link TeamSource}.
 	 * @param teamSourceClass

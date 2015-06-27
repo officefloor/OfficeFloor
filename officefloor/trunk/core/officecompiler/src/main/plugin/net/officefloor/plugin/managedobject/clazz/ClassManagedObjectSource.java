@@ -52,6 +52,8 @@ public class ClassManagedObjectSource extends
 	/**
 	 * Convenience method to aid in unit testing.
 	 * 
+	 * @param <T>
+	 *            {@link Class} type.
 	 * @param clazz
 	 *            {@link Class} to instantiate and have dependencies injected.
 	 * @param dependencyNameObjectListing
@@ -86,6 +88,8 @@ public class ClassManagedObjectSource extends
 	 * unless a specific constructor is provided. This method enables
 	 * instantiation and injecting of dependencies to enable unit testing.
 	 * 
+	 * @param <T>
+	 *            {@link Class} type.
 	 * @param clazz
 	 *            {@link Class} to instantiate and have dependencies injected.
 	 * @param dependencies

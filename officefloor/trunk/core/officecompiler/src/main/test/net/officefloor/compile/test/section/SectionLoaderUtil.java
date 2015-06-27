@@ -67,6 +67,8 @@ public class SectionLoaderUtil {
 	 * Validates the {@link SectionSourceSpecification} for the
 	 * {@link SectionSource}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param sectionSourceClass
 	 *            {@link SectionSource} class.
 	 * @param propertyNameLabels
@@ -115,6 +117,8 @@ public class SectionLoaderUtil {
 	 * Creates the {@link SectionDesigner} to create the expected
 	 * {@link SectionType}/{@link OfficeSection}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param sectionSourceClass
 	 *            {@link SectionSource} class being tested.
 	 * @return {@link SectionDesigner}.
@@ -130,6 +134,8 @@ public class SectionLoaderUtil {
 	 * Facade method to validate the {@link SectionType} and
 	 * {@link OfficeSection}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param designer
 	 *            {@link SectionDesigner} containing the expected
 	 *            {@link SectionType}/{@link OfficeSection}.
@@ -163,6 +169,8 @@ public class SectionLoaderUtil {
 	 * {@link OfficeSection} against expected {@link SectionType}/
 	 * {@link OfficeSection} from the {@link SectionDesigner}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param designer
 	 *            {@link SectionDesigner} containing the expected
 	 *            {@link SectionType}/{@link OfficeSection}.
@@ -190,6 +198,8 @@ public class SectionLoaderUtil {
 	 * Convenience method that validates the loaded {@link SectionType} against
 	 * expected {@link SectionType} from the {@link SectionDesigner}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param designer
 	 *            {@link SectionDesigner} containing the expected
 	 *            {@link SectionType}.
@@ -556,6 +566,8 @@ public class SectionLoaderUtil {
 	 * {@link SectionSource} class's {@link ClassLoader} and subsequent
 	 * {@link ClassLoaderConfigurationContext}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource}.
 	 * @param sectionLocation
@@ -589,7 +601,9 @@ public class SectionLoaderUtil {
 
 	/**
 	 * Loads the {@link SectionType}.
-	 * 
+	 *
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource}.
 	 * @param sectionLocation

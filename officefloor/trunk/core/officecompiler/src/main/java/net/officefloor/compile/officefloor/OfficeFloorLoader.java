@@ -36,6 +36,8 @@ public interface OfficeFloorLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link OfficeFloorSourceSpecification} for the {@link OfficeFloorSource}.
 	 * 
+	 * @param <OF>
+	 *            {@link OfficeFloorSource} type.
 	 * @param officeFloorSourceClass
 	 *            Class of the {@link OfficeFloorSource}.
 	 * @return {@link PropertyList} of the {@link OfficeFloorSourceProperty}
@@ -57,6 +59,8 @@ public interface OfficeFloorLoader {
 	 * these will be {@link Property} instances required by the configuration of
 	 * the {@link OfficeFloor}.
 	 * 
+	 * @param <OF>
+	 *            {@link OfficeFloorSource} type.
 	 * @param officeFloorSourceClass
 	 *            Class of the {@link OfficeFloorSource}.
 	 * @param officeFloorLocation
@@ -74,6 +78,8 @@ public interface OfficeFloorLoader {
 	/**
 	 * Loads the {@link OfficeFloor}.
 	 * 
+	 * @param <OF>
+	 *            {@link OfficeFloorSource} type.
 	 * @param officeFloorSourceClass
 	 *            Class of the {@link OfficeFloorSource}.
 	 * @param officeFloorLocation
@@ -98,6 +104,9 @@ public interface OfficeFloorLoader {
 	 *            Location of the {@link OfficeFloor}. {@link PropertyList}
 	 *            containing both the {@link OfficeFloorSourceProperty} and the
 	 *            required {@link Property} instances.
+	 * @param propertyList
+	 *            {@link PropertyList} to configure the
+	 *            {@link OfficeFloorSource}.
 	 * @return {@link OfficeFloor} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */

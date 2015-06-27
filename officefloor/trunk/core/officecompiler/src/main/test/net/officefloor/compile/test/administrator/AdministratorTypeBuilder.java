@@ -54,6 +54,8 @@ public interface AdministratorTypeBuilder {
 	/**
 	 * Adds a {@link DutyType}.
 	 * 
+	 * @param <F>
+	 *            {@link JobSequence} type keys.
 	 * @param dutyName
 	 *            Name of the {@link Duty}.
 	 * @param dutyKey

@@ -30,6 +30,7 @@ import javax.management.QueryExp;
 import net.officefloor.autowire.AutoWireManagementMBean;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorImpl;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -68,6 +69,10 @@ public class AutoWireManagement implements AutoWireManagementMBean {
 	/**
 	 * Creates the {@link AutoWireOfficeFloor}.
 	 * 
+	 * @param officeFloor
+	 *            {@link OfficeFloor}.
+	 * @param officeName
+	 *            Name of the {@link Office}.
 	 * @return {@link AutoWireOfficeFloor}.
 	 * @throws Exception
 	 *             If fails to create the {@link AutoWireOfficeFloor}.

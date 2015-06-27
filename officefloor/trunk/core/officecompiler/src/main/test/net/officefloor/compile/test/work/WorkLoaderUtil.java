@@ -46,6 +46,10 @@ public class WorkLoaderUtil {
 	/**
 	 * Validates the {@link WorkSourceSpecification} for the {@link WorkSource}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <WS>
+	 *            {@link WorkSource} type.
 	 * @param workSourceClass
 	 *            {@link WorkSource} class.
 	 * @param propertyNameLabels
@@ -72,6 +76,8 @@ public class WorkLoaderUtil {
 	 * Creates the {@link WorkTypeBuilder} to create the expected
 	 * {@link WorkType}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workFactory
 	 *            {@link WorkFactory} for the {@link WorkType}.
 	 * @return {@link WorkTypeBuilder} to build the expected {@link WorkType}.
@@ -88,6 +94,10 @@ public class WorkLoaderUtil {
 	 * input {@link WorkSource} against the expected {@link WorkType} from the
 	 * {@link WorkTypeBuilder}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <WS>
+	 *            {@link WorkSource} type.
 	 * @param expectedWorkType
 	 *            {@link WorkTypeBuilder} that has had the expected
 	 *            {@link WorkType} built against it.
@@ -110,6 +120,10 @@ public class WorkLoaderUtil {
 	 * input {@link WorkSource} against the expected {@link WorkType} from the
 	 * {@link WorkTypeBuilder}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <WS>
+	 *            {@link WorkSource} type.
 	 * @param expectedWorkType
 	 *            {@link WorkTypeBuilder} that has had the expected
 	 *            {@link WorkType} built against it.
@@ -276,6 +290,10 @@ public class WorkLoaderUtil {
 	 * Convenience method that loads the {@link WorkType} by obtaining the
 	 * {@link ClassLoader} from the {@link WorkSource} class.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <WS>
+	 *            {@link WorkSource} type.
 	 * @param workSourceClass
 	 *            {@link WorkSource} class.
 	 * @param propertyNameValues
@@ -293,6 +311,10 @@ public class WorkLoaderUtil {
 	 * Convenience method that loads the {@link WorkType} with the provided
 	 * {@link OfficeFloorCompiler}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <WS>
+	 *            {@link WorkSource} type.
 	 * @param workSourceClass
 	 *            {@link WorkSource} class.
 	 * @param compiler

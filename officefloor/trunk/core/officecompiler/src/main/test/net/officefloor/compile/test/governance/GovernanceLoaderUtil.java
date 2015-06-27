@@ -47,6 +47,12 @@ public class GovernanceLoaderUtil {
 	 * Validates the {@link GovernanceSourceSpecification} for the
 	 * {@link GovernanceSource}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            {@link JobSequence} type keys.
+	 * @param <S>
+	 *            {@link GovernanceSource} type.
 	 * @param governanceSourceClass
 	 *            {@link GovernanceSource} class.
 	 * @param propertyNameLabels
@@ -85,6 +91,18 @@ public class GovernanceLoaderUtil {
 	 * {@link GovernanceTypeBuilder} against the {@link GovernanceType} loaded
 	 * from the {@link GovernanceSource}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            {@link JobSequence} type keys.
+	 * @param <S>
+	 *            {@link GovernanceSource} type.
+	 * @param expectedGovernanceType
+	 *            Expected {@link GovernanceType}.
+	 * @param governanceSourceClass
+	 *            {@link GovernanceSource} class.
+	 * @param propertyNameValues
+	 *            Properties to configure the {@link GovernanceSource}.
 	 * @return {@link GovernanceType} loaded from the {@link GovernanceSource}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -149,6 +167,12 @@ public class GovernanceLoaderUtil {
 	/**
 	 * Loads the {@link GovernanceType} from the {@link GovernanceSource}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            {@link JobSequence} type keys.
+	 * @param <S>
+	 *            {@link GovernanceSource} type.
 	 * @param governanceSourceClass
 	 *            {@link GovernanceSource} class.
 	 * @param propertyNameValues

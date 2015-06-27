@@ -30,6 +30,7 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -82,6 +83,8 @@ public interface DeskChanges {
 	/**
 	 * Adds a {@link WorkModel} to the {@link DeskModel}.
 	 *
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param workSourceClassName
@@ -123,6 +126,8 @@ public interface DeskChanges {
 	/**
 	 * Refactors the {@link WorkModel}.
 	 *
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workModel
 	 *            {@link WorkModel} to refactor.
 	 * @param workName
@@ -167,6 +172,12 @@ public interface DeskChanges {
 	 * Adds the {@link TaskType} as a {@link WorkTaskModel} to the
 	 * {@link WorkModel}.
 	 *
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <D>
+	 *            Dependency type keys.
+	 * @param <F>
+	 *            {@link JobSequence} type keys.
 	 * @param workModel
 	 *            {@link WorkModel} to have the {@link TaskType} added.
 	 * @param taskType
@@ -193,6 +204,12 @@ public interface DeskChanges {
 	/**
 	 * Adds a {@link TaskType} as a {@link TaskModel} to the {@link DeskModel}.
 	 *
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param <D>
+	 *            Dependency type keys.
+	 * @param <F>
+	 *            {@link JobSequence} type keys.
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @param workTaskModel
