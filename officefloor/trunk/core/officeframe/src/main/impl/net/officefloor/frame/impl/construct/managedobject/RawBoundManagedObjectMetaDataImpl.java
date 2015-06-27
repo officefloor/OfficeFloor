@@ -18,10 +18,13 @@
 package net.officefloor.frame.impl.construct.managedobject;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -56,7 +59,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 	 * @return {@link RawBoundManagedObjectMetaDataFactory}.
 	 */
 	public static RawBoundManagedObjectMetaDataFactory getFactory() {
-		return new RawBoundManagedObjectMetaDataImpl(null, null, false);
+		return new RawBoundManagedObjectMetaDataImpl(null, false);
 	}
 
 	/**
@@ -65,14 +68,14 @@ public class RawBoundManagedObjectMetaDataImpl implements
 	private final String boundManagedObjectName;
 
 	/**
-	 * Bound {@link ManagedObjectIndex} for the {@link ManagedObject}.
-	 */
-	private final ManagedObjectIndex index;
-
-	/**
 	 * Indicates if an Input {@link ManagedObject}.
 	 */
 	private final boolean isInput;
+
+	/**
+	 * Bound {@link ManagedObjectIndex} for the {@link ManagedObject}.
+	 */
+	private ManagedObjectIndex index = null;
 
 	/**
 	 * Default instance index.
@@ -90,16 +93,23 @@ public class RawBoundManagedObjectMetaDataImpl implements
 	 * 
 	 * @param boundManagedObjectName
 	 *            Name that the {@link ManagedObject} is bound under.
-	 * @param index
-	 *            {@link ManagedObjectIndex}.
 	 * @param isInput
 	 *            Indicates if an Input {@link ManagedObject}.
 	 */
 	private RawBoundManagedObjectMetaDataImpl(String boundManagedObjectName,
-			ManagedObjectIndex index, boolean isInput) {
+			boolean isInput) {
 		this.boundManagedObjectName = boundManagedObjectName;
-		this.index = index;
 		this.isInput = isInput;
+	}
+
+	/**
+	 * Specifies the {@link ManagedObjectIndex}.
+	 * 
+	 * @param index
+	 *            {@link ManagedObjectIndex}.
+	 */
+	private void setManagedObjectIndex(ManagedObjectIndex index) {
+		this.index = index;
 	}
 
 	/**
@@ -160,7 +170,6 @@ public class RawBoundManagedObjectMetaDataImpl implements
 		// Create details for obtaining the managed object instances
 		Map<String, RawBoundManagedObjectMetaDataImpl> boundMo = new HashMap<String, RawBoundManagedObjectMetaDataImpl>();
 		List<RawBoundManagedObjectMetaDataImpl> boundMoList = new LinkedList<RawBoundManagedObjectMetaDataImpl>();
-		int boundMoIndex = 0;
 
 		// Obtain the bound managed object instances
 		if (boundManagedObjectConfiguration != null) {
@@ -201,10 +210,6 @@ public class RawBoundManagedObjectMetaDataImpl implements
 					continue NEXT_MO; // no managed object
 				}
 
-				// Create the index of this managed object
-				ManagedObjectIndex index = new ManagedObjectIndexImpl(scope,
-						boundMoIndex++);
-
 				// Obtain the dependencies configuration
 				ManagedObjectDependencyConfiguration<?>[] dependenciesConfiguration = mo
 						.getDependencyConfiguration();
@@ -215,7 +220,7 @@ public class RawBoundManagedObjectMetaDataImpl implements
 
 				// Create the bound ManagedObject meta-data (with instance)
 				RawBoundManagedObjectMetaDataImpl rawBoundMoMetaData = new RawBoundManagedObjectMetaDataImpl(
-						boundMoName, index, false);
+						boundMoName, false);
 				rawBoundMoMetaData.addInstance(boundMoName, rawMoMetaData,
 						dependenciesConfiguration, governanceConfiguration);
 
@@ -290,10 +295,8 @@ public class RawBoundManagedObjectMetaDataImpl implements
 					rawBoundMoMetaData = possibleClash;
 				} else {
 					// Create the bound ManagedObject meta-data
-					ManagedObjectIndex index = new ManagedObjectIndexImpl(
-							scope, boundMoIndex++);
 					rawBoundMoMetaData = new RawBoundManagedObjectMetaDataImpl(
-							boundMoName, index, true);
+							boundMoName, true);
 
 					// Register the input managed object
 					boundMo.put(boundMoName, rawBoundMoMetaData);
@@ -306,7 +309,8 @@ public class RawBoundManagedObjectMetaDataImpl implements
 			}
 		}
 
-		// Load default instance indexes, dependencies, meta-data
+		// Load dependencies
+		Set<String> invalidBoundMoNames = new HashSet<String>();
 		NEXT_MO: for (RawBoundManagedObjectMetaDataImpl moMetaData : boundMoList) {
 
 			// If only one instance than is the default instance
@@ -326,6 +330,8 @@ public class RawBoundManagedObjectMetaDataImpl implements
 					issues.addIssue(AssetType.MANAGED_OBJECT, boundMoName,
 							"Bound Managed Object Source must be specified for Input Managed Object '"
 									+ boundMoName + "'");
+					invalidBoundMoNames.add(moMetaData
+							.getBoundManagedObjectName());
 					continue NEXT_MO; // must have bound name
 
 				} else {
@@ -355,12 +361,14 @@ public class RawBoundManagedObjectMetaDataImpl implements
 										+ "' not linked to Input Managed Object '"
 										+ boundMoName
 										+ "' for being the bound instance");
+						invalidBoundMoNames.add(moMetaData
+								.getBoundManagedObjectName());
 						continue NEXT_MO; // must have bound instance index
 					}
 				}
 			}
 
-			// Load dependencies and meta-data for each instance
+			// Load dependencies for each instance
 			for (RawBoundManagedObjectInstanceMetaDataImpl<?> instanceMetaData : moMetaData.instancesMetaData) {
 
 				// Create the mapping of scope managed objects
@@ -370,6 +378,120 @@ public class RawBoundManagedObjectMetaDataImpl implements
 
 				// Load the dependencies
 				instanceMetaData.loadDependencies(issues, dependencyMo);
+			}
+		}
+
+		// Sort the managed objects for clean up (ie dependents first)
+		try {
+			Collections.sort(boundMoList,
+					new Comparator<RawBoundManagedObjectMetaDataImpl>() {
+						@Override
+						public int compare(RawBoundManagedObjectMetaDataImpl a,
+								RawBoundManagedObjectMetaDataImpl b) {
+
+							// Obtain the names
+							String aName = a.getBoundManagedObjectName();
+							String bName = b.getBoundManagedObjectName();
+
+							// Obtain the dependencies
+							Set<String> aDependencies = this
+									.getDependencyManagedObjectNames(a);
+							Set<String> bDependencies = this
+									.getDependencyManagedObjectNames(b);
+
+							// Order based on dependencies for cleanup
+							boolean isAdepB = aDependencies.contains(bName);
+							boolean isBdepA = bDependencies.contains(aName);
+
+							// Determine order (if dependency relationship)
+							if (isAdepB && isBdepA) {
+								// Cyclic dependency
+								throw new CyclicDependencyException(
+										"Cyclic dependency between bound "
+												+ ManagedObject.class
+														.getSimpleName()
+												+ "s (" + aName + ", " + bName
+												+ ")");
+
+							} else if (isAdepB) {
+								// A needs to be cleaned up before B
+								return -1;
+							} else if (isBdepA) {
+								// B needs to be cleaned up before A
+								return 1;
+							}
+
+							/*
+							 * No dependency relationship. As the sorting only
+							 * changes on differences (non 0 value) then need
+							 * means to differentiate when no dependency
+							 * relationship. This is especially the case with
+							 * the merge sort used by default by Java.
+							 */
+
+							// Most number of dependencies first.
+							// Note: this pushes no dependencies to end.
+							int value = bDependencies.size()
+									- aDependencies.size();
+							if (value == 0) {
+								// Same dependencies, so use name
+								value = String.CASE_INSENSITIVE_ORDER.compare(
+										aName, bName);
+							}
+							return value;
+						}
+
+						/**
+						 * Obtains the names of the dependencies.
+						 * 
+						 * @param mo
+						 *            {@link RawBoundManagedObjectMetaDataImpl}.
+						 * @return Names of the dependencies.
+						 */
+						private Set<String> getDependencyManagedObjectNames(
+								RawBoundManagedObjectMetaDataImpl mo) {
+
+							// Load all dependencies for the managed object
+							Set<String> dependencies = new HashSet<String>();
+							for (RawBoundManagedObjectInstanceMetaDataImpl<?> instanceMetaData : mo.instancesMetaData) {
+								RawBoundManagedObjectMetaData[] dependenciesMetaData = instanceMetaData
+										.getDependencies();
+								if (dependenciesMetaData != null) {
+									for (RawBoundManagedObjectMetaData dependency : dependenciesMetaData) {
+										dependencies.add(dependency
+												.getBoundManagedObjectName());
+									}
+								}
+							}
+
+							// Return the dependencies
+							return dependencies;
+						}
+					});
+		} catch (CyclicDependencyException ex) {
+			// Provide issue of cyclic dependency
+			issues.addIssue(assetType, assetName, ex.getMessage());
+		}
+
+		// Load the indexes for the bound managed objects (as ordered)
+		int boundMoIndex = 0;
+		for (RawBoundManagedObjectMetaDataImpl rawBoundManagedObject : boundMoList) {
+			rawBoundManagedObject
+					.setManagedObjectIndex(new ManagedObjectIndexImpl(scope,
+							boundMoIndex++));
+		}
+
+		// Load meta-data for the dependencies
+		NEXT_MO_META_DATA: for (RawBoundManagedObjectMetaDataImpl moMetaData : boundMoList) {
+
+			// Only load meta-data for valid managed object meta data
+			if (invalidBoundMoNames.contains(moMetaData
+					.getBoundManagedObjectName())) {
+				continue NEXT_MO_META_DATA; // ignore
+			}
+
+			// Load meta-data for each instance
+			for (RawBoundManagedObjectInstanceMetaDataImpl<?> instanceMetaData : moMetaData.instancesMetaData) {
 
 				// Load the governance
 				instanceMetaData.loadGovernance(rawGovernanceMetaData, issues);
@@ -382,6 +504,22 @@ public class RawBoundManagedObjectMetaDataImpl implements
 
 		// Return the bound managed object meta-data
 		return boundMoList.toArray(new RawBoundManagedObjectMetaData[0]);
+	}
+
+	/**
+	 * Thrown to indicate a cyclic dependency.
+	 */
+	private static class CyclicDependencyException extends RuntimeException {
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param message
+		 *            Initiate with description for {@link OfficeFloorIssues}.
+		 */
+		public CyclicDependencyException(String message) {
+			super(message);
+		}
 	}
 
 	/*

@@ -480,6 +480,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.record_initManagedObject("MO_A", "ONE", oneDependencyConfig);
 		final ManagedObjectConfiguration<?> twoConfig = this
 				.record_initManagedObject("MO_B", "TWO");
+
+		// Record dependencies
 		this.record_getDependencyMetaData(oneMetaData, oneDependencyMetaData);
 		this.recordReturn(oneDependencyConfig,
 				oneDependencyConfig.getDependencyKey(), DependencyKey.KEY);
@@ -488,9 +490,11 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(oneDependencyConfig,
 				oneDependencyConfig.getScopeManagedObjectName(), "MO_B");
 		this.record_matchingDependencyType(oneDependencyMetaData, twoMetaData);
+		this.record_getDependencyMetaData(twoMetaData);
+
+		// Record loading meta-data
 		this.record_loadManagedObjectMetaData(oneMetaData, "MO_A", 0, null,
 				new ManagedObjectIndexImpl(this.managedObjectScope, 1));
-		this.record_getDependencyMetaData(twoMetaData);
 		this.record_loadManagedObjectMetaData(twoMetaData, "MO_B", 0, null);
 
 		this.replayMockObjects();
@@ -515,6 +519,141 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				oneInstance.getDependencies()[0]);
 		assertEquals("Should be no dependencies for second", 0,
 				twoInstance.getDependencies().length);
+	}
+
+	/**
+	 * Ensures the order of {@link RawBoundManagedObjectMetaData} is order to
+	 * clean up the {@link ManagedObject} instances.
+	 */
+	public void testOrderingManagedObjectsByDependenciesForCleanup() {
+
+		final RawManagedObjectMetaData<?, ?> oneMetaData = this
+				.registerRawManagedObjectMetaData("ONE");
+		final RawManagedObjectMetaData<?, ?> twoMetaData = this
+				.registerRawManagedObjectMetaData("TWO");
+		final ManagedObjectDependencyConfiguration<?> twoDependencyConfig = this
+				.createMock(ManagedObjectDependencyConfiguration.class);
+		final ManagedObjectDependencyMetaData<?> twoDependencyMetaData = this
+				.createMock(ManagedObjectDependencyMetaData.class);
+		final RawManagedObjectMetaData<?, ?> threeMetaData = this
+				.registerRawManagedObjectMetaData("THREE");
+		final ManagedObjectDependencyConfiguration<?> threeDependencyConfig = this
+				.createMock(ManagedObjectDependencyConfiguration.class);
+		final ManagedObjectDependencyMetaData<?> threeDependencyMetaData = this
+				.createMock(ManagedObjectDependencyMetaData.class);
+
+		// Record construction
+		final ManagedObjectConfiguration<?> oneConfig = this
+				.record_initManagedObject("MO_ONE", "ONE");
+		final ManagedObjectConfiguration<?> twoConfig = this
+				.record_initManagedObject("MO_TWO", "TWO", twoDependencyConfig);
+		final ManagedObjectConfiguration<?> threeConfig = this
+				.record_initManagedObject("MO_THREE", "THREE",
+						threeDependencyConfig);
+
+		// Record loading dependencies for first managed object
+		this.record_getDependencyMetaData(oneMetaData);
+
+		// Record loading dependencies for second managed object
+		this.record_getDependencyMetaData(twoMetaData, twoDependencyMetaData);
+		this.recordReturn(twoDependencyConfig,
+				twoDependencyConfig.getDependencyKey(), DependencyKey.KEY);
+		this.record_dependencyMetaDataDetails(twoDependencyMetaData,
+				DependencyKey.KEY, null);
+		this.recordReturn(twoDependencyConfig,
+				twoDependencyConfig.getScopeManagedObjectName(), "MO_ONE");
+		this.record_matchingDependencyType(twoDependencyMetaData, oneMetaData);
+
+		// Record loading dependencies for third managed object
+		this.record_getDependencyMetaData(threeMetaData,
+				threeDependencyMetaData);
+		this.recordReturn(threeDependencyConfig,
+				threeDependencyConfig.getDependencyKey(), DependencyKey.KEY);
+		this.record_dependencyMetaDataDetails(threeDependencyMetaData,
+				DependencyKey.KEY, null);
+		this.recordReturn(threeDependencyConfig,
+				threeDependencyConfig.getScopeManagedObjectName(), "MO_TWO");
+		this.record_matchingDependencyType(threeDependencyMetaData, twoMetaData);
+
+		// Record loading the meta data
+		this.record_loadManagedObjectMetaData(threeMetaData, "MO_THREE", 0,
+				null, new ManagedObjectIndexImpl(this.managedObjectScope, 1));
+		this.record_loadManagedObjectMetaData(twoMetaData, "MO_TWO", 0, null,
+				new ManagedObjectIndexImpl(this.managedObjectScope, 2));
+		this.record_loadManagedObjectMetaData(oneMetaData, "MO_ONE", 0, null);
+
+		this.replayMockObjects();
+		RawBoundManagedObjectMetaData[] rawMetaData = this
+				.constructRawBoundManagedObjectMetaData(3, oneConfig,
+						twoConfig, threeConfig);
+		this.verifyMockObjects();
+
+		// Validate order
+		RawBoundManagedObjectMetaData three = rawMetaData[0];
+		assertEquals("MO_THREE", three.getBoundManagedObjectName());
+		RawBoundManagedObjectMetaData two = rawMetaData[1];
+		assertEquals("MO_TWO", two.getBoundManagedObjectName());
+		RawBoundManagedObjectMetaData one = rawMetaData[2];
+		assertEquals("MO_ONE", one.getBoundManagedObjectName());
+	}
+
+	/**
+	 * Ensure able to detect cyclic dependencies.
+	 */
+	public void testDetectCyclicDependencies() {
+
+		final RawManagedObjectMetaData<?, ?> oneMetaData = this
+				.registerRawManagedObjectMetaData("ONE");
+		final ManagedObjectDependencyMetaData<?> oneDependencyMetaData = this
+				.createMock(ManagedObjectDependencyMetaData.class);
+		final ManagedObjectDependencyConfiguration<?> oneDependencyConfig = this
+				.createMock(ManagedObjectDependencyConfiguration.class);
+		final RawManagedObjectMetaData<?, ?> twoMetaData = this
+				.registerRawManagedObjectMetaData("TWO");
+		final ManagedObjectDependencyMetaData<?> twoDependencyMetaData = this
+				.createMock(ManagedObjectDependencyMetaData.class);
+		final ManagedObjectDependencyConfiguration<?> twoDependencyConfig = this
+				.createMock(ManagedObjectDependencyConfiguration.class);
+
+		// Record construction
+		final ManagedObjectConfiguration<?> oneConfig = this
+				.record_initManagedObject("MO_A", "ONE", oneDependencyConfig);
+		final ManagedObjectConfiguration<?> twoConfig = this
+				.record_initManagedObject("MO_B", "TWO", twoDependencyConfig);
+
+		// Record managed object one
+		this.record_getDependencyMetaData(oneMetaData, oneDependencyMetaData);
+		this.recordReturn(oneDependencyConfig,
+				oneDependencyConfig.getDependencyKey(), DependencyKey.KEY);
+		this.record_dependencyMetaDataDetails(oneDependencyMetaData,
+				DependencyKey.KEY, null);
+		this.recordReturn(oneDependencyConfig,
+				oneDependencyConfig.getScopeManagedObjectName(), "MO_B");
+		this.record_matchingDependencyType(oneDependencyMetaData, twoMetaData);
+
+		// Record managed object two
+		this.record_getDependencyMetaData(twoMetaData, twoDependencyMetaData);
+		this.recordReturn(twoDependencyConfig,
+				twoDependencyConfig.getDependencyKey(), DependencyKey.KEY);
+		this.record_dependencyMetaDataDetails(twoDependencyMetaData,
+				DependencyKey.KEY, null);
+		this.recordReturn(twoDependencyConfig,
+				twoDependencyConfig.getScopeManagedObjectName(), "MO_A");
+		this.record_matchingDependencyType(twoDependencyMetaData, oneMetaData);
+
+		// Record issue in cyclic dependencies
+		this.issues.addIssue(this.assetType, this.assetName,
+				"Cyclic dependency between bound ManagedObjects (MO_B, MO_A)");
+
+		// Record loading meta data
+		this.record_loadManagedObjectMetaData(oneMetaData, "MO_A", 0, null,
+				new ManagedObjectIndexImpl(this.managedObjectScope, 1));
+		this.record_loadManagedObjectMetaData(twoMetaData, "MO_B", 0, null,
+				new ManagedObjectIndexImpl(this.managedObjectScope, 0));
+
+		this.replayMockObjects();
+		this.constructRawBoundManagedObjectMetaData(2, oneConfig, twoConfig);
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -1096,8 +1235,9 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.record_initManagedObject("BOUND", "BOUND_MO");
 		this.record_initInputManagedObject("INPUT", inputMetaData,
 				rawInputMetaData, inputDependencyConfig);
+
+		// Record dependencies
 		this.record_getDependencyMetaData(boundMetaData);
-		this.record_loadManagedObjectMetaData(boundMetaData, "BOUND", 0, null);
 		this.record_getDependencyMetaData(rawInputMetaData,
 				inputDependencyMetaData);
 		this.recordReturn(inputDependencyConfig,
@@ -1108,8 +1248,11 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				inputDependencyConfig.getScopeManagedObjectName(), "BOUND");
 		this.record_matchingDependencyType(inputDependencyMetaData,
 				boundMetaData);
+
+		// Record loading meta data
+		this.record_loadManagedObjectMetaData(boundMetaData, "BOUND", 0, null);
 		this.record_loadManagedObjectMetaData(rawInputMetaData, "INPUT", 0,
-				null, new ManagedObjectIndexImpl(this.managedObjectScope, 0));
+				null, new ManagedObjectIndexImpl(this.managedObjectScope, 1));
 
 		// Construct
 		this.replayMockObjects();
@@ -1120,22 +1263,23 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Validate dependencies
-		RawBoundManagedObjectMetaData bound = rawMetaData[0];
-		assertEquals("Incorrect number of bound instances", 1,
-				bound.getRawBoundManagedObjectInstanceMetaData().length);
-		RawBoundManagedObjectInstanceMetaData<?> boundInstance = bound
-				.getRawBoundManagedObjectInstanceMetaData()[0];
-		assertEquals("Should be no dependencies for bound", 0,
-				boundInstance.getDependencies().length);
-		RawBoundManagedObjectMetaData input = rawMetaData[1];
+		RawBoundManagedObjectMetaData input = rawMetaData[0];
 		assertEquals("Incorrect number of input instances", 1,
 				input.getRawBoundManagedObjectInstanceMetaData().length);
 		RawBoundManagedObjectInstanceMetaData<?> inputInstance = input
 				.getRawBoundManagedObjectInstanceMetaData()[0];
 		assertEquals("Incorrect number of input dependencies", 1,
 				inputInstance.getDependencies().length);
+
+		RawBoundManagedObjectMetaData bound = rawMetaData[1];
+		assertEquals("Incorrect number of bound instances", 1,
+				bound.getRawBoundManagedObjectInstanceMetaData().length);
 		assertEquals("Incorrect input dependencies", bound,
 				inputInstance.getDependencies()[0]);
+		RawBoundManagedObjectInstanceMetaData<?> boundInstance = bound
+				.getRawBoundManagedObjectInstanceMetaData()[0];
+		assertEquals("Should be no dependencies for bound", 0,
+				boundInstance.getDependencies().length);
 	}
 
 	/**
