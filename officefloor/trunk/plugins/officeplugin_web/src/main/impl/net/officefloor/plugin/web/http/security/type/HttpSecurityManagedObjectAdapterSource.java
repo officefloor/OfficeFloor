@@ -19,6 +19,7 @@ package net.officefloor.plugin.web.http.security.type;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -49,6 +50,14 @@ public class HttpSecurityManagedObjectAdapterSource<D extends Enum<D>>
 	/**
 	 * Undertakes the operation for the {@link HttpSecuritySource}.
 	 * 
+	 * @param <S>
+	 *            Security type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource}.
 	 * @param operation

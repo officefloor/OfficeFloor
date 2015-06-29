@@ -152,6 +152,8 @@ public class WarHttpResourceFactory extends AbstractHttpResourceFactory {
 	/**
 	 * Obtains the contents of the {@link HttpResource} for the {@link File}.
 	 * 
+	 * @param file
+	 *            {@link File}.
 	 * @return Class path of the {@link HttpResource}.
 	 */
 	public static ByteBuffer getHttpResourceContents(File file) {

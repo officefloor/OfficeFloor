@@ -65,6 +65,8 @@ public interface HttpParametersLoader<T> {
 	/**
 	 * Loads the parameters of the {@link HttpRequest} to the Object.
 	 * 
+	 * @param <O>
+	 *            Object type.
 	 * @param httpRequest
 	 *            {@link HttpRequest} to extract the parameters.
 	 * @param object

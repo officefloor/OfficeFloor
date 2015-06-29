@@ -23,6 +23,7 @@ import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.ManagedObjectSourceService;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -88,6 +89,10 @@ public class HttpServerSocketManagedObjectSource extends
 	 *            {@link AutoWireApplication}.
 	 * @param port
 	 *            Port to listen for HTTP requests.
+	 * @param sectionName
+	 *            Name of the {@link SectionNode}.
+	 * @param sectionInputName
+	 *            Name of the {@link SectionInput}.
 	 * @return {@link AutoWireObject}.
 	 */
 	public static AutoWireObject autoWire(AutoWireApplication source, int port,

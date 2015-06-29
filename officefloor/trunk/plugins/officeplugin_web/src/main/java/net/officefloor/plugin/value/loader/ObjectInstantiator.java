@@ -27,6 +27,8 @@ public interface ObjectInstantiator {
 	/**
 	 * Instantiates the object.
 	 * 
+	 * @param <T>
+	 *            Object type.
 	 * @param clazz
 	 *            Class of object to instantiate.
 	 * @return Instantiated object.

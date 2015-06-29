@@ -83,6 +83,11 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 
 	/**
 	 * Starts up this {@link MockHttpServer}.
+	 * 
+	 * @param servicerBuilder
+	 *            {@link HttpServicerBuilder}.
+	 * @throws Exception
+	 *             If fails to start up.
 	 */
 	public void startup(HttpServicerBuilder servicerBuilder) throws Exception {
 
@@ -218,6 +223,9 @@ public abstract class MockHttpServer extends AbstractOfficeConstructTestCase
 
 	/**
 	 * Shuts down this {@link MockHttpServer}.
+	 * 
+	 * @throws Exception
+	 *             If fails to shutdown.
 	 */
 	public void shutdown() throws Exception {
 		this.tearDown();

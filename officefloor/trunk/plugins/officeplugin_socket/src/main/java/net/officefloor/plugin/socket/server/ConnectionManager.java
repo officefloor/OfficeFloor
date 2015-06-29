@@ -49,6 +49,9 @@ public interface ConnectionManager {
 	/**
 	 * Closes the {@link Selector} instances for managing the
 	 * {@link EstablishedConnection} instances.
+	 * 
+	 * @throws IOException
+	 *             If fails to close {@link Selector} instances.
 	 */
 	void closeSocketSelectors() throws IOException;
 

@@ -29,12 +29,16 @@ public interface ValueRetrieverSource {
 	 * 
 	 * @param isCaseInsensitive
 	 *            Indicates if property name comparison is case insensitive.
+	 * @throws Exception
+	 *             If fails to specify case sensitivity.
 	 */
 	void init(boolean isCaseInsensitive) throws Exception;
 
 	/**
 	 * Sources the {@link ValueRetriever} for the type.
 	 * 
+	 * @param <T>
+	 *            Type.
 	 * @param type
 	 *            Type.
 	 * @return {@link ValueRetriever} for the <code>type</code>.

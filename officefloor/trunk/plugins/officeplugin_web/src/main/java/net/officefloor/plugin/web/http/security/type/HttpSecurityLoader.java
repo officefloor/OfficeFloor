@@ -19,6 +19,7 @@ package net.officefloor.plugin.web.http.security.type;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceProperty;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
@@ -35,6 +36,14 @@ public interface HttpSecurityLoader {
 	 * {@link HttpSecuritySourceSpecification} for the
 	 * {@link HttpSecuritySource}.
 	 * 
+	 * @param <S>
+	 *            Security type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource} class.
 	 * @return {@link PropertyList} of the {@link HttpSecuritySourceProperty}
@@ -52,6 +61,14 @@ public interface HttpSecurityLoader {
 	 * <p>
 	 * This method will also initialise the {@link HttpSecuritySource}.
 	 * 
+	 * @param <S>
+	 *            Security type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource} instance to use.
 	 * @param propertyList
