@@ -20,7 +20,6 @@ package net.officefloor.plugin.web.http.tokenise;
 import java.io.IOException;
 
 import net.officefloor.plugin.socket.server.http.HttpRequest;
-import net.officefloor.plugin.web.http.parameters.HttpParametersException;
 
 /**
  * Tokenises the {@link HttpRequest} for the path, parameters, fragment.
@@ -44,7 +43,7 @@ public interface HttpRequestTokeniser {
 	 *            {@link HttpRequest} tokens.
 	 * @throws IOException
 	 *             If fails to read data from {@link HttpRequest}.
-	 * @throws HttpParametersException
+	 * @throws HttpRequestTokeniseException
 	 *             If fails to tokenise the {@link HttpRequest}.
 	 */
 	void tokeniseHttpRequest(HttpRequest request,

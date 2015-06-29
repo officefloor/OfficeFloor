@@ -42,6 +42,7 @@ public class ClassPathHttpResourceNode implements Serializable {
 	 * @param classpathPrefix
 	 *            The prefix on the class path to locate resources for the tree.
 	 *            <code>null</code> for the entire class path.
+	 * @return {@link ClassPathHttpResourceNode}.
 	 */
 	public static ClassPathHttpResourceNode createClassPathResourceTree(
 			String classpathPrefix) {

@@ -113,7 +113,9 @@ public class ClasspathHttpResourceFactory extends AbstractHttpResourceFactory {
 	 * 
 	 * @param classpathPrefix
 	 *            Class path prefix to identify the {@link HttpResourceFactory}.
-	 * @return Class path of the {@link HttpResource}.
+	 * @param classPath
+	 *            Class path to the {@link HttpResource}.
+	 * @return ByteBuffer containing the contents of the {@link HttpResource}.
 	 */
 	public static ByteBuffer getHttpResourceContents(String classpathPrefix,
 			String classPath) {

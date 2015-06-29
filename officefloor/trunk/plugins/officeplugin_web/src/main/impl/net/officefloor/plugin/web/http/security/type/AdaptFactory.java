@@ -29,6 +29,10 @@ public abstract class AdaptFactory<A, O> {
 	/**
 	 * Adapts the object.
 	 * 
+	 * @param <A>
+	 *            Required type.
+	 * @param <O>
+	 *            Original type.
 	 * @param delegateObject
 	 *            Delegate object.
 	 * @param adaptFactory
@@ -53,6 +57,10 @@ public abstract class AdaptFactory<A, O> {
 	/**
 	 * Adapts the array.
 	 * 
+	 * @param <A>
+	 *            Required type.
+	 * @param <O>
+	 *            Original type.
 	 * @param delegateArray
 	 *            Array of delegate objects.
 	 * @param adaptComponentType

@@ -55,6 +55,8 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Validates the {@link WoofTemplateExtensionSourceSpecification} for the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
+	 * @param <S>
+	 *            {@link WoofTemplateExtensionSource} type.
 	 * @param woofTemplateExtensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
 	 * @param propertyNameLabels
@@ -73,6 +75,8 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Validates the {@link WoofTemplateExtensionSourceSpecification} for the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
+	 * @param <S>
+	 *            {@link WoofTemplateExtensionSource} type.
 	 * @param woofTemplateExtensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
 	 * @param classLoader
@@ -135,6 +139,8 @@ public class WoofTemplateExtensionLoaderUtil {
 	/**
 	 * Creates the {@link Change} for refactoring.
 	 * 
+	 * @param <S>
+	 *            {@link WoofTemplateExtensionSource} type.
 	 * @param woofTemplateExtensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
 	 * @param oldUri

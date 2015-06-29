@@ -39,6 +39,7 @@ public class ValueRetrieverSourceImpl implements ValueRetrieverSource {
 	 *            {@link Object} containing the value.
 	 * @param method
 	 *            {@link Method} to retrieve the value.
+	 * @return Value retrieved. May be <code>null</code>.
 	 * @throws Exception
 	 *             If fails to retrieve the value.
 	 */

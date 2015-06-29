@@ -26,6 +26,7 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
 
@@ -40,6 +41,16 @@ public class HttpSecurityLoaderUtil {
 	 * Validates the {@link HttpSecuritySourceSpecification} for the
 	 * {@link HttpSecuritySource}.
 	 * 
+	 * @param <S>
+	 *            Security type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
+	 * @param <HS>
+	 *            {@link HttpSecuritySource} type.
 	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} class.
 	 * @param propertyNameLabels
@@ -87,6 +98,16 @@ public class HttpSecurityLoaderUtil {
 	 * {@link HttpSecurityTypeBuilder} against the {@link HttpSecurityType}
 	 * loaded from the {@link HttpSecuritySource}.
 	 * 
+	 * @param <S>
+	 *            Security type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
+	 * @param <HS>
+	 *            {@link HttpSecuritySource} type.
 	 * @param expectedHttpSecurityType
 	 *            {@link HttpSecurityTypeBuilder}.
 	 * @param httpSecuritySourceClass
@@ -136,6 +157,16 @@ public class HttpSecurityLoaderUtil {
 	 * Convenience method to load the {@link HttpSecuritySource} initialised
 	 * ready for testing.
 	 * 
+	 * @param <S>
+	 *            Security type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
+	 * @param <HS>
+	 *            {@link HttpSecuritySource} type.
 	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} class.
 	 * @param propertyNameValues
@@ -159,6 +190,16 @@ public class HttpSecurityLoaderUtil {
 	/**
 	 * Instantiates and instance of the {@link HttpSecuritySource}.
 	 * 
+	 * @param <S>
+	 *            Security type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
+	 * @param <HS>
+	 *            {@link HttpSecuritySource} type.
 	 * @param httpSecuritySourceClass
 	 *            {@link HttpSecuritySource} class.
 	 * @return New {@link HttpSecuritySource} instance.
@@ -183,6 +224,14 @@ public class HttpSecurityLoaderUtil {
 	/**
 	 * Loads the {@link HttpSecurityType}.
 	 * 
+	 * @param <S>
+	 *            Security type.
+	 * @param <C>
+	 *            Credentials type.
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource}.
 	 * @param propertyNameValues
