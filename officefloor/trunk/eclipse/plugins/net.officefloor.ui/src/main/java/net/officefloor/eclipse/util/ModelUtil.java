@@ -312,6 +312,8 @@ public class ModelUtil {
 	/**
 	 * Obtains the {@link Class} by its name.
 	 * 
+	 * @param <S>
+	 *            Super type.
 	 * @param className
 	 *            Fully qualified name of the class.
 	 * @param superType

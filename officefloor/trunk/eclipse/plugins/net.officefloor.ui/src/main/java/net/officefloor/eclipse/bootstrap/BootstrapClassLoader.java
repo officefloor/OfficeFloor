@@ -39,6 +39,7 @@ public class BootstrapClassLoader extends ClassLoader {
 	 * Initiate.
 	 * 
 	 * @param delegate
+	 *            Delegate {@link ClassLoader}.
 	 */
 	public BootstrapClassLoader(ClassLoader delegate) {
 

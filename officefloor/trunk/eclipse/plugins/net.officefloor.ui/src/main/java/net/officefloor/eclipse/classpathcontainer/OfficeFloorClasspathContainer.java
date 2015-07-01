@@ -192,6 +192,7 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 	 * 
 	 * @param path
 	 *            {@link IClasspathEntry} {@link IPath}.
+	 * @return {@link SourceAttachmentEntry}.
 	 */
 	public SourceAttachmentEntry getSourceAttachmentEntry(IPath path) {
 
@@ -300,8 +301,9 @@ public class OfficeFloorClasspathContainer implements IClasspathContainer {
 
 		// Add the core classes first
 		for (Class<?> coreClass : CORE_CLASSES) {
-			this.addClasspathEntry(ClasspathUtil.createClasspathEntry(
-					coreClass, this), classpathEntries);
+			this.addClasspathEntry(
+					ClasspathUtil.createClasspathEntry(coreClass, this),
+					classpathEntries);
 		}
 
 		// Add the extension class path providers next

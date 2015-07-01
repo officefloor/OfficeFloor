@@ -33,6 +33,8 @@ public class ReflectionUtil {
 	/**
 	 * Creates a Bean with properties populated.
 	 * 
+	 * @param <T>
+	 *            Bean {@link Class} type.
 	 * @param beanClassName
 	 *            Name of the Bean {@link Class}.
 	 * @param classLoader
@@ -70,6 +72,8 @@ public class ReflectionUtil {
 	/**
 	 * Creates the Bean with properties populated.
 	 * 
+	 * @param <T>
+	 *            Bean {@link Class} type.
 	 * @param beanClass
 	 *            {@link Class} of the Bean.
 	 * @param properties
@@ -106,6 +110,8 @@ public class ReflectionUtil {
 	/**
 	 * Obtains the {@link Setter} instances from the input bean {@link Class}.
 	 * 
+	 * @param <B>
+	 *            {@link Class} type.
 	 * @param clazz
 	 *            Bean {@link Class}.
 	 * @return {@link Setter} instances.

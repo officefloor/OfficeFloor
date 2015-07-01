@@ -110,6 +110,8 @@ public class ServletBridgeManagedObjectSource
 	 * Convenience method to create a {@link ServletServiceBridger} and also
 	 * configure into the {@link AutoWireOfficeFloorSource}.
 	 * 
+	 * @param <S>
+	 *            {@link Servlet} type.
 	 * @param servletClass
 	 *            {@link Servlet} class.
 	 * @param source
@@ -165,6 +167,8 @@ public class ServletBridgeManagedObjectSource
 	/**
 	 * Creates the {@link ServletServiceBridger} for the {@link Servlet}.
 	 * 
+	 * @param <S>
+	 *            {@link Servlet} type.
 	 * @param servletClass
 	 *            Class of the {@link Servlet}.
 	 * @return {@link ServletServiceBridger} for the {@link Servlet}.

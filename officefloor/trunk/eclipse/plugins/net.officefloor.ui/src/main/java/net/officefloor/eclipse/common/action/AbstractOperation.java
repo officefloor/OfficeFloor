@@ -60,6 +60,8 @@ public abstract class AbstractOperation<E extends EditPart> implements
 	 * Returns whether all the {@link EditPart} instances are assignable to the
 	 * {@link EditPart} type.
 	 * 
+	 * @param <T>
+	 *            {@link EditPart} type.
 	 * @param editPartType
 	 *            {@link EditPart} type.
 	 * @param editParts

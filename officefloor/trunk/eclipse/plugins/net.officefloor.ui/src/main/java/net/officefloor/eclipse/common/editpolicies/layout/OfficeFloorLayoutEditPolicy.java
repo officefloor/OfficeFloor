@@ -95,6 +95,8 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 	/**
 	 * Registers a {@link ChildEditPolicyFactory}.
 	 * 
+	 * @param <M>
+	 *            {@link Model} type.
 	 * @param modelType
 	 *            Type of child {@link Model}.
 	 * @param factory
@@ -120,6 +122,8 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 	/**
 	 * Registers a {@link ConstraintChangeFactory}.
 	 * 
+	 * @param <M>
+	 *            {@link Model} type.
 	 * @param modelType
 	 *            Type of {@link Model} to have its constraints changed.
 	 * @param factory
@@ -134,6 +138,8 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 	/**
 	 * Registers a {@link DeleteChangeFactory}.
 	 * 
+	 * @param <M>
+	 *            {@link Model} type.
 	 * @param modelType
 	 *            Type of {@link Model} to be deleted.
 	 * @param factory

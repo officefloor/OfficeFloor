@@ -35,6 +35,9 @@ public class AddOfficeManagedObjectSourceOperation extends
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param officeChanges
+	 *            {@link OfficeChanges}.
 	 */
 	public AddOfficeManagedObjectSourceOperation(OfficeChanges officeChanges) {
 		super("Add managed object source", OfficeEditPart.class, officeChanges);
@@ -56,10 +59,10 @@ public class AddOfficeManagedObjectSourceOperation extends
 
 		// Create change to add the managed object source
 		Change<OfficeManagedObjectSourceModel> change = changes
-				.addOfficeManagedObjectSource(mo.getManagedObjectName(), mo
-						.getManagedObjectSourceClassName(), mo
-						.getPropertylist(), mo.getTimeout(), mo
-						.getManagedObjectType());
+				.addOfficeManagedObjectSource(mo.getManagedObjectName(),
+						mo.getManagedObjectSourceClassName(),
+						mo.getPropertylist(), mo.getTimeout(),
+						mo.getManagedObjectType());
 
 		// Position the managed object source
 		context.positionModel(change.getTarget());

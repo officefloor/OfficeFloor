@@ -110,10 +110,12 @@ public class OfficeItemNewWizardPage extends WizardPage {
 
 	/**
 	 * Obtains the {@link IResource} container.
+	 * 
+	 * @return {@link IResource} for the container.
 	 */
 	public IResource getItemContainer() {
-		return ResourcesPlugin.getWorkspace().getRoot().findMember(
-				new Path(this.getItemContainerName()));
+		return ResourcesPlugin.getWorkspace().getRoot()
+				.findMember(new Path(this.getItemContainerName()));
 	}
 
 	/**
@@ -264,9 +266,9 @@ public class OfficeItemNewWizardPage extends WizardPage {
 	 */
 	protected void handleContainerBrowse() {
 		// Dialog to select container
-		ContainerSelectionDialog dialog = new ContainerSelectionDialog(this
-				.getShell(), ResourcesPlugin.getWorkspace().getRoot(), false,
-				"Select new container");
+		ContainerSelectionDialog dialog = new ContainerSelectionDialog(
+				this.getShell(), ResourcesPlugin.getWorkspace().getRoot(),
+				false, "Select new container");
 		if (dialog.open() == ContainerSelectionDialog.OK) {
 			// Specify container
 			Object[] result = dialog.getResult();

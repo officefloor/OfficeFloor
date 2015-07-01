@@ -75,6 +75,8 @@ public class WoofPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the shared instance.
+	 * 
+	 * @return Shared instance of the {@link WoofPlugin}.
 	 */
 	public static WoofPlugin getDefault() {
 		return plugin;

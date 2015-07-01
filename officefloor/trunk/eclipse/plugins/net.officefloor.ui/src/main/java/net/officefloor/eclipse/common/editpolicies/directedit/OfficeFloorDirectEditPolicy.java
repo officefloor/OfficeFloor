@@ -69,6 +69,8 @@ public class OfficeFloorDirectEditPolicy<M> extends DirectEditPolicy {
 	 * Initialises this {@link OfficeFloorDirectEditPolicy} to allow directly
 	 * editing the {@link Model} of the {@link EditPolicy} host.
 	 * 
+	 * @param <C>
+	 *            Change type.
 	 * @param initialiser
 	 *            {@link DirectEditInitialiser}.
 	 * @param factory
@@ -85,6 +87,8 @@ public class OfficeFloorDirectEditPolicy<M> extends DirectEditPolicy {
 	 * Initialise this {@link OfficeFloorDirectEditPolicy} to allow directly
 	 * editing the {@link Model} of the {@link EditPolicy} host.
 	 * 
+	 * @param <C>
+	 *            Change type.
 	 * @param adapter
 	 *            {@link DirectEditAdapter}.
 	 */
@@ -99,6 +103,9 @@ public class OfficeFloorDirectEditPolicy<M> extends DirectEditPolicy {
 	 * This is to be called in
 	 * {@link EditPart#performRequest(org.eclipse.gef.Request)} on a
 	 * {@link RequestConstants#REQ_DIRECT_EDIT}.
+	 * 
+	 * @param editPart
+	 *            {@link GraphicalEditPart}.
 	 */
 	public void doDirectEdit(GraphicalEditPart editPart) {
 

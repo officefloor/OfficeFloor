@@ -81,6 +81,8 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the shared instance.
+	 * 
+	 * @return Shared instance of the {@link OfficeFloorPlugin}.
 	 */
 	public static OfficeFloorPlugin getDefault() {
 		return plugin;

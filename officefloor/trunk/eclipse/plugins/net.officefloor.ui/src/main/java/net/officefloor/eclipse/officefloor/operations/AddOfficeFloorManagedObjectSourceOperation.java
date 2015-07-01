@@ -36,6 +36,9 @@ public class AddOfficeFloorManagedObjectSourceOperation extends
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param officeFloorChanges
+	 *            {@link OfficeFloorChanges}.
 	 */
 	public AddOfficeFloorManagedObjectSourceOperation(
 			OfficeFloorChanges officeFloorChanges) {
@@ -60,9 +63,9 @@ public class AddOfficeFloorManagedObjectSourceOperation extends
 		// Create change to add the managed object source
 		Change<OfficeFloorManagedObjectSourceModel> change = changes
 				.addOfficeFloorManagedObjectSource(mo.getManagedObjectName(),
-						mo.getManagedObjectSourceClassName(), mo
-								.getPropertylist(), mo.getTimeout(), mo
-								.getManagedObjectType());
+						mo.getManagedObjectSourceClassName(),
+						mo.getPropertylist(), mo.getTimeout(),
+						mo.getManagedObjectType());
 
 		// Position the managed object source
 		context.positionModel(change.getTarget());
