@@ -35,6 +35,9 @@ public class AddSectionManagedObjectSourceOperation extends
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param sectionChanges
+	 *            {@link SectionChanges}.
 	 */
 	public AddSectionManagedObjectSourceOperation(SectionChanges sectionChanges) {
 		super("Add managed object source", SectionEditPart.class,
@@ -57,10 +60,10 @@ public class AddSectionManagedObjectSourceOperation extends
 
 		// Create change to add the managed object source
 		Change<SectionManagedObjectSourceModel> change = changes
-				.addSectionManagedObjectSource(mo.getManagedObjectName(), mo
-						.getManagedObjectSourceClassName(), mo
-						.getPropertylist(), mo.getTimeout(), mo
-						.getManagedObjectType());
+				.addSectionManagedObjectSource(mo.getManagedObjectName(),
+						mo.getManagedObjectSourceClassName(),
+						mo.getPropertylist(), mo.getTimeout(),
+						mo.getManagedObjectType());
 
 		// Position the managed object source
 		context.positionModel(change.getTarget());

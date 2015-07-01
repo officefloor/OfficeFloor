@@ -40,13 +40,16 @@ public class OfficeFloorClasspathContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can load the {@link OfficeFloorClasspathContainer}.
+	 * 
+	 * @throws Exception
+	 *             If fails.
 	 */
 	@Test
 	public void testLoad() throws Exception {
 
 		// Obtain the raw container data
-		InputStream configuration = new ByteArrayInputStream(CONFIGURATION
-				.getBytes());
+		InputStream configuration = new ByteArrayInputStream(
+				CONFIGURATION.getBytes());
 
 		// Create the container
 		OfficeFloorClasspathContainer container = new OfficeFloorClasspathContainer(
@@ -59,8 +62,8 @@ public class OfficeFloorClasspathContainerTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of source attachment entries", 1,
 				sourceEntries.size());
 		SourceAttachmentEntry sourceEntry = sourceEntries.get(0);
-		assertEquals("Incorrect class path", "class/path", sourceEntry
-				.getClasspathPath());
+		assertEquals("Incorrect class path", "class/path",
+				sourceEntry.getClasspathPath());
 		assertEquals("Incorrect source attachment path", "source/path",
 				sourceEntry.getSourceAttachmentPath());
 		assertEquals("Incorrect source attachment root path",
@@ -69,8 +72,8 @@ public class OfficeFloorClasspathContainerTest extends OfficeFrameTestCase {
 		// Validate the extension class path provider entries
 		List<ExtensionClasspathProviderEntry> providerEntries = container
 				.getExtensionClasspathProviderEntries();
-		assertEquals("Incorrect number of provider entries", 1, providerEntries
-				.size());
+		assertEquals("Incorrect number of provider entries", 1,
+				providerEntries.size());
 		ExtensionClasspathProviderEntry providerEntry = providerEntries.get(0);
 		assertEquals("Incorrect provider class name", "provider.clazz.name",
 				providerEntry.getExtensionClassName());
@@ -78,6 +81,9 @@ public class OfficeFloorClasspathContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can store the {@link OfficeFloorClasspathContainer}.
+	 * 
+	 * @throws Exception
+	 *             If fails.
 	 */
 	@Test
 	public void testStore() throws Exception {

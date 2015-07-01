@@ -35,6 +35,9 @@ public class AddDeskManagedObjectSourceOperation extends
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param deskChanges
+	 *            {@link DeskChanges}.
 	 */
 	public AddDeskManagedObjectSourceOperation(DeskChanges deskChanges) {
 		super("Add managed object source", DeskEditPart.class, deskChanges);
@@ -56,10 +59,10 @@ public class AddDeskManagedObjectSourceOperation extends
 
 		// Create change to add the managed object source
 		Change<DeskManagedObjectSourceModel> change = changes
-				.addDeskManagedObjectSource(mo.getManagedObjectName(), mo
-						.getManagedObjectSourceClassName(), mo
-						.getPropertylist(), mo.getTimeout(), mo
-						.getManagedObjectType());
+				.addDeskManagedObjectSource(mo.getManagedObjectName(),
+						mo.getManagedObjectSourceClassName(),
+						mo.getPropertylist(), mo.getTimeout(),
+						mo.getManagedObjectType());
 
 		// Position the managed object source
 		context.positionModel(change.getTarget());

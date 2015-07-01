@@ -68,6 +68,8 @@ public interface ServletBridge {
 	 * This allows access to the dependency injected objects for the
 	 * {@link Servlet} / {@link Filter}.
 	 * 
+	 * @param <O>
+	 *            Object type.
 	 * @param objectType
 	 *            Type of the {@link Object}.
 	 * @return {@link Object}.

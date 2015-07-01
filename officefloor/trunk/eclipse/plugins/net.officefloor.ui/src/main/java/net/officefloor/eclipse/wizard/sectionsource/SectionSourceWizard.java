@@ -92,6 +92,8 @@ public class SectionSourceWizard extends Wizard implements
 	/**
 	 * Facade method to obtain the {@link SectionInstance}.
 	 * 
+	 * @param isLoadType
+	 *            Flag indicating if loading only the type.
 	 * @param editPart
 	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
 	 *            objects to run the {@link SectionSourceWizard}.

@@ -57,6 +57,9 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param context
+	 *            {@link TaskFigureContext}.
 	 */
 	public StandardTaskFigure(final TaskFigureContext context) {
 
@@ -73,9 +76,7 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 		this.registerConnectionAnchor(TaskFlowToTaskModel.class, inputAnchor);
 		this.registerConnectionAnchor(TaskEscalationToTaskModel.class,
 				inputAnchor);
-		this
-				.registerConnectionAnchor(WorkToInitialTaskModel.class,
-						inputAnchor);
+		this.registerConnectionAnchor(WorkToInitialTaskModel.class, inputAnchor);
 		this.registerTargetConnectionAnchor(TaskToNextTaskModel.class,
 				inputAnchor);
 		this.registerConnectionAnchor(
@@ -111,11 +112,11 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 
 		// Add the connector for task
 		ConnectorFigure taskConnector = new ConnectorFigure(
-				ConnectorDirection.SOUTH, StandardOfficeFloorColours
-						.LINK_LINE());
+				ConnectorDirection.SOUTH,
+				StandardOfficeFloorColours.LINK_LINE());
 		taskConnector.setBorder(new MarginBorder(0, 20, 0, 0));
-		this.registerConnectionAnchor(WorkTaskToTaskModel.class, taskConnector
-				.getConnectionAnchor());
+		this.registerConnectionAnchor(WorkTaskToTaskModel.class,
+				taskConnector.getConnectionAnchor());
 		flowItemAndTaskLink.add(taskConnector);
 
 		// Add next flow connector

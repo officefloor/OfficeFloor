@@ -67,6 +67,9 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure failure if {@link IFile} already exists.
+	 * 
+	 * @throws Exception
+	 *             If fails.
 	 */
 	@Test
 	public void testCreateItem_FileAlreadyExists() throws Exception {
@@ -92,6 +95,9 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to create item under {@link IProject} by creating the
 	 * necessary folders.
+	 * 
+	 * @throws Exception
+	 *             If fails.
 	 */
 	@Test
 	public void testCreateItem_EnsureFoldersExist() throws Exception {
@@ -145,6 +151,9 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure does not nothing if non-existent file.
+	 * 
+	 * @throws Exception
+	 *             If fails.
 	 */
 	@Test
 	public void testDeleteNonExistentFile() throws Exception {
@@ -160,6 +169,9 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure deletes file.
+	 * 
+	 * @throws Exception
+	 *             If fails.
 	 */
 	@Test
 	public void testDeleteFile() throws Exception {
@@ -176,6 +188,9 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure get file.
+	 * 
+	 * @throws Exception
+	 *             If fails.
 	 */
 	@Test
 	public void testGetFile() throws Exception {
@@ -194,6 +209,9 @@ public class ProjectConfigurationContextTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure get unknown file.
+	 * 
+	 * @throws Exception
+	 *             If fails.
 	 */
 	@Test
 	public void testGetUnknownFile() throws Exception {

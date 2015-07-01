@@ -184,6 +184,8 @@ public interface DeskFigureFactory {
 	 *
 	 * @param figure
 	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link WorkTaskToTaskFigureContext}.
 	 */
 	void decorateWorkTaskToTaskFigure(PolylineConnection figure,
 			WorkTaskToTaskFigureContext context);

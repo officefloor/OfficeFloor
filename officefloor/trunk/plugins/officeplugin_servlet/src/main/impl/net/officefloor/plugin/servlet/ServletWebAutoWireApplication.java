@@ -368,6 +368,8 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 	 * {@link Servlet#init(ServletConfig)} so that the
 	 * {@link ServletConfig#getInitParameter(String)} is available.
 	 * 
+	 * @param <I>
+	 *            {@link OfficeFloorServlet} type.
 	 * @param servletInstance
 	 *            {@link OfficeFloorServlet} instance.
 	 * @return {@link ServletWebAutoWireApplication} for the

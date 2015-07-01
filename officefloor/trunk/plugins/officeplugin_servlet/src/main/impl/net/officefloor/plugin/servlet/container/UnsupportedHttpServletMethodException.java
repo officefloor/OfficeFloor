@@ -10,12 +10,13 @@ import javax.servlet.http.HttpServlet;
  * 
  * @author Daniel Sagenschneider
  */
-public class UnsupportedHttpServletMethodException extends
-		RuntimeException {
+public class UnsupportedHttpServletMethodException extends RuntimeException {
 
 	/**
 	 * Invoked to indicate {@link HttpServlet} method is not supported.
 	 * 
+	 * @param <T>
+	 *            Any type for ease of use in methods requiring a return value.
 	 * @return Allow for use in methods requiring a return value.
 	 * @throws UnsupportedHttpServletMethodException
 	 *             {@link UnsupportedHttpServletMethodException}.

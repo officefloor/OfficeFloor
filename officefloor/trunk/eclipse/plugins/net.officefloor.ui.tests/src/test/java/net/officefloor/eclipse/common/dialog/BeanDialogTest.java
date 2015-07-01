@@ -35,6 +35,9 @@ public class BeanDialogTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures dialog populates the bean.
+	 * 
+	 * @throws Exception
+	 *             If fails.
 	 */
 	@Test
 	@GuiTest
@@ -61,7 +64,7 @@ public class BeanDialogTest extends OfficeFrameTestCase {
 		// Specify property values
 		Composite dialogArea = (Composite) dialog.getDialogArea();
 		Control[] children = dialogArea.getChildren();
-		
+
 		// TODO remove
 		for (Control child : children) {
 			System.out.println(child.getClass().getName() + ": " + child);
@@ -71,7 +74,7 @@ public class BeanDialogTest extends OfficeFrameTestCase {
 		((Text) children[1]).setText(MockBean.class.getName());
 		((Text) children[4]).setText("1");
 		((Text) children[7]).setText("name");
-				
+
 		// Flag close
 		dialog.okPressed();
 

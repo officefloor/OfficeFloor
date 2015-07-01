@@ -660,6 +660,8 @@ public class ExtensionUtil {
 	 * Transforms the map of source extensions into a list of source extension
 	 * sorted by the source class name of the source extension.
 	 * 
+	 * @param <E>
+	 *            Extension type.
 	 * @param sourceExtensionMap
 	 *            Map of source extensions.
 	 * @return List of source extensions.
@@ -687,6 +689,8 @@ public class ExtensionUtil {
 	 * Creates the map of Source {@link Class} extensions by the Source
 	 * {@link Class} name.
 	 * 
+	 * @param <E>
+	 *            Extension type.
 	 * @param extensionId
 	 *            Extension Id.
 	 * @param extensionType
@@ -801,6 +805,8 @@ public class ExtensionUtil {
 	/**
 	 * Creates the executable extensions for the particular extension.
 	 * 
+	 * @param <T>
+	 *            Extension type.
 	 * @param extensionId
 	 *            Id of the extension.
 	 * @param type

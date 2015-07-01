@@ -48,6 +48,8 @@ public class EclipseUtil {
 	/**
 	 * Obtains the {@link Class} by its name.
 	 * 
+	 * @param <S>
+	 *            Super type.
 	 * @param className
 	 *            Fully qualified name of the class.
 	 * @param superType
@@ -81,6 +83,8 @@ public class EclipseUtil {
 	/**
 	 * Creates an instance of the class.
 	 * 
+	 * @param <T>
+	 *            Type.
 	 * @param clazz
 	 *            Class to create an instance from.
 	 * @param editor
@@ -101,6 +105,8 @@ public class EclipseUtil {
 	/**
 	 * Convenience method to create an instance of a class by its name.
 	 * 
+	 * @param <S>
+	 *            Super type.
 	 * @param className
 	 *            Fully qualified name of class.
 	 * @param superType
@@ -137,6 +143,10 @@ public class EclipseUtil {
 	 * Convenience method to add an item to a list. Will not add to list if
 	 * <code>null</code>.
 	 * 
+	 * @param <L>
+	 *            Element type of list.
+	 * @param <I>
+	 *            Element type.
 	 * @param list
 	 *            List.
 	 * @param item

@@ -86,6 +86,9 @@ public class OfficeSourceAlignDeployedOfficeWizardPage extends WizardPage {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param officeInstance
+	 *            {@link OfficeInstance}.
 	 */
 	protected OfficeSourceAlignDeployedOfficeWizardPage(
 			OfficeInstance officeInstance) {
@@ -137,8 +140,8 @@ public class OfficeSourceAlignDeployedOfficeWizardPage extends WizardPage {
 				.getOfficeManagedObjectTypes()) {
 			objects.add(object.getOfficeManagedObjectName());
 		}
-		this.objectConform.setConform(this.officeObjects, objects
-				.toArray(new String[0]));
+		this.objectConform.setConform(this.officeObjects,
+				objects.toArray(new String[0]));
 
 		// Load the input conforms
 		List<String> inputs = new LinkedList<String>();
@@ -148,16 +151,16 @@ public class OfficeSourceAlignDeployedOfficeWizardPage extends WizardPage {
 					+ input.getOfficeSectionInputName();
 			inputs.add(name);
 		}
-		this.inputConform.setConform(this.officeInputs, inputs
-				.toArray(new String[0]));
+		this.inputConform.setConform(this.officeInputs,
+				inputs.toArray(new String[0]));
 
 		// Load the team conforms
 		List<String> teams = new LinkedList<String>();
 		for (OfficeTeamType team : officeType.getOfficeTeamTypes()) {
 			teams.add(team.getOfficeTeamName());
 		}
-		this.teamConform.setConform(this.officeTeams, teams
-				.toArray(new String[0]));
+		this.teamConform.setConform(this.officeTeams,
+				teams.toArray(new String[0]));
 	}
 
 	/**

@@ -36,6 +36,8 @@ public interface TextMessageProducer {
 	 * 
 	 * @param text
 	 *            Text for the payload of the {@link javax.jms.Message}.
+	 * @throws JMSException
+	 *             If fails to send the {@link javax.jms.Message}.
 	 */
 	void send(String text) throws JMSException;
 
@@ -77,7 +79,8 @@ class TextMessageProducerImpl implements TextMessageProducer {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.jms.TextMessageProducer#send(java.lang.String)
+	 * @see
+	 * net.officefloor.plugin.jms.TextMessageProducer#send(java.lang.String)
 	 */
 	public void send(String text) throws JMSException {
 		// Lazy load if required

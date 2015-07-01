@@ -46,6 +46,10 @@ public class OfficeFloorGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy 
 	/**
 	 * Registers a {@link ConnectionChangeFactory}.
 	 * 
+	 * @param <S>
+	 *            Source type.
+	 * @param <T>
+	 *            Target type.
 	 * @param sourceType
 	 *            Source {@link Model} type.
 	 * @param targetType
