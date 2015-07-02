@@ -679,6 +679,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * This a utility method to obtain an MBean from an existing Office
 	 * Building.
 	 * 
+	 * @param <I>
+	 *            MBean interface type.
 	 * @param hostName
 	 *            Host where the {@link OfficeBuilding} resides.
 	 * @param port

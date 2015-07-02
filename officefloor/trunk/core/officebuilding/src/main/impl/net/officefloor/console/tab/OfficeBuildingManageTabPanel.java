@@ -56,6 +56,9 @@ public class OfficeBuildingManageTabPanel extends AbstractOfficeBuildingPanel {
 
 	/**
 	 * Refreshes the {@link OfficeFloor} processes.
+	 * 
+	 * @throws Exception
+	 *             If fails to refresh processes.
 	 */
 	public void refreshOfficeFloorProcesses() throws Exception {
 		this.doAsyncAction(this.refreshOfficeAsyncAction);

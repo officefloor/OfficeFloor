@@ -272,6 +272,8 @@ public abstract class AbstractOfficeBuildingPanel extends JPanel {
 	/**
 	 * Undertakes an {@link OfficeAsyncAction}.
 	 * 
+	 * @param <T>
+	 *            Return type from {@link OfficeAsyncAction}.
 	 * @param asyncAction
 	 *            {@link OfficeAsyncAction}.
 	 */

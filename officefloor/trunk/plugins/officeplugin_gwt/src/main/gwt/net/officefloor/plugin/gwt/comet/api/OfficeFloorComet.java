@@ -119,6 +119,8 @@ public class OfficeFloorComet {
 	/**
 	 * Subscribes for asynchronous events.
 	 * 
+	 * @param <L>
+	 *            Listener type.
 	 * @param listenerType
 	 *            Listener interface type that should be marked by extending
 	 *            {@link CometSubscriber}.
@@ -274,6 +276,8 @@ public class OfficeFloorComet {
 	/**
 	 * Publishes an event.
 	 * 
+	 * @param <L>
+	 *            Listener type.
 	 * @param listenerType
 	 *            Listener interface type that should be marked by extending
 	 *            {@link CometSubscriber}.
@@ -322,6 +326,8 @@ public class OfficeFloorComet {
 	/**
 	 * Creates a publisher to allow using type safe publishing of events.
 	 * 
+	 * @param <L>
+	 *            Listener type.
 	 * @param listenerType
 	 *            Listener interface type that should be marked by extending
 	 *            {@link CometSubscriber}.

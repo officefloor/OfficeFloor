@@ -34,12 +34,16 @@ public interface EjbOrchestratorRemote {
 	/**
 	 * Remotely orchestrates EJBs.
 	 * 
+	 * @param <P>
+	 *            Parameter type.
 	 * @param parameter
 	 *            Parameter for the initial {@link Work} of the
 	 *            {@link OfficeFloor} initiating the orchestration of the EJBs.
 	 * @return As {@link Remote} invocations pass by value (serialised), the
 	 *         input parameter is returned to allow changes to the parameter to
 	 *         be obtained by the caller.
+	 * @throws NamingException
+	 *             On failure of orchestration.
 	 */
 	<P> P orchestrateRemotely(P parameter) throws NamingException;
 

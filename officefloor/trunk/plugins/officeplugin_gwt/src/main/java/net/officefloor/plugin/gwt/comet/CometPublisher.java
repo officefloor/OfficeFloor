@@ -32,6 +32,8 @@ public interface CometPublisher {
 	/**
 	 * Creates the publisher.
 	 * 
+	 * @param <L>
+	 *            Listener type.
 	 * @param listenerType
 	 *            Listener interface type that should be marked by extending
 	 *            {@link CometSubscriber}.

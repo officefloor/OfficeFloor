@@ -30,6 +30,7 @@ public interface ClassPathFactory {
 	 * 
 	 * @param artifactLocation
 	 *            Artifact location.
+	 * @return Class path.
 	 * @throws Exception
 	 *             If fails to construct class path.
 	 */
@@ -48,6 +49,7 @@ public interface ClassPathFactory {
 	 *            Type. <code>null</code> will default to <code>jar</code>.
 	 * @param classifier
 	 *            Classifier, may be <code>null</code>.
+	 * @return Class path.
 	 * @throws Exception
 	 *             If fails to construct class path.
 	 */

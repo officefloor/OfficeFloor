@@ -37,6 +37,8 @@ public interface EjbOrchestrator {
 	 * @param parameter
 	 *            Parameter for the initial {@link Work} of the
 	 *            {@link OfficeFloor} initiating the orchestration of the EJBs.
+	 * @throws NamingException
+	 *             If failure in orchestration.
 	 */
 	void orchestrate(Object parameter) throws NamingException;
 
