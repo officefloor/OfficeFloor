@@ -35,6 +35,9 @@ public class AddAdministratorOperation extends
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param officeChanges
+	 *            {@link OfficeChanges}.
 	 */
 	public AddAdministratorOperation(OfficeChanges officeChanges) {
 		super("Add administrator", OfficeEditPart.class, officeChanges);
@@ -56,11 +59,11 @@ public class AddAdministratorOperation extends
 
 		// Create change to add administrator
 		Change<AdministratorModel> change = changes.addAdministrator(
-				administrator.getAdministratorName(), administrator
-						.getAdministratorSourceClassName(), administrator
-						.getPropertylist(), administrator
-						.getAdministratorScope(), administrator
-						.getAdministratorType());
+				administrator.getAdministratorName(),
+				administrator.getAdministratorSourceClassName(),
+				administrator.getPropertylist(),
+				administrator.getAdministratorScope(),
+				administrator.getAdministratorType());
 
 		// Position the administrator
 		context.positionModel(change.getTarget());

@@ -81,6 +81,8 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 	/**
 	 * Registers a {@link CreateChangeFactory}.
 	 * 
+	 * @param <O>
+	 *            {@link Object} type.
 	 * @param objectType
 	 *            Type of new {@link Object} to be added.
 	 * @param factory

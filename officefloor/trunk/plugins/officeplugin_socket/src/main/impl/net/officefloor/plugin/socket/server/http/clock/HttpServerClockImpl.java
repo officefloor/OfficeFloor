@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedO
 /**
  * {@link HttpServerClock} implementation.
  *
- * @authoer Daniel Sagenschneider
+ * @author Daniel Sagenschneider
  */
 public class HttpServerClockImpl implements HttpServerClockSource,
 		HttpServerClock {

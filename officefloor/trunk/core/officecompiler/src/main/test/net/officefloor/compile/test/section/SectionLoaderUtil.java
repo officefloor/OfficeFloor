@@ -277,6 +277,8 @@ public class SectionLoaderUtil {
 	 * Convenience method that validates the loaded {@link OfficeSection}
 	 * against expected {@link OfficeSection} from the {@link SectionDesigner}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param designer
 	 *            {@link SectionDesigner} containing the expected
 	 *            {@link OfficeSection}.
@@ -634,6 +636,8 @@ public class SectionLoaderUtil {
 	 * {@link SectionSource} class's {@link ClassLoader} and subsequent
 	 * {@link ClassLoaderConfigurationContext}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClass
@@ -662,6 +666,8 @@ public class SectionLoaderUtil {
 	/**
 	 * Loads the {@link OfficeSection}.
 	 * 
+	 * @param <S>
+	 *            {@link SectionSource} type.
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClass

@@ -53,6 +53,8 @@ public interface ValueLoaderSource {
 	 * of the {@link Class}. A new {@link ValueLoaderFactory} must be created
 	 * for each child type.
 	 * 
+	 * @param <T>
+	 *            {@link Class} type.
 	 * @param clazz
 	 *            {@link Class} for a dedicated {@link ValueLoaderFactory}. It
 	 *            is expected that all property methods on the <code>type</code>

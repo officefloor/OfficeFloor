@@ -244,6 +244,10 @@ public class HttpTestUtil {
 	 * @param headerNameValues
 	 *            {@link HttpHeader} name values.
 	 * @return {@link net.officefloor.plugin.socket.server.http.HttpRequest}.
+	 * @throws Exception
+	 *             If fails to create the
+	 *             {@link net.officefloor.plugin.socket.server.http.HttpRequest}
+	 *             .
 	 */
 	public static net.officefloor.plugin.socket.server.http.HttpRequest createHttpRequest(
 			String method, String requestUri, String entity,

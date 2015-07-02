@@ -164,6 +164,8 @@ public class WoofTemplateExtensionLoaderUtil {
 	/**
 	 * Creates the {@link Change} for refactoring.
 	 * 
+	 * @param <S>
+	 *            {@link WoofTemplateExtensionSource} type.
 	 * @param woofTemplateExtensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
 	 * @param oldUri
@@ -297,6 +299,8 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Undertakes the extending of the {@link HttpTemplateAutoWireSection} by
 	 * the {@link WoofTemplateExtensionSource}.
 	 * 
+	 * @param <S>
+	 *            {@link WoofTemplateExtensionSource} type.
 	 * @param extensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
 	 * @param template
@@ -321,6 +325,8 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Undertakes the extending of the {@link HttpTemplateAutoWireSection} by
 	 * the {@link WoofTemplateExtensionSource}.
 	 * 
+	 * @param <S>
+	 *            {@link WoofTemplateExtensionSource} type.
 	 * @param extensionSourceClass
 	 *            {@link WoofTemplateExtensionSource} class.
 	 * @param template

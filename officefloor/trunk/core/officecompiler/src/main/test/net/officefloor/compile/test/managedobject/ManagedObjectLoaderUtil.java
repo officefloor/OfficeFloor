@@ -35,6 +35,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -53,6 +54,12 @@ public class ManagedObjectLoaderUtil {
 	 * Validates the {@link ManagedObjectSourceSpecification} for the
 	 * {@link ManagedObjectSource}.
 	 * 
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
+	 * @param <S>
+	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param propertyNameLabels
@@ -92,6 +99,18 @@ public class ManagedObjectLoaderUtil {
 	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType}
 	 * loaded from the {@link ManagedObjectSource}.
 	 * 
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
+	 * @param <S>
+	 *            {@link ManagedObjectSource} type.
+	 * @param expectedManagedObjectType
+	 *            Expected {@link ManagedObjectType}.
+	 * @param managedObjectSourceClass
+	 *            {@link ManagedObjectSource} {@link Class}.
+	 * @param propertyNameValues
+	 *            Property values to configure the {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectType} loaded from the
 	 *         {@link ManagedObjectSource}.
 	 */
@@ -192,6 +211,12 @@ public class ManagedObjectLoaderUtil {
 	 * {@link ManagedObjectSource} utilising the {@link ClassLoader} from the
 	 * input {@link ManagedObjectSource} class.
 	 * 
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
+	 * @param <S>
+	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param propertyNameValues
@@ -212,6 +237,12 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.
 	 * 
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
+	 * @param <S>
+	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
 	 * @param classLoader
@@ -279,6 +310,10 @@ public class ManagedObjectLoaderUtil {
 	 * This is useful for testing abstract {@link ManagedObjectSource} instances
 	 * that delegate configuration to sub classes.
 	 * 
+	 * @param <D>
+	 *            Dependency keys type.
+	 * @param <F>
+	 *            {@link JobSequence} keys type.
 	 * @param dependenciesEnum
 	 *            Dependency {@link Enum}.
 	 * @param flowsEnum

@@ -47,7 +47,6 @@ import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
  * <p>
  * The deployment descriptor for using this {@link SessionBean} is as follows
  * (replacing the contents of the square brackets - [...]):
- * <p>
  * 
  * <pre>
  * &lt;ejb-jar&gt;
