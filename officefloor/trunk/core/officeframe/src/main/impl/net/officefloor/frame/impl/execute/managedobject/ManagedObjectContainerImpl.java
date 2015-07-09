@@ -27,6 +27,7 @@ import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
@@ -78,6 +79,11 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * Lock for managing of the {@link ManagedObjectContainer}.
 	 */
 	private final Object lock;
+
+	/**
+	 * {@link CleanupSequence}.
+	 */
+	private final CleanupSequence cleanupSequence;
 
 	/**
 	 * {@link AssetMonitor} for waiting to source the {@link ManagedObject}
@@ -159,6 +165,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			ManagedObjectMetaData<D> metaData, ProcessState processState) {
 		this.metaData = metaData;
 		this.lock = processState.getProcessLock();
+		this.cleanupSequence = processState.getCleanupSequence();
 
 		// Create the monitor to source the managed object
 		this.sourcingMonitor = this.metaData.getSourcingManager()
@@ -247,7 +254,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		// Job unload action
 		if (recycleJob != null) {
 			// Recycle the managed object
-			recycleJob.activateJob(currentTeam);
+			this.cleanupSequence.registerCleanUpJob(recycleJob, currentTeam);
 
 		} else {
 			// Return directly to pool (if pooled)

@@ -122,7 +122,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 			}
 
 			@Override
-			public void processComplete() {
+			public void processComplete(TeamIdentifier currentTeam) {
 				// Decrement the number of active processes
 				ticker.decrementAndGet();
 			}

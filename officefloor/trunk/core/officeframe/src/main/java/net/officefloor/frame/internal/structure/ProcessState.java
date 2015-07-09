@@ -75,6 +75,13 @@ public interface ProcessState {
 	ProcessMetaData getProcessMetaData();
 
 	/**
+	 * Obtains the {@link CleanupSequence} for this {@link ProcessState}.
+	 * 
+	 * @return {@link CleanupSequence} for this {@link ProcessState}.
+	 */
+	CleanupSequence getCleanupSequence();
+
+	/**
 	 * Obtains the {@link TaskMetaData} for the {@link Work} and {@link Task}
 	 * within the {@link Office} containing this {@link ProcessState}.
 	 * 
