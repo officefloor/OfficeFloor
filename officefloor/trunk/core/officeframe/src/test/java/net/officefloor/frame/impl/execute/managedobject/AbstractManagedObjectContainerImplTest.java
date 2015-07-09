@@ -32,6 +32,7 @@ import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
@@ -223,6 +224,12 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 * Flag indicating if {@link ManagedObject} is recycled.
 	 */
 	private boolean isRecycled = false;
+
+	/**
+	 * {@link CleanupSequence}.
+	 */
+	private final CleanupSequence cleanupSequence = this
+			.createMock(CleanupSequence.class);
 
 	/**
 	 * {@link ManagedObjectMetaData}.
@@ -437,9 +444,11 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		this.isInitialised = true;
 		this.objectType = objectType;
 
-		// Obtains the process lock
+		// Obtains the process lock and cleanup sequence
 		this.recordReturn(this.processState,
 				this.processState.getProcessLock(), "Process lock");
+		this.recordReturn(this.processState,
+				this.processState.getCleanupSequence(), this.cleanupSequence);
 
 		// Sourcing monitor
 		this.recordReturn(this.managedObjectMetaData,
@@ -1087,7 +1096,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	private void record_unloadManagedObject(TeamIdentifier currentTeam) {
 		if (this.isRecycled) {
 			// Recycle managed object
-			this.recycleJobNode.activateJob(currentTeam);
+			this.cleanupSequence.registerCleanUpJob(this.recycleJobNode,
+					currentTeam);
 
 		} else {
 			// Return whether pooled

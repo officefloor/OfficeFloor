@@ -44,6 +44,7 @@ import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Meta-data of the {@link ManagedObject}.
@@ -384,7 +385,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		 */
 
 		@Override
-		public void processComplete() {
+		public void processComplete(TeamIdentifier currentTeam) {
 			if ((!this.isRecycled)
 					&& (ManagedObjectMetaDataImpl.this.pool != null)) {
 				// Not recycled, therefore lost to pool
@@ -392,7 +393,6 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 						.lostManagedObject(this.managedObject);
 			}
 		}
-
 	}
 
 }

@@ -29,11 +29,13 @@ import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
+import net.officefloor.frame.impl.execute.managedobject.CleanupSequenceImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -98,6 +100,11 @@ public class ProcessStateImpl implements ProcessState {
 			return ProcessStateImpl.this;
 		}
 	};
+
+	/**
+	 * {@link CleanupSequence}.
+	 */
+	private final CleanupSequence cleanupSequence = new CleanupSequenceImpl();
 
 	/**
 	 * {@link ProcessMetaData}.
@@ -280,6 +287,11 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
+	public CleanupSequence getCleanupSequence() {
+		return this.cleanupSequence;
+	}
+
+	@Override
 	public TaskMetaData<?, ?, ?> getTaskMetaData(String workName,
 			String taskName) throws UnknownWorkException, UnknownTaskException {
 
@@ -334,7 +346,7 @@ public class ProcessStateImpl implements ProcessState {
 
 				// Notify process complete
 				for (ProcessCompletionListener listener : this.completionListeners) {
-					listener.processComplete();
+					listener.processComplete(currentTeam);
 				}
 
 				// Unload managed objects (some may not have been used)
