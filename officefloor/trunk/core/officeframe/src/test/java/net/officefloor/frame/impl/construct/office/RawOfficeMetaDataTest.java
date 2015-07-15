@@ -1548,7 +1548,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		RawOfficeMetaData rawOfficeMetaData = this
 				.constructRawOfficeMetaData(true);
 		OfficeMetaData officeMetaData = rawOfficeMetaData.getOfficeMetaData();
-		JobNode node = officeMetaData.createProcess(flowMetaData, null);
+		JobNode node = officeMetaData.createProcess(flowMetaData, null, null,
+				null, null);
 		this.verifyMockObjects();
 
 		// Verify the office floor escalation
@@ -1611,7 +1612,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Verify registered Process Context Listener by creating Process
 		JobNode node = metaData.getOfficeMetaData().createProcess(flowMetaData,
-				null);
+				null, null, null, null);
 
 		// Verify functionality
 		this.verifyMockObjects();

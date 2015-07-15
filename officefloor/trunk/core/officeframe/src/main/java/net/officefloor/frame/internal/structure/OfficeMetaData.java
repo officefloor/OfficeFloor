@@ -22,6 +22,7 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -78,8 +79,7 @@ public interface OfficeMetaData {
 	OfficeStartupTask[] getStartupTasks();
 
 	/**
-	 * Creates a new {@link ProcessState} within the {@link Office} returning
-	 * the starting {@link JobNode} to be executed.
+	 * Creates a new {@link ProcessState}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
@@ -88,6 +88,45 @@ public interface OfficeMetaData {
 	 *            {@link ProcessState}.
 	 * @param parameter
 	 *            Parameter to the starting {@link JobNode}.
+	 * @param invocationEscalationHandler
+	 *            Potential {@link EscalationHandler} provided by the invoker.
+	 *            May be <code>null</code> to just use the default
+	 *            {@link Office} {@link EscalationProcedure}.
+	 * @param escalationResponsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible for the
+	 *            {@link Escalation} handling.
+	 * @param escalationContinueTeam
+	 *            {@link Team} to let the worker ({@link Thread}) continue on to
+	 *            execute the {@link EscalationHandler}.
+	 * @return {@link JobNode} to start processing the {@link ProcessState}.
+	 */
+	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
+			Object parameter, EscalationHandler invocationEscalationHandler,
+			TeamManagement escalationResponsibleTeam,
+			Team escalationContinueTeam);
+
+	/**
+	 * Creates a new {@link ProcessState} triggered by a
+	 * {@link ManagedObjectSource} within the {@link Office} returning the
+	 * starting {@link JobNode} to be executed.
+	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 * @param flowMetaData
+	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
+	 *            {@link ProcessState}.
+	 * @param parameter
+	 *            Parameter to the starting {@link JobNode}.
+	 * @param invocationEscalationHandler
+	 *            Potential {@link EscalationHandler} provided by the invoker.
+	 *            May be <code>null</code> to just use the default
+	 *            {@link Office} {@link EscalationProcedure}.
+	 * @param escalationResponsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible for the
+	 *            {@link Escalation} handling.
+	 * @param escalationContinueTeam
+	 *            {@link Team} to let the worker ({@link Thread}) continue on to
+	 *            execute the {@link EscalationHandler}.
 	 * @param inputManagedObject
 	 *            {@link ManagedObject} that possibly invoked the new
 	 *            {@link ProcessState}. This may be <code>null</code> and if so
@@ -101,42 +140,13 @@ public interface OfficeMetaData {
 	 *            Index of the {@link ManagedObject} within the
 	 *            {@link ProcessState}. Ignored if {@link ManagedObject} passed
 	 *            in is <code>null</code>.
-	 * @param inputManagedObjectEscalationHandler
-	 *            Potential {@link EscalationHandler} provided by the
-	 *            {@link ManagedObject}. May be <code>null</code> to just use
-	 *            the default {@link Office} {@link EscalationProcedure}.
-	 *            Ignored if {@link ManagedObject} passed in is
-	 *            <code>null</code>.
-	 * @param escalationResponsibleTeam
-	 *            {@link TeamManagement} of {@link Team} responsible for the
-	 *            {@link ManagedObject} {@link Escalation} handling.
-	 * @param escalationContinueTeam
-	 *            {@link Team} to let the worker ({@link Thread}) continue on to
-	 *            execute the {@link EscalationHandler}.
 	 * @return {@link JobNode} to start processing the {@link ProcessState}.
 	 */
 	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
-			Object parameter, ManagedObject inputManagedObject,
-			ManagedObjectMetaData<?> inputManagedObjectMetaData,
-			int processBoundIndexForInputManagedObject,
-			EscalationHandler inputManagedObjectEscalationHandler,
+			Object parameter, EscalationHandler invocationEscalationHandler,
 			TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam);
-
-	/**
-	 * Creates a new {@link ProcessState} that is not triggered by a
-	 * {@link ManagedObject}.
-	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param flowMetaData
-	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
-	 *            {@link ProcessState}.
-	 * @param parameter
-	 *            Parameter to the starting {@link JobNode}.
-	 * @return {@link JobNode} to start processing the {@link ProcessState}.
-	 */
-	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
-			Object parameter);
+			Team escalationContinueTeam, ManagedObject inputManagedObject,
+			ManagedObjectMetaData<?> inputManagedObjectMetaData,
+			int processBoundIndexForInputManagedObject);
 
 }

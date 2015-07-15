@@ -210,8 +210,8 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 		this.recordReturn(startupTask, startupTask.getFlowMetaData(),
 				flowMetaData);
 		this.recordReturn(startupTask, startupTask.getParameter(), parameter);
-		this.recordReturn(this.officeMetaData,
-				this.officeMetaData.createProcess(flowMetaData, parameter),
+		this.recordReturn(this.officeMetaData, this.officeMetaData
+				.createProcess(flowMetaData, parameter, null, null, null),
 				jobNode);
 		jobNode.activateJob(OfficeFloorImpl.STARTUP_TEAM);
 	}

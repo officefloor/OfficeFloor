@@ -790,17 +790,17 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								}
 
 							case OFFICE:
-								// Tried office, now at managed object source
+								// Tried office, now at invocation
 								globalEscalation = processState
-										.getManagedObjectSourceEscalation();
+										.getInvocationEscalation();
 								if (globalEscalation != null) {
 									threadState
-											.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
+											.setEscalationLevel(EscalationLevel.INVOCATION_HANDLER);
 									break;
 								}
 
-							case MANAGED_OBJECT_SOURCE_HANDLER:
-								// Tried managed object, always at office floor
+							case INVOCATION_HANDLER:
+								// Tried invocation, always at office floor
 								threadState
 										.setEscalationLevel(EscalationLevel.OFFICE_FLOOR);
 								globalEscalation = processState

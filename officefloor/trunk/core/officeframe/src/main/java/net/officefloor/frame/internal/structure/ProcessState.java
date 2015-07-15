@@ -26,7 +26,6 @@ import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
@@ -153,14 +152,12 @@ public interface ProcessState {
 
 	/**
 	 * Obtains the {@link EscalationFlow} for the {@link EscalationHandler}
-	 * provided by the {@link ManagedObjectSource}.
+	 * provided by the invocation of this {@link ProcessState}.
 	 * 
-	 * @return {@link EscalationFlow} or <code>null</code> if
-	 *         {@link ManagedObjectSource} did not provide a
-	 *         {@link EscalationHandler} or this {@link ProcessState} was not
-	 *         invoked by a {@link ManagedObjectSource}.
+	 * @return {@link EscalationFlow} or <code>null</code> if the invoker did
+	 *         not provide a {@link EscalationHandler}.
 	 */
-	EscalationFlow getManagedObjectSourceEscalation();
+	EscalationFlow getInvocationEscalation();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for the {@link Office}.

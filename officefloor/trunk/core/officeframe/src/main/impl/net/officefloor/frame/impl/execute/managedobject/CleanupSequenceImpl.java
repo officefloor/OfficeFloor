@@ -94,7 +94,7 @@ public class CleanupSequenceImpl implements CleanupSequence,
 		cleanupJob.getJobSequence().getThreadState().getProcessState()
 				.registerProcessCompletionListener(this);
 		cleanupJob.activateJob(teamIdentifier);
-
+		
 		// Job activated
 		return true;
 	}
