@@ -321,7 +321,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 			// Create the recycle job node
 			JobNode recycleJobNode = this.officeMetaData.createProcess(
-					this.recycleFlowMetaData, parameter);
+					this.recycleFlowMetaData, parameter, null, null, null);
 
 			// Listen to process completion (handle not being recycled)
 			recycleJobNode.getJobSequence().getThreadState().getProcessState()

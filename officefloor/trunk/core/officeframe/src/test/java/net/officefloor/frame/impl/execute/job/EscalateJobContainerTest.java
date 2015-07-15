@@ -129,7 +129,7 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 		this.record_JobContainer_initialSteps(job, failure);
 		this.record_JobContainer_handleEscalation(job, failure, false);
 		this.record_JobContainer_globalEscalation(job, failure,
-				EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
+				EscalationLevel.INVOCATION_HANDLER);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Replay mocks

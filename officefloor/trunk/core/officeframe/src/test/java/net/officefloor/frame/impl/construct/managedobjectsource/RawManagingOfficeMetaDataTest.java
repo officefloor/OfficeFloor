@@ -740,28 +740,29 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record invoking the flow
 		this.recordReturn(this.officeMetaData, this.officeMetaData
-				.createProcess(null, parameter, managedObject, this.moMetaData,
-						0, null, escalationResponsibleTeam, this.continueTeam),
-				jobNode, new AbstractMatcher() {
+				.createProcess(null, parameter, null,
+						escalationResponsibleTeam, this.continueTeam,
+						managedObject, this.moMetaData, 0), jobNode,
+				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
 						FlowMetaData<?> flowMetaData = (FlowMetaData<?>) actual[0];
 						assertEquals("Incorrect parameter", parameter,
 								actual[1]);
-						assertEquals("Incorrect managed object", managedObject,
-								actual[2]);
-						assertEquals("Incorrect managed object meta-data",
-								RawManagingOfficeMetaDataTest.this.moMetaData,
-								actual[3]);
-						assertEquals("Incorrect process index", 0, actual[4]);
 						assertNull("Should not have escalation handler",
-								actual[5]);
+								actual[2]);
 						assertEquals("Incorrect escalation responsible team",
-								escalationResponsibleTeam, actual[6]);
+								escalationResponsibleTeam, actual[3]);
 						assertEquals(
 								"Incorrect escalation continue team",
 								RawManagingOfficeMetaDataTest.this.continueTeam,
-								actual[7]);
+								actual[4]);
+						assertEquals("Incorrect managed object", managedObject,
+								actual[5]);
+						assertEquals("Incorrect managed object meta-data",
+								RawManagingOfficeMetaDataTest.this.moMetaData,
+								actual[6]);
+						assertEquals("Incorrect process index", 0, actual[7]);
 
 						// Validate flow meta-data
 						assertEquals("Incorrect task meta-data", taskMetaData,
@@ -865,40 +866,44 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record invoking the flow
 		this.recordReturn(this.officeMetaData, this.officeMetaData
-				.createProcess(null, parameter, managedObject, this.moMetaData,
-						processMoIndex, null, escalationResponsibleTeam,
-						this.continueTeam), jobNode, new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				FlowMetaData<?> flowMetaData = (FlowMetaData<?>) actual[0];
-				assertEquals("Incorrect parameter", parameter, actual[1]);
-				assertEquals("Incorrect managed object", managedObject,
-						actual[2]);
-				assertEquals("Incorrect managed object meta-data",
-						RawManagingOfficeMetaDataTest.this.moMetaData,
-						actual[3]);
-				assertEquals("Incorrect process index", processMoIndex,
-						actual[4]);
-				assertNull("Should not have escalation handler", actual[5]);
-				assertEquals("Incorrect escalation responsible team",
-						escalationResponsibleTeam, actual[6]);
-				assertEquals("Incorrect escalation continue team",
-						RawManagingOfficeMetaDataTest.this.continueTeam,
-						actual[7]);
+				.createProcess(null, parameter, null,
+						escalationResponsibleTeam, this.continueTeam,
+						managedObject, this.moMetaData, processMoIndex),
+				jobNode, new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						FlowMetaData<?> flowMetaData = (FlowMetaData<?>) actual[0];
+						assertEquals("Incorrect parameter", parameter,
+								actual[1]);
+						assertNull("Should not have escalation handler",
+								actual[2]);
+						assertEquals("Incorrect escalation responsible team",
+								escalationResponsibleTeam, actual[3]);
+						assertEquals(
+								"Incorrect escalation continue team",
+								RawManagingOfficeMetaDataTest.this.continueTeam,
+								actual[4]);
+						assertEquals("Incorrect managed object", managedObject,
+								actual[5]);
+						assertEquals("Incorrect managed object meta-data",
+								RawManagingOfficeMetaDataTest.this.moMetaData,
+								actual[6]);
+						assertEquals("Incorrect process index", processMoIndex,
+								actual[7]);
 
-				// Validate flow meta-data
-				assertEquals("Incorrect task meta-data", taskMetaData,
-						flowMetaData.getInitialTaskMetaData());
-				assertEquals("Always instigated asynchronously",
-						FlowInstigationStrategyEnum.ASYNCHRONOUS,
-						flowMetaData.getInstigationStrategy());
-				assertEquals("Incorrect asset manager", assetManager,
-						flowMetaData.getFlowManager());
+						// Validate flow meta-data
+						assertEquals("Incorrect task meta-data", taskMetaData,
+								flowMetaData.getInitialTaskMetaData());
+						assertEquals("Always instigated asynchronously",
+								FlowInstigationStrategyEnum.ASYNCHRONOUS,
+								flowMetaData.getInstigationStrategy());
+						assertEquals("Incorrect asset manager", assetManager,
+								flowMetaData.getFlowManager());
 
-				// Matches if at this point
-				return true;
-			}
-		});
+						// Matches if at this point
+						return true;
+					}
+				});
 
 		// Record obtaining the process state
 		this.recordReturn(jobNode, jobNode.getJobSequence(), jobSequence);
@@ -972,8 +977,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ProcessState processState = this.createMock(ProcessState.class);
 
 		// Record creating the job node
-		this.recordReturn(this.officeMetaData,
-				this.officeMetaData.createProcess(recycleFlowMetaData, null),
+		this.recordReturn(this.officeMetaData, this.officeMetaData
+				.createProcess(recycleFlowMetaData, null, null, null, null),
 				recycleJob, new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {

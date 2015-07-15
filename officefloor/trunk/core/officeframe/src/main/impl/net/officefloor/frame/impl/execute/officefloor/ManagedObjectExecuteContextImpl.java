@@ -177,9 +177,9 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 
 		// Create the job in a new process
 		final JobNode jobNode = this.officeMetaData.createProcess(flowMetaData,
-				parameter, managedObject, this.managedObjectMetaData,
-				this.processMoIndex, escalationHandler,
-				this.escalationResponsibleTeam, this.escalationContinueTeam);
+				parameter, escalationHandler, this.escalationResponsibleTeam,
+				this.escalationContinueTeam, managedObject,
+				this.managedObjectMetaData, this.processMoIndex);
 
 		// Obtain the process state
 		ProcessState processState = jobNode.getJobSequence().getThreadState()
@@ -210,5 +210,4 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 		// Return the Process Future
 		return processState.getProcessFuture();
 	}
-
 }

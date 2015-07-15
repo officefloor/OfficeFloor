@@ -105,7 +105,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		}
 
 		// Create the job node within a new process
-		JobNode jobNode = officeMetaData.createProcess(flowMetaData, parameter);
+		JobNode jobNode = officeMetaData.createProcess(flowMetaData, parameter,
+				null, null, null);
 
 		// Obtain the ProcessState
 		ProcessState processState = jobNode.getJobSequence().getThreadState()
@@ -263,19 +264,21 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 	@Override
 	public <W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
-			Object parameter) {
-		return this.createProcess(flowMetaData, parameter, null, null, -1,
-				null, null, null);
+			Object parameter, EscalationHandler invocationEscalationHandler,
+			TeamManagement escalationResponsibleTeam,
+			Team escalationContinueTeam) {
+		return this.createProcess(flowMetaData, parameter,
+				invocationEscalationHandler, escalationResponsibleTeam,
+				escalationContinueTeam, null, null, -1);
 	}
 
 	@Override
 	public <W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
-			Object parameter, ManagedObject inputManagedObject,
-			ManagedObjectMetaData<?> inputManagedObjectMetaData,
-			int processBoundIndexForInputManagedObject,
-			EscalationHandler inputManagedObjectEscalationHandler,
+			Object parameter, EscalationHandler invocationEscalationHandler,
 			TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam) {
+			Team escalationContinueTeam, ManagedObject inputManagedObject,
+			ManagedObjectMetaData<?> inputManagedObjectMetaData,
+			int processBoundIndexForInputManagedObject) {
 
 		// Create the process profiler (if profiling)
 		ProcessProfiler processProfiler = (this.profiler == null ? null
@@ -287,7 +290,10 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 			// Create Process without an Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData,
 					this.processContextListeners, this,
-					this.officeFloorEscalation, processProfiler);
+					this.officeFloorEscalation, processProfiler,
+					invocationEscalationHandler, escalationResponsibleTeam,
+					escalationContinueTeam,
+					this.inputManagedObjectEscalationRequiredGovernance);
 
 		} else {
 			// Create Process with the Input Managed Object
@@ -296,8 +302,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 					this.officeFloorEscalation, processProfiler,
 					inputManagedObject, inputManagedObjectMetaData,
 					processBoundIndexForInputManagedObject,
-					inputManagedObjectEscalationHandler,
-					escalationResponsibleTeam, escalationContinueTeam,
+					invocationEscalationHandler, escalationResponsibleTeam,
+					escalationContinueTeam,
 					this.inputManagedObjectEscalationRequiredGovernance);
 		}
 

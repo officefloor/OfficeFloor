@@ -54,7 +54,6 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
@@ -133,10 +132,10 @@ public class ProcessStateImpl implements ProcessState {
 
 	/**
 	 * {@link EscalationHandlerEscalation} containing the
-	 * {@link EscalationHandler} provided by the {@link ManagedObjectSource}
-	 * that invoked this {@link ProcessState}. May be <code>null</code>.
+	 * {@link EscalationHandler} provided by the invocation of this
+	 * {@link ProcessState}. May be <code>null</code>.
 	 */
-	private final EscalationHandlerEscalation managedObjectSourceEscalation;
+	private final EscalationHandlerEscalation invocationEscalation;
 
 	/**
 	 * {@link OfficeFloor} {@link EscalationFlow}.
@@ -174,15 +173,31 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 * @param processProfiler
 	 *            {@link ProcessProfiler}.
+	 * @param invocationEscalationHandler
+	 *            {@link EscalationHandler} provided by the invocation of this
+	 *            {@link ProcessState}.
+	 * @param escalationResponsibleTeam
+	 *            {@link TeamManagement} of {@link Team} responsible for
+	 *            handling {@link Escalation}.
+	 * @param escalationContinueTeam
+	 *            {@link Team} to enable worker ({@link Thread}) of responsible
+	 *            {@link Team} to continue on to handle {@link Escalation}.
+	 * @param escalationHandlerRequiredGovernance
+	 *            {@link EscalationHandler} required {@link Governance}.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData,
 			ProcessContextListener[] processContextListeners,
 			OfficeMetaData officeMetaData,
 			EscalationFlow officeFloorEscalation,
-			ProcessProfiler processProfiler) {
+			ProcessProfiler processProfiler,
+			EscalationHandler invocationEscalationHandler,
+			TeamManagement escalationResponsibleTeam,
+			Team escalationContinueTeam,
+			boolean[] escalationHandlerRequiredGovernance) {
 		this(processMetaData, processContextListeners, officeMetaData,
-				officeFloorEscalation, processProfiler, null, null, -1, null,
-				null, null, null);
+				officeFloorEscalation, processProfiler, null, null, -1,
+				invocationEscalationHandler, escalationResponsibleTeam,
+				escalationContinueTeam, escalationHandlerRequiredGovernance);
 	}
 
 	/**
@@ -208,16 +223,15 @@ public class ProcessStateImpl implements ProcessState {
 	 * @param inputManagedObjectIndex
 	 *            Index of the input {@link ManagedObject} within this
 	 *            {@link ProcessState}.
-	 * @param inputManagedObjectEscalationHandler
-	 *            {@link EscalationHandler} provided by the
-	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
+	 * @param invocationEscalationHandler
+	 *            {@link EscalationHandler} provided by the invocation of this
+	 *            {@link ProcessState}.
 	 * @param escalationResponsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for
-	 *            handling {@link Escalation} from the {@link ManagedObject}.
+	 *            handling {@link Escalation}.
 	 * @param escalationContinueTeam
 	 *            {@link Team} to enable worker ({@link Thread}) of responsible
-	 *            {@link Team} to continue on to handle {@link Escalation} of
-	 *            {@link ManagedObject}.
+	 *            {@link Team} to continue on to handle {@link Escalation}.
 	 * @param escalationHandlerRequiredGovernance
 	 *            {@link EscalationHandler} required {@link Governance}.
 	 */
@@ -228,7 +242,7 @@ public class ProcessStateImpl implements ProcessState {
 			ProcessProfiler processProfiler, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData,
 			int inputManagedObjectIndex,
-			EscalationHandler inputManagedObjectEscalationHandler,
+			EscalationHandler invocationEscalationHandler,
 			TeamManagement escalationResponsibleTeam,
 			Team escalationContinueTeam,
 			boolean[] escalationHandlerRequiredGovernance) {
@@ -254,10 +268,9 @@ public class ProcessStateImpl implements ProcessState {
 				.getAdministratorMetaData();
 		this.administratorContainers = new AdministratorContainer[administratorMetaData.length];
 
-		// Escalation handled by managed object source
-		this.managedObjectSourceEscalation = (inputManagedObjectEscalationHandler == null ? null
-				: new EscalationHandlerEscalation(
-						inputManagedObjectEscalationHandler,
+		// Escalation handled by invocation of this process
+		this.invocationEscalation = (invocationEscalationHandler == null ? null
+				: new EscalationHandlerEscalation(invocationEscalationHandler,
 						escalationResponsibleTeam, escalationContinueTeam,
 						escalationHandlerRequiredGovernance));
 	}
@@ -410,8 +423,8 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public EscalationFlow getManagedObjectSourceEscalation() {
-		return this.managedObjectSourceEscalation;
+	public EscalationFlow getInvocationEscalation() {
+		return this.invocationEscalation;
 	}
 
 	@Override

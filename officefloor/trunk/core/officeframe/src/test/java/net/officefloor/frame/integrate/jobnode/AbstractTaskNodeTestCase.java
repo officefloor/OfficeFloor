@@ -419,7 +419,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		// Create Flow for executing
 		ProcessState processState = new ProcessStateImpl(processMetaData,
 				new ProcessContextListener[0], officeMetaData, null,
-				processProfiler);
+				processProfiler, null, null, null, null);
 		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
 		FlowMetaData<?> flowMetaData = workMetaData.getInitialFlowMetaData();
 		AssetManager flowAssetManager = flowMetaData.getFlowManager();
