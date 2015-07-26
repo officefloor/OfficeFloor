@@ -206,10 +206,13 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * @param managedObject
 	 *            {@link ManagedObject} to be recycled. Obtained by the
 	 *            {@link RecycleManagedObjectParameter#getManagedObject()}.
+	 * @param cleanupSequence
+	 *            {@link CleanupSequence}.
 	 * @return {@link JobNode} for the recycling this {@link ManagedObject} or
 	 *         <code>null</code> if no recycling is required for this
 	 *         {@link ManagedObject}.
 	 */
-	JobNode createRecycleJobNode(ManagedObject managedObject);
+	JobNode createRecycleJobNode(ManagedObject managedObject,
+			CleanupSequence cleanupSequence);
 
 }

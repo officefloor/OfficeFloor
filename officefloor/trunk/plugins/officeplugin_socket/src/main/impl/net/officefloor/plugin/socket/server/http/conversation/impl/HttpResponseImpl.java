@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -271,7 +272,7 @@ public class HttpResponseImpl implements HttpResponse {
 
 			// Clear the response to write the failure
 			this.resetUnsafe();
-			
+
 			// Send failure as plain text
 			this.contentType = "text/plain";
 
@@ -296,6 +297,58 @@ public class HttpResponseImpl implements HttpResponse {
 				PrintWriter stackTraceWriter = new PrintWriter(writer);
 				failure.printStackTrace(stackTraceWriter);
 				stackTraceWriter.flush();
+			}
+
+			// Send the response containing the failure
+			this.send();
+
+			// Close the connection
+			this.connection.close();
+		}
+	}
+
+	/**
+	 * Flags failure in processing the {@link HttpRequest}.
+	 * 
+	 * @param cleanupEscalations
+	 *            {@link CleanupEscalation} instances.
+	 * @throws IOException
+	 *             If fails to send the failure response.
+	 */
+	void sendCleanupEscalations(CleanupEscalation[] cleanupEscalations)
+			throws IOException {
+
+		// Lock as called from process completion handler
+		synchronized (this.connection.getLock()) {
+
+			// Clear the response to write the failure
+			this.resetUnsafe();
+
+			// Send failure as plain text
+			this.contentType = "text/plain";
+
+			// Write the failure header details
+			this.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+
+			// Write the failure response
+			ServerWriter writer = this.getEntityWriter();
+			for (CleanupEscalation cleanupEscalation : cleanupEscalations) {
+				Throwable escalation = cleanupEscalation.getEscalation();
+
+				// Write the escalation details to the response
+				String failMessage = "Cleanup of object type "
+						+ cleanupEscalation.getObjectType().getName() + ": "
+						+ escalation.getMessage() + " ("
+						+ escalation.getClass().getSimpleName() + ")\n";
+				writer.write(failMessage);
+				if (this.conversation.isSendStackTraceOnFailure()) {
+					// Provide the stack trace
+					writer.write("\n");
+					PrintWriter stackTraceWriter = new PrintWriter(writer);
+					escalation.printStackTrace(stackTraceWriter);
+					stackTraceWriter.flush();
+					writer.write("\n\n\n");
+				}
 			}
 
 			// Send the response containing the failure

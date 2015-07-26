@@ -17,12 +17,17 @@
  */
 package net.officefloor.frame.impl.execute.cleanup;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.impl.execute.managedobject.CleanupSequenceImpl;
 import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -155,6 +160,53 @@ public class CleanupSequenceTest extends OfficeFrameTestCase {
 
 		// Verify mocks
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can obtain {@link CleanupEscalation} instances.
+	 */
+	public void testRegisterCleanupEscalation() {
+
+		// Ensure initially no cleanup escalations
+		CleanupEscalation[] escalations = this.cleanupSequence
+				.getCleanupEscalations();
+		assertEquals("Should be no cleanup escalations", 0, escalations.length);
+
+		// Register cleanup escalation
+		final Throwable testFailure = new Throwable("TEST");
+		this.cleanupSequence.registerCleanupEscalation(String.class,
+				testFailure);
+		escalations = this.cleanupSequence.getCleanupEscalations();
+		assertEquals("Should have a cleanup escalation", 1, escalations.length);
+		assertCleanupEscalation(escalations[0], String.class, testFailure);
+
+		// Register another cleanup escalation
+		final Exception anotherFailure = new SQLException("TEST");
+		this.cleanupSequence.registerCleanupEscalation(Connection.class,
+				anotherFailure);
+		escalations = this.cleanupSequence.getCleanupEscalations();
+		assertEquals("Should have cleanup escalations", 2, escalations.length);
+		assertCleanupEscalation(escalations[0], String.class, testFailure);
+		assertCleanupEscalation(escalations[1], Connection.class,
+				anotherFailure);
+	}
+
+	/**
+	 * Ensures the {@link CleanupEscalation} has correct information.
+	 * 
+	 * @param escalation
+	 *            {@link CleanupEscalation} to validate.
+	 * @param expectedObjectType
+	 *            Expected object type.
+	 * @param expectedEscalation
+	 *            Expected {@link Escalation}.
+	 */
+	private static void assertCleanupEscalation(CleanupEscalation escalation,
+			Class<?> expectedObjectType, Throwable expectedEscalation) {
+		assertEquals("Incorrect object type", expectedObjectType,
+				escalation.getObjectType());
+		assertEquals("Incorrect escalation", expectedEscalation,
+				escalation.getEscalation());
 	}
 
 	/**

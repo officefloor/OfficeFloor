@@ -25,6 +25,8 @@ import java.util.logging.Logger;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -52,15 +54,21 @@ public class CleanupTask extends AbstractSingleTask<Work, None, None> {
 	public Object doTask(TaskContext<Work, None, None> context)
 			throws IOException {
 
-		// Obtain the HTTP managed object
-		HttpManagedObject managedObject = this
+		// Obtain the recycle parameter
+		RecycleManagedObjectParameter<HttpManagedObject> parameter = this
 				.getRecycleManagedObjectParameter(context,
-						HttpManagedObject.class).getManagedObject();
+						HttpManagedObject.class);
+
+		// Obtain the HTTP managed object
+		HttpManagedObject managedObject = parameter.getManagedObject();
+
+		// Obtain any potential cleanup escalations
+		CleanupEscalation[] escalations = parameter.getCleanupEscalations();
 
 		try {
-			
+
 			// Clean up the HTTP managed object
-			managedObject.cleanup();
+			managedObject.cleanup(escalations);
 
 		} catch (ClosedChannelException ex) {
 			// Connection closed. Must handle as recycle task in new process
@@ -74,5 +82,4 @@ public class CleanupTask extends AbstractSingleTask<Work, None, None> {
 		// No further processing
 		return null;
 	}
-
 }

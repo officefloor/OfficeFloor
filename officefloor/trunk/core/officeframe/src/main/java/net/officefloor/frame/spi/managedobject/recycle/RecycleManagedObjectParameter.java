@@ -47,4 +47,12 @@ public interface RecycleManagedObjectParameter<MO extends ManagedObject> {
 	 */
 	void reuseManagedObject(MO managedObject);
 
+	/**
+	 * Obtains possible {@link CleanupEscalation} instances that occurred in
+	 * cleaning up previous {@link ManagedObject} instances.
+	 * 
+	 * @return Possible {@link CleanupEscalation} instances.
+	 */
+	CleanupEscalation[] getCleanupEscalations();
+
 }

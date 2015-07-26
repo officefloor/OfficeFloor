@@ -39,6 +39,7 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -261,6 +262,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
+		final CleanupSequence cleanupSequence = this
+				.createMock(CleanupSequence.class);
 
 		// Record manage office
 		this.record_managedObjectSourceName();
@@ -295,7 +298,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		rawOffice.manageByOffice(null, this.metaDataLocator, this.officeTeams,
 				this.continueTeamManagement, this.assetManagerFactory,
 				this.issues);
-		JobNode jobNode = moMetaData.createRecycleJobNode(managedObject);
+		JobNode jobNode = moMetaData.createRecycleJobNode(managedObject,
+				cleanupSequence);
 		this.verifyMockObjects();
 
 		// Ensure correct recycle job
@@ -318,6 +322,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
+		final CleanupSequence cleanupSequence = this
+				.createMock(CleanupSequence.class);
 
 		// Record managed office
 		this.record_managedObjectSourceName();
@@ -350,7 +356,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Have managed after managed by office.
 		// This would the be case when used by another office.
 		rawOffice.manageManagedObject(moMetaData);
-		JobNode jobNode = moMetaData.createRecycleJobNode(managedObject);
+		JobNode jobNode = moMetaData.createRecycleJobNode(managedObject,
+				cleanupSequence);
 		this.verifyMockObjects();
 
 		// Ensure correct recycle job
@@ -365,6 +372,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
+		final CleanupSequence cleanupSequence = this
+				.createMock(CleanupSequence.class);
 
 		// Record no recycle task
 		this.record_managedObjectSourceName();
@@ -378,7 +387,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Ensure not obtain recycle job
 		rawOffice.manageManagedObject(moMetaData);
-		JobNode jobNode = moMetaData.createRecycleJobNode(managedObject);
+		JobNode jobNode = moMetaData.createRecycleJobNode(managedObject,
+				cleanupSequence);
 		this.verifyMockObjects();
 
 		// Ensure no recycle job
@@ -982,11 +992,25 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				recycleJob, new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
+
+						// Ensure correct flow meta-data
 						assertEquals("Incorrect recycle flow meta-data",
 								recycleFlowMetaData, actual[0]);
+
+						// Ensure correct recycle parameter
 						RecycleManagedObjectParameter<?> parameter = (RecycleManagedObjectParameter<?>) actual[1];
 						assertEquals("Incorrect managed object", managedObject,
 								parameter.getManagedObject());
+
+						// Ensure have recycle escalation handling
+						assertNotNull("Should have recycle escalation handler",
+								actual[2]);
+						assertNotNull(
+								"Should have recycle escalation responsible team",
+								actual[3]);
+						assertNotNull(
+								"Should have recycle escalation continue team",
+								actual[4]);
 						return true;
 					}
 				});

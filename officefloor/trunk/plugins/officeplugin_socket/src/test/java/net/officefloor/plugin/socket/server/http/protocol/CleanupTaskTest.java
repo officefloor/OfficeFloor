@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.conversation.HttpManagedObject;
@@ -64,12 +66,16 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 	 */
 	public void testCleanup() throws IOException {
 
+		final CleanupEscalation[] escalations = new CleanupEscalation[0];
+
 		// Record cleaning up
 		this.recordReturn(this.context, this.context.getObject(0),
 				this.parameter);
 		this.recordReturn(this.parameter, this.parameter.getManagedObject(),
 				this.mo);
-		this.mo.cleanup();
+		this.recordReturn(this.parameter,
+				this.parameter.getCleanupEscalations(), escalations);
+		this.mo.cleanup(escalations);
 
 		// Test
 		this.replayMockObjects();
@@ -78,17 +84,45 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure flags failure if previous cleanup {@link Escalation}.
+	 */
+	public void testPreviousCleanupEscalation() throws IOException {
+
+		final CleanupEscalation[] escalations = new CleanupEscalation[] { this
+				.createMock(CleanupEscalation.class) };
+
+		// Record cleaning up
+		this.recordReturn(this.context, this.context.getObject(0),
+				this.parameter);
+		this.recordReturn(this.parameter, this.parameter.getManagedObject(),
+				this.mo);
+		this.recordReturn(this.parameter,
+				this.parameter.getCleanupEscalations(), escalations);
+		this.mo.cleanup(escalations);
+
+		// Test
+		this.replayMockObjects();
+		this.task.doTask(this.context);
+		this.verifyMockObjects();
+
+	}
+
+	/**
 	 * Ensure handles {@link ClosedChannelException} indicating the peer has
 	 * closed the connection.
 	 */
 	public void testConnectionAlreadyClosed() throws IOException {
+
+		final CleanupEscalation[] escalations = new CleanupEscalation[0];
 
 		// Record connection already closed
 		this.recordReturn(this.context, this.context.getObject(0),
 				this.parameter);
 		this.recordReturn(this.parameter, this.parameter.getManagedObject(),
 				this.mo);
-		this.mo.cleanup();
+		this.recordReturn(this.parameter,
+				this.parameter.getCleanupEscalations(), escalations);
+		this.mo.cleanup(escalations);
 		this.control(this.mo).setThrowable(new ClosedChannelException());
 
 		// Test

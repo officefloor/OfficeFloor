@@ -122,7 +122,7 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 		long startTime = System.currentTimeMillis();
 
 		synchronized (lock) {
-			
+
 			// Allow some time for clean up tasks to be activated
 			lock.wait(100);
 

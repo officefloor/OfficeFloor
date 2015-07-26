@@ -129,6 +129,17 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	private FlowMetaData<?> recycleFlowMetaData = null;
 
 	/**
+	 * {@link TeamManagement} for escalation handling of the recycle
+	 * {@link FlowMetaData}.
+	 */
+	private TeamManagement recycleEscalationResponsibleTeam = null;
+
+	/**
+	 * {@link Team} to continue in handling of the recycle {@link FlowMetaData}.
+	 */
+	private Team recycleEscalationContinueTeam = null;
+
+	/**
 	 * {@link ManagedObjectExecuteContextFactory}.
 	 */
 	private ManagedObjectExecuteContextFactory<F> managedObjectExecuteContextFactory = null;
@@ -191,7 +202,9 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 		} else {
 			// Already being managed, so load remaining state
 			moMetaData.loadRemainingState(this.managingOffice,
-					this.recycleFlowMetaData);
+					this.recycleFlowMetaData,
+					this.recycleEscalationResponsibleTeam,
+					this.recycleEscalationContinueTeam);
 		}
 	}
 
@@ -292,12 +305,15 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 		// Load remaining state to existing managed object meta-data
 		for (ManagedObjectMetaDataImpl<?> moMetaData : this.managedObjectMetaDatas) {
-			moMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData);
+			moMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData,
+					escalationResponsibleTeam, continueTeam);
 		}
 
 		// Setup for further managed object meta-data to be managed
 		this.managingOffice = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
+		this.recycleEscalationResponsibleTeam = escalationResponsibleTeam;
+		this.recycleEscalationContinueTeam = continueTeam;
 		this.managedObjectMetaDatas = null;
 
 		// -----------------------------------------------------------

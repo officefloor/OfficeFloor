@@ -17,6 +17,9 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
@@ -49,5 +52,23 @@ public interface CleanupSequence {
 	 *            {@link TeamIdentifier} of the current {@link Team} executing.
 	 */
 	void registerCleanUpJob(JobNode cleanupJob, TeamIdentifier teamIdentifier);
+
+	/**
+	 * Obtains the registered {@link CleanupEscalation} instances.
+	 * 
+	 * @return {@link CleanupEscalation} instances.
+	 */
+	CleanupEscalation[] getCleanupEscalations();
+
+	/**
+	 * Registers a {@link Throwable} from attempting to cleanup the
+	 * {@link ManagedObject} of the object type.
+	 * 
+	 * @param objectType
+	 *            Object type of the {@link ManagedObject}.
+	 * @param escalation
+	 *            {@link Escalation}.
+	 */
+	void registerCleanupEscalation(Class<?> objectType, Throwable escalation);
 
 }
