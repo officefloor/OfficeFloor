@@ -17,9 +17,15 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
@@ -44,6 +50,16 @@ public class CleanupSequenceImpl implements CleanupSequence,
 	 * Last {@link JobNode} in the sequence.
 	 */
 	private JobNode tail = null;
+
+	/**
+	 * {@link CleanupEscalation} instances.
+	 */
+	private List<CleanupEscalation> cleanupEscalations = null;
+
+	/**
+	 * Cached {@link CleanupEscalation} instances to avoid recreating the array.
+	 */
+	private CleanupEscalation[] cachedCleanupEscalations = null;
 
 	/*
 	 * ==================== CleanupSequence ============================
@@ -70,6 +86,42 @@ public class CleanupSequenceImpl implements CleanupSequence,
 		}
 	}
 
+	@Override
+	public synchronized CleanupEscalation[] getCleanupEscalations() {
+
+		// Obtain the clean up escalations
+		CleanupEscalation[] escalations = this.cachedCleanupEscalations;
+		if (escalations == null) {
+			escalations = (this.cleanupEscalations == null ? new CleanupEscalation[0]
+					: this.cleanupEscalations
+							.toArray(new CleanupEscalation[this.cleanupEscalations
+									.size()]));
+
+			// Cache to avoid recreation
+			this.cachedCleanupEscalations = escalations;
+		}
+
+		// Return the escalations
+		return escalations;
+	}
+
+	@Override
+	public synchronized void registerCleanupEscalation(Class<?> objectType,
+			Throwable escalation) {
+
+		// Ensure have cleanup escalation list
+		if (this.cleanupEscalations == null) {
+			this.cleanupEscalations = new LinkedList<CleanupEscalation>();
+		}
+
+		// Add the cleanup escalation
+		this.cleanupEscalations.add(new CleanupEscalationImpl(objectType,
+				escalation));
+
+		// Clear caching of cleanup escalations
+		this.cachedCleanupEscalations = null;
+	}
+
 	/**
 	 * <p>
 	 * Attempts to activate the {@link JobNode}.
@@ -94,7 +146,7 @@ public class CleanupSequenceImpl implements CleanupSequence,
 		cleanupJob.getJobSequence().getThreadState().getProcessState()
 				.registerProcessCompletionListener(this);
 		cleanupJob.activateJob(teamIdentifier);
-		
+
 		// Job activated
 		return true;
 	}
@@ -121,6 +173,50 @@ public class CleanupSequenceImpl implements CleanupSequence,
 
 		// Activate the job
 		this.attempJob(cleanupJob, currentTeam);
+	}
+
+	/**
+	 * {@link CleanupEscalation} implementation.
+	 */
+	private static class CleanupEscalationImpl implements CleanupEscalation {
+
+		/**
+		 * Object type of the {@link ManagedObject}.
+		 */
+		private final Class<?> objectType;
+
+		/**
+		 * {@link Escalation} on cleanup of the {@link ManagedObject}.
+		 */
+		private final Throwable escalation;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param objectType
+		 *            Object type of the {@link ManagedObject}.
+		 * @param escalation
+		 *            {@link Escalation} on cleanup of the {@link ManagedObject}
+		 *            .
+		 */
+		public CleanupEscalationImpl(Class<?> objectType, Throwable escalation) {
+			this.objectType = objectType;
+			this.escalation = escalation;
+		}
+
+		/*
+		 * ======================== CleanupEscalation ==========================
+		 */
+
+		@Override
+		public Class<?> getObjectType() {
+			return this.objectType;
+		}
+
+		@Override
+		public Throwable getEscalation() {
+			return this.escalation;
+		}
 	}
 
 }

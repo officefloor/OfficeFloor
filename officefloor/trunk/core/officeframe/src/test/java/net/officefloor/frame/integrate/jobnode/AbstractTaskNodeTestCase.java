@@ -143,7 +143,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				"WORK_MO", Object.class, 0, this.workMoSource, null, false,
 				new AssetManagerImpl(null), false, new AssetManagerImpl(null),
 				false, null, 1000, new ManagedObjectGovernanceMetaData[0]);
-		workMo.loadRemainingState(null, null);
+		workMo.loadRemainingState(null, null, null, null);
 
 		// Create the Work meta-data
 		WorkMetaData workMetaData = new WorkMetaDataImpl("TEST_WORK",
@@ -401,7 +401,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				false, new AssetManagerImpl(null), true, new AssetManagerImpl(
 						null), false, null, 1000,
 				new ManagedObjectGovernanceMetaData[0]);
-		processMoMetaData.loadRemainingState(null, null);
+		processMoMetaData.loadRemainingState(null, null, null, null);
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
 				new ManagedObjectMetaData[] { processMoMetaData },
 				new AdministratorMetaData[0], threadMetaData);

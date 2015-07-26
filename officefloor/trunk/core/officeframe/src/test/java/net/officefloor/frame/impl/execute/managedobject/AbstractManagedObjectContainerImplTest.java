@@ -599,8 +599,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 		// Indicates if recycled
 		this.recordReturn(this.managedObjectMetaData,
-				this.managedObjectMetaData
-						.createRecycleJobNode(this.managedObject),
+				this.managedObjectMetaData.createRecycleJobNode(
+						this.managedObject, this.cleanupSequence),
 				(this.isRecycled ? this.recycleJobNode : null));
 
 		// Obtained managed object
@@ -632,8 +632,8 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 		// Create a recycle job for the managed object
 		this.recordReturn(this.managedObjectMetaData,
-				this.managedObjectMetaData
-						.createRecycleJobNode(this.managedObject),
+				this.managedObjectMetaData.createRecycleJobNode(
+						this.managedObject, this.cleanupSequence),
 				(this.isRecycled ? this.recycleJobNode : null));
 
 		// Record unloading the managed object

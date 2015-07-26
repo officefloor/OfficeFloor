@@ -228,8 +228,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		}
 
 		// Create the recycle job node
-		this.recycleJobNode = this.metaData
-				.createRecycleJobNode(this.managedObject);
+		this.recycleJobNode = this.metaData.createRecycleJobNode(
+				this.managedObject, this.cleanupSequence);
 	}
 
 	/**
@@ -941,8 +941,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Determine if container in failed state
 			if (this.failure != null) {
 				// Discard the managed object and no further processing
-				this.unloadManagedObject(managedObject,
-						this.metaData.createRecycleJobNode(managedObject), team);
+				this.unloadManagedObject(managedObject, this.metaData
+						.createRecycleJobNode(managedObject,
+								this.cleanupSequence), team);
 				return;
 			}
 
@@ -954,8 +955,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			switch (this.containerState) {
 			case NOT_LOADED:
 				// Discard the managed object
-				this.unloadManagedObject(managedObject,
-						this.metaData.createRecycleJobNode(managedObject), team);
+				this.unloadManagedObject(managedObject, this.metaData
+						.createRecycleJobNode(managedObject,
+								this.cleanupSequence), team);
 
 				// Should never be called before loadManagedObject
 				throw new IllegalStateException(
@@ -965,9 +967,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				// Determine if already loaded
 				if (this.managedObject != null) {
 					// Discard managed object as already loaded
-					this.unloadManagedObject(managedObject,
-							this.metaData.createRecycleJobNode(managedObject),
-							team);
+					this.unloadManagedObject(managedObject, this.metaData
+							.createRecycleJobNode(managedObject,
+									this.cleanupSequence), team);
 					return; // discarded, nothing further
 				}
 
@@ -1015,8 +1017,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				}
 
 				// Create the recycle job node for the managed object
-				this.recycleJobNode = this.metaData
-						.createRecycleJobNode(this.managedObject);
+				this.recycleJobNode = this.metaData.createRecycleJobNode(
+						this.managedObject, this.cleanupSequence);
 
 				// Activate jobs waiting to source permanently
 				this.sourcingMonitor.activateJobNodes(activateSet, true);
@@ -1027,16 +1029,18 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			case COORDINATING:
 			case OBJECT_AVAILABLE:
 				// Discard the managed object as already have a Managed Object
-				this.unloadManagedObject(managedObject,
-						this.metaData.createRecycleJobNode(managedObject), team);
+				this.unloadManagedObject(managedObject, this.metaData
+						.createRecycleJobNode(managedObject,
+								this.cleanupSequence), team);
 				break;
 
 			case UNLOAD_WAITING_GOVERNANCE:
 			case UNLOADING:
 				// Discard as managed object already flagged for unloading
 				// (if unloading nothing should be waiting on it)
-				this.unloadManagedObject(managedObject,
-						this.metaData.createRecycleJobNode(managedObject), team);
+				this.unloadManagedObject(managedObject, this.metaData
+						.createRecycleJobNode(managedObject,
+								this.cleanupSequence), team);
 				break;
 
 			default:

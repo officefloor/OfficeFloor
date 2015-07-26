@@ -280,162 +280,177 @@ public class SocketListener extends
 			// Flag to loop forever (or until told to stop listening)
 			context.setComplete(false);
 
-			// Start listening on the established connections.
-			// Use size to only do currently added.
-			int establishedConnectionCount = this.establishedConnections.size();
-			EstablishedConnection establishedConnection;
-			while ((establishedConnectionCount-- > 0)
-					&& ((establishedConnection = this.establishedConnections
-							.poll()) != null)) {
+			// Greedily service requests
+			// This avoids overheads of obtaining/releasing locks when busy
+			boolean isServicingRequests;
+			do {
 
-				// Obtains the socket channel
-				SocketChannel socketChannel = establishedConnection
-						.getSocketChannel();
+				// Start listening on the established connections.
+				// Use size to only do currently added.
+				int establishedConnectionCount = this.establishedConnections
+						.size();
+				EstablishedConnection establishedConnection;
+				while ((establishedConnectionCount-- > 0)
+						&& ((establishedConnection = this.establishedConnections
+								.poll()) != null)) {
 
-				// Register connection with selector
-				SelectionKey selectionKey = socketChannel.register(
-						this.selector, SelectionKey.OP_READ);
+					// Obtains the socket channel
+					SocketChannel socketChannel = establishedConnection
+							.getSocketChannel();
 
-				// Create the connection
-				ManagedConnection connection = new ConnectionImpl(selectionKey,
-						socketChannel,
-						establishedConnection.getCommunicationProtocol(), this);
+					// Register connection with selector
+					SelectionKey selectionKey = socketChannel.register(
+							this.selector, SelectionKey.OP_READ);
 
-				// Associate connection to its selection key
-				selectionKey.attach(connection);
-			}
+					// Create the connection
+					ManagedConnection connection = new ConnectionImpl(
+							selectionKey, socketChannel,
+							establishedConnection.getCommunicationProtocol(),
+							this);
 
-			// Undertake the the connection actions.
-			// Use size to only do currently added.
-			int actionCount = this.writeActions.size();
-			WriteDataAction action;
-			while ((actionCount-- > 0)
-					&& ((action = this.writeActions.poll()) != null)) {
-
-				// Obtain the connection
-				ManagedConnection connection = action.getConnection();
-
-				// Undertake queued writes on connection
-				if (!(connection.processWriteQueue())) {
-					// Take interest in write (socket buffer clearing)
-					connection.getSelectionKey().interestOps(
-							SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-				}
-			}
-
-			// Determine if stop listening
-			if (this.isStopListening) {
-
-				// Determine if selector closed by another thread
-				if (!this.selector.isOpen()) {
-					// Selector already closed, so ready for shutdown
-					context.setComplete(true);
-					return null; // shutdown
+					// Associate connection to its selection key
+					selectionKey.attach(connection);
 				}
 
-				// Terminate all connections
-				Set<SelectionKey> allKeys = this.selector.keys();
+				// Undertake the the connection actions.
+				// Use size to only do currently added.
+				int actionCount = this.writeActions.size();
+				WriteDataAction action;
+				while ((actionCount-- > 0)
+						&& ((action = this.writeActions.poll()) != null)) {
 
-				// Determine if connections to notify (need another select)
-				if (allKeys.size() == 0) {
+					// Obtain the connection
+					ManagedConnection connection = action.getConnection();
+
+					// Undertake queued writes on connection
+					if (!(connection.processWriteQueue())) {
+						// Take interest in write (socket buffer clearing)
+						connection.getSelectionKey().interestOps(
+								SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+					}
+				}
+
+				// Determine if stop listening
+				if (this.isStopListening) {
+
+					// Determine if selector closed by another thread
+					if (!this.selector.isOpen()) {
+						// Selector already closed, so ready for shutdown
+						context.setComplete(true);
+						return null; // shutdown
+					}
+
+					// Terminate all connections
+					Set<SelectionKey> allKeys = this.selector.keys();
+
+					// Determine if connections to notify (need another select)
+					if (allKeys.size() == 0) {
+						try {
+							// Close the selector
+							this.selector.close();
+						} catch (IOException ex) {
+							if (LOGGER.isLoggable(Level.WARNING)) {
+								LOGGER.log(Level.WARNING,
+										"Failed to close selector", ex);
+							}
+						}
+
+						// May complete as no further connections
+						context.setComplete(true);
+						return null; // shutdown
+
+					} else {
+						// Force remaining connections to close
+						for (SelectionKey key : allKeys) {
+							this.getManagedConnection(key).terminate();
+						}
+					}
+				}
+
+				// Listen on the socket
+				this.selector.select(1000); // 1 second
+
+				// Reset time (for optimising obtaining time in reads)
+				this.currentTime = -1;
+
+				// Obtain the all keys and selected keys
+				Set<SelectionKey> selectedKeys = this.selector.selectedKeys();
+
+				// Service the selected keys
+				isServicingRequests = false;
+				NEXT_KEY: for (SelectionKey selectedKey : selectedKeys) {
+
+					// Within loop, so servicing requests
+					isServicingRequests = true;
+
+					// Obtain the connection details
+					ManagedConnection connection = this
+							.getManagedConnection(selectedKey);
+					SocketChannel socketChannel = connection.getSocketChannel();
+
 					try {
-						// Close the selector
-						this.selector.close();
-					} catch (IOException ex) {
-						if (LOGGER.isLoggable(Level.WARNING)) {
-							LOGGER.log(Level.WARNING,
-									"Failed to close selector", ex);
+
+						// Determine if read content
+						if (selectedKey.isReadable()) {
+
+							// Keep reading data until empty socket buffer
+							boolean isFurtherDataToRead = true;
+							while (isFurtherDataToRead) {
+
+								// Obtain the buffer
+								ByteBuffer buffer = this.readBuffer.duplicate();
+
+								// Read content from channel
+								int bytesRead;
+								try {
+									bytesRead = socketChannel.read(buffer);
+								} catch (IOException ex) {
+									// Connection failed
+									connection.terminate();
+									continue NEXT_KEY;
+								}
+
+								// Determine if closed connection
+								if (bytesRead < 0) {
+									connection.terminate();
+									continue NEXT_KEY;
+								}
+
+								// Obtain the data and handle
+								buffer.flip();
+								this.readData = new byte[bytesRead];
+								buffer.get(this.readData);
+								connection.getConnectionHandler().handleRead(
+										this);
+
+								// Determine if further data
+								if (bytesRead < this.readBuffer.limit()) {
+									isFurtherDataToRead = false; // all data
+																	// read
+								}
+							}
 						}
-					}
 
-					// May complete as no further connections
-					context.setComplete(true);
-					return null; // shutdown
+						// Determine if send data consumed for further write
+						if (selectedKey.isWritable()) {
 
-				} else {
-					// Force remaining connections to close
-					for (SelectionKey key : allKeys) {
-						this.getManagedConnection(key).terminate();
+							// Process the write queue for the connection
+							if (connection.processWriteQueue()) {
+								// All data written, just listen
+								selectedKey.interestOps(SelectionKey.OP_READ);
+							}
+						}
+
+					} catch (CancelledKeyException ex) {
+						// Key cancelled, ensure connection closed
+						connection.terminate();
 					}
 				}
-			}
 
-			// Listen on the socket
-			this.selector.select(1000); // 1 second
+				// Clear the selected keys as now serviced
+				selectedKeys.clear();
 
-			// Reset time (for optimising obtaining time in reads)
-			this.currentTime = -1;
-
-			// Obtain the all keys and selected keys
-			Set<SelectionKey> selectedKeys = this.selector.selectedKeys();
-
-			// Service the selected keys
-			NEXT_KEY: for (SelectionKey selectedKey : selectedKeys) {
-
-				// Obtain the connection details
-				ManagedConnection connection = this
-						.getManagedConnection(selectedKey);
-				SocketChannel socketChannel = connection.getSocketChannel();
-
-				try {
-
-					// Determine if read content
-					if (selectedKey.isReadable()) {
-
-						// Keep reading data until empty socket buffer
-						boolean isFurtherDataToRead = true;
-						while (isFurtherDataToRead) {
-
-							// Obtain the buffer
-							ByteBuffer buffer = this.readBuffer.duplicate();
-
-							// Read content from channel
-							int bytesRead;
-							try {
-								bytesRead = socketChannel.read(buffer);
-							} catch (IOException ex) {
-								// Connection failed
-								connection.terminate();
-								continue NEXT_KEY;
-							}
-
-							// Determine if closed connection
-							if (bytesRead < 0) {
-								connection.terminate();
-								continue NEXT_KEY;
-							}
-
-							// Obtain the data and handle
-							buffer.flip();
-							this.readData = new byte[bytesRead];
-							buffer.get(this.readData);
-							connection.getConnectionHandler().handleRead(this);
-
-							// Determine if further data
-							if (bytesRead < this.readBuffer.limit()) {
-								isFurtherDataToRead = false; // all data read
-							}
-						}
-					}
-
-					// Determine if send data consumed for further write
-					if (selectedKey.isWritable()) {
-
-						// Process the write queue for the connection
-						if (connection.processWriteQueue()) {
-							// All data written, just listen
-							selectedKey.interestOps(SelectionKey.OP_READ);
-						}
-					}
-
-				} catch (CancelledKeyException ex) {
-					// Key cancelled, ensure connection closed
-					connection.terminate();
-				}
-			}
-
-			// Clear the selected keys as now serviced
-			selectedKeys.clear();
+			} while (isServicingRequests);
 		}
 
 		// No return (as should be executed again and again until shutdown)

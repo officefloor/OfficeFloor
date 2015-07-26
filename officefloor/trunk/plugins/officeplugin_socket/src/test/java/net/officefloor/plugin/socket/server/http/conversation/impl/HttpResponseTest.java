@@ -18,15 +18,18 @@
 package net.officefloor.plugin.socket.server.http.conversation.impl;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Map;
 
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -383,6 +386,105 @@ public class HttpResponseTest extends OfficeFrameTestCase implements Connection 
 				+ "Content-Type: text/plain; charset=US-ASCII\n"
 				+ "Content-Length: 23", FAILURE.getClass().getSimpleName()
 				+ ": Failure Test", charset);
+	}
+
+	/**
+	 * Ensure able to provide {@link CleanupEscalation} failures.
+	 */
+	public void testSendCleanupEscalation() throws IOException {
+
+		// Clean up escalations
+		CleanupEscalation[] escalations = new CleanupEscalation[] { new MockCleanupEscalation(
+				Object.class, new Throwable("Cleanup Escalation Test")) };
+
+		// Write some content
+		HttpResponse response = this.createHttpResponse();
+		ServerOutputStream entity = response.getEntity();
+		entity.write("TEST".getBytes());
+		entity.flush();
+
+		// Send clean up escalation failures
+		((HttpResponseImpl) response).sendCleanupEscalations(escalations);
+		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
+				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name()
+				+ "\nContent-Length: 77", "Cleanup of object type "
+				+ escalations[0].getObjectType().getName()
+				+ ": Cleanup Escalation Test ("
+				+ escalations[0].getEscalation().getClass().getSimpleName()
+				+ ")\n", DEFAULT_CHARSET);
+		assertTrue("Connection should be closed", this.isConnectionClosed);
+	}
+
+	/**
+	 * Ensure able to provide {@link CleanupEscalation} failures.
+	 */
+	public void testSendMultipleCleanupEscalations() throws IOException {
+
+		// Clean up escalations
+		CleanupEscalation[] escalations = new CleanupEscalation[] {
+				new MockCleanupEscalation(Connection.class, new SQLException(
+						"Cleanup Escalation One")),
+				new MockCleanupEscalation(File.class, new IOException(
+						"Cleanup Escalation Two")) };
+
+		// Write some content
+		HttpResponse response = this.createHttpResponse();
+		ServerOutputStream entity = response.getEntity();
+		entity.write("TEST".getBytes());
+		entity.flush();
+
+		// Send clean up escalation failures
+		((HttpResponseImpl) response).sendCleanupEscalations(escalations);
+		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
+				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name()
+				+ "\nContent-Length: 193", "Cleanup of object type "
+				+ escalations[0].getObjectType().getName()
+				+ ": Cleanup Escalation One ("
+				+ escalations[0].getEscalation().getClass().getSimpleName()
+				+ ")\nCleanup of object type "
+				+ escalations[1].getObjectType().getName()
+				+ ": Cleanup Escalation Two ("
+				+ escalations[1].getEscalation().getClass().getSimpleName()
+				+ ")\n", DEFAULT_CHARSET);
+		assertTrue("Connection should be closed", this.isConnectionClosed);
+	}
+
+	/**
+	 * Ensures able to obtain stack trace for testing and debugging purposes.
+	 */
+	public void testSendCleanupEscalationWithStackTrace() throws IOException {
+
+		final Throwable escalation = new Exception("Test");
+		CleanupEscalation[] escalations = new CleanupEscalation[] { new MockCleanupEscalation(
+				Object.class, escalation) };
+
+		// Obtain the expected stack trace
+		StringWriter buffer = new StringWriter();
+		escalation.printStackTrace(new PrintWriter(buffer));
+		String stackTrace = buffer.toString();
+
+		// Determine the expected content and its length
+		String content = "Cleanup of object type "
+				+ escalations[0].getObjectType().getName() + ": Test ("
+				+ escalation.getClass().getSimpleName() + ")\n\n" + stackTrace
+				+ "\n\n\n";
+		int contentLength = content.getBytes(DEFAULT_CHARSET).length;
+
+		// Create conversation to send stack trace on failure
+		this.conversation = this.createHttpConversation(true);
+
+		// Run test
+		HttpResponseImpl response = (HttpResponseImpl) this
+				.createHttpResponse();
+		response.sendCleanupEscalations(escalations);
+		this.assertWireContent("HTTP/1.1 500 Internal Server Error\n"
+				+ "Server: TEST\nDate: [Mock Time]\n"
+				+ "Content-Type: text/plain; charset=" + DEFAULT_CHARSET.name()
+				+ "\nContent-Length: " + contentLength, content,
+				DEFAULT_CHARSET);
+		assertTrue("Connection should be closed", this.isConnectionClosed);
 	}
 
 	/**

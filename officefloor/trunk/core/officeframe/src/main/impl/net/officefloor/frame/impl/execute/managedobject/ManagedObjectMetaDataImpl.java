@@ -17,9 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -32,6 +34,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
@@ -40,10 +43,12 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
@@ -143,6 +148,18 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private FlowMetaData<?> recycleFlowMetaData;
 
 	/**
+	 * {@link TeamManagement} for handling escalation of recycling the
+	 * {@link ManagedObject}.
+	 */
+	private TeamManagement recycleEscalationResponsibleTeam;
+
+	/**
+	 * Continue {@link Team} for handling escalation of recycling the
+	 * {@link ManagedObject}.
+	 */
+	private Team recycleEscalationContinueTeam;
+
+	/**
 	 * Initiate with meta-data of the {@link ManagedObject} to source specific
 	 * to the {@link Work}.
 	 * 
@@ -216,11 +233,21 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * @param recycleFlowMetaData
 	 *            {@link FlowMetaData} for the recycling of this
 	 *            {@link ManagedObject}.
+	 * @param recycleEscalationResponsibleTeam
+	 *            {@link TeamManagement} for handling escalation of recycling
+	 *            the {@link ManagedObject}.
+	 * @param recycleEscalationContinueTeam
+	 *            Continue {@link Team} for handling escalation of recycling the
+	 *            {@link ManagedObject}.
 	 */
 	public void loadRemainingState(OfficeMetaData officeMetaData,
-			FlowMetaData<?> recycleFlowMetaData) {
+			FlowMetaData<?> recycleFlowMetaData,
+			TeamManagement recycleEscalationResponsibleTeam,
+			Team recycleEscalationContinueTeam) {
 		this.officeMetaData = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
+		this.recycleEscalationResponsibleTeam = recycleEscalationResponsibleTeam;
+		this.recycleEscalationContinueTeam = recycleEscalationContinueTeam;
 	}
 
 	/*
@@ -310,18 +337,21 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public JobNode createRecycleJobNode(ManagedObject managedObject) {
+	public JobNode createRecycleJobNode(ManagedObject managedObject,
+			CleanupSequence cleanupSequence) {
 		if (this.recycleFlowMetaData == null) {
 			// No recycling for managed objects
 			return null;
 		} else {
-			// Create the recyle managed object parameter
+			// Create the recycle managed object parameter
 			RecycleManagedObjectParameterImpl<ManagedObject> parameter = new RecycleManagedObjectParameterImpl<ManagedObject>(
-					managedObject);
+					managedObject, cleanupSequence);
 
 			// Create the recycle job node
 			JobNode recycleJobNode = this.officeMetaData.createProcess(
-					this.recycleFlowMetaData, parameter, null, null, null);
+					this.recycleFlowMetaData, parameter, parameter,
+					this.recycleEscalationResponsibleTeam,
+					this.recycleEscalationContinueTeam);
 
 			// Listen to process completion (handle not being recycled)
 			recycleJobNode.getJobSequence().getThreadState().getProcessState()
@@ -336,13 +366,18 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * Implementation of {@link RecycleManagedObjectParameter}.
 	 */
 	private class RecycleManagedObjectParameterImpl<MO extends ManagedObject>
-			implements RecycleManagedObjectParameter<MO>,
+			implements RecycleManagedObjectParameter<MO>, EscalationHandler,
 			ProcessCompletionListener {
 
 		/**
 		 * {@link ManagedObject} being recycled.
 		 */
 		private final MO managedObject;
+
+		/**
+		 * {@link CleanupSequence}.
+		 */
+		private final CleanupSequence cleanupSequence;
 
 		/**
 		 * Flag indicating if has been recycled.
@@ -354,9 +389,13 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		 * 
 		 * @param managedObject
 		 *            {@link ManagedObject} to recycle.
+		 * @param cleanupSequence
+		 *            {@link CleanupSequence}.
 		 */
-		RecycleManagedObjectParameterImpl(MO managedObject) {
+		RecycleManagedObjectParameterImpl(MO managedObject,
+				CleanupSequence cleanupSequence) {
 			this.managedObject = managedObject;
+			this.cleanupSequence = cleanupSequence;
 		}
 
 		/*
@@ -378,6 +417,22 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 			// Flag recycled
 			this.isRecycled = true;
+		}
+
+		@Override
+		public CleanupEscalation[] getCleanupEscalations() {
+			return this.cleanupSequence.getCleanupEscalations();
+		}
+
+		/*
+		 * ================== EscalationHandler ===============================
+		 */
+
+		@Override
+		public void handleEscalation(Throwable escalation) throws Throwable {
+			// Register the failure of recycling
+			this.cleanupSequence.registerCleanupEscalation(
+					ManagedObjectMetaDataImpl.this.objectType, escalation);
 		}
 
 		/*

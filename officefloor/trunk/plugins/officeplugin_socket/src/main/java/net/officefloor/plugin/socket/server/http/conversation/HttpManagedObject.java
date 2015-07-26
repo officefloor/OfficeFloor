@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
@@ -47,9 +48,12 @@ public interface HttpManagedObject extends ManagedObject {
 	/**
 	 * Cleans up this {@link HttpManagedObject}.
 	 *
+	 * @param cleanupEscalations
+	 *            {@link CleanupEscalation} instances of previous cleanup of
+	 *            {@link ManagedObject} instances.
 	 * @throws IOException
 	 *             If fails to clean up {@link HttpManagedObject}.
 	 */
-	void cleanup() throws IOException;
+	void cleanup(CleanupEscalation[] cleanupEscalations) throws IOException;
 
 }

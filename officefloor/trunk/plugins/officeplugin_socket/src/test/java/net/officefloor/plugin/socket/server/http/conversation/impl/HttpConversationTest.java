@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -138,7 +139,7 @@ public class HttpConversationTest extends OfficeFrameTestCase {
 				.addRequest("GET", "/path", "HTTP/1.1", null);
 		HttpResponse response = mo.getServerHttpConnection().getHttpResponse();
 		writeUsAscii(response.getEntity(), "TEST");
-		mo.cleanup();
+		mo.cleanup(new CleanupEscalation[0]);
 		this.assertWireData("HTTP/1.1 200 OK\nServer: TEST\nDate: [Mock time]\nContent-Length: 4\n\nTEST");
 	}
 

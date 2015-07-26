@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -142,9 +143,18 @@ public class HttpManagedObjectImpl implements HttpManagedObject,
 	}
 
 	@Override
-	public void cleanup() throws IOException {
-		// Ensure response is triggered for sending
-		this.response.send();
+	public void cleanup(CleanupEscalation[] cleanupEscalations)
+			throws IOException {
+
+		// Determine if escalations
+		if ((cleanupEscalations != null) && (cleanupEscalations.length > 0)) {
+			// Report cleanup escalations
+			this.response.sendCleanupEscalations(cleanupEscalations);
+
+		} else {
+			// Ensure response is triggered for sending
+			this.response.send();
+		}
 	}
 
 	/*
