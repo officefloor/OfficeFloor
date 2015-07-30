@@ -22,6 +22,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 
@@ -31,6 +32,14 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectSourceWirerContext {
+
+	/**
+	 * Overrides the default {@link ManagedObjectScope}.
+	 * 
+	 * @param managedobjectScope
+	 *            {@link ManagedObjectScope}.
+	 */
+	void setManagedObjectScope(ManagedObjectScope managedobjectScope);
 
 	/**
 	 * Maps a {@link TeamSource} for the {@link ManagedObjectTeam}.

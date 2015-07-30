@@ -312,7 +312,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		// Create the properties
 		PropertyList properties = this.compiler.createPropertyList();
 
-		// Register the raw object
+		// Register the raw object (always in process scope)
 		this.objectSources.add(new AutoWireObjectInstance(
 				new AutoWireObjectImpl(this.compiler, null, properties, null,
 						autoWiring), object, this.compiler));
@@ -984,6 +984,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		private String managedObjectName;
 
 		/**
+		 * {@link ManagedObjectScope}.
+		 */
+		private ManagedObjectScope managedObjectScope = null;
+
+		/**
 		 * Flag indicating is if {@link OfficeFloorInputManagedObject}.
 		 */
 		private boolean isInput = false;
@@ -1323,6 +1328,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					wirer.wire(this);
 				}
 			}
+
+			// Default the managed object scope (if not specified by wirer)
+			if (this.managedObjectScope == null) {
+				this.managedObjectScope = (this.isInput ? ManagedObjectScope.PROCESS
+						: ManagedObjectScope.THREAD);
+			}
 		}
 
 		/**
@@ -1442,7 +1453,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				// Build the managed object
 				this.managedObject = this.managedObjectSource
 						.addOfficeFloorManagedObject(this.managedObjectName,
-								ManagedObjectScope.PROCESS);
+								this.managedObjectScope);
 
 				// Link managed object
 				this.linkManagedObject(state);
@@ -1663,6 +1674,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 		/*
 		 * =============== ManagedObjectSourceWirerContext =================
 		 */
+
+		@Override
+		public void setManagedObjectScope(ManagedObjectScope managedobjectScope) {
+			this.managedObjectScope = managedobjectScope;
+		}
 
 		@Override
 		public void mapDependency(String dependencyName, AutoWire autoWire) {

@@ -56,6 +56,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.UnknownClassError;
@@ -559,6 +560,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 		/*
 		 * ======================= ManagedObjectSourceWirer ====================
 		 */
+
+		@Override
+		public void setManagedObjectScope(ManagedObjectScope managedobjectScope) {
+			// Scope not necessary to determine managed object type
+		}
 
 		@Override
 		public void mapDependency(String dependencyName, AutoWire autoWire) {

@@ -33,6 +33,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -770,6 +771,45 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 		this.recordLinkManagedObjectDependency(oneAutoWire, "dependency",
 				twoAutoWire);
 		this.recordOfficeObject(mo, oneAutoWire);
+
+		// Test
+		this.doSourceOfficeFloorTest();
+	}
+
+	/**
+	 * Ensure can change the {@link ManagedObjectScope}.
+	 */
+	public void testChangeManagedObjectScope() throws Exception {
+
+		// Create wirer
+		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.setManagedObjectScope(ManagedObjectScope.WORK);
+			}
+		};
+
+		final AutoWire autoWire = new AutoWire(MockRawType.class);
+		final OfficeFloorManagedObject mo = this
+				.createMock(OfficeFloorManagedObject.class);
+
+		// Add the managed object source
+		AutoWireObject object = this.source.addManagedObject(
+				ClassManagedObjectSource.class.getName(), wirer, autoWire);
+		object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
+
+		// Record
+		this.recordManagedObjectType(object);
+		this.recordOffice(autoWire);
+		OfficeFloorManagedObjectSource source = this.recordManagedObjectSource(
+				autoWire, ClassManagedObjectSource.class, 0, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockRawObject.class.getName());
+		this.recordReturn(source, source.addOfficeFloorManagedObject(
+				autoWire.getQualifiedType(), ManagedObjectScope.WORK), mo);
+		this.recordManagedObjectDependencies(object);
+		this.recordOfficeObject(mo, autoWire);
 
 		// Test
 		this.doSourceOfficeFloorTest();
