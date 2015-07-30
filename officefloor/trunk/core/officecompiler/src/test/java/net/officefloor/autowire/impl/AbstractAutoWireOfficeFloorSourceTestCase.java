@@ -1175,7 +1175,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 		final OfficeFloorManagedObject mo = this
 				.createMock(OfficeFloorManagedObject.class);
 		this.recordReturn(source, source.addOfficeFloorManagedObject(
-				autoWire.getQualifiedType(), ManagedObjectScope.PROCESS), mo);
+				autoWire.getQualifiedType(), ManagedObjectScope.THREAD), mo);
 		this.managedObjects.put(autoWire, mo);
 
 		// Return the managed object
