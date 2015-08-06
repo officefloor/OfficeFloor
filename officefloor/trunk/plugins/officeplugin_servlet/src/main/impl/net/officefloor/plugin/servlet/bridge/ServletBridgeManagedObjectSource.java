@@ -44,6 +44,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
@@ -139,6 +140,11 @@ public class ServletBridgeManagedObjectSource
 				new ManagedObjectSourceWirer() {
 					@Override
 					public void wire(ManagedObjectSourceWirerContext context) {
+
+						// Process scoped
+						context.setManagedObjectScope(ManagedObjectScope.PROCESS);
+
+						// Map flow to service
 						context.mapFlow(FlowKeys.SERVICE.name(),
 								handlerSectionName, handlerInputName);
 

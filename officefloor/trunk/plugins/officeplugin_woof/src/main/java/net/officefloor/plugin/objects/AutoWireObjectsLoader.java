@@ -19,7 +19,6 @@ package net.officefloor.plugin.objects;
 
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.model.objects.AutoWireObjectsModel;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Loads the {@link AutoWireObjectsModel} configuration to the
@@ -33,16 +32,12 @@ public interface AutoWireObjectsLoader {
 	 * Loads the {@link AutoWireObjectsModel} configuration to the
 	 * {@link AutoWireApplication}.
 	 * 
-	 * @param objectsConfiguration
-	 *            {@link ConfigurationItem} containing the
-	 *            {@link AutoWireObjectsModel} configuration.
-	 * @param application
-	 *            {@link AutoWireApplication}.
+	 * @param context
+	 *            {@link AutoWireObjectsLoaderContext}.
 	 * @throws Exception
 	 *             If fails to load the configuration.
 	 */
-	void loadAutoWireObjectsConfiguration(
-			ConfigurationItem objectsConfiguration,
-			AutoWireApplication application) throws Exception;
+	void loadAutoWireObjectsConfiguration(AutoWireObjectsLoaderContext context)
+			throws Exception;
 
 }

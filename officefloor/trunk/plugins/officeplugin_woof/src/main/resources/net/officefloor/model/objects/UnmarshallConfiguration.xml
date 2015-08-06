@@ -10,6 +10,7 @@
 		<value method="setTimeout" node="managed-object@timeout" />
 		<value method="setQualifier" node="managed-object@qualifier" />
 		<value method="setType" node="managed-object@type" />
+		<value method="setScope" node="managed-object@scope" />
 		<object method="addPropertySource" node="property"
 			class="net.officefloor.model.objects.PropertyModel">
 			<value method="setName" node="property@name" />

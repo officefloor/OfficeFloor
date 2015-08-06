@@ -30,6 +30,9 @@ import javax.servlet.Servlet;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.servlet.host.ServletServer;
 import net.officefloor.plugin.servlet.host.ServletServerManagedObjectSource;
 import net.officefloor.plugin.servlet.security.HttpServletSecurity;
@@ -66,6 +69,14 @@ public class ServletContainerWoofApplicationExtensionService implements
 	@Override
 	public void extendApplication(WoofApplicationExtensionServiceContext context)
 			throws Exception {
+
+		// Process scope managed objects
+		final ManagedObjectSourceWirer processScopeWirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.setManagedObjectScope(ManagedObjectScope.PROCESS);
+			}
+		};
 
 		// Obtain the web application
 		WebAutoWireApplication application = context.getWebApplication();
@@ -115,8 +126,8 @@ public class ServletContainerWoofApplicationExtensionService implements
 		if (!(application.isObjectAvailable(servletServer))) {
 			// Configure the Servlet Server
 			application.addManagedObject(
-					ServletServerManagedObjectSource.class.getName(), null,
-					servletServer);
+					ServletServerManagedObjectSource.class.getName(),
+					processScopeWirer, servletServer);
 		}
 
 		// Ensure HTTP Servlet Security is available
@@ -126,7 +137,8 @@ public class ServletContainerWoofApplicationExtensionService implements
 			AutoWireObject httpServletSecurityObject = application
 					.addManagedObject(
 							HttpServletSecurityManagedObjectSource.class
-									.getName(), null, httpServletSecurity);
+									.getName(), processScopeWirer,
+							httpServletSecurity);
 
 			// Provide time out
 			HttpSecurityAutoWireSection security = application

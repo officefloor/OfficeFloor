@@ -59,6 +59,9 @@ public class CloseEntityManagerTask
 		// Obtain the managed object
 		JpaEntityManagerManagedObject managedObject = parameter
 				.getManagedObject();
+		
+		// TODO remove
+		System.out.println("Closing entity manager");
 
 		// Close the Entity Manager
 		managedObject.closeEntityManager();

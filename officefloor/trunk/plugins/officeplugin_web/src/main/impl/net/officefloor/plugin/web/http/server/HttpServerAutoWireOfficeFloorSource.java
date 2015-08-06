@@ -129,17 +129,17 @@ public class HttpServerAutoWireOfficeFloorSource extends
 
 		// Configure HTTP Session (allowing 10 seconds to retrieve session)
 		this.httpSession = this.addManagedObject(
-				HttpSessionManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpSession.class));
+				HttpSessionManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(HttpSession.class));
 		this.httpSession.setTimeout(10 * 1000);
 
 		// Configure the HTTP Application and Request States
 		this.addManagedObject(
-				HttpApplicationStateManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpApplicationState.class));
+				HttpApplicationStateManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(HttpApplicationState.class));
 		this.addManagedObject(
-				HttpRequestStateManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpRequestState.class));
+				HttpRequestStateManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(HttpRequestState.class));
 	}
 
 	/*

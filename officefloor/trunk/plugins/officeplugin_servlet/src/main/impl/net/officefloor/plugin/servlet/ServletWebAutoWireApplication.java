@@ -38,10 +38,13 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.plugin.servlet.bridge.ServletBridgeManagedObjectSource;
 import net.officefloor.plugin.servlet.bridge.spi.ServletServiceBridger;
@@ -144,6 +147,14 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 			OfficeFloorServlet servletInitiateInstance,
 			final ServletContext servletContext) {
 
+		// Wirer to specify process scoping
+		final ManagedObjectSourceWirer processScopeWirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.setManagedObjectScope(ManagedObjectScope.PROCESS);
+			}
+		};
+
 		// Obtain the Servlet name
 		String servletName = servletInitiateInstance.getServletName();
 
@@ -207,28 +218,28 @@ public class ServletWebAutoWireApplication<S extends OfficeFloorServlet>
 		// Configure Server HTTP connection
 		source.addManagedObject(
 				ServletServerHttpConnectionManagedObjectSource.class.getName(),
-				null, new AutoWire(ServerHttpConnection.class));
+				processScopeWirer, new AutoWire(ServerHttpConnection.class));
 
 		// Configure the HTTP session
 		source.addManagedObject(
-				ServletHttpSessionManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpSession.class));
+				ServletHttpSessionManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(HttpSession.class));
 
 		// Configure the HTTP Application and Request State
 		source.addManagedObject(
 				ServletHttpApplicationStateManagedObjectSource.class.getName(),
-				null, new AutoWire(HttpApplicationState.class));
+				processScopeWirer, new AutoWire(HttpApplicationState.class));
 		source.addManagedObject(
 				ServletHttpRequestStateManagedObjectSource.class.getName(),
-				null, new AutoWire(HttpRequestState.class));
+				processScopeWirer, new AutoWire(HttpRequestState.class));
 
 		// Provide dependencies of Servlet
 		Class<?>[] dependencyTypes = source.bridger.getObjectTypes();
 		for (Class<?> dependencyType : dependencyTypes) {
 			// Add Servlet dependency for dependency injection
 			AutoWireObject dependency = source.addManagedObject(
-					ServletDependencyManagedObjectSource.class.getName(), null,
-					new AutoWire(dependencyType));
+					ServletDependencyManagedObjectSource.class.getName(),
+					processScopeWirer, new AutoWire(dependencyType));
 			dependency.addProperty(
 					ServletDependencyManagedObjectSource.PROPERTY_TYPE_NAME,
 					dependencyType.getName());

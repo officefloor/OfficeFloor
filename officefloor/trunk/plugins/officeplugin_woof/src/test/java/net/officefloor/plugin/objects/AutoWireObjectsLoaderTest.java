@@ -24,6 +24,8 @@ import net.officefloor.autowire.AutoWireSupplier;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -59,6 +61,12 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 	 */
 	private final AutoWireApplication app = this
 			.createMock(AutoWireApplication.class);
+
+	/**
+	 * Mock {@link AutoWireObjectsLoaderContext}.
+	 */
+	private final AutoWireObjectsLoaderContext loaderContext = this
+			.createMock(AutoWireObjectsLoaderContext.class);
 
 	/**
 	 * {@link ManagedObjectSourceWirerContext}.
@@ -101,6 +109,9 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testLoading() throws Exception {
 
+		// Initialise loading
+		this.recordInitLoader("application.objects");
+
 		// Record first managed object
 		final AutoWireObject objectOne = this.createMock(AutoWireObject.class);
 		this.recordReturn(this.app, this.app.addManagedObject(
@@ -110,6 +121,7 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 				this.addManagedObjectMatcher);
 
 		// Record wiring
+		this.wireContext.setManagedObjectScope(ManagedObjectScope.THREAD);
 		this.wireContext.mapFlow("FLOW", "SECTION", "INPUT");
 		this.wireContext.mapTeam("TEAM", new AutoWire("QUALIFIER",
 				"net.example.Type"));
@@ -147,8 +159,7 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.loader.loadAutoWireObjectsConfiguration(
-				this.getConfiguration("application.objects"), this.app);
+		this.loader.loadAutoWireObjectsConfiguration(this.loaderContext);
 		this.verifyMockObjects();
 	}
 
@@ -156,6 +167,9 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 	 * Ensure can load {@link ClassManagedObjectSource} shortcut configuration.
 	 */
 	public void testClassShortcuts() throws Exception {
+
+		// Record initialise loader
+		this.recordInitLoader("class.objects.xml");
 
 		// Record class A
 		final AutoWireObject objectA = this.createMock(AutoWireObject.class);
@@ -225,20 +239,64 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.loader.loadAutoWireObjectsConfiguration(
-				this.getConfiguration("class.objects.xml"), this.app);
+		this.loader.loadAutoWireObjectsConfiguration(this.loaderContext);
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Obtains the {@link ConfigurationItem}.
+	 * Ensure handles {@link ManagedObjectScope} values.
+	 */
+	public void testManagedObjectScopes() throws Exception {
+
+		// Record initialise loader
+		this.recordInitLoader("scoped.objects.xml");
+
+		// Record first managed object
+		final AutoWireObject objectA = this.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				"net.example.ExampleManagedObjectSourceA", null, new AutoWire(
+						String.class)), objectA, this.addManagedObjectMatcher);
+		this.wireContext.setManagedObjectScope(ManagedObjectScope.PROCESS);
+
+		// Record second managed object
+		final AutoWireObject objectB = this.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				"net.example.ExampleManagedObjectSourceB", null, new AutoWire(
+						String.class)), objectB, this.addManagedObjectMatcher);
+		this.wireContext.setManagedObjectScope(ManagedObjectScope.THREAD);
+
+		// Record third managed object
+		final AutoWireObject objectC = this.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				"net.example.ExampleManagedObjectSourceC", null, new AutoWire(
+						String.class)), objectC, this.addManagedObjectMatcher);
+		this.wireContext.setManagedObjectScope(ManagedObjectScope.WORK);
+
+		// Record fourth managed object (using default scope as not specified)
+		final AutoWireObject objectD = this.createMock(AutoWireObject.class);
+		this.recordReturn(this.app, this.app.addManagedObject(
+				"net.example.ExampleManagedObjectSourceD", null, new AutoWire(
+						String.class)), objectD, this.addManagedObjectMatcher);
+
+		// Fifth managed object should report issue
+		this.loaderContext.addIssue("Invalid managed object scope 'invalid'",
+				AssetType.MANAGED_OBJECT, String.class.getName());
+
+		// Test
+		this.replayMockObjects();
+		this.loader.loadAutoWireObjectsConfiguration(this.loaderContext);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Records initialising the {@link AutoWireObjectsLoader}.
 	 * 
 	 * @param fileName
-	 *            File name for {@link ConfigurationItem}.
-	 * @return {@link ConfigurationItem}.
+	 *            File name for {@link ConfigurationItem}.r
 	 */
-	private ConfigurationItem getConfiguration(String fileName)
-			throws Exception {
+	private void recordInitLoader(String fileName) throws Exception {
+
+		// Obtain the configuration
 		String location = this.getFileLocation(this.getClass(), fileName);
 		ConfigurationContext context = new ClassLoaderConfigurationContext(
 				this.compiler.getClassLoader());
@@ -246,7 +304,12 @@ public class AutoWireObjectsLoaderTest extends OfficeFrameTestCase {
 				.getConfigurationItem(location);
 		assertNotNull("Can not find configuration '" + fileName + "'",
 				configuration);
-		return configuration;
+		this.recordReturn(this.loaderContext,
+				this.loaderContext.getConfiguration(), configuration);
+
+		// Obtain the application
+		this.recordReturn(this.loaderContext,
+				this.loaderContext.getAutoWireApplication(), this.app);
 	}
 
 }

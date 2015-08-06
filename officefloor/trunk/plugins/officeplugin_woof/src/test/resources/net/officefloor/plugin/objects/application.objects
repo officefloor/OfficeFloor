@@ -1,7 +1,7 @@
 <objects>
 
 	<managed-object source="net.example.ExampleManagedObjectSourceA"
-		timeout="10">
+		timeout="10" scope="thread">
 		<property name="MO_ONE" value="VALUE_ONE" />
 		<property-file path="example/object.properties" />
 		<property name="MO_TWO" value="VALUE_TWO" />

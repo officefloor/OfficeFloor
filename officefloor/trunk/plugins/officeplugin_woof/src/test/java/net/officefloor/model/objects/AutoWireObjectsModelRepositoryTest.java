@@ -68,15 +68,14 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 		final String[] MANAGED_OBJECT_METHODS = new String[] {
 				"getManagedObjectSourceClassName",
 				"getClassManagedObjectSourceClass", "getTimeout",
-				"getQualifier", "getType" };
+				"getQualifier", "getType", "getScope" };
 
 		// Validate the first object source (managed object)
 		AutoWireManagedObjectModel moOne = assertType(
 				AutoWireManagedObjectModel.class, objectSources.get(0));
-		assertProperties(
-				new AutoWireManagedObjectModel(
-						"net.example.ExampleManagedObjectSourceA", null, 10,
-						null, null), moOne, MANAGED_OBJECT_METHODS);
+		assertProperties(new AutoWireManagedObjectModel(
+				"net.example.ExampleManagedObjectSourceA", null, 10, null,
+				null, "thread"), moOne, MANAGED_OBJECT_METHODS);
 		assertProperties(new PropertyModel("MO_ONE", "VALUE_ONE"),
 				new PropertyFileModel("example/object.properties"),
 				new PropertyModel("MO_TWO", "VALUE_TWO"),
@@ -110,7 +109,7 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(
 				new AutoWireManagedObjectModel(
 						"net.example.ExampleManagedObjectSourceB", null, 0,
-						"QUALIFIER", "net.example.Type"),
+						"QUALIFIER", "net.example.Type", "process"),
 				assertType(AutoWireManagedObjectModel.class,
 						objectSources.get(2)), MANAGED_OBJECT_METHODS);
 
@@ -123,7 +122,7 @@ public class AutoWireObjectsModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the fifth object source (managed object class/POJO shortcut)
 		assertProperties(
 				new AutoWireManagedObjectModel(null,
-						"net.example.ExampleClass", 0, null, null),
+						"net.example.ExampleClass", 0, null, null, null),
 				assertType(AutoWireManagedObjectModel.class,
 						objectSources.get(4)), MANAGED_OBJECT_METHODS);
 	}

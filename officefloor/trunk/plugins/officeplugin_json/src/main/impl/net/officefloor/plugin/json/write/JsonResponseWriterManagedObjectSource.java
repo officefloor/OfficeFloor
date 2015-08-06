@@ -31,7 +31,9 @@ import net.officefloor.plugin.json.JsonResponseWriter;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
+import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * {@link ManagedObjectSource} for the {@link JsonResponseWriter}.
@@ -77,8 +79,11 @@ public class JsonResponseWriterManagedObjectSource
 	@Override
 	public void start(ManagedObjectExecuteContext<None> context)
 			throws Exception {
-		// Create the object mapper
-		this.mapper = new ObjectMapper();
+		// Create the object mapper (does not automatically send response)
+		this.mapper = new ObjectMapper()
+				.configure(Feature.AUTO_CLOSE_TARGET, false)
+				.configure(Feature.FLUSH_PASSED_TO_STREAM, false)
+				.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 	}
 
 	@Override

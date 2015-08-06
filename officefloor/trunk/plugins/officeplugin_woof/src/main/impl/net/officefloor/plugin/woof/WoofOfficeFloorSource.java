@@ -50,6 +50,7 @@ import net.officefloor.model.teams.AutoWireTeamsRepositoryImpl;
 import net.officefloor.model.woof.WoofModel;
 import net.officefloor.model.woof.WoofRepositoryImpl;
 import net.officefloor.plugin.objects.AutoWireObjectsLoader;
+import net.officefloor.plugin.objects.AutoWireObjectsLoaderContext;
 import net.officefloor.plugin.objects.AutoWireObjectsLoaderImpl;
 import net.officefloor.plugin.teams.AutoWireTeamsLoader;
 import net.officefloor.plugin.teams.AutoWireTeamsLoaderImpl;
@@ -412,24 +413,55 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	 *            Location of the Teams {@link ConfigurationItem}.
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
+	 * @param deployer
+	 *            {@link OfficeFloorDeployer}. May be <code>null</code>.
 	 * @throws Exception
 	 *             If fails to load the optional configuration.
 	 */
 	public static void loadOptionalConfiguration(
-			AutoWireApplication application, String objectsLocation,
-			String teamsLocation, ConfigurationContext configurationContext)
-			throws Exception {
+			final AutoWireApplication application, String objectsLocation,
+			String teamsLocation, ConfigurationContext configurationContext,
+			final OfficeFloorDeployer deployer) throws Exception {
 
 		// Load the optional objects configuration to the application
-		ConfigurationItem objectsConfiguration = retrieveOptionalConfiguration(
+		final ConfigurationItem objectsConfiguration = retrieveOptionalConfiguration(
 				objectsLocation, configurationContext,
 				DEFAULT_OBJECTS_CONFIGURATION_LOCATION);
 		if (objectsConfiguration != null) {
+
+			// Create the configuration context
+			AutoWireObjectsLoaderContext context = new AutoWireObjectsLoaderContext() {
+
+				@Override
+				public ConfigurationItem getConfiguration() {
+					return objectsConfiguration;
+				}
+
+				@Override
+				public AutoWireApplication getAutoWireApplication() {
+					return application;
+				}
+
+				@Override
+				public void addIssue(String issueDescription,
+						AssetType assetType, String assetName) throws Exception {
+					if (deployer == null) {
+						// No deployer, so throw exception
+						throw new Exception(assetType.name() + "-" + assetName
+								+ ": " + issueDescription);
+
+					} else {
+						// Have deployer, so report the issue
+						deployer.addIssue(issueDescription, assetType,
+								assetName);
+					}
+				}
+			};
+
 			// Load the objects configuration
 			AutoWireObjectsLoader objectsLoader = new AutoWireObjectsLoaderImpl(
 					new AutoWireObjectsRepositoryImpl(new ModelRepositoryImpl()));
-			objectsLoader.loadAutoWireObjectsConfiguration(
-					objectsConfiguration, application);
+			objectsLoader.loadAutoWireObjectsConfiguration(context);
 		}
 
 		// Load the optional teams configuration to the application
@@ -594,7 +626,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 				PROPERTY_TEAMS_CONFIGURATION_LOCATION,
 				DEFAULT_TEAMS_CONFIGURATION_LOCATION);
 		loadOptionalConfiguration(this, objectsLocation, teamsLocation,
-				configurationContext);
+				configurationContext, deployer);
 
 		// Providing additional configuration
 		this.configure(this);

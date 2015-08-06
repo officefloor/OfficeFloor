@@ -66,6 +66,9 @@ public class CleanupTask extends AbstractSingleTask<Work, None, None> {
 		CleanupEscalation[] escalations = parameter.getCleanupEscalations();
 
 		try {
+			
+			// TODO remove
+			System.out.println("Cleanup connection: " + escalations.length + " escalations");
 
 			// Clean up the HTTP managed object
 			managedObject.cleanup(escalations);
