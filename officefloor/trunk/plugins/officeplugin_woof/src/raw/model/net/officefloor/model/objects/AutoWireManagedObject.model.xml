@@ -6,6 +6,7 @@
 	<field type="long" name="timeout" />
 	<field type="String" name="qualifier" />
 	<field type="String" name="type" />
+	<field type="String" name="scope" />
 	<list type="PropertySourceModel" name="property source" />
 	<list type="AutoWireModel" name="auto wire" plural="auto wiring" />
 	<list type="AutoWireFlowModel" name="flow" />

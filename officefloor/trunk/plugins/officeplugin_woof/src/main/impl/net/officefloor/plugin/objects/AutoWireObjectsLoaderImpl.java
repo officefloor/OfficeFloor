@@ -29,6 +29,8 @@ import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.objects.AutoWireDependencyModel;
 import net.officefloor.model.objects.AutoWireFlowModel;
 import net.officefloor.model.objects.AutoWireManagedObjectModel;
@@ -43,6 +45,7 @@ import net.officefloor.model.objects.PropertyModel;
 import net.officefloor.model.objects.PropertySourceModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.section.clazz.ManagedObject;
 
 /**
  * {@link AutoWireObjectsLoader} implementation.
@@ -72,8 +75,11 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 
 	@Override
 	public void loadAutoWireObjectsConfiguration(
-			ConfigurationItem objectsConfiguration,
-			AutoWireApplication application) throws Exception {
+			AutoWireObjectsLoaderContext context) throws Exception {
+
+		// Obtain the details
+		ConfigurationItem objectsConfiguration = context.getConfiguration();
+		AutoWireApplication application = context.getAutoWireApplication();
 
 		// Load the objects model
 		AutoWireObjectsModel objects = this.repository
@@ -87,7 +93,8 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 			if (objectSource instanceof AutoWireManagedObjectModel) {
 				// Load the managed object
 				this.loadAutoWireManagedObject(
-						(AutoWireManagedObjectModel) objectSource, application);
+						(AutoWireManagedObjectModel) objectSource, application,
+						context);
 
 			} else if (objectSource instanceof AutoWireSupplierModel) {
 				// Load the supplier
@@ -110,12 +117,15 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 	 *            {@link AutoWireManagedObjectModel}.
 	 * @param application
 	 *            {@link AutoWireApplication}.
-	 * @throws IOException
-	 *             If fails to load {@link Property}.
+	 * @param context
+	 *            {@link AutoWireObjectsLoaderContext}.
+	 * @throws Exception
+	 *             If fails to load {@link ManagedObject}.
 	 */
 	private void loadAutoWireManagedObject(
 			final AutoWireManagedObjectModel managedObject,
-			AutoWireApplication application) throws IOException {
+			AutoWireApplication application,
+			AutoWireObjectsLoaderContext context) throws Exception {
 
 		// Obtain the managed object source
 		String managedObjectSourceClassName = managedObject
@@ -153,10 +163,31 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 					classManagedObjectSourceClass));
 		}
 
+		// Obtain the managed object scope
+		String managedObjectScopeName = managedObject.getScope();
+		final ManagedObjectScope managedObjectScope;
+		try {
+			managedObjectScope = CompileUtil.isBlank(managedObjectScopeName) ? null
+					: ManagedObjectScope.valueOf(managedObjectScopeName
+							.toUpperCase());
+		} catch (IllegalArgumentException ex) {
+			// Invalid scope
+			context.addIssue("Invalid managed object scope '"
+					+ managedObjectScopeName + "'", AssetType.MANAGED_OBJECT,
+					autoWiring.size() > 0 ? autoWiring.get(0).toString()
+							: managedObjectScopeName);
+			return; // invalid managed object so do not load
+		}
+
 		// Create the wirer
 		ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
 			@Override
 			public void wire(ManagedObjectSourceWirerContext context) {
+
+				// Specify managed object scope (if provided)
+				if (managedObjectScope != null) {
+					context.setManagedObjectScope(managedObjectScope);
+				}
 
 				// Configure the flows
 				for (AutoWireFlowModel flow : managedObject.getFlows()) {

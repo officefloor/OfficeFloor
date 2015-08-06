@@ -41,6 +41,9 @@ import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationSectionSource;
 import net.officefloor.plugin.web.http.continuation.HttpUrlContinuationWorkSource;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
@@ -102,6 +105,17 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 * Prefix for the link service {@link Task} name.
 	 */
 	private static final String LINK_SERVICE_TASK_NAME_PREFIX = "LINK_";
+
+	/**
+	 * {@link ManagedObjectSourceWirer} to bind the {@link ManagedObject} to the
+	 * {@link ProcessState}.
+	 */
+	protected static final ManagedObjectSourceWirer processScopeWirer = new ManagedObjectSourceWirer() {
+		@Override
+		public void wire(ManagedObjectSourceWirerContext context) {
+			context.setManagedObjectScope(ManagedObjectScope.PROCESS);
+		}
+	};
 
 	/**
 	 * {@link HttpTemplateAutoWireSection} instances.
@@ -335,8 +349,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Not registered, so register
 		object = this.addManagedObject(
-				HttpApplicationObjectManagedObjectSource.class.getName(), null,
-				new AutoWire(objectClass));
+				HttpApplicationObjectManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(objectClass));
 		object.addProperty(
 				HttpApplicationObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
@@ -368,8 +382,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Not registered, so register
 		object = this.addManagedObject(
-				HttpSessionObjectManagedObjectSource.class.getName(), null,
-				new AutoWire(objectClass));
+				HttpSessionObjectManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(objectClass));
 		object.addProperty(
 				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 				objectClass.getName());
@@ -399,8 +413,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 			// Not registered, so register
 			object = this.addManagedObject(
-					HttpRequestObjectManagedObjectSource.class.getName(), null,
-					new AutoWire(objectClass));
+					HttpRequestObjectManagedObjectSource.class.getName(),
+					processScopeWirer, new AutoWire(objectClass));
 			object.addProperty(
 					HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 					objectClass.getName());
@@ -536,6 +550,14 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	protected void initOfficeFloor(OfficeFloorDeployer deployer,
 			OfficeFloorSourceContext context) throws Exception {
 
+		// Specify process managed object scope
+		final ManagedObjectSourceWirer processScopeWirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.setManagedObjectScope(ManagedObjectScope.PROCESS);
+			}
+		};
+
 		// Add the HTTP section
 		AutoWireSection httpSection = this.addSection(HANDLER_SECTION_NAME,
 				WebApplicationSectionSource.class.getName(), null);
@@ -550,7 +572,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			// Add the HTTP Application Location
 			AutoWireObject location = this.addManagedObject(
 					HttpApplicationLocationManagedObjectSource.class.getName(),
-					null, locationAutoWire);
+					processScopeWirer, locationAutoWire);
 			HttpApplicationLocationManagedObjectSource.copyProperties(context,
 					location);
 		}
@@ -562,7 +584,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			if (!(this.isObjectAvailable(httpAuthentication))) {
 				this.addManagedObject(
 						AnonymousHttpAuthenticationManagedObjectSource.class
-								.getName(), null, httpAuthentication);
+								.getName(), processScopeWirer,
+						httpAuthentication);
 			}
 
 		} else {
@@ -605,6 +628,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					new ManagedObjectSourceWirer() {
 						@Override
 						public void wire(ManagedObjectSourceWirerContext context) {
+							context.setManagedObjectScope(ManagedObjectScope.PROCESS);
 							context.mapFlow(
 									"AUTHENTICATE",
 									WebApplicationAutoWireOfficeFloorSource.this.security
@@ -628,7 +652,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			if (!(this.isObjectAvailable(httpSecurityAutoWire))) {
 				// Add the HTTP Security Managed Object
 				AutoWireObject httpSecurity = this.addManagedObject(
-						HttpSecurityManagedObjectSource.class.getName(), null,
+						HttpSecurityManagedObjectSource.class.getName(),
+						processScopeWirer,
 						httpSecurityAutoWire);
 				httpSecurity.setTimeout(securityTimeout);
 				httpSecurity

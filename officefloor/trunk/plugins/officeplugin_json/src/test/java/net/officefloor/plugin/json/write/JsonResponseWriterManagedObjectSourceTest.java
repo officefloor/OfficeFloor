@@ -95,7 +95,7 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 		this.doWriteObjectTest(
 				new MockJsonObject("Daniel", new MockJsonSubObject("SUB"),
 						new Object(), "ONE", "two", "Three"),
-				"{\"name\":\"Daniel\",\"array\":[\"ONE\",\"two\",\"Three\"],\"subObject\":{\"text\":\"SUB\"},\"empty\"}");
+				"{\"name\":\"Daniel\",\"array\":[\"ONE\",\"two\",\"Three\"],\"subObject\":{\"text\":\"SUB\"},\"empty\":{}}");
 	}
 
 	/**
@@ -122,6 +122,8 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 			// Undertake request to obtain the object
 			HttpGet request = new HttpGet("http://localhost:7878/service");
 			HttpResponse response = client.execute(request);
+			assertEquals("Incorrect response entity", expectedJsonEntity,
+					EntityUtils.toString(response.getEntity()));
 			assertEquals("Request should be successful", 200, response
 					.getStatusLine().getStatusCode());
 			assertEquals("Must specify content type",
@@ -129,8 +131,6 @@ public class JsonResponseWriterManagedObjectSourceTest extends
 							+ AbstractServerSocketManagedObjectSource
 									.getCharset(null).name(), response
 							.getFirstHeader("Content-Type").getValue());
-			assertEquals("Incorrect response entity", expectedJsonEntity,
-					EntityUtils.toString(response.getEntity()));
 
 		} finally {
 			// Ensure stop server (client already closed)

@@ -16,6 +16,7 @@
 				<attribute method="getTimeout" attribute="timeout" />
 				<attribute method="getQualifier" attribute="qualifier" />
 				<attribute method="getType" attribute="type" />
+				<attribute method="getScope" attribute="scope" />
 			</attributes>
 			<collection method="getPropertySources">
 				<item type="net.officefloor.model.objects.PropertyModel"

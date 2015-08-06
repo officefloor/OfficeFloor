@@ -27,8 +27,11 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -1222,6 +1225,14 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	protected void startHttpServer(String templateName, Class<?> logicClass,
 			String... templatePropertyPairs) throws Exception {
 
+		// Provide process scoping for managed objects
+		final ManagedObjectSourceWirer processScopeWirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.setManagedObjectScope(ManagedObjectScope.PROCESS);
+			}
+		};
+
 		// Add the HTTP server socket listener
 		HttpServerSocketManagedObjectSource.autoWire(this.source,
 				this.httpPort, "ROUTE", "route");
@@ -1234,14 +1245,15 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 		// Add dependencies
 		this.source.addObject(this.connection, new AutoWire(Connection.class));
 		this.source.addManagedObject(
-				HttpRequestStateManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpRequestState.class));
+				HttpRequestStateManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(HttpRequestState.class));
 		this.source.addManagedObject(
-				HttpSessionManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
+				HttpSessionManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(HttpSession.class)).setTimeout(
+				10 * 1000);
 		AutoWireObject location = this.source.addManagedObject(
 				HttpApplicationLocationManagedObjectSource.class.getName(),
-				null, new AutoWire(HttpApplicationLocation.class));
+				processScopeWirer, new AutoWire(HttpApplicationLocation.class));
 		location.addProperty(
 				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
 				String.valueOf(this.httpPort));

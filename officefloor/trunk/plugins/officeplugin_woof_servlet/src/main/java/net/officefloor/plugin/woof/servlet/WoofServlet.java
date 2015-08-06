@@ -143,7 +143,7 @@ public class WoofServlet extends OfficeFloorServlet {
 				PROPERTY_TEAMS_CONFIGURATION_LOCATION,
 				DEFAULT_TEAMS_CONFIGURATION_LOCATION);
 		WoofOfficeFloorSource.loadOptionalConfiguration(application,
-				objectsLocation, teamsLocation, configurationContext);
+				objectsLocation, teamsLocation, configurationContext, null);
 
 		/*
 		 * Note: WoOF Application extensions are not available within JEE

@@ -29,6 +29,8 @@ import java.sql.SQLException;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -36,8 +38,11 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.ManagedObject;
 import net.officefloor.plugin.section.clazz.NextTask;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -69,6 +74,16 @@ import org.apache.http.impl.client.HttpClientBuilder;
  */
 public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		OfficeFrameTestCase {
+
+	/**
+	 * Binds the {@link ManagedObject} to the {@link ProcessState}.
+	 */
+	private static final ManagedObjectSourceWirer processScopeWirer = new ManagedObjectSourceWirer() {
+		@Override
+		public void wire(ManagedObjectSourceWirerContext context) {
+			context.setManagedObjectScope(ManagedObjectScope.PROCESS);
+		}
+	};
 
 	/**
 	 * Host name for testing.
@@ -120,11 +135,12 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Configure the HTTP Request State and HTTP Session
 		this.source.addManagedObject(
-				HttpRequestStateManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpRequestState.class));
+				HttpRequestStateManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(HttpRequestState.class));
 		this.source.addManagedObject(
-				HttpSessionManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpSession.class)).setTimeout(60 * 1000);
+				HttpSessionManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(HttpSession.class)).setTimeout(
+				60 * 1000);
 
 		// Configure the client (to not redirect)
 		HttpClientBuilder builder = HttpClientBuilder.create();
@@ -1542,8 +1558,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Provide HTTP Application State
 		this.source.addManagedObject(
-				HttpApplicationStateManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpApplicationState.class));
+				HttpApplicationStateManagedObjectSource.class.getName(),
+				processScopeWirer, new AutoWire(HttpApplicationState.class));
 
 		// Add the template
 		this.source.addHttpTemplate("template",
