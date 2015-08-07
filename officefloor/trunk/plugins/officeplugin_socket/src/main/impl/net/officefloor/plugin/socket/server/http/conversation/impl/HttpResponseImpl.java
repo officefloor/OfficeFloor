@@ -20,7 +20,6 @@ package net.officefloor.plugin.socket.server.http.conversation.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -336,13 +335,6 @@ public class HttpResponseImpl implements HttpResponse {
 			for (CleanupEscalation cleanupEscalation : cleanupEscalations) {
 				Throwable escalation = cleanupEscalation.getEscalation();
 				
-				// TODO remove
-				StringWriter msg = new StringWriter();
-				PrintWriter msg2 = new PrintWriter(msg);
-				escalation.printStackTrace(msg2);
-				msg2.flush();
-				System.out.println("ESCALATION: " + msg.toString());
-
 				// Write the escalation details to the response
 				String failMessage = "Cleanup of object type "
 						+ cleanupEscalation.getObjectType().getName() + ": "
@@ -386,9 +378,6 @@ public class HttpResponseImpl implements HttpResponse {
 			this.setStatus(HttpStatus.SC_NO_CONTENT);
 		}
 		
-		// TODO remove
-		System.out.println("STATUS: " + this.status);
-
 		// Write the status line
 		writeUsAscii(this.version + " " + String.valueOf(this.status) + " "
 				+ this.statusMessage + EOL, header);
