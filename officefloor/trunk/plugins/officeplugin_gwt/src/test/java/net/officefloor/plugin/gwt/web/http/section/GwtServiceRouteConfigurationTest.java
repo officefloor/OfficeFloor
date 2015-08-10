@@ -21,6 +21,9 @@ import org.easymock.AbstractMatcher;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.gwt.service.ServerGwtRpcConnection;
@@ -180,6 +183,8 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 				.createMock(AutoWireObject.class);
 		final HttpTemplateAutoWireSectionExtension extension = this
 				.createMock(HttpTemplateAutoWireSectionExtension.class);
+		final ManagedObjectSourceWirerContext wirerContext = this
+				.createMock(ManagedObjectSourceWirerContext.class);
 
 		// Record adding Server GWT RPC Connection
 		this.recordReturn(this.application, this.application
@@ -194,7 +199,9 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 					public boolean matches(Object[] expected, Object[] actual) {
 						assertEquals("Incorrect managed object source",
 								expected[0], actual[0]);
-						assertNull("Should not be a wirer", actual[1]);
+						ManagedObjectSourceWirer wirer = (ManagedObjectSourceWirer) actual[1];
+						assertNotNull("Should be a wirer", wirer);
+						wirer.wire(wirerContext);
 						AutoWire[] expectedAutoWiring = (AutoWire[]) expected[2];
 						AutoWire[] actualAutoWiring = (AutoWire[]) actual[2];
 						assertEquals("Incorrect number of auto-wiring",
@@ -207,6 +214,7 @@ public class GwtServiceRouteConfigurationTest extends OfficeFrameTestCase {
 						return true;
 					}
 				});
+		wirerContext.setManagedObjectScope(ManagedObjectScope.PROCESS);
 
 		// Record configuring a GWT Service
 		this.recordReturn(this.template, this.template.getTemplateUri(),

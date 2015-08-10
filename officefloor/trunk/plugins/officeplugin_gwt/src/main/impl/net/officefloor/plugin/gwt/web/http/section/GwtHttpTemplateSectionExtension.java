@@ -18,6 +18,8 @@
 package net.officefloor.plugin.gwt.web.http.section;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -32,6 +34,7 @@ import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
@@ -130,6 +133,14 @@ public class GwtHttpTemplateSectionExtension implements
 			SourceProperties properties, ClassLoader classLoader)
 			throws Exception {
 
+		// Process scope the managed objects
+		final ManagedObjectSourceWirer processScopeWirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.setManagedObjectScope(ManagedObjectScope.PROCESS);
+			}
+		};
+
 		// Obtain the template URI
 		final String templateUri = template.getTemplateUri();
 		if ((templateUri == null) || (templateUri.trim().length() == 0)) {
@@ -143,8 +154,9 @@ public class GwtHttpTemplateSectionExtension implements
 				ServerGwtRpcConnection.class)))) {
 			application.addManagedObject(
 					ServerGwtRpcConnectionManagedObjectSource.class.getName(),
-					null, new AutoWire(ServerGwtRpcConnection.class),
-					new AutoWire(AsyncCallback.class));
+					processScopeWirer, new AutoWire(
+							ServerGwtRpcConnection.class), new AutoWire(
+							AsyncCallback.class));
 		}
 
 		// Configure this extension
