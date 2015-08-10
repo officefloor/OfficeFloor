@@ -25,6 +25,7 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.model.gwt.module.GwtModuleModel;
 import net.officefloor.plugin.gwt.comet.CometProxyPublisherManagedObjectSource;
@@ -124,6 +125,14 @@ public class CometHttpTemplateSectionExtension implements
 			SourceProperties properties, ClassLoader classLoader)
 			throws Exception {
 
+		// Process scope the managed objects
+		final ManagedObjectSourceWirer processScopeWirer = new ManagedObjectSourceWirer() {
+			@Override
+			public void wire(ManagedObjectSourceWirerContext context) {
+				context.setManagedObjectScope(ManagedObjectScope.PROCESS);
+			}
+		};
+
 		// Configure in as extension to HTTP template
 		template.addTemplateExtension(CometHttpTemplateSectionExtension.class);
 
@@ -135,6 +144,7 @@ public class CometHttpTemplateSectionExtension implements
 					new ManagedObjectSourceWirer() {
 						@Override
 						public void wire(ManagedObjectSourceWirerContext context) {
+							context.setManagedObjectScope(ManagedObjectScope.PROCESS);
 							context.mapTeam(
 									CometServiceManagedObjectSource.EXPIRE_TEAM_NAME,
 									OnePersonTeamSource.class.getName());
@@ -146,17 +156,19 @@ public class CometHttpTemplateSectionExtension implements
 		if (!application.isObjectAvailable(new AutoWire(
 				CometRequestServicer.class))) {
 			// Configure the Comet Request Servicer
-			application.addManagedObject(
-					CometRequestServicerManagedObjectSource.class.getName(),
-					null, new AutoWire(CometRequestServicer.class));
+			application
+					.addManagedObject(
+							CometRequestServicerManagedObjectSource.class
+									.getName(), processScopeWirer,
+							new AutoWire(CometRequestServicer.class));
 		}
 
 		// Determine if already configured CometPublisher
 		if (!application.isObjectAvailable(new AutoWire(CometPublisher.class))) {
 			// Configure the Comet Publisher
 			application.addManagedObject(
-					CometPublisherManagedObjectSource.class.getName(), null,
-					new AutoWire(CometPublisher.class));
+					CometPublisherManagedObjectSource.class.getName(),
+					processScopeWirer, new AutoWire(CometPublisher.class));
 		}
 
 		// Obtain the section to service Comet requests
@@ -216,7 +228,7 @@ public class CometHttpTemplateSectionExtension implements
 						application
 								.addManagedObject(
 										CometProxyPublisherManagedObjectSource.class
-												.getName(), null,
+												.getName(), processScopeWirer,
 										new AutoWire(parameterType))
 								.addProperty(
 										CometProxyPublisherManagedObjectSource.PROPERTY_PROXY_INTERFACE,
