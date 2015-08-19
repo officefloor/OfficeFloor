@@ -71,6 +71,7 @@
 		<projectVersion>${project.version}</projectVersion>
 		<tycho-version>0.21.0</tycho-version>
 		<maven-version>3.1.1</maven-version>
+		<maven-major-version>3.1</maven-major-version>
 		<aether-version>1.0.0.v20140518</aether-version>
 		<plexus-version>1.5.5</plexus-version>
 		<jetty-version>9.2.2.v20140723</jetty-version>
@@ -374,6 +375,11 @@
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-aether-provider</artifactId>
 				<version>${maven-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugin-tools</groupId>
+				<artifactId>maven-plugin-annotations</artifactId>
+				<version>${maven-major-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -683,7 +689,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>2.6</version>
+					<version>${maven-major-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

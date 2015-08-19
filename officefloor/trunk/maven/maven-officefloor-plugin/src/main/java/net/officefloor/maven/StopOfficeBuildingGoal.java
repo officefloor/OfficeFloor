@@ -24,14 +24,15 @@ import net.officefloor.console.OfficeBuilding;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * Maven goal to stop the {@link OfficeBuilding}.
  * 
- * @goal stop
- * 
  * @author Daniel Sagenschneider
  */
+@Mojo(name = "stop")
 public class StopOfficeBuildingGoal extends AbstractGoal {
 
 	/**
@@ -59,16 +60,14 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 
 	/**
 	 * Port that {@link OfficeBuilding} is running on.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private Integer port = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
 	 * Time to wait in stopping the {@link OfficeBuilding}.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private Long waitTime;
 
 	/*

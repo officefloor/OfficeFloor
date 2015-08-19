@@ -23,13 +23,14 @@ import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Maven goal to stop the {@link WoofOfficeFloorSource}.
- * 
- * @goal stop
- * @requiresDependencyResolution compile
  */
+@Mojo(name = "stop", requiresDependencyResolution = ResolutionScope.COMPILE)
 public class StopWoofGoal extends AbstractMojo {
 
 	/**
@@ -37,13 +38,13 @@ public class StopWoofGoal extends AbstractMojo {
 	 * 
 	 * @parameter
 	 */
+	@Parameter
 	private Integer port;
 
 	/**
 	 * Time to wait in stopping the {@link OfficeBuilding}.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private Long waitTime;
 
 	/*

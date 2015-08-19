@@ -45,6 +45,10 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.PlexusContainer;
 import org.eclipse.aether.RepositorySystem;
@@ -52,11 +56,9 @@ import org.eclipse.aether.RepositorySystem;
 /**
  * Maven goal to start the {@link OfficeBuilding}.
  * 
- * @goal start
- * @requiresDependencyResolution compile
- * 
  * @author Daniel Sagenschneider
  */
+@Mojo(name = "start", requiresDependencyResolution = ResolutionScope.COMPILE)
 public class StartOfficeBuildingGoal extends AbstractGoal {
 
 	/**
@@ -132,47 +134,38 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 
 	/**
 	 * {@link MavenProject}.
-	 * 
-	 * @parameter expression="${project}"
-	 * @required
 	 */
+	@Parameter(defaultValue = "${project}", required = true)
 	private MavenProject project;
 
 	/**
 	 * Plug-in dependencies.
-	 * 
-	 * @parameter expression="${plugin.artifacts}"
-	 * @required
 	 */
+	@Parameter(defaultValue = "${plugin.artifacts}", required = true)
 	private List<Artifact> pluginDependencies;
 
 	/**
 	 * Local repository.
-	 * 
-	 * @parameter expression="${localRepository}"
-	 * @required
 	 */
+	@Parameter(defaultValue = "${localRepository}", required = true)
 	private ArtifactRepository localRepository;
 
 	/**
 	 * {@link RepositorySystem}.
-	 * 
-	 * @component
 	 */
+	@Component
 	private RepositorySystem repositorySystem;
 
 	/**
 	 * {@link PlexusContainer}.
-	 * 
-	 * @component
 	 */
+	@Component
 	private PlexusContainer plexusContainer;
 
 	/**
 	 * Port to run the {@link OfficeBuilding} on.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private Integer port = DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
