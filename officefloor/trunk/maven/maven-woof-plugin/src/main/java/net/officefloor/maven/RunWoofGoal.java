@@ -20,6 +20,7 @@ package net.officefloor.maven;
 import java.io.File;
 import java.util.List;
 
+import net.officefloor.autowire.impl.AutoWirePropertiesImpl;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.war.WarOfficeFloorDecorator;
@@ -31,6 +32,10 @@ import org.apache.maven.model.Build;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.PlexusContainer;
 import org.eclipse.aether.RepositorySystem;
@@ -38,57 +43,52 @@ import org.eclipse.aether.RepositorySystem;
 /**
  * Maven goal to run the {@link WoofOfficeFloorSource}.
  * 
- * @goal run
- * @requiresDependencyResolution compile
- * 
  * @author Daniel Sagenschneider
  */
+@Mojo(name = "run", requiresDependencyResolution = ResolutionScope.COMPILE)
 public class RunWoofGoal extends AbstractMojo {
 
 	/**
 	 * {@link MavenProject}.
-	 * 
-	 * @parameter expression="${project}"
-	 * @required
 	 */
+	@Parameter(defaultValue = "${project}", required = true)
 	private MavenProject project;
 
 	/**
 	 * {@link PlexusContainer}.
-	 * 
-	 * @component
 	 */
+	@Component
 	private PlexusContainer plexusContainer;
 
 	/**
 	 * {@link RepositorySystem}.
-	 * 
-	 * @component
 	 */
+	@Component
 	private RepositorySystem repositorySystem;
 
 	/**
 	 * Plug-in dependencies.
-	 * 
-	 * @parameter expression="${plugin.artifacts}"
-	 * @required
 	 */
+	@Parameter(defaultValue = "${plugin.artifacts}", required = true)
 	private List<Artifact> pluginDependencies;
 
 	/**
 	 * Local repository.
-	 * 
-	 * @parameter expression="${localRepository}"
-	 * @required
 	 */
+	@Parameter(defaultValue = "${localRepository}", required = true)
 	private ArtifactRepository localRepository;
 
 	/**
 	 * Path to the {@link OfficeFloor} configuration.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private String officeFloorLocation = "WoOF";
+
+	/**
+	 * Path to directory containing the environment properties files.
+	 */
+	@Parameter
+	private String envDir;
 
 	/*
 	 * ======================= Mojo =========================
@@ -170,6 +170,18 @@ public class RunWoofGoal extends AbstractMojo {
 			this.getLog()
 					.warn("No GWT functionality will be available.  Failed to generate package JAR content",
 							ex);
+		}
+
+		// Provide the environment properties directory (if provided)
+		if (this.envDir != null) {
+
+			// TODO remove
+			this.getLog()
+					.error("Setting environment directory: " + this.envDir);
+
+			openGoal.setJvmOptions("-D"
+					+ AutoWirePropertiesImpl.ENVIRONMENT_PROPERTIES_DIRECTORY
+					+ "=" + this.envDir);
 		}
 
 		// Indicate WoOF application running

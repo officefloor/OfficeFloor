@@ -35,16 +35,17 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
  * Maven goal to open the {@link OfficeFloor}.
  * 
- * @goal open
- * @requiresDependencyResolution compile
- * 
  * @author Daniel Sagenschneider
  */
+@Mojo(name = "open", requiresDependencyResolution = ResolutionScope.COMPILE)
 public class OpenOfficeFloorGoal extends AbstractGoal {
 
 	/**
@@ -87,25 +88,20 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 
 	/**
 	 * {@link MavenProject}.
-	 * 
-	 * @parameter expression="${project}"
-	 * @required
 	 */
+	@Parameter(defaultValue = "${project}", required = true)
 	private MavenProject project;
 
 	/**
 	 * Plug-in dependencies.
-	 * 
-	 * @parameter expression="${plugin.artifacts}"
-	 * @required
 	 */
+	@Parameter(defaultValue = "${plugin.artifacts}", required = true)
 	private List<Artifact> pluginDependencies;
 
 	/**
 	 * Port that {@link OfficeBuilding} is running on.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private Integer port = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
@@ -120,17 +116,14 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 
 	/**
 	 * Path to the {@link OfficeFloor} configuration.
-	 * 
-	 * @parameter
-	 * @required
 	 */
+	@Parameter(required = true)
 	private String officeFloorLocation;
 
 	/**
 	 * {@link OfficeFloorSource} class name.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private String officeFloorSource;
 
 	/**
@@ -144,10 +137,9 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	}
 
 	/**
-	 * Process name to open the {@link OfficeFloor} within.
-	 * 
-	 * @parameter
+	 * Process name to open the {@link OfficeFloor} within. s
 	 */
+	@Parameter
 	private String processName;
 
 	/**
@@ -162,9 +154,8 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 
 	/**
 	 * JVM options for running the {@link OfficeFloor}.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private String[] jvmOptions;
 
 	/**

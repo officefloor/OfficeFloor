@@ -27,61 +27,54 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * Maven goal to invoke a {@link Task} - either directly or as initial
  * {@link Task} of {@link Work}.
  * 
- * @goal invoke
- * 
  * @author Daniel Sagenschneider
  */
+@Mojo(name = "invoke")
 public class InvokeGoal extends AbstractGoal {
 
 	/**
 	 * Port that {@link OfficeBuilding} is running on.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private Integer port = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
 	 * Process name for the {@link OfficeFloor} to invoke the {@link Task}
 	 * within.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private String processName;
 
 	/**
 	 * Name of {@link Office} containing the {@link Task} to invoke.
-	 * 
-	 * @parameter
-	 * @required
 	 */
+	@Parameter(required = true)
 	private String office;
 
 	/**
 	 * Name of {@link Work} containing the {@link Task} to invoke.
-	 * 
-	 * @parameter
-	 * @required
 	 */
+	@Parameter(required = true)
 	private String work;
 
 	/**
 	 * Name of {@link Task} to invoke. May be <code>null</code> to invoke
 	 * initial {@link Task} of {@link Work}.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private String task;
 
 	/**
 	 * Parameter value for the {@link Task}. May be <code>null</code>.
-	 * 
-	 * @parameter
 	 */
+	@Parameter
 	private String parameter;
 
 	/*
