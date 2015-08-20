@@ -42,39 +42,39 @@ public class InvokeGoal extends AbstractGoal {
 	/**
 	 * Port that {@link OfficeBuilding} is running on.
 	 */
-	@Parameter
+	@Parameter(property = "port")
 	private Integer port = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
 	 * Process name for the {@link OfficeFloor} to invoke the {@link Task}
 	 * within.
 	 */
-	@Parameter
+	@Parameter(property = "processName")
 	private String processName;
 
 	/**
 	 * Name of {@link Office} containing the {@link Task} to invoke.
 	 */
-	@Parameter(required = true)
+	@Parameter(required = true, property = "office")
 	private String office;
 
 	/**
 	 * Name of {@link Work} containing the {@link Task} to invoke.
 	 */
-	@Parameter(required = true)
+	@Parameter(required = true, property = "work")
 	private String work;
 
 	/**
 	 * Name of {@link Task} to invoke. May be <code>null</code> to invoke
 	 * initial {@link Task} of {@link Work}.
 	 */
-	@Parameter
+	@Parameter(property = "task")
 	private String task;
 
 	/**
 	 * Parameter value for the {@link Task}. May be <code>null</code>.
 	 */
-	@Parameter
+	@Parameter(property = "parameter")
 	private String parameter;
 
 	/*
