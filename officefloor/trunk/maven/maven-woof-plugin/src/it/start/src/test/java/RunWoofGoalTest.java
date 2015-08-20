@@ -52,6 +52,14 @@ public class RunWoofGoalTest extends TestCase {
 	}
 
 	/**
+	 * Ensure appropriate handles WoOF template. Also tests using property files
+	 * for production environment.
+	 */
+	public void testWoofTemplate() throws Exception {
+		this.doTest("/template.woof", "<html><body>TEMPLATE</body></html>");
+	}
+
+	/**
 	 * Undertakes the tests.
 	 * 
 	 * @param uri

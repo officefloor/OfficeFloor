@@ -81,13 +81,13 @@ public class RunWoofGoal extends AbstractMojo {
 	/**
 	 * Path to the {@link OfficeFloor} configuration.
 	 */
-	@Parameter
+	@Parameter(property = "officeFloorLocation")
 	private String officeFloorLocation = "WoOF";
 
 	/**
 	 * Path to directory containing the environment properties files.
 	 */
-	@Parameter
+	@Parameter(property = "envDir")
 	private String envDir;
 
 	/*

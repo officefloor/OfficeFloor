@@ -101,7 +101,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	/**
 	 * Port that {@link OfficeBuilding} is running on.
 	 */
-	@Parameter
+	@Parameter(property = "port")
 	private Integer port = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
@@ -117,13 +117,13 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	/**
 	 * Path to the {@link OfficeFloor} configuration.
 	 */
-	@Parameter(required = true)
+	@Parameter(required = true, property = "officeFloorLocation")
 	private String officeFloorLocation;
 
 	/**
 	 * {@link OfficeFloorSource} class name.
 	 */
-	@Parameter
+	@Parameter(property = "officeFloorSource")
 	private String officeFloorSource;
 
 	/**
@@ -139,7 +139,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	/**
 	 * Process name to open the {@link OfficeFloor} within. s
 	 */
-	@Parameter
+	@Parameter(property = "processName")
 	private String processName;
 
 	/**
@@ -155,7 +155,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	/**
 	 * JVM options for running the {@link OfficeFloor}.
 	 */
-	@Parameter
+	@Parameter(property = "jvmOptions")
 	private String[] jvmOptions;
 
 	/**
