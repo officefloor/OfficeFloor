@@ -61,13 +61,13 @@ public class StopOfficeBuildingGoal extends AbstractGoal {
 	/**
 	 * Port that {@link OfficeBuilding} is running on.
 	 */
-	@Parameter
+	@Parameter(property = "port")
 	private Integer port = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
 	 * Time to wait in stopping the {@link OfficeBuilding}.
 	 */
-	@Parameter
+	@Parameter(property = "waitTime")
 	private Long waitTime;
 
 	/*

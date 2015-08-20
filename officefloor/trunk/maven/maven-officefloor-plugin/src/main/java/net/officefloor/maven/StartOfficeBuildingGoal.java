@@ -165,7 +165,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	/**
 	 * Port to run the {@link OfficeBuilding} on.
 	 */
-	@Parameter
+	@Parameter(property = "port")
 	private Integer port = DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
