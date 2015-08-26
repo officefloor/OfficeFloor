@@ -132,7 +132,7 @@
 							<!-- Generate Reports -->
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-project-info-reports-plugin</artifactId>
-							<version>2.3</version>
+							<version>${maven-project-info-reports-version}</version>
 							<reportSets>
 								<reportSet>
 									<reports>
@@ -148,7 +148,7 @@
 							<!-- Changes -->
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-changes-plugin</artifactId>
-							<version>2.4</version>
+							<version>${maven-changes-version}</version>
 							<reportSets>
 								<reportSet>
 									<reports>
@@ -161,7 +161,7 @@
 							<!-- Generate Maven plug-in documentation -->
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-plugin-plugin</artifactId>
-							<version>2.6</version>
+							<version>${maven-major-version}</version>
 						</plugin>
 					</reportPlugins>
 				</configuration>

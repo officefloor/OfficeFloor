@@ -28,6 +28,11 @@
 				<artifactId>maven-plugin-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>default-descriptor</id>
+						<phase>process-classes</phase>
+					</execution>
+					<execution>
+						<id>site-documentation</id>
 						<phase>pre-site</phase>
 						<goals>
 							<goal>report</goal>
@@ -45,7 +50,7 @@
 							<!-- Generate Reports -->
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-project-info-reports-plugin</artifactId>
-							<version>2.3</version>
+							<version>${maven-project-info-reports-version}</version>
 							<reportSets>
 								<reportSet>
 									<reports>
@@ -61,7 +66,7 @@
 							<!-- Changes -->
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-changes-plugin</artifactId>
-							<version>2.4</version>
+							<version>${maven-changes-version}</version>
 							<reportSets>
 								<reportSet>
 									<reports>
@@ -74,7 +79,7 @@
 							<!-- Generate Maven plug-in documentation -->
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-plugin-plugin</artifactId>
-							<version>2.6</version>
+							<version>${maven-major-version}</version>
 						</plugin>
 					</reportPlugins>
 				</configuration>
@@ -115,6 +120,11 @@
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

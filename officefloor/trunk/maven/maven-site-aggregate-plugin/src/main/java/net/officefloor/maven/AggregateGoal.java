@@ -41,70 +41,59 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 /**
  * Maven goal to aggregate site content.
  * 
- * @goal aggregate
- * 
  * @author Daniel Sagenschneider
  */
+@Mojo(name = "aggregate")
 public class AggregateGoal extends AbstractMojo {
 
 	/**
 	 * Base directory configured by Maven.
-	 * 
-	 * @parameter default-value="${project.basedir}"
 	 */
+	@Parameter(defaultValue = "${project.basedir}", property = "basedir")
 	private File basedir;
 
 	/**
 	 * Directory within ${basedir} to aggregate site content within.
-	 * 
-	 * @parameter default-value="target/site-aggregate"
 	 */
+	@Parameter(defaultValue = "target/site-aggregate", property = "aggregateDir")
 	private String aggregateDir;
 
 	/**
 	 * Title for the book.
-	 * 
-	 * @parameter
-	 * @required
 	 */
+	@Parameter(required = true, property = "title")
 	private String title;
 
 	/**
 	 * Author of the book.
-	 * 
-	 * @parameter
-	 * @required
 	 */
+	@Parameter(required = true, property = "author")
 	private String author;
 
 	/**
 	 * Version of the book.
-	 * 
-	 * @parameter
-	 * @required
 	 */
+	@Parameter(required = true, property = "version")
 	private String version;
 
 	/**
 	 * Project logo.
-	 * 
-	 * @parameter
-	 * @required
 	 */
+	@Parameter(required = true, property = "projectLogo")
 	private String projectLogo;
 
 	/**
 	 * Base URL for links.
-	 * 
-	 * @parameter
-	 * @required
 	 */
+	@Parameter(required = true, property = "baseUrl")
 	private String baseUrl;
 
 	/**
@@ -112,20 +101,19 @@ public class AggregateGoal extends AbstractMojo {
 	 * 
 	 * @parameter default-value="3"
 	 */
+	@Parameter(defaultValue = "3", property = "tocDepth")
 	private int tocDepth;
 
 	/**
 	 * Ignore file names.
-	 * 
-	 * @parameter
 	 */
+	@Parameter(property = "ignores")
 	private String[] ignores;
 
 	/**
 	 * Order of the sections.
-	 * 
-	 * @parameter
 	 */
+	@Parameter(property = "order")
 	private String[] order;
 
 	/*
@@ -134,7 +122,7 @@ public class AggregateGoal extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		
+
 		// Ensure have base directory
 		if (this.basedir == null) {
 			throw new MojoFailureException("Must have basedir");
@@ -770,7 +758,7 @@ public class AggregateGoal extends AbstractMojo {
 						}
 					}
 					snippetWriter.flush();
-					
+
 				} finally {
 					// Ensure close the snippet reader
 					snippetReader.close();
