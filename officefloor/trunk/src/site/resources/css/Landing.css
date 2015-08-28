@@ -47,52 +47,32 @@ header {
 		endColorstr='#bbe0ff', GradientType=0); /* IE6-9 */
 }
 
-#header-columns {
-	padding: 3% 10%;
+header .header-col {
+	padding-top: 3em;
+	padding-bottom: 3em;
 }
 
-.header-col {
-	padding: 1%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	float: left;
-	width: 50%;
-}
-
-@media (max-width: 800px) {
-	.header-col {
-		float: none;
-		width: 100%;
-		margin-bottom: 2em;
-	}
-}
-
-.header-col-clear {
-	clear: left;
-	visibility: hidden;
-}
-
-img#officefloor-banner {
+header img#officefloor-banner {
 	position: relative;
 	left: -1em;
 }
 
-p#version {
+header p#version {
 	font-size: small;
 	text-align: center;
 }
 
-p#software-brick {
+header p#software-brick {
 	padding-top: 1em;
 	font-size: small;
 }
 
-ul#header-bullets {
+header ul#header-bullets {
 	list-style-type: none;
 	padding: 0px;
 }
 
-ul#header-bullets>li {
+header ul#header-bullets>li {
 	background-image: url(../images/tick.png);
 	background-repeat: no-repeat;
 	background-position: 0px 0.3em;
@@ -101,12 +81,12 @@ ul#header-bullets>li {
 	padding-left: 3em;
 }
 
-p#link-buttons {
+header p#link-buttons {
 	margin-top: 1em;
 	text-align: center;
 }
 
-a.link-button {
+header a.link-button {
 	color: #E5E5E5;
 	background-color: #008BFF;
 	border-radius: 0.8em;
@@ -116,7 +96,7 @@ a.link-button {
 	font-weight: bold;
 }
 
-p#license {
+header p#license {
 	font-size: x-small;
 	text-align: center;
 	padding: 1em;
@@ -154,27 +134,6 @@ section#steps>h1 {
 	padding-left: 3em;
 }
 
-.steps-col {
-	padding: 1%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	float: left;
-	width: 25%;
-}
-
-@media (max-width: 800px) {
-	.steps-col {
-		float: none;
-		width: 100%;
-		margin-bottom: 1em;
-	}
-}
-
-.steps-col-clear {
-	clear: left;
-	visibility: hidden;
-}
-
 .step {
 	text-align: left;
 	line-height: 150%;
@@ -200,25 +159,11 @@ section#steps>h1 {
 footer {
 	background-color: #BBE0FF;
 	border-top: 1px solid #c0c0c0;
-}
-
-#footer-links {
-	padding: 0em 10%;
+	padding-top: 3em;
 }
 
 .footer-link-col {
-	padding: 3%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	float: left;
-	width: 20%;
-}
-
-@media (max-width: 800px) {
-	.footer-link-col {
-		float: none;
-		width: 100%;
-	}
+	padding-bottom: 1em;
 }
 
 .footer-link-col>a {
@@ -230,17 +175,12 @@ footer {
 	line-height: 150%;
 }
 
-.footer-link-col-clear {
-	clear: left;
-	visibility: hidden;
-}
-
 footer img {
 	width: 90px;
 }
 
 #associate {
-	padding: 1em 20%;
+	padding: 2em 20%;
 	clear: right;
 }
 

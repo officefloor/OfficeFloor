@@ -4,21 +4,20 @@
 <meta name="author" content="Daniel Sagenschneider" />
 <meta http-equiv="Content-Language" content="en" />
 <link rel="shortcut icon" href="./favicon.ico" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 <link rel="stylesheet" href="./css/Landing.css" type="text/css" />
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 </head>
 <body>
 
 
-	<header>
-		<div id="header-columns">
-			<div class="header-col">
-				<img id="officefloor-banner"
-					src="http://www.officefloor.net/images/OfficeFloorBannerImage.png"
-					alt="OfficeFloor" />
+	<header class="container-fluid">
+		<div class="row">
+			<div class="col-xs-hidden col-md-1"></div>
+			<div class="col-xs-12 col-md-5 header-col">
+				<img id="officefloor-banner" src="http://officefloor.net/images/OfficeFloorBannerImage.png" alt="OfficeFloor" />
 				<p id="version">v2.16.0</p>
-				<p id="software-brick">
-					Moulding the <em><a href="./mission.html">Software Brick</a></em>
-				</p>
+				<p id="software-brick">Moulding the <em><a href="./mission.html">Software Brick</a></em></p>
 				<ul id="header-bullets">
 					<li>Create a working prototype in minutes</li>
 					<li>Easily enhance the prototype to an application</li>
@@ -26,19 +25,17 @@
 					<li>Self documenting for Agile development</li>
 				</ul>
 				<p id="link-buttons">
-					<a class="link-button" href="./install.html">Install</a> <a
-						class="link-button" href="./tutorials/index.html">Tutorials</a>
+					<a class="link-button" href="./mission.html">About</a>
+					<a class="link-button" href="./tutorials/index.html">Tutorials</a>
+					<a class="link-button" href="./install.html">Install</a>
 				</p>
 			</div>
-			<div class="header-col">
-				<img src="./images/landing_application_woof.png"
-					alt="Example OfficeFloor Graphical Configuration" />
-				<p id="license">
-					OfficeFloor is freely distributed under GPL and the source is
-					available <a href="./source-repository.html">here</a>.
+			<div class="col-xs-12 col-md-5 header-col">
+				<img src="./images/landing_application_woof.png" alt="Example OfficeFloor Graphical Configuration" />
+				<p id="license">OfficeFloor is freely distributed under GPL and the source is available <a href="./source-repository.html">here</a>.
 				</p>
 			</div>
-			<div class="header-col-clear"></div>
+			<div class="col-xs-hidden col-md-1"></div>
 		</div>
 	</header>
 
@@ -49,10 +46,10 @@
 	</article>
 
 
-	<section id="steps">
+	<section id="steps" class="container">
 		<h1>Four steps to build an OfficeFloor application</h1>
-		<div class="steps-col">
-			<article class="step">
+		<div class="row">
+			<article class="col-xs-12 col-md-3 step">
 				<img src="./images/OfficeFloor_StepOne.png"
 					alt="OfficeFloor Step One" />
 				<p>
@@ -82,9 +79,7 @@
 					This makes for faster feedback loops with the Web Designer enabling
 					the right look and feel for the web application.</p>
 			</article>
-		</div>
-		<div class="steps-col">
-			<article class="step">
+			<article class="col-xs-12 col-md-3 step">
 				<img src="./images/OfficeFloor_StepTwo.png"
 					alt="OfficeFloor Step Two." />
 				<p>
@@ -112,9 +107,7 @@
 						Injection</strong>).
 				</p>
 			</article>
-		</div>
-		<div class="steps-col">
-			<article class="step">
+			<article class="col-xs-12 col-md-3 step">
 				<img src="./images/OfficeFloor_StepThree.png"
 					alt="OfficeFloor Step Three." />
 				<p>
@@ -143,9 +136,7 @@
 					pages and POJOs.
 				</p>
 			</article>
-		</div>
-		<div class="steps-col">
-			<article class="step">
+			<article class="col-xs-12 col-md-3 step">
 				<img src="./images/OfficeFloor_StepFour.png"
 					alt="OfficeFloor Step Four." />
 				<p>
@@ -168,34 +159,34 @@
 				</p>
 			</article>
 		</div>
-		<div class="steps-col-clear"></div>
 	</section>
 
 	<footer>
-		<div id="footer-links">
-			<div class="footer-link-col">
-				<a href="./eclipse/index.html">Eclipse</a>
-				<p>Install the Eclipse Plug-in and try out OfficeFloor</p>
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-hidden col-md-1"></div>
+				<div class="col-xs-12 col-md-2 footer-link-col">
+					<a href="./eclipse/index.html">Eclipse</a>
+					<p>Install the Eclipse Plug-in and try out OfficeFloor</p>
+				</div>
+				<div class="col-xs-12 col-md-2 footer-link-col">
+					<a href="./tutorials/index.html">Tutorials</a>
+					<p>Check out the tutorials covering various features of OfficeFloor</p>
+				</div>
+				<div class="col-xs-12 col-md-2 footer-link-col">
+					<a href="./mission.html">Mission</a>
+					<p>Read the mission statement of the OfficeFloor team and get involved</p>
+				</div>
+				<div class="col-xs-12 col-md-2 footer-link-col">
+					<a href="http://officefloor.wordpress.com">Blog</a>
+					<p>Get the latest information regarding OfficeFloor</p>
+				</div>
+				<div class="col-xs-12 col-md-2 footer-link-col">
+					<a href="./getting-help.html">Help</a>
+					<p>Get help in using Officefloor</p>
+				</div>
+				<div class="col-xs-hidden col-md-1"></div>
 			</div>
-			<div class="footer-link-col">
-				<a href="./tutorials/index.html">Tutorials</a>
-				<p>Check out the tutorials covering various features of
-					OfficeFloor</p>
-			</div>
-			<div class="footer-link-col">
-				<a href="./mission.html">Mission</a>
-				<p>Read the mission statement of the OfficeFloor team and get
-					involved</p>
-			</div>
-			<div class="footer-link-col">
-				<a href="http://officefloor.wordpress.com">Blog</a>
-				<p>Get the latest information regarding OfficeFloor</p>
-			</div>
-			<div class="footer-link-col">
-				<a href="./getting-help.html">Help</a>
-				<p>Get help in using Officefloor</p>
-			</div>
-			<div class="footer-link-col-clear"></div>
 		</div>
 
 		<div id="associate">
@@ -235,7 +226,7 @@
 		</div>
 
 		<div id="copyright">
-			<p>Copyright &#169; 2005-2014. All Rights Reserved.</p>
+			<p>Copyright &#169; 2005-2015. All Rights Reserved.</p>
 		</div>
 		<div id="copyright-clear"></div>
 	</footer>
