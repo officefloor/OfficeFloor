@@ -65,7 +65,7 @@
 		<module>package</module>
 	</modules>
 	<properties>
-		<current.year>2014</current.year>
+		<current.year>2015</current.year>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<officefloor.skin.version>${project.version}</officefloor.skin.version>
 		<projectVersion>${project.version}</projectVersion>
