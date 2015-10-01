@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -32,8 +33,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -55,12 +54,6 @@ import mx4j.tools.remote.PasswordAuthenticator;
  * @author Daniel Sagenschneider
  */
 public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
-
-	/**
-	 * {@link Logger}.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(ProcessShell.class
-			.getName());
 
 	/**
 	 * Name of the {@link #triggerStopProcess()} method to invoke via another
@@ -140,7 +133,7 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	 *             If failure in running the {@link ManagedProcess}.
 	 */
 	public static void main(String[] arguments) throws IOException {
-		main(System.in, arguments);
+		main(System.in, System.out, System.err, arguments);
 	}
 
 	/**
@@ -148,13 +141,17 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 	 * 
 	 * @param fromParentPipe
 	 *            From parent pipe.
+	 * @param logger
+	 *            Logger.
+	 * @param errorLogger
+	 *            Logger for errors.
 	 * @param arguments
 	 *            Arguments.
 	 * @throws IOException
 	 *             If failure in running the {@link ManagedProcess}.
 	 */
-	static void main(InputStream fromParentPipe, String... arguments)
-			throws IOException {
+	static void main(InputStream fromParentPipe, PrintStream logger,
+			PrintStream errorLogger, String... arguments) throws IOException {
 
 		// Obtain pipe from parent
 		ObjectInputStream fromParentObjectPipe = new ObjectInputStream(
@@ -166,6 +163,8 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 		boolean isInitilised = false;
 		try {
 			try {
+				ProgressLogger.logInitialMessage(
+						"Process waiting on configuration", logger);
 
 				// Obtain the name space (always first)
 				Object object = fromParentObjectPipe.readObject();
@@ -188,95 +187,120 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 				// Obtain parent port (always third)
 				int parentPort = fromParentObjectPipe.readInt();
 
-				// Connect to parent to send notifications
-				@SuppressWarnings("resource")
-				// socket closed by shell
-				Socket parentSocket = new Socket();
-				parentSocket.connect(new InetSocketAddress(parentPort));
-				toParentPipe = new ObjectOutputStream(
-						parentSocket.getOutputStream());
+				ProgressLogger.logCompleteMessage(
+						"received configuration (namespace " + processName
+								+ ", management port " + parentPort + ")",
+						logger);
 
-				// Create the MBean Server
-				MBeanServer mbeanServer = ManagementFactory
-						.getPlatformMBeanServer();
+				try (ProgressLogger progress = new ProgressLogger(
+						"Connecting to process management", "connected", logger)) {
+					// Connect to parent to send notifications
+					@SuppressWarnings("resource")
+					Socket parentSocket = new Socket(); // socket closed by
+														// shell
+					parentSocket.connect(new InetSocketAddress(parentPort));
+					toParentPipe = new ObjectOutputStream(
+							parentSocket.getOutputStream());
+				}
 
-				// Create the server socket for the JMX Connector Server
-				final ServerSocket serverSocket = new ServerSocket();
-				serverSocket.bind(null); // Any available port
-				int serverPort = serverSocket.getLocalPort();
+				try (ProgressLogger progress = new ProgressLogger(
+						"Providing process control details", "provided", logger)) {
 
-				// Set up environment for JMX Connector Server
-				Map<String, Object> environment = new HashMap<String, Object>();
-				environment.put(
-						RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
-						new RMIServerSocketFactory() {
-							@Override
-							public ServerSocket createServerSocket(int port)
-									throws IOException {
-								return serverSocket;
-							}
-						});
+					// Create the MBean Server
+					MBeanServer mbeanServer = ManagementFactory
+							.getPlatformMBeanServer();
 
-				/*
-				 * Use password to secure JMX Connector Server.
-				 * 
-				 * No need to encrypt information (i.e. SSL not needed) as only
-				 * the parent process will be provided the password and will be
-				 * interprocess communication on the same machine.
-				 */
-				UUID passwordUuid = UUID.randomUUID();
-				String userName = processName;
-				String password = String.valueOf(passwordUuid
-						.getMostSignificantBits())
-						+ String.valueOf(passwordUuid.getLeastSignificantBits());
-				InputStream passwordStream = new ByteArrayInputStream((userName
-						+ "=" + password).getBytes());
-				environment.put(RMIConnectorServer.AUTHENTICATOR,
-						new PasswordAuthenticator(passwordStream));
+					// Create the server socket for the JMX Connector Server
+					final ServerSocket serverSocket = new ServerSocket();
+					serverSocket.bind(null); // Any available port
+					int serverPort = serverSocket.getLocalPort();
 
-				// Start the JMX Connecter Server (also ensure shutdown)
-				connectorServer = JMXConnectorServerFactory
-						.newJMXConnectorServer(new JMXServiceURL(
-								JMX_COMMUNICATION_PROTOCOL, null, serverPort),
-								environment, mbeanServer);
-				connectorServer.start();
+					// Set up environment for JMX Connector Server
+					Map<String, Object> environment = new HashMap<String, Object>();
+					environment
+							.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
+									new RMIServerSocketFactory() {
+										@Override
+										public ServerSocket createServerSocket(
+												int port) throws IOException {
+											return serverSocket;
+										}
+									});
 
-				// Send connection details back to parent
-				Object[] connectionDetails = new Object[3];
-				connectionDetails[0] = connectorServer.getAddress();
-				connectionDetails[1] = userName;
-				connectionDetails[2] = password;
-				toParentPipe.writeObject(connectionDetails);
-				toParentPipe.flush();
+					/*
+					 * Use password to secure JMX Connector Server.
+					 * 
+					 * No need to encrypt information (i.e. SSL not needed) as
+					 * only the parent process will be provided the password and
+					 * will be interprocess communication on the same machine.
+					 */
+					UUID passwordUuid = UUID.randomUUID();
+					String userName = processName;
+					String password = String.valueOf(passwordUuid
+							.getMostSignificantBits())
+							+ String.valueOf(passwordUuid
+									.getLeastSignificantBits());
+					InputStream passwordStream = new ByteArrayInputStream(
+							(userName + "=" + password).getBytes());
+					environment.put(RMIConnectorServer.AUTHENTICATOR,
+							new PasswordAuthenticator(passwordStream));
 
-				// Wait on parent to connect
-				fromParentObjectPipe.readBoolean();
+					// Start the JMX Connecter Server (also ensure shutdown)
+					connectorServer = JMXConnectorServerFactory
+							.newJMXConnectorServer(new JMXServiceURL(
+									JMX_COMMUNICATION_PROTOCOL, null,
+									serverPort), environment, mbeanServer);
+					connectorServer.start();
+
+					// Send connection details back to parent
+					Object[] connectionDetails = new Object[3];
+					connectionDetails[0] = connectorServer.getAddress();
+					connectionDetails[1] = userName;
+					connectionDetails[2] = password;
+					toParentPipe.writeObject(connectionDetails);
+					toParentPipe.flush();
+				}
+
+				try (ProgressLogger progress = new ProgressLogger(
+						"Waiting on management to connect", "connected", logger)) {
+					// Wait on parent to connect
+					fromParentObjectPipe.readBoolean();
+				}
 
 				// Create instance as context
 				ProcessShell context = new ProcessShell(processName,
 						connectorServer, toParentPipe);
 
-				// Initialise the managed process
-				managedProcess.init(context);
-				isInitilised = true;
+				try (ProgressLogger progress = new ProgressLogger(
+						"Initialising the process", "initialised", logger)) {
+					// Initialise the managed process
+					managedProcess.init(context);
+					isInitilised = true;
+				}
 
-				// Initialised so register the process shell MBean
-				context.registerMBean(context, PROCESS_SHELL_OBJECT_NAME);
+				try (ProgressLogger progress = new ProgressLogger(
+						"Registering process MBean", "registered", logger)) {
+					// Initialised so register the process shell MBean
+					context.registerMBean(context, PROCESS_SHELL_OBJECT_NAME);
+				}
 
-				// Wait on parent to register initialised
-				fromParentObjectPipe.readBoolean();
+				try (ProgressLogger progress = new ProgressLogger(
+						"Waiting for startup to complete", "completed", logger)) {
+					// Wait on parent to register initialised
+					fromParentObjectPipe.readBoolean();
+				}
 
 				// Run the managed process
+				logger.println("Running process");
 				managedProcess.main();
+				logger.println("Process finished");
 
 			} catch (Throwable ex) {
 
 				// Log the failure
-				if (LOGGER.isLoggable(Level.WARNING)) {
-					String message = (isInitilised ? "Process failure"
-							: "Failed to initialise process");
-					LOGGER.log(Level.WARNING, message, ex);
-				}
+				errorLogger.println(isInitilised ? "Process failure"
+						: "Failed to initialise process");
+				ex.printStackTrace(errorLogger);
 
 				// Notify Process Manager of failure
 				if (toParentPipe != null) {
@@ -291,11 +315,10 @@ public class ProcessShell implements ManagedProcessContext, ProcessShellMBean {
 						toParentPipe.flush();
 					} catch (Throwable notifyEx) {
 						// Indicate failure to notify
-						if (LOGGER.isLoggable(Level.WARNING)) {
-							LOGGER.log(Level.WARNING, "Failed to notify "
-									+ ProcessManager.class.getSimpleName()
-									+ " of failure", notifyEx);
-						}
+						errorLogger.println("Failed to notify "
+								+ ProcessManager.class.getSimpleName()
+								+ " of failure");
+						notifyEx.printStackTrace(errorLogger);
 					}
 				}
 

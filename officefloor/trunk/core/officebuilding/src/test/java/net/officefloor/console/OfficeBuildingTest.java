@@ -20,8 +20,6 @@ package net.officefloor.console;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.management.InstanceNotFoundException;
 
@@ -31,6 +29,7 @@ import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.UploadArtifact;
 import net.officefloor.building.process.ProcessManagerMBean;
+import net.officefloor.building.process.ProcessManagerTest;
 import net.officefloor.building.process.officefloor.MockOfficeFloorSource;
 import net.officefloor.building.process.officefloor.MockWork;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
@@ -147,12 +146,9 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		// Obtain location of Jar file
 		File jarFilePath = this.findFile("lib/MockCore.jar");
 
-		// Expected output
-		List<String> out = new LinkedList<String>();
-
 		// Start the OfficeBuilding
 		this.doSecureMain("start");
-		out.add(this.officeBuildingStartLine);
+		String prefixOutput = this.officeBuildingStartLine;
 
 		// Ensure MockCore.jar is not existing
 		File mockJar = new File(System.getProperty("java.io.tmpdir"),
@@ -164,34 +160,35 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				+ jarFilePath.getAbsolutePath()
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
 				+ " --property team.name=TEAM" + " open");
-		out.add("OfficeFloor open under process name space '" + PROCESS_NAME
-				+ "'");
+		String startupOutput = "OfficeFloor open under process name space '"
+				+ PROCESS_NAME + "'\n";
 
 		// List the processes for the OfficeFloor
 		this.doSecureMain("list");
-		out.add(PROCESS_NAME);
+		String processOutput = PROCESS_NAME + "\n";
 
 		// List the tasks for the OfficeFloor
 		this.doSecureMain("--process_name " + PROCESS_NAME + " list");
-		out.add("OFFICE SECTION.WORK writeMessage(java.lang.String)");
+		processOutput += "OFFICE SECTION.WORK writeMessage(java.lang.String)\n";
 
 		// Validate the MockCore.jar is available
 		assertTrue("MockCore.jar should be uploaded", mockJar.exists());
 
 		// Close the OfficeFloor
 		this.doSecureMain("--process_name " + PROCESS_NAME + " close");
-		out.add("Closed");
+		String suffixOutput = "Closed\n";
 
 		// Validate the process work space cleaned up
 		assertFalse("MockCore.jar should be cleaned up", mockJar.exists());
 
 		// Stop the OfficeBuilding
 		this.doSecureMain("stop");
-		out.add("OfficeBuilding stopped");
+		suffixOutput += "OfficeBuilding stopped\n";
 
 		// Validate no error and correct output
 		this.assertErr();
-		this.assertOut(out.toArray(new String[out.size()]));
+		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true,
+				prefixOutput, startupOutput, processOutput, suffixOutput);
 	}
 
 	/**
@@ -205,12 +202,9 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		final String OFFICE_FLOOR_VERSION = OfficeBuildingTestUtil
 				.getOfficeCompilerArtifactVersion();
 
-		// Expected output
-		List<String> out = new LinkedList<String>();
-
 		// Start the OfficeBuilding
 		this.doSecureMain("start");
-		out.add(this.officeBuildingStartLine);
+		String prefixOutput = this.officeBuildingStartLine;
 
 		// Open the OfficeFloor (via an Artifact)
 		String openCommand = "--artifact net.officefloor.core:officecompiler:"
@@ -220,8 +214,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
 				+ " --property team.name=TEAM" + " open";
 		this.doSecureMain(openCommand);
-		out.add("OfficeFloor open under process name space '" + PROCESS_NAME
-				+ "'");
+		String startupOutput = "OfficeFloor open under process name space '"
+				+ PROCESS_NAME + "'\n";
 
 		// File
 		File tempFile = File.createTempFile(this.getName(), "txt");
@@ -230,8 +224,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		this.doSecureMain("--process_name " + PROCESS_NAME + " --office OFFICE"
 				+ " --work SECTION.WORK" + " --task writeMessage"
 				+ " --parameter " + tempFile.getAbsolutePath() + " invoke");
-		out.add("Invoked work SECTION.WORK (task writeMessage) on office OFFICE with parameter "
-				+ tempFile.getAbsolutePath());
+		String processOutput = "Invoked work SECTION.WORK (task writeMessage) on office OFFICE with parameter "
+				+ tempFile.getAbsolutePath() + "\n";
 
 		// Ensure message written to file (passive team so should be done)
 		String fileContent = this.getFileContents(tempFile);
@@ -240,14 +234,15 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Stop the OfficeBuilding (ensuring running processes are stopped)
 		this.doSecureMain("stop");
-		out.add("Stopping processes:");
-		out.add("\t" + PROCESS_NAME + " [" + PROCESS_NAME + "]");
-		out.add("");
-		out.add("OfficeBuilding stopped");
+		String suffixOutput = "Stopping processes:\n";
+		suffixOutput += "\t" + PROCESS_NAME + " [" + PROCESS_NAME + "]\n";
+		suffixOutput += "\n";
+		suffixOutput += "OfficeBuilding stopped\n";
 
 		// Validate no error and correct output
 		this.assertErr();
-		this.assertOut(out.toArray(new String[out.size()]));
+		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true,
+				prefixOutput, startupOutput, processOutput, suffixOutput);
 	}
 
 	/**
@@ -258,12 +253,9 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		final String PROCESS_NAME = this.getName();
 
-		// Expected output
-		List<String> out = new LinkedList<String>();
-
 		// Start the OfficeBuilding
 		this.doSecureMain("start");
-		out.add(this.officeBuildingStartLine);
+		String prefixOutput = this.officeBuildingStartLine;
 
 		// File
 		File tempFile = File.createTempFile(this.getName(), "txt");
@@ -281,10 +273,10 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				+ tempFile.getAbsolutePath() + " --property team.name=TEAM"
 				+ " open";
 		this.doSecureMain(openCommand);
-		out.add("OfficeFloor open under process name space '"
+		String startupOutput = "OfficeFloor open under process name space '"
 				+ PROCESS_NAME
 				+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
-				+ tempFile.getAbsolutePath() + ")");
+				+ tempFile.getAbsolutePath() + ")\n";
 
 		// Wait for office floor to complete
 		try {
@@ -312,11 +304,12 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Stop the OfficeBuilding (ensuring running processes are stopped)
 		this.doSecureMain("stop");
-		out.add("OfficeBuilding stopped");
+		String suffixOutput = "OfficeBuilding stopped\n";
 
 		// Validate no error and correct output
 		this.assertErr();
-		this.assertOut(out.toArray(new String[out.size()]));
+		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true,
+				prefixOutput, startupOutput, null, suffixOutput);
 	}
 
 	/**
@@ -327,12 +320,9 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		final String PROCESS_NAME = this.getName();
 		final String MESSAGE = "MESSAGE";
 
-		// Expected output
-		List<String> out = new LinkedList<String>();
-
 		// Start the OfficeBuilding
 		this.doSecureMain("start");
-		out.add(this.officeBuildingStartLine);
+		String prefixOutput = this.officeBuildingStartLine;
 
 		// File
 		File tempFile = File.createTempFile(this.getName(), "txt");
@@ -345,8 +335,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				+ MockOfficeFloorSource.PROPERTY_MESSAGE + "=" + MESSAGE
 				+ " open";
 		this.doSecureMain(openCommand);
-		out.add("OfficeFloor open under process name space '" + PROCESS_NAME
-				+ "'");
+		String startupOutput = "OfficeFloor open under process name space '"
+				+ PROCESS_NAME + "'\n";
 
 		// Ensure message written to file
 		OfficeBuildingTestUtil.validateFileContent(
@@ -354,14 +344,15 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Stop the OfficeBuilding (ensuring running processes are stopped)
 		this.doSecureMain("stop");
-		out.add("Stopping processes:");
-		out.add("\t" + PROCESS_NAME + " [" + PROCESS_NAME + "]");
-		out.add("");
-		out.add("OfficeBuilding stopped");
+		String suffixOutput = "Stopping processes:\n";
+		suffixOutput += "\t" + PROCESS_NAME + " [" + PROCESS_NAME + "]\n";
+		suffixOutput += "\n";
+		suffixOutput += "OfficeBuilding stopped\n";
 
 		// Validate no error and correct output
 		this.assertErr();
-		this.assertOut(out.toArray(new String[out.size()]));
+		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true,
+				prefixOutput, startupOutput, null, suffixOutput);
 	}
 
 	/**

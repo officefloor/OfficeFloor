@@ -17,6 +17,7 @@
  */
 package net.officefloor.building.process;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,9 +28,11 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
+import java.util.regex.Pattern;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
@@ -44,6 +47,174 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class ProcessManagerTest extends OfficeFrameTestCase {
+
+	/**
+	 * Ensures the start up output is correct for the process.
+	 * 
+	 * @param output
+	 *            Actual output.
+	 * @param expectedProcessOutput
+	 *            Expected output of the {@link ManagedProcess}.
+	 * @throws IOException
+	 *             If fails to compare output.
+	 */
+	public static void assertProcessStartOutput(String output,
+			String expectedProcessOutput) throws IOException {
+		assertProcessStartOutput(output, false, null, null,
+				expectedProcessOutput, null);
+	}
+
+	/**
+	 * Ensure the start up output is correct for the process.
+	 * 
+	 * @param output
+	 *            Actual output.
+	 * @param isProcessStartListener
+	 *            Indicates if a {@link ProcessStartListener} registered.
+	 * @param expectedPrefixOutput
+	 *            Expected prefix output before process is started.
+	 * @param expectedProcessStartup
+	 *            Expected output of having started the {@link ManagedProcess}.
+	 * @param expectedProcessOutput
+	 *            Expected output of the {@link ManagedProcess}.
+	 * @param expectedSuffixOutput
+	 *            Expected suffix output after process is finished.
+	 * @throws IOException
+	 *             If fails to compare output.
+	 */
+	public static void assertProcessStartOutput(String output,
+			boolean isProcessStartListener, String expectedPrefixOutput,
+			String expectedProcessStartup, String expectedProcessOutput,
+			String expectedSuffixOutput) throws IOException {
+
+		// Enable reading the actual content
+		final BufferedReader actual = new BufferedReader(new StringReader(
+				output));
+
+		// Ensure prefix output is as expected
+		if (expectedPrefixOutput != null) {
+			final BufferedReader expectedPrefix = new BufferedReader(
+					new StringReader(expectedPrefixOutput));
+			for (String expectedLine = expectedPrefix.readLine(); expectedLine != null; expectedLine = expectedPrefix
+					.readLine()) {
+				String actualLine = actual.readLine();
+				assertEquals("Incorrect prefix line", expectedLine, actualLine);
+			}
+		}
+
+		// Expected regular expression for matching output
+		final String expectedOutput = "Process spawned under namespace \\w+ ... spawned\n"
+				+ "Initiating process management ... initiated\n"
+				+ "Starting process management ... started on port \\d+\n"
+				+ (isProcessStartListener ? "Notifying process started ... notified\n"
+						: "")
+				+ "Process waiting on configuration ... received configuration \\(namespace \\w+, management port \\d+\\)\n"
+				+ "Connecting to process management ... connected\n"
+				+ "Providing process control details ... provided\n"
+				+ "Waiting on management to connect ... connected\n"
+				+ "Initialising the process ... initialised\n";
+		final BufferedReader expected = new BufferedReader(new StringReader(
+				expectedOutput));
+		for (String expectedLine = expected.readLine(); expectedLine != null; expectedLine = expected
+				.readLine()) {
+			String actualLine = actual.readLine();
+
+			// Validate the lines match
+			assertTrue("Incorrect output line.\n\tE: " + expectedLine
+					+ "\n\tA: " + actualLine,
+					Pattern.matches("^" + expectedLine + "$", actualLine));
+		}
+
+		// Expected matching output (with potential process startup)
+		final String[] expectedStartupOutput = new String[] {
+				"Registering process MBean ...", " registered",
+				"Waiting for startup to complete ...", " completed",
+				"Running process", "Process finished" };
+		int expectedStartupOutputIndex = 0;
+		String expectedStartupOutputLine = expectedStartupOutput[expectedStartupOutputIndex];
+		BufferedReader expectedProcessStartupReader = null;
+		String expectedProcessStartupLine = null;
+		if (expectedProcessStartup != null) {
+			expectedProcessStartupReader = new BufferedReader(new StringReader(
+					expectedProcessStartup));
+			expectedProcessStartupLine = expectedProcessStartupReader
+					.readLine();
+		}
+		BufferedReader expectedProcessOutputReader = null;
+		String expectedProcessOutputLine = null;
+		if (expectedProcessOutput != null) {
+			expectedProcessOutputReader = new BufferedReader(new StringReader(
+					expectedProcessOutput));
+			expectedProcessOutputLine = expectedProcessOutputReader.readLine();
+		}
+		String actualLine = null;
+		while ((expectedStartupOutputIndex < expectedStartupOutput.length)
+				|| (expectedProcessStartupLine != null)
+				|| (expectedProcessOutputLine != null)) {
+
+			// Obtain the actual line (if completed)
+			if (actualLine == null) {
+				actualLine = actual.readLine();
+			}
+			assertNotNull("Expecting further output", actualLine);
+
+			if ((expectedStartupOutputLine != null)
+					&& (actualLine.startsWith(expectedStartupOutputLine))) {
+				// Expected content
+				actualLine = actualLine.substring(expectedStartupOutputLine
+						.length());
+				expectedStartupOutputIndex++;
+				expectedStartupOutputLine = (expectedStartupOutputIndex < expectedStartupOutput.length ? expectedStartupOutput[expectedStartupOutputIndex]
+						: null);
+
+			} else if ((expectedProcessStartupLine != null)
+					&& (actualLine.startsWith(expectedProcessStartupLine))) {
+				// Expected startup content
+				actualLine = actualLine.substring(expectedProcessStartupLine
+						.length());
+				expectedProcessStartupLine = expectedProcessStartupReader
+						.readLine();
+
+			} else if ((expectedProcessOutputLine != null)
+					&& (actualLine.startsWith(expectedProcessOutputLine))) {
+				// Expected output content
+				actualLine = actualLine.substring(expectedProcessOutputLine
+						.length());
+				expectedProcessOutputLine = expectedProcessOutputReader
+						.readLine();
+
+			} else {
+				// Unknown content
+				fail("Incorrect output content.\n\tE: "
+						+ expectedStartupOutputLine + " E: "
+						+ expectedProcessStartupLine + " E: "
+						+ expectedProcessOutputLine + "\n\tA: " + actualLine);
+			}
+
+			// Clear actual line if empty
+			if ((actualLine != null) && (actualLine.length() == 0)) {
+				actualLine = null;
+			}
+		}
+		assertNull("Additional unknown startup output: " + actualLine,
+				actualLine);
+
+		// Ensure suffix output is as expected
+		if (expectedSuffixOutput != null) {
+			final BufferedReader expectedSuffix = new BufferedReader(
+					new StringReader(expectedSuffixOutput));
+			for (String expectedLine = expectedSuffix.readLine(); expectedLine != null; expectedLine = expectedSuffix
+					.readLine()) {
+				actualLine = actual.readLine();
+				assertEquals("Incorrect suffix line", expectedLine, actualLine);
+			}
+		}
+
+		// Ensure at end of actual output
+		String possibleExtraLine = actual.readLine();
+		assertNull("Should be no further output: " + possibleExtraLine,
+				possibleExtraLine);
+	}
 
 	/**
 	 * {@link ProcessManager}.
@@ -248,8 +419,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 		OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
 
 		// Validate the output content
-		assertEquals("Incorrect stdout content", STDOUT_CONTENT, factory
-				.getOutContent().trim());
+		assertProcessStartOutput(factory.getOutContent(), STDOUT_CONTENT + "\n");
 		assertEquals("Incorrect stderr content", STDERR_CONTENT, factory
 				.getErrContent().trim());
 	}
@@ -282,8 +452,8 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 			OfficeBuildingTestUtil.waitUntilProcessComplete(this.manager, null);
 
 			// Validate the output content
-			assertEquals("Incorrect stdout content", STDOUT_CONTENT,
-					new String(bufferOut.toByteArray()).trim());
+			assertProcessStartOutput(new String(bufferOut.toByteArray()),
+					STDOUT_CONTENT + "\n");
 			assertEquals("Incorrect stderr content", STDERR_CONTENT,
 					new String(bufferErr.toByteArray()).trim());
 
@@ -568,7 +738,7 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 
 		// Create the expected end of the log message
 		StringWriter expectedLogMessage = new StringWriter();
-		expectedLogMessage.append("WARNING: Failed to initialise process\n");
+		expectedLogMessage.append("Failed to initialise process\n");
 		failure.printStackTrace(new PrintWriter(expectedLogMessage, true));
 		String expectedLogMessageText = expectedLogMessage.toString().trim();
 
