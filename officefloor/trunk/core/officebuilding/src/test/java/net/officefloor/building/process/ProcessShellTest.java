@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.net.ServerSocket;
@@ -98,6 +99,11 @@ public class ProcessShellTest extends TestCase {
 		InputStream fromParentPipe = new ByteArrayInputStream(
 				buffer.toByteArray());
 
+		// Provide logger
+		ByteArrayOutputStream log = new ByteArrayOutputStream();
+		PrintStream logger = new PrintStream(log);
+		PrintStream errorLogger = new PrintStream(log);
+
 		// Ensure flagged not run
 		isStarted = false;
 		isInitRun = false;
@@ -105,7 +111,7 @@ public class ProcessShellTest extends TestCase {
 		processNamespace = null;
 
 		// Run the process
-		ProcessShell.main(fromParentPipe);
+		ProcessShell.main(fromParentPipe, logger, errorLogger);
 
 		// Validate child started
 		assertTrue("Child process should be started", isStarted);

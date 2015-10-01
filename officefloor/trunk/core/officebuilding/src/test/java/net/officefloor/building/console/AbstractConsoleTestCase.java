@@ -366,6 +366,15 @@ public class AbstractConsoleTestCase extends OfficeFrameTestCase implements
 	}
 
 	/**
+	 * Obtains the <code>out</code>.
+	 * 
+	 * @return Output content.
+	 */
+	protected String getOut() throws IOException {
+		return this.getPipeContent(this.consoleOut, this.out);
+	}
+
+	/**
 	 * Asserts <code>err</code>.
 	 * 
 	 * @param lines
