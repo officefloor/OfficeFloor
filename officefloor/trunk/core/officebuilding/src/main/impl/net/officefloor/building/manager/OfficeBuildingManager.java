@@ -237,9 +237,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 		// Obtain the work space location
 		if (workspace == null) {
-			// Use default location of temp directory
-			workspace = new File(System.getProperty("java.io.tmpdir"),
-					"officebuilding");
+			// Use default location of user specific temporary directory.
+			// Note: Avoids file permission errors on cleaning the workspace of
+			// running under different users.
+			workspace = new File(new File(System.getProperty("java.io.tmpdir"),
+					System.getProperty("user.name")), "officebuilding");
 		}
 
 		// Ensure start with empty work space
