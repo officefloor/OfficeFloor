@@ -45,6 +45,16 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 	/**
+	 * Obtains the working directory.
+	 * 
+	 * @return Working directory.
+	 */
+	public static File getWorkingDirectory() {
+		return new File(new File(System.getProperty("java.io.tmpdir"),
+				System.getProperty("user.name")), "officebuilding");
+	}
+
+	/**
 	 * Start line for {@link OfficeBuilding}.
 	 */
 	private String officeBuildingStartLine;
@@ -151,8 +161,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		String prefixOutput = this.officeBuildingStartLine;
 
 		// Ensure MockCore.jar is not existing
-		File mockJar = new File(System.getProperty("java.io.tmpdir"),
-				"officebuilding/officefloor1/MockCore.jar");
+		File mockJar = new File(getWorkingDirectory(),
+				"officefloor1/MockCore.jar");
 		assertFalse("MockCore.jar should not yet be uploaded", mockJar.exists());
 
 		// Open the OfficeFloor (via an uploaded artifact)

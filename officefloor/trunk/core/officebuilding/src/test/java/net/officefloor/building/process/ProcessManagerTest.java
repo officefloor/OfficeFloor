@@ -182,6 +182,9 @@ public class ProcessManagerTest extends OfficeFrameTestCase {
 						.length());
 				expectedProcessOutputLine = expectedProcessOutputReader
 						.readLine();
+				
+			} else if (actualLine.trim().length() == 0) {
+				// Ignore blank lines
 
 			} else {
 				// Unknown content
