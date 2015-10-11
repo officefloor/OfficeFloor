@@ -85,6 +85,13 @@ public class RunWoofGoal extends AbstractMojo {
 	private String officeFloorLocation = "WoOF";
 
 	/**
+	 * Flag indicating whether to include GWT functionality. By default it is
+	 * included, however ability to turn off for faster load time.
+	 */
+	@Parameter(property = "includeGWT")
+	private String includeGWT = String.valueOf(Boolean.TRUE);
+
+	/**
 	 * Path to directory containing the environment properties files.
 	 */
 	@Parameter(property = "envDir")
@@ -147,38 +154,37 @@ public class RunWoofGoal extends AbstractMojo {
 		 * Include resulting pre-WAR directory. This allows inclusion of GWT
 		 * generated content.
 		 */
-		Build build = this.project.getBuild();
-		String assemblePath = build.getDirectory() + "/" + build.getFinalName();
-		File assembleDir = new File(assemblePath);
-		if (!(assembleDir.exists())) {
-			this.getLog()
-					.warn("No GWT functionality will be available.  Please package project to create content in "
-							+ assembleDir.getAbsolutePath());
-		}
-		try {
-			File assembleContent = WarOfficeFloorDecorator
-					.generateJarMinusMetaAndWebInf(assembleDir);
-			if (assembleContent == null) {
+		if (Boolean.parseBoolean(this.includeGWT)) {
+			Build build = this.project.getBuild();
+			String assemblePath = build.getDirectory() + "/"
+					+ build.getFinalName();
+			File assembleDir = new File(assemblePath);
+			if (!(assembleDir.exists())) {
 				this.getLog()
-						.warn("No GWT functionality will be available.  Packaged content is not in a WAR structure");
-
-			} else {
-				// Include the assemble content (GWT content)
-				openGoal.addClassPathEntry(assembleContent.getAbsolutePath());
+						.warn("No GWT functionality will be available.  Please package project to create content in "
+								+ assembleDir.getAbsolutePath());
 			}
-		} catch (Exception ex) {
-			this.getLog()
-					.warn("No GWT functionality will be available.  Failed to generate package JAR content",
-							ex);
+			try {
+				File assembleContent = WarOfficeFloorDecorator
+						.generateJarMinusMetaAndWebInf(assembleDir);
+				if (assembleContent == null) {
+					this.getLog()
+							.warn("No GWT functionality will be available.  Packaged content is not in a WAR structure");
+
+				} else {
+					// Include the assemble content (GWT content)
+					openGoal.addClassPathEntry(assembleContent
+							.getAbsolutePath());
+				}
+			} catch (Exception ex) {
+				this.getLog()
+						.warn("No GWT functionality will be available.  Failed to generate package JAR content",
+								ex);
+			}
 		}
 
 		// Provide the environment properties directory (if provided)
 		if (this.envDir != null) {
-
-			// TODO remove
-			this.getLog()
-					.error("Setting environment directory: " + this.envDir);
-
 			openGoal.setJvmOptions("-D"
 					+ AutoWirePropertiesImpl.ENVIRONMENT_PROPERTIES_DIRECTORY
 					+ "=" + this.envDir);
