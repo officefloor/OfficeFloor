@@ -10,7 +10,11 @@
         Inversion of Control = Dependency Injection + Thread Injection + Continuation Injection
 ---
 
-  Identifying these dimensions has given rise to the software equivalent of a <brick>.  This is enabled by the inversion of control for methods in a paper presented by the OfficeFloor team at {{{http://www.europlop.net/content/writers-workshops}EuroPLoP}}.  The inversion of control for methods enables building applications bottom-up, which is similar to building a house bottom-up with bricks.  Bricks are not produced specific to the house but define their own dimensions for cheaper mass production and easier assembly.  The inversion of control for methods provides a similar defining of dimensions for methods to enable easier development of applications.
+  Identifying these dimensions has given rise to the software equivalent of a <brick>.  This is enabled by the inversion of control for methods presented by the OfficeFloor team in the following paper:
+
+  {{{http://doi.acm.org/10.1145/2739011.2739013}http://doi.acm.org/10.1145/2739011.2739013}}
+  
+  The inversion of control for methods enables building applications bottom-up, which is similar to building a house bottom-up with bricks.  Bricks are not produced specific to the house but define their own dimensions for cheaper mass production and easier assembly.  The inversion of control for methods provides a similar defining of dimensions for methods to enable easier development of applications.
   
   The result is OfficeFloor enables software development to be as simple as building walls from bricks.  These walls are then used together to form buildings and more complex structures - many of which already come prefabricated for you.
 

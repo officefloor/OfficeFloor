@@ -78,7 +78,7 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 	private void doTest(Team team) throws Exception {
 
 		final int MAX_COUNT = 5000000;
-		int MAX_RUN_TIME = 100;
+		int MAX_RUN_TIME = 200;
 		this.setVerbose(true);
 
 		// Construct team
