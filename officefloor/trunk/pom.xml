@@ -1076,6 +1076,7 @@
 					</execution>
 					<execution>
 						<id>Replace link to paper with Authorizor download link</id>
+						<inherited>false</inherited>
 						<phase>post-site</phase>
 						<goals>
 							<goal>run</goal>
