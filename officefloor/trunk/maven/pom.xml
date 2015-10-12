@@ -16,10 +16,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<modules>
-		<module>maven-officefloor-plugin</module>
-		<module>maven-officefloor-skin</module>
-		<module>maven-site-aggregate-plugin</module>
-		<module>maven-woof-plugin</module>
+		<module>officefloor-maven-plugin</module>
+		<module>officefloor-maven-skin</module>
+		<module>site-aggregate-maven-plugin</module>
+		<module>woof-maven-plugin</module>
 		<module>woof-archetype</module>
 	</modules>
 </project>
