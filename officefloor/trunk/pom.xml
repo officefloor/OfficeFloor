@@ -1074,6 +1074,21 @@
 							</target>
 						</configuration>
 					</execution>
+					<execution>
+						<id>Replace link to paper with Authorizor download link</id>
+						<phase>post-site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<replace file="${project.build.directory}/site/mission.html">
+									<replacetoken><![CDATA[<a class="externalLink" href="http://doi.acm.org/10.1145/2739011.2739013">http://doi.acm.org/10.1145/2739011.2739013</a>]]></replacetoken>
+									<replacevalue><![CDATA[<div class="acmdlitem" id="item2739013"><img src="http://dl.acm.org/images/oa.gif" width="25" height="25" border="0" alt="ACM DL Author-ize service" style="vertical-align:middle"/><a href="http://dl.acm.org/authorize?N05689" title="OfficeFloor: using office patterns to improve software design">OfficeFloor: using office patterns to improve software design</a><div style="margin-left:25px"><a href="http://dl.acm.org/author_page.cfm?id=98058630974" >Daniel Sagenschneider</a><br />EuroPLoP '13 Proceedings of the 18th European Conference on Pattern Languages of Program,&nbsp;2015</div></div>]]></replacevalue>
+								</replace>
+							</target>
+						</configuration>
+					</execution>
 				</executions>
 				<dependencies>
 					<dependency>

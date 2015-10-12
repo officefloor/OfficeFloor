@@ -84,7 +84,7 @@ public class AsynchronousOperationStressTest extends
 	private void doTest(Team team) throws Exception {
 
 		int OPERATION_COUNT = 1000000;
-		int MAX_RUN_TIME = 100;
+		int MAX_RUN_TIME = 200;
 		this.setVerbose(true);
 
 		// Obtain the office name and builder
