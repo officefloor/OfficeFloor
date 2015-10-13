@@ -51,7 +51,7 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	/**
 	 * Default process name.
 	 */
-	public static final String DEFAULT_PROCESS_NAME = "maven-officefloor-plugin";
+	public static final String DEFAULT_PROCESS_NAME = "officefloor-maven-plugin";
 
 	/**
 	 * Creates the {@link OpenOfficeFloorGoal} with the required parameters.

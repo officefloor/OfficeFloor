@@ -271,22 +271,22 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
-				<artifactId>maven-officefloor-plugin</artifactId>
+				<artifactId>officefloor-maven-plugin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
-				<artifactId>maven-officefloor-skin</artifactId>
+				<artifactId>officefloor-maven-skin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
-				<artifactId>maven-site-aggregate-plugin</artifactId>
+				<artifactId>site-aggregate-maven-plugin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
-				<artifactId>maven-woof-plugin</artifactId>
+				<artifactId>woof-maven-plugin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -564,22 +564,22 @@
 				<!-- ================================================ -->
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
-					<artifactId>maven-officefloor-plugin</artifactId>
+					<artifactId>officefloor-maven-plugin</artifactId>
 					<version>${project.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
-					<artifactId>maven-officefloor-skin</artifactId>
+					<artifactId>officefloor-maven-skin</artifactId>
 					<version>${project.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
-					<artifactId>maven-site-aggregate-plugin</artifactId>
+					<artifactId>site-aggregate-maven-plugin</artifactId>
 					<version>${project.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
-					<artifactId>maven-woof-plugin</artifactId>
+					<artifactId>woof-maven-plugin</artifactId>
 					<version>${project.version}</version>
 				</plugin>
 				<plugin>
@@ -1182,13 +1182,13 @@
 			<!-- START SNIPPET: pdf -->
 			<plugin>
 				<groupId>net.officefloor.maven</groupId>
-				<artifactId>maven-site-aggregate-plugin</artifactId>
+				<artifactId>site-aggregate-maven-plugin</artifactId>
 				<inherited>false</inherited>
 				<configuration>
 					<title>OfficeFloor</title>
 					<author>Daniel Sagenschneider</author>
 					<version>${project.version}</version>
-					<projectLogo>${project.basedir}/maven/maven-officefloor-skin/src/main/resources/images/OfficeFloorBannerImage.png</projectLogo>
+					<projectLogo>${project.basedir}/maven/officefloor-maven-skin/src/main/resources/images/OfficeFloorBannerImage.png</projectLogo>
 					<baseUrl>http://www.officefloor.net</baseUrl>
 					<order>
 						<order>index</order>

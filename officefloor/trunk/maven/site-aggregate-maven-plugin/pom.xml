@@ -8,7 +8,7 @@
 		<version>2.16.0</version>
 	</parent>
 	<groupId>net.officefloor.maven</groupId>
-	<artifactId>maven-site-aggregate-plugin</artifactId>
+	<artifactId>site-aggregate-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 	<name>Maven Site Aggregate Plugin</name>
 	<description>Maven plug-in to aggregate site content of a multi-module build.  Allows for such things as PDF generation of whole site content.</description>
@@ -114,12 +114,13 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-embedder</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-embedder</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven.plugin-tools</groupId>

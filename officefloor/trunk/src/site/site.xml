@@ -34,7 +34,7 @@
 	<version position="right" />
 	<skin>
 		<groupId>net.officefloor.maven</groupId>
-		<artifactId>maven-officefloor-skin</artifactId>
+		<artifactId>officefloor-maven-skin</artifactId>
 		<version>${officefloor.skin.version}</version>
 	</skin>
 	<body>
