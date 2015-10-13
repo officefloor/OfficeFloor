@@ -6,7 +6,7 @@
 		<artifactId>maven</artifactId>
 		<version>2.16.0</version>
 	</parent>
-	<artifactId>maven-officefloor-plugin</artifactId>
+	<artifactId>officefloor-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 	<name>Maven OfficeFloor Plugin</name>
 	<description>Maven plug-in to start/stop an OfficeFloor instance</description>

@@ -137,7 +137,7 @@ public class RunWoofGoal extends AbstractMojo {
 
 		// Create the open goal and configure for WoOF
 		OpenOfficeFloorGoal openGoal = OpenOfficeFloorGoal
-				.createOfficeFloorGoal("maven-woof-plugin", this.project,
+				.createOfficeFloorGoal("woof-maven-plugin", this.project,
 						this.pluginDependencies, this.officeFloorLocation,
 						this.getLog());
 		openGoal.setOfficeFloorSource(WoofOfficeFloorSource.class.getName());

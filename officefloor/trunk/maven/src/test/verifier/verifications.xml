@@ -8,19 +8,19 @@
 		
 		<!-- Ensure all the modules inheriting latest -->
 		<file>
-			<location>maven-officefloor-plugin/pom.xml</location>
+			<location>officefloor-maven-plugin/pom.xml</location>
 			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
 		</file>
 		<file>
-			<location>maven-officefloor-skin/pom.xml</location>
+			<location>officefloor-maven-skin/pom.xml</location>
 			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
 		</file>
 		<file>
-			<location>maven-site-aggregate-plugin/pom.xml</location>
+			<location>site-aggregate-maven-plugin/pom.xml</location>
 			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
 		</file>
 		<file>
-			<location>maven-woof-plugin/pom.xml</location>
+			<location>woof-maven-plugin/pom.xml</location>
 			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
 		</file>
 		<file>

@@ -6,7 +6,7 @@
 		<artifactId>maven</artifactId>
 		<version>2.16.0</version>
 	</parent>
-	<artifactId>maven-woof-plugin</artifactId>
+	<artifactId>woof-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 	<name>Maven WoOF Plugin</name>
 	<description>Maven plug-in for WoOF (Web on OfficeFloor)</description>
@@ -125,7 +125,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.maven</groupId>
-			<artifactId>maven-officefloor-plugin</artifactId>
+			<artifactId>officefloor-maven-plugin</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>

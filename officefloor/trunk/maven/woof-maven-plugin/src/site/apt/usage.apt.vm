@@ -26,6 +26,13 @@ Running WoOF
 							<goal>run</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>stop-WoOF</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 			...
@@ -33,5 +40,3 @@ Running WoOF
 	</build>
 
 +--------------
-
-  Use {{{../maven-officefloor-plugin/index.html}maven-officefloor-plugin}} to stop WoOF. 
