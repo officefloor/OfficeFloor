@@ -31,8 +31,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * <p>
  * {@link ManagedObjectSource} that provides an Object via a JNDI lookup.
  * <p>
- * This allows use of JNDI Objects such as a {@link javax.sql.DataSource} or
- * {@link javax.jms.Queue}.
+ * This allows use of JNDI Objects.
  * 
  * @author Daniel Sagenschneider
  */

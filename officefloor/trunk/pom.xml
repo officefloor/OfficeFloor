@@ -1400,6 +1400,11 @@
 								<goals>
 									<goal>jar</goal>
 								</goals>
+								<configuration>
+									<links>
+										<link>http://docs.oracle.com/javaee/6/api/</link>
+									</links>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
