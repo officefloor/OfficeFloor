@@ -81,7 +81,7 @@
 								<configuration>
 									<resourceSrc>${project.basedir}/target/site/*</resourceSrc>
 									<url>scp://sagenschneider,officefloor@shell.sourceforge.net</url>
-									<resourceDest>home/frs/project/o/of/officefloor/eclipse/${project.version}</resourceDest>
+									<resourceDest>home/frs/project/officefloor/eclipse/${project.version}</resourceDest>
 									<serverId>repo.officefloor.sf.net</serverId>
 								</configuration>
 							</execution>
@@ -114,7 +114,7 @@
 								<configuration>
 									<resourceSrc>${project.basedir}/target/site/*</resourceSrc>
 									<url>scp://sagenschneider,officefloor@shell.sourceforge.net</url>
-									<resourceDest>home/frs/project/o/of/officefloor/eclipse/update</resourceDest>
+									<resourceDest>home/frs/project/officefloor/eclipse/update</resourceDest>
 									<serverId>repo.officefloor.sf.net</serverId>
 								</configuration>
 							</execution>
