@@ -1,0 +1,82 @@
+<context item-labels="true">
+    <office-floor>
+        <office-floor>
+            <teams>
+                <team name="TEAM" source="ONE_PERSON" />
+            </teams>
+            <offices>
+                <office name="OFFICE" source="OFFICE" location="office">
+                    <team name="OFFICE_TEAM">
+                        <office-floor-team name="TEAM" />
+                    </team>
+                </office>
+            </offices>
+        </office-floor>
+    </office-floor>
+    <office>
+        <office>
+            <teams>
+                <team name="OFFICE_TEAM" />
+            </teams>
+            <sections>
+                <section name="SECTION_A" source="DESK"
+                    location="desk-one">
+                    <output name="OUTPUT">
+                        <section-input section="SECTION_B"
+                            input="INPUT" />
+                    </output>
+                    <responsibility name="RESPONSIBILITY">
+                        <team name="OFFICE_TEAM" />
+                    </responsibility>
+                </section>
+                <section name="SECTION_B" source="DESK"
+                    location="desk-two">
+                    <input name="INPUT" />
+                    <responsibility name="RESPONSIBILITY">
+                        <team name="OFFICE_TEAM" />
+                    </responsibility>
+                </section>
+            </sections>
+        </office>
+    </office>
+    <desk-one>
+        <desk>
+            <external-flows>
+                <external-flow name="OUTPUT" />
+            </external-flows>
+            <works>
+                <work name="WORK" source="CLASS">
+                    <properties>
+                        <property name="class.name"
+                            value="${testcase}$CompileTaskWork" />
+                    </properties>
+                    <work-task name="flowTask" />
+                </work>
+            </works>
+            <tasks>
+                <task name="TASK" work="WORK" task="flowTask">
+                    <task-flow name="flow">
+                        <external-flow name="OUTPUT" link="ASYNCHRONOUS" />
+                    </task-flow>
+                </task>
+            </tasks>
+        </desk>
+    </desk-one>
+    <desk-two>
+        <desk>
+            <works>
+                <work name="WORK" source="CLASS">
+                    <properties>
+                        <property name="class.name"
+                            value="${testcase}$CompileTaskWork" />
+                    </properties>
+                    <work-task name="simpleTask" />
+                </work>
+            </works>
+            <tasks>
+                <task name="INPUT" work="WORK" task="simpleTask"
+                    public="true" />
+            </tasks>
+        </desk>
+    </desk-two>
+</context>

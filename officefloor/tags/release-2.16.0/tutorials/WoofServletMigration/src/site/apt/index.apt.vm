@@ -1,0 +1,62 @@
+                                               -----------------------
+                                      JEE Servlet Container within WoOF Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<JEE Servlet Container within WoOF Tutorial>>
+
+  This tutorial demonstrates running JEE Servlet functionality within a WoOF web application.
+    
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/WoofServletMigration/${projectVersion}/WoofServletMigration-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+Extending WoOF application for Servlet functionality
+
+  The {{{/apidocs/net/officefloor/plugin/woof/servlet/ServletContainerWoofApplicationExtensionService.html}ServletContainerWoofApplicationExtensionService}} provides extension to a WoOF application by detecting the presence of a <<<web.xml>>> file following standard Maven <<<war>>> project structure or standard JEE Servlet <<<*.war>>> packaging.  On detecting this file, it will load a chained servicer containing the configured Servlet functionality.
+  
+  This occurs automatically by the inclusion of the following dependencies on the class path:
+  
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/pom.xml}
+
+  The result is that any unhandled HTTP request by the WoOF functionality is sent to this servicer.  This servicer attempts to service the HTTP request with the <<<web.xml>>> configured Servlet functionality.
+  
+  Should the HTTP request not be handled by the Servlet functionality then the last chained servicer is used.  The last chained servicer attempts to send a corresponding static resource by URI or a 404 if no corresponding resource.
+  
+
+
+Servlet functionality
+
+  The following provides the configuration of the <<<web.xml>>> Servlet functionality for this tutorial:
+
+%{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
+
+  Servlet functionality supported by the WoOF extension is:
+  
+   * Filters
+
+   * Servlets
+      
+   * MIME mappings
+   
+  Note that the intention is not to rebuild another JEE Server.  The intention is provide enough Servlet Container functionality to embed existing JEE Servlet Applications within WoOF so that they do not need to be fully migrated to WoOF functionality.
+
+  The configured Servlet is as follows:
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletmigration/ExampleHttpServlet.java}
+
+  
+
+
+Unit Test
+
+  The unit test highlights the servicing of the HTTP request by the Servlet functionality.
+
+%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/servletmigration/ExampleHttpServletTest.java}
+
+
+
+Next
+
+  The {{{./migrate.html}next tutorial}} looks at migrating an existing JEE Servlet Application to run within OfficeFloor as a WoOF Application.
+

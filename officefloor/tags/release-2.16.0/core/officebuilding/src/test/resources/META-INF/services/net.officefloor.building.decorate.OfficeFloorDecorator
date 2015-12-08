@@ -1,0 +1,5 @@
+# Mock for testing
+net.officefloor.building.decorate.MockOfficeFloorDecorator
+
+# Duplicate to ensure only loads unique by type
+net.officefloor.building.decorate.MockOfficeFloorDecorator

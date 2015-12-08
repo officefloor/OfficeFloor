@@ -1,0 +1,9 @@
+<office>
+	<sections>
+		<section name="NAME" source="net.example.ExampleSectionSource"
+			location="LOCATION">
+			<object name="CHANGE_DETAILS" object-type="java.lang.String" />
+			<object name="RENAME_OLD" object-type="java.lang.Object" />
+		</section>
+	</sections>
+</office>

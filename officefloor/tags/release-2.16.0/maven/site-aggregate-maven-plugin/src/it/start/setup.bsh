@@ -1,0 +1,21 @@
+import java.io.*;
+
+// Deletes a directory
+deleteDirectory( dir ) {
+	if (!(dir.exists())) {
+		return;
+	}
+	for ( File child : dir.listFiles() ) {
+		if (child.isFile()) {
+			child.delete();
+		}
+	}
+	for ( File child : dir.listFiles() ) {
+		deleteDirectory( child );
+	}
+	dir.delete();
+}
+
+
+// Delete the site-generate directory
+deleteDirectory( new File(basedir, "target/site-aggregate") );

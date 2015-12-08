@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+
+	<listener>
+		<listener-class>net.officefloor.tutorial.woofservletdependencyinjection.ExampleServlet</listener-class>
+	</listener>
+
+</web-app>

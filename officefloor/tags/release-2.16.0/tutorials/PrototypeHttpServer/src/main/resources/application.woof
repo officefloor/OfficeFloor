@@ -1,0 +1,24 @@
+<woof>
+  <templates>
+    <template name="form" uri="form" path="form.woof.html" class="" x="162" y="20">
+      <output name="handleSubmit" argument-type="">
+        <template name="href"/>
+      </output>
+    </template>
+    <template name="href" uri="href" path="href.woof.html" class="" x="32" y="21">
+      <output name="link" argument-type="">
+        <template name="form"/>
+      </output>
+    </template>
+  </templates>
+  <sections>
+  </sections>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

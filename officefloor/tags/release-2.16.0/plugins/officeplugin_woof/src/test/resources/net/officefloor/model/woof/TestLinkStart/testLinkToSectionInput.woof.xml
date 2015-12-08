@@ -1,0 +1,21 @@
+<woof>
+
+	<sections>
+		<section name="SECTION">
+			<input name="INPUT" />
+		</section>
+		<section name="SECTION_LINK">
+			<input name="INPUT" />
+		</section>
+	</sections>
+	
+	<starting>
+		<start>
+			<flow section="SECTION_LINK" input="INPUT" />
+		</start>
+		<start>
+			<flow section="SECTION" input="INPUT" />
+		</start>
+	</starting>
+
+</woof>

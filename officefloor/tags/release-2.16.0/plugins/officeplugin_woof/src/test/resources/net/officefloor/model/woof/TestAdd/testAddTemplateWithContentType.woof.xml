@@ -1,0 +1,10 @@
+<woof>
+
+	<templates>
+		<template name="uri" uri="uri" path="example/Template.ofp"
+			class="net.example.LogicClass" content-type="text/html; charset=UTF-16"
+			x="100" y="101">
+		</template>
+	</templates>
+
+</woof>
