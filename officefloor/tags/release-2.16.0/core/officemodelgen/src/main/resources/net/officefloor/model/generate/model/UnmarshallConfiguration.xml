@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unmarshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../../../../../plugin/xml/src/schema/TreeXmlUnmarshaller.xsd"
+	node="model" class="net.officefloor.model.generate.model.ModelMetaData">
+	<!-- NAME / PACKAGE (available but overriden by location and file name) -->
+	<value method="setName" node="model@name" />
+	<value method="setPackageName" node="model@package" />
+	<value method="setClassSuffix" node="model@class-suffix" />
+	<!-- IMPORTS -->
+	<value method="addImportClass" node="import" />
+	<!-- INTERFACES -->
+	<value method="addInterface" node="interface" />
+	<!-- FIELDS -->
+	<object method="addField" node="field"
+		class="net.officefloor.model.generate.model.FieldMetaData">
+		<value method="setName" node="field@name" />
+		<value method="setType" node="field@type" />
+		<value method="setCascadeRemove" node="field@cascade-remove" />
+		<value method="setDescription" node="field@description" />
+		<value method="setEndField" node="field@end-field" />
+		<value method="setEndList" node="field@end-list" />
+	</object>
+	<!-- LISTS -->
+	<object method="addList" node="list"
+		class="net.officefloor.model.generate.model.ListMetaData">
+		<value method="setName" node="list@name" />
+		<value method="setType" node="list@type" />
+		<value method="setCascadeRemove" node="list@cascade-remove" />
+		<value method="setPlural" node="list@plural" />
+		<value method="setDescription" node="list@description" />
+	</object>
+</unmarshall>

@@ -1,0 +1,27 @@
+<verifications>
+	<files>
+		<!-- Ensure using latest version -->
+		<file>
+			<location>${basedir}/../../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+
+		<!-- Ensure correct version -->
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.extras.feature"(\s+)version="${project.version}"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[<import(\s+)feature="net.officefloor.feature"(\s+)version="@{net.officefloor.feature_version}"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[<import(\s+)feature="net.officefloor.woof.feature"(\s+)version="@{net.officefloor.woof.feature_version}"]]></contains>
+		</file>
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[id="net.officefloor.extras"(\s+)version="@{net.officefloor.extras_version}"]]></contains>
+		</file>
+	</files>
+</verifications>

@@ -1,0 +1,8 @@
+<woof>
+
+	<templates>
+		<template name="woof" uri="woof" path="resource.woof.html" />
+		<template name="template" uri="template" path="template.woof.html" class="TemplateLogic" />
+	</templates>
+
+</woof>

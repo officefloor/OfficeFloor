@@ -1,0 +1,126 @@
+/*
+ * License
+ */
+package net.officefloor;
+
+import javax.annotation.Generated;
+
+import net.officefloor.model.AbstractModel;
+import net.officefloor.model.ConnectionModel;
+
+@Generated("net.officefloor.model.generate.ModelGenerator")
+public class ClassModel extends AbstractModel implements ConnectionModel {
+
+    public static enum ClassEvent {
+     CHANGE_FIELD_ONE, CHANGE_FIELD_TWO
+    }
+
+    /**
+     * Default constructor.
+     */
+    public ClassModel() {
+    }
+
+    /**
+     * Convenience constructor.
+     *
+     * @param fieldOne Test field one.
+     * @param fieldTwo Test field two.
+     */
+    public ClassModel(
+      String fieldOne
+    , String fieldTwo
+    ) {
+        this.fieldOne = fieldOne;
+        this.fieldTwo = fieldTwo;
+    }
+
+    /**
+     * Convenience constructor allowing XY initialising.
+     *
+     * @param fieldOne Test field one.
+     * @param fieldTwo Test field two.
+     * @param x Horizontal location.
+     * @param y Vertical location.
+     */
+    public ClassModel(
+      String fieldOne
+    , String fieldTwo
+    , int x
+    , int y
+    ) {
+        this.fieldOne = fieldOne;
+        this.fieldTwo = fieldTwo;
+        this.setX(x);
+        this.setY(y);
+    }
+
+
+    /**
+     * Test field one.
+     */
+    private String fieldOne;
+
+    /**
+     * @return Test field one.
+     */
+    public String getFieldOne() {
+        return this.fieldOne;
+    }
+
+    /**
+     * @param fieldOne Test field one.
+     */
+    public void setFieldOne(String fieldOne) {
+        String oldValue = this.fieldOne;
+        this.fieldOne = fieldOne;
+        this.changeField(oldValue, this.fieldOne, ClassEvent.CHANGE_FIELD_ONE);
+    }
+
+
+    /**
+     * Test field two.
+     */
+    private String fieldTwo;
+
+    /**
+     * @return Test field two.
+     */
+    public String getFieldTwo() {
+        return this.fieldTwo;
+    }
+
+    /**
+     * @param fieldTwo Test field two.
+     */
+    public void setFieldTwo(String fieldTwo) {
+        String oldValue = this.fieldTwo;
+        this.fieldTwo = fieldTwo;
+        this.changeField(oldValue, this.fieldTwo, ClassEvent.CHANGE_FIELD_TWO);
+    }
+
+
+    /**
+     * @return Indicates if removable.
+     */
+    public boolean isRemovable() {
+        return true;
+    }
+
+    /**
+     * Connects to the {@link AbstractModel} instances.
+     */
+    public void connect() {
+        this.fieldOne.setLinkOne(this);
+        this.fieldTwo.addLinkTwo(this);
+    }
+
+    /**
+     * Removes connection to the {@link AbstractModel} instances.
+     */
+    public void remove() {
+        this.fieldOne.setLinkOne(null);
+        this.fieldTwo.removeLinkTwo(this);
+    }
+
+}

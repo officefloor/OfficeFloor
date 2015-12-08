@@ -1,0 +1,82 @@
+                                               -----------------------
+                                             Dynamic Navigation Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Dynamic Navigation Tutorial>>
+
+  This tutorial demonstrates controlling navigation back and forth between the following two pages:
+  
+[./images/NavigateHttpServer-one-screenshot.png] NavigateHttpServer one screen shot.
+
+[./images/NavigateHttpServer-two-screenshot.png] NavigateHttpServer two screen shot.
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/NavigateHttpServer/${projectVersion}/NavigateHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  
+
+  
+application.woof
+
+  The following shows the configuration of the two web page templates and the navigation between the templates.
+
+[./images/navigate-woof.png] application.woof configuration.
+
+  The links are the navigation paths between the templates.  Each template provides outputs that by the above configuration navigates the user to the other page.
+  
+
+
+@NextTask
+
+  The first template provides a link to navigate to the other template.
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/TemplateOne.woof.html}
+
+  The link is handled by the following method.  The annotation indicates the next task within the flow.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java}
+
+  As the next task name is not a name of another method (and not a template section name, see later tutorials) it becomes an output from the template.  From the configuration above the output is configured to navigate to the other template.
+  
+  This is useful should some action be required to be taken when the user clicks to navigate to the next page.
+
+
+
+@FlowInterface
+
+  The second template uses a submit to navigate to the first template.
+
+%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/TemplateTwo.woof.html}
+
+  Much like the first template the logic class also navigates to an external flow.  In this case it uses an interface for programmatic control of navigation.
+
+%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateTwo.java}
+
+  As the interface is dependency injected, WoOF sees the <<<@FlowInterface>>> annotation and will provide an implementation of the interface.  Each method on the interface will be linked by name to one of the following:
+  
+   * a method on the template logic class
+   
+   * a section of the template (see later tutorials)
+   
+   * an external flow from the template.  This is then linked by the <<<application.woof>>> configuration (as is the case above)
+   
+  This allows programmatically determining which is the next task.  It is possible to add further methods to the interface to provide alternate navigation paths.  Navigation only occurs if the method is invoked.  Please also be aware that navigation to the page happens after the method has completed.
+  
+  Both <<<@NextTask>>> and <<<@FlowInterface>>> may also be used in combination. <<<@NextTask>>> will provide the default next task unless overridden by a method of a <<<@FlowInterface>>> being invoked.
+
+  The above configuration has the external flow linked back to the first template.
+
+
+
+Unit Test
+
+  The unit test navigates between the templates.
+
+%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerTest.java}
+
+
+
+Next
+
+  The {{{../SessionHttpServer/index.html}next tutorial}} looks at storing state between requests within a HTTP session.
+

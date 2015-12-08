@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="initial task name"/>
+	<field type="WorkModel" name="work" end-field="initial task"/>
+	<field type="TaskModel" name="initial task" end-field="initial task for work"/>
+</model>

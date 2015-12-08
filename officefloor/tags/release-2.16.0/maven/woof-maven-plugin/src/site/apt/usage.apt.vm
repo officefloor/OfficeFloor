@@ -1,0 +1,42 @@
+                                               -----------------------
+                                                        Usage 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  There are various {{{./plugin-info.html}Goals}} available for working with WoOF via maven.
+
+Running WoOF
+
+  To run WoOF for integration tests use the following configuration:
+  
++--------------
+	<build>
+		<plugins>
+			...
+			<plugin>
+				<groupId>${projectGroupId}</groupId>
+				<artifactId>${projectArtifactId}</artifactId>
+				<version>${projectVersion}</version>
+				<executions>
+					<execution>
+						<id>run-WoOF</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-WoOF</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			...
+		</plugins>
+	</build>
+
++--------------

@@ -1,0 +1,27 @@
+<objects>
+
+	<managed-object source="net.example.ExampleManagedObjectSourceA"
+		timeout="10" scope="thread">
+		<property name="MO_ONE" value="VALUE_ONE" />
+		<property-file path="example/object.properties" />
+		<property name="MO_TWO" value="VALUE_TWO" />
+		<auto-wire qualifier="QUALIFIED" type="net.orm.Session" />
+		<auto-wire type="net.orm.SessionLocal" />
+		<flow name="FLOW" section="SECTION" input="INPUT" />
+		<team name="TEAM" qualifier="QUALIFIER" type="net.example.Type" />
+		<dependency name="DEPENDENCY" qualifier="QUALIFIER"
+			type="net.example.Dependency" />
+	</managed-object>
+
+	<supplier source="net.example.ExampleSupplierSourceA">
+		<property name="SUPPLIER_A" value="VALUE_A" />
+		<property-file path="example/supplier.properties" />
+		<property name="SUPPLIER_B" value="VALUE_B" />
+	</supplier>
+
+	<managed-object source="net.example.ExampleManagedObjectSourceB"
+		qualifier="QUALIFIER" type="net.example.Type" />
+
+	<supplier source="net.example.ExampleSupplierSourceB" />
+
+</objects>

@@ -1,0 +1,13 @@
+<section>
+	<external-flows>
+		<external-flow name="FLOW" argument-type="java.lang.Object" />
+	</external-flows>
+	<sub-sections>
+		<sub-section name="SUB_SECTION" source="net.example.ExampleSectionSource"
+			location="LOCATION">
+			<output name="OUTPUT" argument-type="java.lang.String">
+				<external-flow name="FLOW" />
+			</output>
+		</sub-section>
+	</sub-sections>
+</section>

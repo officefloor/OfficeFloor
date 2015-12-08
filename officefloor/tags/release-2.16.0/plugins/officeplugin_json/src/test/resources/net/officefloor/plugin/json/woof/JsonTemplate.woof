@@ -1,0 +1,8 @@
+<woof>
+    
+    <templates>
+        <template name="TEMPLATE" uri="template" path="net/officefloor/plugin/json/woof/JsonTemplate.ofp"
+           class="net.officefloor.plugin.json.woof.WoofImplicitJsonTest$TemplateLogic" />
+    </templates>
+    
+</woof>

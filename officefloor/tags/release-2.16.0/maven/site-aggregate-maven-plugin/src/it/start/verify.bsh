@@ -1,0 +1,74 @@
+import java.io.*;
+
+// Log verifying
+System.out.println("Verifying project run");
+
+// Obtain the file
+File getFile( path ) {
+	File siteAggregateDir = new File(basedir, "target/site-aggregate");
+	File file = new File(siteAggregateDir, path);
+	return file;
+}
+
+// Method to ensure file created
+ensureExists( path ) {
+	File file = getFile(path);
+	if ( !file.isFile() ) {
+		throw new FileNotFoundException("Site aggregator did not aggregate file " + file);
+	}	
+}
+
+// Method to ensure ignore file
+ensureIgnored( path ) {
+	File ignoredFile = getFile(path);
+	if (ignoredFile.exists()) {
+		throw new IOException("Should ignore file " + path);
+	}
+}
+
+// Ensure content is correct
+ensureContent( path, content ) {
+	ensureExists(path);
+	StringWriter buffer = new StringWriter();
+	File file = getFile(path);
+	FileReader reader = new FileReader(file);
+	for (int character = reader.read(); character != -1; character = reader.read()) {
+		buffer.write(character);
+	}
+	reader.close();
+	String actual = buffer.toString();
+	content = content.replace('\r', '\n');
+	content = content.replace("\n\n", "\n");
+	actual = actual.replace('\r', '\n');
+	actual = actual.replace("\n\n", "\n");
+	if ( !(actual.trim().equals(content.trim())) ) {
+		throw new IOException( "Incorrect content\nEXPECTED : '" + content + "'\nACTUAL   : '" + actual + "'");
+	}
+}
+
+// Ensure content is as per file
+ensureFile( path, file ) {
+	File expectedFile = new File(basedir, file);
+	FileReader reader = new FileReader(expectedFile);
+	StringWriter content = new StringWriter();
+	for (int character = reader.read(); character != -1; character = reader.read()) {
+		content.write(character);
+	}
+	ensureContent(path, content.toString());
+}
+
+// Ensure top level site content
+ensureContent("apt/index.apt", "  PARENT");
+ensureFile("apt/code-snippet.apt", "expected-code-snippet.apt");
+ensureContent("resources/raw.apt.vm", "${raw}");
+
+// Ensure child content aggregated
+ensureContent("apt/child-index.apt", "  CHILD");
+ensureContent("apt/child-link.apt", " {{{http://www.officefloor.net/child/link.html}Link}}");
+
+// Ensure pdf.xml available
+ensureFile("pdf.xml", "expected-pdf.xml");
+
+// Ensure ignore
+ensureIgnored("resources/ignore/ignored.txt");
+ensureIgnored("resources/ignored.apt~");
