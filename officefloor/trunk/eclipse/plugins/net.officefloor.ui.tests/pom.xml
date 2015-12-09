@@ -5,7 +5,7 @@
 		<groupId>net.officefloor.eclipse</groupId>
 		<artifactId>eclipse</artifactId>
 		<relativePath>../../pom.xml</relativePath>
-		<version>2.16.0</version>
+		<version>2.17.0</version>
 	</parent>
 	<artifactId>net.officefloor.ui.tests</artifactId>
 	<name>Tests for Eclipse UI</name>
