@@ -27,6 +27,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
+import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -296,6 +297,14 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 		// Return the listing of required properties
 		return requiredPropertyList;
+	}
+
+	@Override
+	public <OF extends OfficeFloorSource> OfficeFloorType loadOfficeFloorType(
+			Class<OF> officeFloorSourceClass, String officeFloorLocation,
+			PropertyList propertyList) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override

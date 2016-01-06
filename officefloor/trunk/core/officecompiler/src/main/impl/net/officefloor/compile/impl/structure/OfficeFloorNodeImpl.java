@@ -39,9 +39,11 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorOutput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -142,6 +144,18 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	/*
 	 * ===================== OfficeFloorDeployer =============================
 	 */
+
+	@Override
+	public OfficeFloorInput addInput(String inputName, String parameterType) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public OfficeFloorOutput addOutput(String outputName, String argumentType) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
 
 	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(
@@ -286,6 +300,20 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			this.addIssue("Office " + officeName + " already deployed");
 		}
 		return office;
+	}
+
+	@Override
+	public void linkSynchronousInput(OfficeFloorInput input,
+			OfficeFloorOutput output) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public void linkSynchronousOutput(OfficeFloorOutput output,
+			OfficeFloorInput input) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override

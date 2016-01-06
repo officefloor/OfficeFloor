@@ -43,6 +43,30 @@ import net.officefloor.frame.spi.team.source.TeamSource;
 public interface OfficeFloorDeployer {
 
 	/**
+	 * Adds a {@link OfficeFloorInput}.
+	 * 
+	 * @param inputName
+	 *            Name of the {@link OfficeFloorInput}.
+	 * @param parameterType
+	 *            Fully qualified type name of the parameter to this
+	 *            {@link OfficeFloorInput}.
+	 * @return Added {@link OfficeFloorInput}.
+	 */
+	OfficeFloorInput addInput(String inputName, String parameterType);
+
+	/**
+	 * Adds a {@link OfficeFloorOutput}.
+	 * 
+	 * @param outputName
+	 *            Name of the {@link OfficeFloorOutput}.
+	 * @param argumentType
+	 *            Fully qualified type name of the argument from this
+	 *            {@link OfficeFloorOutput}.
+	 * @return Added {@link OfficeFloorOutput}.
+	 */
+	OfficeFloorOutput addOutput(String outputName, String argumentType);
+
+	/**
 	 * Adds a {@link Team}.
 	 * 
 	 * @param teamName
@@ -134,6 +158,26 @@ public interface OfficeFloorDeployer {
 	 */
 	DeployedOffice addDeployedOffice(String officeName,
 			OfficeSource officeSource, String officeLocation);
+
+	/**
+	 * Links {@link OfficeFloorOutput} for synchronous {@link OfficeFloorInput}.
+	 * 
+	 * @param input
+	 *            {@link OfficeFloorInput} to receive request.
+	 * @param output
+	 *            {@link OfficeFloorOutput} to provide response.
+	 */
+	void linkSynchronousInput(OfficeFloorInput input, OfficeFloorOutput output);
+
+	/**
+	 * Links {@link OfficeFloorInput} for synchronous {@link OfficeFloorOutput}.
+	 * 
+	 * @param output
+	 *            {@link OfficeFloorOutput} to make request.
+	 * @param input
+	 *            {@link OfficeFloorInput} to handle response.
+	 */
+	void linkSynchronousOutput(OfficeFloorOutput output, OfficeFloorInput input);
 
 	/**
 	 * Links the {@link ManagedObjectTeam} to be the {@link OfficeFloorTeam}.
