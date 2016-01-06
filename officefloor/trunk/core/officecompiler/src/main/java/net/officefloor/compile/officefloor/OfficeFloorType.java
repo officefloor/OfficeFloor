@@ -35,7 +35,7 @@ public interface OfficeFloorType {
 	 * 
 	 * @return {@link OfficeFloorInputType} instances.
 	 */
-	OfficeFloorInputType[] getOfficeFloorInputType();
+	OfficeFloorInputType[] getOfficeFloorInputTypes();
 
 	/**
 	 * Obtains the <code>type definitions</code> of the outputs from this
@@ -43,7 +43,7 @@ public interface OfficeFloorType {
 	 * 
 	 * @return {@link OfficeFloorOutputType} instances.
 	 */
-	OfficeFloorOutputType[] getOfficeFloorOutputType();
+	OfficeFloorOutputType[] getOfficeFloorOutputTypes();
 
 	/**
 	 * Obtains the required {@link Property} instances to be configured for this

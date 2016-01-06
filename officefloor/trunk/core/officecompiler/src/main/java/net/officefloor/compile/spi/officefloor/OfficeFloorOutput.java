@@ -15,36 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.officefloor;
+package net.officefloor.compile.spi.officefloor;
 
-import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
- * <code>Type definition</code> of a {@link TeamSource} available to be
- * configured in the {@link OfficeFloor}.
+ * Output from the {@link OfficeFloor}.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorTeamSourceType {
+public interface OfficeFloorOutput {
 
 	/**
-	 * Obtains the name of the {@link TeamSource} within the {@link OfficeFloor}
-	 * that may be configured.
+	 * Obtains the name of this {@link OfficeFloorOutput}.
 	 * 
-	 * @return Name of the {@link TeamSource} within the {@link OfficeFloor}
-	 *         that may be configured.
+	 * @return Name of this {@link OfficeFloorOutput}.
 	 */
-	String getOfficeFloorTeamSourceName();
+	String getOfficeFloorOutputName();
 
 	/**
-	 * Obtains the {@link OfficeFloorTeamSourcePropertyType} instances identify
-	 * the {@link Property} instances that may be configured for this
-	 * {@link TeamSource}.
+	 * Obtains the argument type from this {@link OfficeFloorOutput}.
 	 * 
-	 * @return {@link OfficeFloorTeamSourcePropertyType} instances.
+	 * @return Argument type from this {@link OfficeFloorOutput}.
 	 */
-	OfficeFloorTeamSourcePropertyType[] getOfficeFloorTeamSourcePropertyTypes();
+	String getArgumentType();
 
 }

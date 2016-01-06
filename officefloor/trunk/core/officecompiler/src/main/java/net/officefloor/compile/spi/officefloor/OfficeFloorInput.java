@@ -15,36 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.officefloor;
+package net.officefloor.compile.spi.officefloor;
 
-import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
- * <code>Type definition</code> of a {@link TeamSource} available to be
- * configured in the {@link OfficeFloor}.
+ * Input to the {@link OfficeFloor}.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorTeamSourceType {
+public interface OfficeFloorInput {
 
 	/**
-	 * Obtains the name of the {@link TeamSource} within the {@link OfficeFloor}
-	 * that may be configured.
+	 * Obtains the name of this {@link OfficeFloorInput}.
 	 * 
-	 * @return Name of the {@link TeamSource} within the {@link OfficeFloor}
-	 *         that may be configured.
+	 * @return Name of this {@link OfficeFloorInput}.
 	 */
-	String getOfficeFloorTeamSourceName();
+	String getOfficeFloorInputName();
 
 	/**
-	 * Obtains the {@link OfficeFloorTeamSourcePropertyType} instances identify
-	 * the {@link Property} instances that may be configured for this
-	 * {@link TeamSource}.
+	 * Obtains the parameter type for this {@link OfficeFloorInput}.
 	 * 
-	 * @return {@link OfficeFloorTeamSourcePropertyType} instances.
+	 * @return Parameter type for this {@link OfficeFloorInput}.
 	 */
-	OfficeFloorTeamSourcePropertyType[] getOfficeFloorTeamSourcePropertyTypes();
+	String getParameterType();
 
 }
