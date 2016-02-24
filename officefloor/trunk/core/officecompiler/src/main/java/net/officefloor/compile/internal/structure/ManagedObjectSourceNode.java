@@ -19,6 +19,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
@@ -42,6 +43,14 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 		OfficeFloorManagedObjectSource {
 
 	/**
+	 * Indicates if have a {@link ManagedObjectSource} configured.
+	 * 
+	 * @return <code>true</code> if have the {@link ManagedObjectSource}
+	 *         configured.
+	 */
+	boolean hasManagedObjectSource();
+
+	/**
 	 * Loads the {@link ManagedObjectType}.
 	 */
 	void loadManagedObjectType();
@@ -53,6 +62,20 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	 *         with issue reported to the {@link CompilerIssues}.
 	 */
 	ManagedObjectType<?> getManagedObjectType();
+
+	/**
+	 * Loads the {@link OfficeFloorManagedObjectSourceType}.
+	 */
+	public void loadOfficeFloorManagedObjectSourceType();
+
+	/**
+	 * Obtains the {@link OfficeFloorManagedObjectSourceType}.
+	 * 
+	 * @return {@link OfficeFloorManagedObjectSourceType} or <code>null</code>
+	 *         if issue loading with issue reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	OfficeFloorManagedObjectSourceType getOfficeFloorManagedObjectSourceType();
 
 	/**
 	 * Adds the context of the {@link Office} containing this

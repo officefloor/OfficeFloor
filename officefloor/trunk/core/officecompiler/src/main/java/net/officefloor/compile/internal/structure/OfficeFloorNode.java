@@ -17,11 +17,14 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.source.ResourceSource;
 
 /**
  * {@link OfficeFloor} node.
@@ -44,6 +47,24 @@ public interface OfficeFloorNode extends OfficeFloorDeployer {
 	OfficeFloorManagedObjectSource addManagedObjectSource(
 			String managedObjectSourceName,
 			SuppliedManagedObjectNode suppliedManagedObject);
+
+	/**
+	 * Loads the {@link OfficeFloorType}.
+	 * 
+	 * @param officeFrame
+	 *            {@link OfficeFrame} to provide {@link ResourceSource}
+	 *            instances in loading the {@link OfficeFloorType}.
+	 * @return <code>true</code> if the {@link OfficeFloorType} was loaded.
+	 */
+	boolean loadOfficeFloorType(OfficeFrame officeFrame);
+
+	/**
+	 * Obtains the {@link OfficeFloorType}.
+	 * 
+	 * @return {@link OfficeFloorType} or <code>null</code> if issue loading
+	 *         with issue reported to the {@link CompilerIssues}.
+	 */
+	OfficeFloorType getOfficeFloorType();
 
 	/**
 	 * Deploys the {@link OfficeFloor}.

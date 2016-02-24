@@ -625,4 +625,10 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 				this.getCompilerIssues());
 	}
 
+	@Override
+	public TeamLoader getTeamLoader(LocationType locationType, String location,
+			String teamName) {
+		return new TeamLoaderImpl(location, teamName, this);
+	}
+
 }

@@ -18,8 +18,11 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.impl.officefloor.OfficeFloorTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
@@ -32,6 +35,9 @@ import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
+import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
+import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -113,6 +119,11 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	 * {@link OfficeNode} instances by their {@link DeployedOffice} name.
 	 */
 	private final Map<String, OfficeNode> offices = new HashMap<String, OfficeNode>();
+
+	/**
+	 * {@link OfficeFloorType}.
+	 */
+	private OfficeFloorType officeFloorType = null;
 
 	/**
 	 * Initiate.
@@ -413,6 +424,116 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
+	public boolean loadOfficeFloorType(OfficeFrame officeFrame) {
+
+		// Load the managed object sources (in deterministic order)
+		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
+				.toSortedArray(this.managedObjectSources.values(),
+						new ManagedObjectSourceNode[0],
+						new StringExtractor<ManagedObjectSourceNode>() {
+							@Override
+							public String toString(
+									ManagedObjectSourceNode object) {
+								return object
+										.getOfficeFloorManagedObjectSourceName();
+							}
+						});
+		int managedObjectSourceIndex = 0;
+		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
+
+			// Ensure have the managed object source name
+			String managedObjectSourceName = managedObjectSource
+					.getOfficeFloorManagedObjectSourceName();
+			if (CompileUtil.isBlank(managedObjectSourceName)) {
+				this.addIssue("Null name for managed object source "
+						+ managedObjectSourceIndex);
+				return false; // must have name
+			}
+
+			// Ensure have the managed object source
+			if (!managedObjectSource.hasManagedObjectSource()) {
+				this.addIssue("Null source for managed object source "
+						+ managedObjectSourceName + " (managed object source "
+						+ managedObjectSourceIndex + ")");
+				return false; // must have source
+			}
+
+			// Load the managed object source type
+			managedObjectSource.loadOfficeFloorManagedObjectSourceType();
+
+			// Increment for next managed object source
+			managedObjectSourceIndex++;
+		}
+
+		// Load the team sources (in deterministic order)
+		TeamNode[] teams = CompileUtil.toSortedArray(this.teams.values(),
+				new TeamNode[0], new StringExtractor<TeamNode>() {
+					@Override
+					public String toString(TeamNode object) {
+						return object.getOfficeFloorTeamName();
+					}
+				});
+		int teamIndex = 0;
+		for (TeamNode team : teams) {
+
+			// Ensure have the team name
+			String teamName = team.getOfficeFloorTeamName();
+			if (CompileUtil.isBlank(teamName)) {
+				this.addIssue("Null name for team " + teamIndex);
+				return false; // must have name
+			}
+
+			// Ensure have the team source
+			if (!team.hasTeamSource()) {
+				this.addIssue("Null source for team " + teamName + " (team "
+						+ teamIndex + ")", AssetType.TEAM, teamName);
+				return false; // must have source
+			}
+
+			// Load team type
+			team.loadOfficeFloorTeamSourceType();
+
+			// Increment for next team
+			teamIndex++;
+		}
+
+		// Copy the managed object source types into an array
+		List<OfficeFloorManagedObjectSourceType> mosTypes = new LinkedList<OfficeFloorManagedObjectSourceType>();
+		for (ManagedObjectSourceNode mos : managedObjectSources) {
+			OfficeFloorManagedObjectSourceType mosType = mos
+					.getOfficeFloorManagedObjectSourceType();
+			if (mosType != null) {
+				mosTypes.add(mosType);
+			}
+		}
+
+		// Copy team types into an array
+		List<OfficeFloorTeamSourceType> teamTypes = new LinkedList<OfficeFloorTeamSourceType>();
+		for (TeamNode team : teams) {
+			OfficeFloorTeamSourceType teamType = team
+					.getOfficeFloorTeamSourceType();
+			if (teamType != null) {
+				teamTypes.add(teamType);
+			}
+		}
+
+		// Load the type
+		this.officeFloorType = new OfficeFloorTypeImpl(
+				mosTypes.toArray(new OfficeFloorManagedObjectSourceType[mosTypes
+						.size()]),
+				teamTypes.toArray(new OfficeFloorTeamSourceType[teamTypes
+						.size()]));
+
+		// Loaded successfully
+		return true;
+	}
+
+	@Override
+	public OfficeFloorType getOfficeFloorType() {
+		return this.officeFloorType;
+	}
+
+	@Override
 	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame) {
 
 		// Obtain the OfficeFloor builder
@@ -446,11 +567,33 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 										.getOfficeFloorManagedObjectSourceName();
 							}
 						});
+		int managedObjectSourceIndex = 0;
 		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
+
+			// Ensure have the managed object source name
+			String managedObjectSourceName = managedObjectSource
+					.getOfficeFloorManagedObjectSourceName();
+			if (CompileUtil.isBlank(managedObjectSourceName)) {
+				this.addIssue("Null name for managed object source "
+						+ managedObjectSourceIndex);
+			}
+
+			// Ensure have the managed object source
+			if (!managedObjectSource.hasManagedObjectSource()) {
+				this.addIssue("Null source for managed object source "
+						+ managedObjectSourceName + " (managed object source "
+						+ managedObjectSourceIndex + ")");
+				return null; // must have source
+			}
+
+			// Load the managed object source type
 			managedObjectSource.loadManagedObjectType();
+
+			// Increment for next managed object source
+			managedObjectSourceIndex++;
 		}
 
-		// Build the teams (in deterministic order)
+		// Load the team sources (in deterministic order)
 		TeamNode[] teams = CompileUtil.toSortedArray(this.teams.values(),
 				new TeamNode[0], new StringExtractor<TeamNode>() {
 					@Override
@@ -458,6 +601,31 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 						return object.getOfficeFloorTeamName();
 					}
 				});
+		int teamIndex = 0;
+		for (TeamNode team : teams) {
+
+			// Ensure have the team name
+			String teamName = team.getOfficeFloorTeamName();
+			if (CompileUtil.isBlank(teamName)) {
+				this.addIssue("Null name for team " + teamIndex);
+				return null; // must have name
+			}
+
+			// Ensure have the team source
+			if (!team.hasTeamSource()) {
+				this.addIssue("Null source for team " + teamName + " (team "
+						+ teamIndex + ")", AssetType.TEAM, teamName);
+				return null; // must have source
+			}
+
+			// Load team type
+			team.loadTeamType();
+
+			// Increment for next team
+			teamIndex++;
+		}
+
+		// Build the teams (in deterministic order)
 		for (TeamNode team : teams) {
 			team.buildTeam(builder);
 		}

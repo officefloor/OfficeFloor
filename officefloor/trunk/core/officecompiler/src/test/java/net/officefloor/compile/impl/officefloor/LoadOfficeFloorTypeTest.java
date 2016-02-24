@@ -44,6 +44,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -69,6 +70,9 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+
+		// Reset the mock OfficeFloor source
+		MockOfficeFloorSource.reset();
 	}
 
 	/**
@@ -84,6 +88,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 				+ " by default constructor", failure);
 
 		// Load the office floor type
+		MockOfficeFloorSource.instantiateFailure = failure;
 		this.loadType(null, null);
 	}
 
@@ -104,7 +109,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	/**
 	 * Ensure issue if missing {@link Property}.
 	 */
-	public void testMisstingProperty() {
+	public void testMissingProperty() {
 
 		// Record missing property
 		this.record_issue("Missing property 'missing' for OfficeFloorSource "
@@ -171,7 +176,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	public void testMissingResource() {
 		this.recordReturn(this.resourceSource,
 				this.resourceSource.sourceResource("missing"), null);
-		this.record_issue("Can not obtian resource at location 'missing' for OfficeFloorSource "
+		this.record_issue("Can not obtain resource at location 'missing' for OfficeFloorSource "
 				+ MockOfficeFloorSource.class.getName());
 		this.loadType(new Loader() {
 			@Override
@@ -253,7 +258,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if <code>null</code> {@link ManagedObjectSource} type.
 	 */
 	public void testNullManagedObjectSourceType() {
-		this.record_issue("Null type for managed object source 0 (name=MO)");
+		this.record_issue("Null source for managed object source MO (managed object source 0)");
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -280,6 +285,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 			void validate(OfficeFloorType type) {
 				OfficeFloorManagedObjectSourceType[] mos = type
 						.getOfficeFloorManagedObjectSourceTypes();
+				assertNotNull("Should have types", mos);
 				assertEquals("Incorrect number of managed object sources", 1,
 						mos.length);
 				OfficeFloorManagedObjectSourceType mosType = mos[0];
@@ -287,6 +293,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 						mosType.getOfficeFloorManagedObjectSourceName());
 				OfficeFloorManagedObjectSourcePropertyType[] properties = mosType
 						.getOfficeFloorManagedObjectSourcePropertyTypes();
+				assertNotNull("Should have properties", properties);
 				assertEquals("Incorrect number of properties", 1,
 						properties.length);
 				OfficeFloorManagedObjectSourcePropertyType property = properties[0];
@@ -315,7 +322,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		@Override
 		protected void loadMetaData(MetaDataContext<None, None> context)
 				throws Exception {
-			fail("Should not require meta-data for determining type");
+			context.setObjectClass(Object.class);
 		}
 
 		@Override
@@ -343,7 +350,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if <code>null</code> {@link OfficeFloorTeamSourceType} type.
 	 */
 	public void testNullTeamSourceType() {
-		this.record_issue("Null type for type 0 (name=TEAM)");
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
+				AssetType.TEAM, "TEAM", "Null source for team TEAM (team 0)");
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -375,6 +383,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 						team.getOfficeFloorTeamSourceName());
 				OfficeFloorTeamSourcePropertyType[] properties = team
 						.getOfficeFloorTeamSourcePropertyTypes();
+				assertNotNull("Ensure have properties", properties);
 				assertEquals("Incorrect number of properties", 1,
 						properties.length);
 				OfficeFloorTeamSourcePropertyType property = properties[0];
@@ -401,8 +410,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 
 		@Override
 		public Team createTeam(TeamSourceContext context) throws Exception {
-			fail("Should not require to create the team");
-			return null;
+			return null; // Team is ignored
 		}
 	}
 

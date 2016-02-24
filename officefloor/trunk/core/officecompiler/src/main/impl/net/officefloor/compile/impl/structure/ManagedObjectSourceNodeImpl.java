@@ -50,6 +50,7 @@ import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -187,6 +188,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * Loaded {@link ManagedObjectType}.
 	 */
 	private ManagedObjectType<?> managedObjectType;
+
+	/**
+	 * Indicates if the {@link OfficeFloorManagedObjectSourceType} is loaded.
+	 */
+	private boolean isOfficeFloorManagedObjectSourceTypeLoaded = false;
+
+	/**
+	 * Loaded {@link OfficeFloorManagedObjectSourceType}.
+	 */
+	private OfficeFloorManagedObjectSourceType managedObjectSourceType;
 
 	/**
 	 * {@link ManagingOffice}.
@@ -416,6 +427,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 */
 
 	@Override
+	public boolean hasManagedObjectSource() {
+		return (this.managedObjectSource != null)
+				|| (!CompileUtil.isBlank(this.managedObjectSourceClassName));
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void loadManagedObjectType() {
 
@@ -487,6 +504,58 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 		// Return the loaded managed object type
 		return this.managedObjectType;
+	}
+
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void loadOfficeFloorManagedObjectSourceType() {
+
+		// Only load managed object source type once (whether successful or not)
+		if (this.isOfficeFloorManagedObjectSourceTypeLoaded) {
+			return;
+		}
+		this.isOfficeFloorManagedObjectSourceTypeLoaded = true;
+
+		// Create the loader to obtain the managed object type
+		ManagedObjectLoader loader = this.context.getManagedObjectLoader(
+				this.locationType, this.location, this.managedObjectSourceName);
+
+		// Load the managed object type
+		if (this.managedObjectSource != null) {
+			// Load the managed object type from instance
+			this.managedObjectSourceType = loader
+					.loadOfficeFloorManagedObjectSourceType(
+							this.managedObjectSource, this.propertyList);
+
+		} else {
+			// Obtain the managed object source class
+			Class managedObjectSourceClass = this.context
+					.getManagedObjectSourceClass(
+							this.managedObjectSourceClassName,
+							this.locationType, this.location,
+							this.managedObjectSourceName);
+			if (managedObjectSourceClass == null) {
+				return; // must have managed object source class
+			}
+
+			// Load the managed object type from class
+			this.managedObjectSourceType = loader
+					.loadOfficeFloorManagedObjectSourceType(
+							managedObjectSourceClass, this.propertyList);
+		}
+	}
+
+	@Override
+	public OfficeFloorManagedObjectSourceType getOfficeFloorManagedObjectSourceType() {
+
+		// Ensure the managed object source type is loaded
+		if (!this.isOfficeFloorManagedObjectSourceTypeLoaded) {
+			throw new IllegalStateException(
+					"Managed object source type must be loaded");
+		}
+
+		// Return the loaded managed object source type
+		return this.managedObjectSourceType;
 	}
 
 	@Override
