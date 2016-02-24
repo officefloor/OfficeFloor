@@ -28,6 +28,7 @@ import java.util.Set;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
+import net.officefloor.compile.impl.structure.PropertyNode;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -36,6 +37,8 @@ import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -142,6 +145,26 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			return null; // failed to instantiate
 		}
 
+		// Return the specification
+		return this.loadSpecification(managedObjectSource);
+	}
+
+	/**
+	 * Loads the {@link PropertyList} specification.
+	 * 
+	 * @param <D>
+	 *            Dependency key.
+	 * @param <H>
+	 *            Flow key.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource}.
+	 * @return {@link PropertyList} specification or <code>null</code> if issue.
+	 */
+	private <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> PropertyList loadSpecification(
+			MS managedObjectSource) {
+
 		// Obtain the specification
 		ManagedObjectSourceSpecification specification;
 		try {
@@ -149,7 +172,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain "
 					+ ManagedObjectSourceSpecification.class.getSimpleName()
-					+ " from " + managedObjectSourceClass.getName(), ex);
+					+ " from " + managedObjectSource.getClass().getName(), ex);
 			return null; // failed to obtain
 		}
 
@@ -157,7 +180,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		if (specification == null) {
 			this.addIssue("No "
 					+ ManagedObjectSourceSpecification.class.getSimpleName()
-					+ " returned from " + managedObjectSourceClass.getName());
+					+ " returned from "
+					+ managedObjectSource.getClass().getName());
 			return null; // no specification obtained
 		}
 
@@ -170,7 +194,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 					+ ManagedObjectSourceProperty.class.getSimpleName()
 					+ " instances from "
 					+ ManagedObjectSourceSpecification.class.getSimpleName()
-					+ " for " + managedObjectSourceClass.getName(), ex);
+					+ " for " + managedObjectSource.getClass().getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -190,7 +214,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 							+ ManagedObjectSourceSpecification.class
 									.getSimpleName()
 							+ " for "
-							+ managedObjectSourceClass.getName());
+							+ managedObjectSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -208,7 +232,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 									+ " from "
 									+ ManagedObjectSourceSpecification.class
 											.getSimpleName() + " for "
-									+ managedObjectSourceClass.getName(), ex);
+									+ managedObjectSource.getClass().getName(),
+							ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
@@ -220,7 +245,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 							+ ManagedObjectSourceSpecification.class
 									.getSimpleName()
 							+ " for "
-							+ managedObjectSourceClass.getName());
+							+ managedObjectSource.getClass().getName());
 					return null; // must have complete property details
 				}
 
@@ -240,7 +265,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 									+ ") from "
 									+ ManagedObjectSourceSpecification.class
 											.getSimpleName() + " for "
-									+ managedObjectSourceClass.getName(), ex);
+									+ managedObjectSource.getClass().getName(),
+							ex);
 					return null; // must have complete property details
 				}
 
@@ -409,6 +435,47 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		return new ManagedObjectTypeImpl<D>(objectType, dependencyTypes,
 				moFlowTypes.toArray(new ManagedObjectFlowType[0]), teamTypes,
 				extensionInterfaces);
+	}
+
+	@Override
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
+			Class<MS> managedObjectSourceClass, PropertyList propertyList) {
+
+		// Create an instance of the managed object source
+		MS managedObjectSource = CompileUtil.newInstance(
+				managedObjectSourceClass, ManagedObjectSource.class,
+				this.locationType, this.location, AssetType.MANAGED_OBJECT,
+				this.managedObjectName, this.nodeContext.getCompilerIssues());
+		if (managedObjectSource == null) {
+			return null; // failed to instantiate
+		}
+
+		// Return the loaded managed object source type
+		return this.loadOfficeFloorManagedObjectSourceType(managedObjectSource,
+				propertyList);
+	}
+
+	@Override
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
+			MS managedObjectSource, PropertyList propertyList) {
+
+		// Load the specification
+		PropertyList properties = this.loadSpecification(managedObjectSource);
+		if (properties == null) {
+			return null;
+		}
+
+		// Load the values onto the properties
+		// Note: create additional optional properties as needed
+		for (Property property : propertyList) {
+			properties.getOrAddProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Create and return the managed object source type
+		return new OfficeFloorManagedObjectSourceTypeImpl(
+				this.managedObjectName,
+				PropertyNode.constructPropertyNodes(properties));
 	}
 
 	@Override

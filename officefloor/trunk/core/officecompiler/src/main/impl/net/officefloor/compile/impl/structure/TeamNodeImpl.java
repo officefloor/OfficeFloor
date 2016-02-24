@@ -18,12 +18,17 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.team.TeamLoader;
+import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -63,6 +68,26 @@ public class TeamNodeImpl implements TeamNode {
 	private final NodeContext context;
 
 	/**
+	 * Indicates if the {@link TeamType} is loaded.
+	 */
+	private boolean isTeamTypeLoaded = false;
+
+	/**
+	 * Loaded {@link TeamType}.
+	 */
+	private TeamType teamType;
+
+	/**
+	 * Indicates if the {@link OfficeFloorTeamSourceType} is loaded.
+	 */
+	private boolean isOfficeFloorTeamSourceTypeLoaded = false;
+
+	/**
+	 * Loaded {@link OfficeFloorTeamSourceType}.
+	 */
+	private OfficeFloorTeamSourceType teamSourceType;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param teamName
@@ -85,6 +110,88 @@ public class TeamNodeImpl implements TeamNode {
 	/*
 	 * =============== TeamNode ======================================
 	 */
+
+	@Override
+	public boolean hasTeamSource() {
+		return !CompileUtil.isBlank(this.teamSourceClassName);
+	}
+
+	@Override
+	public void loadTeamType() {
+
+		// Only load the team type once (whether successful or not)
+		if (this.isTeamTypeLoaded) {
+			return;
+		}
+		this.isTeamTypeLoaded = true;
+
+		// Obtain the loader
+		TeamLoader loader = this.context.getTeamLoader(
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+				this.teamName);
+
+		// Obtain the team source class
+		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(
+				this.teamSourceClassName, this.officeFloorLocation,
+				this.teamName);
+		if (teamSourceClass == null) {
+			return; // must have source class
+		}
+
+		// Load the team type
+		this.teamType = loader.loadTeamType(teamSourceClass, this.propertyList);
+	}
+
+	@Override
+	public TeamType getTeamType() {
+
+		// Ensure the team type is loaded
+		if (!this.isTeamTypeLoaded) {
+			throw new IllegalStateException("Team type must be loaded");
+		}
+
+		// Return the loaded team type (if loaded, otherwise null)
+		return this.teamType;
+	}
+
+	@Override
+	public void loadOfficeFloorTeamSourceType() {
+
+		// Only load the team source type once (whether successful or not)
+		if (this.isOfficeFloorTeamSourceTypeLoaded) {
+			return;
+		}
+		this.isOfficeFloorTeamSourceTypeLoaded = true;
+
+		// Obtain the loader
+		TeamLoader loader = this.context.getTeamLoader(
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+				this.teamName);
+
+		// Obtain the team source class
+		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(
+				this.teamSourceClassName, this.officeFloorLocation,
+				this.teamName);
+		if (teamSourceClass == null) {
+			return; // must have source class
+		}
+
+		// Load the team source type
+		this.teamSourceType = loader.loadOfficeFloorTeamSourceType(
+				teamSourceClass, this.propertyList);
+	}
+
+	@Override
+	public OfficeFloorTeamSourceType getOfficeFloorTeamSourceType() {
+
+		// Ensure the team source type is loaded
+		if (!this.isOfficeFloorTeamSourceTypeLoaded) {
+			throw new IllegalStateException("Team source type must be loaded");
+		}
+
+		// Return the loaded team source type (if loaded, otherwise null)
+		return this.teamSourceType;
+	}
 
 	@Override
 	public void buildTeam(OfficeFloorBuilder builder) {

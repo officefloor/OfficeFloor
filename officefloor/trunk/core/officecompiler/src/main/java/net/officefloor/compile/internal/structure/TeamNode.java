@@ -17,9 +17,13 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * {@link OfficeFloorTeam} node.
@@ -27,6 +31,38 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public interface TeamNode extends OfficeFloorTeam, LinkTeamNode {
+
+	/**
+	 * Indicates if have the {@link TeamSource} configured.
+	 * 
+	 * @return <code>true</code> if have the {@link TeamSource} configured.
+	 */
+	boolean hasTeamSource();
+
+	/**
+	 * Loads the type information for this {@link Team}.
+	 */
+	void loadTeamType();
+
+	/**
+	 * Obtains the {@link TeamType} for the {@link TeamSource}.
+	 * 
+	 * @return {@link TeamType} for the {@link TeamSource}.
+	 */
+	TeamType getTeamType();
+
+	/**
+	 * Loads the {@link OfficeFloorTeamSourceType}.
+	 */
+	public void loadOfficeFloorTeamSourceType();
+
+	/**
+	 * Obtains the {@link OfficeFloorTeamSourceType}.
+	 * 
+	 * @return {@link OfficeFloorTeamSourceType} or <code>null</code> if issue
+	 *         loading with issue reported to the {@link CompilerIssues}.
+	 */
+	OfficeFloorTeamSourceType getOfficeFloorTeamSourceType();
 
 	/**
 	 * Builds the {@link Team} for this {@link TeamNode}.

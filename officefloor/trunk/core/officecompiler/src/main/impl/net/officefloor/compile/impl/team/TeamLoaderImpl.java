@@ -20,9 +20,12 @@ package net.officefloor.compile.impl.team;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
+import net.officefloor.compile.impl.structure.PropertyNode;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
@@ -256,7 +259,30 @@ public class TeamLoaderImpl implements TeamLoader {
 			return null; // failed loading team
 		}
 
+		// Create and return the team type
 		return new TeamTypeImpl();
+	}
+
+	@Override
+	public <TS extends TeamSource> OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(
+			Class<TS> teamSourceClass, PropertyList propertyList) {
+
+		// Load the specification
+		PropertyList properties = this.loadSpecification(teamSourceClass);
+		if (properties == null) {
+			return null;
+		}
+
+		// Load the values onto the properties
+		// Note: create additional optional properties as needed
+		for (Property property : propertyList) {
+			properties.getOrAddProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Create and return type
+		return new OfficeFloorTeamSourceTypeImpl(this.teamName,
+				PropertyNode.constructPropertyNodes(properties));
 	}
 
 	/**

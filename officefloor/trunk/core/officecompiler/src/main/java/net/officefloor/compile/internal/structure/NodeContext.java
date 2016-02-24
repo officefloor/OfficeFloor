@@ -35,6 +35,7 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -350,5 +351,19 @@ public interface NodeContext {
 	 */
 	<S extends TeamSource> Class<S> getTeamSourceClass(String teamSourceName,
 			String officeFloorLocation, String teamName);
+
+	/**
+	 * Obtains the {@link TeamLoader}.
+	 * 
+	 * @param locationType
+	 *            {@link LocationType}.
+	 * @param location
+	 *            Location.
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @return {@link TeamLoader}.
+	 */
+	TeamLoader getTeamLoader(LocationType locationType, String location,
+			String teamName);
 
 }
