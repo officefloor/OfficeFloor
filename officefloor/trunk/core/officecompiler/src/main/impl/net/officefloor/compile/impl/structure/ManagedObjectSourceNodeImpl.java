@@ -428,7 +428,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public boolean hasManagedObjectSource() {
-		return (this.managedObjectSource != null)
+		return (this.suppliedManagedObjectNode != null)
+				|| (this.managedObjectSource != null)
 				|| (!CompileUtil.isBlank(this.managedObjectSourceClassName));
 	}
 
