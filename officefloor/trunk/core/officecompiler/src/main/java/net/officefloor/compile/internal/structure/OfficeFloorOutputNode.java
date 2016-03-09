@@ -15,31 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.officefloor;
+package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.officefloor.OfficeFloorOutputType;
+import net.officefloor.compile.spi.officefloor.OfficeFloorOutput;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * <code>Type definition</code> of a required {@link Property} of the
- * {@link OfficeFloor}.
+ * Output from the {@link OfficeFloor}.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorRequiredPropertyType {
+public interface OfficeFloorOutputNode extends OfficeFloorOutput {
 
 	/**
-	 * Obtains the name for the {@link Property}.
+	 * Obtains the {@link OfficeFloorOutputType} for this
+	 * {@link OfficeFloorOutputNode}.
 	 * 
-	 * @return Name for the {@link Property}.
+	 * @return {@link OfficeFloorOutputType}.
 	 */
-	String getName();
-
-	/**
-	 * Obtains the label to describe the {@link Property}.
-	 * 
-	 * @return Label to describe the {@link Property}.
-	 */
-	String getLabel();
+	OfficeFloorOutputType getOfficeFloorOutputType();
 
 }

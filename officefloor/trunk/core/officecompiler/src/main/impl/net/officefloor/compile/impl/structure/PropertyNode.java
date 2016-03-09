@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourcePropertyType;
+import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourcePropertyType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -30,7 +31,8 @@ import net.officefloor.compile.properties.PropertyList;
  *
  * @author Daniel Sagenschneider
  */
-public class PropertyNode implements OfficeFloorTeamSourcePropertyType,
+public class PropertyNode implements OfficeFloorPropertyType,
+		OfficeFloorTeamSourcePropertyType,
 		OfficeFloorManagedObjectSourcePropertyType {
 
 	/**

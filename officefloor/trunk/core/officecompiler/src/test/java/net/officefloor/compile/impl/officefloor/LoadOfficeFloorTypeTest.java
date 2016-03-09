@@ -31,6 +31,7 @@ import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourcePropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorOutputType;
+import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourcePropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
@@ -41,8 +42,8 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorOutput;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
+import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -126,6 +127,37 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensure includes required properties.
+	 */
+	public void testSpecificationAndRequiredProperties() {
+		this.loadType(new Loader() {
+			@Override
+			public void sourceOffice(OfficeFloorDeployer officeFloor,
+					OfficeFloorSourceContext context) throws Exception {
+				// Do nothing as testing specification of properties
+			}
+		}, new Validator() {
+			@Override
+			void validate(OfficeFloorType type) {
+				OfficeFloorPropertyType[] properties = type
+						.getOfficeFloorPropertyTypes();
+				assertEquals("Incorrect number of properties", 2,
+						properties.length);
+				OfficeFloorPropertyType propertyOne = properties[0];
+				assertEquals("Incorrect property one name", "ONE",
+						propertyOne.getName());
+				assertEquals("Incorrect property one label", "A",
+						propertyOne.getLabel());
+				OfficeFloorPropertyType propertyTwo = properties[1];
+				assertEquals("Incorrect property two name", "TWO",
+						propertyTwo.getName());
+				assertEquals("Incorrect property two label", "B",
+						propertyTwo.getLabel());
+			}
+		});
+	}
+
+	/**
 	 * Ensure able to get properties.
 	 */
 	public void testGetProperties() {
@@ -152,7 +184,29 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 				assertEquals("Incorrect property TWO", "2",
 						properties.getProperty("TWO"));
 			}
-		}, new LoadedValidator(), "ONE", "1", "TWO", "2");
+		}, new Validator() {
+			@Override
+			void validate(OfficeFloorType type) {
+				OfficeFloorPropertyType[] properties = type
+						.getOfficeFloorPropertyTypes();
+				assertEquals("Incorrect number of properties", 2,
+						properties.length);
+				OfficeFloorPropertyType propertyOne = properties[0];
+				assertEquals("Incorrect property one name", "ONE",
+						propertyOne.getName());
+				assertEquals("Incorrect property one label", "A",
+						propertyOne.getLabel());
+				assertEquals("Incorrect property one default value", "1",
+						propertyOne.getDefaultValue());
+				OfficeFloorPropertyType propertyTwo = properties[1];
+				assertEquals("Incorrect property two name", "TWO",
+						propertyTwo.getName());
+				assertEquals("Incorrect property two label", "B",
+						propertyTwo.getLabel());
+				assertEquals("Incorrect property two default value", "2",
+						propertyTwo.getDefaultValue());
+			}
+		}, "ONE", "1", "TWO", "2");
 	}
 
 	/**
@@ -441,6 +495,33 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensure issue if duplicate name for {@link OfficeFloorInput} instances.
+	 */
+	public void testInputType_DuplicateName() {
+		this.record_issue("OfficeFloor input TEST already added");
+		this.loadType(new Loader() {
+			@Override
+			public void sourceOffice(OfficeFloorDeployer officeFloor,
+					OfficeFloorSourceContext context) throws Exception {
+				OfficeFloorInput inputOne = officeFloor.addInput("TEST",
+						String.class.getName());
+				OfficeFloorInput inputTwo = officeFloor.addInput("TEST",
+						Integer.class.getName());
+				assertSame("Should be the same object", inputOne, inputTwo);
+			}
+		}, new Validator() {
+			@Override
+			void validate(OfficeFloorType type) {
+				OfficeFloorInputType[] inputs = type.getOfficeFloorInputTypes();
+				assertEquals("Incorrect number of inputs", 1, inputs.length);
+				OfficeFloorInputType input = inputs[0];
+				assertEquals("Incorrect input name", "TEST",
+						input.getOfficeFloorInputName());
+			}
+		});
+	}
+
+	/**
 	 * Ensure obtain the {@link OfficeFloorOutputType}.
 	 */
 	public void testOutputType_Asynchronous() {
@@ -460,9 +541,37 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 				assertEquals("Incorrect output name", "OUTPUT",
 						output.getOfficeFloorOutputName());
 				assertEquals("Incorrect output argument type",
-						Long.class.getName(), output.getOfficeFloorOutputName());
-				assertEquals("Should be no corresponding input",
+						Long.class.getName(), output.getArgumentType());
+				assertNull("Should be no corresponding input",
 						output.getHandlingOfficeFloorInputType());
+			}
+		});
+	}
+
+	/**
+	 * Ensure issue if duplicate name for {@link OfficeFloorOutput} instances.
+	 */
+	public void testOutputType_DuplicateName() {
+		this.record_issue("OfficeFloor output TEST already added");
+		this.loadType(new Loader() {
+			@Override
+			public void sourceOffice(OfficeFloorDeployer officeFloor,
+					OfficeFloorSourceContext context) throws Exception {
+				OfficeFloorOutput outputOne = officeFloor.addOutput("TEST",
+						String.class.getName());
+				OfficeFloorOutput outputTwo = officeFloor.addOutput("TEST",
+						Integer.class.getName());
+				assertSame("Should be the same object", outputOne, outputTwo);
+			}
+		}, new Validator() {
+			@Override
+			void validate(OfficeFloorType type) {
+				OfficeFloorOutputType[] outputs = type
+						.getOfficeFloorOutputTypes();
+				assertEquals("Incorrect number of outputs", 1, outputs.length);
+				OfficeFloorOutputType output = outputs[0];
+				assertEquals("Incorrect output name", "TEST",
+						output.getOfficeFloorOutputName());
 			}
 		});
 	}
@@ -663,7 +772,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Mock {@link OfficeFloorSource} for testing.
 	 */
 	@TestSource
-	public static class MockOfficeFloorSource implements OfficeFloorSource {
+	public static class MockOfficeFloorSource extends AbstractOfficeFloorSource {
 
 		/**
 		 * {@link Loader} to load the {@link OfficeType}.
@@ -697,16 +806,15 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		 */
 
 		@Override
-		public OfficeFloorSourceSpecification getSpecification() {
-			fail("Should not be invoked in obtaining office floor type");
-			return null;
+		protected void loadSpecification(SpecificationContext context) {
+			context.addProperty("ONE", "A");
 		}
 
 		@Override
 		public void specifyConfigurationProperties(
 				RequiredProperties requiredProperties,
 				OfficeFloorSourceContext context) throws Exception {
-			fail("Should not be invoked in obtaining office floor type");
+			requiredProperties.addRequiredProperty("TWO", "B");
 		}
 
 		@Override
@@ -714,6 +822,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 				OfficeFloorSourceContext context) throws Exception {
 			loader.sourceOffice(officeFloorDeployer, context);
 		}
+
 	}
 
 }

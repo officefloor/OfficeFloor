@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.officefloor;
 import net.officefloor.compile.officefloor.OfficeFloorInputType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorOutputType;
-import net.officefloor.compile.officefloor.OfficeFloorRequiredPropertyType;
+import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
 
@@ -30,6 +30,21 @@ import net.officefloor.compile.officefloor.OfficeFloorType;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorTypeImpl implements OfficeFloorType {
+
+	/**
+	 * {@link OfficeFloorPropertyType} instances.
+	 */
+	private final OfficeFloorPropertyType[] propertyTypes;
+
+	/**
+	 * {@link OfficeFloorInputType} instances.
+	 */
+	private final OfficeFloorInputType[] inputTypes;
+
+	/**
+	 * {@link OfficeFloorOutputType} instances.
+	 */
+	private final OfficeFloorOutputType[] outputTypes;
 
 	/**
 	 * {@link OfficeFloorManagedObjectSourceType} instances.
@@ -44,14 +59,25 @@ public class OfficeFloorTypeImpl implements OfficeFloorType {
 	/**
 	 * Initialise.
 	 * 
+	 * @param propertyTypes
+	 *            {@link OfficeFloorPropertyType} instances.
+	 * @param inputTypes
+	 *            {@link OfficeFloorInputType} instances.
+	 * @param outputTypes
+	 *            {@link OfficeFloorOutputType} instances.
 	 * @param managedObjectSourceTypes
 	 *            {@link OfficeFloorManagedObjectSourceType} instances.
 	 * @param teamSourceTypes
 	 *            {@link OfficeFloorTeamSourceType} instances.
 	 */
-	public OfficeFloorTypeImpl(
+	public OfficeFloorTypeImpl(OfficeFloorPropertyType[] propertyTypes,
+			OfficeFloorInputType[] inputTypes,
+			OfficeFloorOutputType[] outputTypes,
 			OfficeFloorManagedObjectSourceType[] managedObjectSourceTypes,
 			OfficeFloorTeamSourceType[] teamSourceTypes) {
+		this.propertyTypes = propertyTypes;
+		this.inputTypes = inputTypes;
+		this.outputTypes = outputTypes;
 		this.managedObjectSourceTypes = managedObjectSourceTypes;
 		this.teamSourceTypes = teamSourceTypes;
 	}
@@ -61,21 +87,18 @@ public class OfficeFloorTypeImpl implements OfficeFloorType {
 	 */
 
 	@Override
+	public OfficeFloorPropertyType[] getOfficeFloorPropertyTypes() {
+		return this.propertyTypes;
+	}
+
+	@Override
 	public OfficeFloorInputType[] getOfficeFloorInputTypes() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.inputTypes;
 	}
 
 	@Override
 	public OfficeFloorOutputType[] getOfficeFloorOutputTypes() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public OfficeFloorRequiredPropertyType[] getOfficeFloorRequiredPropertyTypes() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.outputTypes;
 	}
 
 	@Override

@@ -29,13 +29,18 @@ import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeFloorInputNode;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
+import net.officefloor.compile.internal.structure.OfficeFloorOutputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.officefloor.OfficeFloorInputType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
+import net.officefloor.compile.officefloor.OfficeFloorOutputType;
+import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -121,6 +126,16 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	private final Map<String, OfficeNode> offices = new HashMap<String, OfficeNode>();
 
 	/**
+	 * {@link OfficeFloorInputNode} instances by their name.
+	 */
+	private final Map<String, OfficeFloorInputNode> inputs = new HashMap<String, OfficeFloorInputNode>();
+
+	/**
+	 * {@link OfficeFloorOutputNode} instances by their name.
+	 */
+	private final Map<String, OfficeFloorOutputNode> outputs = new HashMap<String, OfficeFloorOutputNode>();
+
+	/**
 	 * {@link OfficeFloorType}.
 	 */
 	private OfficeFloorType officeFloorType = null;
@@ -158,14 +173,36 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	@Override
 	public OfficeFloorInput addInput(String inputName, String parameterType) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		// Obtain and return the input for the name
+		OfficeFloorInputNode input = this.inputs.get(inputName);
+		if (input == null) {
+			// Create the input
+			input = new OfficeFloorInputNodeImpl(inputName, parameterType);
+
+			// Add the input
+			this.inputs.put(inputName, input);
+		} else {
+			// Input already added
+			this.addIssue("OfficeFloor input " + inputName + " already added");
+		}
+		return input;
 	}
 
 	@Override
 	public OfficeFloorOutput addOutput(String outputName, String argumentType) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		// Obtain and return the output for the name
+		OfficeFloorOutputNode output = this.outputs.get(outputName);
+		if (output == null) {
+			// Create the output
+			output = new OfficeFloorOutputNodeImpl(outputName, argumentType);
+
+			// Add the output
+			this.outputs.put(outputName, output);
+		} else {
+			// Output already added
+			this.addIssue("OfficeFloor output " + outputName + " already added");
+		}
+		return output;
 	}
 
 	@Override
@@ -424,7 +461,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public boolean loadOfficeFloorType(OfficeFrame officeFrame) {
+	public boolean loadOfficeFloorType(OfficeFloorPropertyType[] properties) {
 
 		// Load the managed object sources (in deterministic order)
 		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
@@ -517,8 +554,47 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			}
 		}
 
+		// Copy the inputs into an array (in deterministic order)
+		OfficeFloorInputNode[] inputs = CompileUtil.toSortedArray(
+				this.inputs.values(), new OfficeFloorInputNode[0],
+				new StringExtractor<OfficeFloorInputNode>() {
+					@Override
+					public String toString(OfficeFloorInputNode object) {
+						return object.getOfficeFloorInputName();
+					}
+				});
+		List<OfficeFloorInputType> inputTypes = new LinkedList<OfficeFloorInputType>();
+		for (OfficeFloorInputNode input : inputs) {
+			OfficeFloorInputType inputType = input.getOfficeFloorInputType();
+			if (inputType != null) {
+				inputTypes.add(inputType);
+			}
+		}
+
+		// Copy the outputs into an array (in deterministic order)
+		OfficeFloorOutputNode[] outputs = CompileUtil.toSortedArray(
+				this.outputs.values(), new OfficeFloorOutputNode[0],
+				new StringExtractor<OfficeFloorOutputNode>() {
+					@Override
+					public String toString(OfficeFloorOutputNode object) {
+						return object.getOfficeFloorOutputName();
+					}
+				});
+		List<OfficeFloorOutputType> outputTypes = new LinkedList<OfficeFloorOutputType>();
+		for (OfficeFloorOutputNode output : outputs) {
+			OfficeFloorOutputType outputType = output
+					.getOfficeFloorOutputType();
+			if (outputType != null) {
+				outputTypes.add(outputType);
+			}
+		}
+
 		// Load the type
 		this.officeFloorType = new OfficeFloorTypeImpl(
+				properties,
+				inputTypes.toArray(new OfficeFloorInputType[inputTypes.size()]),
+				outputTypes.toArray(new OfficeFloorOutputType[outputTypes
+						.size()]),
 				mosTypes.toArray(new OfficeFloorManagedObjectSourceType[mosTypes
 						.size()]),
 				teamTypes.toArray(new OfficeFloorTeamSourceType[teamTypes

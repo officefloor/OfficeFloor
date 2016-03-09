@@ -21,6 +21,7 @@ import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
+import net.officefloor.compile.impl.structure.PropertyNode;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -28,6 +29,7 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.officefloor.OfficeFloorType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -76,18 +78,48 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	 * ======================= OfficeFloorLoader ===========================
 	 */
 
+	/**
+	 * Instantiates the {@link OfficeFloorSource}.
+	 * 
+	 * @param officeFloorSourceClass
+	 *            {@link OfficeFloorSource} {@link Class}.
+	 * @param officeFloorLocation
+	 *            Optional location of the {@link OfficeFloor}. May be
+	 *            <code>null</code>.
+	 * @return {@link OfficeFloorSource} or <code>null</code> if issue.
+	 */
+	private <OF extends OfficeFloorSource> OfficeFloorSource newOfficeFloorSource(
+			Class<OF> officeFloorSourceClass, String officeFloorLocation) {
+		return CompileUtil.newInstance(officeFloorSourceClass,
+				OfficeFloorSource.class, LocationType.OFFICE_FLOOR,
+				officeFloorLocation, null, null,
+				this.nodeContext.getCompilerIssues());
+	}
+
 	@Override
 	public <OF extends OfficeFloorSource> PropertyList loadSpecification(
 			Class<OF> officeFloorSourceClass) {
 
 		// Instantiate the office floor source
-		OfficeFloorSource officeFloorSource = CompileUtil.newInstance(
-				officeFloorSourceClass, OfficeFloorSource.class,
-				LocationType.OFFICE_FLOOR, null, null, null,
-				this.nodeContext.getCompilerIssues());
+		OfficeFloorSource officeFloorSource = this.newOfficeFloorSource(
+				officeFloorSourceClass, null);
 		if (officeFloorSource == null) {
 			return null; // failed to instantiate
 		}
+
+		// Load and return the specification
+		return this.loadSpecification(officeFloorSource);
+	}
+
+	/**
+	 * Loads the {@link PropertyList} specification from the
+	 * {@link OfficeFloorSource} instance.
+	 * 
+	 * @param officeFloorSource
+	 *            {@link OfficeFloorSource}.
+	 * @return {@link PropertyList} specification or <code>null</code> if issue.
+	 */
+	private PropertyList loadSpecification(OfficeFloorSource officeFloorSource) {
 
 		// Obtain the specification
 		OfficeFloorSourceSpecification specification;
@@ -96,7 +128,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain "
 					+ OfficeFloorSourceSpecification.class.getSimpleName()
-					+ " from " + officeFloorSourceClass.getName(), ex, null);
+					+ " from " + officeFloorSource.getClass().getName(), ex,
+					null);
 			return null; // failed to obtain
 		}
 
@@ -106,7 +139,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 					"No "
 							+ OfficeFloorSourceSpecification.class
 									.getSimpleName() + " returned from "
-							+ officeFloorSourceClass.getName(), null);
+							+ officeFloorSource.getClass().getName(), null);
 			return null; // no specification obtained
 		}
 
@@ -121,7 +154,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 							+ " instances from "
 							+ OfficeFloorSourceSpecification.class
 									.getSimpleName() + " for "
-							+ officeFloorSourceClass.getName(), ex, null);
+							+ officeFloorSource.getClass().getName(), ex, null);
 			return null; // failed to obtain properties
 		}
 
@@ -140,7 +173,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 									+ " is null from "
 									+ OfficeFloorSourceSpecification.class
 											.getSimpleName() + " for "
-									+ officeFloorSourceClass.getName(), null);
+									+ officeFloorSource.getClass().getName(),
+							null);
 					return null; // must have complete property details
 				}
 
@@ -158,8 +192,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 									+ " from "
 									+ OfficeFloorSourceSpecification.class
 											.getSimpleName() + " for "
-									+ officeFloorSourceClass.getName(), ex,
-							null);
+									+ officeFloorSource.getClass().getName(),
+							ex, null);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
@@ -170,7 +204,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 									+ " provided blank name from "
 									+ OfficeFloorSourceSpecification.class
 											.getSimpleName() + " for "
-									+ officeFloorSourceClass.getName(), null);
+									+ officeFloorSource.getClass().getName(),
+							null);
 					return null; // must have complete property details
 				}
 
@@ -190,8 +225,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 									+ ") from "
 									+ OfficeFloorSourceSpecification.class
 											.getSimpleName() + " for "
-									+ officeFloorSourceClass.getName(), ex,
-							null);
+									+ officeFloorSource.getClass().getName(),
+							ex, null);
 					return null; // must have complete property details
 				}
 
@@ -210,13 +245,32 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			PropertyList propertyList) {
 
 		// Instantiate the office floor source
-		OfficeFloorSource officeFloorSource = CompileUtil.newInstance(
-				officeFloorSourceClass, OfficeFloorSource.class,
-				LocationType.OFFICE_FLOOR, officeFloorLocation, null, null,
-				this.nodeContext.getCompilerIssues());
+		OfficeFloorSource officeFloorSource = this.newOfficeFloorSource(
+				officeFloorSourceClass, officeFloorLocation);
 		if (officeFloorSource == null) {
 			return null; // failed to instantiate
 		}
+
+		// Load and return the required properties
+		return this.loadRequiredProperties(officeFloorSource,
+				officeFloorLocation, propertyList);
+	}
+
+	/**
+	 * Loads the required {@link Property} instances.
+	 * 
+	 * @param officeFloorSource
+	 *            {@link OfficeFloorSource}.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
+	 * @param propertyList
+	 *            {@link PropertyList} to configure the {@link OfficeFloor}.
+	 * @return Required {@link Property} instances or <code>null</code> if issue
+	 *         loading.
+	 */
+	private PropertyList loadRequiredProperties(
+			OfficeFloorSource officeFloorSource,
+			final String officeFloorLocation, PropertyList propertyList) {
 
 		// Create the office floor source context
 		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
@@ -264,13 +318,15 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
 					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
-					+ officeFloorSourceClass.getName(), officeFloorLocation);
+					+ officeFloorSource.getClass().getName(),
+					officeFloorLocation);
 			return null; // must have property
 
 		} catch (UnknownClassError ex) {
 			this.addIssue("Can not load class '" + ex.getUnknownClassName()
 					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
-					+ officeFloorSourceClass.getName(), officeFloorLocation);
+					+ officeFloorSource.getClass().getName(),
+					officeFloorLocation);
 			return null; // must have class
 
 		} catch (UnknownResourceError ex) {
@@ -278,14 +334,14 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 					"Can not obtain resource at location '"
 							+ ex.getUnknownResourceLocation() + "' for "
 							+ OfficeFloorSource.class.getSimpleName() + " "
-							+ officeFloorSourceClass.getName(),
+							+ officeFloorSource.getClass().getName(),
 					officeFloorLocation);
 			return null; // must have resource
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source required properties from "
 					+ OfficeFloorSource.class.getSimpleName() + " (source="
-					+ officeFloorSourceClass.getName() + ", location="
+					+ officeFloorSource.getClass().getName() + ", location="
 					+ officeFloorLocation + ")", ex, officeFloorLocation);
 			return null; // must be successful
 		}
@@ -305,12 +361,29 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			PropertyList propertyList) {
 
 		// Instantiate the office floor source
-		OfficeFloorSource officeFloorSource = CompileUtil.newInstance(
-				officeFloorSourceClass, OfficeFloorSource.class,
-				LocationType.OFFICE_FLOOR, officeFloorLocation, null, null,
-				this.nodeContext.getCompilerIssues());
+		OfficeFloorSource officeFloorSource = this.newOfficeFloorSource(
+				officeFloorSourceClass, officeFloorLocation);
 		if (officeFloorSource == null) {
 			return null; // failed to instantiate
+		}
+
+		// Load the specification properties
+		PropertyList properties = this.loadSpecification(officeFloorSource);
+
+		// Load the required properties
+		PropertyList requiredProperties = this.loadRequiredProperties(
+				officeFloorSource, officeFloorLocation, propertyList);
+		for (Property property : requiredProperties) {
+			String propertyName = property.getName();
+			if (properties.getProperty(propertyName) == null) {
+				properties.addProperty(propertyName, property.getLabel());
+			}
+		}
+
+		// Load optional properties
+		for (Property property : propertyList) {
+			properties.getOrAddProperty(property.getName()).setValue(
+					property.getValue());
 		}
 
 		// Load the OfficeFloor type
@@ -319,8 +392,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 		if (node == null) {
 			return null; // must be loaded
 		}
-		boolean isLoaded = node.loadOfficeFloorType(this.nodeContext
-				.getOfficeFrame());
+		boolean isLoaded = node.loadOfficeFloorType(PropertyNode
+				.constructPropertyNodes(properties));
 		if (!isLoaded) {
 			return null; // must be loaded
 		}
@@ -335,10 +408,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			PropertyList propertyList) {
 
 		// Instantiate the OfficeFloor source
-		OfficeFloorSource officeFloorSource = CompileUtil.newInstance(
-				officeFloorSourceClass, OfficeFloorSource.class,
-				LocationType.OFFICE_FLOOR, officeFloorLocation, null, null,
-				this.nodeContext.getCompilerIssues());
+		OfficeFloorSource officeFloorSource = this.newOfficeFloorSource(
+				officeFloorSourceClass, officeFloorLocation);
 		if (officeFloorSource == null) {
 			return null; // failed to instantiate
 		}
