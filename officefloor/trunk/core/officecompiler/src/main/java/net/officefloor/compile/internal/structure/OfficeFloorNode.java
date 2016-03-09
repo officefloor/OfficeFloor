@@ -18,13 +18,13 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.source.ResourceSource;
 
 /**
  * {@link OfficeFloor} node.
@@ -51,12 +51,12 @@ public interface OfficeFloorNode extends OfficeFloorDeployer {
 	/**
 	 * Loads the {@link OfficeFloorType}.
 	 * 
-	 * @param officeFrame
-	 *            {@link OfficeFrame} to provide {@link ResourceSource}
-	 *            instances in loading the {@link OfficeFloorType}.
+	 * @param properties
+	 *            {@link OfficeFloorPropertyType} instances to configure the
+	 *            {@link OfficeFloor}..
 	 * @return <code>true</code> if the {@link OfficeFloorType} was loaded.
 	 */
-	boolean loadOfficeFloorType(OfficeFrame officeFrame);
+	boolean loadOfficeFloorType(OfficeFloorPropertyType[] properties);
 
 	/**
 	 * Obtains the {@link OfficeFloorType}.

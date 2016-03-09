@@ -30,6 +30,15 @@ import net.officefloor.frame.spi.team.source.TeamSource;
 public interface OfficeFloorType {
 
 	/**
+	 * Obtains the {@link Property} instances to be configured for this
+	 * {@link OfficeFloor}.
+	 * 
+	 * @return {@link Property} instances to be configured for this
+	 *         {@link OfficeFloor}.
+	 */
+	OfficeFloorPropertyType[] getOfficeFloorPropertyTypes();
+
+	/**
 	 * Obtains the <code>type definitions</code> of the inputs to the
 	 * {@link OfficeFloor}.
 	 * 
@@ -44,15 +53,6 @@ public interface OfficeFloorType {
 	 * @return {@link OfficeFloorOutputType} instances.
 	 */
 	OfficeFloorOutputType[] getOfficeFloorOutputTypes();
-
-	/**
-	 * Obtains the required {@link Property} instances to be configured for this
-	 * {@link OfficeFloor}.
-	 * 
-	 * @return Required {@link Property} instances to be configured for this
-	 *         {@link OfficeFloor}.
-	 */
-	OfficeFloorRequiredPropertyType[] getOfficeFloorRequiredPropertyTypes();
 
 	/**
 	 * Obtains the <code>type definitions</code> of the
