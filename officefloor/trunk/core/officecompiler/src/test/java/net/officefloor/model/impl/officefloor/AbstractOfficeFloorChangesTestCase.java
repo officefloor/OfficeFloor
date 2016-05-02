@@ -22,8 +22,12 @@ import java.util.List;
 
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
+import net.officefloor.compile.office.OfficeOutputType;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.spi.office.OfficeInput;
+import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -110,7 +114,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 	protected interface OfficeTypeContext {
 
 		/**
-		 * Add {@link OfficeInputType}.
+		 * Add {@link OfficeSectionInputType}.
 		 * 
 		 * @param name
 		 *            Name of {@link OfficeSection}.
@@ -119,7 +123,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 * @param parameterType
 		 *            Parameter type.
 		 */
-		void addOfficeInput(String name, String inputName,
+		void addOfficeSectionInput(String sectionName, String inputName,
 				Class<?> parameterType);
 
 		/**
@@ -144,6 +148,32 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 *            Name of {@link OfficeTeamType}.
 		 */
 		void addOfficeTeam(String name);
+
+		/**
+		 * Add {@link OfficeInputType}.
+		 * 
+		 * @param inputName
+		 *            Name of {@link OfficeInput}.
+		 * @param parameterType
+		 *            Parameter type.
+		 * @param response
+		 *            {@link OfficeOutputType}.
+		 */
+		void addOfficeInput(String inputName, Class<?> parameterType,
+				OfficeOutputType response);
+
+		/**
+		 * Add {@link OfficeOutputType}.
+		 * 
+		 * @param outputName
+		 *            Name of {@link OfficeOutput}.
+		 * @param argumentType
+		 *            Argument type.
+		 * @param handler
+		 *            {@link OfficeInputType}.
+		 */
+		void addOfficeOutput(String outputName, Class<?> argumentType,
+				OfficeInputType handler);
 	}
 
 	/**
@@ -156,6 +186,16 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 * {@link OfficeInputType} instances.
 		 */
 		private final List<OfficeInputType> inputs = new LinkedList<OfficeInputType>();
+
+		/**
+		 * {@link OfficeOutputType} instances.
+		 */
+		private final List<OfficeOutputType> outputs = new LinkedList<OfficeOutputType>();
+
+		/**
+		 * {@link OfficeSectionInputType} instances.
+		 */
+		private final List<OfficeSectionInputType> sectionInputs = new LinkedList<OfficeSectionInputType>();
 
 		/**
 		 * {@link OfficeManagedObjectType} instances.
@@ -172,10 +212,24 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 */
 
 		@Override
-		public void addOfficeInput(String name, String inputName,
+		public void addOfficeInput(String inputName, Class<?> parameterType,
+				OfficeOutputType response) {
+			this.inputs.add(new OfficeTypeItem(inputName, parameterType
+					.getName(), response));
+		}
+
+		@Override
+		public void addOfficeOutput(String outputName, Class<?> argumentType,
+				OfficeInputType handler) {
+			this.outputs.add(new OfficeTypeItem(outputName, argumentType
+					.getName(), handler));
+		}
+
+		@Override
+		public void addOfficeSectionInput(String name, String inputName,
 				Class<?> parameterType) {
-			this.inputs.add(new OfficeTypeItem(name, inputName, parameterType
-					.getName()));
+			this.sectionInputs.add(new OfficeTypeItem(name, inputName,
+					parameterType.getName()));
 		}
 
 		@Override
@@ -195,8 +249,8 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 */
 
 		@Override
-		public OfficeInputType[] getOfficeInputTypes() {
-			return this.inputs.toArray(new OfficeInputType[0]);
+		public OfficeSectionInputType[] getOfficeSectionInputTypes() {
+			return this.sectionInputs.toArray(new OfficeSectionInputType[0]);
 		}
 
 		@Override
@@ -208,13 +262,26 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		public OfficeTeamType[] getOfficeTeamTypes() {
 			return this.teams.toArray(new OfficeTeamType[0]);
 		}
+
+		@Override
+		public OfficeInputType[] getOfficeInputTypes() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public OfficeOutputType[] getOfficeOutputTypes() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 
 	/**
 	 * {@link OfficeType} item.
 	 */
-	private class OfficeTypeItem implements OfficeInputType,
-			OfficeManagedObjectType, OfficeTeamType {
+	private class OfficeTypeItem implements OfficeSectionInputType,
+			OfficeManagedObjectType, OfficeTeamType, OfficeInputType,
+			OfficeOutputType {
 
 		/**
 		 * Name.
@@ -242,7 +309,17 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		private final String[] extensionInterfaces;
 
 		/**
-		 * Initialise for {@link OfficeInputType}.
+		 * {@link OfficeInputType}.
+		 */
+		private final OfficeInputType inputType;
+
+		/**
+		 * {@link OfficeOutputType}.
+		 */
+		private final OfficeOutputType outputType;
+
+		/**
+		 * Initialise for {@link OfficeSectionInputType}.
 		 * 
 		 * @param name
 		 *            Name.
@@ -258,6 +335,50 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 			this.type = parameterType;
 			this.typeQualifier = null;
 			this.extensionInterfaces = null;
+			this.inputType = null;
+			this.outputType = null;
+		}
+
+		/**
+		 * Initialise for {@link OfficeInputType}.
+		 * 
+		 * @param name
+		 *            Name.
+		 * @param parameterType
+		 *            Parameter type.
+		 * @param response
+		 *            {@link OfficeOutputType}.
+		 */
+		public OfficeTypeItem(String name, String parameterType,
+				OfficeOutputType response) {
+			this.name = name;
+			this.inputName = null;
+			this.type = parameterType;
+			this.typeQualifier = null;
+			this.extensionInterfaces = null;
+			this.inputType = null;
+			this.outputType = response;
+		}
+
+		/**
+		 * Initialise for {@link OfficeOutputType}.
+		 * 
+		 * @param name
+		 *            Name.
+		 * @param argumentType
+		 *            Argument type.
+		 * @param handler
+		 *            {@link OfficeInputType}.
+		 */
+		public OfficeTypeItem(String name, String argumentType,
+				OfficeInputType handler) {
+			this.name = name;
+			this.inputName = null;
+			this.type = argumentType;
+			this.typeQualifier = null;
+			this.extensionInterfaces = null;
+			this.inputType = handler;
+			this.outputType = null;
 		}
 
 		/**
@@ -282,6 +403,8 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 			for (int i = 0; i < this.extensionInterfaces.length; i++) {
 				this.extensionInterfaces[i] = extensionInterfaces[i].getName();
 			}
+			this.inputType = null;
+			this.outputType = null;
 		}
 
 		/**
@@ -296,10 +419,12 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 			this.type = null;
 			this.typeQualifier = null;
 			this.extensionInterfaces = null;
+			this.inputType = null;
+			this.outputType = null;
 		}
 
 		/*
-		 * ================== OfficeInputType =========================
+		 * =========== OfficeSectionInputType / OfficeInputType ===========
 		 */
 
 		@Override
@@ -315,6 +440,16 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		@Override
 		public String getParameterType() {
 			return this.type;
+		}
+
+		@Override
+		public String getOfficeInputName() {
+			return this.name;
+		}
+
+		@Override
+		public OfficeOutputType getResponseOfficeOutputType() {
+			return this.outputType;
 		}
 
 		/*
@@ -348,6 +483,25 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		@Override
 		public String getOfficeTeamName() {
 			return this.name;
+		}
+
+		/*
+		 * ================== OfficeOutputType =================================
+		 */
+
+		@Override
+		public String getOfficeOutputName() {
+			return this.name;
+		}
+
+		@Override
+		public String getArgumentType() {
+			return this.type;
+		}
+
+		@Override
+		public OfficeInputType getHandlingOfficeInputType() {
+			return this.inputType;
 		}
 	}
 

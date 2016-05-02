@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
@@ -77,7 +77,7 @@ public abstract class AbstractRefactorDeployedOfficeTest extends
 	private final Map<String, String> objectNameMapping = new HashMap<String, String>();
 
 	/**
-	 * Mapping of {@link OfficeInputType} name to
+	 * Mapping of {@link OfficeSectionInputType} name to
 	 * {@link DeployedOfficeInputModel} name.
 	 */
 	private final Map<String, String> inputNameMapping = new HashMap<String, String>();
@@ -179,11 +179,11 @@ public abstract class AbstractRefactorDeployedOfficeTest extends
 	}
 
 	/**
-	 * Maps {@link OfficeInputType} name to {@link DeployedOfficeInputModel}
+	 * Maps {@link OfficeSectionInputType} name to {@link DeployedOfficeInputModel}
 	 * name.
 	 *
 	 * @param inputTypeName
-	 *            {@link OfficeInputType} name.
+	 *            {@link OfficeSectionInputType} name.
 	 * @param inputModelName
 	 *            {@link DeployedOfficeInputModel} name.
 	 */

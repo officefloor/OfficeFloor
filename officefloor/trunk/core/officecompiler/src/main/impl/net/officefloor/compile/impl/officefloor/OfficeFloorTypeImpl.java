@@ -17,9 +17,7 @@
  */
 package net.officefloor.compile.impl.officefloor;
 
-import net.officefloor.compile.officefloor.OfficeFloorInputType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
-import net.officefloor.compile.officefloor.OfficeFloorOutputType;
 import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
@@ -37,16 +35,6 @@ public class OfficeFloorTypeImpl implements OfficeFloorType {
 	private final OfficeFloorPropertyType[] propertyTypes;
 
 	/**
-	 * {@link OfficeFloorInputType} instances.
-	 */
-	private final OfficeFloorInputType[] inputTypes;
-
-	/**
-	 * {@link OfficeFloorOutputType} instances.
-	 */
-	private final OfficeFloorOutputType[] outputTypes;
-
-	/**
 	 * {@link OfficeFloorManagedObjectSourceType} instances.
 	 */
 	private final OfficeFloorManagedObjectSourceType[] managedObjectSourceTypes;
@@ -61,23 +49,15 @@ public class OfficeFloorTypeImpl implements OfficeFloorType {
 	 * 
 	 * @param propertyTypes
 	 *            {@link OfficeFloorPropertyType} instances.
-	 * @param inputTypes
-	 *            {@link OfficeFloorInputType} instances.
-	 * @param outputTypes
-	 *            {@link OfficeFloorOutputType} instances.
 	 * @param managedObjectSourceTypes
 	 *            {@link OfficeFloorManagedObjectSourceType} instances.
 	 * @param teamSourceTypes
 	 *            {@link OfficeFloorTeamSourceType} instances.
 	 */
 	public OfficeFloorTypeImpl(OfficeFloorPropertyType[] propertyTypes,
-			OfficeFloorInputType[] inputTypes,
-			OfficeFloorOutputType[] outputTypes,
 			OfficeFloorManagedObjectSourceType[] managedObjectSourceTypes,
 			OfficeFloorTeamSourceType[] teamSourceTypes) {
 		this.propertyTypes = propertyTypes;
-		this.inputTypes = inputTypes;
-		this.outputTypes = outputTypes;
 		this.managedObjectSourceTypes = managedObjectSourceTypes;
 		this.teamSourceTypes = teamSourceTypes;
 	}
@@ -89,16 +69,6 @@ public class OfficeFloorTypeImpl implements OfficeFloorType {
 	@Override
 	public OfficeFloorPropertyType[] getOfficeFloorPropertyTypes() {
 		return this.propertyTypes;
-	}
-
-	@Override
-	public OfficeFloorInputType[] getOfficeFloorInputTypes() {
-		return this.inputTypes;
-	}
-
-	@Override
-	public OfficeFloorOutputType[] getOfficeFloorOutputTypes() {
-		return this.outputTypes;
 	}
 
 	@Override

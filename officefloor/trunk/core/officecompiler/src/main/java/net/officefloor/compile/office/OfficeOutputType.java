@@ -18,39 +18,40 @@
 package net.officefloor.compile.office;
 
 import net.officefloor.compile.spi.office.OfficeInput;
+import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.frame.api.manage.Office;
 
 /**
- * <code>Type definition</code> of an {@link OfficeInput} into the
+ * <code>Type definition</code> of an {@link OfficeOutput} from the
  * {@link Office}.
- * 
+ *
  * @author Daniel Sagenschneider
  */
-public interface OfficeInputType {
+public interface OfficeOutputType {
 
 	/**
-	 * Obtains the name of {@link OfficeInput}.
+	 * Obtains the name of {@link OfficeOutput}.
 	 * 
-	 * @return Name of this {@link OfficeInput}.
+	 * @return Name of this {@link OfficeOutput}.
 	 */
-	String getOfficeInputName();
+	String getOfficeOutputName();
 
 	/**
-	 * Obtains the fully qualified class name of the parameter type to this
-	 * {@link OfficeInput}.
+	 * Obtains the fully qualified class name of the argument type from this
+	 * {@link OfficeOutput}.
 	 * 
-	 * @return Parameter type to this {@link OfficeInput}.
+	 * @return Argument type to this {@link OfficeOutput}.
 	 */
-	String getParameterType();
+	String getArgumentType();
 
 	/**
-	 * Obtains the possible {@link OfficeOutputType} responsible for sending the
-	 * response for this {@link OfficeInput}.
+	 * Obtains the possible {@link OfficeInput} for handling a response from
+	 * this {@link OfficeOutput}.
 	 * 
-	 * @return Possible {@link OfficeOutputType} responsible for sending the
-	 *         response for this {@link OfficeInput}. May be <code>null</code>
-	 *         to indicate no response is sent.
+	 * @return Possible {@link OfficeInput} for handling a response from this
+	 *         {@link OfficeOutput}. May be <code>null</code> to indicate no
+	 *         response required.
 	 */
-	OfficeOutputType getResponseOfficeOutputType();
+	OfficeInputType getHandlingOfficeInputType();
 
 }

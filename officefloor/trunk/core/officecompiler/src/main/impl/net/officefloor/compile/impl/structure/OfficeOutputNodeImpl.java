@@ -17,18 +17,17 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import net.officefloor.compile.internal.structure.OfficeFloorOutputNode;
-import net.officefloor.compile.officefloor.OfficeFloorInputType;
-import net.officefloor.compile.officefloor.OfficeFloorOutputType;
-import net.officefloor.compile.spi.officefloor.OfficeFloorOutput;
+import net.officefloor.compile.internal.structure.LinkSynchronousNode;
+import net.officefloor.compile.internal.structure.OfficeOutputNode;
+import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeOutputType;
 
 /**
- * Implementation of the {@link OfficeFloorOutputNode}.
+ * Implementation of the {@link OfficeOutputNode}.
  *
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorOutputNodeImpl implements OfficeFloorOutputNode,
-		OfficeFloorOutputType {
+public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType {
 
 	/**
 	 * Name of this {@link OfficeFloorOutput}.
@@ -48,26 +47,33 @@ public class OfficeFloorOutputNodeImpl implements OfficeFloorOutputNode,
 	 * @param argumentType
 	 *            Argument type from this {@link OfficeFloorOutput}.
 	 */
-	public OfficeFloorOutputNodeImpl(String name, String argumentType) {
+	public OfficeOutputNodeImpl(String name, String argumentType) {
 		this.name = name;
 		this.argumentType = argumentType;
 	}
 
 	/*
-	 * ================= OfficeFloorOuputNode =============================
+	 * ================= OfficeOuputNode =============================
 	 */
 
 	@Override
-	public OfficeFloorOutputType getOfficeFloorOutputType() {
-		return this;
+	public boolean linkSynchronousNode(LinkSynchronousNode node) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public LinkSynchronousNode getLinkedSynchronousNode() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/*
-	 * =================== OfficeFloorOuput ===============================
+	 * =================== OfficeOuput ===============================
 	 */
 
 	@Override
-	public String getOfficeFloorOutputName() {
+	public String getOfficeOutputName() {
 		return this.name;
 	}
 
@@ -77,11 +83,11 @@ public class OfficeFloorOutputNodeImpl implements OfficeFloorOutputNode,
 	}
 
 	/*
-	 * ================= OfficeFloorOuputType =============================
+	 * ================= OfficeOuputType =============================
 	 */
 
 	@Override
-	public OfficeFloorInputType getHandlingOfficeFloorInputType() {
+	public OfficeInputType getHandlingOfficeInputType() {
 		// TODO Auto-generated method stub
 		return null;
 	}

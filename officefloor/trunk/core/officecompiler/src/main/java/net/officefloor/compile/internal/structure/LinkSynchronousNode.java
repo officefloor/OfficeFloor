@@ -17,35 +17,32 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.office.OfficeSectionInputType;
-import net.officefloor.compile.section.SectionInputType;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.section.SectionInput;
-import net.officefloor.compile.spi.section.SubSectionInput;
-
 /**
- * {@link SectionInput} node.
+ * {@link LinkSynchronousNode} that can be linked to another
+ * {@link LinkSynchronousNode}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionInputNode extends SectionInputType, SectionInput,
-		SubSectionInput, OfficeSectionInput, OfficeSectionInputType,
-		DeployedOfficeInput, LinkFlowNode {
+public interface LinkSynchronousNode {
 
 	/**
-	 * Indicates if this {@link SectionInputType} has been initialised.
+	 * Links the input {@link LinkSynchronousNode} to this
+	 * {@link LinkSynchronousNode}.
 	 * 
-	 * @return <code>true</code> if initialised.
+	 * @param node
+	 *            {@link LinkSynchronousNode} to link to this
+	 *            {@link LinkSynchronousNode}.
+	 * @return <code>true</code> if linked.
 	 */
-	boolean isInitialised();
+	boolean linkSynchronousNode(LinkSynchronousNode node);
 
 	/**
-	 * Initialises this {@link SectionInputType}.
+	 * Obtains the {@link LinkSynchronousNode} linked to this
+	 * {@link LinkSynchronousNode}.
 	 * 
-	 * @param parameterType
-	 *            Parameter type.
+	 * @return {@link LinkSynchronousNode} linked to this
+	 *         {@link LinkSynchronousNode}.
 	 */
-	void initialise(String parameterType);
+	LinkSynchronousNode getLinkedSynchronousNode();
 
 }

@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.office;
 
+import net.officefloor.compile.spi.office.OfficeInput;
+import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -28,6 +30,24 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public interface OfficeType {
+
+	/**
+	 * Obtains the {@link OfficeInput} <code>type definitions</code> required by
+	 * this {@link OfficeType}.
+	 * 
+	 * @return {@link OfficeInput} <code>type definitions</code> required by
+	 *         this {@link OfficeType}.
+	 */
+	OfficeInputType[] getOfficeInputTypes();
+
+	/**
+	 * Obtains the {@link OfficeOutput} <code>type definitions</code> required
+	 * by this {@link OfficeType}.
+	 * 
+	 * @return {@link OfficeOutput} <code>type definitions</code> required by
+	 *         this {@link OfficeType}.
+	 */
+	OfficeOutputType[] getOfficeOutputTypes();
 
 	/**
 	 * Obtains the {@link Team} <code>type definitions</code> required by this
@@ -54,6 +74,6 @@ public interface OfficeType {
 	 * @return {@link OfficeSectionInput} <code>type definition</code> available
 	 *         for this {@link OfficeType}.
 	 */
-	OfficeInputType[] getOfficeInputTypes();
+	OfficeSectionInputType[] getOfficeSectionInputTypes();
 
 }

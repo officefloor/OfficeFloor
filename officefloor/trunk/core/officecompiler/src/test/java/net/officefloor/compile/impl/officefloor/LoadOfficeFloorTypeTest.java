@@ -26,11 +26,9 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeType;
-import net.officefloor.compile.officefloor.OfficeFloorInputType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourcePropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
-import net.officefloor.compile.officefloor.OfficeFloorOutputType;
 import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourcePropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
@@ -38,8 +36,6 @@ import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInput;
-import net.officefloor.compile.spi.officefloor.OfficeFloorOutput;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
@@ -466,187 +462,6 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		public Team createTeam(TeamSourceContext context) throws Exception {
 			return null; // Team is ignored
 		}
-	}
-
-	/**
-	 * Ensure obtain the {@link OfficeFloorInputType}.
-	 */
-	public void testInputType_Asynchronous() {
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor,
-					OfficeFloorSourceContext context) throws Exception {
-				officeFloor.addInput("INPUT", Integer.class.getName());
-			}
-		}, new Validator() {
-			@Override
-			void validate(OfficeFloorType type) {
-				OfficeFloorInputType[] inputs = type.getOfficeFloorInputTypes();
-				assertEquals("Incorrect number of inputs", 1, inputs.length);
-				OfficeFloorInputType input = inputs[0];
-				assertEquals("Incorrect input name", "INPUT",
-						input.getOfficeFloorInputName());
-				assertEquals("Incorrect input parameter type",
-						Integer.class.getName(), input.getParameterType());
-				assertNull("Should be no corresponding output",
-						input.getResponseOfficeFloorOutputType());
-			}
-		});
-	}
-
-	/**
-	 * Ensure issue if duplicate name for {@link OfficeFloorInput} instances.
-	 */
-	public void testInputType_DuplicateName() {
-		this.record_issue("OfficeFloor input TEST already added");
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor,
-					OfficeFloorSourceContext context) throws Exception {
-				OfficeFloorInput inputOne = officeFloor.addInput("TEST",
-						String.class.getName());
-				OfficeFloorInput inputTwo = officeFloor.addInput("TEST",
-						Integer.class.getName());
-				assertSame("Should be the same object", inputOne, inputTwo);
-			}
-		}, new Validator() {
-			@Override
-			void validate(OfficeFloorType type) {
-				OfficeFloorInputType[] inputs = type.getOfficeFloorInputTypes();
-				assertEquals("Incorrect number of inputs", 1, inputs.length);
-				OfficeFloorInputType input = inputs[0];
-				assertEquals("Incorrect input name", "TEST",
-						input.getOfficeFloorInputName());
-			}
-		});
-	}
-
-	/**
-	 * Ensure obtain the {@link OfficeFloorOutputType}.
-	 */
-	public void testOutputType_Asynchronous() {
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor,
-					OfficeFloorSourceContext context) throws Exception {
-				officeFloor.addOutput("OUTPUT", Long.class.getName());
-			}
-		}, new Validator() {
-			@Override
-			void validate(OfficeFloorType type) {
-				OfficeFloorOutputType[] outputs = type
-						.getOfficeFloorOutputTypes();
-				assertEquals("Incorrect number of outputs", 1, outputs.length);
-				OfficeFloorOutputType output = outputs[0];
-				assertEquals("Incorrect output name", "OUTPUT",
-						output.getOfficeFloorOutputName());
-				assertEquals("Incorrect output argument type",
-						Long.class.getName(), output.getArgumentType());
-				assertNull("Should be no corresponding input",
-						output.getHandlingOfficeFloorInputType());
-			}
-		});
-	}
-
-	/**
-	 * Ensure issue if duplicate name for {@link OfficeFloorOutput} instances.
-	 */
-	public void testOutputType_DuplicateName() {
-		this.record_issue("OfficeFloor output TEST already added");
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor,
-					OfficeFloorSourceContext context) throws Exception {
-				OfficeFloorOutput outputOne = officeFloor.addOutput("TEST",
-						String.class.getName());
-				OfficeFloorOutput outputTwo = officeFloor.addOutput("TEST",
-						Integer.class.getName());
-				assertSame("Should be the same object", outputOne, outputTwo);
-			}
-		}, new Validator() {
-			@Override
-			void validate(OfficeFloorType type) {
-				OfficeFloorOutputType[] outputs = type
-						.getOfficeFloorOutputTypes();
-				assertEquals("Incorrect number of outputs", 1, outputs.length);
-				OfficeFloorOutputType output = outputs[0];
-				assertEquals("Incorrect output name", "TEST",
-						output.getOfficeFloorOutputName());
-			}
-		});
-	}
-
-	/**
-	 * Ensure obtain synchronous {@link OfficeFloorOutputType}.
-	 */
-	public void testInputOutput_Synchronous() {
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor,
-					OfficeFloorSourceContext context) throws Exception {
-				OfficeFloorInput input = officeFloor.addInput("INPUT",
-						Integer.class.getName());
-				OfficeFloorOutput output = officeFloor.addOutput("OUTPUT",
-						Long.class.getName());
-				officeFloor.linkSynchronousInput(input, output);
-			}
-		}, new Validator() {
-			@Override
-			void validate(OfficeFloorType type) {
-				// Validate synchronous input
-				OfficeFloorInputType[] inputs = type.getOfficeFloorInputTypes();
-				assertEquals("Incorrect number of inputs", 1, inputs.length);
-				OfficeFloorInputType input = inputs[0];
-				assertEquals("Incorrect input name", "INPUT",
-						input.getOfficeFloorInputName());
-				OfficeFloorOutputType output = input
-						.getResponseOfficeFloorOutputType();
-				assertNotNull("Should have response output", output);
-				assertEquals("Incorrect output name", "OUTPUT",
-						output.getOfficeFloorOutputName());
-
-				// Ensure synchronous output not included in outputs
-				assertEquals("Should be no outputs", 0,
-						type.getOfficeFloorOutputTypes().length);
-			}
-		});
-	}
-
-	/**
-	 * Ensure obtain synchronous {@link OfficeFloorInputType}.
-	 */
-	public void testOutputInput_Synchronous() {
-		this.loadType(new Loader() {
-			@Override
-			public void sourceOffice(OfficeFloorDeployer officeFloor,
-					OfficeFloorSourceContext context) throws Exception {
-				OfficeFloorOutput output = officeFloor.addOutput("OUTPUT",
-						Long.class.getName());
-				OfficeFloorInput input = officeFloor.addInput("INPUT",
-						Integer.class.getName());
-				officeFloor.linkSynchronousOutput(output, input);
-			}
-		}, new Validator() {
-			@Override
-			void validate(OfficeFloorType type) {
-				// Validate synchronous output
-				OfficeFloorOutputType[] outputs = type
-						.getOfficeFloorOutputTypes();
-				assertEquals("Incorrect number of outputs", 1, outputs.length);
-				OfficeFloorOutputType output = outputs[0];
-				assertEquals("Incorrect output name", "OUTPUT",
-						output.getOfficeFloorOutputName());
-				OfficeFloorInputType input = output
-						.getHandlingOfficeFloorInputType();
-				assertNotNull("Should have handling input", input);
-				assertEquals("Incorrect input name", "INPUT",
-						input.getOfficeFloorInputName());
-
-				// Ensure synchronous input not included in inputs
-				assertEquals("Should be no inputs", 0,
-						type.getOfficeFloorInputTypes().length);
-			}
-		});
 	}
 
 	/**

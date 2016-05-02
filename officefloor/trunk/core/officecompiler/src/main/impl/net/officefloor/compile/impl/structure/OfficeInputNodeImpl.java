@@ -17,18 +17,18 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import net.officefloor.compile.internal.structure.OfficeFloorInputNode;
-import net.officefloor.compile.officefloor.OfficeFloorInputType;
-import net.officefloor.compile.officefloor.OfficeFloorOutputType;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInput;
+import net.officefloor.compile.internal.structure.LinkSynchronousNode;
+import net.officefloor.compile.internal.structure.OfficeInputNode;
+import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeOutputType;
 
 /**
  * Implementation of the {@link OfficeFloorInputNode}.
  *
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorInputNodeImpl implements OfficeFloorInputNode,
-		OfficeFloorInputType {
+public class OfficeInputNodeImpl implements OfficeInputNode,
+		OfficeInputType {
 
 	/**
 	 * Name of this {@link OfficeFloorInput}.
@@ -48,26 +48,33 @@ public class OfficeFloorInputNodeImpl implements OfficeFloorInputNode,
 	 * @param parameterType
 	 *            Parameter type of {@link OfficeFloorInput}.
 	 */
-	public OfficeFloorInputNodeImpl(String name, String parameterType) {
+	public OfficeInputNodeImpl(String name, String parameterType) {
 		this.name = name;
 		this.parameterType = parameterType;
 	}
 
 	/*
-	 * ======================= OfficeFloorInputNode ===========================
+	 * ======================= OfficeInputNode ===========================
 	 */
 
 	@Override
-	public OfficeFloorInputType getOfficeFloorInputType() {
-		return this;
+	public boolean linkSynchronousNode(LinkSynchronousNode node) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public LinkSynchronousNode getLinkedSynchronousNode() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/*
-	 * ========================= OfficeFloorInput =============================
+	 * ========================= OfficeInput =============================
 	 */
 
 	@Override
-	public String getOfficeFloorInputName() {
+	public String getOfficeInputName() {
 		return this.name;
 	}
 
@@ -77,11 +84,11 @@ public class OfficeFloorInputNodeImpl implements OfficeFloorInputNode,
 	}
 
 	/*
-	 * ======================= OfficeFloorInputType ===========================
+	 * ======================= OfficeInputType ===========================
 	 */
 
 	@Override
-	public OfficeFloorOutputType getResponseOfficeFloorOutputType() {
+	public OfficeOutputType getResponseOfficeOutputType() {
 		// TODO Auto-generated method stub
 		return null;
 	}

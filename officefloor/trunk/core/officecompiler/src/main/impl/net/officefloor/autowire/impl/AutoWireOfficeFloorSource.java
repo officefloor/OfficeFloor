@@ -51,7 +51,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
@@ -530,7 +530,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 		// Load all handled office inputs
 		Set<AutoWire> handledInputs = new HashSet<AutoWire>();
-		for (OfficeInputType officeInput : officeType.getOfficeInputTypes()) {
+		for (OfficeSectionInputType officeInput : officeType
+				.getOfficeSectionInputTypes()) {
 
 			// Obtain the auto-wire for the office input
 			String sectionName = officeInput.getOfficeSectionName();

@@ -39,22 +39,6 @@ public interface OfficeFloorType {
 	OfficeFloorPropertyType[] getOfficeFloorPropertyTypes();
 
 	/**
-	 * Obtains the <code>type definitions</code> of the inputs to the
-	 * {@link OfficeFloor}.
-	 * 
-	 * @return {@link OfficeFloorInputType} instances.
-	 */
-	OfficeFloorInputType[] getOfficeFloorInputTypes();
-
-	/**
-	 * Obtains the <code>type definitions</code> of the outputs from this
-	 * {@link OfficeFloor}.
-	 * 
-	 * @return {@link OfficeFloorOutputType} instances.
-	 */
-	OfficeFloorOutputType[] getOfficeFloorOutputTypes();
-
-	/**
 	 * Obtains the <code>type definitions</code> of the
 	 * {@link ManagedObjectSource} instances that may be configured for the
 	 * {@link OfficeFloor}.

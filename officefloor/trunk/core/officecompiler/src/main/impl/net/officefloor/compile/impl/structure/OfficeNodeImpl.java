@@ -41,8 +41,10 @@ import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
+import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -50,6 +52,8 @@ import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
+import net.officefloor.compile.office.OfficeOutputType;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
@@ -59,9 +63,11 @@ import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
+import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
@@ -136,6 +142,16 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 * {@link OfficeTeamNode} instances by their {@link OfficeTeam} name.
 	 */
 	private final Map<String, TeamStruct> teams = new HashMap<String, TeamStruct>();
+
+	/**
+	 * {@link OfficeInputNode} instances by their name.
+	 */
+	private final Map<String, OfficeInputNode> inputs = new HashMap<String, OfficeInputNode>();
+
+	/**
+	 * {@link OfficeOutputNode} instances by their name.
+	 */
+	private final Map<String, OfficeOutputNode> outputs = new HashMap<String, OfficeOutputNode>();
 
 	/**
 	 * {@link SectionNode} instances by their {@link OfficeSection} name.
@@ -271,16 +287,64 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 */
 
 	@Override
+	public OfficeOutputType[] getOfficeOutputTypes() {
+		
+		// Copy the inputs into an array (in deterministic order)
+		OfficeInputNode[] inputs = CompileUtil.toSortedArray(
+				this.inputs.values(), new OfficeInputNode[0],
+				new StringExtractor<OfficeInputNode>() {
+					@Override
+					public String toString(OfficeInputNode object) {
+						return object.getOfficeInputName();
+					}
+				});
+		List<OfficeInputType> inputTypes = new LinkedList<OfficeInputType>();
+		for (OfficeInputNode input : inputs) {
+//			OfficeInputType inputType = input.getOfficeInputType();
+//			if (inputType != null) {
+//				inputTypes.add(inputType);
+//			}
+		}
+
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
 	public OfficeInputType[] getOfficeInputTypes() {
 
+		// Copy the outputs into an array (in deterministic order)
+		OfficeOutputNode[] outputs = CompileUtil.toSortedArray(
+				this.outputs.values(), new OfficeOutputNode[0],
+				new StringExtractor<OfficeOutputNode>() {
+					@Override
+					public String toString(OfficeOutputNode object) {
+						return object.getOfficeOutputName();
+					}
+				});
+		List<OfficeOutputType> outputTypes = new LinkedList<OfficeOutputType>();
+		for (OfficeOutputNode output : outputs) {
+//			OfficeOutputType outputType = output.getOfficeOutputType();
+//			if (outputType != null) {
+//				outputTypes.add(outputType);
+//			}
+		}
+
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public OfficeSectionInputType[] getOfficeSectionInputTypes() {
+
 		// Create the listing of office inputs
-		List<OfficeInputType> inputs = new LinkedList<OfficeInputType>();
+		List<OfficeSectionInputType> inputs = new LinkedList<OfficeSectionInputType>();
 		for (SectionNode section : this.sections.values()) {
 			inputs.addAll(Arrays.asList(section.getOfficeInputTypes()));
 		}
 
 		// Return the listing of office inputs
-		return inputs.toArray(new OfficeInputType[0]);
+		return inputs.toArray(new OfficeSectionInputType[0]);
 	}
 
 	@Override
@@ -711,6 +775,40 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
+	public OfficeInput addInput(String inputName, String parameterType) {
+		// Obtain and return the input for the name
+		OfficeInputNode input = this.inputs.get(inputName);
+		if (input == null) {
+			// Create the input
+			input = new OfficeInputNodeImpl(inputName, parameterType);
+
+			// Add the input
+			this.inputs.put(inputName, input);
+		} else {
+			// Input already added
+			this.addIssue("Office input " + inputName + " already added");
+		}
+		return input;
+	}
+
+	@Override
+	public OfficeOutput addOutput(String outputName, String argumentType) {
+		// Obtain and return the output for the name
+		OfficeOutputNode output = this.outputs.get(outputName);
+		if (output == null) {
+			// Create the output
+			output = new OfficeOutputNodeImpl(outputName, argumentType);
+
+			// Add the output
+			this.outputs.put(outputName, output);
+		} else {
+			// Output already added
+			this.addIssue("Office output " + outputName + " already added");
+		}
+		return output;
+	}
+
+	@Override
 	public OfficeTeam addOfficeTeam(String officeTeamName) {
 		// Obtain and return the team for the name
 		TeamStruct struct = this.teams.get(officeTeamName);
@@ -956,6 +1054,30 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 					+ " already added");
 		}
 		return start;
+	}
+
+	@Override
+	public void link(OfficeInput input, OfficeOutput output) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public void link(OfficeInput input, OfficeSectionInput sectionInput) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public void link(OfficeOutput output, OfficeInput input) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public void link(OfficeSectionOutput sectionOutput, OfficeOutput output) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
