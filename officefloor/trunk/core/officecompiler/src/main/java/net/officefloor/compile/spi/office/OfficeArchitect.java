@@ -38,6 +38,30 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface OfficeArchitect {
 
 	/**
+	 * Adds a {@link OfficeInput}.
+	 * 
+	 * @param inputName
+	 *            Name of the {@link OfficeInput}.
+	 * @param parameterType
+	 *            Fully qualified type name of the parameter to this
+	 *            {@link OfficeInput}.
+	 * @return Added {@link OfficeInput}.
+	 */
+	OfficeInput addInput(String inputName, String parameterType);
+
+	/**
+	 * Adds a {@link OfficeOutput}.
+	 * 
+	 * @param outputName
+	 *            Name of the {@link OfficeOutput}.
+	 * @param argumentType
+	 *            Fully qualified type name of the argument from this
+	 *            {@link OfficeOutput}.
+	 * @return Added {@link OfficeOutput}.
+	 */
+	OfficeOutput addOutput(String outputName, String argumentType);
+
+	/**
 	 * Adds an {@link OfficeObject}.
 	 * 
 	 * @param officeObjectName
@@ -181,6 +205,50 @@ public interface OfficeArchitect {
 	 * @return Added {@link OfficeStart}.
 	 */
 	OfficeStart addOfficeStart(String startName);
+
+	/**
+	 * Links the {@link OfficeOutput} for synchronous response to an
+	 * {@link OfficeInput}.
+	 * 
+	 * @param input
+	 *            {@link OfficeInput} to receive request.
+	 * @param output
+	 *            {@link OfficeOutput} to provide response.
+	 */
+	void link(OfficeInput input, OfficeOutput output);
+
+	/**
+	 * Links the {@link OfficeInput} to be handled by the
+	 * {@link OfficeSectionInput}.
+	 * 
+	 * @param input
+	 *            {@link OfficeInput}.
+	 * @param sectionInput
+	 *            {@link OfficeSectionInput}.
+	 */
+	void link(OfficeInput input, OfficeSectionInput sectionInput);
+
+	/**
+	 * Links the {@link OfficeInput} for synchronous request to an
+	 * {@link OfficeOutput}.
+	 * 
+	 * @param output
+	 *            {@link OfficeOutput} to make request.
+	 * @param input
+	 *            {@link OfficeInput} to handle response.
+	 */
+	void link(OfficeOutput output, OfficeInput input);
+
+	/**
+	 * Links the {@link OfficeSectionOutput} to be handled by the
+	 * {@link OfficeOutput}.
+	 * 
+	 * @param sectionOutput
+	 *            {@link OfficeSectionOutput}.
+	 * @param output
+	 *            {@link OfficeOutput}.
+	 */
+	void link(OfficeSectionOutput sectionOutput, OfficeOutput output);
 
 	/**
 	 * Links the {@link OfficeSectionObject} to be the

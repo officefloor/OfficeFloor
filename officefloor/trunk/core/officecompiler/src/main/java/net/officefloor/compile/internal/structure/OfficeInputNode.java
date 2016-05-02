@@ -17,23 +17,13 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.officefloor.OfficeFloorInputType;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInput;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.compile.spi.office.OfficeInput;
 
 /**
- * Input to the {@link OfficeFloor}.
+ * {@link OfficeInput} node.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorInputNode extends OfficeFloorInput {
-
-	/**
-	 * Obtains the {@link OfficeFloorInputType} for this
-	 * {@link OfficeFloorInputNode}.
-	 * 
-	 * @return {@link OfficeFloorInputType}.
-	 */
-	OfficeFloorInputType getOfficeFloorInputType();
+public interface OfficeInputNode extends OfficeInput, LinkSynchronousNode {
 
 }

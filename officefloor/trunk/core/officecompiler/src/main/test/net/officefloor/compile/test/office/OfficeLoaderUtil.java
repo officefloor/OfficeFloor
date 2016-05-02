@@ -23,6 +23,8 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeOutputType;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
@@ -170,6 +172,27 @@ public class OfficeLoaderUtil {
 		OfficeType actualOffice = loadOfficeType(officeSourceClass,
 				officeLocation, propertyNameValuePairs);
 
+		// Validate the section inputs
+		OfficeSectionInputType[] eSectionInputs = expectedOffice
+				.getOfficeSectionInputTypes();
+		OfficeSectionInputType[] aSectionInputs = actualOffice
+				.getOfficeSectionInputTypes();
+		TestCase.assertEquals("Incorrect number of section inputs",
+				eSectionInputs.length, aSectionInputs.length);
+		for (int i = 0; i < eSectionInputs.length; i++) {
+			OfficeSectionInputType eSectionInput = eSectionInputs[i];
+			OfficeSectionInputType aSectionInput = aSectionInputs[i];
+			TestCase.assertEquals("Incorrect name for section input " + i,
+					eSectionInput.getOfficeSectionInputName(),
+					aSectionInput.getOfficeSectionInputName());
+			TestCase.assertEquals("Incorrect section for section input " + i,
+					eSectionInput.getOfficeSectionName(),
+					aSectionInput.getOfficeSectionName());
+			TestCase.assertEquals("Incorrect parameter type for section input "
+					+ i, eSectionInput.getParameterType(),
+					aSectionInput.getParameterType());
+		}
+
 		// Validate the inputs
 		OfficeInputType[] eInputs = expectedOffice.getOfficeInputTypes();
 		OfficeInputType[] aInputs = actualOffice.getOfficeInputTypes();
@@ -179,13 +202,50 @@ public class OfficeLoaderUtil {
 			OfficeInputType eInput = eInputs[i];
 			OfficeInputType aInput = aInputs[i];
 			TestCase.assertEquals("Incorrect name for input " + i,
-					eInput.getOfficeSectionInputName(),
-					aInput.getOfficeSectionInputName());
-			TestCase.assertEquals("Incorrect section for input " + i,
-					eInput.getOfficeSectionName(),
-					aInput.getOfficeSectionName());
+					eInput.getOfficeInputName(), aInput.getOfficeInputName());
 			TestCase.assertEquals("Incorrect parameter type for input " + i,
 					eInput.getParameterType(), aInput.getParameterType());
+			OfficeOutputType eResponse = eInput.getResponseOfficeOutputType();
+			if (eResponse == null) {
+				TestCase.assertNull(
+						"Should not have response output for input " + i,
+						aInput.getResponseOfficeOutputType());
+			} else {
+				OfficeOutputType aResponse = aInput
+						.getResponseOfficeOutputType();
+				TestCase.assertEquals(
+						"Incorrect response output for input " + i,
+						eResponse.getOfficeOutputName(),
+						(aResponse == null ? null : aResponse
+								.getOfficeOutputName()));
+			}
+		}
+
+		// Validate the outputs
+		OfficeOutputType[] eOutputs = expectedOffice.getOfficeOutputTypes();
+		OfficeOutputType[] aOutputs = actualOffice.getOfficeOutputTypes();
+		TestCase.assertEquals("Incorrect number of outputs", eOutputs.length,
+				aOutputs.length);
+		for (int i = 0; i < eOutputs.length; i++) {
+			OfficeOutputType eOutput = eOutputs[i];
+			OfficeOutputType aOutput = aOutputs[i];
+			TestCase.assertEquals("Incorrect name for output " + i,
+					eOutput.getOfficeOutputName(),
+					aOutput.getOfficeOutputName());
+			TestCase.assertEquals("Incorrect argument type for output " + i,
+					eOutput.getArgumentType(), aOutput.getArgumentType());
+			OfficeInputType eHandler = eOutput.getHandlingOfficeInputType();
+			if (eHandler == null) {
+				TestCase.assertEquals(
+						"Should not have handler input for output " + i,
+						aOutput.getHandlingOfficeInputType());
+			} else {
+				OfficeInputType aHandler = aOutput.getHandlingOfficeInputType();
+				TestCase.assertEquals(
+						"Incorrect handler input for output " + i, eHandler
+								.getOfficeInputName(), (aHandler == null ? null
+								: aHandler.getOfficeInputName()));
+			}
 		}
 
 		// Validate the managed objects

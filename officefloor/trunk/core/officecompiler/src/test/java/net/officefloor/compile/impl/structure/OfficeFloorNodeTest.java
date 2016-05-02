@@ -138,8 +138,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same team
-		assertEquals("Should be same team on adding twice", teamFirst,
-				teamSecond);
+		assertSame("Should be same team on adding twice", teamFirst, teamSecond);
 	}
 
 	/**
@@ -175,7 +174,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same managed object source
-		assertEquals("Should be same managed object source on adding twice",
+		assertSame("Should be same managed object source on adding twice",
 				moSourceFirst, moSourceSecond);
 	}
 
@@ -217,7 +216,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same managed object source
-		assertEquals("Should be same managed object source on adding twice",
+		assertSame("Should be same managed object source on adding twice",
 				moSourceFirst, moSourceSecond);
 	}
 
@@ -254,7 +253,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same input managed object
-		assertEquals("Should be same input managed object on adding twice",
+		assertSame("Should be same input managed object on adding twice",
 				moFirst, moSecond);
 	}
 
@@ -299,7 +298,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same managed object
-		assertEquals("Should be same managed object on adding twice", moFirst,
+		assertSame("Should be same managed object on adding twice", moFirst,
 				moSecond);
 	}
 
@@ -328,7 +327,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same managed object
-		assertEquals("Should be same managed object on adding twice", moFirst,
+		assertSame("Should be same managed object on adding twice", moFirst,
 				moSecond);
 	}
 
@@ -365,7 +364,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same supplier
-		assertEquals("Should be same supplier on adding twice", supplierFirst,
+		assertSame("Should be same supplier on adding twice", supplierFirst,
 				supplierSecond);
 	}
 
@@ -413,7 +412,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same managed object source
-		assertEquals("Should be same managed object source on adding twice",
+		assertSame("Should be same managed object source on adding twice",
 				mosFirst, mosSecond);
 	}
 
@@ -443,7 +442,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same managed object
-		assertEquals("Should be same managed object source on adding twice",
+		assertSame("Should be same managed object source on adding twice",
 				moSourceFirst, moSourceSecond);
 	}
 
@@ -480,7 +479,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same office
-		assertEquals("Should be same office on adding twice", officeFirst,
+		assertSame("Should be same office on adding twice", officeFirst,
 				officeSecond);
 	}
 
@@ -518,7 +517,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		this.verifyMockObjects();
 
 		// Should be the same office
-		assertEquals("Should be same office on adding twice", officeFirst,
+		assertSame("Should be same office on adding twice", officeFirst,
 				officeSecond);
 	}
 

@@ -41,7 +41,7 @@ import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
@@ -554,8 +554,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public OfficeInputType[] getOfficeInputTypes() {
-		return this.inputs.values().toArray(new OfficeInputType[0]);
+	public OfficeSectionInputType[] getOfficeInputTypes() {
+		return this.inputs.values().toArray(new OfficeSectionInputType[0]);
 	}
 
 	@Override

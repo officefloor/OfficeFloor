@@ -43,7 +43,7 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
@@ -713,7 +713,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 	}
 
 	/**
-	 * Records the {@link OfficeInputType}.
+	 * Records the {@link OfficeSectionInputType}.
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
@@ -755,10 +755,10 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 		final OfficeType officeType = this.createMock(OfficeType.class);
 
 		// Create the office input types
-		final OfficeInputType[] officeInputs = new OfficeInputType[this.officeInputTypes
+		final OfficeSectionInputType[] officeInputs = new OfficeSectionInputType[this.officeInputTypes
 				.size()];
 		for (int i = 0; i < officeInputs.length; i++) {
-			officeInputs[i] = this.createMock(OfficeInputType.class);
+			officeInputs[i] = this.createMock(OfficeSectionInputType.class);
 		}
 
 		// Create the office team types
@@ -797,10 +797,10 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 				});
 
 		// Record the office input types
-		this.recordReturn(officeType, officeType.getOfficeInputTypes(),
+		this.recordReturn(officeType, officeType.getOfficeSectionInputTypes(),
 				officeInputs);
 		for (int i = 0; i < officeInputs.length; i++) {
-			OfficeInputType officeInput = officeInputs[i];
+			OfficeSectionInputType officeInput = officeInputs[i];
 			AutoWire handledInput = this.officeInputTypes.get(i);
 			this.recordReturn(officeInput, officeInput.getOfficeSectionName(),
 					handledInput.getQualifier());

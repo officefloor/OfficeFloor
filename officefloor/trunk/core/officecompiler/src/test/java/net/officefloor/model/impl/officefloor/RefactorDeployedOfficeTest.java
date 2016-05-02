@@ -75,8 +75,9 @@ public class RefactorDeployedOfficeTest extends
 		this.doRefactor(new OfficeTypeConstructor() {
 			@Override
 			public void construct(OfficeTypeContext context) {
-				context.addOfficeInput("CHANGE", "DETAILS", Integer.class);
-				context.addOfficeInput("RENAME", "NEW", Object.class);
+				context.addOfficeSectionInput("CHANGE", "DETAILS",
+						Integer.class);
+				context.addOfficeSectionInput("RENAME", "NEW", Object.class);
 			}
 		});
 	}

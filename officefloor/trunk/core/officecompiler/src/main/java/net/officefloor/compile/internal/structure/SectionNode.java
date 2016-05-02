@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -72,18 +72,18 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 			PropertyList properties);
 
 	/**
-	 * Obtains the {@link OfficeInputType} instances for this
+	 * Obtains the {@link OfficeSectionInputType} instances for this
 	 * {@link OfficeSection}.
 	 * 
-	 * @return {@link OfficeInputType} instances for this {@link OfficeSection}.
+	 * @return {@link OfficeSectionInputType} instances for this {@link OfficeSection}.
 	 */
-	OfficeInputType[] getOfficeInputTypes();
+	OfficeSectionInputType[] getOfficeInputTypes();
 
 	/**
 	 * Obtains the {@link DeployedOfficeInput}.
 	 * 
 	 * @param inputName
-	 *            Input name as per the {@link OfficeInputType}.
+	 *            Input name as per the {@link OfficeSectionInputType}.
 	 * @return {@link DeployedOfficeInput}.
 	 */
 	DeployedOfficeInput getDeployedOfficeInput(String inputName);

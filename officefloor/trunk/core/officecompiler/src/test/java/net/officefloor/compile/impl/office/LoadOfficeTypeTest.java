@@ -37,6 +37,8 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeManagedObjectType;
+import net.officefloor.compile.office.OfficeOutputType;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
@@ -46,9 +48,11 @@ import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
+import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeTask;
@@ -315,6 +319,179 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensure obtain the {@link OfficeInputType}.
+	 */
+	public void testInputType_Asynchronous() {
+
+		// Load the type
+		OfficeType type = this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+				office.addInput("INPUT", Integer.class.getName());
+			}
+		});
+
+		// Validate the type
+		OfficeInputType[] inputs = type.getOfficeInputTypes();
+		assertEquals("Incorrect number of inputs", 1, inputs.length);
+		OfficeInputType input = inputs[0];
+		assertEquals("Incorrect input name", "INPUT",
+				input.getOfficeInputName());
+		assertEquals("Incorrect input parameter type", Integer.class.getName(),
+				input.getParameterType());
+		assertNull("Should be no corresponding output",
+				input.getResponseOfficeOutputType());
+	}
+
+	/**
+	 * Ensure issue if duplicate name for {@link OfficeInput} instances.
+	 */
+	public void testInputType_DuplicateName() {
+		this.record_issue("Office input TEST already added");
+
+		// Load the type
+		OfficeType type = this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+				OfficeInput inputOne = office.addInput("TEST",
+						String.class.getName());
+				OfficeInput inputTwo = office.addInput("TEST",
+						Integer.class.getName());
+				assertSame("Should be the same object", inputOne, inputTwo);
+			}
+		});
+
+		// Validate the type
+		OfficeInputType[] inputs = type.getOfficeInputTypes();
+		assertEquals("Incorrect number of inputs", 1, inputs.length);
+		OfficeInputType input = inputs[0];
+		assertEquals("Incorrect input name", "TEST", input.getOfficeInputName());
+	}
+
+	/**
+	 * Ensure obtain the {@link OfficeOutputType}.
+	 */
+	public void testOutputType_Asynchronous() {
+
+		// Load the type
+		OfficeType type = this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+				office.addOutput("OUTPUT", Long.class.getName());
+			}
+		});
+
+		// Validate the type
+		OfficeOutputType[] outputs = type.getOfficeOutputTypes();
+		assertEquals("Incorrect number of outputs", 1, outputs.length);
+		OfficeOutputType output = outputs[0];
+		assertEquals("Incorrect output name", "OUTPUT",
+				output.getOfficeOutputName());
+		assertEquals("Incorrect output argument type", Long.class.getName(),
+				output.getArgumentType());
+		assertNull("Should be no corresponding input",
+				output.getHandlingOfficeInputType());
+	}
+
+	/**
+	 * Ensure issue if duplicate name for {@link OfficeOutput} instances.
+	 */
+	public void testOutputType_DuplicateName() {
+		this.record_issue("Office output TEST already added");
+
+		// Load the type
+		OfficeType type = this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+				OfficeOutput outputOne = office.addOutput("TEST",
+						String.class.getName());
+				OfficeOutput outputTwo = office.addOutput("TEST",
+						Integer.class.getName());
+				assertSame("Should be the same object", outputOne, outputTwo);
+			}
+		});
+
+		// Validate the type
+		OfficeOutputType[] outputs = type.getOfficeOutputTypes();
+		assertEquals("Incorrect number of outputs", 1, outputs.length);
+		OfficeOutputType output = outputs[0];
+		assertEquals("Incorrect output name", "TEST",
+				output.getOfficeOutputName());
+	}
+
+	/**
+	 * Ensure obtain synchronous {@link OfficeOutputType}.
+	 */
+	public void testInputOutput_Synchronous() {
+
+		// Load the type
+		OfficeType type = this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+				OfficeInput input = office.addInput("INPUT",
+						Integer.class.getName());
+				OfficeOutput output = office.addOutput("OUTPUT",
+						Long.class.getName());
+				office.link(input, output);
+			}
+		});
+
+		// Validate synchronous input
+		OfficeInputType[] inputs = type.getOfficeInputTypes();
+		assertEquals("Incorrect number of inputs", 1, inputs.length);
+		OfficeInputType input = inputs[0];
+		assertEquals("Incorrect input name", "INPUT",
+				input.getOfficeInputName());
+		OfficeOutputType output = input.getResponseOfficeOutputType();
+		assertNotNull("Should have response output", output);
+		assertEquals("Incorrect output name", "OUTPUT",
+				output.getOfficeOutputName());
+
+		// Ensure synchronous output not included in outputs
+		assertEquals("Should be no outputs", 0,
+				type.getOfficeOutputTypes().length);
+	}
+
+	/**
+	 * Ensure obtain synchronous {@link OfficeInputType}.
+	 */
+	public void testOutputInput_Synchronous() {
+
+		// Load the type
+		OfficeType type = this.loadOfficeType(true, new Loader() {
+			@Override
+			public void sourceOffice(OfficeArchitect office,
+					OfficeSourceContext context) throws Exception {
+				OfficeOutput output = office.addOutput("OUTPUT",
+						Long.class.getName());
+				OfficeInput input = office.addInput("INPUT",
+						Integer.class.getName());
+				office.link(output, input);
+			}
+		});
+
+		// Validate synchronous output
+		OfficeOutputType[] outputs = type.getOfficeOutputTypes();
+		assertEquals("Incorrect number of outputs", 1, outputs.length);
+		OfficeOutputType output = outputs[0];
+		assertEquals("Incorrect output name", "OUTPUT",
+				output.getOfficeOutputName());
+		OfficeInputType input = output.getHandlingOfficeInputType();
+		assertNotNull("Should have handling input", input);
+		assertEquals("Incorrect input name", "INPUT",
+				input.getOfficeInputName());
+
+		// Ensure synchronous input not included in inputs
+		assertEquals("Should be no inputs", 0,
+				type.getOfficeInputTypes().length);
+	}
+
+	/**
 	 * Ensure issue if <code>null</code> {@link OfficeManagedObjectType} name.
 	 */
 	public void testNullManagedObjectName() {
@@ -572,7 +749,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure obtain the {@link OfficeInputType}.
+	 * Ensure obtain the {@link OfficeSectionInputType}.
 	 */
 	public void testInputType() {
 
@@ -596,7 +773,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		// Validate type
 		assertEquals("Incorrect number of inputs", 1,
 				officeType.getOfficeInputTypes().length);
-		OfficeInputType input = officeType.getOfficeInputTypes()[0];
+		OfficeSectionInputType input = officeType.getOfficeSectionInputTypes()[0];
 		assertEquals("Incorrect section name", "SECTION",
 				input.getOfficeSectionName());
 		assertEquals("Incorrect input name", "INPUT",

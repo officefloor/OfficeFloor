@@ -15,39 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.officefloor;
+package net.officefloor.compile.spi.office;
 
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.Office;
 
 /**
- * <code>Type definition</code> of an input to the {@link OfficeFloor}.
+ * Input to the {@link Office}.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorInputType {
+public interface OfficeInput {
 
 	/**
-	 * Obtains the name of the input to the {@link OfficeFloor}.
+	 * Obtains the name of this {@link OfficeInput}.
 	 * 
-	 * @return Name of the input to the {@link OfficeFloor}.
+	 * @return Name of this {@link OfficeInput}.
 	 */
-	String getOfficeFloorInputName();
+	String getOfficeInputName();
 
 	/**
-	 * Obtains the fully qualified class name of the parameter type to this
-	 * input.
+	 * Obtains the parameter type for this {@link OfficeInput}.
 	 * 
-	 * @return Fully qualified class name of the parameter type to this input.
+	 * @return Parameter type for this {@link OfficeInput}.
 	 */
 	String getParameterType();
-
-	/**
-	 * Should this input be synchronous, this returns the corresponding
-	 * {@link OfficeFloorOutputType}.
-	 * 
-	 * @return {@link OfficeFloorOutputType} if synchronous input. Otherwise,
-	 *         <code>null</code> to indicate no synchronous response.
-	 */
-	OfficeFloorOutputType getResponseOfficeFloorOutputType();
 
 }

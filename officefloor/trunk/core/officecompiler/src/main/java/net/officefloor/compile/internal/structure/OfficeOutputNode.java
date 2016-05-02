@@ -17,23 +17,13 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.officefloor.OfficeFloorOutputType;
-import net.officefloor.compile.spi.officefloor.OfficeFloorOutput;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.compile.spi.office.OfficeOutput;
 
 /**
- * Output from the {@link OfficeFloor}.
+ * {@link OfficeOutput} node.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorOutputNode extends OfficeFloorOutput {
-
-	/**
-	 * Obtains the {@link OfficeFloorOutputType} for this
-	 * {@link OfficeFloorOutputNode}.
-	 * 
-	 * @return {@link OfficeFloorOutputType}.
-	 */
-	OfficeFloorOutputType getOfficeFloorOutputType();
+public interface OfficeOutputNode extends OfficeOutput, LinkSynchronousNode {
 
 }

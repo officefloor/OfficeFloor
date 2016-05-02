@@ -31,9 +31,11 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
+import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
@@ -50,8 +52,10 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
+import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -163,6 +167,79 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Should be the managed object
 		assertEquals("Should be same managed object on adding twice", moFirst,
 				moSecond);
+	}
+
+	/**
+	 * Tests adding an {@link OfficeInput}.
+	 */
+	public void testAddInput() {
+		// Add two different inputs verifying details
+		this.replayMockObjects();
+		OfficeInput input = this.node.addInput("INPUT", String.class.getName());
+		assertNotNull("Must have input", input);
+		assertEquals("Incorrect input name", "INPUT",
+				input.getOfficeInputName());
+		assertNotSame("Should obtain another input", input,
+				this.node.addInput("ANOTHER", Integer.class.getName()));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if adding the {@link OfficeInput} twice.
+	 */
+	public void testAddInputTwice() {
+
+		// Record issue in adding the input twice
+		this.record_issue("Office input INPUT already added");
+
+		// Add the input twice
+		this.replayMockObjects();
+		OfficeInput inputFirst = this.node.addInput("INPUT",
+				Integer.class.getName());
+		OfficeInput inputSecond = this.node.addInput("INPUT",
+				Integer.class.getName());
+		this.verifyMockObjects();
+
+		// Should be the same input
+		assertSame("Should be same input on adding twice", inputFirst,
+				inputSecond);
+	}
+
+	/**
+	 * Tests adding an {@link OfficeOutput}.
+	 */
+	public void testAddOutput() {
+		// Add two different outputs verifying details
+		this.replayMockObjects();
+		OfficeOutput output = this.node.addOutput("OUTPUT",
+				String.class.getName());
+		assertNotNull("Must have output", output);
+		assertEquals("Incorrect output name", "OUTPUT",
+				output.getOfficeOutputName());
+		assertNotSame("Should obtain another output", output,
+				this.node.addOutput("ANOTHER", Integer.class.getName()));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if adding the {@link OfficeOutput} twice.
+	 */
+	public void testAddOutputTwice() {
+
+		// Record issue in adding the output twice
+		this.record_issue("Office output OUTPUT already added");
+
+		// Add the output twice
+		this.replayMockObjects();
+		OfficeOutput outputFirst = this.node.addOutput("OUTPUT",
+				Integer.class.getName());
+		OfficeOutput outputSecond = this.node.addOutput("OUTPUT",
+				Integer.class.getName());
+		this.verifyMockObjects();
+
+		// Should be the same output
+		assertSame("Should be same output on adding twice", outputFirst,
+				outputSecond);
 	}
 
 	/**
@@ -661,6 +738,132 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Should be the same administrator
 		assertEquals("Should be same administrator on adding twice",
 				adminFirst, adminSecond);
+	}
+
+	/**
+	 * Ensure can link {@link OfficeInput} to the {@link SectionInput}.
+	 */
+	public void testLinkInputToSectionInput() {
+
+		// Record already being linked
+		this.record_issue("Input INPUT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeInput input = this.node
+				.addInput("INPUT", Integer.class.getName());
+		OfficeSection section = this.addSection(this.node, "SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.getBuilder().addSectionInput("SECTION_INPUT",
+								Object.class.getName());
+						context.getBuilder().addSectionInput("ANOTHER",
+								String.class.getName());
+					}
+				});
+		// Obtain section input (should be ordered)
+		OfficeSectionInput sectionInput = section.getOfficeSectionInputs()[1];
+		assertEquals("Incorrect office section input", "SECTION_INPUT",
+				sectionInput.getOfficeSectionInputName());
+
+		this.node.link(input, sectionInput);
+		assertFlowLink("input -> section input", input, sectionInput);
+
+		// Ensure only can link once
+		this.node.link(input, section.getOfficeSectionInputs()[0]);
+		assertFlowLink("Can only link once", input, sectionInput);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link {@link SectionOutput} to a {@link OfficeOutput}.
+	 */
+	public void testLinkSectionOutputToOutput() {
+
+		// Record already being linked
+		this.record_issue("Section SECTION output SECTION_OUTPUT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeSection section = this.addSection(this.node, "SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.getBuilder().addSectionOutput("SECTION_OUTPUT",
+								Object.class.getName(), false);
+					}
+				});
+		OfficeSectionOutput sectionOutput = section.getOfficeSectionOutputs()[0];
+		OfficeOutput output = this.node.addOutput("OUTPUT",
+				Integer.class.getName());
+
+		this.node.link(sectionOutput, output);
+		assertFlowLink("section output -> output", sectionOutput, output);
+
+		// Ensure only can link once
+		this.node.link(sectionOutput,
+				this.node.addOutput("ANOTHER", Character.class.getName()));
+		assertFlowLink("Can only link once", sectionOutput, output);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link {@link OfficeInput} to {@link OfficeOutput} for
+	 * synchronous response.
+	 */
+	public void testLinkInputToOutput() {
+
+		// Record already being linked
+		this.record_issue("Input INPUT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeInput input = this.node
+				.addInput("INPUT", Integer.class.getName());
+		OfficeOutput output = this.node.addOutput("OUTPUT",
+				Long.class.getName());
+		this.node.link(input, output);
+		assertSynchronousLink("input -> output", input, output);
+
+		// Ensure only can link once
+		this.node.link(input,
+				this.node.addOutput("ANOHTER", Character.class.getName()));
+		assertSynchronousLink("input -> output", input, output);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can link {@link OfficeOutput} to {@link OfficeInput} for
+	 * synchronous request.
+	 */
+	public void testLinkOutputToInput() {
+
+		// Record already being linked
+		this.record_issue("Output OUTPUT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		OfficeOutput output = this.node.addOutput("OUTPUT",
+				Long.class.getName());
+		OfficeInput input = this.node
+				.addInput("INPUT", Integer.class.getName());
+		this.node.link(output, input);
+		assertSynchronousLink("output -> input", output, input);
+
+		// Ensure only can link once
+		this.node.link(output,
+				this.node.addInput("ANOTHER", Character.class.getName()));
+		assertSynchronousLink("output -> input", output, input);
+
+		this.verifyMockObjects();
 	}
 
 	/**

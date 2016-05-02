@@ -15,28 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.spi.officefloor;
-
-import net.officefloor.frame.api.manage.OfficeFloor;
+package net.officefloor.compile.spi.office;
 
 /**
- * Output from the {@link OfficeFloor}.
+ * Output from the {@link OfficeOutput}.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorOutput {
+public interface OfficeOutput {
 
 	/**
-	 * Obtains the name of this {@link OfficeFloorOutput}.
+	 * Obtains the name of this {@link OfficeOutput}.
 	 * 
-	 * @return Name of this {@link OfficeFloorOutput}.
+	 * @return Name of this {@link OfficeOutput}.
 	 */
-	String getOfficeFloorOutputName();
+	String getOfficeOutputName();
 
 	/**
-	 * Obtains the argument type from this {@link OfficeFloorOutput}.
+	 * Obtains the argument type from this {@link OfficeOutput}.
 	 * 
-	 * @return Argument type from this {@link OfficeFloorOutput}.
+	 * @return Argument type from this {@link OfficeOutput}.
 	 */
 	String getArgumentType();
 
