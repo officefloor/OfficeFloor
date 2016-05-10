@@ -62,7 +62,7 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 
 		// Ensure correct section inputs
 		TestCase.assertEquals("Incorrect number of inputs", 1,
-				officeType.getOfficeInputTypes().length);
+				officeType.getOfficeSectionInputTypes().length);
 		OfficeSectionInputType sectionInput = officeType
 				.getOfficeSectionInputTypes()[0];
 		TestCase.assertEquals("Incorrect section name", "section",

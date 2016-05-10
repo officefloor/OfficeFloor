@@ -181,8 +181,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		assertTrue(
 				msg + ": source must be " + LinkFlowNode.class.getSimpleName(),
 				linkSource instanceof LinkFlowNode);
-		assertEquals(msg, ((LinkFlowNode) linkSource).getLinkedFlowNode(),
-				linkTarget);
+		assertEquals(msg, linkTarget,
+				((LinkFlowNode) linkSource).getLinkedFlowNode());
 	}
 
 	/**
@@ -202,9 +202,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				msg + ": source must be "
 						+ LinkSynchronousNode.class.getSimpleName(),
 				linkSource instanceof LinkSynchronousNode);
-		assertEquals(msg,
-				((LinkSynchronousNode) linkSource).getLinkedSynchronousNode(),
-				linkTarget);
+		assertEquals(msg, linkTarget,
+				((LinkSynchronousNode) linkSource).getLinkedSynchronousNode());
 	}
 
 	/**
@@ -224,8 +223,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				msg + ": source must be "
 						+ LinkObjectNode.class.getSimpleName(),
 				linkSource instanceof LinkObjectNode);
-		assertEquals(msg, ((LinkObjectNode) linkSource).getLinkedObjectNode(),
-				linkTarget);
+		assertEquals(msg, linkTarget,
+				((LinkObjectNode) linkSource).getLinkedObjectNode());
 	}
 
 	/**
@@ -244,8 +243,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		assertTrue(
 				msg + ": source must be " + LinkTeamNode.class.getSimpleName(),
 				linkSource instanceof LinkTeamNode);
-		assertEquals(msg, ((LinkTeamNode) linkSource).getLinkedTeamNode(),
-				linkTarget);
+		assertEquals(msg, linkTarget,
+				((LinkTeamNode) linkSource).getLinkedTeamNode());
 	}
 
 	/**
@@ -265,8 +264,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				msg + ": source must be "
 						+ LinkOfficeNode.class.getSimpleName(),
 				linkSource instanceof LinkOfficeNode);
-		assertEquals(msg, ((LinkOfficeNode) linkSource).getLinkedOfficeNode(),
-				linkTarget);
+		assertEquals(msg, linkTarget,
+				((LinkOfficeNode) linkSource).getLinkedOfficeNode());
 	}
 
 	/**
@@ -286,9 +285,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				msg + ": source must be "
 						+ ManagedObjectSourceNode.class.getSimpleName(),
 				managedObjectSourceNode instanceof ManagedObjectSourceNode);
-		assertEquals(msg,
+		assertEquals(msg, inputManagedObjectNode,
 				((ManagedObjectSourceNode) managedObjectSourceNode)
-						.getInputManagedObjectNode(), inputManagedObjectNode);
+						.getInputManagedObjectNode());
 	}
 
 	/**

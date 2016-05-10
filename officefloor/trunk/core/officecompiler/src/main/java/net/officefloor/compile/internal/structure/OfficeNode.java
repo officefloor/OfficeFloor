@@ -17,10 +17,9 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeType;
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -32,8 +31,25 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeNode extends OfficeType, OfficeArchitect,
-		DeployedOffice, LinkOfficeNode {
+public interface OfficeNode extends OfficeArchitect, DeployedOffice,
+		LinkOfficeNode {
+
+	/**
+	 * Sources this {@link Office} into this {@link OfficeNode}.
+	 * 
+	 * @return <code>true</code> if successfully sourced. Otherwise
+	 *         <code>false</code> with issue reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceOffice();
+
+	/**
+	 * Loads the {@link OfficeType}.
+	 * 
+	 * @return {@link OfficeType} or <code>null</code> if issue loading with
+	 *         issue reported to the {@link CompilerIssues}.
+	 */
+	OfficeType loadOfficeType();
 
 	/**
 	 * Adds the context of the {@link OfficeFloor} containing this
@@ -43,22 +59,6 @@ public interface OfficeNode extends OfficeType, OfficeArchitect,
 	 *            Location of the {@link OfficeFloor}.
 	 */
 	void addOfficeFloorContext(String officeFloorLocation);
-
-	/**
-	 * Loads this {@link Office} into this {@link OfficeNode}.
-	 * 
-	 * @param officeSource
-	 *            {@link OfficeSource}.
-	 * @param properties
-	 *            {@link PropertyList}.
-	 * @return <code>true</code> if successfully loaded.
-	 */
-	boolean loadOffice(OfficeSource officeSource, PropertyList properties);
-
-	/**
-	 * Loads this {@link Office} ready for it to be built.
-	 */
-	void loadOffice();
 
 	/**
 	 * Builds the {@link Office} for this {@link OfficeNode}.

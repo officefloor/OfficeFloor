@@ -763,6 +763,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 								String.class.getName());
 					}
 				});
+
 		// Obtain section input (should be ordered)
 		OfficeSectionInput sectionInput = section.getOfficeSectionInputs()[1];
 		assertEquals("Incorrect office section input", "SECTION_INPUT",
@@ -784,7 +785,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionOutputToOutput() {
 
 		// Record already being linked
-		this.record_issue("Section SECTION output SECTION_OUTPUT linked more than once");
+		this.record_issue("Office section output SECTION_OUTPUT linked more than once");
 
 		this.replayMockObjects();
 

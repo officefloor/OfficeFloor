@@ -111,7 +111,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	/*
-	 * =================== OfficeInputType ===========================
+	 * ================== OfficeSectionInputType ========================
 	 */
 
 	@Override

@@ -17,10 +17,15 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
+import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeOutputType;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * Implementation of the {@link OfficeOutputNode}.
@@ -40,16 +45,44 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 	private final String argumentType;
 
 	/**
+	 * Location of the {@link Office} containing this {@link OfficeOutputNode}.
+	 */
+	private final String officeLocation;
+
+	/**
+	 * {@link NodeContext}.
+	 */
+	private final NodeContext context;
+
+	/**
+	 * {@link LinkSynchronousNode} being the {@link OfficeInputNode}.
+	 */
+	private OfficeInputNode linkedSynchronousNode = null;
+
+	/**
+	 * {@link LinkFlowNode}.
+	 */
+	private LinkFlowNode linkedFlowNode = null;
+
+	/**
 	 * Initialise.
 	 * 
 	 * @param name
 	 *            Name of this {@link OfficeFloorOutput}.
 	 * @param argumentType
 	 *            Argument type from this {@link OfficeFloorOutput}.
+	 * @param officeLocation
+	 *            Location of the {@link Office} containing this
+	 *            {@link OfficeOutputNode}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
-	public OfficeOutputNodeImpl(String name, String argumentType) {
+	public OfficeOutputNodeImpl(String name, String argumentType,
+			String officeLocation, NodeContext context) {
 		this.name = name;
 		this.argumentType = argumentType;
+		this.officeLocation = officeLocation;
+		this.context = context;
 	}
 
 	/*
@@ -57,15 +90,71 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 	 */
 
 	@Override
+	public OfficeOutputType getOfficeOutputType() {
+		return this;
+	}
+
+	/*
+	 * =============== LinkSynchronousNode ===========================
+	 */
+
+	@Override
 	public boolean linkSynchronousNode(LinkSynchronousNode node) {
-		// TODO Auto-generated method stub
-		return false;
+
+		// Ensure not already linked
+		if (this.linkedSynchronousNode != null) {
+			this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
+					this.officeLocation, null, null,
+					"Output " + this.name + " linked more than once");
+			return false; // already linked
+		}
+
+		// Ensure is an input
+		if (!(node instanceof OfficeInputNode)) {
+			this.context.getCompilerIssues().addIssue(
+					LocationType.OFFICE,
+					this.officeLocation,
+					null,
+					null,
+					"Output " + this.name
+							+ " may only be synchronously linked to an "
+							+ OfficeInputNode.class.getSimpleName());
+			return false; // already linked
+		}
+
+		// Link
+		this.linkedSynchronousNode = (OfficeInputNode) node;
+		return true;
 	}
 
 	@Override
 	public LinkSynchronousNode getLinkedSynchronousNode() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.linkedSynchronousNode;
+	}
+
+	/*
+	 * ==================== LinkFlowNode =============================
+	 */
+
+	@Override
+	public boolean linkFlowNode(LinkFlowNode node) {
+
+		// Ensure not already linked
+		if (this.linkedFlowNode != null) {
+			this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
+					this.officeLocation, null, null,
+					"Output " + this.name + " linked more than once");
+			return false; // already linked
+		}
+
+		// Link
+		this.linkedFlowNode = node;
+		return false;
+	}
+
+	@Override
+	public LinkFlowNode getLinkedFlowNode() {
+		return this.linkedFlowNode;
 	}
 
 	/*
@@ -88,8 +177,8 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 
 	@Override
 	public OfficeInputType getHandlingOfficeInputType() {
-		// TODO Auto-generated method stub
-		return null;
+		return (this.linkedSynchronousNode == null ? null
+				: this.linkedSynchronousNode.getOfficeInputType());
 	}
 
 }

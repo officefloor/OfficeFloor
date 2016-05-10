@@ -45,7 +45,7 @@ public class OfficeModelOfficeSourceTest extends OfficeFrameTestCase {
 
 		// Create the expected office
 		OfficeArchitect architect = OfficeLoaderUtil
-				.createOfficeArchitect(OfficeModelOfficeSource.class);
+				.createOfficeArchitect(OfficeModelOfficeSource.class.getName());
 		architect.addOfficeObject("OBJECT", Connection.class.getName());
 		architect.addOfficeTeam("TEAM");
 

@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.spi.office.OfficeInput;
 
 /**
@@ -24,6 +25,15 @@ import net.officefloor.compile.spi.office.OfficeInput;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeInputNode extends OfficeInput, LinkSynchronousNode {
+public interface OfficeInputNode extends OfficeInput, LinkSynchronousNode,
+		LinkFlowNode {
+
+	/**
+	 * Obtains the {@link OfficeInputType}.
+	 * 
+	 * @return {@link OfficeInputType} or <code>null</code> if can not
+	 *         determine.
+	 */
+	OfficeInputType getOfficeInputType();
 
 }
