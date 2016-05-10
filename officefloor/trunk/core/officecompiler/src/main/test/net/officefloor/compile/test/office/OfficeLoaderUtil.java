@@ -22,6 +22,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.office.OfficeSectionInputType;
@@ -95,17 +96,33 @@ public class OfficeLoaderUtil {
 	 * Creates the {@link OfficeArchitect} to create the expected
 	 * {@link OfficeType}.
 	 * 
+	 * @param officeSourceClassName
+	 *            {@link OfficeSource} class name.
+	 * @return {@link OfficeArchitect}.
+	 */
+	public static OfficeArchitect createOfficeArchitect(
+			String officeSourceClassName) {
+		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
+		NodeContext context = (NodeContext) compiler;
+		return new OfficeNodeImpl(null, officeSourceClassName, "TEST_LOCATION",
+				context);
+	}
+
+	/**
+	 * Creates the {@link OfficeArchitect} to create the expected
+	 * {@link OfficeType}.
+	 * 
 	 * @param <O>
 	 *            {@link OfficeSource} type.
 	 * @param officeSourceClass
-	 *            {@link OfficeSource} class.
+	 *            {@link OfficeSource} instance.
 	 * @return {@link OfficeArchitect}.
 	 */
 	public static <O extends OfficeSource> OfficeArchitect createOfficeArchitect(
-			Class<O> officeSourceClass) {
+			O officeSource) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return new OfficeNodeImpl("TEST_LOCATION", context);
+		return new OfficeNodeImpl(null, officeSource, "TEST_LOCATION", context);
 	}
 
 	/**
@@ -163,10 +180,10 @@ public class OfficeLoaderUtil {
 			String officeLocation, String... propertyNameValuePairs) {
 
 		// Cast to obtain expected office type
-		if (!(architect instanceof OfficeType)) {
+		if (!(architect instanceof OfficeNode)) {
 			TestCase.fail("architect must be created from createOfficeArchitect");
 		}
-		OfficeType expectedOffice = (OfficeType) architect;
+		OfficeType expectedOffice = ((OfficeNode) architect).loadOfficeType();
 
 		// Load the actual office type
 		OfficeType actualOffice = loadOfficeType(officeSourceClass,

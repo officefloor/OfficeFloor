@@ -187,18 +187,18 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	public OfficeType loadOfficeType(OfficeSource officeSource,
 			String officeLocation, PropertyList propertyList) {
 
-		// Create the office type
-		OfficeNode officeType = new OfficeNodeImpl(officeLocation,
-				this.nodeContext);
+		// Create the office node
+		OfficeNode officeNode = new OfficeNodeImpl(officeSource, propertyList,
+				officeLocation, this.nodeContext);
 
-		// Load the office which in turn provides the detail for the office type
-		boolean isLoaded = officeType.loadOffice(officeSource, propertyList);
-		if (!isLoaded) {
-			return null; // must load office
+		// Source the office
+		boolean isSourced = officeNode.sourceOffice();
+		if (!isSourced) {
+			return null; // must source office successfully
 		}
 
 		// Return the office type
-		return officeType;
+		return officeNode.loadOfficeType();
 	}
 
 	/**

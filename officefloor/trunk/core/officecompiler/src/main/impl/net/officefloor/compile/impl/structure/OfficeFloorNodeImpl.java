@@ -517,7 +517,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		// Initiate the OfficeFloor builder with compiler details
 		this.context.initiateOfficeFloorBuilder(builder);
 
-		// Load the offices (in deterministic order)
+		// Source the offices (in deterministic order)
 		OfficeNode[] offices = CompileUtil.toSortedArray(this.offices.values(),
 				new OfficeNode[0], new StringExtractor<OfficeNode>() {
 					@Override
@@ -526,7 +526,9 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 					}
 				});
 		for (OfficeNode office : offices) {
-			office.loadOffice();
+			if (!office.sourceOffice()) {
+				return null; // Must be able to source the offices
+			}
 		}
 
 		// Load the managed object sources (in deterministic order)

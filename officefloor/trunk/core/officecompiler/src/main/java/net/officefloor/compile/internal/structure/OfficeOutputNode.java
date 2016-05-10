@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.spi.office.OfficeOutput;
 
 /**
@@ -24,6 +25,15 @@ import net.officefloor.compile.spi.office.OfficeOutput;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeOutputNode extends OfficeOutput, LinkSynchronousNode {
+public interface OfficeOutputNode extends OfficeOutput, LinkSynchronousNode,
+		LinkFlowNode {
+
+	/**
+	 * Obtains the {@link OfficeOutputType}.
+	 * 
+	 * @return {@link OfficeOutputType} or <code>null</code> if can not
+	 *         determine.
+	 */
+	OfficeOutputType getOfficeOutputType();
 
 }

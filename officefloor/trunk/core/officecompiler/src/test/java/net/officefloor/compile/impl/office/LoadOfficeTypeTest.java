@@ -751,7 +751,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	/**
 	 * Ensure obtain the {@link OfficeSectionInputType}.
 	 */
-	public void testInputType() {
+	public void testSectionInputType() {
 
 		// Load office type
 		OfficeType officeType = this.loadOfficeType(true, new Loader() {
@@ -771,8 +771,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		});
 
 		// Validate type
-		assertEquals("Incorrect number of inputs", 1,
-				officeType.getOfficeInputTypes().length);
+		assertEquals("Incorrect number of section inputs", 1,
+				officeType.getOfficeSectionInputTypes().length);
 		OfficeSectionInputType input = officeType.getOfficeSectionInputTypes()[0];
 		assertEquals("Incorrect section name", "SECTION",
 				input.getOfficeSectionName());

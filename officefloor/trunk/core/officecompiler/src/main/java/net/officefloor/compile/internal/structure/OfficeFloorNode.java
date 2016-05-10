@@ -53,7 +53,7 @@ public interface OfficeFloorNode extends OfficeFloorDeployer {
 	 * 
 	 * @param properties
 	 *            {@link OfficeFloorPropertyType} instances to configure the
-	 *            {@link OfficeFloor}..
+	 *            {@link OfficeFloor}.
 	 * @return <code>true</code> if the {@link OfficeFloorType} was loaded.
 	 */
 	boolean loadOfficeFloorType(OfficeFloorPropertyType[] properties);

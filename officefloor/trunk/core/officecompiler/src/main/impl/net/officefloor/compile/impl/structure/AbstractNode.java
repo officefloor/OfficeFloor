@@ -21,6 +21,7 @@ import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
+import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 
@@ -58,14 +59,50 @@ public abstract class AbstractNode {
 					+ linkTarget
 					+ " ["
 					+ (linkTarget == null ? null : linkTarget.getClass()
-							.getName()
-							+ "]"));
+							.getName() + "]"));
 			return false; // can not link
 		}
 
 		// Link the nodes together
 		return ((LinkFlowNode) linkSource)
 				.linkFlowNode((LinkFlowNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkSynchronousNode} and if so links
+	 * them.
+	 * 
+	 * @param linkSource
+	 *            Source {@link LinkSynchronousNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkSynchronousNode}.
+	 * @return <code>true</code> if linked.
+	 */
+	protected boolean linkSynchronous(Object linkSource, Object linkTarget) {
+
+		// Ensure the link source is link synchronous node
+		if (!(linkSource instanceof LinkSynchronousNode)) {
+			this.addIssue("Invalid link source: "
+					+ linkSource
+					+ " ["
+					+ (linkSource == null ? null : linkSource.getClass()
+							.getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link synchronous node
+		if (!(linkTarget instanceof LinkSynchronousNode)) {
+			this.addIssue("Invalid link target: "
+					+ linkTarget
+					+ " ["
+					+ (linkTarget == null ? null : linkTarget.getClass()
+							.getName() + "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkSynchronousNode) linkSource)
+				.linkSynchronousNode((LinkSynchronousNode) linkTarget);
 	}
 
 	/**
@@ -95,8 +132,7 @@ public abstract class AbstractNode {
 					+ linkTarget
 					+ " ["
 					+ (linkTarget == null ? null : linkTarget.getClass()
-							.getName()
-							+ "]"));
+							.getName() + "]"));
 			return false; // can not link
 		}
 
@@ -132,8 +168,7 @@ public abstract class AbstractNode {
 					+ linkTarget
 					+ " ["
 					+ (linkTarget == null ? null : linkTarget.getClass()
-							.getName()
-							+ "]"));
+							.getName() + "]"));
 			return false; // can not link
 		}
 
@@ -169,8 +204,7 @@ public abstract class AbstractNode {
 					+ linkTarget
 					+ " ["
 					+ (linkTarget == null ? null : linkTarget.getClass()
-							.getName()
-							+ "]"));
+							.getName() + "]"));
 			return false; // can not link
 		}
 
@@ -198,8 +232,7 @@ public abstract class AbstractNode {
 					+ managedObjectSource
 					+ " ["
 					+ (managedObjectSource == null ? null : managedObjectSource
-							.getClass().getName()
-							+ "]"));
+							.getClass().getName() + "]"));
 			return false; // can not link
 		}
 
@@ -209,8 +242,7 @@ public abstract class AbstractNode {
 					+ inputManagedObject
 					+ " ["
 					+ (inputManagedObject == null ? null : inputManagedObject
-							.getClass().getName()
-							+ "]"));
+							.getClass().getName() + "]"));
 			return false; // can not link
 		}
 

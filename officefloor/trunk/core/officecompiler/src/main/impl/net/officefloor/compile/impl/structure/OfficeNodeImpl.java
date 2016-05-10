@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
+import net.officefloor.compile.impl.office.OfficeTypeImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
@@ -38,6 +39,7 @@ import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
+import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -121,7 +123,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	/**
 	 * {@link PropertyList} to source the {@link Office}.
 	 */
-	private final PropertyList properties = new PropertyListImpl();
+	private final PropertyList properties;
 
 	/**
 	 * Location of the {@link Office}.
@@ -202,19 +204,49 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private String officeFloorLocation;
 
 	/**
-	 * Allows loading the {@link OfficeType}.
+	 * Initialise with all parameters.
 	 * 
+	 * @param officeName
+	 *            Name of the {@link DeployedOffice}.
+	 * @param officeSource
+	 *            {@link OfficeSource} instance.
+	 * @param officeSourceClassName
+	 *            {@link OfficeSource} class name.
+	 * @param properties
+	 *            {@link PropertyList}.
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeNodeImpl(String officeLocation, NodeContext context) {
-		this.officeName = null;
-		this.officeSourceClassName = null;
-		this.officeSource = null;
+	private OfficeNodeImpl(String officeName, OfficeSource officeSource,
+			String officeSourceClassName, PropertyList properties,
+			String officeLocation, NodeContext context) {
+		this.officeName = officeName;
+		this.officeSource = officeSource;
+		this.officeSourceClassName = (officeSource == null ? officeSourceClassName
+				: null);
+		this.properties = (properties != null ? properties
+				: new PropertyListImpl());
 		this.officeLocation = officeLocation;
 		this.context = context;
+	}
+
+	/**
+	 * Allows loading the {@link OfficeType}.
+	 * 
+	 * @param officeSource
+	 *            {@link OfficeSource} instance.
+	 * @param properties
+	 *            {@link PropertyList} to configure the {@link OfficeSource}.
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 * @param context
+	 *            {@link NodeContext}.
+	 */
+	public OfficeNodeImpl(OfficeSource officeSource, PropertyList properties,
+			String officeLocation, NodeContext context) {
+		this(null, officeSource, null, properties, officeLocation, context);
 	}
 
 	/**
@@ -231,11 +263,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 */
 	public OfficeNodeImpl(String officeName, String officeSourceClassName,
 			String officeLocation, NodeContext context) {
-		this.officeName = officeName;
-		this.officeSourceClassName = officeSourceClassName;
-		this.officeSource = null;
-		this.officeLocation = officeLocation;
-		this.context = context;
+		this(officeName, null, officeSourceClassName, null, officeLocation,
+				context);
 	}
 
 	/**
@@ -252,11 +281,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 */
 	public OfficeNodeImpl(String officeName, OfficeSource officeSource,
 			String officeLocation, NodeContext context) {
-		this.officeName = officeName;
-		this.officeSourceClassName = null;
-		this.officeSource = officeSource;
-		this.officeLocation = officeLocation;
-		this.context = context;
+		this(officeName, officeSource, null, null, officeLocation, context);
 	}
 
 	/**
@@ -283,119 +308,33 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	/*
-	 * ===================== OfficeType ================================
-	 */
-
-	@Override
-	public OfficeOutputType[] getOfficeOutputTypes() {
-		
-		// Copy the inputs into an array (in deterministic order)
-		OfficeInputNode[] inputs = CompileUtil.toSortedArray(
-				this.inputs.values(), new OfficeInputNode[0],
-				new StringExtractor<OfficeInputNode>() {
-					@Override
-					public String toString(OfficeInputNode object) {
-						return object.getOfficeInputName();
-					}
-				});
-		List<OfficeInputType> inputTypes = new LinkedList<OfficeInputType>();
-		for (OfficeInputNode input : inputs) {
-//			OfficeInputType inputType = input.getOfficeInputType();
-//			if (inputType != null) {
-//				inputTypes.add(inputType);
-//			}
-		}
-
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public OfficeInputType[] getOfficeInputTypes() {
-
-		// Copy the outputs into an array (in deterministic order)
-		OfficeOutputNode[] outputs = CompileUtil.toSortedArray(
-				this.outputs.values(), new OfficeOutputNode[0],
-				new StringExtractor<OfficeOutputNode>() {
-					@Override
-					public String toString(OfficeOutputNode object) {
-						return object.getOfficeOutputName();
-					}
-				});
-		List<OfficeOutputType> outputTypes = new LinkedList<OfficeOutputType>();
-		for (OfficeOutputNode output : outputs) {
-//			OfficeOutputType outputType = output.getOfficeOutputType();
-//			if (outputType != null) {
-//				outputTypes.add(outputType);
-//			}
-		}
-
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public OfficeSectionInputType[] getOfficeSectionInputTypes() {
-
-		// Create the listing of office inputs
-		List<OfficeSectionInputType> inputs = new LinkedList<OfficeSectionInputType>();
-		for (SectionNode section : this.sections.values()) {
-			inputs.addAll(Arrays.asList(section.getOfficeInputTypes()));
-		}
-
-		// Return the listing of office inputs
-		return inputs.toArray(new OfficeSectionInputType[0]);
-	}
-
-	@Override
-	public OfficeManagedObjectType[] getOfficeManagedObjectTypes() {
-		// Copy architect added object types into an array
-		OfficeObjectStruct[] structs = this.objects.values().toArray(
-				new OfficeObjectStruct[0]);
-		List<OfficeManagedObjectType> managedObjectTypes = new LinkedList<OfficeManagedObjectType>();
-		for (int i = 0; i < structs.length; i++) {
-			if (structs[i].isAdded) {
-				managedObjectTypes.add(structs[i].officeObject);
-			}
-		}
-
-		// Return the managed object types
-		return managedObjectTypes.toArray(new OfficeManagedObjectType[0]);
-	}
-
-	@Override
-	public OfficeTeamType[] getOfficeTeamTypes() {
-		// Copy architect added team types into an array
-		TeamStruct[] structs = this.teams.values().toArray(new TeamStruct[0]);
-		List<OfficeTeamType> teamTypes = new LinkedList<OfficeTeamType>();
-		for (int i = 0; i < structs.length; i++) {
-			if (structs[i].isAdded) {
-				teamTypes.add(structs[i].team);
-			}
-		}
-
-		// Return the team types
-		return teamTypes.toArray(new OfficeTeamType[0]);
-	}
-
-	/*
 	 * ================== OfficeNode ===================================
 	 */
 
 	@Override
-	public void addOfficeFloorContext(String officeFloorLocation) {
-		this.officeFloorLocation = officeFloorLocation;
+	public boolean sourceOffice() {
 
-		// Flag all the teams within office floor context
-		for (TeamStruct struct : this.teams.values()) {
-			struct.team.addOfficeFloorContext(this.officeFloorLocation);
+		// Determine if must instantiate
+		OfficeSource source = this.officeSource;
+		if (source == null) {
+
+			// Obtain the office source class
+			Class<? extends OfficeSource> officeSourceClass = this.context
+					.getOfficeSourceClass(this.officeSourceClassName,
+							this.officeLocation, this.officeName);
+			if (officeSourceClass == null) {
+				return false; // must have office source class
+			}
+
+			// Obtain the office source
+			source = CompileUtil.newInstance(officeSourceClass,
+					OfficeSource.class, LocationType.OFFICE,
+					this.officeLocation, AssetType.OFFICE, this.officeName,
+					this.context.getCompilerIssues());
+			if (source == null) {
+				return false; // must have office source
+			}
 		}
-
-		this.isInOfficeFloorContext = true;
-	}
-
-	@Override
-	public boolean loadOffice(OfficeSource officeSource, PropertyList properties) {
 
 		// Create the office source context
 		OfficeSourceContext context = new OfficeSourceContextImpl(false,
@@ -403,25 +342,25 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 		try {
 			// Source the office
-			officeSource.sourceOffice(this, context);
+			source.sourceOffice(this, context);
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
 					+ "' for " + OfficeSource.class.getSimpleName() + " "
-					+ officeSource.getClass().getName());
+					+ source.getClass().getName());
 			return false; // must have property
 
 		} catch (UnknownClassError ex) {
 			this.addIssue("Can not load class '" + ex.getUnknownClassName()
 					+ "' for " + OfficeSource.class.getSimpleName() + " "
-					+ officeSource.getClass().getName());
+					+ source.getClass().getName());
 			return false; // must have class
 
 		} catch (UnknownResourceError ex) {
 			this.addIssue("Can not obtain resource at location '"
 					+ ex.getUnknownResourceLocation() + "' for "
 					+ OfficeSource.class.getSimpleName() + " "
-					+ officeSource.getClass().getName());
+					+ source.getClass().getName());
 			return false; // must have resource
 
 		} catch (LoadTypeError ex) {
@@ -434,38 +373,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 					"Failed to source " + OfficeType.class.getSimpleName()
 							+ " definition from "
 							+ OfficeSource.class.getSimpleName() + " "
-							+ officeSource.getClass().getName(), ex);
+							+ source.getClass().getName(), ex);
 			return false; // must be successful
-		}
-
-		// Ensure all objects have names and types
-		OfficeManagedObjectType[] moTypes = this.getOfficeManagedObjectTypes();
-		for (int i = 0; i < moTypes.length; i++) {
-			OfficeManagedObjectType moType = moTypes[i];
-
-			// Ensure have name
-			String moName = moType.getOfficeManagedObjectName();
-			if (CompileUtil.isBlank(moName)) {
-				this.addIssue("Null name for managed object " + i);
-				return false; // must have name
-			}
-
-			// Ensure have type
-			if (CompileUtil.isBlank(moType.getObjectType())) {
-				this.addIssue("Null type for managed object " + i + " (name="
-						+ moName + ")");
-				return false; // must have type
-			}
-		}
-
-		// Ensure all teams have names
-		OfficeTeamType[] teamTypes = this.getOfficeTeamTypes();
-		for (int i = 0; i < teamTypes.length; i++) {
-			OfficeTeamType teamType = teamTypes[i];
-			if (CompileUtil.isBlank(teamType.getOfficeTeamName())) {
-				this.addIssue("Null name for team " + i);
-				return false; // must have name
-			}
 		}
 
 		// As here, successfully loaded the office
@@ -473,32 +382,167 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public void loadOffice() {
+	public OfficeType loadOfficeType() {
 
-		// Determine if must instantiate
-		OfficeSource source = this.officeSource;
-		if (source == null) {
+		// Copy the inputs into an array (in deterministic order)
+		OfficeInputNode[] inputs = CompileUtil.toSortedArray(
+				this.inputs.values(), new OfficeInputNode[0],
+				new StringExtractor<OfficeInputNode>() {
+					@Override
+					public String toString(OfficeInputNode object) {
+						return object.getOfficeInputName();
+					}
+				});
+		OfficeInputNode[] originalInputs = new OfficeInputNode[inputs.length];
+		System.arraycopy(inputs, 0, originalInputs, 0, inputs.length);
 
-			// Obtain the office source class
-			Class<? extends OfficeSource> officeSourceClass = this.context
-					.getOfficeSourceClass(this.officeSourceClassName,
-							this.officeLocation, this.officeName);
-			if (officeSourceClass == null) {
-				return; // must have office source class
-			}
+		// Copy the outputs into an array (in deterministic order)
+		OfficeOutputNode[] outputs = CompileUtil.toSortedArray(
+				this.outputs.values(), new OfficeOutputNode[0],
+				new StringExtractor<OfficeOutputNode>() {
+					@Override
+					public String toString(OfficeOutputNode object) {
+						return object.getOfficeOutputName();
+					}
+				});
+		OfficeOutputNode[] originalOutputs = new OfficeOutputNode[outputs.length];
+		System.arraycopy(outputs, 0, originalOutputs, 0, outputs.length);
 
-			// Obtain the office source
-			source = CompileUtil.newInstance(officeSourceClass,
-					OfficeSource.class, LocationType.OFFICE,
-					this.officeLocation, AssetType.OFFICE, this.officeName,
-					this.context.getCompilerIssues());
-			if (source == null) {
-				return; // must have office source
+		// Remove inputs used to handle response
+		for (int o = 0; o < outputs.length; o++) {
+			OfficeOutputNode output = originalOutputs[o];
+			LinkSynchronousNode possibleInput = output
+					.getLinkedSynchronousNode();
+			if (possibleInput != null) {
+				for (int i = 0; i < inputs.length; i++) {
+					if (inputs[i] == possibleInput) {
+						inputs[i] = null; // not include in input types
+					}
+				}
 			}
 		}
 
-		// Load this office (will also recursively load the office sections)
-		this.loadOffice(source, this.properties);
+		// Remove outputs used to send responses
+		for (int i = 0; i < inputs.length; i++) {
+			OfficeInputNode input = originalInputs[i];
+			LinkSynchronousNode possibleOuput = input
+					.getLinkedSynchronousNode();
+			if (possibleOuput != null) {
+				for (int o = 0; o < outputs.length; o++) {
+					if (outputs[o] == possibleOuput) {
+						outputs[o] = null; // not include in output types
+					}
+				}
+			}
+		}
+
+		// Create the listing of input types
+		List<OfficeInputType> inputTypeList = new LinkedList<OfficeInputType>();
+		for (OfficeInputNode input : inputs) {
+			if (input == null) {
+				continue; // used to handle response
+			}
+			OfficeInputType inputType = input.getOfficeInputType();
+			if (inputType != null) {
+				inputTypeList.add(inputType);
+			}
+		}
+		OfficeInputType[] inputTypes = inputTypeList
+				.toArray(new OfficeInputType[0]);
+
+		// Create the listing of output types
+		List<OfficeOutputType> outputTypeList = new LinkedList<OfficeOutputType>();
+		for (OfficeOutputNode output : outputs) {
+			if (output == null) {
+				continue; // used as response provider
+			}
+			OfficeOutputType outputType = output.getOfficeOutputType();
+			if (outputType != null) {
+				outputTypeList.add(outputType);
+			}
+		}
+		OfficeOutputType[] outputTypes = outputTypeList
+				.toArray(new OfficeOutputType[0]);
+
+		// Copy architect added object types into an array
+		OfficeObjectStruct[] objectStructs = this.objects.values().toArray(
+				new OfficeObjectStruct[0]);
+		List<OfficeManagedObjectType> managedObjectTypes = new LinkedList<OfficeManagedObjectType>();
+		for (int i = 0; i < objectStructs.length; i++) {
+			if (objectStructs[i].isAdded) {
+				managedObjectTypes.add(objectStructs[i].officeObject);
+			}
+		}
+		OfficeManagedObjectType[] moTypes = managedObjectTypes
+				.toArray(new OfficeManagedObjectType[0]);
+
+		// Ensure all objects have names and types
+		for (int i = 0; i < moTypes.length; i++) {
+			OfficeManagedObjectType moType = moTypes[i];
+
+			// Ensure have name
+			String moName = moType.getOfficeManagedObjectName();
+			if (CompileUtil.isBlank(moName)) {
+				this.addIssue("Null name for managed object " + i);
+				return null; // must have name
+			}
+
+			// Ensure have type
+			if (CompileUtil.isBlank(moType.getObjectType())) {
+				this.addIssue("Null type for managed object " + i + " (name="
+						+ moName + ")");
+				return null; // must have type
+			}
+		}
+
+		// Copy architect added team types into an array
+		TeamStruct[] teamStructs = this.teams.values().toArray(
+				new TeamStruct[0]);
+		List<OfficeTeamType> teamTypeList = new LinkedList<OfficeTeamType>();
+		for (int i = 0; i < teamStructs.length; i++) {
+			if (teamStructs[i].isAdded) {
+				teamTypeList.add(teamStructs[i].team);
+			}
+		}
+		OfficeTeamType[] teamTypes = teamTypeList
+				.toArray(new OfficeTeamType[0]);
+
+		// Ensure all teams have names
+		for (int i = 0; i < teamTypes.length; i++) {
+			OfficeTeamType teamType = teamTypes[i];
+			if (CompileUtil.isBlank(teamType.getOfficeTeamName())) {
+				this.addIssue("Null name for team " + i);
+				return null; // must have name
+			}
+		}
+
+		// Create the listing of office section inputs
+		List<OfficeSectionInputType> sectionInputTypeList = new LinkedList<OfficeSectionInputType>();
+		for (SectionNode section : this.sections.values()) {
+			sectionInputTypeList.addAll(Arrays.asList(section
+					.getOfficeInputTypes()));
+		}
+		OfficeSectionInputType[] sectionInputTypes = sectionInputTypeList
+				.toArray(new OfficeSectionInputType[0]);
+
+		// Load the type
+		OfficeType officeType = new OfficeTypeImpl(inputTypes, outputTypes,
+				teamTypes, moTypes, sectionInputTypes);
+
+		// Type loaded successfully
+		return officeType;
+	}
+
+	@Override
+	public void addOfficeFloorContext(String officeFloorLocation) {
+		this.officeFloorLocation = officeFloorLocation;
+
+		// Flag all the teams within office floor context
+		for (TeamStruct struct : this.teams.values()) {
+			struct.team.addOfficeFloorContext(this.officeFloorLocation);
+		}
+
+		this.isInOfficeFloorContext = true;
 	}
 
 	@Override
@@ -780,7 +824,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		OfficeInputNode input = this.inputs.get(inputName);
 		if (input == null) {
 			// Create the input
-			input = new OfficeInputNodeImpl(inputName, parameterType);
+			input = new OfficeInputNodeImpl(inputName, parameterType,
+					this.officeLocation, this.context);
 
 			// Add the input
 			this.inputs.put(inputName, input);
@@ -797,7 +842,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		OfficeOutputNode output = this.outputs.get(outputName);
 		if (output == null) {
 			// Create the output
-			output = new OfficeOutputNodeImpl(outputName, argumentType);
+			output = new OfficeOutputNodeImpl(outputName, argumentType,
+					this.officeLocation, this.context);
 
 			// Add the output
 			this.outputs.put(outputName, output);
@@ -1058,26 +1104,22 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public void link(OfficeInput input, OfficeOutput output) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+		this.linkSynchronous(input, output);
 	}
 
 	@Override
 	public void link(OfficeInput input, OfficeSectionInput sectionInput) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+		this.linkFlow(input, sectionInput);
 	}
 
 	@Override
 	public void link(OfficeOutput output, OfficeInput input) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+		this.linkSynchronous(output, input);
 	}
 
 	@Override
 	public void link(OfficeSectionOutput sectionOutput, OfficeOutput output) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+		this.linkFlow(sectionOutput, output);
 	}
 
 	@Override
