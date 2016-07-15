@@ -17,8 +17,10 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -35,49 +37,60 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionNode extends SectionDesigner, SectionType, SubSection,
-		OfficeSection {
+public interface SectionNode extends SectionDesigner, SubSection, OfficeSection {
 
 	/**
-	 * Indicates if this {@link OfficeSection} has been initialised.
+	 * Initialises this {@link SectionNode}.
 	 * 
-	 * @return <code>true</code> if initialised.
+	 * @param sectionSource
+	 *            Optional {@link SectionSource} instance.
+	 * @param sectionSourceClassName
+	 *            {@link SectionSource} class name.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param propertyList
+	 *            {@link PropertyList} to configure the {@link SectionSource}.
+	 * @param parentSection
+	 *            Optional parent {@link SectionNode}.
+	 * @return This {@link SectionNode} to enable stringing together with
+	 *         constructor.
+	 */
+	SectionNode initialise(SectionSource sectionSource,
+			String sectionSourceClassName, String sectionLocation,
+			PropertyList propertyList, SectionNode parentSection);
+
+	/**
+	 * Indicates if this {@link SectionNode} has been initialised.
+	 * 
+	 * @return <code>true</code> if this {@link SectionNode} has been
+	 *         initialised.
 	 */
 	boolean isInitialised();
 
 	/**
-	 * Initialises this {@link OfficeSection}.
+	 * Sources the section into this {@link SectionNode}.
 	 * 
-	 * @param sectionSourceClassName
-	 *            Class name of the {@link SectionSource}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param properties
-	 *            {@link PropertyList}.
+	 * @return <code>true</code> if successfully sourced. Otherwise
+	 *         <code>false</code> with issue reported to the
+	 *         {@link CompilerIssues}.
 	 */
-	void initialise(String sectionSourceClassName, String sectionLocation,
-			PropertyList properties);
+	boolean sourceSection();
 
 	/**
-	 * Initialises this {@link OfficeSection}.
+	 * Loads the {@link SectionType}.
 	 * 
-	 * @param sectionSource
-	 *            {@link SectionSource} instance.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param properties
-	 *            {@link PropertyList}.
+	 * @return {@link SectionType} or <code>null</code> if issue loading with
+	 *         issue reported to the {@link CompilerIssues}.
 	 */
-	void initialise(SectionSource sectionSource, String sectionLocation,
-			PropertyList properties);
+	SectionType loadSectionType();
 
 	/**
-	 * Obtains the {@link OfficeSectionInputType} instances for this
-	 * {@link OfficeSection}.
+	 * Loads the {@link OfficeSectionType}.
 	 * 
-	 * @return {@link OfficeSectionInputType} instances for this {@link OfficeSection}.
+	 * @return {@link OfficeSectionType} or <code>null</code> if issue loading
+	 *         with issue reported to the {@link CompilerIssues}.
 	 */
-	OfficeSectionInputType[] getOfficeInputTypes();
+	OfficeSectionType loadOfficeSectionType();
 
 	/**
 	 * Obtains the {@link DeployedOfficeInput}.
@@ -106,23 +119,6 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 	GovernanceNode[] getGoverningGovernances();
 
 	/**
-	 * Loads the {@link OfficeSection} of this {@link SectionNode} and all its
-	 * {@link SubSection} {@link SectionNode} instances.
-	 * 
-	 * @param officeLocation
-	 *            Location of the {@link Office} containing this
-	 *            {@link OfficeSection}.
-	 */
-	void loadOfficeSection(String officeLocation);
-
-	/**
-	 * Obtains the {@link OfficeNode} containing this {@link SectionNode}.
-	 * 
-	 * @return {@link OfficeNode} containing this {@link SectionNode}.
-	 */
-	OfficeNode getOfficeNode();
-
-	/**
 	 * Obtains the parent {@link SectionNode} containing this
 	 * {@link SectionNode}.
 	 * 
@@ -131,6 +127,13 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 	 *         other words a {@link OfficeSection}).
 	 */
 	SectionNode getParentSectionNode();
+
+	/**
+	 * Obtains the {@link OfficeNode} containing this {@link SectionNode}.
+	 * 
+	 * @return {@link OfficeNode} containing this {@link SectionNode}.
+	 */
+	OfficeNode getOfficeNode();
 
 	/**
 	 * Obtain the {@link OfficeSection} qualified name.

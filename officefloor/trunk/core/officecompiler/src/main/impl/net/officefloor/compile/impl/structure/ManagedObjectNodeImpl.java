@@ -17,8 +17,6 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -39,9 +37,7 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.TypeQualification;
-import net.officefloor.compile.spi.office.UnknownType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -320,8 +316,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		if (dependency == null) {
 			// Create the managed object dependency
 			dependency = new ManagedObjectDependencyNodeImpl(
-					this.managedObjectSourceNode, managedObjectDependencyName,
-					this.locationType, this.location, this.context);
+					managedObjectDependencyName, this.locationType,
+					this.location, this.context);
 
 			// Add the managed object dependency
 			this.dependencies.put(managedObjectDependencyName, dependency);
@@ -345,23 +341,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public String getOfficeSectionManagedObjectName() {
 		return this.managedObjectName;
-	}
-
-	@Override
-	public Class<?>[] getSupportedExtensionInterfaces() {
-
-		// Obtain the managed object type
-		ManagedObjectType<?> managedObjectType = this.managedObjectSourceNode
-				.getManagedObjectType();
-
-		// Return the supported extension interfaces
-		if (managedObjectType == null) {
-			// Issue in loading type, no extension interfaces
-			return new Class[0];
-		} else {
-			// Return the extension interfaces supported by the managed object
-			return managedObjectType.getExtensionInterfaces();
-		}
 	}
 
 	/*
@@ -389,49 +368,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public String getDependentManagedObjectName() {
 		return this.managedObjectName;
-	}
-
-	@Override
-	public TypeQualification[] getTypeQualifications() {
-
-		// Determine if have type qualifications
-		if (this.typeQualifications.size() > 0) {
-			// Type qualifications provided so return
-			return this.typeQualifications
-					.toArray(new TypeQualification[this.typeQualifications
-							.size()]);
-		}
-
-		// Default type qualification from managed object type
-		this.managedObjectSourceNode.loadManagedObjectType(); // ensure loaded
-		ManagedObjectType<?> managedObjectType = this.managedObjectSourceNode
-				.getManagedObjectType();
-		Class<?> type;
-		if (managedObjectType == null) {
-			// Failed loading managed object type, so unknown type
-			type = UnknownType.class;
-		} else {
-			// Default type qualification from managed object type
-			type = managedObjectType.getObjectClass();
-		}
-
-		// Return defaulted type qualification
-		return new TypeQualification[] { new TypeQualificationImpl(null,
-				type.getName()) };
-	}
-
-	@Override
-	public ObjectDependency[] getObjectDependencies() {
-		ObjectDependency[] dependencies = this.dependencies.values().toArray(
-				new ObjectDependency[0]);
-		Arrays.sort(dependencies, new Comparator<ObjectDependency>() {
-			@Override
-			public int compare(ObjectDependency a, ObjectDependency b) {
-				return a.getObjectDependencyName().compareTo(
-						b.getObjectDependencyName());
-			}
-		});
-		return dependencies;
 	}
 
 	/*

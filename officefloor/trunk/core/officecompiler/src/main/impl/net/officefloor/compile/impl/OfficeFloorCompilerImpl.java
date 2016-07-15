@@ -38,10 +38,13 @@ import net.officefloor.compile.impl.officefloor.OfficeFloorLoaderImpl;
 import net.officefloor.compile.impl.pool.ManagedObjectPoolLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionLoaderImpl;
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.team.TeamLoaderImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.work.WorkLoaderImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -516,6 +519,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 				SectionSource.class, this.sectionSourceAliases,
 				this.getSourceContext(), LocationType.SECTION, sectionLocation,
 				null, null, this.getCompilerIssues());
+	}
+
+	@Override
+	public SectionNode createSectionNode(String sectionName, OfficeNode office) {
+		return new SectionNodeImpl(sectionName, office, this);
 	}
 
 	@Override

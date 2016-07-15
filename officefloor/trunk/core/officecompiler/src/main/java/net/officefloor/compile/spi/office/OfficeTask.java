@@ -41,19 +41,6 @@ public interface OfficeTask {
 	String getOfficeTaskName();
 
 	/**
-	 * <p>
-	 * Obtains the {@link ObjectDependency} instances that this
-	 * {@link OfficeTask} is dependent upon.
-	 * <p>
-	 * This aids the {@link OfficeSource} in deciding the {@link Team}
-	 * responsible for this {@link OfficeTask}.
-	 * 
-	 * @return {@link ObjectDependency} instances that this {@link OfficeTask}
-	 *         is dependent upon.
-	 */
-	ObjectDependency[] getObjectDependencies();
-
-	/**
 	 * Obtains the {@link TaskTeam} responsible for this {@link OfficeTask}.
 	 * 
 	 * @return {@link TaskTeam} responsible for this {@link OfficeTask}.

@@ -48,6 +48,11 @@ public class AutoWireEscalationCauseRouteWorkSource
 		AbstractWorkSource<AutoWireEscalationCauseRouteWorkSource.AutoWireEscalationCauseRouteTask> {
 
 	/**
+	 * Name of the {@link Task} handling the {@link Escalation}.
+	 */
+	public static final String HANDLER_TASK_NAME = "Handle";
+
+	/**
 	 * Name of {@link Property} prefix containing the {@link Escalation} type.
 	 * This is is indexed from <code>0</code> to provide the listing of
 	 * {@link Escalation} causes to handle.
@@ -147,7 +152,7 @@ public class AutoWireEscalationCauseRouteWorkSource
 				escalations);
 		workTypeBuilder.setWorkFactory(factory);
 		TaskTypeBuilder<Dependencies, Indexed> task = workTypeBuilder
-				.addTaskType("Handle", factory, Dependencies.class,
+				.addTaskType(HANDLER_TASK_NAME, factory, Dependencies.class,
 						Indexed.class);
 		task.addObject(Throwable.class).setKey(Dependencies.ESCALATION);
 		for (Class<? extends Throwable> escalation : escalations) {

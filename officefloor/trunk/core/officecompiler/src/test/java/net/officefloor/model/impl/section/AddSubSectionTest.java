@@ -41,7 +41,8 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	public void testAddSubSectionWithPropertiesOnly() {
 
 		// Create the sub section
-		SectionType sectionType = new SectionNodeImpl(null, (String) null, null);
+		SectionType sectionType = new SectionNodeImpl(null, null, null)
+				.loadSectionType();
 
 		// Ensure can add
 		Change<SubSectionModel> change = this.operations.addSubSection(
@@ -64,20 +65,20 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	public void testAddSubSectionWithInputsOutputsObjects() {
 
 		// Create the sub section with inputs, outputs, objects
-		SectionNodeImpl sectionType = new SectionNodeImpl(null, (String) null,
-				null);
-		sectionType.addSectionInput("INPUT_B", Integer.class.getName());
-		sectionType.addSectionInput("INPUT_A", Double.class.getName());
-		sectionType.addSectionOutput("OUTPUT_B", String.class.getName(), false);
-		sectionType.addSectionOutput("OUTPUT_A", Exception.class.getName(),
+		SectionNodeImpl sectionNode = new SectionNodeImpl(null, null, null);
+		sectionNode.addSectionInput("INPUT_B", Integer.class.getName());
+		sectionNode.addSectionInput("INPUT_A", Double.class.getName());
+		sectionNode.addSectionOutput("OUTPUT_B", String.class.getName(), false);
+		sectionNode.addSectionOutput("OUTPUT_A", Exception.class.getName(),
 				true);
-		sectionType.addSectionObject("OBJECT_B", Object.class.getName());
-		sectionType.addSectionObject("OBJECT_A", Connection.class.getName());
+		sectionNode.addSectionObject("OBJECT_B", Object.class.getName());
+		sectionNode.addSectionObject("OBJECT_A", Connection.class.getName());
 
 		// Ensure can add (ordering the inputs, outputs, objects for easier SCM)
 		Change<SubSectionModel> change = this.operations.addSubSection(
 				"SUB_SECTION", "net.example.ExampleSectionSource",
-				"SECTION_LOCATION", new PropertyListImpl(), sectionType);
+				"SECTION_LOCATION", new PropertyListImpl(),
+				sectionNode.loadSectionType());
 		this.assertChange(change, null, "Add sub section SUB_SECTION", true);
 	}
 
@@ -87,7 +88,8 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	public void testAddMultipleSubSections() {
 
 		// Create the section type
-		SectionType sectionType = new SectionNodeImpl(null, (String) null, null);
+		SectionType sectionType = new SectionNodeImpl(null, null, null)
+				.loadSectionType();
 
 		// Add multiple section types
 		Change<SubSectionModel> changeB = this.operations.addSubSection(
@@ -103,4 +105,5 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 		// Apply the changes, ensuring ordering of the sub sections
 		this.assertChanges(changeB, changeA, changeC);
 	}
+
 }

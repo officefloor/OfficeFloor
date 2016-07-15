@@ -23,9 +23,7 @@ import java.sql.Connection;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeDuty;
@@ -53,10 +51,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionInput;
-import net.officefloor.compile.spi.section.SectionManagedObjectSource;
-import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskFactory;
@@ -753,19 +748,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeInput input = this.node
 				.addInput("INPUT", Integer.class.getName());
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.getBuilder().addSectionInput("SECTION_INPUT",
-								Object.class.getName());
-						context.getBuilder().addSectionInput("ANOTHER",
-								String.class.getName());
-					}
-				});
-
-		// Obtain section input (should be ordered)
-		OfficeSectionInput sectionInput = section.getOfficeSectionInputs()[1];
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+		OfficeSectionInput sectionInput = section
+				.getOfficeSectionInput("SECTION_INPUT");
 		assertEquals("Incorrect office section input", "SECTION_INPUT",
 				sectionInput.getOfficeSectionInputName());
 
@@ -773,7 +758,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		assertFlowLink("input -> section input", input, sectionInput);
 
 		// Ensure only can link once
-		this.node.link(input, section.getOfficeSectionInputs()[0]);
+		this.node.link(input, section.getOfficeSectionInput("ANOTHER"));
 		assertFlowLink("Can only link once", input, sectionInput);
 
 		this.verifyMockObjects();
@@ -790,15 +775,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.getBuilder().addSectionOutput("SECTION_OUTPUT",
-								Object.class.getName(), false);
-					}
-				});
-		OfficeSectionOutput sectionOutput = section.getOfficeSectionOutputs()[0];
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+		OfficeSectionOutput sectionOutput = section
+				.getOfficeSectionOutput("SECTION_OUTPUT");
 		OfficeOutput output = this.node.addOutput("OUTPUT",
 				Integer.class.getName());
 
@@ -872,27 +851,14 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 */
 	public void testLinkTaskTeamToOfficeTeam() {
 
-		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMockTaskFactory();
-
 		// Record already being linked
 		this.record_issue("Team for task TASK already assigned");
 
 		this.replayMockObjects();
 
 		// Add section with task
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.addTask("WORK", workFactory, "TASK",
-								taskFactory, null);
-					}
-				});
-		assertEquals("Incorrect number of section tasks", 1,
-				section.getOfficeTasks().length);
-		OfficeTask task = section.getOfficeTasks()[0];
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+		OfficeTask task = section.getOfficeTask("TASK");
 		assertEquals("Incorrect office task", "TASK", task.getOfficeTaskName());
 
 		// Link
@@ -991,14 +957,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Add section with sub-section
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.addSubSection("SUB_SECTION", null);
-					}
-				});
-		OfficeSubSection subSection = section.getOfficeSubSections()[0];
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+		OfficeSubSection subSection = section
+				.getOfficeSubSection("SUB_SECTION");
 
 		// Link
 		OfficeGovernance governance = this.addGovernance(this.node,
@@ -1020,22 +981,11 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 */
 	public void testLinkOfficeGovernanceForOfficeTask() {
 
-		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMockTaskFactory();
-
 		this.replayMockObjects();
 
 		// Add section with task
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.addTask("WORK", workFactory, "TASK",
-								taskFactory, null);
-					}
-				});
-		OfficeTask task = section.getOfficeTasks()[0];
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+		OfficeTask task = section.getOfficeTask("TASK");
 
 		// Link
 		OfficeGovernance governance = this.addGovernance(this.node,
@@ -1056,22 +1006,11 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 */
 	public void testLinkPreOfficeDutyForOfficeTask() {
 
-		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMockTaskFactory();
-
 		this.replayMockObjects();
 
 		// Add section with task
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.addTask("WORK", workFactory, "TASK",
-								taskFactory, null);
-					}
-				});
-		OfficeTask task = section.getOfficeTasks()[0];
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+		OfficeTask task = section.getOfficeTask("TASK");
 
 		// Link
 		OfficeAdministrator administrator = this.addAdministrator(this.node,
@@ -1094,22 +1033,11 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 */
 	public void testLinkPostOfficeDutyForOfficeTask() {
 
-		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMockTaskFactory();
-
 		this.replayMockObjects();
 
 		// Add section with task
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.addTask("WORK", workFactory, "TASK",
-								taskFactory, null);
-					}
-				});
-		OfficeTask task = section.getOfficeTasks()[0];
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+		OfficeTask task = section.getOfficeTask("TASK");
 
 		// Link
 		OfficeAdministrator administrator = this.addAdministrator(this.node,
@@ -1131,19 +1059,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Add section with governance
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						SectionManagedObjectSource moSource = context
-								.addManagedObjectSource("MO_SOURCE", null);
-						moSource.addSectionManagedObject("MO",
-								ManagedObjectScope.WORK);
-					}
-				});
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
 		OfficeSectionManagedObject mo = section
-				.getOfficeSectionManagedObjectSources()[0]
-				.getOfficeSectionManagedObjects()[0];
+				.getOfficeSectionManagedObjectSource("MO_SOURCE")
+				.getOfficeSectionManagedObject("MO");
 
 		// Link
 		OfficeGovernance governance = this.addGovernance(this.node,
@@ -1206,19 +1125,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Add section with managed object
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						SectionManagedObjectSource moSource = context
-								.addManagedObjectSource("MO_SOURCE", null);
-						moSource.addSectionManagedObject("MO",
-								ManagedObjectScope.WORK);
-					}
-				});
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
 		OfficeSectionManagedObject mo = section
-				.getOfficeSectionManagedObjectSources()[0]
-				.getOfficeSectionManagedObjects()[0];
+				.getOfficeSectionManagedObjectSource("MO_SOURCE")
+				.getOfficeSectionManagedObject("MO");
 
 		// Link
 		OfficeAdministrator administrator = this.addAdministrator(this.node,
@@ -1286,17 +1196,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Add section with section object
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.getBuilder().addSectionObject("SECTION_OBJECT",
-								Connection.class.getName());
-					}
-				});
-		assertEquals("Incorrect number of section objects", 1,
-				section.getOfficeSectionObjects().length);
-		OfficeSectionObject sectionObject = section.getOfficeSectionObjects()[0];
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+		OfficeSectionObject sectionObject = section
+				.getOfficeSectionObject("SECTION_OBJECT");
 		assertEquals("Incorrect section object", "SECTION_OBJECT",
 				sectionObject.getOfficeSectionObjectName());
 
@@ -1328,15 +1230,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Add section with section object
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.getBuilder().addSectionObject("SECTION_OBJECT",
-								Connection.class.getName());
-					}
-				});
-		OfficeSectionObject sectionObject = section.getOfficeSectionObjects()[0];
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
+		OfficeSectionObject sectionObject = section
+				.getOfficeSectionObject("SECTION_OBJECT");
 
 		// Link
 		OfficeObject mo = this.node.addOfficeObject("MO",
@@ -1349,113 +1245,6 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.node.link(sectionObject, this.node.addOfficeObject("ANOTHER",
 				Connection.class.getName()));
 		assertObjectLink("Can only link once", sectionObject, mo);
-
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure can have {@link ObjectDependency} linked to an
-	 * {@link OfficeManagedObject}.
-	 */
-	public void testLinkObjectDependencyToOfficeManagedObject() {
-
-		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMockTaskFactory();
-
-		// Record not linked on first attempt to retrieve dependent
-		this.record_issue("TaskObject OBJECT is not linked to a DependentManagedObject");
-
-		this.replayMockObjects();
-
-		// Add section with section object
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						// Add managed object and link to section output
-						TaskObject object = context.addTaskObject("WORK",
-								workFactory, "TASK", taskFactory, "OBJECT",
-								Connection.class, null);
-						SectionObject sectionObject = context.getBuilder()
-								.addSectionObject("SECTION_OBJECT",
-										Connection.class.getName());
-						context.getBuilder().link(object, sectionObject);
-					}
-				});
-		OfficeSectionObject sectionObject = section.getOfficeSectionObjects()[0];
-
-		// Obtain the object dependency and ensure not linked at this stage
-		ObjectDependency dependency = section.getOfficeTasks()[0]
-				.getObjectDependencies()[0];
-		assertEquals("Incorrect dependency", "OBJECT",
-				dependency.getObjectDependencyName());
-		DependentManagedObject dependent = dependency
-				.getDependentManagedObject();
-		assertNull("Should not yet be linked to a managed object", dependent);
-
-		// Link section object to an office managed object
-		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
-				this.node, "MO_SOURCE", null);
-		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
-				ManagedObjectScope.WORK);
-		this.node.link(sectionObject, mo);
-
-		// Ensure task object linked to office managed object
-		assertEquals("Incorrect linked managed object", mo,
-				dependency.getDependentManagedObject());
-
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure can have {@link ObjectDependency} linked to an
-	 * {@link OfficeObject}.
-	 */
-	public void testLinkObjectDependencyToOfficeFloorManagedObject() {
-
-		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMockTaskFactory();
-
-		// Record not linked on first attempt to retrieve dependent
-		this.record_issue("TaskObject OBJECT is not linked to a DependentManagedObject");
-
-		this.replayMockObjects();
-
-		// Add section with section object
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						// Add managed object and link to section output
-						TaskObject object = context.addTaskObject("WORK",
-								workFactory, "TASK", taskFactory, "OBJECT",
-								Connection.class, null);
-						SectionObject sectionObject = context.getBuilder()
-								.addSectionObject("SECTION_OBJECT",
-										Connection.class.getName());
-						context.getBuilder().link(object, sectionObject);
-					}
-				});
-		OfficeSectionObject sectionObject = section.getOfficeSectionObjects()[0];
-
-		// Obtain the object dependency and ensure not linked at this stage
-		ObjectDependency dependency = section.getOfficeTasks()[0]
-				.getObjectDependencies()[0];
-		assertEquals("Incorrect dependency", "OBJECT",
-				dependency.getObjectDependencyName());
-		assertNull("Should not yet be linked to managed object",
-				dependency.getDependentManagedObject());
-
-		// Link section object to an office floor managed object
-		OfficeObject mo = this.node.addOfficeObject("MO",
-				Connection.class.getName());
-		this.node.link(sectionObject, mo);
-
-		// Ensure task object linked to office floor managed object
-		assertEquals("Incorrect linked managed object", mo,
-				dependency.getDependentManagedObject());
 
 		this.verifyMockObjects();
 	}
@@ -1524,15 +1313,12 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 								});
 					}
 				});
-		assertEquals("Incorrect number of section managed object sources", 1,
-				section.getOfficeSectionManagedObjectSources().length);
 		OfficeSectionManagedObjectSource moSource = section
-				.getOfficeSectionManagedObjectSources()[0];
+				.getOfficeSectionManagedObjectSource("MO_SOURCE");
 		assertEquals("Incorrect section managed object source", "MO_SOURCE",
 				moSource.getOfficeSectionManagedObjectSourceName());
-		assertEquals("Incorrect number of section managed object source teams",
-				1, moSource.getOfficeSectionManagedObjectTeams().length);
-		ManagedObjectTeam team = moSource.getOfficeSectionManagedObjectTeams()[0];
+		ManagedObjectTeam team = moSource
+				.getOfficeSectionManagedObjectTeam("TEAM");
 		assertEquals("Incorrect section managed object source team", "TEAM",
 				team.getManagedObjectTeamName());
 
@@ -1692,18 +1478,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Add section with section inputs
-		OfficeSection section = this.addSection(this.node, "SECTION",
-				new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.getBuilder().addSectionInput("SECTION_INPUT",
-								Object.class.getName());
-						context.getBuilder().addSectionInput("ANOTHER",
-								String.class.getName());
-					}
-				});
+		OfficeSection section = this.addSection(this.node, "SECTION", null);
 		// Obtain section input (should be ordered)
-		OfficeSectionInput sectionInput = section.getOfficeSectionInputs()[1];
+		OfficeSectionInput sectionInput = section
+				.getOfficeSectionInput("SECTION_INPUT");
 		assertEquals("Incorrect office section input", "SECTION_INPUT",
 				sectionInput.getOfficeSectionInputName());
 
@@ -1716,7 +1494,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				sectionInput);
 
 		// Ensure only can link once
-		this.node.link(flow, section.getOfficeSectionInputs()[0]); // ordered
+		this.node.link(flow, section.getOfficeSectionInput("ANOTHER"));
 		assertFlowLink("Can only link once", flow, sectionInput);
 
 		this.verifyMockObjects();
@@ -1735,31 +1513,17 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add section with section outputs
 		OfficeSection outputSection = this.addSection(this.node,
-				"OUTPUT_SECTION", new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.getBuilder().addSectionOutput("SECTION_OUTPUT",
-								Object.class.getName(), false);
-					}
-				});
+				"OUTPUT_SECTION", null);
 		OfficeSectionOutput sectionOutput = outputSection
-				.getOfficeSectionOutputs()[0];
+				.getOfficeSectionOutput("SECTION_OUTPUT");
 		assertEquals("Incorrect office section input", "SECTION_OUTPUT",
 				sectionOutput.getOfficeSectionOutputName());
 
 		// Add section with section inputs
 		OfficeSection inputSection = this.addSection(this.node,
-				"INPUT_SECTION", new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.getBuilder().addSectionInput("SECTION_INPUT",
-								Object.class.getName());
-						context.getBuilder().addSectionInput("ANOTHER",
-								String.class.getName());
-					}
-				});
-		// Should be ordered (so will be second input)
-		OfficeSectionInput sectionInput = inputSection.getOfficeSectionInputs()[1];
+				"INPUT_SECTION", null);
+		OfficeSectionInput sectionInput = inputSection
+				.getOfficeSectionInput("SECTION_INPUT");
 		assertEquals("Incorrect office section input", "SECTION_INPUT",
 				sectionInput.getOfficeSectionInputName());
 
@@ -1769,7 +1533,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				sectionInput);
 
 		// Ensure only can link once
-		this.node.link(sectionOutput, inputSection.getOfficeSectionInputs()[0]); // ordered
+		this.node.link(sectionOutput,
+				inputSection.getOfficeSectionInput("ANOTHER"));
 		assertFlowLink("Can only link once", sectionOutput, sectionInput);
 
 		this.verifyMockObjects();
@@ -1794,17 +1559,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add section with section inputs
 		OfficeSection inputSection = this.addSection(this.node,
-				"INPUT_SECTION", new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.getBuilder().addSectionInput("SECTION_INPUT",
-								Object.class.getName());
-						context.getBuilder().addSectionInput("ANOTHER",
-								String.class.getName());
-					}
-				});
-		// Should be ordered (so will be second input)
-		OfficeSectionInput sectionInput = inputSection.getOfficeSectionInputs()[1];
+				"INPUT_SECTION", null);
+		OfficeSectionInput sectionInput = inputSection
+				.getOfficeSectionInput("SECTION_INPUT");
 		assertEquals("Incorrect office section input", "SECTION_INPUT",
 				sectionInput.getOfficeSectionInputName());
 
@@ -1813,7 +1570,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		assertFlowLink("escalation -> section input", escalation, sectionInput);
 
 		// Ensure only can link once
-		this.node.link(escalation, inputSection.getOfficeSectionInputs()[0]); // ordered
+		this.node.link(escalation,
+				inputSection.getOfficeSectionInput("ANOTHER"));
 		assertFlowLink("Can only link once", escalation, sectionInput);
 
 		this.verifyMockObjects();
@@ -1836,17 +1594,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add section with section inputs
 		OfficeSection inputSection = this.addSection(this.node,
-				"INPUT_SECTION", new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.getBuilder().addSectionInput("SECTION_INPUT",
-								Object.class.getName());
-						context.getBuilder().addSectionInput("ANOTHER",
-								String.class.getName());
-					}
-				});
-		// Should be ordered (so will be second input)
-		OfficeSectionInput sectionInput = inputSection.getOfficeSectionInputs()[1];
+				"INPUT_SECTION", null);
+		OfficeSectionInput sectionInput = inputSection
+				.getOfficeSectionInput("SECTION_INPUT");
 		assertEquals("Incorrect office section input", "SECTION_INPUT",
 				sectionInput.getOfficeSectionInputName());
 
@@ -1855,7 +1605,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		assertFlowLink("start -> section input", start, sectionInput);
 
 		// Ensure only can link once
-		this.node.link(start, inputSection.getOfficeSectionInputs()[0]); // ordered
+		this.node.link(start, inputSection.getOfficeSectionInput("ANOTHER"));
 		assertFlowLink("Can only link once", start, sectionInput);
 
 		this.verifyMockObjects();

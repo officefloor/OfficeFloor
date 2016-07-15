@@ -53,6 +53,7 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	/**
 	 * Loads the {@link ManagedObjectType}.
 	 */
+	// TODO refactor to return ManagedObjectType
 	void loadManagedObjectType();
 
 	/**
@@ -61,6 +62,7 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
 	 */
+	@Deprecated // TODO return type from loadManagedObjectType()
 	ManagedObjectType<?> getManagedObjectType();
 
 	/**
@@ -75,6 +77,7 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	 *         if issue loading with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
+	@Deprecated // TODO return type from loadOfficeFloorManagedObjectSourceType()
 	OfficeFloorManagedObjectSourceType getOfficeFloorManagedObjectSourceType();
 
 	/**
@@ -84,6 +87,7 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 */
+	@Deprecated // TODO REMOVE
 	void addOfficeContext(String officeLocation);
 
 	/**

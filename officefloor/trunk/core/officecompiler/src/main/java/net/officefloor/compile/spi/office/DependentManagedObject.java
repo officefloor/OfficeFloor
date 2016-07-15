@@ -17,7 +17,6 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -34,28 +33,5 @@ public interface DependentManagedObject {
 	 * @return Name of this {@link DependentManagedObject}.
 	 */
 	String getDependentManagedObjectName();
-
-	/**
-	 * <p>
-	 * Obtains the {@link TypeQualification} instances for this
-	 * {@link DependentManagedObject}.
-	 * <p>
-	 * Should no {@link TypeQualification} instances be manually assigned, the
-	 * {@link TypeQualification} should be derived from the
-	 * {@link ManagedObjectType} (i.e. type without qualifier).
-	 * 
-	 * @return {@link TypeQualification} instances for this
-	 *         {@link DependentManagedObject}.
-	 */
-	TypeQualification[] getTypeQualifications();
-
-	/**
-	 * Obtains the {@link ObjectDependency} instances for this
-	 * {@link DependentManagedObject}.
-	 * 
-	 * @return {@link ObjectDependency} instances for this
-	 *         {@link DependentManagedObject}.
-	 */
-	ObjectDependency[] getObjectDependencies();
 
 }

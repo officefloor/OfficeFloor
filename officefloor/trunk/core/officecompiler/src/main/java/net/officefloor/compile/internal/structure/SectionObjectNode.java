@@ -36,6 +36,7 @@ public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
 	 * 
 	 * @return <code>true</code> if initialised.
 	 */
+	@Deprecated // TODO add method loadSectionObjectType()
 	boolean isInitialised();
 
 	/**
@@ -53,6 +54,7 @@ public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 */
+	@Deprecated
 	void addOfficeContext(String officeLocation);
 
 	/**

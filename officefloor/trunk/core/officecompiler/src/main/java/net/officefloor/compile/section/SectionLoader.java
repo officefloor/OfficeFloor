@@ -26,7 +26,8 @@ import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 
 /**
- * Loads the {@link SectionType} from the {@link SectionSource}.
+ * Loads the {@link SectionType} and {@link OfficeSectionType} from the
+ * {@link SectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -68,12 +69,29 @@ public interface SectionLoader {
 			PropertyList propertyList);
 
 	/**
+	 * Loads and returns the {@link SectionType} from the {@link SectionSource}.
+	 * 
+	 * @param sectionSource
+	 *            {@link SectionSource} instance.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param propertyList
+	 *            {@link PropertyList} containing the properties to source the
+	 *            {@link SectionType}.
+	 * @return {@link SectionType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	SectionType loadSectionType(SectionSource sectionSource,
+			String sectionLocation, PropertyList propertyList);
+
+	/**
 	 * <p>
-	 * Loads and returns the {@link OfficeSection} from this
+	 * Loads and returns the {@link OfficeSectionType} from this
 	 * {@link SectionSource}.
 	 * <p>
 	 * Unlike loading the {@link SectionType} this will recursively load the
-	 * {@link SubSection} instances to fully construct the {@link OfficeSection}.
+	 * {@link SubSection} instances to fully construct the
+	 * {@link OfficeSectionType}.
 	 * 
 	 * @param <S>
 	 *            {@link SectionSource} type.
@@ -85,11 +103,35 @@ public interface SectionLoader {
 	 *            Location of the {@link OfficeSection}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link OfficeSection}.
-	 * @return {@link OfficeSection}.
+	 *            {@link OfficeSectionType}.
+	 * @return {@link OfficeSectionType}.
 	 */
-	<S extends SectionSource> OfficeSection loadOfficeSection(
+	<S extends SectionSource> OfficeSectionType loadOfficeSectionType(
 			String sectionName, Class<S> sectionSourceClass,
 			String sectionLocation, PropertyList propertyList);
+
+	/**
+	 * <p>
+	 * Loads and returns the {@link OfficeSectionType} from this
+	 * {@link SectionSource}.
+	 * <p>
+	 * Unlike loading the {@link SectionType} this will recursively load the
+	 * {@link SubSection} instances to fully construct the
+	 * {@link OfficeSectionType}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @param sectionSource
+	 *            {@link SectionSource} instance.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param propertyList
+	 *            {@link PropertyList} containing the properties to source the
+	 *            {@link OfficeSectionType}.
+	 * @return {@link OfficeSectionType}.
+	 */
+	OfficeSectionType loadOfficeSectionType(String sectionName,
+			SectionSource sectionSource, String sectionLocation,
+			PropertyList propertyList);
 
 }

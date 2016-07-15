@@ -18,26 +18,18 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
-import net.officefloor.compile.section.SectionObjectType;
-import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link SectionLoader} implementation.
@@ -187,116 +179,67 @@ public class SectionLoaderImpl implements SectionLoader {
 			return null; // failed to instantiate
 		}
 
-		// Create the section source context
-		SectionSourceContext context = new SectionSourceContextImpl(true,
-				sectionLocation, propertyList, this.nodeContext);
-
-		// Create the section designer
-		SectionNode sectionType = new SectionNodeImpl(
-				SectionType.class.getSimpleName(), sectionLocation,
-				this.nodeContext);
-
-		try {
-			// Source the section type
-			sectionSource.sourceSection(sectionType, context);
-
-		} catch (UnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
-					+ "' for " + SectionSource.class.getSimpleName() + " "
-					+ sectionSourceClass.getName(), sectionLocation);
-			return null; // must have property
-
-		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName()
-					+ "' for " + SectionSource.class.getSimpleName() + " "
-					+ sectionSourceClass.getName(), sectionLocation);
-			return null; // must have class
-
-		} catch (UnknownResourceError ex) {
-			this.addIssue(
-					"Can not obtain resource at location '"
-							+ ex.getUnknownResourceLocation() + "' for "
-							+ SectionSource.class.getSimpleName() + " "
-							+ sectionSourceClass.getName(), sectionLocation);
-			return null; // must have resource
-
-		} catch (LoadTypeError ex) {
-			this.addIssue("Failure loading " + ex.getType().getSimpleName()
-					+ " from source " + ex.getSourceClassName(),
-					sectionLocation);
-			return null; // must not fail in loading types
-
-		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to source " + SectionType.class.getSimpleName()
-							+ " definition from "
-							+ SectionSource.class.getSimpleName() + " "
-							+ sectionSourceClass.getName(), ex, sectionLocation);
-			return null; // must be successful
-		}
-
-		// Ensure all inputs have names
-		SectionInputType[] inputs = sectionType.getSectionInputTypes();
-		for (int i = 0; i < inputs.length; i++) {
-			if (CompileUtil.isBlank(inputs[i].getSectionInputName())) {
-				this.addIssue("Null name for input " + i, sectionLocation);
-				return null; // must have names for inputs
-			}
-		}
-
-		// Ensure all outputs have names
-		SectionOutputType[] outputs = sectionType.getSectionOutputTypes();
-		for (int i = 0; i < outputs.length; i++) {
-			if (CompileUtil.isBlank(outputs[i].getSectionOutputName())) {
-				this.addIssue("Null name for output " + i, sectionLocation);
-				return null; // must have names for outputs
-			}
-		}
-
-		// Ensure all objects have names and types
-		SectionObjectType[] objects = sectionType.getSectionObjectTypes();
-		for (int i = 0; i < objects.length; i++) {
-			SectionObjectType object = objects[i];
-			if (CompileUtil.isBlank(object.getSectionObjectName())) {
-				this.addIssue("Null name for object " + i, sectionLocation);
-				return null; // must have names for objects
-			}
-			if (CompileUtil.isBlank(object.getObjectType())) {
-				this.addIssue(
-						"Null type for object " + i + " (name="
-								+ object.getSectionObjectName() + ")",
-						sectionLocation);
-				return null; // must have types for objects
-			}
-		}
-
-		// Return the section type
-		return sectionType;
+		// Return loaded section type
+		return this.loadSectionType(sectionSource, sectionLocation,
+				propertyList);
 	}
 
 	@Override
-	public <S extends SectionSource> OfficeSection loadOfficeSection(
+	public SectionType loadSectionType(SectionSource sectionSource,
+			String sectionLocation, PropertyList propertyList) {
+
+		// Create the section node
+		SectionNode sectionNode = this.nodeContext.createSectionNode("type",
+				null).initialise(sectionSource, null, sectionLocation,
+				propertyList, null);
+
+		// Source the section
+		boolean isSourced = sectionNode.sourceSection();
+		if (!isSourced) {
+			return null; // must source section successfully
+		}
+
+		// Return the section type
+		return sectionNode.loadSectionType();
+	}
+
+	@Override
+	public <S extends SectionSource> OfficeSectionType loadOfficeSectionType(
 			String sectionName, Class<S> sectionSourceClass,
 			String sectionLocation, PropertyList propertyList) {
 
-		// Instantiate an instance of the section source
-		S sectionSource = CompileUtil.newInstance(sectionSourceClass,
-				SectionSource.class, LocationType.SECTION, sectionLocation,
-				null, null, this.nodeContext.getCompilerIssues());
+		// Instantiate the section source
+		SectionSource sectionSource = CompileUtil.newInstance(
+				sectionSourceClass, SectionSource.class, LocationType.SECTION,
+				sectionLocation, null, null,
+				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
-			return null; // must instantiate section source
+			return null; // failed to instantiate
 		}
 
-		// Create the section node (loading in its properties)
-		SectionNode sectionNode = new SectionNodeImpl(sectionName,
-				sectionSource, sectionLocation, propertyList, null,
-				this.nodeContext);
+		// Return loaded office section type
+		return this.loadOfficeSectionType(sectionName, sectionSource,
+				sectionLocation, propertyList);
+	}
 
-		// Recursive load all the section nodes
-		sectionNode.loadOfficeSection(sectionLocation);
+	@Override
+	public OfficeSectionType loadOfficeSectionType(String sectionName,
+			SectionSource sectionSource, String sectionLocation,
+			PropertyList propertyList) {
 
-		// Return the section node as the office section
-		return sectionNode;
+		// Create the section node
+		SectionNode sectionNode = this.nodeContext.createSectionNode(
+				sectionName, null).initialise(sectionSource, null,
+				sectionLocation, propertyList, null);
+
+		// Source the section
+		boolean isSourced = sectionNode.sourceSection();
+		if (!isSourced) {
+			return null; // must source section successfully
+		}
+
+		// Return the office section type
+		return sectionNode.loadOfficeSectionType();
 	}
 
 	/**

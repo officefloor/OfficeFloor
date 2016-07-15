@@ -17,7 +17,6 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -519,8 +518,13 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		// Create the listing of office section inputs
 		List<OfficeSectionInputType> sectionInputTypeList = new LinkedList<OfficeSectionInputType>();
 		for (SectionNode section : this.sections.values()) {
-			sectionInputTypeList.addAll(Arrays.asList(section
-					.getOfficeInputTypes()));
+
+			// TODO implement
+			throw new UnsupportedOperationException(
+					"TODO implement creating list of OfficeSectionInputTypes");
+
+			// sectionInputTypeList.addAll(Arrays.asList(section
+			// .getOfficeInputTypes()));
 		}
 		OfficeSectionInputType[] sectionInputTypes = sectionInputTypeList
 				.toArray(new OfficeSectionInputType[0]);
@@ -891,23 +895,14 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		SectionNode section = this.sections.get(sectionName);
 		if (section == null) {
 			// Create the section and have it loaded
-			section = new SectionNodeImpl(sectionName, sectionSourceClassName,
-					sectionLocation, properties, this, this.context);
-			section.loadOfficeSection(this.officeLocation);
-
+			section = this.context.createSectionNode(sectionName, this)
+					.initialise(null, sectionSourceClassName, sectionLocation,
+							properties, null);
 			// Add the section
 			this.sections.put(sectionName, section);
 		} else {
-			// Added but determine if initialised
-			if (!section.isInitialised()) {
-				// Initialise as not yet initialised
-				section.initialise(sectionSourceClassName, sectionLocation,
-						properties);
-				section.loadOfficeSection(this.officeLocation);
-			} else {
-				// Section already added and initialised
-				this.addIssue("Section " + sectionName + " already added");
-			}
+			// Section already added
+			this.addIssue("Section " + sectionName + " already added");
 		}
 		return section;
 	}
@@ -920,22 +915,14 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		SectionNode section = this.sections.get(sectionName);
 		if (section == null) {
 			// Create the section and have it loaded
-			section = new SectionNodeImpl(sectionName, sectionSource,
-					sectionLocation, properties, this, this.context);
-			section.loadOfficeSection(this.officeLocation);
-
+			section = this.context.createSectionNode(sectionName, this)
+					.initialise(sectionSource, null, sectionLocation,
+							properties, null);
 			// Add the section
 			this.sections.put(sectionName, section);
 		} else {
-			// Added but determine if initialised
-			if (!section.isInitialised()) {
-				// Initialise as not yet initialised
-				section.initialise(sectionSource, sectionLocation, properties);
-				section.loadOfficeSection(this.officeLocation);
-			} else {
-				// Section already added and initialised
-				this.addIssue("Section " + sectionName + " already added");
-			}
+			// Section already added and initialised
+			this.addIssue("Section " + sectionName + " already added");
 		}
 		return section;
 	}

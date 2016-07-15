@@ -28,6 +28,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -83,6 +84,15 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 	@Override
 	public PropertyList createPropertyList() {
 		return this.context.createPropertyList();
+	}
+
+	@Override
+	public OfficeSectionType loadOfficeSectionType(
+			String sectionSourceClassName, String sectionLocation,
+			PropertyList properties) {
+		// TODO implement loadOfficeSectionType
+		throw new UnsupportedOperationException(
+				"TODO implement loadOfficeSectionType");
 	}
 
 	@Override

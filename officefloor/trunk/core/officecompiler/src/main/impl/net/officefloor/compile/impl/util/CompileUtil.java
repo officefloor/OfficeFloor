@@ -95,12 +95,26 @@ public class CompileUtil {
 				String bKey = extractor.toString(b);
 
 				// Return the comparison (handling possible null key)
-				return (aKey == null ? "" : aKey).compareTo(bKey);
+				return CompileUtil.sortCompare(aKey, bKey);
 			}
 		});
 
 		// Return the sorted array
 		return array;
+	}
+
+	/**
+	 * Convenience method to compare two strings for sorting.
+	 * 
+	 * @param a
+	 *            First string.
+	 * @param b
+	 *            Second string.
+	 * @return Compare result for sorting.
+	 */
+	public static int sortCompare(String a, String b) {
+		return String.CASE_INSENSITIVE_ORDER.compare(a == null ? "" : a,
+				b == null ? "" : b);
 	}
 
 	/**

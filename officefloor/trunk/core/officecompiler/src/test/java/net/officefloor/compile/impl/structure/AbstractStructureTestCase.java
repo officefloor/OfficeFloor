@@ -37,6 +37,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
@@ -311,21 +312,21 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Loads the {@link OfficeSection}.
+	 * Loads the {@link OfficeSectionType}.
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
 	 * @param maker
 	 *            {@link SectionMaker} to make the {@link OfficeSection}.
-	 * @return Loaded {@link OfficeSection}.
+	 * @return Loaded {@link OfficeSectionType}.
 	 */
-	protected OfficeSection loadOfficeSection(String sectionName,
+	protected OfficeSectionType loadOfficeSectionType(String sectionName,
 			SectionMaker maker) {
-		return this.loadOfficeSection(true, sectionName, maker);
+		return this.loadOfficeSectionType(true, sectionName, maker);
 	}
 
 	/**
-	 * Loads the {@link OfficeSection}.
+	 * Loads the {@link OfficeSectionType}.
 	 * 
 	 * @param isHandleMockState
 	 *            <code>true</code> for method to handle mock states.
@@ -333,10 +334,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 *            Name of the {@link OfficeSection}.
 	 * @param maker
 	 *            {@link SectionMaker} to make the {@link OfficeSection}.
-	 * @return Loaded {@link OfficeSection}.
+	 * @return Loaded {@link OfficeSectionType}.
 	 */
-	protected OfficeSection loadOfficeSection(boolean isHandleMockState,
-			String sectionName, SectionMaker maker) {
+	protected OfficeSectionType loadOfficeSectionType(
+			boolean isHandleMockState, String sectionName, SectionMaker maker) {
 
 		// Register the section maker
 		PropertyList propertyList = MakerSectionSource.register(maker);
@@ -352,16 +353,17 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		compiler.addResources(this.resourceSource);
 		SectionLoader loader = compiler.getSectionLoader();
-		OfficeSection section = loader.loadOfficeSection(sectionName,
-				MakerSectionSource.class, SECTION_LOCATION, propertyList);
+		OfficeSectionType sectionType = loader.loadOfficeSectionType(
+				sectionName, MakerSectionSource.class, SECTION_LOCATION,
+				propertyList);
 
 		// Verify the mocks if handling mock state
 		if (isHandleMockState) {
 			this.verifyMockObjects();
 		}
 
-		// Return the section
-		return section;
+		// Return the section type
+		return sectionType;
 	}
 
 	/**

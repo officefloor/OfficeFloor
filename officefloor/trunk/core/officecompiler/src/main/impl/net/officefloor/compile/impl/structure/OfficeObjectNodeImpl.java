@@ -33,13 +33,11 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.section.SectionObjectType;
-import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
-import net.officefloor.compile.spi.office.TypeQualification;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -261,23 +259,6 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	@Override
 	public String getDependentManagedObjectName() {
 		return this.objectName;
-	}
-
-	@Override
-	public TypeQualification[] getTypeQualifications() {
-		// Provide type qualification from this object node
-		return new TypeQualification[] { new TypeQualificationImpl(
-				this.typeQualifier, this.objectType) };
-	}
-
-	@Override
-	public ObjectDependency[] getObjectDependencies() {
-		/*
-		 * Never any dependencies for Office Object. Dependency checking only
-		 * available to Office (therefore can not interrogate OfficeFloor
-		 * managed objects).
-		 */
-		return new ObjectDependency[0];
 	}
 
 	/*

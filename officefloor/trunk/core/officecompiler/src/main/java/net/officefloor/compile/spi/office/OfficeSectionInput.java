@@ -31,11 +31,4 @@ public interface OfficeSectionInput {
 	 */
 	String getOfficeSectionInputName();
 
-	/**
-	 * Obtains the parameter type for this {@link OfficeSectionInput}.
-	 * 
-	 * @return Parameter type for this {@link OfficeSectionInput}.
-	 */
-	String getParameterType();
-
 }
