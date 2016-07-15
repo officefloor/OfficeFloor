@@ -17,8 +17,6 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -36,26 +34,24 @@ public interface OfficeSectionManagedObjectSource {
 	String getOfficeSectionManagedObjectSourceName();
 
 	/**
-	 * <p>
-	 * Obtains the {@link ManagedObjectTeam} instances required by this
+	 * Obtains the {@link ManagedObjectTeam} required by this
 	 * {@link OfficeSectionManagedObjectSource}.
-	 * <p>
-	 * Should there be an issue by the underlying {@link ManagedObjectSource}
-	 * providing the listing, an empty array will be returned with an issue
-	 * reported to the {@link CompilerIssues}.
 	 * 
-	 * @return {@link ManagedObjectTeam} instances required by this
-	 *         {@link OfficeSectionManagedObjectSource}.
+	 * @param teamName
+	 *            Name of the {@link ManagedObjectTeam}.
+	 * @return {@link ManagedObjectTeam}.
 	 */
-	ManagedObjectTeam[] getOfficeSectionManagedObjectTeams();
+	ManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName);
 
 	/**
-	 * Obtains the {@link OfficeSectionManagedObject} instance uses of
-	 * {@link ManagedObject} from the {@link ManagedObjectSource}.
+	 * Obtains the {@link OfficeSectionManagedObject} use of this
+	 * {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link OfficeSectionManagedObject} instance uses of
-	 *         {@link ManagedObject} from the {@link ManagedObjectSource}.
+	 * @param managedObjectName
+	 *            Name of the {@link OfficeSectionManagedObject} to obtain.
+	 * @return {@link OfficeSectionManagedObject}.
 	 */
-	OfficeSectionManagedObject[] getOfficeSectionManagedObjects();
+	OfficeSectionManagedObject getOfficeSectionManagedObject(
+			String managedObjectName);
 
 }

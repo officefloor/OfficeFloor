@@ -31,18 +31,4 @@ public interface OfficeSectionObject {
 	 */
 	String getOfficeSectionObjectName();
 
-	/**
-	 * Obtains the object type.
-	 * 
-	 * @return Object type.
-	 */
-	String getObjectType();
-
-	/**
-	 * Obtains the type qualifier.
-	 * 
-	 * @return Type qualifier.
-	 */
-	String getTypeQualifier();
-
 }

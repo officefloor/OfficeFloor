@@ -35,38 +35,35 @@ public interface OfficeSubSection {
 	String getOfficeSectionName();
 
 	/**
-	 * Obtains the {@link OfficeSubSection} instances of this
-	 * {@link OfficeSection}.
+	 * Obtains the {@link OfficeSubSection}.
 	 * 
-	 * @return {@link OfficeSubSection} instances.
+	 * @param sectionName
+	 *            Name of the {@link OfficeSubSection} to obtain.
+	 * @return {@link OfficeSubSection}.
 	 */
-	OfficeSubSection[] getOfficeSubSections();
+	OfficeSubSection getOfficeSubSection(String sectionName);
 
 	/**
-	 * <p>
-	 * Obtains the {@link OfficeTask} instances for this particular
+	 * Obtains the {@link OfficeTask} instance particular to this
 	 * {@link OfficeSubSection}.
-	 * <p>
-	 * This does not include the {@link OfficeTask} instances of the sub
-	 * sections.
 	 * 
-	 * @return {@link OfficeTask} instances for this particular
-	 *         {@link OfficeSubSection}.
+	 * @param taskName
+	 *            Name of the {@link OfficeTask} to obtain.
+	 * @return {@link OfficeTask}.
 	 */
-	OfficeTask[] getOfficeTasks();
+	OfficeTask getOfficeTask(String taskName);
 
 	/**
-	 * <p>
-	 * Obtains the {@link OfficeSectionManagedObjectSource} instances for this
-	 * particular {@link OfficeSubSection}.
-	 * <p>
-	 * This does not include the {@link OfficeSectionManagedObjectSource}
-	 * instances of the sub sections.
+	 * Obtains the {@link OfficeSectionManagedObjectSource} particular to his
+	 * {@link OfficeSubSection}.
 	 * 
-	 * @return {@link OfficeSectionManagedObjectSource} instances for this
-	 *         particular {@link OfficeSubSection}.
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeSectionManagedObjectSource} to
+	 *            obtain.
+	 * @return {@link OfficeSectionManagedObjectSource}.
 	 */
-	OfficeSectionManagedObjectSource[] getOfficeSectionManagedObjectSources();
+	OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource(
+			String managedObjectSourceName);
 
 	/**
 	 * <p>

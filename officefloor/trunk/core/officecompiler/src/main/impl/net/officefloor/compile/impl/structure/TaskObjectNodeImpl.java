@@ -17,16 +17,13 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
-import net.officefloor.compile.spi.office.UnknownType;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
@@ -137,32 +134,6 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 		return this.objectName;
 	}
 
-	@Override
-	public Class<?> getObjectDependencyType() {
-
-		// Obtain the task object type
-		TaskObjectType<?> objectType = this.getTaskObjectType();
-		if (objectType == null) {
-			return UnknownType.class; // unable to obtain object type
-		}
-
-		// Return the type
-		return objectType.getObjectType();
-	}
-
-	@Override
-	public String getObjectDependencyTypeQualifier() {
-
-		// Obtain the task object type
-		TaskObjectType<?> objectType = this.getTaskObjectType();
-		if (objectType == null) {
-			return null; // unable to obtain object type
-		}
-
-		// Return the type qualifier
-		return objectType.getTypeQualifier();
-	}
-
 	/**
 	 * Obtains the {@link TaskObjectType} for this {@link TaskObjectNode}.
 	 * 
@@ -192,26 +163,6 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 
 		// As here, did not find the object type
 		return null;
-	}
-
-	@Override
-	public DependentManagedObject getDependentManagedObject() {
-
-		// Ensure in office context
-		if (!this.isInOfficeContext) {
-			throw new IllegalStateException("Must be in office context");
-		}
-
-		// No dependent if a parameter
-		if (this.isParameter) {
-			return null;
-		}
-
-		// Return the retrieved dependent managed object
-		return LinkUtil.retrieveTarget(this, DependentManagedObject.class,
-				"TaskObject " + this.objectName, LocationType.OFFICE,
-				this.officeLocation, null, null,
-				this.context.getCompilerIssues());
 	}
 
 	/*

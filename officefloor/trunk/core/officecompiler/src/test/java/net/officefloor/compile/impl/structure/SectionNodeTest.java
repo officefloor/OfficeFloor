@@ -59,6 +59,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
  * Tests the {@link SectionDesigner}.
@@ -80,8 +81,9 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	/**
 	 * {@link SectionDesigner} to be tested.
 	 */
-	private final SectionNode node = new SectionNodeImpl(SECTION_NAME,
-			SECTION_LOCATION, this.nodeContext);
+	private final SectionNode node = this.nodeContext.createSectionNode(
+			SECTION_NAME, null).initialise(new ClassSectionSource(), null,
+			SECTION_LOCATION, null, null);
 
 	/**
 	 * Ensure allow {@link SectionSource} to report issues via the

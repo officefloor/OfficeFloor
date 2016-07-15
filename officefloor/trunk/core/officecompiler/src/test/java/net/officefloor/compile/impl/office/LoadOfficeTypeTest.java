@@ -43,8 +43,6 @@ import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.DependentManagedObject;
-import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -55,8 +53,6 @@ import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
-import net.officefloor.compile.spi.office.OfficeTask;
-import net.officefloor.compile.spi.office.TypeQualification;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
@@ -551,27 +547,12 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 						MANAGED_OBJECT_NAME, officeObject.getOfficeObjectName());
 				assertEquals("Incorrect dependent name", MANAGED_OBJECT_NAME,
 						officeObject.getDependentManagedObjectName());
-				assertEquals(
-						"Always no dependencies for Office object in sourcing Office",
-						0, officeObject.getObjectDependencies().length);
 				assertEquals("Incorrect administerable name",
 						MANAGED_OBJECT_NAME,
 						officeObject.getAdministerableManagedObjectName());
 				assertEquals("Incorrect governerable name",
 						MANAGED_OBJECT_NAME,
 						officeObject.getGovernerableManagedObjectName());
-
-				// Validate default type qualification
-				TypeQualification[] qualifications = officeObject
-						.getTypeQualifications();
-				assertEquals(
-						"Should always be only one type qualification for OfficeObject",
-						1, qualifications.length);
-				TypeQualification qualification = qualifications[0];
-				assertEquals("Incorrect type", Connection.class.getName(),
-						qualification.getType());
-				assertNull("Should be no qualfier",
-						qualification.getQualifier());
 			}
 		});
 
@@ -605,18 +586,6 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				OfficeObject officeObject = office.addOfficeObject("MO",
 						Connection.class.getName());
 				officeObject.setTypeQualifier("QUALIFIED");
-
-				// Validate type qualifications
-				TypeQualification[] qualifications = officeObject
-						.getTypeQualifications();
-				assertEquals(
-						"Should always be only one type qualification for OfficeObject",
-						1, qualifications.length);
-				TypeQualification qualification = qualifications[0];
-				assertEquals("Incorrect type", Connection.class.getName(),
-						qualification.getType());
-				assertEquals("Incorrect qualfier", "QUALIFIED",
-						qualification.getQualifier());
 			}
 		});
 
@@ -947,10 +916,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * {@link OfficeManagedObject} should not show up in {@link OfficeType}
-	 * however it should be available link as {@link DependentManagedObject}.
+	 * {@link OfficeManagedObject} should not show up in {@link OfficeType}.
 	 */
-	public void testTypeQualifiedOfficeManagedObject() {
+	public void testLinkedOfficeSectionManagedObject() {
 
 		// Load office type with office managed object
 		OfficeType officeType = this.loadOfficeType(true, new Loader() {
@@ -975,57 +943,10 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 						context.createPropertyList());
 
 				// Link section object to office managed object
-				OfficeSectionObject object = section.getOfficeSectionObjects()[0];
+				OfficeSectionObject object = section
+						.getOfficeSectionObject(MockOfficeManagedObject.class
+								.getName());
 				office.link(object, mo);
-
-				// Obtain the dependent object (should be office managed object)
-				OfficeTask task = section.getOfficeTasks()[0];
-				ObjectDependency dependency = task.getObjectDependencies()[1];
-				assertEquals("Ensure correct dependency",
-						MockOfficeManagedObject.class,
-						dependency.getObjectDependencyType());
-				DependentManagedObject dependent = dependency
-						.getDependentManagedObject();
-				assertEquals("Dependent should be Office Managed Object", mo,
-						dependent);
-
-				// Validate default type qualifier
-				this.validateTypeQualifications(
-						dependent.getTypeQualifications(), null,
-						MockOfficeManagedObject.class.getName());
-
-				// Add type qualifiers and validate can retrieve as dependent
-				mo.addTypeQualification("QUALIFIED", String.class.getName());
-				mo.addTypeQualification(null, Connection.class.getName());
-				this.validateTypeQualifications(
-						dependent.getTypeQualifications(), "QUALIFIED",
-						String.class.getName(), null,
-						Connection.class.getName());
-			}
-
-			/**
-			 * Validates the {@link TypeQualification} instances.
-			 * 
-			 * @param qualifications
-			 *            {@link TypeQualification} instances.
-			 * @param expectedQualifierTypePairs
-			 *            Expected qualifier and type pairs.
-			 */
-			private void validateTypeQualifications(
-					TypeQualification[] qualifications,
-					String... expectedQualifierTypePairs) {
-				assertEquals("Incorrect number of type qualifiers",
-						(expectedQualifierTypePairs.length / 2),
-						qualifications.length);
-				for (int i = 0; i < expectedQualifierTypePairs.length; i += 2) {
-					TypeQualification qualification = qualifications[i / 2];
-					String expectedQualifier = expectedQualifierTypePairs[i];
-					String expectedType = expectedQualifierTypePairs[i + 1];
-					assertEquals("Incorrect qualifier type for " + (i / 2),
-							expectedQualifier, qualification.getQualifier());
-					assertEquals("Incorrect type for " + (i / 2), expectedType,
-							qualification.getType());
-				}
 			}
 		});
 

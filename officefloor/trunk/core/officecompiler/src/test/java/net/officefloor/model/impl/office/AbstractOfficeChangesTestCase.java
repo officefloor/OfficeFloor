@@ -17,8 +17,8 @@
  */
 package net.officefloor.model.impl.office;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -165,17 +165,17 @@ public abstract class AbstractOfficeChangesTestCase extends
 		/**
 		 * {@link OfficeSectionInput} instances.
 		 */
-		private List<OfficeSectionInput> inputs = new LinkedList<OfficeSectionInput>();
+		private Map<String, OfficeSectionInput> inputs = new HashMap<String, OfficeSectionInput>();
 
 		/**
 		 * {@link OfficeSectionOutput} instances.
 		 */
-		private List<OfficeSectionOutput> outputs = new LinkedList<OfficeSectionOutput>();
+		private Map<String, OfficeSectionOutput> outputs = new HashMap<String, OfficeSectionOutput>();
 
 		/**
 		 * {@link OfficeSectionObject} instances.
 		 */
-		private List<OfficeSectionObject> objects = new LinkedList<OfficeSectionObject>();
+		private Map<String, OfficeSectionObject> objects = new HashMap<String, OfficeSectionObject>();
 
 		/*
 		 * ===================== OfficeSectionContext =====================
@@ -183,22 +183,19 @@ public abstract class AbstractOfficeChangesTestCase extends
 
 		@Override
 		public void addOfficeSectionInput(String name, Class<?> parameterType) {
-			this.inputs
-					.add(new OfficeSectionItem(name, parameterType.getName()));
+			this.inputs.put(name, new OfficeSectionItem(name));
 		}
 
 		@Override
 		public void addOfficeSectionOutput(String name, Class<?> argumentType,
 				boolean isEscalationOnly) {
-			this.outputs.add(new OfficeSectionItem(name,
-					argumentType.getName(), isEscalationOnly));
+			this.outputs.put(name, new OfficeSectionItem(name));
 		}
 
 		@Override
 		public void addOfficeSectionObject(String name, Class<?> objectType,
 				String qualifier) {
-			this.objects.add(new OfficeSectionItem(name, objectType.getName(),
-					qualifier));
+			this.objects.put(name, new OfficeSectionItem(name));
 		}
 
 		/*
@@ -211,22 +208,23 @@ public abstract class AbstractOfficeChangesTestCase extends
 		}
 
 		@Override
-		public OfficeSectionInput[] getOfficeSectionInputs() {
-			return this.inputs.toArray(new OfficeSectionInput[0]);
+		public OfficeSectionInput getOfficeSectionInput(String inputName) {
+			return this.inputs.get(inputName);
 		}
 
 		@Override
-		public OfficeSectionOutput[] getOfficeSectionOutputs() {
-			return this.outputs.toArray(new OfficeSectionOutput[0]);
+		public OfficeSectionOutput getOfficeSectionOutput(String outputName) {
+			return this.outputs.get(outputName);
 		}
 
 		@Override
-		public OfficeSectionObject[] getOfficeSectionObjects() {
-			return this.objects.toArray(new OfficeSectionObject[0]);
+		public OfficeSectionObject getOfficeSectionObject(String objectName) {
+			return this.objects.get(objectName);
 		}
 
 		@Override
-		public OfficeSectionManagedObjectSource[] getOfficeSectionManagedObjectSources() {
+		public OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource(
+				String managedObjectName) {
 			fail("Currently not testing sub sections");
 			return null;
 		}
@@ -237,13 +235,13 @@ public abstract class AbstractOfficeChangesTestCase extends
 		}
 
 		@Override
-		public OfficeSubSection[] getOfficeSubSections() {
+		public OfficeSubSection getOfficeSubSection(String sectionName) {
 			fail("Currently not testing sub sections");
 			return null;
 		}
 
 		@Override
-		public OfficeTask[] getOfficeTasks() {
+		public OfficeTask getOfficeTask(String taskName) {
 			fail("Currently not testing sub sections");
 			return null;
 		}
@@ -261,64 +259,13 @@ public abstract class AbstractOfficeChangesTestCase extends
 		private final String name;
 
 		/**
-		 * Type.
-		 */
-		private final String type;
-
-		/**
-		 * Type qualifier.
-		 */
-		private final String typeQualifier;
-
-		/**
-		 * Flag indicating if escalation only.
-		 */
-		private final boolean isEscalation;
-
-		/**
-		 * Initialise {@link OfficeSectionInput}.
+		 * Initialise.
 		 * 
 		 * @param name
 		 *            Name.
-		 * @param type
-		 *            Type.
 		 */
-		public OfficeSectionItem(String name, String type) {
-			this(name, type, false);
-		}
-
-		/**
-		 * Initialise {@link OfficeSectionOutput}.
-		 * 
-		 * @param name
-		 *            Name.
-		 * @param type
-		 *            Type.
-		 * @param isEscalation
-		 *            Flag indicating if escalation only.
-		 */
-		public OfficeSectionItem(String name, String type, boolean isEscalation) {
+		public OfficeSectionItem(String name) {
 			this.name = name;
-			this.type = type;
-			this.typeQualifier = null;
-			this.isEscalation = isEscalation;
-		}
-
-		/**
-		 * Initialise {@link OfficeSectionObject}.
-		 * 
-		 * @param name
-		 *            Name.
-		 * @param type
-		 *            Type.
-		 * @param qualifier
-		 *            Type qualifier.
-		 */
-		public OfficeSectionItem(String name, String type, String qualifier) {
-			this.name = name;
-			this.type = type;
-			this.typeQualifier = qualifier;
-			this.isEscalation = false;
 		}
 
 		/*
@@ -330,11 +277,6 @@ public abstract class AbstractOfficeChangesTestCase extends
 			return this.name;
 		}
 
-		@Override
-		public String getParameterType() {
-			return this.type;
-		}
-
 		/*
 		 * ================ OfficeSectionOutput ======================
 		 */
@@ -344,16 +286,6 @@ public abstract class AbstractOfficeChangesTestCase extends
 			return this.name;
 		}
 
-		@Override
-		public String getArgumentType() {
-			return this.type;
-		}
-
-		@Override
-		public boolean isEscalationOnly() {
-			return this.isEscalation;
-		}
-
 		/*
 		 * ================ OfficeSectionObject ======================
 		 */
@@ -361,16 +293,6 @@ public abstract class AbstractOfficeChangesTestCase extends
 		@Override
 		public String getOfficeSectionObjectName() {
 			return this.name;
-		}
-
-		@Override
-		public String getObjectType() {
-			return this.type;
-		}
-
-		@Override
-		public String getTypeQualifier() {
-			return this.typeQualifier;
 		}
 	}
 

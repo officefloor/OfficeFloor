@@ -17,9 +17,7 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObject} contained within an {@link OfficeSubSection}.
@@ -35,19 +33,5 @@ public interface OfficeSectionManagedObject extends DependentManagedObject,
 	 * @return Name of this {@link OfficeSectionManagedObject}.
 	 */
 	String getOfficeSectionManagedObjectName();
-
-	/**
-	 * <p>
-	 * Obtains the supported extension interfaces by this
-	 * {@link OfficeSectionManagedObject}.
-	 * <p>
-	 * Should there be an issue by the underlying {@link ManagedObjectSource}
-	 * providing the listing, an empty array will be returned with an issue
-	 * reported to the {@link CompilerIssues}.
-	 * 
-	 * @return Supported extension interfaces by this
-	 *         {@link OfficeSectionManagedObject}.
-	 */
-	Class<?>[] getSupportedExtensionInterfaces();
 
 }

@@ -89,7 +89,7 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 										});
 
 								// Link in team responsible for task
-								architect.link(section.getOfficeTasks()[0]
+								architect.link(section.getOfficeTask("TASK")
 										.getTeamResponsible(), architect
 										.addOfficeTeam("OFFICE_TEAM"));
 							}

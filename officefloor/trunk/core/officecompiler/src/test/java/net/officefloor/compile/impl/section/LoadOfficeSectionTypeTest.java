@@ -24,17 +24,17 @@ import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.spi.office.DependentManagedObject;
-import net.officefloor.compile.spi.office.ObjectDependency;
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
-import net.officefloor.compile.spi.office.OfficeSectionObject;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeTask;
-import net.officefloor.compile.spi.office.TypeQualification;
+import net.officefloor.compile.section.DependentManagedObjectType;
+import net.officefloor.compile.section.ObjectDependencyType;
+import net.officefloor.compile.section.OfficeSectionInputType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectType;
+import net.officefloor.compile.section.OfficeSectionObjectType;
+import net.officefloor.compile.section.OfficeSectionOutputType;
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeSubSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
@@ -51,19 +51,19 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.DependencyLabeller;
 
 /**
- * Tests loading the {@link OfficeSection}.
+ * Tests loading the {@link OfficeSectionType}.
  * 
  * @author Daniel Sagenschneider
  */
-public class LoadOfficeSectionTest extends AbstractStructureTestCase {
+public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 
 	/**
-	 * Ensure can load an empty {@link OfficeSection}.
+	 * Ensure can load an empty {@link OfficeSectionType}.
 	 */
 	public void testLoadEmptySection() {
 
 		// Load the empty office section
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -75,17 +75,18 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect section name", "SECTION",
 				section.getOfficeSectionName());
 		assertEquals("Should be no sub section", 0,
-				section.getOfficeSubSections().length);
-		assertEquals("Should be no tasks", 0, section.getOfficeTasks().length);
+				section.getOfficeSubSectionTypes().length);
+		assertEquals("Should be no tasks", 0,
+				section.getOfficeTaskTypes().length);
 	}
 
 	/**
-	 * Ensure can load a {@link SubSection}.
+	 * Ensure can load a {@link SubSectionType}.
 	 */
 	public void testLoadSubSection() {
 
 		// Load the office section with a sub section
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -95,23 +96,24 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Validate results
 		assertEquals("Should have a sub section", 1,
-				section.getOfficeSubSections().length);
-		OfficeSubSection subSection = section.getOfficeSubSections()[0];
+				section.getOfficeSubSectionTypes().length);
+		OfficeSubSectionType subSection = section.getOfficeSubSectionTypes()[0];
 		assertEquals("Incorrect sub section", "SUB_SECTION",
 				subSection.getOfficeSectionName());
 		assertEquals("Should be no sub section tasks", 0,
-				subSection.getOfficeTasks().length);
-		assertEquals("Should be no tasks", 0, section.getOfficeTasks().length);
+				subSection.getOfficeTaskTypes().length);
+		assertEquals("Should be no tasks", 0,
+				section.getOfficeTaskTypes().length);
 	}
 
 	/**
-	 * Ensure can load a sub {@link SubSection}. To ensure recursive loading of
-	 * the {@link SubSection} instances.
+	 * Ensure can load a sub {@link SubSectionType}. To ensure recursive loading
+	 * of the {@link SubSectionType} instances.
 	 */
 	public void testLoadSubSubSection() {
 
 		// Load the office section with a sub sub section
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -128,23 +130,24 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Validate the results
 		assertEquals("Should have a sub section", 1,
-				section.getOfficeSubSections().length);
+				section.getOfficeSubSectionTypes().length);
 		assertEquals("Should be no tasks on section", 0,
-				section.getOfficeTasks().length);
-		OfficeSubSection subSection = section.getOfficeSubSections()[0];
+				section.getOfficeTaskTypes().length);
+		OfficeSubSectionType subSection = section.getOfficeSubSectionTypes()[0];
 		assertEquals("Should have a sub sub section", 1,
-				subSection.getOfficeSubSections().length);
+				subSection.getOfficeSubSectionTypes().length);
 		assertEquals("Should be no tasks on sub section", 0,
-				subSection.getOfficeTasks().length);
-		OfficeSubSection subSubSection = subSection.getOfficeSubSections()[0];
+				subSection.getOfficeTaskTypes().length);
+		OfficeSubSectionType subSubSection = subSection
+				.getOfficeSubSectionTypes()[0];
 		assertEquals("Incorrect sub sub section", "SUB_SUB_SECTION",
 				subSubSection.getOfficeSectionName());
 		assertEquals("Should be no tasks on sub sub section", 0,
-				subSubSection.getOfficeTasks().length);
+				subSubSection.getOfficeTaskTypes().length);
 	}
 
 	/**
-	 * Ensure can load a {@link SectionTask}.
+	 * Ensure can load a {@link SectionTaskType}.
 	 */
 	public void testLoadSectionTask() {
 
@@ -153,7 +156,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactory();
 
 		// Load the office section with a section task
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -164,18 +167,18 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Validate results
 		assertEquals("Should be no sub sections", 0,
-				section.getOfficeSubSections().length);
+				section.getOfficeSubSectionTypes().length);
 		assertEquals("Should be no managed object sources", 0,
-				section.getOfficeSectionManagedObjectSources().length);
+				section.getOfficeSectionManagedObjectSourceTypes().length);
 		assertEquals("Should have a single task", 1,
-				section.getOfficeTasks().length);
-		OfficeTask task = section.getOfficeTasks()[0];
+				section.getOfficeTaskTypes().length);
+		OfficeTaskType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect task name", "TASK", task.getOfficeTaskName());
 	}
 
 	/**
-	 * Ensure no {@link DependentManagedObject} if {@link TaskObject} not
-	 * linked.
+	 * Ensure no {@link DependentManagedObjectType} if {@link TaskObjectType}
+	 * not linked.
 	 */
 	public void testTaskObjectDependencyNotLinked() {
 
@@ -195,8 +198,8 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Load the task object dependency not linked
-		OfficeSection section = this.loadOfficeSection(false, "SECTION",
-				new SectionMaker() {
+		OfficeSectionType section = this.loadOfficeSectionType(false,
+				"SECTION", new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
 						SectionTask task = context.addTask("WORK", workFactory,
@@ -215,12 +218,12 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				});
 
 		// Ensure task object is correct
-		OfficeTask task = section.getOfficeTasks()[0];
+		OfficeTaskType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of dependencies", 2,
 				task.getObjectDependencies().length);
 
 		// Validate the qualified object (sorting puts first)
-		ObjectDependency qualified = task.getObjectDependencies()[0];
+		ObjectDependencyType qualified = task.getObjectDependencies()[0];
 		assertEquals("Incorrect qualified dependency name", "QUALIFIED-OBJECT",
 				qualified.getObjectDependencyName());
 		assertEquals("Incorrect qualified dependency type", String.class,
@@ -234,7 +237,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				qualified.getDependentManagedObject());
 
 		// Validate the unqualified object
-		ObjectDependency unqualified = task.getObjectDependencies()[1];
+		ObjectDependencyType unqualified = task.getObjectDependencies()[1];
 		assertEquals("Incorrect unqualified dependency name",
 				"UNQUALIFIED-OBJECT", unqualified.getObjectDependencyName());
 		assertEquals("Incorrect unqualified dependency type", Connection.class,
@@ -252,12 +255,12 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can load a {@link OfficeSectionInput}.
+	 * Ensure can load a {@link OfficeSectionInputType}.
 	 */
 	public void testLoadOfficeSectionInput() {
 
 		// Load the office section with an office section input
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -268,16 +271,16 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Validate results
 		assertEquals("Should have office section input", 1,
-				section.getOfficeSectionInputs().length);
-		OfficeSectionInput input = section.getOfficeSectionInputs()[0];
+				section.getOfficeSectionInputTypes().length);
+		OfficeSectionInputType input = section.getOfficeSectionInputTypes()[0];
 		assertEquals("Incorrect office section input", "INPUT",
 				input.getOfficeSectionInputName());
 		assertEquals("Incorrect office section input parameter type",
 				String.class.getName(), input.getParameterType());
 		assertEquals("Should be no office section outputs", 0,
-				section.getOfficeSectionOutputs().length);
+				section.getOfficeSectionOutputTypes().length);
 		assertEquals("Should have no office section objects", 0,
-				section.getOfficeSectionObjects().length);
+				section.getOfficeSectionObjectTypes().length);
 	}
 
 	/**
@@ -286,7 +289,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadOfficeSectionOutput() {
 
 		// Load the office section with an office section output
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -297,10 +300,10 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Validate results
 		assertEquals("Should be no office section inputs", 0,
-				section.getOfficeSectionInputs().length);
+				section.getOfficeSectionInputTypes().length);
 		assertEquals("Should have office section output", 1,
-				section.getOfficeSectionOutputs().length);
-		OfficeSectionOutput output = section.getOfficeSectionOutputs()[0];
+				section.getOfficeSectionOutputTypes().length);
+		OfficeSectionOutputType output = section.getOfficeSectionOutputTypes()[0];
 		assertEquals("Incorrect office section output", "OUTPUT",
 				output.getOfficeSectionOutputName());
 		assertEquals("Incorrect office section output argument type",
@@ -308,7 +311,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 		assertTrue("Incorrect office section output escalation only flag",
 				output.isEscalationOnly());
 		assertEquals("Should have no office section objects", 0,
-				section.getOfficeSectionObjects().length);
+				section.getOfficeSectionObjectTypes().length);
 	}
 
 	/**
@@ -317,7 +320,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadOfficeSectionObject() {
 
 		// Load the office section with an office section object
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -328,12 +331,12 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Validate results
 		assertEquals("Should be no office section inputs", 0,
-				section.getOfficeSectionInputs().length);
+				section.getOfficeSectionInputTypes().length);
 		assertEquals("Should be no office section outputs", 0,
-				section.getOfficeSectionOutputs().length);
+				section.getOfficeSectionOutputTypes().length);
 		assertEquals("Should have office section object", 1,
-				section.getOfficeSectionObjects().length);
-		OfficeSectionObject object = section.getOfficeSectionObjects()[0];
+				section.getOfficeSectionObjectTypes().length);
+		OfficeSectionObjectType object = section.getOfficeSectionObjectTypes()[0];
 		assertEquals("Incorrect office section object", "OBJECT",
 				object.getOfficeSectionObjectName());
 		assertEquals("Incorrect office section object, object type",
@@ -348,7 +351,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadQualifiedOfficeSectionObject() {
 
 		// Load the office section with an office section object
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -361,12 +364,12 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Validate results
 		assertEquals("Should be no office section inputs", 0,
-				section.getOfficeSectionInputs().length);
+				section.getOfficeSectionInputTypes().length);
 		assertEquals("Should be no office section outputs", 0,
-				section.getOfficeSectionOutputs().length);
+				section.getOfficeSectionOutputTypes().length);
 		assertEquals("Should have office section object", 1,
-				section.getOfficeSectionObjects().length);
-		OfficeSectionObject object = section.getOfficeSectionObjects()[0];
+				section.getOfficeSectionObjectTypes().length);
+		OfficeSectionObjectType object = section.getOfficeSectionObjectTypes()[0];
 		assertEquals("Incorrect office section object", "OBJECT",
 				object.getOfficeSectionObjectName());
 		assertEquals("Incorrect office section object, object type",
@@ -381,7 +384,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadSectionManagedObject() {
 
 		// Load the section managed object
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -394,18 +397,19 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Validate the results
 		assertEquals("Should have no sub section", 0,
-				section.getOfficeSubSections().length);
-		assertEquals("Should have no tasks", 0, section.getOfficeTasks().length);
+				section.getOfficeSubSectionTypes().length);
+		assertEquals("Should have no tasks", 0,
+				section.getOfficeTaskTypes().length);
 		assertEquals("Should have a section managed object source", 1,
-				section.getOfficeSectionManagedObjectSources().length);
-		OfficeSectionManagedObjectSource moSource = section
-				.getOfficeSectionManagedObjectSources()[0];
+				section.getOfficeSectionManagedObjectSourceTypes().length);
+		OfficeSectionManagedObjectSourceType moSource = section
+				.getOfficeSectionManagedObjectSourceTypes()[0];
 		assertEquals("Incorrect managed object source name", "MO_SOURCE",
 				moSource.getOfficeSectionManagedObjectSourceName());
 		assertEquals("Should have a section managed object", 1,
-				moSource.getOfficeSectionManagedObjects().length);
-		OfficeSectionManagedObject mo = moSource
-				.getOfficeSectionManagedObjects()[0];
+				moSource.getOfficeSectionManagedObjectTypes().length);
+		OfficeSectionManagedObjectType mo = moSource
+				.getOfficeSectionManagedObjectTypes()[0];
 		assertEquals("Incorrect managed object name", "MO",
 				mo.getOfficeSectionManagedObjectName());
 		assertEquals("Should not have dependencies", 0,
@@ -436,8 +440,8 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Load the section managed object with a dependency
 		this.replayMockObjects();
-		OfficeSection section = this.loadOfficeSection(false, "SECTION",
-				new SectionMaker() {
+		OfficeSectionType section = this.loadOfficeSectionType(false,
+				"SECTION", new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
 						SectionManagedObjectSource source = context
@@ -475,22 +479,22 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Validate the managed object
 		assertEquals("Should have a section managed object source", 1,
-				section.getOfficeSectionManagedObjectSources().length);
-		OfficeSectionManagedObjectSource moSource = section
-				.getOfficeSectionManagedObjectSources()[0];
+				section.getOfficeSectionManagedObjectSourceTypes().length);
+		OfficeSectionManagedObjectSourceType moSource = section
+				.getOfficeSectionManagedObjectSourceTypes()[0];
 		assertEquals("Incorrect managed object source name", "MO_SOURCE",
 				moSource.getOfficeSectionManagedObjectSourceName());
 		assertEquals("Should have a section managed object", 1,
-				moSource.getOfficeSectionManagedObjects().length);
-		OfficeSectionManagedObject mo = moSource
-				.getOfficeSectionManagedObjects()[0];
+				moSource.getOfficeSectionManagedObjectTypes().length);
+		OfficeSectionManagedObjectType mo = moSource
+				.getOfficeSectionManagedObjectTypes()[0];
 		assertEquals("Incorrect managed object name", "MO",
 				mo.getOfficeSectionManagedObjectName());
 		assertEquals("Should have a dependencies", 2,
 				mo.getObjectDependencies().length);
 
 		// Validate qualified dependency
-		ObjectDependency qualified = mo.getObjectDependencies()[0];
+		ObjectDependencyType qualified = mo.getObjectDependencies()[0];
 		assertEquals("Incorrect qualified dependency name",
 				"QUALIFIED-DEPENDENCY", qualified.getObjectDependencyName());
 		assertEquals("Incorrect qualified dependency type", Connection.class,
@@ -501,7 +505,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				qualified.getDependentManagedObject());
 
 		// Validate unqualified dependency
-		ObjectDependency unqualified = mo.getObjectDependencies()[1];
+		ObjectDependencyType unqualified = mo.getObjectDependencies()[1];
 		assertEquals("Incorrect unqualified dependency name",
 				"UNQUALIFIED-DEPENDENCY", unqualified.getObjectDependencyName());
 		assertEquals("Incorrect unqualified dependency type", String.class,
@@ -522,7 +526,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadSectionManagedObjectSupportingAnExtensionInterface() {
 
 		// Load the section managed object supporting an extension interface
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -542,15 +546,15 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Validate the results
 		assertEquals("Should have a section managed object source", 1,
-				section.getOfficeSectionManagedObjectSources().length);
-		OfficeSectionManagedObjectSource moSource = section
-				.getOfficeSectionManagedObjectSources()[0];
+				section.getOfficeSectionManagedObjectSourceTypes().length);
+		OfficeSectionManagedObjectSourceType moSource = section
+				.getOfficeSectionManagedObjectSourceTypes()[0];
 		assertEquals("Incorrect managed object source name", "MO_SOURCE",
 				moSource.getOfficeSectionManagedObjectSourceName());
 		assertEquals("Should have a section managed object", 1,
-				moSource.getOfficeSectionManagedObjects().length);
-		OfficeSectionManagedObject mo = moSource
-				.getOfficeSectionManagedObjects()[0];
+				moSource.getOfficeSectionManagedObjectTypes().length);
+		OfficeSectionManagedObjectType mo = moSource
+				.getOfficeSectionManagedObjectTypes()[0];
 		assertEquals("Should have a supported extension interface", 1,
 				mo.getSupportedExtensionInterfaces().length);
 		Class<?> supportedEi = mo.getSupportedExtensionInterfaces()[0];
@@ -569,7 +573,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactory();
 
 		// Load the task object dependent on managed object of same section
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -590,17 +594,17 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				});
 
 		// Validate link to dependent managed object
-		OfficeTask task = section.getOfficeTasks()[0];
+		OfficeTaskType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of dependencies", 1,
 				task.getObjectDependencies().length);
-		ObjectDependency dependency = task.getObjectDependencies()[0];
+		ObjectDependencyType dependency = task.getObjectDependencies()[0];
 		assertEquals("Incorrect object dependency", "OBJECT",
 				dependency.getObjectDependencyName());
-		DependentManagedObject mo = dependency.getDependentManagedObject();
+		DependentManagedObjectType mo = dependency.getDependentManagedObject();
 		assertEquals("Incorrect dependent managed object", "MO",
 				mo.getDependentManagedObjectName());
 		assertTrue("Incorrect managed object type",
-				mo instanceof OfficeSectionManagedObject);
+				mo instanceof OfficeSectionManagedObjectType);
 
 		// Validate the default type qualification (from managed object type)
 		assertEquals("Incorrect number of type qualifications", 1,
@@ -622,7 +626,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactory();
 
 		// Load the task object dependent on managed object of same section
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -649,17 +653,17 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				});
 
 		// Validate link to dependent managed object
-		OfficeTask task = section.getOfficeTasks()[0];
+		OfficeTaskType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of dependencies", 1,
 				task.getObjectDependencies().length);
-		ObjectDependency dependency = task.getObjectDependencies()[0];
+		ObjectDependencyType dependency = task.getObjectDependencies()[0];
 		assertEquals("Incorrect object dependency", "OBJECT",
 				dependency.getObjectDependencyName());
-		DependentManagedObject mo = dependency.getDependentManagedObject();
+		DependentManagedObjectType mo = dependency.getDependentManagedObject();
 		assertEquals("Incorrect dependent managed object", "MO",
 				mo.getDependentManagedObjectName());
 		assertTrue("Incorrect managed object type",
-				mo instanceof OfficeSectionManagedObject);
+				mo instanceof OfficeSectionManagedObjectType);
 
 		// Validate the specifying auto-wiring
 		assertEquals("Incorrect number of type qualifiers", 2,
@@ -686,7 +690,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactory();
 
 		// Load the task object dependent on managed object of another section
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -730,17 +734,18 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				});
 
 		// Validate link to dependent managed object
-		OfficeTask task = section.getOfficeSubSections()[0].getOfficeTasks()[0];
+		OfficeTaskType task = section.getOfficeSubSectionTypes()[0]
+				.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of dependencies", 1,
 				task.getObjectDependencies().length);
-		ObjectDependency dependency = task.getObjectDependencies()[0];
+		ObjectDependencyType dependency = task.getObjectDependencies()[0];
 		assertEquals("Incorrect object dependency", "OBJECT",
 				dependency.getObjectDependencyName());
-		DependentManagedObject mo = dependency.getDependentManagedObject();
+		DependentManagedObjectType mo = dependency.getDependentManagedObject();
 		assertEquals("Incorrect dependent managed object", "MO",
 				mo.getDependentManagedObjectName());
 		assertTrue("Incorrect managed object type",
-				mo instanceof OfficeSectionManagedObject);
+				mo instanceof OfficeSectionManagedObjectType);
 	}
 
 	/**
@@ -750,7 +755,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testManagedObjectDependentOnAnotherManagedObject() {
 
 		// Load the section managed object with a dependency
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -788,17 +793,17 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 
 		// Ensure correct number of managed object sources
 		assertEquals("Should have a two managed object sources", 2,
-				section.getOfficeSectionManagedObjectSources().length);
+				section.getOfficeSectionManagedObjectSourceTypes().length);
 
 		// Obtain appropriate sources
-		OfficeSectionManagedObjectSource moSourceOne = section
-				.getOfficeSectionManagedObjectSources()[0];
-		OfficeSectionManagedObjectSource moSourceTwo = section
-				.getOfficeSectionManagedObjectSources()[1];
+		OfficeSectionManagedObjectSourceType moSourceOne = section
+				.getOfficeSectionManagedObjectSourceTypes()[0];
+		OfficeSectionManagedObjectSourceType moSourceTwo = section
+				.getOfficeSectionManagedObjectSourceTypes()[1];
 		if (!("MO_SOURCE_ONE".equals(moSourceOne
 				.getOfficeSectionManagedObjectSourceName()))) {
 			// Wrong way round, so swap
-			OfficeSectionManagedObjectSource tmp = moSourceOne;
+			OfficeSectionManagedObjectSourceType tmp = moSourceOne;
 			moSourceOne = moSourceTwo;
 			moSourceTwo = tmp;
 		}
@@ -807,14 +812,14 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect managed object source name", "MO_SOURCE_ONE",
 				moSourceOne.getOfficeSectionManagedObjectSourceName());
 		assertEquals("MO_SOURCE_ONE should have a section managed object", 1,
-				moSourceOne.getOfficeSectionManagedObjects().length);
-		OfficeSectionManagedObject moOne = moSourceOne
-				.getOfficeSectionManagedObjects()[0];
+				moSourceOne.getOfficeSectionManagedObjectTypes().length);
+		OfficeSectionManagedObjectType moOne = moSourceOne
+				.getOfficeSectionManagedObjectTypes()[0];
 		assertEquals("Incorrect managed object name", "MO_ONE",
 				moOne.getOfficeSectionManagedObjectName());
 		assertEquals("MO_ONE should have a dependency", 1,
 				moOne.getObjectDependencies().length);
-		ObjectDependency dependency = moOne.getObjectDependencies()[0];
+		ObjectDependencyType dependency = moOne.getObjectDependencies()[0];
 		assertEquals("Incorrect dependency name", "DEPENDENCY",
 				dependency.getObjectDependencyName());
 		assertEquals("Incorrect dependency type", Connection.class,
@@ -826,9 +831,9 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect managed object source name", "MO_SOURCE_TWO",
 				moSourceTwo.getOfficeSectionManagedObjectSourceName());
 		assertEquals("MO_SOURCE_TWO should have a section managed object", 1,
-				moSourceTwo.getOfficeSectionManagedObjects().length);
-		OfficeSectionManagedObject moTwo = moSourceTwo
-				.getOfficeSectionManagedObjects()[0];
+				moSourceTwo.getOfficeSectionManagedObjectTypes().length);
+		OfficeSectionManagedObjectType moTwo = moSourceTwo
+				.getOfficeSectionManagedObjectTypes()[0];
 		assertEquals("Incorrect managed object name", "MO_TWO",
 				moTwo.getOfficeSectionManagedObjectName());
 		assertEquals("MO_TWO should not have a dependency", 0,
@@ -851,7 +856,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactory();
 
 		// Load the task object dependent on managed object of same section
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -896,25 +901,26 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				});
 
 		// Validate link to dependent managed object
-		OfficeTask task = section.getOfficeTasks()[0];
+		OfficeTaskType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of task object dependencies", 1,
 				task.getObjectDependencies().length);
-		ObjectDependency taskDependency = task.getObjectDependencies()[0];
+		ObjectDependencyType taskDependency = task.getObjectDependencies()[0];
 		assertEquals("Incorrect task object dependency", "OBJECT",
 				taskDependency.getObjectDependencyName());
 		assertEquals("Incorrect task object dependency type", Connection.class,
 				taskDependency.getObjectDependencyType());
-		DependentManagedObject mo = taskDependency.getDependentManagedObject();
+		DependentManagedObjectType mo = taskDependency
+				.getDependentManagedObject();
 		assertEquals("Incorrect task dependent managed object", "MO_ONE",
 				mo.getDependentManagedObjectName());
 		assertEquals("Incorrect number of managed object dependencies", 1,
 				mo.getObjectDependencies().length);
-		ObjectDependency moDependency = mo.getObjectDependencies()[0];
+		ObjectDependencyType moDependency = mo.getObjectDependencies()[0];
 		assertEquals("Incorrect managed object dependency", "DEPENDENCY",
 				moDependency.getObjectDependencyName());
 		assertEquals("Incorrect managed object dependency type",
 				DataSource.class, moDependency.getObjectDependencyType());
-		DependentManagedObject dependentMo = moDependency
+		DependentManagedObjectType dependentMo = moDependency
 				.getDependentManagedObject();
 		assertEquals("Incorrect managed object dependent managed object",
 				"MO_TWO", dependentMo.getDependentManagedObjectName());
@@ -933,7 +939,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactory();
 
 		// Load the task object dependent on managed object of same section
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -946,10 +952,10 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				});
 
 		// Validate no dependent managed object
-		OfficeTask task = section.getOfficeTasks()[0];
+		OfficeTaskType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of task object dependencies", 1,
 				task.getObjectDependencies().length);
-		ObjectDependency taskDependency = task.getObjectDependencies()[0];
+		ObjectDependencyType taskDependency = task.getObjectDependencies()[0];
 		assertEquals("Incorrect task object dependency", "OBJECT",
 				taskDependency.getObjectDependencyName());
 		assertEquals("Incorrect task object dependency type", Connection.class,

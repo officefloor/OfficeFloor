@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.work.TaskType;
@@ -42,7 +44,16 @@ public interface TaskNode extends SectionTask, OfficeTask, LinkFlowNode {
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 */
+	@Deprecated
 	void addOfficeContext(String officeLocation);
+
+	/**
+	 * Loads the {@link OfficeTaskType}.
+	 * 
+	 * @return {@link OfficeTaskType} or <code>null</code> with issues reported
+	 *         to the {@link CompilerIssues}.
+	 */
+	OfficeTaskType loadOfficeTaskType();
 
 	/**
 	 * Obtains the {@link WorkNode} containing this {@link TaskNode}.

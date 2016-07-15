@@ -27,30 +27,30 @@ import net.officefloor.frame.api.manage.Office;
 public interface OfficeSection extends OfficeSubSection {
 
 	/**
-	 * Obtains the {@link OfficeSectionInput} instances for this
-	 * {@link OfficeSection}.
+	 * Obtains the {@link OfficeSectionInput}.
 	 * 
-	 * @return {@link OfficeSectionInput} instances for this
-	 *         {@link OfficeSection}.
+	 * @param inputName
+	 *            Name of the {@link OfficeSectionInput} to obtain.
+	 * @return {@link OfficeSectionInput}.
 	 */
-	OfficeSectionInput[] getOfficeSectionInputs();
+	OfficeSectionInput getOfficeSectionInput(String inputName);
 
 	/**
-	 * Obtains the {@link OfficeSectionOutput} instances for this
-	 * {@link OfficeSection}.
+	 * Obtains the {@link OfficeSectionOutput}.
 	 * 
-	 * @return {@link OfficeSectionOutput} instances for this
-	 *         {@link OfficeSection}.
+	 * @param outputName
+	 *            Name of the {@link OfficeSectionOutput} to obtain.
+	 * @return {@link OfficeSectionOutput}.
 	 */
-	OfficeSectionOutput[] getOfficeSectionOutputs();
+	OfficeSectionOutput getOfficeSectionOutput(String outputName);
 
 	/**
-	 * Obtains the {@link OfficeSectionObject} instances required by this
-	 * {@link OfficeSection}.
+	 * Obtains the {@link OfficeSectionObject}.
 	 * 
-	 * @return {@link OfficeSectionObject} instances required by this
-	 *         {@link OfficeSection}.
+	 * @param objectName
+	 *            Name of the {@link OfficeSectionObject} to obtain.
+	 * @return {@link OfficeSectionObject}.
 	 */
-	OfficeSectionObject[] getOfficeSectionObjects();
+	OfficeSectionObject getOfficeSectionObject(String objectName);
 
 }

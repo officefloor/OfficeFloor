@@ -23,26 +23,27 @@ import java.io.StringWriter;
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.ManagedObjectTeamType;
+import net.officefloor.compile.section.ObjectDependencyType;
+import net.officefloor.compile.section.OfficeSectionInputType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectType;
+import net.officefloor.compile.section.OfficeSectionObjectType;
+import net.officefloor.compile.section.OfficeSectionOutputType;
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeSubSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.office.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.ObjectDependency;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
-import net.officefloor.compile.spi.office.OfficeSectionObject;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeTask;
-import net.officefloor.compile.spi.office.TypeQualification;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
@@ -127,7 +128,7 @@ public class SectionLoaderUtil {
 			Class<S> sectionSourceClass) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return new SectionNodeImpl(SECTION_NAME, "TEST_LOCATION", context);
+		return context.createSectionNode(SECTION_NAME, null);
 	}
 
 	/**
@@ -294,13 +295,13 @@ public class SectionLoaderUtil {
 			String sectionLocation, String... propertyNameValuePairs) {
 
 		// Cast to obtain expected section type
-		if (!(designer instanceof OfficeSection)) {
+		if (!(designer instanceof OfficeSectionType)) {
 			TestCase.fail("designer must be created from createSectionDesigner");
 		}
-		OfficeSection eSection = (OfficeSection) designer;
+		OfficeSectionType eSection = (OfficeSectionType) designer;
 
 		// Load the actual section type
-		OfficeSection aSection = loadOfficeSection(SECTION_NAME,
+		OfficeSectionType aSection = loadOfficeSectionType(SECTION_NAME,
 				sectionSourceClass, sectionLocation, propertyNameValuePairs);
 
 		// Validate the office section
@@ -309,13 +310,15 @@ public class SectionLoaderUtil {
 				aSection.getOfficeSectionName());
 
 		// Validate the office section inputs
-		OfficeSectionInput[] eInputs = eSection.getOfficeSectionInputs();
-		OfficeSectionInput[] aInputs = aSection.getOfficeSectionInputs();
+		OfficeSectionInputType[] eInputs = eSection
+				.getOfficeSectionInputTypes();
+		OfficeSectionInputType[] aInputs = aSection
+				.getOfficeSectionInputTypes();
 		TestCase.assertEquals("Incorrect number of section inputs",
 				eInputs.length, aInputs.length);
 		for (int i = 0; i < eInputs.length; i++) {
-			OfficeSectionInput eInput = eInputs[i];
-			OfficeSectionInput aInput = aInputs[i];
+			OfficeSectionInputType eInput = eInputs[i];
+			OfficeSectionInputType aInput = aInputs[i];
 			TestCase.assertEquals("Incorrect name for section input " + i,
 					eInput.getOfficeSectionInputName(),
 					aInput.getOfficeSectionInputName());
@@ -324,13 +327,15 @@ public class SectionLoaderUtil {
 		}
 
 		// Validate the office section outputs
-		OfficeSectionOutput[] eOutputs = eSection.getOfficeSectionOutputs();
-		OfficeSectionOutput[] aOutputs = aSection.getOfficeSectionOutputs();
+		OfficeSectionOutputType[] eOutputs = eSection
+				.getOfficeSectionOutputTypes();
+		OfficeSectionOutputType[] aOutputs = aSection
+				.getOfficeSectionOutputTypes();
 		TestCase.assertEquals("Incorrect number of section outputs",
 				eOutputs.length, aOutputs.length);
 		for (int i = 0; i < eOutputs.length; i++) {
-			OfficeSectionOutput eOutput = eOutputs[i];
-			OfficeSectionOutput aOutput = aOutputs[i];
+			OfficeSectionOutputType eOutput = eOutputs[i];
+			OfficeSectionOutputType aOutput = aOutputs[i];
 			TestCase.assertEquals("Incorrect name for section output " + i,
 					eOutput.getOfficeSectionOutputName(),
 					aOutput.getOfficeSectionOutputName());
@@ -342,13 +347,15 @@ public class SectionLoaderUtil {
 		}
 
 		// Validate the office section objects
-		OfficeSectionObject[] eObjects = eSection.getOfficeSectionObjects();
-		OfficeSectionObject[] aObjects = aSection.getOfficeSectionObjects();
+		OfficeSectionObjectType[] eObjects = eSection
+				.getOfficeSectionObjectTypes();
+		OfficeSectionObjectType[] aObjects = aSection
+				.getOfficeSectionObjectTypes();
 		TestCase.assertEquals("Incorrect number of section objects",
 				eObjects.length, aObjects.length);
 		for (int i = 0; i < eObjects.length; i++) {
-			OfficeSectionObject eObject = eObjects[i];
-			OfficeSectionObject aObject = aObjects[i];
+			OfficeSectionObjectType eObject = eObjects[i];
+			OfficeSectionObjectType aObject = aObjects[i];
 			TestCase.assertEquals("Incorrect name for section object " + i,
 					eObject.getOfficeSectionObjectName(),
 					aObject.getOfficeSectionObjectName());
@@ -360,7 +367,7 @@ public class SectionLoaderUtil {
 		}
 
 		// Validate remaining of the office section
-		validateOfficeSubSection(null, eSection, aSection);
+		validateOfficeSubSectionType(null, eSection, aSection);
 	}
 
 	/**
@@ -373,8 +380,8 @@ public class SectionLoaderUtil {
 	 * @param aSection
 	 *            Actual {@link OfficeSubSection}.
 	 */
-	private static void validateOfficeSubSection(String subSectionName,
-			OfficeSubSection eSection, OfficeSubSection aSection) {
+	private static void validateOfficeSubSectionType(String subSectionName,
+			OfficeSubSectionType eSection, OfficeSubSectionType aSection) {
 
 		// Validate the office sub section
 		TestCase.assertEquals("Incorrect section name (parent section="
@@ -386,31 +393,30 @@ public class SectionLoaderUtil {
 				+ eSection.getOfficeSectionName();
 
 		// Validate the tasks
-		OfficeTask[] eTasks = eSection.getOfficeTasks();
-		OfficeTask[] aTasks = aSection.getOfficeTasks();
+		OfficeTaskType[] eTasks = eSection.getOfficeTaskTypes();
+		OfficeTaskType[] aTasks = aSection.getOfficeTaskTypes();
 		TestCase.assertEquals("Incorrect number of tasks (section="
 				+ subSectionName + ")", eTasks.length, aTasks.length);
 		for (int i = 0; i < eTasks.length; i++) {
-			OfficeTask eTask = eTasks[i];
-			OfficeTask aTask = aTasks[i];
+			OfficeTaskType eTask = eTasks[i];
+			OfficeTaskType aTask = aTasks[i];
 			TestCase.assertEquals("Incorrect name for task " + i
 					+ " (sub section=" + subSectionName + ")",
 					eTask.getOfficeTaskName(), aTask.getOfficeTaskName());
-			TestCase.assertNotNull("Must have team responsible for task " + i
-					+ " (sub section=" + subSectionName + ")",
-					aTask.getTeamResponsible());
 
 			// Validate the dependencies
-			ObjectDependency[] eDependencies = eTask.getObjectDependencies();
-			ObjectDependency[] aDependencies = aTask.getObjectDependencies();
+			ObjectDependencyType[] eDependencies = eTask
+					.getObjectDependencies();
+			ObjectDependencyType[] aDependencies = aTask
+					.getObjectDependencies();
 			TestCase.assertEquals(
 					"Incorrect number of dependencies for task " + i
 							+ " (sub section=" + subSectionName + ", task="
 							+ eTask.getOfficeTaskName() + ")",
 					eDependencies.length, aDependencies.length);
 			for (int j = 0; j < eDependencies.length; j++) {
-				ObjectDependency eDependency = eDependencies[j];
-				ObjectDependency aDependency = aDependencies[j];
+				ObjectDependencyType eDependency = eDependencies[j];
+				ObjectDependencyType aDependency = aDependencies[j];
 				TestCase.assertEquals(
 						"Incorrect name for dependency " + j + " (sub section="
 								+ subSectionName + ", task="
@@ -422,17 +428,17 @@ public class SectionLoaderUtil {
 		}
 
 		// Validate the managed object sources
-		OfficeSectionManagedObjectSource[] eMoSources = eSection
-				.getOfficeSectionManagedObjectSources();
-		OfficeSectionManagedObjectSource[] aMoSources = aSection
-				.getOfficeSectionManagedObjectSources();
+		OfficeSectionManagedObjectSourceType[] eMoSources = eSection
+				.getOfficeSectionManagedObjectSourceTypes();
+		OfficeSectionManagedObjectSourceType[] aMoSources = aSection
+				.getOfficeSectionManagedObjectSourceTypes();
 		TestCase.assertEquals(
 				"Incorrect number of managed object sources (sub section="
 						+ subSectionName + ")", eMoSources.length,
 				aMoSources.length);
 		for (int i = 0; i < eMoSources.length; i++) {
-			OfficeSectionManagedObjectSource eMoSource = eMoSources[i];
-			OfficeSectionManagedObjectSource aMoSource = aMoSources[i];
+			OfficeSectionManagedObjectSourceType eMoSource = eMoSources[i];
+			OfficeSectionManagedObjectSourceType aMoSource = aMoSources[i];
 			TestCase.assertEquals("Incorrect name for managed obect source "
 					+ i + " (sub section=" + subSectionName + ")",
 					eMoSource.getOfficeSectionManagedObjectSourceName(),
@@ -445,10 +451,10 @@ public class SectionLoaderUtil {
 			mosNode.loadManagedObjectType();
 
 			// Validate the managed object source teams
-			ManagedObjectTeam[] eTeams = eMoSource
-					.getOfficeSectionManagedObjectTeams();
-			ManagedObjectTeam[] aTeams = aMoSource
-					.getOfficeSectionManagedObjectTeams();
+			ManagedObjectTeamType[] eTeams = eMoSource
+					.getOfficeSectionManagedObjectTeamTypes();
+			ManagedObjectTeamType[] aTeams = aMoSource
+					.getOfficeSectionManagedObjectTeamTypes();
 			TestCase.assertEquals(
 					"Incorrect number of teams for managed object source " + i
 							+ " (managed object source="
@@ -456,8 +462,8 @@ public class SectionLoaderUtil {
 							+ subSectionName + ")", eTeams.length,
 					aTeams.length);
 			for (int j = 0; j < eTeams.length; j++) {
-				ManagedObjectTeam eTeam = eTeams[j];
-				ManagedObjectTeam aTeam = aTeams[j];
+				ManagedObjectTeamType eTeam = eTeams[j];
+				ManagedObjectTeamType aTeam = aTeams[j];
 				TestCase.assertEquals("Incorrect name for team " + j
 						+ " (managed object source=" + managedObjectSourceName
 						+ ", sub section=" + subSectionName + ")",
@@ -466,18 +472,18 @@ public class SectionLoaderUtil {
 			}
 
 			// Validate the managed objects
-			OfficeSectionManagedObject[] eMos = eMoSource
-					.getOfficeSectionManagedObjects();
-			OfficeSectionManagedObject[] aMos = aMoSource
-					.getOfficeSectionManagedObjects();
+			OfficeSectionManagedObjectType[] eMos = eMoSource
+					.getOfficeSectionManagedObjectTypes();
+			OfficeSectionManagedObjectType[] aMos = aMoSource
+					.getOfficeSectionManagedObjectTypes();
 			TestCase.assertEquals(
 					"Incorrect number of managed objects (managed object source="
 							+ managedObjectSourceName + ", sub section="
 							+ subSectionName + ")", eMoSources.length,
 					aMoSources.length);
 			for (int j = 0; j < eMos.length; j++) {
-				OfficeSectionManagedObject eMo = eMos[j];
-				OfficeSectionManagedObject aMo = aMos[j];
+				OfficeSectionManagedObjectType eMo = eMos[j];
+				OfficeSectionManagedObjectType aMo = aMos[j];
 				TestCase.assertEquals("Incorrect name for managed object " + j
 						+ " (managed object source=" + managedObjectSourceName
 						+ ", sub section=" + subSectionName + ")",
@@ -490,13 +496,6 @@ public class SectionLoaderUtil {
 								+ subSectionName + ")",
 						eMo.getDependentManagedObjectName(),
 						aMo.getDependentManagedObjectName());
-				TestCase.assertEquals(
-						"Incorrect administerable name for managed object " + i
-								+ " (managed object source="
-								+ managedObjectSourceName + ", sub section="
-								+ subSectionName + ")",
-						eMo.getAdministerableManagedObjectName(),
-						aMo.getAdministerableManagedObjectName());
 				String managedObjectName = eMo
 						.getOfficeSectionManagedObjectName();
 
@@ -548,14 +547,16 @@ public class SectionLoaderUtil {
 		}
 
 		// Validate the sub sections
-		OfficeSubSection[] eSubSections = eSection.getOfficeSubSections();
-		OfficeSubSection[] aSubSections = aSection.getOfficeSubSections();
+		OfficeSubSectionType[] eSubSections = eSection
+				.getOfficeSubSectionTypes();
+		OfficeSubSectionType[] aSubSections = aSection
+				.getOfficeSubSectionTypes();
 		TestCase.assertEquals("Incorect number of sub sections (sub section="
 				+ subSectionName + ")", eSubSections.length,
 				aSubSections.length);
 		for (int i = 0; i < eSubSections.length; i++) {
-			OfficeSubSection eSubSection = eSubSections[i];
-			OfficeSubSection aSubSection = aSubSections[i];
+			OfficeSubSectionType eSubSection = eSubSections[i];
+			OfficeSubSectionType aSubSection = aSubSections[i];
 			TestCase.assertEquals("Incorrect name for sub section " + i
 					+ " (sub section=" + subSectionName + ")",
 					eSubSection.getOfficeSectionName(),
@@ -632,7 +633,7 @@ public class SectionLoaderUtil {
 	}
 
 	/**
-	 * Convenience method to load the {@link OfficeSection}. It uses the
+	 * Convenience method to load the {@link OfficeSectionType}. It uses the
 	 * {@link SectionSource} class's {@link ClassLoader} and subsequent
 	 * {@link ClassLoaderConfigurationContext}.
 	 * 
@@ -646,9 +647,9 @@ public class SectionLoaderUtil {
 	 *            Location of the {@link OfficeSection}.
 	 * @param propertyNameValuePairs
 	 *            Listing of {@link Property} name/value pairs.
-	 * @return {@link SectionType}.
+	 * @return {@link OfficeSectionType}.
 	 */
-	public static <S extends SectionSource> OfficeSection loadOfficeSection(
+	public static <S extends SectionSource> OfficeSectionType loadOfficeSectionType(
 			String sectionName, Class<S> sectionSourceClass,
 			String sectionLocation, String... propertyNameValuePairs) {
 
@@ -664,7 +665,7 @@ public class SectionLoaderUtil {
 	}
 
 	/**
-	 * Loads the {@link OfficeSection}.
+	 * Loads the {@link OfficeSectionType}.
 	 * 
 	 * @param <S>
 	 *            {@link SectionSource} type.
@@ -680,17 +681,18 @@ public class SectionLoaderUtil {
 	 *            {@link ClassLoader}.
 	 * @param propertyNameValuePairs
 	 *            Listing of {@link Property} name/value pairs.
-	 * @return {@link OfficeSection}.
+	 * @return {@link OfficeSectionType}.
 	 */
-	public static <S extends SectionSource> OfficeSection loadOfficeSection(
+	public static <S extends SectionSource> OfficeSectionType loadOfficeSection(
 			String sectionName, Class<S> sectionSourceClass,
 			String sectionLocation, ConfigurationContext configurationContext,
 			ClassLoader classLoader, String... propertyNameValuePairs) {
 
 		// Load and return the office section
-		return getOfficeFloorCompiler().getSectionLoader().loadOfficeSection(
-				sectionName, sectionSourceClass, sectionLocation,
-				new PropertyListImpl(propertyNameValuePairs));
+		return getOfficeFloorCompiler().getSectionLoader()
+				.loadOfficeSectionType(sectionName, sectionSourceClass,
+						sectionLocation,
+						new PropertyListImpl(propertyNameValuePairs));
 	}
 
 	/**

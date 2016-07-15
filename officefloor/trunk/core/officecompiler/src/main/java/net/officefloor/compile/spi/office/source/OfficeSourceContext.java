@@ -21,7 +21,10 @@ import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -53,6 +56,26 @@ public interface OfficeSourceContext extends SourceContext {
 	 * @return New {@link PropertyList}.
 	 */
 	PropertyList createPropertyList();
+
+	/**
+	 * <p>
+	 * Loads the {@link OfficeSectionType}.
+	 * <p>
+	 * This is to enable obtaining the type information for the
+	 * {@link OfficeSection} to allow reflective configuration by the
+	 * {@link OfficeSource}.
+	 * 
+	 * @param sectionSourceClassName
+	 *            Name of the implementing {@link SectionSource} class.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param properties
+	 *            {@link PropertyList} to configure the {@link OfficeSection}.
+	 * @return {@link OfficeSectionType} or <code>null</code> if fails to load
+	 *         the {@link OfficeSectionType}.
+	 */
+	OfficeSectionType loadOfficeSectionType(String sectionSourceClassName,
+			String sectionLocation, PropertyList properties);
 
 	/**
 	 * <p>

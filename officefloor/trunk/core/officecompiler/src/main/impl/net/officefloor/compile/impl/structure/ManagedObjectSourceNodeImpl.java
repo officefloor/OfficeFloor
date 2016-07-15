@@ -69,8 +69,8 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
@@ -1075,7 +1075,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				.get(managedObjectDependencyName);
 		if (dependency == null) {
 			// Create the managed object dependency
-			dependency = new ManagedObjectDependencyNodeImpl(this,
+			dependency = new ManagedObjectDependencyNodeImpl(
 					managedObjectDependencyName, this.locationType,
 					this.location, this.context);
 
@@ -1110,22 +1110,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public ManagedObjectTeam[] getOfficeSectionManagedObjectTeams() {
-
-		// Ensure managed object type loaded (ensures all teams loaded)
-		if (!this.isManagedObjectTypeLoaded) {
-			throw new IllegalStateException(
-					"Must have the managed object type loaded");
-		}
-
-		// Return the managed object teams
-		return this.teams.values().toArray(new ManagedObjectTeam[0]);
+	public ManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
-	public OfficeSectionManagedObject[] getOfficeSectionManagedObjects() {
-		return this.managedObjects.values().toArray(
-				new OfficeSectionManagedObject[0]);
+	public OfficeSectionManagedObject getOfficeSectionManagedObject(
+			String managedObjectName) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	/*

@@ -149,6 +149,17 @@ public interface NodeContext {
 	SectionLoader getSectionLoader();
 
 	/**
+	 * Creates a {@link SectionNode}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @param office
+	 *            {@link OfficeNode} containing this {@link OfficeSection}.
+	 * @return {@link SectionNode}.
+	 */
+	SectionNode createSectionNode(String sectionName, OfficeNode office);
+
+	/**
 	 * Obtains the {@link WorkSource} class.
 	 * 
 	 * @param <S>

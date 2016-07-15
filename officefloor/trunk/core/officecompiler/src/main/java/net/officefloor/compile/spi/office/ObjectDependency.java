@@ -27,6 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // TODO remove as now use ObjectDependencyType
 public interface ObjectDependency {
 
 	/**
@@ -39,43 +40,5 @@ public interface ObjectDependency {
 	 * @return Name of this {@link ObjectDependency}.
 	 */
 	String getObjectDependencyName();
-
-	/**
-	 * Obtains the type required of this {@link ObjectDependency}.
-	 * 
-	 * @return Type required of this {@link ObjectDependency}.
-	 *         {@link UnknownType} is to be returned if the type can not be
-	 *         determined which avoids clients having to do <code>null</code>
-	 *         checks.
-	 */
-	Class<?> getObjectDependencyType();
-
-	/**
-	 * Obtains the type qualifier required of this {@link ObjectDependency}.
-	 * 
-	 * @return Type qualifier required of this {@link ObjectDependency}. May be
-	 *         <code>null</code> if no qualifier.
-	 */
-	String getObjectDependencyTypeQualifier();
-
-	/**
-	 * <p>
-	 * Obtains the {@link ManagedObject} that full fills the dependency.
-	 * <p>
-	 * Should the {@link ObjectDependency} represent a parameter then no
-	 * {@link DependentManagedObject} will be provided.
-	 * <p>
-	 * Expected return types are:
-	 * <ol>
-	 * <li>{@link OfficeSectionManagedObject}</li>
-	 * <li>{@link OfficeManagedObject}</li>
-	 * <li>{@link OfficeObject}</li>
-	 * <li><code>null</code> if not yet linked (or issue in linking)</li>
-	 * </ol>
-	 * 
-	 * @return {@link DependentManagedObject} or <code>null</code> if a
-	 *         parameter or not yet linked (or issue in linking).
-	 */
-	DependentManagedObject getDependentManagedObject();
 
 }

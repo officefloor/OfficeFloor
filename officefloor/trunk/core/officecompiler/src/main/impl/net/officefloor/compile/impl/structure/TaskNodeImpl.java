@@ -38,6 +38,7 @@ import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -223,6 +224,12 @@ public class TaskNodeImpl implements TaskNode {
 
 		// As here, did not find corresponding task type
 		return null;
+	}
+
+	@Override
+	public OfficeTaskType loadOfficeTaskType() {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
@@ -559,20 +566,6 @@ public class TaskNodeImpl implements TaskNode {
 	@Override
 	public String getOfficeTaskName() {
 		return this.taskName;
-	}
-
-	@Override
-	public ObjectDependency[] getObjectDependencies() {
-		ObjectDependency[] dependencies = this.taskObjects.values().toArray(
-				new ObjectDependency[0]);
-		Arrays.sort(dependencies, new Comparator<ObjectDependency>() {
-			@Override
-			public int compare(ObjectDependency a, ObjectDependency b) {
-				return a.getObjectDependencyName().compareTo(
-						b.getObjectDependencyName());
-			}
-		});
-		return dependencies;
 	}
 
 	@Override

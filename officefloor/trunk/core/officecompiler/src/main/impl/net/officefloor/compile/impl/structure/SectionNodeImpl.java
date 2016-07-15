@@ -18,15 +18,17 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.section.OfficeSectionTypeImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
+import net.officefloor.compile.impl.section.SectionTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -41,9 +43,14 @@ import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.office.OfficeSectionInputType;
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionInputType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
+import net.officefloor.compile.section.OfficeSectionObjectType;
+import net.officefloor.compile.section.OfficeSectionOutputType;
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeSubSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
@@ -57,7 +64,6 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -84,6 +90,9 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.UnknownClassError;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link SectionNode} implementation.
@@ -98,16 +107,6 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private final String sectionName;
 
 	/**
-	 * {@link PropertyList} to source this {@link OfficeSection}.
-	 */
-	private final PropertyList propertyList = new PropertyListImpl();
-
-	/**
-	 * Parent {@link OfficeSection} containing this {@link OfficeSection}.
-	 */
-	private final SectionNode parentSection;
-
-	/**
 	 * {@link OfficeNode} containing this {@link SectionNode}.
 	 */
 	private final OfficeNode office;
@@ -116,6 +115,11 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
+
+	/**
+	 * {@link InitialisedState} for this {@link SectionNode}.
+	 */
+	private InitialisedState state = null;
 
 	/**
 	 * {@link SectionInput} instances by their names.
@@ -167,156 +171,20 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private final Map<String, SectionNode> subSections = new HashMap<String, SectionNode>();
 
 	/**
-	 * Indicates if this {@link SectionNode} is initialised.
-	 */
-	private boolean isInitialised = false;
-
-	/**
-	 * Class name of the {@link SectionSource}.
-	 */
-	private String sectionSourceClassName;
-
-	/**
-	 * Location of the {@link OfficeSection} being built by this
-	 * {@link SectionDesigner}.
-	 */
-	private String sectionLocation;
-
-	/**
-	 * {@link SectionSource} for this {@link SectionNode}.
-	 */
-	private SectionSource sectionSource;
-
-	/**
-	 * Allows for loading the {@link SectionType}.
-	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection} being built by this
-	 *            {@link SectionDesigner}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	public SectionNodeImpl(String sectionName, String sectionLocation,
-			NodeContext context) {
-		this.sectionName = sectionName;
-		this.parentSection = null;
-		this.office = null;
-		this.context = context;
-		this.sectionLocation = sectionLocation;
-	}
-
-	/**
-	 * Allows for obtaining {@link DeployedOfficeInput} from the
-	 * {@link OfficeFloorDeployer}.
+	 * Initialises this {@link SectionNode} with the basic information.
 	 * 
 	 * @param sectionName
 	 *            Name of this {@link OfficeSection}.
 	 * @param office
-	 *            {@link OfficeNode} containing this {@link SectionNode}.
+	 *            {@link Office} containing the {@link OfficeSection}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionNodeImpl(String sectionName, OfficeNode office,
 			NodeContext context) {
 		this.sectionName = sectionName;
-		this.parentSection = null;
-		this.office = office;
+		this.office = null;
 		this.context = context;
-	}
-
-	/**
-	 * Allows for loading top level {@link OfficeSection} to an {@link Office}.
-	 * 
-	 * @param sectionName
-	 *            Name of this {@link OfficeSection}.
-	 * @param sectionSource
-	 *            {@link SectionSource}.
-	 * @param sectionLocation
-	 *            Location of this {@link SectionNode}.
-	 * @param propertyList
-	 *            {@link PropertyList}.
-	 * @param office
-	 *            {@link OfficeNode} containing this {@link SectionNode}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	public SectionNodeImpl(String sectionName, SectionSource sectionSource,
-			String sectionLocation, PropertyList propertyList,
-			OfficeNode office, NodeContext context) {
-		this.sectionName = sectionName;
-		this.parentSection = null;
-		this.office = office;
-		this.context = context;
-
-		// Initialise this section
-		this.sectionSource = sectionSource;
-		this.initialise(sectionSource.getClass().getName(), sectionLocation,
-				propertyList);
-	}
-
-	/**
-	 * Allows for adding a top level {@link OfficeSection} to an {@link Office}.
-	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClassName
-	 *            Class name of the {@link SectionSource} for this
-	 *            {@link OfficeSection}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyList
-	 *            {@link PropertyList}.
-	 * @param office
-	 *            {@link OfficeNode} containing this {@link SectionNode}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	public SectionNodeImpl(String sectionName, String sectionSourceClassName,
-			String sectionLocation, PropertyList propertyList,
-			OfficeNode office, NodeContext context) {
-		this.sectionName = sectionName;
-		this.parentSection = null;
-		this.office = office;
-		this.context = context;
-
-		// Initialise the section
-		this.initialise(sectionSourceClassName, sectionLocation, propertyList);
-	}
-
-	/**
-	 * Allows for the creation of {@link SubSection} instances.
-	 * 
-	 * @param sectionName
-	 *            Name of this {@link SectionNode} as a {@link SubSection}.
-	 * @param sectionSourceClassName
-	 *            Class name of the {@link SectionSource} for this
-	 *            {@link SubSection}.
-	 * @param sectionSource
-	 *            {@link SectionSource} instance. May be <code>null</code>.
-	 * @param sectionLocation
-	 *            Location of this {@link SubSection}.
-	 * @param parentSection
-	 *            Parent {@link OfficeSection} containing this
-	 *            {@link SubSection}.
-	 * @param office
-	 *            {@link OfficeNode} containing this {@link SectionNode}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	private SectionNodeImpl(String sectionName, String sectionSourceClassName,
-			SectionSource sectionSource, String sectionLocation,
-			SectionNode parentSection, OfficeNode office, NodeContext context) {
-		this.sectionName = sectionName;
-		this.parentSection = parentSection;
-		this.office = office;
-		this.context = context;
-
-		// Initialise the section
-		this.sectionSource = sectionSource;
-		this.initialise(sectionSourceClassName, sectionLocation,
-				new PropertyListImpl());
 	}
 
 	/**
@@ -328,8 +196,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
-				this.sectionLocation, null, null, issueDescription, cause);
+		this.context.getCompilerIssues()
+				.addIssue(LocationType.SECTION, this.state.sectionLocation,
+						null, null, issueDescription, cause);
 	}
 
 	/*
@@ -339,7 +208,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	@Override
 	protected void addIssue(String issueDescription) {
 		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
-				this.sectionLocation, null, null, issueDescription);
+				this.state.sectionLocation, null, null, issueDescription);
 	}
 
 	/*
@@ -347,42 +216,241 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 */
 
 	@Override
+	public SectionNode initialise(SectionSource sectionSource,
+			String sectionSourceClassName, String sectionLocation,
+			PropertyList propertyList, SectionNode parentSection) {
+
+		// Ensure not already initialise
+		if (this.isInitialised()) {
+			throw new IllegalStateException("SectionNode " + this.sectionName
+					+ " already initialised");
+		}
+
+		// Load the initialised state
+		this.state = new InitialisedState(sectionSourceClassName,
+				sectionSource, sectionLocation, propertyList, parentSection);
+
+		// Return this for stringing together with constructor
+		return this;
+	}
+
+	@Override
 	public boolean isInitialised() {
-		return this.isInitialised;
+		return (this.state != null);
 	}
 
 	@Override
-	public void initialise(String sectionSourceClassName,
-			String sectionLocation, PropertyList properties) {
+	public boolean sourceSection() {
 
-		// Initialise this section node
-		this.sectionSourceClassName = sectionSourceClassName;
-		this.sectionSource = null;
-		this.sectionLocation = sectionLocation;
-		for (Property property : properties) {
-			this.propertyList.addProperty(property.getName()).setValue(
-					property.getValue());
+		// Determine if must instantiate
+		SectionSource source = this.state.sectionSource;
+		if (source == null) {
+
+			// Obtain the section source class
+			Class<? extends SectionSource> sectionSourceClass = this.context
+					.getSectionSourceClass(this.state.sectionSourceClassName,
+							this.state.sectionLocation, this.sectionName);
+			if (sectionSourceClass == null) {
+				return false; // must have section source class
+			}
+
+			// Obtain the section source
+			source = CompileUtil.newInstance(sectionSourceClass,
+					SectionSource.class, LocationType.SECTION,
+					this.state.sectionLocation, null, this.sectionName,
+					this.context.getCompilerIssues());
+			if (source == null) {
+				return false; // must have office source
+			}
 		}
 
-		// Flag that initialised
-		this.isInitialised = true;
+		// Create the section source context
+		SectionSourceContext context = new SectionSourceContextImpl(true,
+				this.state.sectionLocation, this.state.propertyList,
+				this.context);
+
+		try {
+			// Source the section type
+			source.sourceSection(this, context);
+
+		} catch (UnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
+					+ "' for " + SectionSource.class.getSimpleName() + " "
+					+ source.getClass().getName());
+			return false; // must have property
+
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "' for " + SectionSource.class.getSimpleName() + " "
+					+ source.getClass().getName());
+			return false; // must have class
+
+		} catch (UnknownResourceError ex) {
+			this.addIssue("Can not obtain resource at location '"
+					+ ex.getUnknownResourceLocation() + "' for "
+					+ SectionSource.class.getSimpleName() + " "
+					+ source.getClass().getName());
+			return false; // must have resource
+
+		} catch (LoadTypeError ex) {
+			this.addIssue("Failure loading " + ex.getType().getSimpleName()
+					+ " from source " + ex.getSourceClassName());
+			return false; // must not fail in loading types
+
+		} catch (Throwable ex) {
+			this.addIssue("Failed to source "
+					+ SectionType.class.getSimpleName() + " definition from "
+					+ SectionSource.class.getSimpleName() + " "
+					+ source.getClass().getName());
+			return false; // must be successful
+		}
+
+		// Successfully sourced section
+		return true;
 	}
 
 	@Override
-	public void initialise(SectionSource sectionSource, String sectionLocation,
-			PropertyList properties) {
+	public SectionType loadSectionType() {
 
-		// Initialise this section node
-		this.sectionSourceClassName = null;
-		this.sectionSource = sectionSource;
-		this.sectionLocation = sectionLocation;
-		for (Property property : properties) {
-			this.propertyList.addProperty(property.getName()).setValue(
-					property.getValue());
+		// Obtain the listing of input types sorted by name
+		SectionInputType[] inputTypes = this.inputs
+				.values()
+				.stream()
+				.sorted((a, b) -> a.getSectionInputName().compareTo(
+						b.getSectionInputName()))
+				.toArray(SectionInputType[]::new);
+		for (int i = 0; i < inputTypes.length; i++) {
+			if (CompileUtil.isBlank(inputTypes[i].getSectionInputName())) {
+				this.addIssue("Null name for input " + i);
+				return null; // must have names for inputs
+			}
 		}
 
-		// Flag that initialised
-		this.isInitialised = true;
+		// Obtain the listing of output types sorted by name
+		SectionOutputType[] outputTypes = this.outputs
+				.values()
+				.stream()
+				.sorted((a, b) -> a.getSectionOutputName().compareTo(
+						b.getSectionOutputName()))
+				.toArray(SectionOutputType[]::new);
+		for (int i = 0; i < outputTypes.length; i++) {
+			if (CompileUtil.isBlank(outputTypes[i].getSectionOutputName())) {
+				this.addIssue("Null name for output " + i);
+				return null; // must have names for outputs
+			}
+		}
+
+		// Obtain the listing of object types sorted by name
+		SectionObjectType[] objectTypes = this.objects
+				.values()
+				.stream()
+				.sorted((a, b) -> a.getSectionObjectName().compareTo(
+						b.getSectionObjectName()))
+				.toArray(SectionObjectType[]::new);
+		for (int i = 0; i < objectTypes.length; i++) {
+			SectionObjectType objectType = objectTypes[i];
+			if (CompileUtil.isBlank(objectType.getSectionObjectName())) {
+				this.addIssue("Null name for object " + i);
+				return null; // must have names for objects
+			}
+			if (CompileUtil.isBlank(objectType.getObjectType())) {
+				this.addIssue("Null type for object " + i + " (name="
+						+ objectType.getSectionObjectName() + ")");
+				return null; // must have types for objects
+			}
+		}
+
+		// Create and return the section type
+		return new SectionTypeImpl(inputTypes, outputTypes, objectTypes);
+	}
+
+	@Override
+	public OfficeSectionType loadOfficeSectionType() {
+
+		// Load the section type
+		SectionType sectionType = this.loadSectionType();
+		if (sectionType == null) {
+			return null; // must load section type
+		}
+
+		// Load the sub sections
+		OfficeSubSectionType[] subSections = this.subSections
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getSubSectionName(), b.getSubSectionName()))
+				.map(t -> t.loadOfficeSectionType())
+				.toArray(OfficeSubSectionType[]::new);
+
+		// Load managed object sources
+		OfficeSectionManagedObjectSource[] managedObjectSources = this.managedObjectSourceNodes
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionManagedObjectSourceName(),
+						b.getOfficeSectionManagedObjectSourceName()))
+				.toArray(OfficeSectionManagedObjectSource[]::new);
+		for (ManagedObjectSourceNode managedObjectSource : this.managedObjectSourceNodes
+				.values()) {
+			managedObjectSource.addOfficeContext(null);
+			managedObjectSource.loadManagedObjectType();
+		}
+		OfficeSectionManagedObjectSourceType[] managedObjectSourceTypes = this.managedObjectSourceNodes
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionManagedObjectSourceName(),
+						b.getOfficeSectionManagedObjectSourceName()))
+				.toArray(OfficeSectionManagedObjectSourceType[]::new);
+
+		// Add the office context for the tasks
+		for (TaskNode task : this.taskNodes.values()) {
+			task.addOfficeContext(null);
+		}
+		OfficeTaskType[] taskTypes = this.taskNodes
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeTaskName(), b.getOfficeTaskName()))
+				.map(t -> t.loadOfficeTaskType())
+				.toArray(OfficeTaskType[]::new);
+
+		// Obtain the section inputs
+		OfficeSectionInputType[] inputTypes = this.inputs
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionInputName(),
+						b.getOfficeSectionInputName()))
+				.toArray(OfficeSectionInputType[]::new);
+
+		// Add the office context for the section outputs
+		for (SectionOutputNode output : this.outputs.values()) {
+			output.addOfficeContext(null);
+		}
+		OfficeSectionOutputType[] outputTypes = this.outputs
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionOutputName(),
+						b.getOfficeSectionOutputName()))
+				.toArray(OfficeSectionOutputType[]::new);
+
+		// Add the office context for the section objects
+		for (SectionObjectNode object : this.objects.values()) {
+			object.addOfficeContext(null);
+		}
+		OfficeSectionObjectType[] objectTypes = this.objects
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionObjectName(),
+						b.getOfficeSectionObjectName()))
+				.toArray(OfficeSectionObjectType[]::new);
+
+		// Return the office section type
+		return new OfficeSectionTypeImpl(null, subSections, taskTypes,
+				managedObjectSourceTypes, inputTypes, outputTypes, objectTypes);
 	}
 
 	@Override
@@ -407,91 +475,19 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public void loadOfficeSection(String officeLocation) {
-
-		// Ensure have instance of section source
-		if (this.sectionSource == null) {
-
-			// Obtain the section source class
-			Class<? extends SectionSource> sectionSourceClass = this.context
-					.getSectionSourceClass(this.sectionSourceClassName,
-							this.sectionLocation, this.sectionName);
-			if (sectionSourceClass == null) {
-				return; // must have section source class
-			}
-
-			// Instantiate an instance of the section source
-			this.sectionSource = CompileUtil.newInstance(sectionSourceClass,
-					SectionSource.class, LocationType.SECTION,
-					this.sectionLocation, null, null,
-					this.context.getCompilerIssues());
-			if (this.sectionSource == null) {
-				return; // must instantiate section source
-			}
-		}
-
-		// Create the section source context
-		SectionSourceContext context = new SectionSourceContextImpl(false,
-				this.sectionLocation, this.propertyList, this.context);
-
-		try {
-			// Source the section
-			this.sectionSource.sourceSection(this, context);
-
-		} catch (Throwable ex) {
-			// Indicate failure to source section
-			this.addIssue(
-					"Failed to source " + OfficeSection.class.getSimpleName(),
-					ex);
-			return; // can not load sub section as section load failure
-		}
-
-		// Load the sub sections
-		for (SectionNode subSection : this.subSections.values()) {
-			subSection.loadOfficeSection(officeLocation);
-		}
-
-		// Load managed object sources (require supported extension interfaces)
-		for (ManagedObjectSourceNode managedObjectSource : this.managedObjectSourceNodes
-				.values()) {
-			managedObjectSource.addOfficeContext(officeLocation);
-			managedObjectSource.loadManagedObjectType();
-		}
-
-		// Add the office context for the work
-		for (WorkNode work : this.workNodes.values()) {
-			work.addOfficeContext(officeLocation);
-		}
-
-		// Add the office context for the tasks
-		for (TaskNode task : this.taskNodes.values()) {
-			task.addOfficeContext(officeLocation);
-		}
-
-		// Add the office context for the section outputs
-		for (SectionOutputNode output : this.outputs.values()) {
-			output.addOfficeContext(officeLocation);
-		}
-
-		// Add the office context for the section objects
-		for (SectionObjectNode object : this.objects.values()) {
-			object.addOfficeContext(officeLocation);
-		}
-	}
-
-	@Override
 	public String getSectionQualifiedName(String simpleName) {
 
 		// Obtain the qualified name for this section
 		String qualifiedName = this.sectionName + "." + simpleName;
 
 		// Recursively determine the qualified name
-		if (this.parentSection == null) {
+		if (this.state.parentSection == null) {
 			// Top level section
 			return qualifiedName;
 		} else {
 			// Further parent sections
-			return this.parentSection.getSectionQualifiedName(qualifiedName);
+			return this.state.parentSection
+					.getSectionQualifiedName(qualifiedName);
 		}
 	}
 
@@ -544,18 +540,13 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
+	public SectionNode getParentSectionNode() {
+		return this.state.parentSection;
+	}
+
+	@Override
 	public OfficeNode getOfficeNode() {
 		return this.office;
-	}
-
-	@Override
-	public SectionNode getParentSectionNode() {
-		return this.parentSection;
-	}
-
-	@Override
-	public OfficeSectionInputType[] getOfficeInputTypes() {
-		return this.inputs.values().toArray(new OfficeSectionInputType[0]);
 	}
 
 	@Override
@@ -565,59 +556,10 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (input == null) {
 			// Add the section input
 			input = new SectionInputNodeImpl(inputName, this,
-					this.sectionLocation, this.context);
+					this.state.sectionLocation, this.context);
 			this.inputs.put(inputName, input);
 		}
 		return input;
-	}
-
-	/*
-	 * ===================== SectionType ===================================
-	 */
-
-	@Override
-	public SectionInputType[] getSectionInputTypes() {
-		// Return the listing of input types sorted by name
-		SectionInputType[] inputTypes = this.inputs.values().toArray(
-				new SectionInputType[0]);
-		Arrays.sort(inputTypes, new Comparator<SectionInputType>() {
-			@Override
-			public int compare(SectionInputType a, SectionInputType b) {
-				return a.getSectionInputName().compareTo(
-						b.getSectionInputName());
-			}
-		});
-		return inputTypes;
-	}
-
-	@Override
-	public SectionOutputType[] getSectionOutputTypes() {
-		// Return the listing of output types sorted by name
-		SectionOutputType[] outputTypes = this.outputs.values().toArray(
-				new SectionOutputType[0]);
-		Arrays.sort(outputTypes, new Comparator<SectionOutputType>() {
-			@Override
-			public int compare(SectionOutputType a, SectionOutputType b) {
-				return a.getSectionOutputName().compareTo(
-						b.getSectionOutputName());
-			}
-		});
-		return outputTypes;
-	}
-
-	@Override
-	public SectionObjectType[] getSectionObjectTypes() {
-		// Return the listing of object types sorted by name
-		SectionObjectType[] objectTypes = this.objects.values().toArray(
-				new SectionObjectType[0]);
-		Arrays.sort(objectTypes, new Comparator<SectionObjectType>() {
-			@Override
-			public int compare(SectionObjectType a, SectionObjectType b) {
-				return a.getSectionObjectName().compareTo(
-						b.getSectionObjectName());
-			}
-		});
-		return objectTypes;
 	}
 
 	/*
@@ -631,7 +573,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public void addProperty(String name, String value) {
-		this.propertyList.addProperty(name).setValue(value);
+		this.state.propertyList.addProperty(name).setValue(value);
 	}
 
 	@Override
@@ -641,7 +583,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (input == null) {
 			// Add the input
 			input = new SectionInputNodeImpl(inputName, this,
-					this.sectionLocation, this.context);
+					this.state.sectionLocation, this.context);
 			this.inputs.put(inputName, input);
 		}
 		return input;
@@ -654,7 +596,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (output == null) {
 			// Add the output
 			output = new SectionOutputNodeImpl(outputName,
-					this.sectionLocation, this, this.context);
+					this.state.sectionLocation, this, this.context);
 			this.outputs.put(outputName, output);
 		}
 		return output;
@@ -667,7 +609,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (object == null) {
 			// Add the object
 			object = new SectionObjectNodeImpl(objectName,
-					this.sectionLocation, this, this.context);
+					this.state.sectionLocation, this, this.context);
 			this.objects.put(objectName, object);
 		}
 		return object;
@@ -684,7 +626,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (input == null) {
 			// Add the input
 			input = new SectionInputNodeImpl(inputName, this, parameterType,
-					this.sectionLocation, this.context);
+					this.state.sectionLocation, this.context);
 			this.inputs.put(inputName, input);
 		} else {
 			// Added but determine if requires initialising
@@ -707,7 +649,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (output == null) {
 			// Add the output
 			output = new SectionOutputNodeImpl(outputName, argumentType,
-					isEscalationOnly, this.sectionLocation, this, this.context);
+					isEscalationOnly, this.state.sectionLocation, this,
+					this.context);
 			this.outputs.put(outputName, output);
 		} else {
 			// Added but determine if requires initialising
@@ -729,7 +672,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (object == null) {
 			// Add the object
 			object = new SectionObjectNodeImpl(objectName, objectType,
-					this.sectionLocation, this, this.context);
+					this.state.sectionLocation, this, this.context);
 			this.objects.put(objectName, object);
 		} else {
 			// Added but determine if requires initialising
@@ -754,7 +697,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Add the section managed object source
 			managedObjectSource = new ManagedObjectSourceNodeImpl(
 					managedObjectSourceName, managedObjectSourceClassName,
-					LocationType.SECTION, this.sectionLocation, this,
+					LocationType.SECTION, this.state.sectionLocation, this,
 					this.office, this.managedObjects, this.context);
 			this.managedObjectSourceNodes.put(managedObjectSourceName,
 					managedObjectSource);
@@ -777,7 +720,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Add the section managed object source
 			managedObjectSourceNode = new ManagedObjectSourceNodeImpl(
 					managedObjectSourceName, managedObjectSource,
-					LocationType.SECTION, this.sectionLocation, this,
+					LocationType.SECTION, this.state.sectionLocation, this,
 					this.office, this.managedObjects, this.context);
 			this.managedObjectSourceNodes.put(managedObjectSourceName,
 					managedObjectSourceNode);
@@ -797,7 +740,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (work == null) {
 			// Add the section work
 			work = new WorkNodeImpl(workName, workSourceClassName,
-					this.sectionLocation, this.taskNodes, this, this.context);
+					this.state.sectionLocation, this.taskNodes, this,
+					this.context);
 			this.workNodes.put(workName, work);
 		} else {
 			// Section work already added
@@ -812,8 +756,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		WorkNode work = this.workNodes.get(workName);
 		if (work == null) {
 			// Add the section work
-			work = new WorkNodeImpl(workName, workSource, this.sectionLocation,
-					this.taskNodes, this, this.context);
+			work = new WorkNodeImpl(workName, workSource,
+					this.state.sectionLocation, this.taskNodes, this,
+					this.context);
 			this.workNodes.put(workName, work);
 		} else {
 			// Section work already added
@@ -856,9 +801,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		SectionNode subSection = this.subSections.get(subSectionName);
 		if (subSection == null) {
 			// Add the sub section
-			subSection = new SectionNodeImpl(subSectionName,
-					sectionSourceClassName, sectionSource, location, this,
-					this.office, this.context);
+			subSection = new SectionNodeImpl(subSectionName, this.office,
+					this.context).initialise(sectionSource,
+					sectionSourceClassName, location, null, this);
 			this.subSections.put(subSectionName, subSection);
 		} else {
 			// Sub section already added
@@ -1021,15 +966,16 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	public void addIssue(String issueDescription, AssetType assetType,
 			String assetName) {
 		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
-				this.sectionLocation, assetType, assetName, issueDescription);
+				this.state.sectionLocation, assetType, assetName,
+				issueDescription);
 	}
 
 	@Override
 	public void addIssue(String issueDescription, Throwable cause,
 			AssetType assetType, String assetName) {
 		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
-				this.sectionLocation, assetType, assetName, issueDescription,
-				cause);
+				this.state.sectionLocation, assetType, assetName,
+				issueDescription, cause);
 	}
 
 	/*
@@ -1042,81 +988,34 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public OfficeSubSection[] getOfficeSubSections() {
-		// Return the sub sections sorted by name
-		OfficeSubSection[] subSections = this.subSections.values().toArray(
-				new OfficeSubSection[0]);
-		Arrays.sort(subSections, new Comparator<OfficeSubSection>() {
-			@Override
-			public int compare(OfficeSubSection a, OfficeSubSection b) {
-				return a.getOfficeSectionName().compareTo(
-						b.getOfficeSectionName());
-			}
-		});
-		return subSections;
+	public OfficeSectionInput getOfficeSectionInput(String inputName) {
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
-	public OfficeSectionInput[] getOfficeSectionInputs() {
-		// Return the section inputs sorted by name
-		OfficeSectionInput[] sectionInputs = this.inputs.values().toArray(
-				new OfficeSectionInput[0]);
-		Arrays.sort(sectionInputs, new Comparator<OfficeSectionInput>() {
-			@Override
-			public int compare(OfficeSectionInput a, OfficeSectionInput b) {
-				return a.getOfficeSectionInputName().compareTo(
-						b.getOfficeSectionInputName());
-			}
-		});
-		return sectionInputs;
+	public OfficeSectionOutput getOfficeSectionOutput(String outputName) {
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
-	public OfficeSectionOutput[] getOfficeSectionOutputs() {
-		// Return the section outputs sorted by name
-		OfficeSectionOutput[] sectionOutputs = this.outputs.values().toArray(
-				new OfficeSectionOutput[0]);
-		Arrays.sort(sectionOutputs, new Comparator<OfficeSectionOutput>() {
-			@Override
-			public int compare(OfficeSectionOutput a, OfficeSectionOutput b) {
-				return a.getOfficeSectionOutputName().compareTo(
-						b.getOfficeSectionOutputName());
-			}
-		});
-		return sectionOutputs;
+	public OfficeSectionObject getOfficeSectionObject(String objectName) {
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
-	public OfficeSectionObject[] getOfficeSectionObjects() {
-		// Return the section objects sorted by name
-		OfficeSectionObject[] sectionObjects = this.objects.values().toArray(
-				new OfficeSectionObject[0]);
-		Arrays.sort(sectionObjects, new Comparator<OfficeSectionObject>() {
-			@Override
-			public int compare(OfficeSectionObject a, OfficeSectionObject b) {
-				return a.getOfficeSectionObjectName().compareTo(
-						b.getOfficeSectionObjectName());
-			}
-		});
-		return sectionObjects;
+	public OfficeSubSection getOfficeSubSection(String sectionName) {
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
-	public OfficeSectionManagedObjectSource[] getOfficeSectionManagedObjectSources() {
-		// Return the section managed object sources sorted by name
-		OfficeSectionManagedObjectSource[] sectionMos = this.managedObjectSourceNodes
-				.values().toArray(new OfficeSectionManagedObjectSource[0]);
-		Arrays.sort(sectionMos,
-				new Comparator<OfficeSectionManagedObjectSource>() {
-					@Override
-					public int compare(OfficeSectionManagedObjectSource a,
-							OfficeSectionManagedObjectSource b) {
-						return a.getOfficeSectionManagedObjectSourceName()
-								.compareTo(
-										b.getOfficeSectionManagedObjectSourceName());
-					}
-				});
-		return sectionMos;
+	public OfficeTask getOfficeTask(String taskName) {
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource(
+			String managedObjectSourceName) {
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
@@ -1137,18 +1036,63 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		this.governances.add(governanceNode);
 	}
 
-	@Override
-	public OfficeTask[] getOfficeTasks() {
-		// Return the office tasks sorted by name
-		OfficeTask[] officeTasks = this.taskNodes.values().toArray(
-				new OfficeTask[0]);
-		Arrays.sort(officeTasks, new Comparator<OfficeTask>() {
-			@Override
-			public int compare(OfficeTask a, OfficeTask b) {
-				return a.getOfficeTaskName().compareTo(b.getOfficeTaskName());
-			}
-		});
-		return officeTasks;
+	/**
+	 * Initialised state of the {@link SectionNode}.
+	 */
+	private class InitialisedState {
+
+		/**
+		 * Class name of the {@link SectionSource}.
+		 */
+		private final String sectionSourceClassName;
+
+		/**
+		 * {@link SectionSource} for this {@link SectionNode}.
+		 */
+		private final SectionSource sectionSource;
+
+		/**
+		 * Location of the {@link OfficeSection} being built by this
+		 * {@link SectionDesigner}.
+		 */
+		private final String sectionLocation;
+
+		/**
+		 * {@link PropertyList} to source this {@link OfficeSection}.
+		 */
+		private final PropertyList propertyList;
+
+		/**
+		 * Parent {@link OfficeSection} containing this {@link OfficeSection}.
+		 */
+		private final SectionNode parentSection;
+
+		/**
+		 * Initialise the state.
+		 * 
+		 * @param sectionSourceClassName
+		 *            Class name of the {@link SectionSource}.
+		 * @param sectionSource
+		 *            {@link SectionSource} for this {@link SectionNode}.
+		 * @param sectionLocation
+		 *            Location of the {@link OfficeSection} being built by this
+		 *            {@link SectionDesigner}.
+		 * @param propertyList
+		 *            {@link PropertyList} to source this {@link OfficeSection}.
+		 * @param parentSection
+		 *            Parent {@link OfficeSection} containing this
+		 *            {@link OfficeSection}.
+		 */
+		private InitialisedState(String sectionSourceClassName,
+				SectionSource sectionSource, String sectionLocation,
+				PropertyList propertyList, SectionNode parentSection) {
+			this.sectionSourceClassName = sectionSourceClassName;
+			this.sectionSource = sectionSource;
+			this.sectionLocation = sectionLocation;
+			this.propertyList = (propertyList != null ? propertyList
+					: SectionNodeImpl.this.context.createPropertyList());
+			this.parentSection = parentSection;
+		}
 	}
 
 }
