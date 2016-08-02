@@ -100,6 +100,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		OfficeSubSectionType subSection = section.getOfficeSubSectionTypes()[0];
 		assertEquals("Incorrect sub section", "SUB_SECTION",
 				subSection.getOfficeSectionName());
+		assertSame("Incorrect parent section", section,
+				subSection.getParentOfficeSubSectionType());
 		assertEquals("Should be no sub section tasks", 0,
 				subSection.getOfficeTaskTypes().length);
 		assertEquals("Should be no tasks", 0,
@@ -136,12 +138,16 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		OfficeSubSectionType subSection = section.getOfficeSubSectionTypes()[0];
 		assertEquals("Should have a sub sub section", 1,
 				subSection.getOfficeSubSectionTypes().length);
+		assertSame("Incorrect parent of sub section", section,
+				subSection.getParentOfficeSubSectionType());
 		assertEquals("Should be no tasks on sub section", 0,
 				subSection.getOfficeTaskTypes().length);
 		OfficeSubSectionType subSubSection = subSection
 				.getOfficeSubSectionTypes()[0];
 		assertEquals("Incorrect sub sub section", "SUB_SUB_SECTION",
 				subSubSection.getOfficeSectionName());
+		assertSame("Incorrect parent of sub sub section", subSection,
+				subSubSection.getParentOfficeSubSectionType());
 		assertEquals("Should be no tasks on sub sub section", 0,
 				subSubSection.getOfficeTaskTypes().length);
 	}

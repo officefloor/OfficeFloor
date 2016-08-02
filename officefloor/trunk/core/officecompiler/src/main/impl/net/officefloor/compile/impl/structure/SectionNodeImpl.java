@@ -23,7 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.OfficeSectionTypeImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.section.SectionTypeImpl;
@@ -298,15 +297,34 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			return false; // must not fail in loading types
 
 		} catch (Throwable ex) {
-			this.addIssue("Failed to source "
-					+ SectionType.class.getSimpleName() + " definition from "
-					+ SectionSource.class.getSimpleName() + " "
-					+ source.getClass().getName());
+			this.addIssue(
+					"Failed to source " + SectionType.class.getSimpleName()
+							+ " definition from "
+							+ SectionSource.class.getSimpleName() + " "
+							+ source.getClass().getName(), ex);
 			return false; // must be successful
 		}
 
 		// Successfully sourced section
 		return true;
+	}
+
+	@Override
+	public boolean sourceSectionTree() {
+
+		// Source this section
+		boolean isSourced = this.sourceSection();
+		if (!isSourced) {
+			return false;
+		}
+
+		// Successful only if all sub sections are also sourced
+		return this.subSections
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionName(), b.getOfficeSectionName()))
+				.allMatch(t -> t.sourceSectionTree());
 	}
 
 	@Override
@@ -316,8 +334,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		SectionInputType[] inputTypes = this.inputs
 				.values()
 				.stream()
-				.sorted((a, b) -> a.getSectionInputName().compareTo(
-						b.getSectionInputName()))
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getSectionInputName(), b.getSectionInputName()))
 				.toArray(SectionInputType[]::new);
 		for (int i = 0; i < inputTypes.length; i++) {
 			if (CompileUtil.isBlank(inputTypes[i].getSectionInputName())) {
@@ -330,8 +348,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		SectionOutputType[] outputTypes = this.outputs
 				.values()
 				.stream()
-				.sorted((a, b) -> a.getSectionOutputName().compareTo(
-						b.getSectionOutputName()))
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getSectionOutputName(), b.getSectionOutputName()))
 				.toArray(SectionOutputType[]::new);
 		for (int i = 0; i < outputTypes.length; i++) {
 			if (CompileUtil.isBlank(outputTypes[i].getSectionOutputName())) {
@@ -344,8 +362,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		SectionObjectType[] objectTypes = this.objects
 				.values()
 				.stream()
-				.sorted((a, b) -> a.getSectionObjectName().compareTo(
-						b.getSectionObjectName()))
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getSectionObjectName(), b.getSectionObjectName()))
 				.toArray(SectionObjectType[]::new);
 		for (int i = 0; i < objectTypes.length; i++) {
 			SectionObjectType objectType = objectTypes[i];
@@ -372,48 +390,6 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (sectionType == null) {
 			return null; // must load section type
 		}
-
-		// Load the sub sections
-		OfficeSubSectionType[] subSections = this.subSections
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getSubSectionName(), b.getSubSectionName()))
-				.map(t -> t.loadOfficeSectionType())
-				.toArray(OfficeSubSectionType[]::new);
-
-		// Load managed object sources
-		OfficeSectionManagedObjectSource[] managedObjectSources = this.managedObjectSourceNodes
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionManagedObjectSourceName(),
-						b.getOfficeSectionManagedObjectSourceName()))
-				.toArray(OfficeSectionManagedObjectSource[]::new);
-		for (ManagedObjectSourceNode managedObjectSource : this.managedObjectSourceNodes
-				.values()) {
-			managedObjectSource.addOfficeContext(null);
-			managedObjectSource.loadManagedObjectType();
-		}
-		OfficeSectionManagedObjectSourceType[] managedObjectSourceTypes = this.managedObjectSourceNodes
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionManagedObjectSourceName(),
-						b.getOfficeSectionManagedObjectSourceName()))
-				.toArray(OfficeSectionManagedObjectSourceType[]::new);
-
-		// Add the office context for the tasks
-		for (TaskNode task : this.taskNodes.values()) {
-			task.addOfficeContext(null);
-		}
-		OfficeTaskType[] taskTypes = this.taskNodes
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeTaskName(), b.getOfficeTaskName()))
-				.map(t -> t.loadOfficeTaskType())
-				.toArray(OfficeTaskType[]::new);
 
 		// Obtain the section inputs
 		OfficeSectionInputType[] inputTypes = this.inputs
@@ -448,9 +424,87 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 						b.getOfficeSectionObjectName()))
 				.toArray(OfficeSectionObjectType[]::new);
 
-		// Return the office section type
-		return new OfficeSectionTypeImpl(null, subSections, taskTypes,
-				managedObjectSourceTypes, inputTypes, outputTypes, objectTypes);
+		// Create the office section type
+		OfficeSectionTypeImpl officeSectionType = new OfficeSectionTypeImpl(
+				this.sectionName, inputTypes, outputTypes, objectTypes);
+		this.initialiseSubSectionState(officeSectionType, null);
+
+		// Return the type
+		return officeSectionType;
+	}
+
+	@Override
+	public OfficeSectionType loadOfficeSubSectionType(
+			OfficeSubSectionType parentSectionType) {
+
+		// Create the office section type
+		OfficeSectionTypeImpl officeSectionType = new OfficeSectionTypeImpl(
+				this.sectionName, new OfficeSectionInputType[] {},
+				new OfficeSectionOutputType[] {},
+				new OfficeSectionObjectType[] {});
+		this.initialiseSubSectionState(officeSectionType, parentSectionType);
+
+		// Return the type
+		return officeSectionType;
+	}
+
+	/**
+	 * Initialises the {@link OfficeSectionTypeImpl} with the
+	 * {@link OfficeSubSectionType} information.
+	 * 
+	 * @param sectionType
+	 *            {@link OfficeSectionTypeImpl}.
+	 * @param parentSectionType
+	 *            Parent {@link OfficeSubSectionType}.
+	 */
+	private void initialiseSubSectionState(OfficeSectionTypeImpl sectionType,
+			OfficeSubSectionType parentSectionType) {
+
+		// Load the sub sections
+		OfficeSubSectionType[] subSections = this.subSections
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getSubSectionName(), b.getSubSectionName()))
+				.map(t -> t.loadOfficeSubSectionType(sectionType))
+				.filter(t -> (t != null)).toArray(OfficeSubSectionType[]::new);
+
+		// Load managed object sources
+		OfficeSectionManagedObjectSource[] managedObjectSources = this.managedObjectSourceNodes
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionManagedObjectSourceName(),
+						b.getOfficeSectionManagedObjectSourceName()))
+				.toArray(OfficeSectionManagedObjectSource[]::new);
+		for (ManagedObjectSourceNode managedObjectSource : this.managedObjectSourceNodes
+				.values()) {
+			managedObjectSource.addOfficeContext(null);
+			managedObjectSource.loadManagedObjectType();
+		}
+		OfficeSectionManagedObjectSourceType[] managedObjectSourceTypes = this.managedObjectSourceNodes
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionManagedObjectSourceName(),
+						b.getOfficeSectionManagedObjectSourceName()))
+				.toArray(OfficeSectionManagedObjectSourceType[]::new);
+
+		// Add the office context for the tasks
+		for (TaskNode task : this.taskNodes.values()) {
+			task.addOfficeContext(null);
+		}
+		OfficeTaskType[] taskTypes = this.taskNodes
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeTaskName(), b.getOfficeTaskName()))
+				.map(t -> t.loadOfficeTaskType()).filter(t -> (t != null))
+				.toArray(OfficeTaskType[]::new);
+
+		// Initialise the sub section state
+		sectionType.initialiseAsOfficeSubSectionType(parentSectionType,
+				subSections, taskTypes, managedObjectSourceTypes);
 	}
 
 	@Override

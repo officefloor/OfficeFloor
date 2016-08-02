@@ -21,8 +21,10 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SubSection;
@@ -68,7 +70,10 @@ public interface SectionNode extends SectionDesigner, SubSection, OfficeSection 
 	boolean isInitialised();
 
 	/**
+	 * <p>
 	 * Sources the section into this {@link SectionNode}.
+	 * <p>
+	 * This will only source the top level {@link OfficeSection}.
 	 * 
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
@@ -77,10 +82,22 @@ public interface SectionNode extends SectionDesigner, SubSection, OfficeSection 
 	boolean sourceSection();
 
 	/**
+	 * Sources this {@link SectionNode} and all the {@link OfficeSubSection}
+	 * instances recursively.
+	 * 
+	 * @return <code>true</code> if successfully sourced. Otherwise
+	 *         <code>false</code> with issue reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceSectionTree();
+
+	/**
 	 * Loads the {@link SectionType}.
 	 * 
 	 * @return {@link SectionType} or <code>null</code> if issue loading with
 	 *         issue reported to the {@link CompilerIssues}.
+	 * 
+	 * @see #sourceSection()
 	 */
 	SectionType loadSectionType();
 
@@ -89,8 +106,21 @@ public interface SectionNode extends SectionDesigner, SubSection, OfficeSection 
 	 * 
 	 * @return {@link OfficeSectionType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
+	 * 
+	 * @see #sourceSectionTree()
 	 */
 	OfficeSectionType loadOfficeSectionType();
+
+	/**
+	 * Loads the {@link OfficeSubSectionType}.
+	 * 
+	 * @param parentSectionType
+	 *            Parent {@link OfficeSubSectionType}.
+	 * @return {@link OfficeSubSectionType} or <code>null</code> if issue
+	 *         loading with issue reported to the {@link CompilerIssues}.
+	 */
+	OfficeSubSectionType loadOfficeSubSectionType(
+			OfficeSubSectionType parentSectionType);
 
 	/**
 	 * Obtains the {@link DeployedOfficeInput}.
