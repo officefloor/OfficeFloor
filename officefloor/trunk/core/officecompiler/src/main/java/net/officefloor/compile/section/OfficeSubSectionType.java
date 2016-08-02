@@ -35,6 +35,14 @@ public interface OfficeSubSectionType {
 	String getOfficeSectionName();
 
 	/**
+	 * Obtains the parent {@link OfficeSubSectionType}.
+	 * 
+	 * @return Parent {@link OfficeSubSectionType} or <code>null</code> if this
+	 *         is the {@link OfficeSectionType}.
+	 */
+	OfficeSubSectionType getParentOfficeSubSectionType();
+
+	/**
 	 * Obtains the {@link OfficeSubSectionType} instances of this
 	 * {@link OfficeSectionType}.
 	 * 
@@ -57,8 +65,8 @@ public interface OfficeSubSectionType {
 
 	/**
 	 * <p>
-	 * Obtains the {@link OfficeSectionManagedObjectSourceType} instances for this
-	 * particular {@link OfficeSubSection}.
+	 * Obtains the {@link OfficeSectionManagedObjectSourceType} instances for
+	 * this particular {@link OfficeSubSection}.
 	 * <p>
 	 * This does not include the {@link OfficeSectionManagedObjectSourceType}
 	 * instances of the sub sections.

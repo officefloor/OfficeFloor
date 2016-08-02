@@ -22,6 +22,8 @@ import java.util.Map;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
@@ -89,13 +91,13 @@ public interface OfficeChanges {
 	 *            Location of the {@link OfficeSection}.
 	 * @param properties
 	 *            {@link PropertyList}.
-	 * @param officeSection
-	 *            {@link OfficeSection}.
+	 * @param officeSectionType
+	 *            {@link OfficeSectionType}.
 	 * @return {@link Change} to add the {@link OfficeSectionModel}.
 	 */
 	Change<OfficeSectionModel> addOfficeSection(String sectionSourceClassName,
 			String sectionLocation, PropertyList properties,
-			OfficeSection officeSection);
+			OfficeSectionType officeSectionType);
 
 	/**
 	 * Removes the {@link OfficeSectionModel}.
@@ -133,9 +135,9 @@ public interface OfficeChanges {
 	 *            Location of the {@link OfficeSection}.
 	 * @param properties
 	 *            {@link PropertyList}.
-	 * @param officeSection
-	 *            {@link OfficeSection} that the {@link OfficeSectionModel} is
-	 *            being refactored to.
+	 * @param officeSectionType
+	 *            {@link OfficeSectionType} that the {@link OfficeSectionModel}
+	 *            is being refactored to.
 	 * @param inputNameMapping
 	 *            Mapping of the {@link OfficeSectionInput} name to the
 	 *            {@link OfficeSectionInputModel} name.
@@ -150,7 +152,7 @@ public interface OfficeChanges {
 	Change<OfficeSectionModel> refactorOfficeSection(
 			OfficeSectionModel sectionModel, String sectionName,
 			String sectionSourceClassName, String sectionLocation,
-			PropertyList properties, OfficeSection officeSection,
+			PropertyList properties, OfficeSectionType officeSectionType,
 			Map<String, String> inputNameMapping,
 			Map<String, String> outputNameMapping,
 			Map<String, String> objectNameMapping);
@@ -738,21 +740,19 @@ public interface OfficeChanges {
 	 * Links the {@link OfficeTaskModel} to the {@link Duty} for
 	 * pre-administration.
 	 * 
-	 * @param officeTask
+	 * @param officeSectionModel
+	 *            {@link OfficeSectionModel} containing the
+	 *            {@link OfficeTaskModel}.
+	 * @param officeTaskType
 	 *            {@link OfficeTask} of the {@link OfficeSection} to ensure an
 	 *            {@link OfficeTaskModel} exists for it.
 	 * @param duty
 	 *            {@link DutyModel}.
-	 * @param officeSectionModel
-	 *            {@link OfficeSectionModel} to ensure {@link OfficeTaskModel}
-	 *            exists on.
-	 * @param officeSection
-	 *            {@link OfficeSection} for the {@link OfficeSectionModel}.
 	 * @return {@link Change} to add the {@link OfficeTaskToPreDutyModel}.
 	 */
 	Change<OfficeTaskToPreDutyModel> linkOfficeTaskToPreDuty(
-			OfficeTask officeTask, DutyModel duty,
-			OfficeSectionModel officeSectionModel, OfficeSection officeSection);
+			OfficeSectionModel officeSectionModel,
+			OfficeTaskType officeTaskType, DutyModel duty);
 
 	/**
 	 * Removes the {@link OfficeTaskToPreDutyModel}.
@@ -768,21 +768,19 @@ public interface OfficeChanges {
 	 * Links the {@link OfficeTaskModel} to the {@link Duty} for
 	 * post-administration.
 	 * 
-	 * @param officeTask
+	 * @param officeSectionModel
+	 *            {@link OfficeSectionModel} containing the
+	 *            {@link OfficeTaskModel}.
+	 * @param officeTaskType
 	 *            {@link OfficeTask} of the {@link OfficeSection} to ensure an
 	 *            {@link OfficeTaskModel} exists for it.
 	 * @param duty
 	 *            {@link DutyModel}.
-	 * @param officeSectionModel
-	 *            {@link OfficeSectionModel} to ensure {@link OfficeTaskModel}
-	 *            exists on.
-	 * @param officeSection
-	 *            {@link OfficeSection} for the {@link OfficeSectionModel}.
 	 * @return {@link Change} to add the {@link OfficeTaskToPostDutyModel}.
 	 */
 	Change<OfficeTaskToPostDutyModel> linkOfficeTaskToPostDuty(
-			OfficeTask officeTask, DutyModel duty,
-			OfficeSectionModel officeSectionModel, OfficeSection officeSection);
+			OfficeSectionModel officeSectionModel,
+			OfficeTaskType officeTaskType, DutyModel duty);
 
 	/**
 	 * Removes the {@link OfficeTaskToPostDutyModel}.

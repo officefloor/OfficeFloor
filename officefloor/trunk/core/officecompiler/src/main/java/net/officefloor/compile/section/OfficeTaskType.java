@@ -40,6 +40,15 @@ public interface OfficeTaskType {
 	String getOfficeTaskName();
 
 	/**
+	 * Obtains the {@link OfficeSubSectionType} directly containing this
+	 * {@link OfficeTaskType}.
+	 * 
+	 * @return {@link OfficeSubSectionType} directly containing this
+	 *         {@link OfficeTaskType}.
+	 */
+	OfficeSubSectionType getOfficeSubSectionType();
+
+	/**
 	 * <p>
 	 * Obtains the {@link ObjectDependencyType} instances that this
 	 * {@link OfficeTask} is dependent upon.

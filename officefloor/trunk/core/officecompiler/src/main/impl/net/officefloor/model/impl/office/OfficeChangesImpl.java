@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
@@ -37,11 +38,12 @@ import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionObject;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.office.OfficeSubSection;
+import net.officefloor.compile.section.OfficeSectionInputType;
+import net.officefloor.compile.section.OfficeSectionObjectType;
+import net.officefloor.compile.section.OfficeSectionOutputType;
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeSubSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -135,195 +137,6 @@ public class OfficeChangesImpl implements OfficeChanges {
 		default:
 			throw new IllegalStateException("Unknown scope " + scope);
 		}
-	}
-
-	/**
-	 * Loads the hierarchy of {@link OfficeSubSection} instances from the top
-	 * {@link OfficeSubSection} down to the {@link OfficeSubSection} containing
-	 * the {@link OfficeTask}.
-	 * 
-	 * @param hierarchy
-	 *            Hierarchy to be loaded with the {@link OfficeSubSection}
-	 *            instances containing the {@link OfficeTask}.
-	 * @param task
-	 *            {@link OfficeTask} to load the hierarchy for.
-	 * @param subSection
-	 *            Current {@link OfficeSubSection} being searched for the
-	 *            {@link OfficeTask}.
-	 * @return <code>true</code> if the input {@link OfficeSubSection} contains
-	 *         the {@link OfficeTask}.
-	 */
-	private boolean loadHierarchy(Deque<OfficeSubSection> hierarchy,
-			OfficeTask task, OfficeSubSection subSection) {
-
-		// Search the sub section for the task
-		boolean isContainsTask = false;
-		for (OfficeTask checkTask : subSection.getOfficeTasks()) {
-			if (checkTask == task) {
-				isContainsTask = true;
-			}
-		}
-
-		// Determine if contains the task
-		if (isContainsTask) {
-			// Contains the task, so add the sub section to bottom of hierarchy
-			hierarchy.push(subSection);
-
-			// Return indicating sub section contains the task
-			return true;
-		}
-
-		// Not in this sub section, search the sub sub sections
-		for (OfficeSubSection subSubSection : subSection.getOfficeSubSections()) {
-
-			// Search the sub sub section
-			boolean isWithinSubSubSection = this.loadHierarchy(hierarchy, task,
-					subSubSection);
-			if (isWithinSubSubSection) {
-				// Task within sub sub section, so add sub section to hierarchy
-				hierarchy.push(subSection);
-
-				// Return indicating this sub section contains the task
-				return true;
-			}
-		}
-
-		// No sub sub sections contains task, not contained in this sub section
-		return false;
-	}
-
-	/**
-	 * Adds the {@link OfficeSubSection} hierarchy to the
-	 * {@link OfficeSectionModel}.
-	 * 
-	 * @param hierarchy
-	 *            {@link OfficeSubSection} hierarchy.
-	 * @param section
-	 *            {@link OfficeSectionModel} to have the
-	 *            {@link OfficeSubSection} hierarchy added.
-	 * @return Bottom {@link OfficeSubSectionModel} of the added
-	 *         {@link OfficeSubSection} hierarchy.
-	 */
-	private OfficeSubSectionModel addHierarchy(
-			Deque<OfficeSubSection> hierarchy, OfficeSectionModel section) {
-
-		// Top of hierarchy is always the office section
-		hierarchy.pop();
-
-		// Ensure the top level sub section is on the section
-		OfficeSubSectionModel subSection = section.getOfficeSubSection();
-		if (subSection == null) {
-			// Create and add the top level sub section
-			subSection = new OfficeSubSectionModel();
-			section.setOfficeSubSection(subSection);
-		}
-
-		// Determine if further hierarchy to add
-		if (hierarchy.size() == 0) {
-			// No further hierarchy, so return sub section as bottom
-			return subSection;
-		}
-
-		// Add the remaining hierarchy of sub sections
-		return this.addHierarchy(hierarchy, subSection);
-	}
-
-	/**
-	 * Adds the hierarchy to the {@link OfficeSubSectionModel}.
-	 * 
-	 * @param hierarchy
-	 *            Hierarchy of {@link OfficeSubSection} instances to add to the
-	 *            {@link OfficeSubSectionModel}.
-	 * @param subSection
-	 *            {@link OfficeSubSectionModel} to have the
-	 *            {@link OfficeSubSection} hierarchy added.
-	 * @return Bottom {@link OfficeSubSectionModel} of the added
-	 *         {@link OfficeSubSection} hierarchy.
-	 */
-	private OfficeSubSectionModel addHierarchy(
-			Deque<OfficeSubSection> hierarchy, OfficeSubSectionModel subSection) {
-
-		// Obtain the name of the sub sub section to add
-		OfficeSubSection addSubSubSection = hierarchy.pop();
-		String subSubSectionName = addSubSubSection.getOfficeSectionName();
-
-		// Determine if sub section already added
-		OfficeSubSectionModel subSubSection = null;
-		for (OfficeSubSectionModel checkSubSubSection : subSection
-				.getOfficeSubSections()) {
-			if (subSubSectionName.equals(checkSubSubSection
-					.getOfficeSubSectionName())) {
-				subSubSection = checkSubSubSection;
-			}
-		}
-		if (subSubSection == null) {
-			// Sub sub section not added, so add the sub sub section
-			subSubSection = new OfficeSubSectionModel(subSubSectionName);
-			subSection.addOfficeSubSection(subSubSection);
-
-			// Keep sub sub sections ordered for the sub section
-			Collections.sort(subSection.getOfficeSubSections(),
-					new Comparator<OfficeSubSectionModel>() {
-						@Override
-						public int compare(OfficeSubSectionModel a,
-								OfficeSubSectionModel b) {
-							return a.getOfficeSubSectionName().compareTo(
-									b.getOfficeSubSectionName());
-						}
-					});
-		}
-
-		// Determine if further hierarchy to add
-		if (hierarchy.size() == 0) {
-			// No further hierarchy, so return sub sub section as bottom
-			return subSubSection;
-		}
-
-		// Add the remaining hierarchy of sub sections
-		return this.addHierarchy(hierarchy, subSubSection);
-	}
-
-	/**
-	 * Adds (or retrieves if already added) the {@link OfficeTask} to the
-	 * {@link OfficeSubSectionModel}.
-	 * 
-	 * @param subSection
-	 *            {@link OfficeSubSectionModel} to add the {@link OfficeTask}.
-	 * @param officeTask
-	 *            {@link OfficeTask} to add to {@link OfficeSubSectionModel}.
-	 * @return Resulting {@link OfficeTaskModel} that either existed already for
-	 *         the {@link OfficeTask} in the {@link OfficeSubSectionModel} or
-	 *         the newly added {@link OfficeTaskModel} for the
-	 *         {@link OfficeTask}.
-	 */
-	private OfficeTaskModel addOfficeTask(OfficeSubSectionModel subSection,
-			OfficeTask officeTask) {
-
-		// Determine if office task already in sub section
-		String taskName = officeTask.getOfficeTaskName();
-		for (OfficeTaskModel task : subSection.getOfficeTasks()) {
-			if (taskName.equals(task.getOfficeTaskName())) {
-				// Task already exists, so return it
-				return task;
-			}
-		}
-
-		// As at this point, task does not exist so add it
-		OfficeTaskModel task = new OfficeTaskModel(taskName);
-		subSection.addOfficeTask(task);
-
-		// Keep the tasks ordered for the sub section
-		Collections.sort(subSection.getOfficeTasks(),
-				new Comparator<OfficeTaskModel>() {
-					@Override
-					public int compare(OfficeTaskModel a, OfficeTaskModel b) {
-						return a.getOfficeTaskName().compareTo(
-								b.getOfficeTaskName());
-					}
-				});
-
-		// Return the added task
-		return task;
 	}
 
 	/**
@@ -467,6 +280,155 @@ public class OfficeChangesImpl implements OfficeChanges {
 		return false;
 	}
 
+	/**
+	 * Links the {@link OfficeTaskModel} to the {@link DutyModel}.
+	 * 
+	 * @param officeSectionModel
+	 *            {@link OfficeSectionModel} containing the {@link OfficeTask}.
+	 * @param officeTaskType
+	 *            {@link OfficeTaskType} of {@link OfficeTask} to link to
+	 *            {@link DutyModel}.
+	 * @param duty
+	 *            {@link DutyModel}.
+	 * @param connectionModel
+	 *            Specific {@link ConnectionModel}.
+	 * @param connectConnection
+	 *            Configures the {@link ConnectionModel} with end points.
+	 * @return {@link Change} to link the {@link OfficeTaskModel} to the
+	 *         {@link DutyModel}.
+	 */
+	private <C extends ConnectionModel> Change<C> linkOfficeTaskToDuty(
+			OfficeSectionModel officeSectionModel,
+			OfficeTaskType officeTaskType, DutyModel duty, C connectionModel,
+			Consumer<OfficeTaskModel> connectConnection) {
+
+		// Create hierarchy of sub section names (not include top level section)
+		final Deque<String> subSectionNames = new LinkedList<String>();
+		OfficeSubSectionType subSectionType = officeTaskType
+				.getOfficeSubSectionType();
+		while (subSectionType.getParentOfficeSubSectionType() != null) {
+			subSectionNames.push(subSectionType.getOfficeSectionName());
+			subSectionType = subSectionType.getParentOfficeSubSectionType();
+		}
+
+		// Find the lowest sub section in hierarchy
+		OfficeSubSectionModel subSectionModel = officeSectionModel
+				.getOfficeSubSection();
+		while (!subSectionNames.isEmpty()) {
+			String sectionName = subSectionNames.pop();
+			OfficeSubSectionModel[] matches = subSectionModel
+					.getOfficeSubSections()
+					.stream()
+					.filter((subSubSectionModel) -> (sectionName
+							.equals(subSubSectionModel
+									.getOfficeSubSectionName())))
+					.toArray(OfficeSubSectionModel[]::new);
+			if (matches.length > 0) {
+				// Sub section already exists (continue to next level)
+				subSectionModel = matches[0];
+
+			} else {
+				// New branch off sub section
+				subSectionNames.push(sectionName);
+			}
+		}
+
+		// Construct branch of sub sections
+		OfficeSubSectionModel branchHead = null;
+		OfficeSubSectionModel branchTail = null;
+		while (!subSectionNames.isEmpty()) {
+			String sectionName = subSectionNames.pop();
+			OfficeSubSectionModel subSubSection = new OfficeSubSectionModel(
+					sectionName);
+			if (branchHead == null) {
+				branchHead = subSubSection;
+				branchTail = branchHead;
+			} else {
+				branchTail.addOfficeSubSection(subSubSection);
+				branchTail = subSubSection;
+			}
+		}
+
+		// Obtain the task
+		String taskName = officeTaskType.getOfficeTaskName();
+		OfficeTaskModel foundTask = null;
+		if (branchHead == null) {
+			OfficeTaskModel[] tasks = subSectionModel
+					.getOfficeTasks()
+					.stream()
+					.filter((task) -> (taskName.equals(task.getOfficeTaskName())))
+					.toArray(OfficeTaskModel[]::new);
+			if (tasks.length > 0) {
+				foundTask = tasks[0];
+			}
+		}
+
+		// Return change to link office task to duty
+		final OfficeSubSectionModel existingLeaf = subSectionModel;
+		final OfficeSubSectionModel newHead = branchHead;
+		final OfficeSubSectionModel newTail = branchTail;
+		final OfficeTaskModel existingTask = foundTask;
+		final OfficeTaskModel newTask = (foundTask != null ? null
+				: new OfficeTaskModel(taskName));
+		return new AbstractChange<C>(connectionModel, "Connect") {
+
+			@Override
+			public void apply() {
+
+				// Add the branch
+				OfficeSubSectionModel tail = existingLeaf;
+				if (newHead != null) {
+					existingLeaf.addOfficeSubSection(newHead);
+					tail = newTail;
+				}
+
+				// Add the task
+				OfficeTaskModel taskModel = existingTask;
+				if (newTask != null) {
+					tail.addOfficeTask(newTask);
+					taskModel = newTask;
+
+					// Keep the tasks ordered for the sub section
+					Collections.sort(tail.getOfficeTasks(),
+							new Comparator<OfficeTaskModel>() {
+								@Override
+								public int compare(OfficeTaskModel a,
+										OfficeTaskModel b) {
+									return a.getOfficeTaskName().compareTo(
+											b.getOfficeTaskName());
+								}
+							});
+				}
+
+				// Connect the link
+				connectConnection.accept(taskModel);
+
+				// Connect the connection
+				connectionModel.connect();
+			}
+
+			@Override
+			public void revert() {
+				// Remove the connection
+				connectionModel.remove();
+
+				// Remove the possible new task
+				if (newTask != null) {
+					OfficeSubSectionModel tail = existingLeaf;
+					if (newHead != null) {
+						tail = newTail;
+					}
+					tail.removeOfficeTask(newTask);
+				}
+
+				// Remove the possible branch
+				if (newHead != null) {
+					existingLeaf.removeOfficeSubSection(newHead);
+				}
+			}
+		};
+	}
+
 	/*
 	 * =================== OfficeChanges =========================
 	 */
@@ -474,12 +436,12 @@ public class OfficeChangesImpl implements OfficeChanges {
 	@Override
 	public Change<OfficeSectionModel> addOfficeSection(
 			String sectionSourceClassName, String sectionLocation,
-			PropertyList properties, OfficeSection officeSection) {
+			PropertyList properties, OfficeSectionType officeSectionType) {
 
 		// TODO test this method (addOfficeSection)
 
 		// Create the office section model
-		String sectionName = officeSection.getOfficeSectionName();
+		String sectionName = officeSectionType.getOfficeSectionName();
 		final OfficeSectionModel section = new OfficeSectionModel(sectionName,
 				sectionSourceClassName, sectionLocation);
 		for (Property property : properties) {
@@ -488,24 +450,26 @@ public class OfficeChangesImpl implements OfficeChanges {
 		}
 
 		// Add the inputs
-		for (OfficeSectionInput input : officeSection.getOfficeSectionInputs()) {
-			section.addOfficeSectionInput(new OfficeSectionInputModel(input
-					.getOfficeSectionInputName(), input.getParameterType()));
+		for (OfficeSectionInputType inputType : officeSectionType
+				.getOfficeSectionInputTypes()) {
+			section.addOfficeSectionInput(new OfficeSectionInputModel(inputType
+					.getOfficeSectionInputName(), inputType.getParameterType()));
 		}
 
 		// Add the outputs
-		for (OfficeSectionOutput output : officeSection
-				.getOfficeSectionOutputs()) {
-			section.addOfficeSectionOutput(new OfficeSectionOutputModel(output
-					.getOfficeSectionOutputName(), output.getArgumentType(),
-					output.isEscalationOnly()));
+		for (OfficeSectionOutputType outputType : officeSectionType
+				.getOfficeSectionOutputTypes()) {
+			section.addOfficeSectionOutput(new OfficeSectionOutputModel(
+					outputType.getOfficeSectionOutputName(), outputType
+							.getArgumentType(), outputType.isEscalationOnly()));
 		}
 
 		// Add the objects
-		for (OfficeSectionObject object : officeSection
-				.getOfficeSectionObjects()) {
-			section.addOfficeSectionObject(new OfficeSectionObjectModel(object
-					.getOfficeSectionObjectName(), object.getObjectType()));
+		for (OfficeSectionObjectType objectType : officeSectionType
+				.getOfficeSectionObjectTypes()) {
+			section.addOfficeSectionObject(new OfficeSectionObjectModel(
+					objectType.getOfficeSectionObjectName(), objectType
+							.getObjectType()));
 		}
 
 		// Add a responsibility for convenience
@@ -577,7 +541,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	public Change<OfficeSectionModel> refactorOfficeSection(
 			final OfficeSectionModel sectionModel, final String sectionName,
 			final String sectionSourceClassName, final String sectionLocation,
-			PropertyList properties, OfficeSection officeSection,
+			PropertyList properties, OfficeSectionType officeSectionType,
 			Map<String, String> inputNameMapping,
 			Map<String, String> outputNameMapping,
 			Map<String, String> objectNameMapping) {
@@ -653,11 +617,11 @@ public class OfficeChangesImpl implements OfficeChanges {
 		}
 
 		// Create the listing of target objects
-		OfficeSectionObject[] objectTypes = officeSection
-				.getOfficeSectionObjects();
+		OfficeSectionObjectType[] objectTypes = officeSectionType
+				.getOfficeSectionObjectTypes();
 		final OfficeSectionObjectModel[] targetObjects = new OfficeSectionObjectModel[objectTypes.length];
 		for (int o = 0; o < targetObjects.length; o++) {
-			OfficeSectionObject objectType = objectTypes[o];
+			OfficeSectionObjectType objectType = objectTypes[o];
 
 			// Obtain the details of the object
 			final String objectName = objectType.getOfficeSectionObjectName();
@@ -765,11 +729,11 @@ public class OfficeChangesImpl implements OfficeChanges {
 		}
 
 		// Create the listing of target inputs
-		OfficeSectionInput[] inputTypes = officeSection
-				.getOfficeSectionInputs();
+		OfficeSectionInputType[] inputTypes = officeSectionType
+				.getOfficeSectionInputTypes();
 		final OfficeSectionInputModel[] targetInputs = new OfficeSectionInputModel[inputTypes.length];
 		for (int i = 0; i < targetInputs.length; i++) {
-			OfficeSectionInput inputType = inputTypes[i];
+			OfficeSectionInputType inputType = inputTypes[i];
 
 			// Obtain the details of the input
 			final String inputName = inputType.getOfficeSectionInputName();
@@ -876,11 +840,11 @@ public class OfficeChangesImpl implements OfficeChanges {
 		}
 
 		// Create the listing of target outputs
-		OfficeSectionOutput[] outputTypes = officeSection
-				.getOfficeSectionOutputs();
+		OfficeSectionOutputType[] outputTypes = officeSectionType
+				.getOfficeSectionOutputTypes();
 		final OfficeSectionOutputModel[] targetOutputs = new OfficeSectionOutputModel[outputTypes.length];
 		for (int o = 0; o < targetOutputs.length; o++) {
-			OfficeSectionOutput outputType = outputTypes[o];
+			OfficeSectionOutputType outputType = outputTypes[o];
 
 			// Obtain the details of the output
 			final String outputName = outputType.getOfficeSectionOutputName();
@@ -2234,74 +2198,20 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	@Override
 	public Change<OfficeTaskToPreDutyModel> linkOfficeTaskToPreDuty(
-			final OfficeTask officeTask, final DutyModel duty,
-			final OfficeSectionModel officeSectionModel,
-			OfficeSection officeSection) {
+			OfficeSectionModel officeSectionModel,
+			final OfficeTaskType officeTaskType, final DutyModel duty) {
 
 		// TODO test this method (linkOfficeTaskToPreDuty)
 
-		// Load the sub section hierarchy for the task
-		final Deque<OfficeSubSection> hierarchy = new LinkedList<OfficeSubSection>();
-		if (!(this.loadHierarchy(hierarchy, officeTask, officeSection))) {
-			// Task not found in office section
-			return new NoChange<OfficeTaskToPreDutyModel>(
-					new OfficeTaskToPreDutyModel(), "Add pre-duty to task",
-					"Can not find task '" + officeTask.getOfficeTaskName()
-							+ "' in office section '"
-							+ officeSection.getOfficeSectionName() + "'");
-		}
-
 		// Create the connection
-		final OfficeTaskToPreDutyModel conn = new OfficeTaskToPreDutyModel();
+		final OfficeTaskToPreDutyModel connectionModel = new OfficeTaskToPreDutyModel();
 
-		// Return change to link office task to pre duty
-		return new AbstractChange<OfficeTaskToPreDutyModel>(conn, "Connect") {
-
-			/**
-			 * Clean {@link Change} instances.
-			 */
-			private List<Change<?>> cleanChanges = null;
-
-			@Override
-			public void apply() {
-
-				// Determine if applying first time
-				if (this.cleanChanges == null) {
-					// Applying first time so add the hierarchy of sub sections
-					OfficeSubSectionModel subSection = OfficeChangesImpl.this
-							.addHierarchy(hierarchy, officeSectionModel);
-
-					// Add the task to the sub section
-					OfficeTaskModel task = OfficeChangesImpl.this
-							.addOfficeTask(subSection, officeTask);
-
-					// Add ends to the connection
-					conn.setOfficeTask(task);
-					conn.setDuty(duty);
-
-				} else {
-					// Re-applying so revert changes (adds back hierarchy)
-					for (Change<?> change : this.cleanChanges) {
-						change.revert();
-					}
-				}
-
-				// Connect the connection
-				conn.connect();
-			}
-
-			@Override
-			public void revert() {
-				// Remove the connection
-				conn.remove();
-
-				// Clean up sub section
-				this.cleanChanges = new LinkedList<Change<?>>();
-				OfficeChangesImpl.this.cleanSubSection(
-						officeSectionModel.getOfficeSubSection(),
-						this.cleanChanges);
-			}
-		};
+		// Return change to link office task to post duty
+		return this.linkOfficeTaskToDuty(officeSectionModel, officeTaskType,
+				duty, connectionModel, (officeTaskModel) -> {
+					connectionModel.setOfficeTask(officeTaskModel);
+					connectionModel.setDuty(duty);
+				});
 	}
 
 	@Override
@@ -2349,74 +2259,20 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	@Override
 	public Change<OfficeTaskToPostDutyModel> linkOfficeTaskToPostDuty(
-			final OfficeTask officeTask, final DutyModel duty,
-			final OfficeSectionModel officeSectionModel,
-			OfficeSection officeSection) {
+			OfficeSectionModel officeSectionModel,
+			final OfficeTaskType officeTaskType, final DutyModel duty) {
 
 		// TODO test this method (linkOfficeTaskToPostDuty)
 
-		// Load the sub section hierarchy for the task
-		final Deque<OfficeSubSection> hierarchy = new LinkedList<OfficeSubSection>();
-		if (!(this.loadHierarchy(hierarchy, officeTask, officeSection))) {
-			// Task not found in office section
-			return new NoChange<OfficeTaskToPostDutyModel>(
-					new OfficeTaskToPostDutyModel(), "Add post-duty to task",
-					"Can not find task '" + officeTask.getOfficeTaskName()
-							+ "' in office section '"
-							+ officeSection.getOfficeSectionName() + "'");
-		}
-
 		// Create the connection
-		final OfficeTaskToPostDutyModel conn = new OfficeTaskToPostDutyModel();
+		final OfficeTaskToPostDutyModel connectionModel = new OfficeTaskToPostDutyModel();
 
 		// Return change to link office task to post duty
-		return new AbstractChange<OfficeTaskToPostDutyModel>(conn, "Connect") {
-
-			/**
-			 * Clean {@link Change} instances.
-			 */
-			private List<Change<?>> cleanChanges = null;
-
-			@Override
-			public void apply() {
-
-				// Determine if applying first time
-				if (this.cleanChanges == null) {
-					// Applying first time so add the hierarchy of sub sections
-					OfficeSubSectionModel subSection = OfficeChangesImpl.this
-							.addHierarchy(hierarchy, officeSectionModel);
-
-					// Add the task to the sub section
-					OfficeTaskModel task = OfficeChangesImpl.this
-							.addOfficeTask(subSection, officeTask);
-
-					// Add ends to the connection
-					conn.setOfficeTask(task);
-					conn.setDuty(duty);
-
-				} else {
-					// Re-applying so revert changes (adds back hierarchy)
-					for (Change<?> change : this.cleanChanges) {
-						change.revert();
-					}
-				}
-
-				// Connect the connection
-				conn.connect();
-			}
-
-			@Override
-			public void revert() {
-				// Remove the connection
-				conn.remove();
-
-				// Clean up sub section
-				this.cleanChanges = new LinkedList<Change<?>>();
-				OfficeChangesImpl.this.cleanSubSection(
-						officeSectionModel.getOfficeSubSection(),
-						this.cleanChanges);
-			}
-		};
+		return this.linkOfficeTaskToDuty(officeSectionModel, officeTaskType,
+				duty, connectionModel, (officeTaskModel) -> {
+					connectionModel.setOfficeTask(officeTaskModel);
+					connectionModel.setDuty(duty);
+				});
 	}
 
 	@Override

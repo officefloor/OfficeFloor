@@ -67,17 +67,17 @@ public class SectionTypeImpl implements SectionType {
 
 	@Override
 	public SectionInputType[] getSectionInputTypes() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.inputTypes;
 	}
 
 	@Override
 	public SectionOutputType[] getSectionOutputTypes() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.outputTypes;
 	}
 
 	@Override
 	public SectionObjectType[] getSectionObjectTypes() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.objectTypes;
 	}
 
 }

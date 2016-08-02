@@ -233,7 +233,7 @@ public class SectionLoaderImpl implements SectionLoader {
 				sectionLocation, propertyList, null);
 
 		// Source the section
-		boolean isSourced = sectionNode.sourceSection();
+		boolean isSourced = sectionNode.sourceSectionTree();
 		if (!isSourced) {
 			return null; // must source section successfully
 		}

@@ -30,6 +30,11 @@ import net.officefloor.compile.OfficeSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectType;
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeSubSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
@@ -43,7 +48,6 @@ import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
@@ -421,11 +425,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			}
 		}
 
-		// Add the sections, keeping registry of inputs/outputs/objects
+		// Add the sections, keeping registry of them
 		Map<String, OfficeSection> sections = new HashMap<String, OfficeSection>();
-		DoubleKeyMap<String, String, OfficeSectionInput> inputs = new DoubleKeyMap<String, String, OfficeSectionInput>();
-		DoubleKeyMap<String, String, OfficeSectionOutput> outputs = new DoubleKeyMap<String, String, OfficeSectionOutput>();
-		DoubleKeyMap<String, String, OfficeSectionObject> objects = new DoubleKeyMap<String, String, OfficeSectionObject>();
+		Map<String, OfficeSectionType> sectionTypes = new HashMap<String, OfficeSectionType>();
 		for (OfficeSectionModel sectionModel : office.getOfficeSections()) {
 
 			// Create the property list to add the section
@@ -442,23 +444,11 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					sectionModel.getSectionLocation(), propertyList);
 			sections.put(sectionName, section);
 
-			// Register the section inputs
-			for (OfficeSectionInput input : section.getOfficeSectionInputs()) {
-				inputs.put(sectionName, input.getOfficeSectionInputName(),
-						input);
-			}
-
-			// Register the section outputs
-			for (OfficeSectionOutput output : section.getOfficeSectionOutputs()) {
-				outputs.put(sectionName, output.getOfficeSectionOutputName(),
-						output);
-			}
-
-			// Register the section objects
-			for (OfficeSectionObject object : section.getOfficeSectionObjects()) {
-				objects.put(sectionName, object.getOfficeSectionObjectName(),
-						object);
-			}
+			// Obtain the section type (register for later)
+			OfficeSectionType sectionType = context.loadOfficeSectionType(
+					sectionModel.getSectionSourceClassName(),
+					sectionModel.getSectionLocation(), propertyList);
+			sectionTypes.put(sectionName, sectionType);
 
 			// Create the listing of responsibilities
 			List<Responsibility> responsibilities = new LinkedList<Responsibility>();
@@ -486,7 +476,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 			// Create the listing of all tasks
 			List<OfficeTask> tasks = new LinkedList<OfficeTask>();
-			this.loadOfficeTasks(section, tasks);
+			this.loadOfficeTasks(section, sectionType, tasks);
 
 			// Assign teams their responsibilities
 			for (Responsibility responsibility : responsibilities) {
@@ -529,9 +519,13 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			OfficeStartToOfficeSectionInputModel connToInput = startModel
 					.getOfficeSectionInput();
 			if (connToInput != null) {
-				officeSectionInput = inputs.get(
-						connToInput.getOfficeSectionName(),
-						connToInput.getOfficeSectionInputName());
+				OfficeSection section = sections.get(connToInput
+						.getOfficeSectionName());
+				if (section != null) {
+					officeSectionInput = section
+							.getOfficeSectionInput(connToInput
+									.getOfficeSectionInputName());
+				}
 			}
 			if (officeSectionInput != null) {
 				// Link start-up to section input
@@ -542,19 +536,18 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		// Link the sections to other sections and external office
 		for (OfficeSectionModel sectionModel : office.getOfficeSections()) {
 
-			// Obtain the section name
+			// Obtain the section
 			String sectionName = sectionModel.getOfficeSectionName();
+			OfficeSection section = sections.get(sectionName);
 
 			// Link the objects to office objects
 			for (OfficeSectionObjectModel objectModel : sectionModel
 					.getOfficeSectionObjects()) {
 
 				// Obtain the object
-				OfficeSectionObject object = objects.get(sectionName,
-						objectModel.getOfficeSectionObjectName());
-				if (object == null) {
-					continue; // must have the object
-				}
+				OfficeSectionObject object = section
+						.getOfficeSectionObject(objectModel
+								.getOfficeSectionObjectName());
 
 				// Determine if link object to office object
 				OfficeObject officeObject = null;
@@ -596,11 +589,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					.getOfficeSectionOutputs()) {
 
 				// Obtain the output
-				OfficeSectionOutput output = outputs.get(sectionName,
-						outputModel.getOfficeSectionOutputName());
-				if (output == null) {
-					continue; // must have the output
-				}
+				OfficeSectionOutput output = section
+						.getOfficeSectionOutput(outputModel
+								.getOfficeSectionOutputName());
 
 				// Obtain the input
 				OfficeSectionInput input = null;
@@ -610,12 +601,17 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					OfficeSectionInputModel inputModel = conn
 							.getOfficeSectionInput();
 					if (inputModel != null) {
-						OfficeSectionModel inputSection = this
+						OfficeSectionModel inputSectionModel = this
 								.getOfficeSectionForInput(office, inputModel);
-						if (inputSection != null) {
-							input = inputs.get(
-									inputSection.getOfficeSectionName(),
-									inputModel.getOfficeSectionInputName());
+						if (inputSectionModel != null) {
+							OfficeSection inputSection = sections
+									.get(inputSectionModel
+											.getOfficeSectionName());
+							if (inputSection != null) {
+								input = inputSection
+										.getOfficeSectionInput(inputModel
+												.getOfficeSectionInputName());
+							}
 						}
 					}
 				}
@@ -660,9 +656,13 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 								.getOfficeSectionForInput(office,
 										sectionInputModel);
 						if (sectionModel != null) {
-							sectionInput = inputs.get(sectionModel
-									.getOfficeSectionName(), sectionInputModel
-									.getOfficeSectionInputName());
+							OfficeSection inputSection = sections
+									.get(sectionModel.getOfficeSectionName());
+							if (inputSection != null) {
+								sectionInput = inputSection
+										.getOfficeSectionInput(sectionInputModel
+												.getOfficeSectionInputName());
+							}
 						}
 					}
 				}
@@ -853,9 +853,13 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 					OfficeSectionModel sectionModel = this
 							.getOfficeSectionForInput(office, sectionInputModel);
 					if (sectionModel != null) {
-						sectionInput = inputs.get(
-								sectionModel.getOfficeSectionName(),
-								sectionInputModel.getOfficeSectionInputName());
+						OfficeSection inputSection = sections.get(sectionModel
+								.getOfficeSectionName());
+						if (inputSection != null) {
+							sectionInput = inputSection
+									.getOfficeSectionInput(sectionInputModel
+											.getOfficeSectionInputName());
+						}
 					}
 				}
 			}
@@ -869,14 +873,15 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		for (OfficeSectionModel sectionModel : office.getOfficeSections()) {
 
 			// Obtain the top level office sub sections
-			OfficeSection subSection = sections.get(sectionModel
-					.getOfficeSectionName());
+			String subSectionName = sectionModel.getOfficeSectionName();
+			OfficeSection subSection = sections.get(subSectionName);
+			OfficeSectionType subSectionType = sectionTypes.get(subSectionName);
 			OfficeSubSectionModel subSectionModel = sectionModel
 					.getOfficeSubSection();
 
 			// Process the section and its sub sections
-			this.processSubSections(null, subSection, subSectionModel,
-					sectionModel, processors, architect);
+			this.processSubSections(null, subSection, subSectionType,
+					subSectionModel, sectionModel, processors, architect);
 		}
 	}
 
@@ -1006,26 +1011,34 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	 * 
 	 * @param section
 	 *            {@link OfficeSubSection}.
+	 * @param sectionType
+	 *            {@link OfficeSubSectionType}.
 	 * @param tasks
-	 *            Listing to be populated with the {@link OfficeSubSection}
+	 *            Listing to be populated with the {@link OfficeSubSectionType}
 	 *            {@link OfficeTask} instances.
 	 */
 	private void loadOfficeTasks(OfficeSubSection section,
-			List<OfficeTask> tasks) {
+			OfficeSubSectionType sectionType, List<OfficeTask> tasks) {
 
 		// Ensure have section
-		if (section == null) {
+		if (sectionType == null) {
 			return;
 		}
 
 		// Add the section office tasks
-		for (OfficeTask task : section.getOfficeTasks()) {
+		for (OfficeTaskType taskType : sectionType.getOfficeTaskTypes()) {
+			String taskName = taskType.getOfficeTaskName();
+			OfficeTask task = section.getOfficeTask(taskName);
 			tasks.add(task);
 		}
 
 		// Recursively add the sub section office tasks
-		for (OfficeSubSection subSection : section.getOfficeSubSections()) {
-			this.loadOfficeTasks(subSection, tasks);
+		for (OfficeSubSectionType subSectionType : sectionType
+				.getOfficeSubSectionTypes()) {
+			String subSectionName = subSectionType.getOfficeSectionName();
+			OfficeSubSection subSection = section
+					.getOfficeSubSection(subSectionName);
+			this.loadOfficeTasks(subSection, subSectionType, tasks);
 		}
 	}
 
@@ -1038,6 +1051,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	 *            {@link OfficeSubSectionModel}.
 	 * @param subSection
 	 *            {@link OfficeSubSection}.
+	 * @param subSectionType
+	 *            {@link OfficeSubSectionType}.
 	 * @param subSectionModel
 	 *            {@link OfficeSubSectionModel}.
 	 * @param sectionModel
@@ -1048,7 +1063,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	 *            {@link OfficeArchitect}.
 	 */
 	private void processSubSections(String subSectionPath,
-			OfficeSubSection subSection, OfficeSubSectionModel subSectionModel,
+			OfficeSubSection subSection, OfficeSubSectionType subSectionType,
+			OfficeSubSectionModel subSectionModel,
 			OfficeSectionModel sectionModel, SubSectionProcessor processor,
 			OfficeArchitect architect) {
 
@@ -1077,13 +1093,20 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			String managedObjectName = managedObjectModel
 					.getOfficeSectionManagedObjectName();
 			OfficeSectionManagedObject managedObject = null;
-			for (OfficeSectionManagedObjectSource checkManagedObjectSource : subSection
-					.getOfficeSectionManagedObjectSources()) {
-				for (OfficeSectionManagedObject checkManagedObject : checkManagedObjectSource
-						.getOfficeSectionManagedObjects()) {
-					if (managedObjectName.equals(checkManagedObject
+			for (OfficeSectionManagedObjectSourceType checkManagedObjectSourceType : subSectionType
+					.getOfficeSectionManagedObjectSourceTypes()) {
+				for (OfficeSectionManagedObjectType checkManagedObjectType : checkManagedObjectSourceType
+						.getOfficeSectionManagedObjectTypes()) {
+					if (managedObjectName.equals(checkManagedObjectType
 							.getOfficeSectionManagedObjectName())) {
-						managedObject = checkManagedObject;
+
+						// Obtain the managed object
+						managedObject = subSection
+								.getOfficeSectionManagedObjectSource(
+										checkManagedObjectSourceType
+												.getOfficeSectionManagedObjectSourceName())
+								.getOfficeSectionManagedObject(
+										managedObjectName);
 					}
 				}
 			}
@@ -1093,7 +1116,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 								+ managedObjectName + "' [" + subSectionPath
 								+ "]", AssetType.MANAGED_OBJECT,
 						managedObjectName);
-				continue; // must have task
+				continue; // must have managed object
 			}
 
 			// Process the managed object
@@ -1106,19 +1129,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 			// Obtain the corresponding office task
 			String taskName = taskModel.getOfficeTaskName();
-			OfficeTask task = null;
-			for (OfficeTask checkTask : subSection.getOfficeTasks()) {
-				if (taskName.equals(checkTask.getOfficeTaskName())) {
-					task = checkTask;
-				}
-			}
-			if (task == null) {
-				architect.addIssue(
-						"Office model is out of sync with sections. Can not find task '"
-								+ taskName + "' [" + subSectionPath + "]",
-						AssetType.TASK, taskName);
-				continue; // must have task
-			}
+			OfficeTask task = subSection.getOfficeTask(taskName);
 
 			// Process the office task
 			processor.processOfficeTask(taskModel, task, architect,
@@ -1132,25 +1143,30 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			// Obtain the corresponding sub section
 			String subSubSectionName = subSubSectionModel
 					.getOfficeSubSectionName();
-			OfficeSubSection subSubSection = null;
-			for (OfficeSubSection checkSection : subSection
-					.getOfficeSubSections()) {
-				if (subSubSectionName.equals(checkSection
+			OfficeSubSection subSubSection = subSection
+					.getOfficeSubSection(subSubSectionName);
+
+			// Obtain the sub section type
+			OfficeSubSectionType subSubSectionType = null;
+			for (OfficeSubSectionType checkSubSectionType : subSectionType
+					.getOfficeSubSectionTypes()) {
+				if (subSubSectionName.equals(checkSubSectionType
 						.getOfficeSectionName())) {
-					subSubSection = checkSection;
+					subSubSectionType = checkSubSectionType;
 				}
 			}
-			if (subSubSection == null) {
+			if (subSubSectionType == null) {
 				architect.addIssue(
 						"Office model is out of sync with sections. Can not find sub section '"
 								+ subSubSectionName + "' [" + subSectionPath
-								+ "]", null, null);
-				continue; // must have office sub section
+								+ "]", AssetType.OFFICE, subSubSectionName);
+				continue; // must have sub section
 			}
 
 			// Recursively process the sub sections
 			this.processSubSections(subSectionPath, subSubSection,
-					subSubSectionModel, sectionModel, processor, architect);
+					subSubSectionType, subSubSectionModel, sectionModel,
+					processor, architect);
 		}
 	}
 

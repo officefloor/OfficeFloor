@@ -17,10 +17,8 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link OfficeTask} within the {@link Office}.
@@ -30,11 +28,7 @@ import net.officefloor.frame.spi.team.Team;
 public interface OfficeTask {
 
 	/**
-	 * <p>
 	 * Obtains the name of the {@link OfficeTask}.
-	 * <p>
-	 * This aids the {@link OfficeSource} in deciding the {@link Team}
-	 * responsible for this {@link OfficeTask}.
 	 * 
 	 * @return Name of the {@link OfficeTask}.
 	 */

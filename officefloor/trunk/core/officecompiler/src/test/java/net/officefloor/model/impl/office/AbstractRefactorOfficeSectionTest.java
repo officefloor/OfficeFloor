@@ -20,9 +20,11 @@ package net.officefloor.model.impl.office;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
@@ -34,6 +36,7 @@ import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.PropertyModel;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
  * Abstract functionality for refactoring {@link OfficeSectionModel} to an
@@ -97,7 +100,7 @@ public abstract class AbstractRefactorOfficeSectionTest extends
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see net.officefloor.model.impl.AbstractChangesTestCase#setUp()
 	 */
 	@Override
@@ -231,17 +234,13 @@ public abstract class AbstractRefactorOfficeSectionTest extends
 	 */
 	protected void doRefactor(OfficeSection officeSection) {
 
-		// Ensure have office section
-		if (officeSection == null) {
-			// Provide simple office section
-			officeSection = this
-					.constructOfficeSection(new OfficeSectionConstructor() {
-						@Override
-						public void construct(OfficeSectionContext context) {
-							// Keep simple
-						}
-					});
-		}
+		// Load the office section type
+		OfficeSectionType officeSectionType = OfficeFloorCompiler
+				.newOfficeFloorCompiler(null)
+				.getSectionLoader()
+				.loadOfficeSectionType(this.sectionName,
+						ClassSectionSource.class, Object.class.getName(),
+						this.properties);
 
 		// Create the property list
 		PropertyList propertyList = this.properties;
@@ -258,7 +257,7 @@ public abstract class AbstractRefactorOfficeSectionTest extends
 		Change<OfficeSectionModel> change = this.operations
 				.refactorOfficeSection(this.sectionModel, this.sectionName,
 						this.sectionSourceClassName, this.sectionLocation,
-						propertyList, officeSection, this.inputNameMapping,
+						propertyList, officeSectionType, this.inputNameMapping,
 						this.outputNameMapping, this.objectNameMapping);
 
 		// Assert the refactoring changes

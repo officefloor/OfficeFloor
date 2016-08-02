@@ -39,21 +39,6 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 	private final String name;
 
 	/**
-	 * {@link OfficeSubSectionType} instances.
-	 */
-	private final OfficeSubSectionType[] subSections;
-
-	/**
-	 * {@link OfficeTaskType} instances.
-	 */
-	private final OfficeTaskType[] tasks;
-
-	/**
-	 * {@link OfficeSectionManagedObjectSourceType} instances.
-	 */
-	private final OfficeSectionManagedObjectSourceType[] managedObjectSources;
-
-	/**
 	 * {@link OfficeSectionInputType} instances.
 	 */
 	private final OfficeSectionInputType[] inputs;
@@ -69,16 +54,15 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 	private final OfficeSectionObjectType[] objects;
 
 	/**
+	 * State of the {@link OfficeSubSectionType}.
+	 */
+	private SubSectionState subSectionState = null;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param name
 	 *            Name of this {@link OfficeSection}.
-	 * @param subSections
-	 *            {@link OfficeSubSectionType} instances.
-	 * @param tasks
-	 *            {@link OfficeTaskType} instances.
-	 * @param managedObjectSources
-	 *            {@link OfficeSectionManagedObjectSourceType} instances.
 	 * @param inputs
 	 *            {@link OfficeSectionInputType} instances.
 	 * @param outputs
@@ -86,18 +70,31 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 	 * @param objects
 	 *            {@link OfficeSectionObjectType} instances.
 	 */
-	public OfficeSectionTypeImpl(String name,
-			OfficeSubSectionType[] subSections, OfficeTaskType[] tasks,
-			OfficeSectionManagedObjectSourceType[] managedObjectSources,
-			OfficeSectionInputType[] inputs, OfficeSectionOutputType[] outputs,
-			OfficeSectionObjectType[] objects) {
+	public OfficeSectionTypeImpl(String name, OfficeSectionInputType[] inputs,
+			OfficeSectionOutputType[] outputs, OfficeSectionObjectType[] objects) {
 		this.name = name;
-		this.subSections = subSections;
-		this.tasks = tasks;
-		this.managedObjectSources = managedObjectSources;
 		this.inputs = inputs;
 		this.outputs = outputs;
 		this.objects = objects;
+	}
+
+	/**
+	 * Initialises the {@link OfficeSubSectionType} state.
+	 * 
+	 * @param parent
+	 *            Parent {@link OfficeSubSectionType}.
+	 * @param subSections
+	 *            {@link OfficeSubSectionType} instances.
+	 * @param tasks
+	 *            {@link OfficeTaskType} instances.
+	 * @param managedObjectSources
+	 *            {@link OfficeSectionManagedObjectSourceType} instances.
+	 */
+	public void initialiseAsOfficeSubSectionType(OfficeSubSectionType parent,
+			OfficeSubSectionType[] subSections, OfficeTaskType[] tasks,
+			OfficeSectionManagedObjectSourceType[] managedObjectSources) {
+		this.subSectionState = new SubSectionState(parent, subSections, tasks,
+				managedObjectSources);
 	}
 
 	/*
@@ -106,17 +103,22 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 
 	@Override
 	public String getOfficeSectionName() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.name;
+	}
+
+	@Override
+	public OfficeSubSectionType getParentOfficeSubSectionType() {
+		return this.subSectionState.parent;
 	}
 
 	@Override
 	public OfficeSubSectionType[] getOfficeSubSectionTypes() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.subSectionState.subSections;
 	}
 
 	@Override
 	public OfficeTaskType[] getOfficeTaskTypes() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.subSectionState.tasks;
 	}
 
 	@Override
@@ -137,6 +139,53 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 	@Override
 	public OfficeSectionObjectType[] getOfficeSectionObjectTypes() {
 		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	/**
+	 * {@link OfficeSubSectionType} state.
+	 */
+	private static class SubSectionState {
+
+		/**
+		 * Parent {@link OfficeSubSectionType}.
+		 */
+		private final OfficeSubSectionType parent;
+
+		/**
+		 * {@link OfficeSubSectionType} instances.
+		 */
+		private final OfficeSubSectionType[] subSections;
+
+		/**
+		 * {@link OfficeTaskType} instances.
+		 */
+		private final OfficeTaskType[] tasks;
+
+		/**
+		 * {@link OfficeSectionManagedObjectSourceType} instances.
+		 */
+		private final OfficeSectionManagedObjectSourceType[] managedObjectSources;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param parent
+		 *            Parent {@link OfficeSubSectionType}.
+		 * @param subSections
+		 *            {@link OfficeSubSectionType} instances.
+		 * @param tasks
+		 *            {@link OfficeTaskType} instances.
+		 * @param managedObjectSources
+		 *            {@link OfficeSectionManagedObjectSourceType} instances.
+		 */
+		public SubSectionState(OfficeSubSectionType parent,
+				OfficeSubSectionType[] subSections, OfficeTaskType[] tasks,
+				OfficeSectionManagedObjectSourceType[] managedObjectSources) {
+			this.parent = parent;
+			this.subSections = subSections;
+			this.tasks = tasks;
+			this.managedObjectSources = managedObjectSources;
+		}
 	}
 
 }
