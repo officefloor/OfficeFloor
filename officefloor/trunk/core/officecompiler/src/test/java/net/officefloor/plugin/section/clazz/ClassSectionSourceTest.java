@@ -32,8 +32,11 @@ import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
+import net.officefloor.compile.impl.structure.WorkNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -46,7 +49,6 @@ import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.compile.work.TaskType;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
@@ -401,7 +403,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testMultipleQualifiedObject() {
 
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Enable recording issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
@@ -409,11 +411,10 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.addIssue(
-				LocationType.SECTION,
-				MockMultipleQualifiedObjectSection.class.getName(),
-				AssetType.WORK,
-				"loadWorkType",
+		CompilerIssue[] cause = issues.recordCaptureIssues(true);
+		issues.recordIssue(
+				"WORK",
+				WorkNodeImpl.class,
 				"Failed to source WorkType definition from WorkSource "
 						+ SectionClassWorkSource.class.getName(),
 				new IllegalArgumentException(
@@ -446,10 +447,9 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				return true;
 			}
 		});
-		issues.addIssue(LocationType.SECTION,
-				MockMultipleQualifiedObjectSection.class.getName(), null, null,
+		issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
 				"Failure loading WorkType from source "
-						+ SectionClassWorkSource.class.getName());
+						+ SectionClassWorkSource.class.getName(), cause);
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
@@ -556,7 +556,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testMulipleQualifiedDependency() {
 
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Enable loading with compiler issues
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
@@ -564,9 +564,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.addIssue(LocationType.SECTION,
-				MockMultipleQualifiedDependencySection.class.getName(), null,
-				null, "Dependency connection has more than one Qualifier");
+		issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
+				"Dependency connection has more than one Qualifier");
 
 		// Test
 		this.replayMockObjects();

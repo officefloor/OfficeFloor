@@ -22,7 +22,6 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -227,61 +226,6 @@ public abstract class AbstractOfficeFloorTestCase extends
 		this.recordReturn(this.workBuilder,
 				this.workBuilder.addTask("TASK", factory), this.taskBuilder);
 		return this.taskBuilder;
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	protected void record_officefloor_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				null, null, issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	protected void record_officefloor_issue(String issueDescription,
-			Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				null, null, issueDescription, cause);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 */
-	protected void record_office_issue(String issueDescription,
-			String officeLocation) {
-		this.issues.addIssue(LocationType.OFFICE, officeLocation, null, null,
-				issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 */
-	protected void record_office_issue(String issueDescription,
-			Throwable cause, String officeLocation) {
-		this.issues.addIssue(LocationType.OFFICE, officeLocation, null, null,
-				issueDescription, cause);
 	}
 
 	/**

@@ -24,7 +24,9 @@ import java.util.Properties;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
+import net.officefloor.compile.impl.structure.TeamNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourcePropertyType;
@@ -41,7 +43,6 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -80,9 +81,12 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		// Record failure to instantiate
 		final RuntimeException failure = new RuntimeException(
 				"instantiate failure");
-		this.record_issue("Failed to instantiate "
-				+ MockOfficeFloorSource.class.getName()
-				+ " by default constructor", failure);
+		this.issues.recordIssue(
+				Node.TYPE_NAME,
+				OfficeFloorNodeImpl.class,
+				"Failed to instantiate "
+						+ MockOfficeFloorSource.class.getName()
+						+ " by default constructor", failure);
 
 		// Load the office floor type
 		MockOfficeFloorSource.instantiateFailure = failure;
@@ -109,8 +113,9 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.record_issue("Missing property 'missing' for OfficeFloorSource "
-				+ MockOfficeFloorSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
+				"Missing property 'missing' for OfficeFloorSource "
+						+ MockOfficeFloorSource.class.getName());
 
 		// Attempt to load office floor type
 		this.loadType(new Loader() {
@@ -209,8 +214,9 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if missing {@link Class}.
 	 */
 	public void testMissingClass() {
-		this.record_issue("Can not load class 'missing' for OfficeFloorSource "
-				+ MockOfficeFloorSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
+				"Can not load class 'missing' for OfficeFloorSource "
+						+ MockOfficeFloorSource.class.getName());
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -226,8 +232,9 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	public void testMissingResource() {
 		this.recordReturn(this.resourceSource,
 				this.resourceSource.sourceResource("missing"), null);
-		this.record_issue("Can not obtain resource at location 'missing' for OfficeFloorSource "
-				+ MockOfficeFloorSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
+				"Can not obtain resource at location 'missing' for OfficeFloorSource "
+						+ MockOfficeFloorSource.class.getName());
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -276,7 +283,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	public void testFailSourceOfficeFloorType() {
 		final NullPointerException failure = new NullPointerException(
 				"Fail to source office floor type");
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
 				"Failed to source OfficeFloorType definition from OfficeFloorSource "
 						+ MockOfficeFloorSource.class.getName(), failure);
 		this.loadType(new Loader() {
@@ -293,7 +300,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * {@link OfficeFloorManagedObjectSourceType} name.
 	 */
 	public void testNullManagedObjectSourceName() {
-		this.record_issue("Null name for managed object source 0");
+		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
+				"Null name for managed object source 0");
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -308,7 +316,9 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if <code>null</code> {@link ManagedObjectSource} type.
 	 */
 	public void testNullManagedObjectSourceType() {
-		this.record_issue("Null source for managed object source MO (managed object source 0)");
+		this.issues
+				.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
+						"Null source for managed object source MO (managed object source 0)");
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -386,7 +396,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if <code>null</code> {@link OfficeFloorTeamSourceType} name.
 	 */
 	public void testNullTeamSourceName() {
-		this.record_issue("Null name for team 0");
+		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
+				"Null name for team 0");
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -400,8 +411,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if <code>null</code> {@link OfficeFloorTeamSourceType} type.
 	 */
 	public void testNullTeamSourceType() {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				AssetType.TEAM, "TEAM", "Null source for team TEAM (team 0)");
+		this.issues.recordIssue("TEAM", TeamNodeImpl.class,
+				"Null source for team TEAM (team 0)");
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -462,30 +473,6 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		public Team createTeam(TeamSourceContext context) throws Exception {
 			return null; // Team is ignored
 		}
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				null, null, issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				null, null, issueDescription, cause);
 	}
 
 	/**

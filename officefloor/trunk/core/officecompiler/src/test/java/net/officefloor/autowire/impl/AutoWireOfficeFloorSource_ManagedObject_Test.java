@@ -32,7 +32,6 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -474,11 +473,8 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 		this.recordReturn(moDependency,
 				moDependency.getManagedObjectDependencyName(), "dependency");
 		this.deployer
-				.addIssue(
-						"No dependent managed object for auto-wiring dependency dependency (qualifier=QUALIFIED, type="
-								+ Connection.class.getName() + ")",
-						AssetType.MANAGED_OBJECT,
-						rawTypeAutoWire.getQualifiedType());
+				.addIssue("No dependent managed object for auto-wiring dependency dependency (qualifier=QUALIFIED, type="
+						+ Connection.class.getName() + ")");
 		this.recordOfficeObject(mo, rawTypeAutoWire);
 
 		// Test

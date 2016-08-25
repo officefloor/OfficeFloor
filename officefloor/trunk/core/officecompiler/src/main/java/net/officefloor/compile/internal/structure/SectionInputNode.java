@@ -29,7 +29,7 @@ import net.officefloor.compile.spi.section.SubSectionInput;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionInputNode extends SectionInputType, SectionInput,
+public interface SectionInputNode extends Node, SectionInputType, SectionInput,
 		SubSectionInput, OfficeSectionInput, OfficeSectionInputType,
 		DeployedOfficeInput, LinkFlowNode {
 

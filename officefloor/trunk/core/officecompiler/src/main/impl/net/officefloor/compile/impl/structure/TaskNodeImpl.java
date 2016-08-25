@@ -30,7 +30,7 @@ import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
@@ -82,11 +82,6 @@ public class TaskNodeImpl implements TaskNode {
 	private final String taskTypeName;
 
 	/**
-	 * Location of {@link OfficeSection} containing this {@link SectionTask}.
-	 */
-	private final String sectionLocation;
-
-	/**
 	 * {@link WorkNode} containing this {@link TaskNode}.
 	 */
 	private final WorkNode workNode;
@@ -130,20 +125,9 @@ public class TaskNodeImpl implements TaskNode {
 	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
 	/**
-	 * Flag indicating if the context of the {@link Office} for this
-	 * {@link OfficeTask} has been loaded.
-	 */
-	private boolean isOfficeContextLoaded = false;
-
-	/**
-	 * Location of {@link DeployedOffice} containing this {@link OfficeTask}.
-	 */
-	private String officeLocation;
-
-	/**
 	 * {@link TaskTeam} responsible for this {@link OfficeTask}.
 	 */
-	private OfficeTeamNode teamResponsible = null;
+	private final TaskTeamNode teamResponsible;
 
 	/**
 	 * Initiate.
@@ -152,21 +136,19 @@ public class TaskNodeImpl implements TaskNode {
 	 *            Name of this {@link SectionTask}.
 	 * @param taskTypeName
 	 *            Name of the {@link TaskType} for this {@link SectionTask}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection} containing this
-	 *            {@link TaskNode}.
 	 * @param workNode
 	 *            {@link WorkNode} containing this {@link TaskNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public TaskNodeImpl(String taskName, String taskTypeName,
-			String sectionLocation, WorkNode workNode, NodeContext context) {
+			WorkNode workNode, NodeContext context) {
 		this.taskName = taskName;
 		this.taskTypeName = taskTypeName;
-		this.sectionLocation = sectionLocation;
 		this.workNode = workNode;
 		this.context = context;
+		this.teamResponsible = new TaskTeamNodeImpl("Team for task "
+				+ this.taskName, this, this.context);
 	}
 
 	/**
@@ -184,21 +166,6 @@ public class TaskNodeImpl implements TaskNode {
 	/*
 	 * ========================== TaskNode ===================================
 	 */
-
-	@Override
-	public void addOfficeContext(String officeLocation) {
-		this.officeLocation = officeLocation;
-
-		// Flag all task objects within office context
-		for (TaskObjectNode object : this.taskObjects.values()) {
-			object.addOfficeContext(officeLocation);
-		}
-
-		// Create the team responsible
-		this.teamResponsible = new OfficeTeamNodeImpl("Team for task "
-				+ this.taskName, this.officeLocation, this.context);
-		this.isOfficeContextLoaded = true;
-	}
 
 	@Override
 	public WorkNode getWorkNode() {

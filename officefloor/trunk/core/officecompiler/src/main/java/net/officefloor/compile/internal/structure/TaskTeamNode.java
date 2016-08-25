@@ -18,25 +18,14 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.office.OfficeTeamType;
-import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
-import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link OfficeTeam} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeTeamNode extends OfficeTeam, OfficeTeamType, TaskTeam,
-		ManagedObjectTeam, LinkTeamNode {
-
-	/**
-	 * Adds the context of the {@link OfficeFloor} containing this
-	 * {@link OfficeTeam}.
-	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 */
-	void addOfficeFloorContext(String officeFloorLocation);
+public interface TaskTeamNode extends Node, OfficeTeam, OfficeTeamType,
+		TaskTeam, LinkTeamNode {
 }

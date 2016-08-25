@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TeamNode extends OfficeFloorTeam, LinkTeamNode {
+public interface TeamNode extends Node, OfficeFloorTeam, LinkTeamNode {
 
 	/**
 	 * Indicates if have the {@link TeamSource} configured.

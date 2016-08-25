@@ -25,6 +25,7 @@ import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
@@ -134,8 +135,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	protected final CompilerIssues issues = this
-			.createMock(CompilerIssues.class);
+	protected final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * {@link NodeContext}.

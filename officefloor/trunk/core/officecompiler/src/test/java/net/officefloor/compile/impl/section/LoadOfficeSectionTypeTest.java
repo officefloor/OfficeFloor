@@ -23,7 +23,8 @@ import javax.sql.DataSource;
 import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
+import net.officefloor.compile.impl.structure.TaskNodeImpl;
 import net.officefloor.compile.section.DependentManagedObjectType;
 import net.officefloor.compile.section.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionInputType;
@@ -35,6 +36,11 @@ import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.section.TypeQualification;
+import net.officefloor.compile.spi.office.DependentManagedObject;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
@@ -43,6 +49,7 @@ import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
@@ -194,10 +201,10 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 
 		// Record not linked on first attempt to retrieve dependent
 		this.issues
-				.addIssue(LocationType.OFFICE, SECTION_LOCATION, null, null,
+				.recordIssue("TASK", TaskNodeImpl.class,
 						"TaskObject QUALIFIED-OBJECT is not linked to a DependentManagedObject");
 		this.issues
-				.addIssue(LocationType.OFFICE, SECTION_LOCATION, null, null,
+				.recordIssue("TASK", TaskNodeImpl.class,
 						"TaskObject UNQUALIFIED-OBJECT is not linked to a DependentManagedObject");
 
 		// Replay
@@ -430,18 +437,14 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 
 		// Record not linked on first attempt to retrieve dependent
 		this.issues
-				.addIssue(
-						LocationType.SECTION,
-						SECTION_LOCATION,
-						null,
-						null,
+				.recordIssue(
+						"MO_SOURCE",
+						ManagedObjectSourceNodeImpl.class,
 						"ManagedObjectDependency QUALIFIED-DEPENDENCY is not linked to a DependentManagedObject");
 		this.issues
-				.addIssue(
-						LocationType.SECTION,
-						SECTION_LOCATION,
-						null,
-						null,
+				.recordIssue(
+						"MO_SOURCE",
+						ManagedObjectSourceNodeImpl.class,
 						"ManagedObjectDependency UNQUALIFIED-DEPENDENCY is not linked to a DependentManagedObject");
 
 		// Load the section managed object with a dependency

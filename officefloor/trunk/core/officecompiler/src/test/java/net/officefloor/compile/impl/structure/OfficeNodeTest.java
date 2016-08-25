@@ -22,7 +22,6 @@ import java.sql.Connection;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.internal.structure.OfficeNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -53,7 +52,6 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
@@ -97,13 +95,12 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddIssue() {
 
 		// Record adding the issue
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
-				AssetType.ADMINISTRATOR, "SOME ADMINISTRATOR", "TEST_ISSUE");
+		this.issues
+				.recordIssue(OFFICE_NAME, OfficeNodeImpl.class, "TEST_ISSUE");
 
 		// Add the issue
 		this.replayMockObjects();
-		this.node.addIssue("TEST_ISSUE", AssetType.ADMINISTRATOR,
-				"SOME ADMINISTRATOR");
+		this.node.addIssue("TEST_ISSUE");
 		this.verifyMockObjects();
 	}
 
@@ -116,14 +113,12 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		final Exception failure = new Exception("cause");
 
 		// Record adding the issue
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
-				AssetType.ADMINISTRATOR, "SOME ADMINISTRATOR", "TEST_ISSUE",
-				failure);
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"TEST_ISSUE", failure);
 
 		// Add the issue
 		this.replayMockObjects();
-		this.node.addIssue("TEST_ISSUE", failure, AssetType.ADMINISTRATOR,
-				"SOME ADMINISTRATOR");
+		this.node.addIssue("TEST_ISSUE", failure);
 		this.verifyMockObjects();
 	}
 
@@ -149,7 +144,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testGetOfficeFloorObjectTwice() {
 
 		// Record issue in adding the managed object twice
-		this.record_issue("Object MO already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Object MO already added");
 
 		// Add the managed object twice
 		this.replayMockObjects();
@@ -185,7 +181,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddInputTwice() {
 
 		// Record issue in adding the input twice
-		this.record_issue("Office input INPUT already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Office input INPUT already added");
 
 		// Add the input twice
 		this.replayMockObjects();
@@ -222,7 +219,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOutputTwice() {
 
 		// Record issue in adding the output twice
-		this.record_issue("Office output OUTPUT already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Office output OUTPUT already added");
 
 		// Add the output twice
 		this.replayMockObjects();
@@ -257,7 +255,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testGetOfficeTeamTwice() {
 
 		// Record issue in adding the teams twice
-		this.record_issue("Team TEAM already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Team TEAM already added");
 
 		// Add the team twice
 		this.replayMockObjects();
@@ -291,7 +290,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionTwice() {
 
 		// Record issue in adding the section twice
-		this.record_issue("Section SECTION already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Section SECTION already added");
 
 		// Add the section twice
 		this.replayMockObjects();
@@ -343,7 +343,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.recordReturn(this.resourceSource,
 				this.resourceSource.sourceResource("location"),
 				new ByteArrayInputStream("<section/>".getBytes()));
-		this.record_issue("Section SECTION already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Section SECTION already added");
 
 		// Add the section twice
 		this.replayMockObjects();
@@ -382,7 +383,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeManagedObjectSourceTwice() {
 
 		// Record issue in adding the managed object sources twice
-		this.record_issue("Managed object source MO already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Managed object source MO already added");
 
 		// Add the managed object source twice
 		this.replayMockObjects();
@@ -421,7 +423,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeManagedObjectSourceInstanceTwice() {
 
 		// Record issue in adding the managed object sources twice
-		this.record_issue("Managed object source MO already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Managed object source MO already added");
 
 		// Add the managed object source twice
 		this.replayMockObjects();
@@ -465,8 +468,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeManagedObjectTwice() {
 
 		// Record issue in adding the managed objects twice
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
-				AssetType.MANAGED_OBJECT, "MO",
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
 				"Office managed object MO already added");
 
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
@@ -492,8 +494,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeManagedObjectTwiceByDifferentSources() {
 
 		// Record issue in adding the managed objects twice
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
-				AssetType.MANAGED_OBJECT, "MO",
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
 				"Office managed object MO already added");
 
 		OfficeManagedObjectSource moSourceOne = this.addManagedObjectSource(
@@ -536,7 +537,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeEscalationTwice() {
 
 		// Record issue in adding the escalation twice
-		this.record_issue("Escalation java.sql.SQLException already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Escalation java.sql.SQLException already added");
 
 		// Add the escalation twice
 		this.replayMockObjects();
@@ -572,7 +574,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeStartTwice() {
 
 		// Record issue in adding the start twice
-		this.record_issue("Office start-up trigger START already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Office start-up trigger START already added");
 
 		// Add the start twice
 		this.replayMockObjects();
@@ -607,7 +610,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeGovernanceTwice() {
 
 		// Record issue in adding the governance twice
-		this.record_issue("Governance GOVERNANCE already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Governance GOVERNANCE already added");
 
 		// Add the governance twice
 		this.replayMockObjects();
@@ -645,7 +649,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeGovernanceInstanceTwice() {
 
 		// Record issue in adding the governance twice
-		this.record_issue("Governance GOVERNANCE already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Governance GOVERNANCE already added");
 
 		// Add the governance twice
 		this.replayMockObjects();
@@ -682,7 +687,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeAdministratorTwice() {
 
 		// Record issue in adding the administrator twice
-		this.record_issue("Administrator ADMIN already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Administrator ADMIN already added");
 
 		// Add the administrator twice
 		this.replayMockObjects();
@@ -720,7 +726,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOfficeAdministratorInstanceTwice() {
 
 		// Record issue in adding the administrator twice
-		this.record_issue("Administrator ADMIN already added");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Administrator ADMIN already added");
 
 		// Add the administrator twice
 		this.replayMockObjects();
@@ -741,7 +748,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkInputToSectionInput() {
 
 		// Record already being linked
-		this.record_issue("Input INPUT linked more than once");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Input INPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -770,7 +778,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionOutputToOutput() {
 
 		// Record already being linked
-		this.record_issue("Office section output SECTION_OUTPUT linked more than once");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Office section output SECTION_OUTPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -799,7 +808,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkInputToOutput() {
 
 		// Record already being linked
-		this.record_issue("Input INPUT linked more than once");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Input INPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -826,7 +836,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOutputToInput() {
 
 		// Record already being linked
-		this.record_issue("Output OUTPUT linked more than once");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class,
+				"Output OUTPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -852,7 +863,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkTaskTeamToOfficeTeam() {
 
 		// Record already being linked
-		this.record_issue("Team for task TASK already assigned");
+		this.issues.recordIssue("TASK", TaskNodeImpl.class,
+				"Team for task TASK already assigned");
 
 		this.replayMockObjects();
 
@@ -880,8 +892,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeGovernanceToOfficeTeam() {
 
 		// Record already being linked
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
-				AssetType.GOVERNANCE, "GOVERNANCE", "Team already assigned");
+		this.issues.recordIssue("GOVERNANCE", GovernanceNodeImpl.class,
+				"Team already assigned");
 
 		this.replayMockObjects();
 
@@ -905,8 +917,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeAdministratorToOfficeTeam() {
 
 		// Record already being linked
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
-				AssetType.ADMINISTRATOR, "ADMIN", "Team already assigned");
+		this.issues.recordIssue("ADMIN", AdministratorNodeImpl.class,
+				"Team already assigned");
 
 		this.replayMockObjects();
 
@@ -1191,7 +1203,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeSectionObjectToOfficeManagedObject() {
 
 		// Record already being linked
-		this.record_issue("Office section object SECTION_OBJECT linked more than once");
+		this.issues.recordIssue("SECTION_OBJECT", SectionObjectNodeImpl.class,
+				"Office section object SECTION_OBJECT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1225,7 +1238,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeSectionObjectToOfficeObject() {
 
 		// Record already being linked
-		this.record_issue("Office section object SECTION_OBJECT linked more than once");
+		this.issues.recordIssue("SECTION_OBJECT", SectionObjectNodeImpl.class,
+				"Office section object SECTION_OBJECT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1256,7 +1270,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeManagedObjectSourceTeamToOfficeTeam() {
 
 		// Record already being linked
-		this.record_issue("TEAM already assigned");
+		this.issues.recordIssue("TEAM", ManagedObjectTeamNodeImpl.class,
+				"TEAM already assigned");
 
 		this.replayMockObjects();
 
@@ -1288,7 +1303,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				.createMock(TaskFactory.class);
 
 		// Record already being linked
-		this.record_issue("TEAM already assigned");
+		this.issues.recordIssue("TEAM", ManagedObjectTeamNodeImpl.class,
+				"TEAM already assigned");
 
 		this.replayMockObjects();
 
@@ -1342,7 +1358,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectDependencyToOfficeManagedObject() {
 
 		// Record already being linked
-		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.issues.recordIssue("DEPENDENCY",
+				ManagedObjectDependencyNodeImpl.class,
+				"Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -1376,7 +1394,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectDependencyToOfficeObject() {
 
 		// Record already being linked
-		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.issues.recordIssue("DEPENDENCY",
+				ManagedObjectDependencyNodeImpl.class,
+				"Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -1409,7 +1429,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkInputManagedObjectDependencyToOfficeManagedObject() {
 
 		// Record already being linked
-		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.issues.recordIssue("DEPENDENCY",
+				ManagedObjectDependencyNodeImpl.class,
+				"Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -1442,7 +1464,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkInputManagedObjectDependencyToOfficeObject() {
 
 		// Record already being linked
-		this.record_issue("Managed object dependency DEPENDENCY linked more than once");
+		this.issues.recordIssue("DEPENDENCY",
+				ManagedObjectDependencyNodeImpl.class,
+				"Managed object dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
 
@@ -1473,7 +1497,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectFlowToOfficeSectionInput() {
 
 		// Record already being linked
-		this.record_issue("Managed object source flow FLOW linked more than once");
+		this.issues.recordIssue("FLOW", ManagedObjectFlowNodeImpl.class,
+				"Managed object source flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
@@ -1507,7 +1532,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeSectionOutputToOfficeSectionInput() {
 
 		// Record already being linked
-		this.record_issue("Office section output SECTION_OUTPUT linked more than once");
+		this.issues.recordIssue("SECTION_OUTPUT", SectionOutputNodeImpl.class,
+				"Office section output SECTION_OUTPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1547,7 +1573,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeEscalationToOfficeSectionInput() {
 
 		// Record already being linked
-		this.record_issue("Office escalation java.sql.SQLException linked more than once");
+		this.issues
+				.recordIssue("java.sql.SQLException", EscalationNodeImpl.class,
+						"Office escalation java.sql.SQLException linked more than once");
 
 		this.replayMockObjects();
 
@@ -1583,7 +1611,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeStartToOfficeSectionInput() {
 
 		// Record already being linked
-		this.record_issue("Office start-up trigger START linked more than once");
+		this.issues.recordIssue("START", OfficeStartNodeImpl.class,
+				"Office start-up trigger START linked more than once");
 
 		this.replayMockObjects();
 
@@ -1609,17 +1638,6 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		assertFlowLink("Can only link once", start, sectionInput);
 
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records adding an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION, null, null,
-				issueDescription);
 	}
 
 }

@@ -18,14 +18,15 @@
 package net.officefloor.compile.impl.team;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.TeamNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
@@ -45,7 +46,7 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * Ensure issue if missing property.
@@ -53,7 +54,8 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.record_issue("Missing property 'missing'");
+		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
+				"Missing property 'missing'");
 
 		// Attempt to load
 		this.loadTeamType(false, new Loader() {
@@ -70,7 +72,8 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.record_issue("Can not load class 'missing'");
+		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
+				"Can not load class 'missing'");
 
 		// Attempt to load
 		this.loadTeamType(false, new Loader() {
@@ -87,7 +90,8 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record missing class
-		this.record_issue("Can not obtain resource at location 'missing'");
+		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
+				"Can not obtain resource at location 'missing'");
 
 		// Attempt to load
 		this.loadTeamType(false, new Loader() {
@@ -96,17 +100,6 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 				context.getResource("missing");
 			}
 		});
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, AssetType.TEAM,
-				null, issueDescription);
 	}
 
 	/**

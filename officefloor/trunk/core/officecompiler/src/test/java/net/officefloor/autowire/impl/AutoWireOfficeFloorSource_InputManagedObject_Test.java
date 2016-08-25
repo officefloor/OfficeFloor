@@ -31,7 +31,6 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -158,8 +157,7 @@ public class AutoWireOfficeFloorSource_InputManagedObject_Test extends
 		this.recordOffice();
 		this.deployer.addIssue("OfficeFloorInputManagedObject "
 				+ rawTypeAutoWire.getQualifiedType()
-				+ " must have only one AutoWire", AssetType.MANAGED_OBJECT,
-				rawTypeAutoWire.getQualifiedType());
+				+ " must have only one AutoWire");
 		// Not use the input managed object (even though it can be handled)
 
 		// Test
@@ -739,11 +737,10 @@ public class AutoWireOfficeFloorSource_InputManagedObject_Test extends
 		this.recordReturn(source,
 				source.getInputManagedObjectDependency("dependency"),
 				moDependency);
-		this.deployer.addIssue(
-				"May only depend on OfficeFloorInputManagedObject "
+		this.deployer
+				.addIssue("May only depend on OfficeFloorInputManagedObject "
 						+ connectionAutoWire.getQualifiedType()
-						+ " if all of its flows are handled",
-				AssetType.MANAGED_OBJECT, rawTypeAutoWire.getQualifiedType());
+						+ " if all of its flows are handled");
 
 		// Record linking flow
 		this.recordManagedObjectFlow(source, "flow", "handled", "input");

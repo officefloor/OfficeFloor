@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceNode extends OfficeGovernance, LinkTeamNode {
+public interface GovernanceNode extends Node, OfficeGovernance, LinkTeamNode {
 
 	/**
 	 * Obtains the {@link GovernanceType} for this {@link GovernanceNode}.

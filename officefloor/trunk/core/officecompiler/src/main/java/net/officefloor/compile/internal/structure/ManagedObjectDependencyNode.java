@@ -25,6 +25,6 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectDependencyNode extends ManagedObjectDependency,
-		ObjectDependency, LinkObjectNode {
+public interface ManagedObjectDependencyNode extends Node,
+		ManagedObjectDependency, ObjectDependency, LinkObjectNode {
 }

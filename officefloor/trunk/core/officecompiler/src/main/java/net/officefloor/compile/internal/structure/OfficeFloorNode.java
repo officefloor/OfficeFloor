@@ -31,7 +31,12 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorNode extends OfficeFloorDeployer {
+public interface OfficeFloorNode extends Node, OfficeFloorDeployer {
+
+	/**
+	 * Default name of the {@link OfficeFloorNode}.
+	 */
+	static final String OFFICE_FLOOR_NAME = "OfficeFloor";
 
 	/**
 	 * Adds a {@link OfficeFloorManagedObjectSource} supplied from an

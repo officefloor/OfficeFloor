@@ -23,13 +23,14 @@ import java.sql.Connection;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -143,7 +144,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings("rawtypes")
 	public void testMultipleQualifiersOnDependency() {
 
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Enable using compiler issues
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
@@ -151,7 +152,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
+		issues.recordIssue(Node.TYPE_NAME, ManagedObjectSourceNodeImpl.class,
 				"Failed to init", new IllegalArgumentException(
 						"Dependency connection has more than one Qualifier"));
 		this.control(issues).setMatcher(new AbstractMatcher() {

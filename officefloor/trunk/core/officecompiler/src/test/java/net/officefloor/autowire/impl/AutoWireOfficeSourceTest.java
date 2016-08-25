@@ -66,7 +66,6 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.execute.Task;
@@ -385,9 +384,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		// TODO flag output is not escalation
 		// this.recordReturn(output, output.isEscalationOnly(), false);
 
-		this.architect.addIssue(
-				"Section output 'Section:output' is not linked",
-				AssetType.TASK, "Section:output");
+		this.architect
+				.addIssue("Section output 'Section:output' is not linked");
 
 		// Test
 		this.replayMockObjects();
@@ -506,9 +504,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionOutputs(ONE, OUTPUT);
 		this.recordSectionOutputs(TWO);
 		this.architect
-				.addIssue(
-						"Cyclic section inheritance hierarchy ( One : Two : One : ... )",
-						null, null);
+				.addIssue("Cyclic section inheritance hierarchy ( One : Two : One : ... )");
 		OfficeSectionOutput output = this.outputs.get(ONE).get(OUTPUT);
 
 		// TODO flag output is escalation
@@ -594,9 +590,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionOutputs(ONE);
 		this.recordSectionOutputs(TWO);
 		this.architect
-				.addIssue(
-						"Unknown section output 'One:output' to link to section input 'Two:input'",
-						AssetType.TASK, "One:output");
+				.addIssue("Unknown section output 'One:output' to link to section input 'Two:input'");
 
 		// Test
 		this.replayMockObjects();
@@ -632,9 +626,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionOutputs(ONE, ONE_OUTPUT);
 		this.recordSectionOutputs(TWO);
 		this.architect
-				.addIssue(
-						"Unknown section input 'Two:input' for linking section output 'One:output'",
-						AssetType.TASK, "Two:input");
+				.addIssue("Unknown section input 'Two:input' for linking section output 'One:output'");
 
 		// Test
 		this.replayMockObjects();
@@ -850,10 +842,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(objectType, objectType.getOfficeSectionObjectName(),
 				"OBJECT");
 		this.architect
-				.addIssue(
-						"No available auto-wiring for OfficeSectionObject OBJECT (qualifier=null, type="
-								+ Connection.class.getName()
-								+ ") from OfficeSection SECTION", null, null);
+				.addIssue("No available auto-wiring for OfficeSectionObject OBJECT (qualifier=null, type="
+						+ Connection.class.getName()
+						+ ") from OfficeSection SECTION");
 
 		this.recordSectionInputs(SECTION);
 		this.recordSubSections(SECTION);
@@ -1050,7 +1041,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(unknownSection, unknownSection.getSectionName(),
 				UNKNOWN_SECTION);
 		this.architect.addIssue("Unknown section '" + UNKNOWN_SECTION
-				+ "' to be governed", AssetType.GOVERNANCE, GOVERNANCE);
+				+ "' to be governed");
 		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
 
 		// Test

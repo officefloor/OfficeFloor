@@ -17,8 +17,10 @@
  */
 package net.officefloor.compile.integrate.task;
 
+import net.officefloor.compile.impl.structure.TaskFlowNodeImpl;
+import net.officefloor.compile.impl.structure.TaskNodeImpl;
+import net.officefloor.compile.impl.structure.TaskObjectNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
@@ -38,14 +40,13 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.JobSequence;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.work.clazz.ClassTaskFactory;
 import net.officefloor.plugin.work.clazz.ClassWork;
@@ -127,8 +128,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
-				"TASK", "Flow flow is not linked to a TaskNode");
+		this.issues.recordIssue("TASK", TaskNodeImpl.class,
+				"Flow flow is not linked to a TaskNode");
 
 		// Compile the office floor
 		this.compile(true);
@@ -147,11 +148,10 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK_A", "OFFICE_TEAM");
 		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
-		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
-				"TASK_A",
+		this.issues.recordIssue("flow", TaskFlowNodeImpl.class,
 				"Unknown flow instigation strategy 'unknown' for flow flow");
-		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
-				"TASK_A", "No instigation strategy provided for flow flow");
+		this.issues.recordIssue("flow", TaskFlowNodeImpl.class,
+				"No instigation strategy provided for flow flow");
 
 		// Compile the office floor
 		this.compile(true);
@@ -348,8 +348,9 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
-				"TASK", "Object " + CompileManagedObject.class.getName()
+		this.issues.recordIssue(CompileManagedObject.class.getName(),
+				TaskObjectNodeImpl.class, "Object "
+						+ CompileManagedObject.class.getName()
 						+ " is not linked to a BoundManagedObjectNode");
 
 		// Compile the office floor
@@ -608,11 +609,9 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 		this.issues
-				.addIssue(
-						LocationType.SECTION,
-						"desk",
-						AssetType.TASK,
-						"TASK",
+				.recordIssue(
+						Exception.class.getName(),
+						TaskFlowNodeImpl.class,
 						"Escalation "
 								+ Exception.class.getName()
 								+ " not handled by a Task nor propagated to the Office");
@@ -653,7 +652,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
 		this.record_officeBuilder_addStartupTask("SECTION.WORK", "INPUT");
-		
+
 		// Compile the office floor
 		this.compile(true);
 	}

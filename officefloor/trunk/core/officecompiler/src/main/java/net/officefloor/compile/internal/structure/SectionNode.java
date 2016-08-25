@@ -39,7 +39,8 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionNode extends SectionDesigner, SubSection, OfficeSection {
+public interface SectionNode extends Node, SectionDesigner, SubSection,
+		OfficeSection {
 
 	/**
 	 * Initialises this {@link SectionNode}.

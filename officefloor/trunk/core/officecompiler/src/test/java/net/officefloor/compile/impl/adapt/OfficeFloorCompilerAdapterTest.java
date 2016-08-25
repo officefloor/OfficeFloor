@@ -34,8 +34,8 @@ import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
-import net.officefloor.compile.impl.adapt.AdaptedException;
-import net.officefloor.compile.impl.adapt.OfficeFloorCompilerAdapter;
+import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -47,7 +47,6 @@ import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
@@ -289,7 +288,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public void testObject() throws Exception {
 
 		final AdaptManagedObjectImpl object = new AdaptManagedObjectImpl();
-		
+
 		// Build OfficeFloor
 		AutoWireOfficeFloorSource source = new AutoWireOfficeFloorSource(
 				this.compiler);
@@ -547,18 +546,22 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		final Throwable[] adaptedCause = new Throwable[1];
 		final CompilerIssues issues = new CompilerIssues() {
 			@Override
-			public void addIssue(LocationType locationType, String location,
-					AssetType assetType, String assetName,
-					String issueDescription, Throwable cause) {
+			public void addIssue(Node node, String issueDescription,
+					Throwable cause) {
 				// Register the adapted cause
 				adaptedCause[0] = cause;
 			}
 
 			@Override
-			public void addIssue(LocationType locationType, String location,
-					AssetType assetType, String assetName,
-					String issueDescription) {
+			public void addIssue(Node node, String issueDescription,
+					CompilerIssue... causes) {
 				fail("Should not be invoked - " + issueDescription);
+			}
+
+			@Override
+			public CompilerIssue[] captureIssues(Runnable runnable) {
+				fail("Should not be invoked");
+				return null;
 			}
 		};
 		this.compiler.setCompilerIssues(issues);

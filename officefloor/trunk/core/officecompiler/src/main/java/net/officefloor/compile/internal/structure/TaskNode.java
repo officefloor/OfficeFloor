@@ -25,27 +25,13 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionTask} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskNode extends SectionTask, OfficeTask, LinkFlowNode {
-
-	/**
-	 * <p>
-	 * Adds context of the {@link Office} containing this {@link OfficeTask}.
-	 * <p>
-	 * The {@link TaskType} can not be added until the {@link Office} context is
-	 * provided.
-	 * 
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 */
-	@Deprecated
-	void addOfficeContext(String officeLocation);
+public interface TaskNode extends Node, SectionTask, OfficeTask, LinkFlowNode {
 
 	/**
 	 * Loads the {@link OfficeTaskType}.

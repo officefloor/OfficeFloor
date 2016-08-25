@@ -19,18 +19,19 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.TaskTeamNode;
+import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * {@link OfficeTeamNode} implementation.
+ * {@link TaskTeamNode} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeTeamNodeImpl implements OfficeTeamNode {
+public class ManagedObjectTeamNodeImpl implements TaskTeamNode {
 
 	/**
 	 * Name of this {@link OfficeTeam}.
@@ -38,9 +39,9 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	private final String teamName;
 
 	/**
-	 * Location of the {@link Office}.
+	 * {@link TaskNode} containing this {@link TaskTeamNode}.
 	 */
-	private final String officeLocation;
+	private final TaskNode taskNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -48,40 +49,20 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	private final NodeContext context;
 
 	/**
-	 * Flag indicating if in {@link OfficeFloor} context.
-	 */
-	private boolean isInOfficeFloorContext = false;
-
-	/**
-	 * Location of the {@link OfficeFloor}.
-	 */
-	private String officeFloorLocation;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param teamName
 	 *            Name of this {@link OfficeTeam}.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
+	 * @param taskNode
+	 *            {@link TaskNode} containing this {@link TaskTeamNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeTeamNodeImpl(String teamName, String officeLocation,
+	public ManagedObjectTeamNodeImpl(String teamName, TaskNode taskNode,
 			NodeContext context) {
 		this.teamName = teamName;
-		this.officeLocation = officeLocation;
+		this.taskNode = taskNode;
 		this.context = context;
-	}
-
-	/*
-	 * ================== OfficeTeamNode ============================
-	 */
-
-	@Override
-	public void addOfficeFloorContext(String officeFloorLocation) {
-		this.officeFloorLocation = officeFloorLocation;
-		this.isInOfficeFloorContext = true;
 	}
 
 	/*

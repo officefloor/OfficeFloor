@@ -22,7 +22,7 @@ package net.officefloor.compile.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
-public interface LinkObjectNode {
+public interface LinkObjectNode extends Node {
 
 	/**
 	 * Links the input {@link LinkObjectNode} to this {@link LinkObjectNode}.

@@ -33,9 +33,11 @@ import net.officefloor.autowire.supplier.SuppliedManagedObjectTeam;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplyOrder;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.SupplierNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -56,7 +58,7 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -70,7 +72,8 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	public void testNullAutoWire() {
 
 		// Ensure issue if no auto-wire
-		this.record_issue("SupplyOrder 0 must have an AutoWire");
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+				"SupplyOrder 0 must have an AutoWire");
 
 		// Test
 		MockSupplyOrder order = new MockSupplyOrder(null);
@@ -214,17 +217,6 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 				.getSuppliedTeams();
 		assertEquals("Incorrect number of supplied teams",
 				numberOfSuppliedTeams, suppliedTeams.length);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
-				issueDescription);
 	}
 
 	/**

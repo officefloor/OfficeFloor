@@ -28,8 +28,9 @@ import net.officefloor.autowire.impl.supplier.MockTypeManagedObjectSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
@@ -38,7 +39,6 @@ import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
@@ -249,8 +249,8 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeBuilder_addProcessManagedObject("DEPENDENT",
 				"DEPENDENT");
 		this.issues
-				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-						AssetType.MANAGED_OBJECT, "DEPENDENT",
+				.recordIssue("DEPENDENT",
+						ManagedObjectDependencyNodeImpl.class,
 						"Dependency dependency is not linked to a BoundManagedObjectNode");
 
 		// Add managed objects to office floor
@@ -383,8 +383,8 @@ public class CompileOfficeFloorManagedObjectTest extends
 				"class.name", ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-				AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
+		this.issues.recordIssue("MANAGED_OBJECT_SOURCE",
+				ManagedObjectSourceNodeImpl.class,
 				"Managed object flow doProcess is not linked to a TaskNode");
 
 		// Compile the office floor
@@ -413,8 +413,8 @@ public class CompileOfficeFloorManagedObjectTest extends
 		ManagingOfficeBuilder<?> managingOffice = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.issues
-				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
+				.recordIssue("MANAGED_OBJECT_SOURCE",
+						ManagedObjectSourceNodeImpl.class,
 						"Must provide input managed object as managed object source has flows/teams");
 		managingOffice.linkProcess(0, "SECTION.WORK", "INPUT");
 
@@ -475,8 +475,8 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_managedObjectBuilder_setManagingOffice("MANAGING_OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
 		this.issues
-				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
+				.recordIssue("MANAGED_OBJECT_SOURCE",
+						ManagedObjectSourceNodeImpl.class,
 						"Flow doProcess linked task must be within the managing office");
 
 		// Compile the office floor
@@ -496,8 +496,8 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("MANAGED_OBJECT_SOURCE");
 		this.issues
-				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
+				.recordIssue("MANAGED_OBJECT_SOURCE",
+						ManagedObjectSourceNodeImpl.class,
 						"Managed object team MANAGED_OBJECT_SOURCE_TEAM is not linked to a TeamNode");
 
 		// Compile the office floor

@@ -47,7 +47,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
-import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -140,7 +140,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private final Map<String, OfficeObjectStruct> objects = new HashMap<String, OfficeObjectStruct>();
 
 	/**
-	 * {@link OfficeTeamNode} instances by their {@link OfficeTeam} name.
+	 * {@link TaskTeamNode} instances by their {@link OfficeTeam} name.
 	 */
 	private final Map<String, TeamStruct> teams = new HashMap<String, TeamStruct>();
 
@@ -864,7 +864,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		TeamStruct struct = this.teams.get(officeTeamName);
 		if (struct == null) {
 			// Create the team
-			OfficeTeamNode team = new OfficeTeamNodeImpl(officeTeamName,
+			TaskTeamNode team = new TaskTeamNodeImpl(officeTeamName,
 					this.officeLocation, this.context);
 			struct = new TeamStruct(team, true); // added by architect
 			if (this.isInOfficeFloorContext) {
@@ -1261,7 +1261,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		TeamStruct struct = this.teams.get(officeTeamName);
 		if (struct == null) {
 			// Create the team within the office floor context
-			OfficeTeamNode team = new OfficeTeamNodeImpl(officeTeamName,
+			TaskTeamNode team = new TaskTeamNodeImpl(officeTeamName,
 					this.officeLocation, this.context);
 			struct = new TeamStruct(team, false); // not added by architect
 			team.addOfficeFloorContext(this.officeFloorLocation);
@@ -1325,14 +1325,14 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	/**
-	 * Structure containing details of an {@link OfficeTeamNode}.
+	 * Structure containing details of an {@link TaskTeamNode}.
 	 */
 	private class TeamStruct {
 
 		/**
-		 * {@link OfficeTeamNode}.
+		 * {@link TaskTeamNode}.
 		 */
-		public final OfficeTeamNode team;
+		public final TaskTeamNode team;
 
 		/**
 		 * Flag indicating if has been added by {@link OfficeArchitect}.
@@ -1343,12 +1343,12 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		 * Initiate.
 		 * 
 		 * @param team
-		 *            {@link OfficeTeamNode}.
+		 *            {@link TaskTeamNode}.
 		 * @param isAdded
 		 *            <code>true</code> if has been added by
 		 *            {@link OfficeArchitect}.
 		 */
-		public TeamStruct(OfficeTeamNode team, boolean isAdded) {
+		public TeamStruct(TaskTeamNode team, boolean isAdded) {
 			this.team = team;
 			this.isAdded = isAdded;
 		}

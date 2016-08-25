@@ -27,7 +27,7 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskObjectNode extends TaskObject, ObjectDependency,
+public interface TaskObjectNode extends Node, TaskObject, ObjectDependency,
 		LinkObjectNode {
 
 	/**
