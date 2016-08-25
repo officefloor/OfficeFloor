@@ -25,5 +25,5 @@ import net.officefloor.frame.api.escalate.Escalation;
  * 
  * @author Daniel Sagenschneider
  */
-public interface EscalationNode extends OfficeEscalation, LinkFlowNode {
+public interface EscalationNode extends Node, OfficeEscalation, LinkFlowNode {
 }

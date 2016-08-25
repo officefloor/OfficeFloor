@@ -15,21 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
-
-import net.officefloor.autowire.supplier.SupplyOrder;
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+package net.officefloor.compile.issues;
 
 /**
- * Supplier {@link Node}.
- * 
+ * Compile issue to be used as cause of another issue.
+ *
  * @author Daniel Sagenschneider
  */
-public interface SupplierNode extends Node, OfficeFloorSupplier {
-
-	/**
-	 * Fill {@link SupplyOrder} instances.
-	 */
-	void fillSupplyOrders();
-
+public interface CompilerIssue {
 }

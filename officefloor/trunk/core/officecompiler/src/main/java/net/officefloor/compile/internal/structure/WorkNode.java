@@ -29,7 +29,7 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface WorkNode extends SectionWork {
+public interface WorkNode extends Node, SectionWork {
 
 	/**
 	 * <p>

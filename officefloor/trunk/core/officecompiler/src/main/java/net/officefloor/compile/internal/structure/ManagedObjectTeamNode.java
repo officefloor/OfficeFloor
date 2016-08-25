@@ -17,13 +17,13 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.office.OfficeTeam;
 
 /**
- * {@link ManagedObjectFlow} node.
+ * {@link OfficeTeam} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectFlowNode extends Node, ManagedObjectFlow,
-		LinkFlowNode {
+public interface ManagedObjectTeamNode extends ManagedObjectTeam, LinkTeamNode {
 }

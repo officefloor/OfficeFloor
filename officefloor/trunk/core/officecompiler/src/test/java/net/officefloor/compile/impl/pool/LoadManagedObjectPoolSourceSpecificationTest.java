@@ -18,6 +18,8 @@
 package net.officefloor.compile.impl.pool;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.Property;
@@ -27,7 +29,6 @@ import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceContext;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceProperty;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceSpecification;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -42,7 +43,7 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * {@link ManagedObjectPoolSourceSpecification}.
@@ -65,7 +66,7 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to instantiate "
+		this.issues.recordIssue(Node.TYPE_NAME, null, "Failed to instantiate "
 				+ MockManagedObjectPoolSource.class.getName()
 				+ " by default constructor", failure);
 
@@ -85,7 +86,7 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, null,
 				"Failed to obtain ManagedObjectPoolSourceSpecification from "
 						+ MockManagedObjectPoolSource.class.getName(), failure);
 
@@ -103,8 +104,9 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 	public void testNoManagedObjectPoolSourceSpecification() {
 
 		// Record no specification returned
-		this.record_issue("No ManagedObjectPoolSourceSpecification returned from "
-				+ MockManagedObjectPoolSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, null,
+				"No ManagedObjectPoolSourceSpecification returned from "
+						+ MockManagedObjectPoolSource.class.getName());
 
 		// Attempt to obtain specification
 		MockManagedObjectPoolSource.specification = null;
@@ -125,9 +127,13 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 		// Record null properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this.record_issue(
-				"Failed to obtain ManagedObjectPoolSourceProperty instances from ManagedObjectPoolSourceSpecification for "
-						+ MockManagedObjectPoolSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						null,
+						"Failed to obtain ManagedObjectPoolSourceProperty instances from ManagedObjectPoolSourceSpecification for "
+								+ MockManagedObjectPoolSource.class.getName(),
+						failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -161,8 +167,12 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new ManagedObjectPoolSourceProperty[] { null });
-		this.record_issue("ManagedObjectPoolSourceProperty 0 is null from ManagedObjectPoolSourceSpecification for "
-				+ MockManagedObjectPoolSource.class.getName());
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						null,
+						"ManagedObjectPoolSourceProperty 0 is null from ManagedObjectPoolSourceSpecification for "
+								+ MockManagedObjectPoolSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -184,8 +194,12 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 				this.specification.getProperties(),
 				new ManagedObjectPoolSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.record_issue("ManagedObjectPoolSourceProperty 0 provided blank name from ManagedObjectPoolSourceSpecification for "
-				+ MockManagedObjectPoolSource.class.getName());
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						null,
+						"ManagedObjectPoolSourceProperty 0 provided blank name from ManagedObjectPoolSourceSpecification for "
+								+ MockManagedObjectPoolSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -209,9 +223,13 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 				this.specification.getProperties(),
 				new ManagedObjectPoolSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.record_issue(
-				"Failed to get name for ManagedObjectPoolSourceProperty 0 from ManagedObjectPoolSourceSpecification for "
-						+ MockManagedObjectPoolSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						null,
+						"Failed to get name for ManagedObjectPoolSourceProperty 0 from ManagedObjectPoolSourceSpecification for "
+								+ MockManagedObjectPoolSource.class.getName(),
+						failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -236,9 +254,13 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 				new ManagedObjectPoolSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.record_issue(
-				"Failed to get label for ManagedObjectPoolSourceProperty 0 (NAME) from ManagedObjectPoolSourceSpecification for "
-						+ MockManagedObjectPoolSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						null,
+						"Failed to get label for ManagedObjectPoolSourceProperty 0 (NAME) from ManagedObjectPoolSourceSpecification for "
+								+ MockManagedObjectPoolSource.class.getName(),
+						failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -274,30 +296,6 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 		this.replayMockObjects();
 		this.loadSpecification(true, "NAME", "LABEL", "NO LABEL", "NO LABEL");
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT_POOL, null,
-				issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT_POOL, null,
-				issueDescription, cause);
 	}
 
 	/**

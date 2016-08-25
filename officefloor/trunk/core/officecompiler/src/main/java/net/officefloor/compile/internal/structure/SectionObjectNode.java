@@ -28,15 +28,16 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
-		SectionObject, OfficeSectionObject, LinkObjectNode {
+public interface SectionObjectNode extends Node, SectionObjectType,
+		SubSectionObject, SectionObject, OfficeSectionObject, LinkObjectNode {
 
 	/**
 	 * Indicates if this {@link SectionObjectType} has been initialised.
 	 * 
 	 * @return <code>true</code> if initialised.
 	 */
-	@Deprecated // TODO add method loadSectionObjectType()
+	@Deprecated
+	// TODO add method loadSectionObjectType()
 	boolean isInitialised();
 
 	/**

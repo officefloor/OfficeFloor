@@ -33,13 +33,16 @@ import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
+import net.officefloor.compile.impl.structure.SupplierNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -58,7 +61,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -74,7 +77,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
 				"Failed to instantiate " + MockSupplierSource.class.getName()
 						+ " by default constructor", failure);
 
@@ -89,8 +92,9 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.record_issue("Missing property 'missing' for SupplierSource "
-				+ MockSupplierSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+				"Missing property 'missing' for SupplierSource "
+						+ MockSupplierSource.class.getName());
 
 		// Attempt to load
 		this.loadSupplierType(false, new Init() {
@@ -133,8 +137,9 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.record_issue("Can not load class 'missing' for SupplierSource "
-				+ MockSupplierSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+				"Can not load class 'missing' for SupplierSource "
+						+ MockSupplierSource.class.getName());
 
 		// Attempt to load
 		this.loadSupplierType(false, new Init() {
@@ -151,8 +156,9 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record missing resource
-		this.record_issue("Can not obtain resource at location 'missing' for SupplierSource "
-				+ MockSupplierSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+				"Can not obtain resource at location 'missing' for SupplierSource "
+						+ MockSupplierSource.class.getName());
 
 		// Attempt to load
 		this.loadSupplierType(false, new Init() {
@@ -193,7 +199,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				"Fail init SupplierSource");
 
 		// Record failure to init the Supplier Source
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
 				"Failed to source SupplierType definition from SupplierSource "
 						+ MockSupplierSource.class.getName(), failure);
 
@@ -232,7 +238,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testNoAutoWiring() {
 
 		// Record no auto-wiring
-		this.record_issue("Must provide auto-wiring for ManagedObject 1");
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+				"Must provide auto-wiring for ManagedObject 1");
 
 		// Attempt to load
 		this.loadEmptySupplierType(new Init() {
@@ -251,8 +258,9 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		final AutoWire autoWire = new AutoWire(Connection.class);
 
 		// Record no null managed object source
-		this.record_issue("Must provide a ManagedObjectSource for ManagedObject "
-				+ autoWire.getQualifiedType());
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+				"Must provide a ManagedObjectSource for ManagedObject "
+						+ autoWire.getQualifiedType());
 
 		// Attempt to load
 		this.loadEmptySupplierType(new Init() {
@@ -273,11 +281,13 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		final AutoWire autoWire = new AutoWire(Connection.class);
 
 		// Record invalid managed object type
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, null,
-				AssetType.MANAGED_OBJECT, autoWire.getQualifiedType(),
+		CompilerIssue[] capturedIssues = this.issues.recordCaptureIssues(true);
+		this.issues.recordIssue(autoWire.getQualifiedType(),
+				ManagedObjectSourceNodeImpl.class,
 				"Missing property 'class.name'");
-		this.record_issue("Could not load ManagedObjectType for ManagedObject "
-				+ autoWire.getQualifiedType());
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+				"Could not load ManagedObjectType for ManagedObject "
+						+ autoWire.getQualifiedType(), capturedIssues);
 
 		// Attempt to load
 		this.loadEmptySupplierType(new Init() {
@@ -410,9 +420,16 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testUnknownManagedObjectDependencyAutoWire() {
 
+		final MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+				Object.class);
+
 		// Record issue as unknown dependency
-		this.record_issue("Wired dependency 'dependency' not specified on ManagedObjectType for ManagedObject "
-				+ new AutoWire(Object.class).getQualifiedType());
+		this.issues
+				.recordIssue(
+						source.getAutoWire().getQualifiedType(),
+						ManagedObjectSourceNodeImpl.class,
+						"Wired dependency 'dependency' not specified on ManagedObjectType for ManagedObject "
+								+ new AutoWire(Object.class).getQualifiedType());
 
 		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
 			@Override
@@ -426,8 +443,6 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.loadSuppliedManagedObjectType(new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
-				MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
-						Object.class);
 				source.addAsManagedObject(context, wirer);
 			}
 		});
@@ -478,17 +493,20 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testUnwiredManagedObjectFlow() {
 
+		final MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+				Object.class);
+
 		// Record issue as unknown flow
-		this.record_issue("Flow 'flow' must be wired for ManagedObject "
-				+ new AutoWire(Object.class).getQualifiedType());
+		this.issues.recordIssue(source.getAutoWire().getQualifiedType(),
+				ManagedObjectSourceNodeImpl.class,
+				"Flow 'flow' must be wired for ManagedObject "
+						+ new AutoWire(Object.class).getQualifiedType());
 
 		// Load
 		SuppliedManagedObjectType type = this
 				.loadSuppliedManagedObjectType(new Init() {
 					@Override
 					public void supply(SupplierSourceContext context) {
-						MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
-								Object.class);
 						source.addFlow("flow", Integer.class);
 						source.addAsManagedObject(context, null);
 					}
@@ -503,9 +521,14 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testUnknownManagedObjectFlowAutoWire() {
 
+		final MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+				Object.class);
+
 		// Record issue as unknown flow
-		this.record_issue("Wired flow 'flow' not specified on ManagedObjectType for ManagedObject "
-				+ new AutoWire(Object.class).getQualifiedType());
+		this.issues.recordIssue(source.getAutoWire().getQualifiedType(),
+				ManagedObjectSourceNodeImpl.class,
+				"Wired flow 'flow' not specified on ManagedObjectType for ManagedObject "
+						+ new AutoWire(Object.class).getQualifiedType());
 
 		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
 			@Override
@@ -518,8 +541,6 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.loadSuppliedManagedObjectType(new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
-				MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
-						Object.class);
 				source.addAsManagedObject(context, wirer);
 			}
 		});
@@ -530,17 +551,20 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testUnwiredManagedObjectTeam() {
 
+		final MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+				Object.class);
+
 		// Record issue as unknown team
-		this.record_issue("Team 'team' must be wired for ManagedObject "
-				+ new AutoWire(Object.class).getQualifiedType());
+		this.issues.recordIssue(source.getAutoWire().getQualifiedType(),
+				ManagedObjectSourceNodeImpl.class,
+				"Team 'team' must be wired for ManagedObject "
+						+ new AutoWire(Object.class).getQualifiedType());
 
 		// Load
 		SuppliedManagedObjectType type = this
 				.loadSuppliedManagedObjectType(new Init() {
 					@Override
 					public void supply(SupplierSourceContext context) {
-						MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
-								Object.class);
 						source.addTeam("team");
 						source.addAsManagedObject(context, null);
 					}
@@ -555,9 +579,14 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testUnknownManagedObjectTeamAutoWire() {
 
+		final MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
+				Object.class);
+
 		// Record issue as unknown team
-		this.record_issue("Wired team 'team' not specified on ManagedObjectType for ManagedObject "
-				+ new AutoWire(Object.class).getQualifiedType());
+		this.issues.recordIssue(source.getAutoWire().getQualifiedType(),
+				ManagedObjectSourceNodeImpl.class,
+				"Wired team 'team' not specified on ManagedObjectType for ManagedObject "
+						+ new AutoWire(Object.class).getQualifiedType());
 
 		final ManagedObjectSourceWirer wirer = new ManagedObjectSourceWirer() {
 			@Override
@@ -570,8 +599,6 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.loadSuppliedManagedObjectType(new Init() {
 			@Override
 			public void supply(SupplierSourceContext context) {
-				MockTypeManagedObjectSource source = new MockTypeManagedObjectSource(
-						Object.class);
 				source.addAsManagedObject(context, wirer);
 			}
 		});
@@ -643,30 +670,6 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect fourth managed object", new AutoWire(
 				"QUALIFIED", Object.class.getName()),
 				managedObjects[3].getAutoWiring()[0]);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
-				issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
-				issueDescription, cause);
 	}
 
 	/**

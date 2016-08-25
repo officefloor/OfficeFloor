@@ -17,9 +17,9 @@
  */
 package net.officefloor.compile.integrate.officefloor;
 
+import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
 
@@ -41,8 +41,8 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testMissingTag() {
 
 		// Record issue if tag not provided as property
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-				AssetType.OFFICE_FLOOR, "OfficeFloor",
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
+				OfficeFloorNodeImpl.class,
 				"Property 'missing.tag' must be specified");
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -56,8 +56,8 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testWarnOnceOnMissingTagRepeated() {
 
 		// Record issue if tag not provided as property
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-				AssetType.OFFICE_FLOOR, "OfficeFloor",
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
+				OfficeFloorNodeImpl.class,
 				"Property 'repeated' must be specified");
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -71,11 +71,11 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testMultipleMissingTags() {
 
 		// Record issue for each missing unique tag
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-				AssetType.OFFICE_FLOOR, "OfficeFloor",
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
+				OfficeFloorNodeImpl.class,
 				"Property 'tag.one' must be specified");
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-				AssetType.OFFICE_FLOOR, "OfficeFloor",
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
+				OfficeFloorNodeImpl.class,
 				"Property 'tag.two' must be specified");
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -89,8 +89,8 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testPartialSetOfTagsProvided() {
 
 		// Record loading with tags provided
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
-				AssetType.OFFICE_FLOOR, "OfficeFloor",
+		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
+				OfficeFloorNodeImpl.class,
 				"Property 'not.provided' must be specified");
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -107,9 +107,7 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Ensure can compile with tag values
-		this
-				.compile(true, "office.name", "OFFICE", "office.location",
-						"office");
+		this.compile(true, "office.name", "OFFICE", "office.location", "office");
 	}
 
 }

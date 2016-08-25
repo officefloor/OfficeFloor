@@ -19,15 +19,15 @@ package net.officefloor.compile.impl.managedobject;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -52,6 +52,9 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 	 */
 	public void testLoadByClass() {
 
+		// Node
+		final Node node = this.createMock(Node.class);
+
 		// Name of the managed object source
 		final String MANAGED_OBJECT_SOURCE_NAME = "MOS";
 
@@ -70,9 +73,7 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		NodeContext nodeContext = (NodeContext) compiler;
 
 		// Load the officeflooor managed object source type
-		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(
-				LocationType.OFFICE_FLOOR, "OFFICE_FLOOR",
-				MANAGED_OBJECT_SOURCE_NAME);
+		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(node);
 		OfficeFloorManagedObjectSourceType mosType = moLoader
 				.loadOfficeFloorManagedObjectSourceType(
 						ClassManagedObjectSource.class, properties);
@@ -85,6 +86,9 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 	 */
 	public void testLoadByInstance() {
 
+		// Node
+		final Node node = this.createMock(Node.class);
+
 		// Name of the managed object source
 		final String MANAGED_OBJECT_SOURCE_NAME = "MOS";
 
@@ -103,9 +107,7 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		NodeContext nodeContext = (NodeContext) compiler;
 
 		// Load the officeflooor managed object source type
-		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(
-				LocationType.OFFICE_FLOOR, "OFFICE_FLOOR",
-				MANAGED_OBJECT_SOURCE_NAME);
+		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(node);
 		OfficeFloorManagedObjectSourceType mosType = moLoader
 				.loadOfficeFloorManagedObjectSourceType(
 						new ClassManagedObjectSource(), properties);
@@ -119,12 +121,12 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 	 */
 	public void testFailGetManagedObjectSourceSpecification() {
 
+		final Node node = this.createMock(Node.class);
 		final Error failure = new Error("specification failure");
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Record failure to instantiate
-		issues.addIssue(LocationType.OFFICE_FLOOR, "OFFICE_FLOOR",
-				AssetType.MANAGED_OBJECT, "mos",
+		issues.recordIssue("mos", ManagedObjectSourceNodeImpl.class,
 				"Failed to obtain ManagedObjectSourceSpecification from "
 						+ MockManagedObjectSource.class.getName(), failure);
 
@@ -142,8 +144,7 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		NodeContext nodeContext = (NodeContext) compiler;
 
 		// Load the officelooor managed object source type
-		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(
-				LocationType.OFFICE_FLOOR, "OFFICE_FLOOR", "mos");
+		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(node);
 		OfficeFloorManagedObjectSourceType mosType = moLoader
 				.loadOfficeFloorManagedObjectSourceType(
 						MockManagedObjectSource.class,

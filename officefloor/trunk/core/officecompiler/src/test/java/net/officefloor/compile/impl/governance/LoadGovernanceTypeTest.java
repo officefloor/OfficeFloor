@@ -25,9 +25,11 @@ import net.officefloor.compile.governance.GovernanceEscalationType;
 import net.officefloor.compile.governance.GovernanceFlowType;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.GovernanceNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceFlowMetaData;
@@ -37,7 +39,6 @@ import net.officefloor.compile.spi.governance.source.GovernanceSourceMetaData;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecification;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.spi.TestSource;
@@ -60,7 +61,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -77,7 +78,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
 				"Failed to instantiate " + MockGovernanceSource.class.getName()
 						+ " by default constructor", failure);
 
@@ -92,7 +93,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.record_issue("Property 'missing' must be specified");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"Property 'missing' must be specified");
 
 		// Attempt to load
 		this.loadGovernanceType(false, new Init<None>() {
@@ -138,7 +140,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.record_issue("Can not load class 'missing'");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"Can not load class 'missing'");
 
 		// Attempt to load
 		this.loadGovernanceType(false, new Init<None>() {
@@ -155,7 +158,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record missing resource
-		this.record_issue("Can not obtain resource at location 'missing'");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"Can not obtain resource at location 'missing'");
 
 		// Attempt to load
 		this.loadGovernanceType(false, new Init<None>() {
@@ -199,7 +203,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 				"Fail init GovernanceSource");
 
 		// Record failure to init the Governance Source
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
 				"Failed to initialise " + MockGovernanceSource.class.getName(),
 				failure);
 
@@ -218,7 +222,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	public void testNullGovernanceSourceMetaData() {
 
 		// Record null the Governance Source meta-data
-		this.record_issue("Must provide meta-data");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"Must provide meta-data");
 
 		// Attempt to load
 		this.loadGovernanceType(false, new Init<None>() {
@@ -237,7 +242,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		final Error failure = new Error("Obtain meta-data failure");
 
 		// Record failure to obtain the meta-data
-		this.record_issue("Failed to get GovernanceSourceMetaData", failure);
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"Failed to get GovernanceSourceMetaData", failure);
 
 		// Attempt to load
 		MockGovernanceSource.metaDataFailure = failure;
@@ -252,7 +258,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		// Record no governance factory
 		this.recordReturn(this.metaData, this.metaData.getGovernanceFactory(),
 				null);
-		this.record_issue("No GovernanceFactory provided");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"No GovernanceFactory provided");
 
 		// Attempt to load
 		this.loadGovernanceType(false, null);
@@ -268,7 +275,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 				this.createMock(GovernanceFactory.class));
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(),
 				null);
-		this.record_issue("No extension interface type provided");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"No extension interface type provided");
 
 		// Attempt to load
 		this.loadGovernanceType(false, null);
@@ -314,7 +322,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.record_factoryAndExtensionInterfaceType();
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new GovernanceFlowMetaData[] { null });
-		this.record_issue("Null GovernanceFlowMetaData for flow 0");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"Null GovernanceFlowMetaData for flow 0");
 
 		// Attempt to load
 		this.loadGovernanceType(false, null);
@@ -381,9 +390,12 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowOne, flowOne.getArgumentType(), Connection.class);
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), InvalidKey.INVALID);
-		this.record_issue("Meta-data flows identified by different key types ("
-				+ TwoKey.class.getName() + ", " + InvalidKey.class.getName()
-				+ ")");
+		this.issues.recordIssue(
+				Node.TYPE_NAME,
+				GovernanceNodeImpl.class,
+				"Meta-data flows identified by different key types ("
+						+ TwoKey.class.getName() + ", "
+						+ InvalidKey.class.getName() + ")");
 
 		// Attempt to load
 		this.loadGovernanceType(false, null);
@@ -408,7 +420,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowOne, flowOne.getArgumentType(), Connection.class);
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), null);
-		this.record_issue("Meta-data flows mixing keys and indexes");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"Meta-data flows mixing keys and indexes");
 
 		// Attempt to load
 		this.loadGovernanceType(false, null);
@@ -434,8 +447,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), TwoKey.ONE);
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
-		this.record_issue("Must have exactly one flow per key (key="
-				+ TwoKey.ONE + ")");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"Must have exactly one flow per key (key=" + TwoKey.ONE + ")");
 
 		// Attempt to load
 		this.loadGovernanceType(false, null);
@@ -456,7 +469,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flow, flow.getLabel(), null);
 		this.recordReturn(flow, flow.getKey(), TwoKey.ONE);
 		this.recordReturn(flow, flow.getArgumentType(), Connection.class);
-		this.record_issue("Missing flow meta-data (keys=" + TwoKey.TWO + ")");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"Missing flow meta-data (keys=" + TwoKey.TWO + ")");
 
 		// Attempt to load
 		this.loadGovernanceType(false, null);
@@ -468,7 +482,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	public void testNoEscalationType() {
 
 		// Record no escalation type
-		this.record_issue("Null escalation type for 0");
+		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+				"Null escalation type for 0");
 
 		// Record no escalation type
 		this.record_factoryAndExtensionInterfaceType();
@@ -611,30 +626,6 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.record_factoryAndExtensionInterfaceType();
 		this.record_flowMetaData();
 		this.record_escalationTypes();
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE, null, AssetType.GOVERNANCE,
-				null, issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE, null, AssetType.GOVERNANCE,
-				null, issueDescription, cause);
 	}
 
 	/**

@@ -19,13 +19,14 @@ package net.officefloor.compile.impl.administrator;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.impl.structure.AdministratorNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -46,7 +47,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * {@link AdministratorSourceSpecification}.
@@ -73,9 +74,12 @@ public class LoadAdministratorSourceSpecificationTest extends
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to instantiate "
-				+ MockAdministratorSource.class.getName()
-				+ " by default constructor", failure);
+		this.issues.recordIssue(
+				Node.TYPE_NAME,
+				AdministratorNodeImpl.class,
+				"Failed to instantiate "
+						+ MockAdministratorSource.class.getName()
+						+ " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockAdministratorSource.instantiateFailure = failure;
@@ -93,7 +97,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
 				"Failed to obtain AdministratorSourceSpecification from "
 						+ MockAdministratorSource.class.getName(), failure);
 
@@ -110,8 +114,9 @@ public class LoadAdministratorSourceSpecificationTest extends
 	public void testNoAdministratorSourceSpecification() {
 
 		// Record no specification returned
-		this.record_issue("No AdministratorSourceSpecification returned from "
-				+ MockAdministratorSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
+				"No AdministratorSourceSpecification returned from "
+						+ MockAdministratorSource.class.getName());
 
 		// Attempt to obtain specification
 		MockAdministratorSource.specification = null;
@@ -132,9 +137,13 @@ public class LoadAdministratorSourceSpecificationTest extends
 		// Record null properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this.record_issue(
-				"Failed to obtain AdministratorSourceProperty instances from AdministratorSourceSpecification for "
-						+ MockAdministratorSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						AdministratorNodeImpl.class,
+						"Failed to obtain AdministratorSourceProperty instances from AdministratorSourceSpecification for "
+								+ MockAdministratorSource.class.getName(),
+						failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -168,8 +177,12 @@ public class LoadAdministratorSourceSpecificationTest extends
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new AdministratorSourceProperty[] { null });
-		this.record_issue("AdministratorSourceProperty 0 is null from AdministratorSourceSpecification for "
-				+ MockAdministratorSource.class.getName());
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						AdministratorNodeImpl.class,
+						"AdministratorSourceProperty 0 is null from AdministratorSourceSpecification for "
+								+ MockAdministratorSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -191,8 +204,12 @@ public class LoadAdministratorSourceSpecificationTest extends
 				this.specification.getProperties(),
 				new AdministratorSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.record_issue("AdministratorSourceProperty 0 provided blank name from AdministratorSourceSpecification for "
-				+ MockAdministratorSource.class.getName());
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						AdministratorNodeImpl.class,
+						"AdministratorSourceProperty 0 provided blank name from AdministratorSourceSpecification for "
+								+ MockAdministratorSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -216,9 +233,13 @@ public class LoadAdministratorSourceSpecificationTest extends
 				this.specification.getProperties(),
 				new AdministratorSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.record_issue(
-				"Failed to get name for AdministratorSourceProperty 0 from AdministratorSourceSpecification for "
-						+ MockAdministratorSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						AdministratorNodeImpl.class,
+						"Failed to get name for AdministratorSourceProperty 0 from AdministratorSourceSpecification for "
+								+ MockAdministratorSource.class.getName(),
+						failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -243,9 +264,13 @@ public class LoadAdministratorSourceSpecificationTest extends
 				new AdministratorSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.record_issue(
-				"Failed to get label for AdministratorSourceProperty 0 (NAME) from AdministratorSourceSpecification for "
-						+ MockAdministratorSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						AdministratorNodeImpl.class,
+						"Failed to get label for AdministratorSourceProperty 0 (NAME) from AdministratorSourceSpecification for "
+								+ MockAdministratorSource.class.getName(),
+						failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -281,30 +306,6 @@ public class LoadAdministratorSourceSpecificationTest extends
 		this.replayMockObjects();
 		this.loadSpecification(true, "NAME", "LABEL", "NO LABEL", "NO LABEL");
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE, null,
-				AssetType.ADMINISTRATOR, null, issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE, null,
-				AssetType.ADMINISTRATOR, null, issueDescription, cause);
 	}
 
 	/**

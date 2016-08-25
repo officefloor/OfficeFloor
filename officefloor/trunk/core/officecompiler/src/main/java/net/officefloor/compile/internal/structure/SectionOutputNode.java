@@ -28,15 +28,16 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionOutputNode extends SectionOutputType, SectionOutput,
-		SubSectionOutput, OfficeSectionOutput, LinkFlowNode {
+public interface SectionOutputNode extends Node, SectionOutputType,
+		SectionOutput, SubSectionOutput, OfficeSectionOutput, LinkFlowNode {
 
 	/**
 	 * Indicates if this {@link SectionOutputType} has been initialised.
 	 * 
 	 * @return <code>true</code> if initialised.
 	 */
-	@Deprecated // TODO use add method SectionOutputType loadSectionOutputType
+	@Deprecated
+	// TODO use add method SectionOutputType loadSectionOutputType
 	boolean isInitialised();
 
 	/**
@@ -47,7 +48,8 @@ public interface SectionOutputNode extends SectionOutputType, SectionOutput,
 	 * @param isEscalationOnly
 	 *            Flag indicating if escalation only.
 	 */
-	@Deprecated // TODO add method OfficeSectionOutputType loadOfficeSectionOutputType
+	@Deprecated
+	// TODO add method OfficeSectionOutputType loadOfficeSectionOutputType
 	void initialise(String argumentType, boolean isEscalationOnly);
 
 	/**

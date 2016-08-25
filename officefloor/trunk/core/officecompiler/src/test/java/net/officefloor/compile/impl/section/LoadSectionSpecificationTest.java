@@ -18,8 +18,10 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
@@ -42,7 +44,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * {@link SectionSourceSpecification}.
@@ -64,7 +66,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
 				"Failed to instantiate " + MockSectionSource.class.getName()
 						+ " by default constructor", failure);
 
@@ -84,8 +86,9 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to obtain SectionSourceSpecification from "
-				+ MockSectionSource.class.getName(), failure);
+		this.issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
+				"Failed to obtain SectionSourceSpecification from "
+						+ MockSectionSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		MockSectionSource.specificationFailure = failure;
@@ -100,8 +103,9 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	public void testNoSectionSpecification() {
 
 		// Record no specification returned
-		this.record_issue("No SectionSourceSpecification returned from "
-				+ MockSectionSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
+				"No SectionSourceSpecification returned from "
+						+ MockSectionSource.class.getName());
 
 		// Attempt to obtain specification
 		MockSectionSource.specification = null;
@@ -122,9 +126,12 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		// Record null section properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this.record_issue(
-				"Failed to obtain SectionSourceProperty instances from SectionSourceSpecification for "
-						+ MockSectionSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						SectionNodeImpl.class,
+						"Failed to obtain SectionSourceProperty instances from SectionSourceSpecification for "
+								+ MockSectionSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -157,8 +164,9 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new SectionSourceProperty[] { null });
-		this.record_issue("SectionSourceProperty 0 is null from SectionSourceSpecification for "
-				+ MockSectionSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
+				"SectionSourceProperty 0 is null from SectionSourceSpecification for "
+						+ MockSectionSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -179,8 +187,12 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new SectionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.record_issue("SectionSourceProperty 0 provided blank name from SectionSourceSpecification for "
-				+ MockSectionSource.class.getName());
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						SectionNodeImpl.class,
+						"SectionSourceProperty 0 provided blank name from SectionSourceSpecification for "
+								+ MockSectionSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -203,9 +215,12 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new SectionSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.record_issue(
-				"Failed to get name for SectionSourceProperty 0 from SectionSourceSpecification for "
-						+ MockSectionSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						SectionNodeImpl.class,
+						"Failed to get name for SectionSourceProperty 0 from SectionSourceSpecification for "
+								+ MockSectionSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -229,9 +244,12 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 				new SectionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.record_issue(
-				"Failed to get label for SectionSourceProperty 0 (NAME) from SectionSourceSpecification for "
-						+ MockSectionSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						SectionNodeImpl.class,
+						"Failed to get label for SectionSourceProperty 0 (NAME) from SectionSourceSpecification for "
+								+ MockSectionSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -267,30 +285,6 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.loadSpecification(true, "NAME", "LABEL", "NO LABEL", "NO LABEL");
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.SECTION, null, null, null,
-				issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.SECTION, null, null, null,
-				issueDescription, cause);
 	}
 
 	/**

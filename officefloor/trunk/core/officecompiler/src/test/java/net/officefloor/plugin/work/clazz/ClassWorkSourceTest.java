@@ -24,8 +24,9 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.impl.structure.WorkNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
@@ -33,7 +34,6 @@ import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -116,7 +116,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testMultipleQualifiedDependency() throws Exception {
 
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Use compiler to record issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
@@ -124,7 +124,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
+		issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
 				"Failed to source WorkType definition from WorkSource "
 						+ ClassWorkSource.class.getName(),
 				new IllegalArgumentException(
@@ -548,7 +548,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testDuplicateMethodName() throws Exception {
 
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Use compiler to record issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
@@ -556,11 +556,9 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.addIssue(
-				LocationType.SECTION,
-				null,
-				AssetType.WORK,
-				null,
+		issues.recordIssue(
+				Node.TYPE_NAME,
+				WorkNodeImpl.class,
 				"Failed to source WorkType definition from WorkSource "
 						+ ClassWorkSource.class.getName(),
 				new IllegalStateException(

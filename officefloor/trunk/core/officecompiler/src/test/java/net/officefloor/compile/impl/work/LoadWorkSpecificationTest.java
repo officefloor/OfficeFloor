@@ -18,8 +18,10 @@
 package net.officefloor.compile.impl.work;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.impl.structure.WorkNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -29,7 +31,6 @@ import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -44,7 +45,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * {@link WorkSourceSpecification}.
@@ -66,7 +67,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
 				"Failed to instantiate " + MockWorkSource.class.getName()
 						+ " by default constructor", failure);
 
@@ -86,8 +87,9 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to obtain WorkSourceSpecification from "
-				+ MockWorkSource.class.getName(), failure);
+		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
+				"Failed to obtain WorkSourceSpecification from "
+						+ MockWorkSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		MockWorkSource.specificationFailure = failure;
@@ -102,8 +104,9 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	public void testNoWorkSpecification() {
 
 		// Record no specification returned
-		this.record_issue("No WorkSourceSpecification returned from "
-				+ MockWorkSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
+				"No WorkSourceSpecification returned from "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to obtain specification
 		MockWorkSource.specification = null;
@@ -124,9 +127,12 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		// Record null work properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this.record_issue(
-				"Failed to obtain WorkSourceProperty instances from WorkSourceSpecification for "
-						+ MockWorkSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						WorkNodeImpl.class,
+						"Failed to obtain WorkSourceProperty instances from WorkSourceSpecification for "
+								+ MockWorkSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -158,8 +164,9 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new WorkSourceProperty[] { null });
-		this.record_issue("WorkSourceProperty 0 is null from WorkSourceSpecification for "
-				+ MockWorkSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
+				"WorkSourceProperty 0 is null from WorkSourceSpecification for "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -180,8 +187,9 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new WorkSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.record_issue("WorkSourceProperty 0 provided blank name from WorkSourceSpecification for "
-				+ MockWorkSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
+				"WorkSourceProperty 0 provided blank name from WorkSourceSpecification for "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -204,7 +212,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new WorkSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
 				"Failed to get name for WorkSourceProperty 0 from WorkSourceSpecification for "
 						+ MockWorkSource.class.getName(), failure);
 
@@ -230,9 +238,12 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 				new WorkSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.record_issue(
-				"Failed to get label for WorkSourceProperty 0 (NAME) from WorkSourceSpecification for "
-						+ MockWorkSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						WorkNodeImpl.class,
+						"Failed to get label for WorkSourceProperty 0 (NAME) from WorkSourceSpecification for "
+								+ MockWorkSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -267,30 +278,6 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.loadSpecification(true, "NAME", "LABEL", "NO LABEL", "NO LABEL");
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
-				issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
-				issueDescription, cause);
 	}
 
 	/**

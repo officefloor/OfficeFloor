@@ -25,7 +25,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskFlowNode extends TaskFlow, LinkFlowNode {
+public interface TaskFlowNode extends Node, TaskFlow, LinkFlowNode {
 
 	/**
 	 * Obtains the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.

@@ -38,7 +38,7 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagingOfficeNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
-import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.TaskNode;
@@ -122,10 +122,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final Map<String, ManagedObjectFlowNode> flows = new HashMap<String, ManagedObjectFlowNode>();
 
 	/**
-	 * {@link OfficeTeamNode} instances by their {@link ManagedObjectTeam}
+	 * {@link TaskTeamNode} instances by their {@link ManagedObjectTeam}
 	 * names.
 	 */
-	private final Map<String, OfficeTeamNode> teams = new HashMap<String, OfficeTeamNode>();
+	private final Map<String, TaskTeamNode> teams = new HashMap<String, TaskTeamNode>();
 
 	/**
 	 * {@link ManagedObjectDependencyNode} instances by their
@@ -575,7 +575,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				this.context);
 
 		// Flag all existing teams within office floor context
-		for (OfficeTeamNode team : this.teams.values()) {
+		for (TaskTeamNode team : this.teams.values()) {
 			team.addOfficeFloorContext(this.officeFloorLocation);
 		}
 
@@ -979,7 +979,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			}
 
 			// Obtain the team
-			OfficeTeamNode managedObjectTeam = this.teams.get(teamName);
+			TaskTeamNode managedObjectTeam = this.teams.get(teamName);
 			TeamNode team = LinkUtil.retrieveTarget(managedObjectTeam,
 					TeamNode.class, "Managed object team " + teamName,
 					this.locationType, this.location, AssetType.MANAGED_OBJECT,
@@ -1051,10 +1051,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		}
 
 		// Obtain and return the team for the name
-		OfficeTeamNode team = this.teams.get(managedObjectSourceTeamName);
+		TaskTeamNode team = this.teams.get(managedObjectSourceTeamName);
 		if (team == null) {
 			// Create the office team
-			team = new OfficeTeamNodeImpl(managedObjectSourceTeamName,
+			team = new TaskTeamNodeImpl(managedObjectSourceTeamName,
 					this.officeLocation, this.context);
 			if (this.isInOfficeFloorContext) {
 				// Add office floor context as within office floor context

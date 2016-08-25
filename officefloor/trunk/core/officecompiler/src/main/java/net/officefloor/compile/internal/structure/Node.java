@@ -17,19 +17,38 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.autowire.supplier.SupplyOrder;
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
-
 /**
- * Supplier {@link Node}.
- * 
+ * Node within the compilation tree.
+ *
  * @author Daniel Sagenschneider
  */
-public interface SupplierNode extends Node, OfficeFloorSupplier {
+public interface Node {
 
 	/**
-	 * Fill {@link SupplyOrder} instances.
+	 * Name used for {@link Node} when loaded as type.
 	 */
-	void fillSupplyOrders();
+	static final String TYPE_NAME = "TYPE";
+
+	/**
+	 * Obtains the name of the {@link Node}.
+	 * 
+	 * @return Name of the {@link Node}.
+	 */
+	String getNodeName();
+
+	/**
+	 * Obtains the location of the {@link Node}.
+	 * 
+	 * @return Location of the {@link Node}. May be <code>null</code> if
+	 *         {@link Node} does not support a location.
+	 */
+	String getLocation();
+
+	/**
+	 * Obtains the {@link Node} containing this {@link Node}.
+	 * 
+	 * @return {@link Node} containing this {@link Node}.
+	 */
+	Node getParentNode();
 
 }

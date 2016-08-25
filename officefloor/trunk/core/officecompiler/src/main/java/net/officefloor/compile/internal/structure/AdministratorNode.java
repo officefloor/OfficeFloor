@@ -28,7 +28,8 @@ import net.officefloor.frame.spi.administration.Administrator;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministratorNode extends OfficeAdministrator, LinkTeamNode {
+public interface AdministratorNode extends Node, OfficeAdministrator,
+		LinkTeamNode {
 
 	/**
 	 * <p>

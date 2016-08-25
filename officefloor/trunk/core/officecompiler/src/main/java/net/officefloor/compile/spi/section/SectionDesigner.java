@@ -24,8 +24,6 @@ import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -410,14 +408,8 @@ public interface SectionDesigner {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
-	 * @param assetType
-	 *            {@link AssetType}. May be <code>null</code> if
-	 *            {@link SectionNode} in general.
-	 * @param assetName
-	 *            Name of the {@link Asset}. May be <code>null</code> if
-	 *            {@link SectionNode} in general.
 	 */
-	void addIssue(String issueDescription, AssetType assetType, String assetName);
+	void addIssue(String issueDescription);
 
 	/**
 	 * <p>
@@ -432,14 +424,7 @@ public interface SectionDesigner {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
-	 * @param assetType
-	 *            {@link AssetType}. May be <code>null</code> if
-	 *            {@link SectionNode} in general.
-	 * @param assetName
-	 *            Name of the {@link Asset}. May be <code>null</code> if
-	 *            {@link SectionNode} in general.
 	 */
-	void addIssue(String issueDescription, Throwable cause,
-			AssetType assetType, String assetName);
+	void addIssue(String issueDescription, Throwable cause);
 
 }

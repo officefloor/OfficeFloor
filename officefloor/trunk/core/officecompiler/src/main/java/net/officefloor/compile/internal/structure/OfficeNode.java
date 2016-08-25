@@ -31,7 +31,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeNode extends OfficeArchitect, DeployedOffice,
+public interface OfficeNode extends Node, OfficeArchitect, DeployedOffice,
 		LinkOfficeNode {
 
 	/**

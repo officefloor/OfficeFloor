@@ -18,13 +18,14 @@
 package net.officefloor.compile.impl.team;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.impl.structure.TeamNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -43,7 +44,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * {@link TeamSourceSpecification}.
@@ -65,7 +66,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
 				"Failed to instantiate " + MockLoadTeamSource.class.getName()
 						+ " by default constructor", failure);
 
@@ -85,8 +86,9 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to obtain TeamSourceSpecification from "
-				+ MockLoadTeamSource.class.getName(), failure);
+		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
+				"Failed to obtain TeamSourceSpecification from "
+						+ MockLoadTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		MockLoadTeamSource.specificationFailure = failure;
@@ -101,8 +103,9 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNoTeamSourceSpecification() {
 
 		// Record no specification returned
-		this.record_issue("No TeamSourceSpecification returned from "
-				+ MockLoadTeamSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
+				"No TeamSourceSpecification returned from "
+						+ MockLoadTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		MockLoadTeamSource.specification = null;
@@ -123,9 +126,12 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 		// Record null properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this.record_issue(
-				"Failed to obtain TeamSourceProperty instances from TeamSourceSpecification for "
-						+ MockLoadTeamSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						TeamNodeImpl.class,
+						"Failed to obtain TeamSourceProperty instances from TeamSourceSpecification for "
+								+ MockLoadTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -157,8 +163,9 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new TeamSourceProperty[] { null });
-		this.record_issue("TeamSourceProperty 0 is null from TeamSourceSpecification for "
-				+ MockLoadTeamSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
+				"TeamSourceProperty 0 is null from TeamSourceSpecification for "
+						+ MockLoadTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -179,8 +186,9 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new TeamSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.record_issue("TeamSourceProperty 0 provided blank name from TeamSourceSpecification for "
-				+ MockLoadTeamSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
+				"TeamSourceProperty 0 provided blank name from TeamSourceSpecification for "
+						+ MockLoadTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -203,7 +211,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new TeamSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
 				"Failed to get name for TeamSourceProperty 0 from TeamSourceSpecification for "
 						+ MockLoadTeamSource.class.getName(), failure);
 
@@ -229,9 +237,12 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				new TeamSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.record_issue(
-				"Failed to get label for TeamSourceProperty 0 (NAME) from TeamSourceSpecification for "
-						+ MockLoadTeamSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						TeamNodeImpl.class,
+						"Failed to get label for TeamSourceProperty 0 (NAME) from TeamSourceSpecification for "
+								+ MockLoadTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -266,30 +277,6 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.loadSpecification(true, "NAME", "LABEL", "NO LABEL", "NO LABEL");
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, AssetType.TEAM,
-				null, issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, AssetType.TEAM,
-				null, issueDescription, cause);
 	}
 
 	/**

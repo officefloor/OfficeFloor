@@ -17,9 +17,8 @@
  */
 package net.officefloor.compile.issues;
 
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.model.Model;
 
 /**
  * Notified of issues in compilation of the {@link OfficeFloor}.
@@ -29,47 +28,43 @@ import net.officefloor.model.Model;
 public interface CompilerIssues {
 
 	/**
-	 * Type of location where issues may arise.
+	 * Captures {@link CompilerIssue} instances.
+	 * 
+	 * @param runnable
+	 *            {@link Runnable} of code to capture {@link CompilerIssue}
+	 *            within.
+	 * @return Array of {@link CompilerIssue} instances.
 	 */
-	public static enum LocationType {
-		SECTION, OFFICE, OFFICE_FLOOR
-	}
+	CompilerIssue[] captureIssues(Runnable runnable);
 
 	/**
-	 * Adds an issue about an asset at a particular location.
+	 * Adds an issue regarding a particular {@link Node}.
 	 * 
-	 * @param locationType
-	 *            {@link LocationType}.
-	 * @param location
-	 *            Path to {@link Model} file containing the issue.
-	 * @param assetType
-	 *            {@link AssetType}.
-	 * @param assetName
-	 *            Name of asset.
+	 * @param node
+	 *            {@link Node}.
 	 * @param issueDescription
 	 *            Description of the issue.
+	 * @param causes
+	 *            Possible {@link CompilerIssue} instances causing this issue.
+	 * @throws Error
+	 *             If fail compile fast.
+	 * 
+	 * @see CompilerIssues#captureIssues(Runnable)
 	 */
-	void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription);
+	void addIssue(Node node, String issueDescription, CompilerIssue... causes);
 
 	/**
-	 * Adds an issue about an asset at a particular location.
+	 * Adds an issue regarding a particular {@link Node}.
 	 * 
-	 * @param locationType
-	 *            {@link LocationType}.
-	 * @param location
-	 *            Path to {@link Model} file containing the issue.
-	 * @param assetType
-	 *            {@link AssetType}.
-	 * @param assetName
-	 *            Name of asset.
+	 * @param node
+	 *            {@link Node}.
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
+	 * @throws Error
+	 *             If fail compile fast.
 	 */
-	void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause);
+	void addIssue(Node node, String issueDescription, Throwable cause);
 
 }

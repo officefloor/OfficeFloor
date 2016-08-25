@@ -23,7 +23,10 @@ import java.util.Properties;
 import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
@@ -36,7 +39,6 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
@@ -71,7 +73,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * {@link ManagedObjectSourceMetaData}.
@@ -99,7 +101,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load {@link SimpleManagedObject} via
+	 * Ensure can load {@link ManagedObject} via
 	 * {@link ClassManagedObjectSource} {@link Class}.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -124,7 +126,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load {@link SimpleManagedObject} via
+	 * Ensure can load {@link ManagedObject} via
 	 * {@link ClassManagedObjectSource} instance.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -157,9 +159,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to instantiate "
-				+ MockManagedObjectSource.class.getName()
-				+ " by default constructor", failure);
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class, "Failed to instantiate "
+						+ MockManagedObjectSource.class.getName()
+						+ " by default constructor", failure);
 
 		// Attempt to load
 		MockManagedObjectSource.instantiateFailure = failure;
@@ -172,7 +175,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.record_issue("Missing property 'missing'");
+		this.issues
+				.recordIssue(Node.TYPE_NAME, ManagedObjectSourceNodeImpl.class,
+						"Missing property 'missing'");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -220,7 +225,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.record_issue("Can not load class 'missing'");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Can not load class 'missing'");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -238,7 +245,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record missing resource
-		this.record_issue("Can not obtain resource at location 'missing'");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Can not obtain resource at location 'missing'");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -284,7 +293,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				"Fail init ManagedObjectSource");
 
 		// Record failure to init the Managed Object Source
-		this.record_issue("Failed to init", failure);
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class, "Failed to init", failure);
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -302,7 +312,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	public void testNullManagedObjectSourceMetaData() {
 
 		// Record null the Managed Object Source meta-data
-		this.record_issue("Returned null ManagedObjectSourceMetaData");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Returned null ManagedObjectSourceMetaData");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -322,7 +334,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		final Error failure = new Error("Obtain meta-data failure");
 
 		// Record failure to obtain the meta-data
-		this.record_issue("Failed to get ManagedObjectSourceMetaData", failure);
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Failed to get ManagedObjectSourceMetaData", failure);
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -341,7 +355,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record no object class
 		this.recordReturn(this.metaData, this.metaData.getObjectClass(), null);
-		this.record_issue("No Object type provided");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class, "No Object type provided");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -357,7 +372,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				null);
-		this.record_issue("No ManagedObject type provided");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"No ManagedObject type provided");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -374,9 +391,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				Integer.class);
-		this.record_issue("ManagedObject class must implement "
-				+ ManagedObject.class.getName() + " (class="
-				+ Integer.class.getName() + ")");
+		this.issues.recordIssue(
+				Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"ManagedObject class must implement "
+						+ ManagedObject.class.getName() + " (class="
+						+ Integer.class.getName() + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -392,7 +412,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
 				new ManagedObjectDependencyMetaData[] { null });
-		this.record_issue("Null ManagedObjectDependencyMetaData for dependency 0");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Null ManagedObjectDependencyMetaData for dependency 0");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -413,7 +435,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependency, dependency.getLabel(), "NO TYPE");
 		this.recordReturn(dependency, dependency.getKey(), null);
 		this.recordReturn(dependency, dependency.getType(), null);
-		this.record_issue("No type for dependency 0 (key=<indexed>, label=NO TYPE)");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"No type for dependency 0 (key=<indexed>, label=NO TYPE)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -442,9 +466,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(),
 				InvalidKey.INVALID);
-		this.record_issue("Dependencies identified by different key types ("
-				+ TwoKey.class.getName() + ", " + InvalidKey.class.getName()
-				+ ")");
+		this.issues.recordIssue(
+				Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Dependencies identified by different key types ("
+						+ TwoKey.class.getName() + ", "
+						+ InvalidKey.class.getName() + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -472,7 +499,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyOne, dependencyOne.getTypeQualifier(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getLabel(), null);
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), null);
-		this.record_issue("Dependencies mixing keys and indexes");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Dependencies mixing keys and indexes");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -502,8 +531,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependencyTwo, dependencyTwo.getKey(), TwoKey.ONE);
 		this.recordReturn(dependencyTwo, dependencyTwo.getType(), String.class);
 		this.recordReturn(dependencyTwo, dependencyTwo.getTypeQualifier(), null);
-		this.record_issue("Must have exactly one dependency per key (key="
-				+ TwoKey.ONE + ")");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Must have exactly one dependency per key (key=" + TwoKey.ONE
+						+ ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -525,8 +556,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependency, dependency.getKey(), TwoKey.ONE);
 		this.recordReturn(dependency, dependency.getType(), Connection.class);
 		this.recordReturn(dependency, dependency.getTypeQualifier(), null);
-		this.record_issue("Missing dependency meta-data (keys=" + TwoKey.TWO
-				+ ")");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Missing dependency meta-data (keys=" + TwoKey.TWO + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -544,7 +576,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new ManagedObjectFlowMetaData[] { null });
-		this.record_issue("Null ManagedObjectFlowMetaData for flow 0");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Null ManagedObjectFlowMetaData for flow 0");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -616,9 +650,12 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowOne, flowOne.getArgumentType(), Connection.class);
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), InvalidKey.INVALID);
-		this.record_issue("Meta-data flows identified by different key types ("
-				+ TwoKey.class.getName() + ", " + InvalidKey.class.getName()
-				+ ")");
+		this.issues.recordIssue(
+				Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Meta-data flows identified by different key types ("
+						+ TwoKey.class.getName() + ", "
+						+ InvalidKey.class.getName() + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -645,7 +682,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowOne, flowOne.getArgumentType(), Connection.class);
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), null);
-		this.record_issue("Meta-data flows mixing keys and indexes");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Meta-data flows mixing keys and indexes");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -673,8 +712,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), TwoKey.ONE);
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
-		this.record_issue("Must have exactly one flow per key (key="
-				+ TwoKey.ONE + ")");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Must have exactly one flow per key (key=" + TwoKey.ONE + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -697,7 +737,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flow, flow.getLabel(), null);
 		this.recordReturn(flow, flow.getKey(), TwoKey.ONE);
 		this.recordReturn(flow, flow.getArgumentType(), Connection.class);
-		this.record_issue("Missing flow meta-data (keys=" + TwoKey.TWO + ")");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Missing flow meta-data (keys=" + TwoKey.TWO + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -902,7 +944,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData,
 				this.metaData.getExtensionInterfacesMetaData(),
 				new ManagedObjectExtensionInterfaceMetaData[] { null });
-		this.record_issue("Null extension interface meta-data");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Null extension interface meta-data");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -926,7 +970,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				new ManagedObjectExtensionInterfaceMetaData[] { eiMetaData });
 		this.recordReturn(eiMetaData, eiMetaData.getExtensionInterfaceType(),
 				null);
-		this.record_issue("Null extension interface type");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Null extension interface type");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -953,8 +999,11 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				XAResource.class);
 		this.recordReturn(eiMetaData,
 				eiMetaData.getExtensionInterfaceFactory(), null);
-		this.record_issue("No extension interface factory (type="
-				+ XAResource.class.getName() + ")");
+		this.issues.recordIssue(
+				Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"No extension interface factory (type="
+						+ XAResource.class.getName() + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (Init<None>) null);
@@ -1001,7 +1050,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record no tasks for work
 		this.record_basicMetaData();
-		this.record_issue("No tasks added for work (work=WORK)");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"No tasks added for work (work=WORK)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1020,7 +1071,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record no work name for task
 		this.record_basicMetaData();
-		this.record_issue("Work added without a name");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class, "Work added without a name");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1040,7 +1092,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record no name for task
 		this.record_basicMetaData();
-		this.record_issue("Task added without a name (work=WORK)");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Task added without a name (work=WORK)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1060,7 +1114,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record no team for task
 		this.record_basicMetaData();
-		this.record_issue("Must specify team for task (work=WORK, task=TASK)");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Must specify team for task (work=WORK, task=TASK)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1212,7 +1268,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record basic meta-data
 		this.record_basicMetaData();
-		this.record_issue("No instigation strategy for flow (work=WORK, task=TASK, flow=0)");
+		this.issues
+				.recordIssue(Node.TYPE_NAME, ManagedObjectSourceNodeImpl.class,
+						"No instigation strategy for flow (work=WORK, task=TASK, flow=0)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1237,7 +1295,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record basic meta-data
 		this.record_basicMetaData();
-		this.record_issue("No task name for flow (work=WORK, task=TASK, flow=0, link work=LINK_WORK)");
+		this.issues
+				.recordIssue(Node.TYPE_NAME, ManagedObjectSourceNodeImpl.class,
+						"No task name for flow (work=WORK, task=TASK, flow=0, link work=LINK_WORK)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1263,7 +1323,11 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record basic meta-data
 		this.record_basicMetaData();
-		this.record_issue("Unknown task being linked (work=WORK, task=TASK, flow=0, link work=LINK_WORK, link task=LINK_TASK)");
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						ManagedObjectSourceNodeImpl.class,
+						"Unknown task being linked (work=WORK, task=TASK, flow=0, link work=LINK_WORK, link task=LINK_TASK)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<None>() {
@@ -1369,7 +1433,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData(OneKey.KEY);
-		this.record_issue("ManagedObjectFlowMetaData requires linking by keys (not indexes)");
+		this.issues
+				.recordIssue(Node.TYPE_NAME, ManagedObjectSourceNodeImpl.class,
+						"ManagedObjectFlowMetaData requires linking by keys (not indexes)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<OneKey>() {
@@ -1390,12 +1456,16 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData(OneKey.KEY);
-		this.record_issue("Link key does not match type for ManagedObjectFlowMetaData (meta-data key type="
-				+ OneKey.class.getName()
-				+ ", link key type="
-				+ InvalidKey.class.getName()
-				+ ", link key="
-				+ InvalidKey.INVALID + ")");
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						ManagedObjectSourceNodeImpl.class,
+						"Link key does not match type for ManagedObjectFlowMetaData (meta-data key type="
+								+ OneKey.class.getName()
+								+ ", link key type="
+								+ InvalidKey.class.getName()
+								+ ", link key="
+								+ InvalidKey.INVALID + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init() {
@@ -1416,7 +1486,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData((Indexed) null);
-		this.record_issue("ManagedObjectFlowMetaData requires linking by indexes (not keys)");
+		this.issues
+				.recordIssue(Node.TYPE_NAME, ManagedObjectSourceNodeImpl.class,
+						"ManagedObjectFlowMetaData requires linking by indexes (not keys)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init() {
@@ -1435,7 +1507,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData((Indexed) null);
-		this.record_issue("ManagedObjectFlowMetaData does not define index (index=1)");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"ManagedObjectFlowMetaData does not define index (index=1)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<Indexed>() {
@@ -1460,7 +1534,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData((Indexed) null);
-		this.record_issue("Must provide work name for linked process 0 (key=<indexed>)");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Must provide work name for linked process 0 (key=<indexed>)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<Indexed>() {
@@ -1479,8 +1555,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData(OneKey.KEY);
-		this.record_issue("Must provide task name for linked process 0 (key="
-				+ OneKey.KEY + ")");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Must provide task name for linked process 0 (key="
+						+ OneKey.KEY + ")");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<OneKey>() {
@@ -1500,8 +1578,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record
 		this.record_basicMetaData(OneKey.KEY);
-		this.record_issue("Unknown task for linked process 0 (key="
-				+ OneKey.KEY + ", link work=WORK, link task=TASK)");
+		this.issues.recordIssue(Node.TYPE_NAME,
+				ManagedObjectSourceNodeImpl.class,
+				"Unknown task for linked process 0 (key=" + OneKey.KEY
+						+ ", link work=WORK, link task=TASK)");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, new Init<OneKey>() {
@@ -1625,30 +1705,6 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		// Record no supported extension interfaces
 		this.recordReturn(this.metaData,
 				this.metaData.getExtensionInterfacesMetaData(), null);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
-				issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
-				issueDescription, cause);
 	}
 
 	/**

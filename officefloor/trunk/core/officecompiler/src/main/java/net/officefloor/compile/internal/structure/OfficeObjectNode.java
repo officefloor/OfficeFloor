@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeObjectNode extends OfficeManagedObjectType,
+public interface OfficeObjectNode extends Node, OfficeManagedObjectType,
 		OfficeObject, LinkObjectNode {
 
 	/**

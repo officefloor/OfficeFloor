@@ -22,6 +22,7 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
@@ -76,8 +77,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	protected final CompilerIssues issues = this
-			.createMock(CompilerIssues.class);
+	protected final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * Enhances {@link CompilerIssues}.

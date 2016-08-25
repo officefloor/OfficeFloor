@@ -38,9 +38,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
-		OfficeManagedObjectSource, OfficeSectionManagedObjectSource,
-		OfficeFloorManagedObjectSource {
+public interface ManagedObjectSourceNode extends Node,
+		SectionManagedObjectSource, OfficeManagedObjectSource,
+		OfficeSectionManagedObjectSource, OfficeFloorManagedObjectSource {
 
 	/**
 	 * Indicates if have a {@link ManagedObjectSource} configured.
@@ -62,7 +62,8 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
 	 */
-	@Deprecated // TODO return type from loadManagedObjectType()
+	@Deprecated
+	// TODO return type from loadManagedObjectType()
 	ManagedObjectType<?> getManagedObjectType();
 
 	/**
@@ -77,7 +78,8 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	 *         if issue loading with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	@Deprecated // TODO return type from loadOfficeFloorManagedObjectSourceType()
+	@Deprecated
+	// TODO return type from loadOfficeFloorManagedObjectSourceType()
 	OfficeFloorManagedObjectSourceType getOfficeFloorManagedObjectSourceType();
 
 	/**
@@ -87,7 +89,8 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 */
-	@Deprecated // TODO REMOVE
+	@Deprecated
+	// TODO REMOVE
 	void addOfficeContext(String officeLocation);
 
 	/**

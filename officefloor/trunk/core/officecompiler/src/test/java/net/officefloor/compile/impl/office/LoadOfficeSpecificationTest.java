@@ -18,8 +18,10 @@
 package net.officefloor.compile.impl.office;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -42,7 +44,7 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * {@link OfficeSourceSpecification}.
@@ -64,7 +66,7 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, OfficeNodeImpl.class,
 				"Failed to instantiate " + MockOfficeSource.class.getName()
 						+ " by default constructor", failure);
 
@@ -84,8 +86,9 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to obtain OfficeSourceSpecification from "
-				+ MockOfficeSource.class.getName(), failure);
+		this.issues.recordIssue(Node.TYPE_NAME, OfficeNodeImpl.class,
+				"Failed to obtain OfficeSourceSpecification from "
+						+ MockOfficeSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		MockOfficeSource.specificationFailure = failure;
@@ -100,8 +103,9 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 	public void testNoOfficeSpecification() {
 
 		// Record no specification returned
-		this.record_issue("No OfficeSourceSpecification returned from "
-				+ MockOfficeSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, OfficeNodeImpl.class,
+				"No OfficeSourceSpecification returned from "
+						+ MockOfficeSource.class.getName());
 
 		// Attempt to obtain specification
 		MockOfficeSource.specification = null;
@@ -122,9 +126,12 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 		// Record null office properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this.record_issue(
-				"Failed to obtain OfficeSourceProperty instances from OfficeSourceSpecification for "
-						+ MockOfficeSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						OfficeNodeImpl.class,
+						"Failed to obtain OfficeSourceProperty instances from OfficeSourceSpecification for "
+								+ MockOfficeSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -157,8 +164,9 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new OfficeSourceProperty[] { null });
-		this.record_issue("OfficeSourceProperty 0 is null from OfficeSourceSpecification for "
-				+ MockOfficeSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, OfficeNodeImpl.class,
+				"OfficeSourceProperty 0 is null from OfficeSourceSpecification for "
+						+ MockOfficeSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -179,8 +187,12 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new OfficeSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.record_issue("OfficeSourceProperty 0 provided blank name from OfficeSourceSpecification for "
-				+ MockOfficeSource.class.getName());
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						OfficeNodeImpl.class,
+						"OfficeSourceProperty 0 provided blank name from OfficeSourceSpecification for "
+								+ MockOfficeSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -203,9 +215,12 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new OfficeSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.record_issue(
-				"Failed to get name for OfficeSourceProperty 0 from OfficeSourceSpecification for "
-						+ MockOfficeSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						OfficeNodeImpl.class,
+						"Failed to get name for OfficeSourceProperty 0 from OfficeSourceSpecification for "
+								+ MockOfficeSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -229,9 +244,12 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 				new OfficeSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.record_issue(
-				"Failed to get label for OfficeSourceProperty 0 (NAME) from OfficeSourceSpecification for "
-						+ MockOfficeSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						OfficeNodeImpl.class,
+						"Failed to get label for OfficeSourceProperty 0 (NAME) from OfficeSourceSpecification for "
+								+ MockOfficeSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -266,30 +284,6 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.loadSpecification(true, "NAME", "LABEL", "NO LABEL", "NO LABEL");
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE, null, null, null,
-				issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE, null, null, null,
-				issueDescription, cause);
 	}
 
 	/**

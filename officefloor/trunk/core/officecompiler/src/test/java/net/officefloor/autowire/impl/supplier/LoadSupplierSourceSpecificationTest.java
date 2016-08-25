@@ -23,8 +23,10 @@ import net.officefloor.autowire.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.MockCompilerIssues;
+import net.officefloor.compile.impl.structure.SupplierNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
@@ -41,7 +43,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * {@link SupplierSourceSpecification}.
@@ -63,7 +65,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue(
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
 				"Failed to instantiate " + MockSupplierSource.class.getName()
 						+ " by default constructor", failure);
 
@@ -83,8 +85,9 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to obtain SupplierSourceSpecification from "
-				+ MockSupplierSource.class.getName(), failure);
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+				"Failed to obtain SupplierSourceSpecification from "
+						+ MockSupplierSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		MockSupplierSource.specificationFailure = failure;
@@ -99,8 +102,9 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNoSupplierSourceSpecification() {
 
 		// Record no specification returned
-		this.record_issue("No SupplierSourceSpecification returned from "
-				+ MockSupplierSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+				"No SupplierSourceSpecification returned from "
+						+ MockSupplierSource.class.getName());
 
 		// Attempt to obtain specification
 		MockSupplierSource.specification = null;
@@ -121,9 +125,12 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 		// Record null properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this.record_issue(
-				"Failed to obtain SupplierSourceProperty instances from SupplierSourceSpecification for "
-						+ MockSupplierSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						SupplierNodeImpl.class,
+						"Failed to obtain SupplierSourceProperty instances from SupplierSourceSpecification for "
+								+ MockSupplierSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -156,8 +163,9 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new SupplierSourceProperty[] { null });
-		this.record_issue("SupplierSourceProperty 0 is null from SupplierSourceSpecification for "
-				+ MockSupplierSource.class.getName());
+		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+				"SupplierSourceProperty 0 is null from SupplierSourceSpecification for "
+						+ MockSupplierSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -178,8 +186,12 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new SupplierSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.record_issue("SupplierSourceProperty 0 provided blank name from SupplierSourceSpecification for "
-				+ MockSupplierSource.class.getName());
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						SupplierNodeImpl.class,
+						"SupplierSourceProperty 0 provided blank name from SupplierSourceSpecification for "
+								+ MockSupplierSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -202,9 +214,12 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new SupplierSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.record_issue(
-				"Failed to get name for SupplierSourceProperty 0 from SupplierSourceSpecification for "
-						+ MockSupplierSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						SupplierNodeImpl.class,
+						"Failed to get name for SupplierSourceProperty 0 from SupplierSourceSpecification for "
+								+ MockSupplierSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -228,9 +243,12 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 				new SupplierSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.record_issue(
-				"Failed to get label for SupplierSourceProperty 0 (NAME) from SupplierSourceSpecification for "
-						+ MockSupplierSource.class.getName(), failure);
+		this.issues
+				.recordIssue(
+						Node.TYPE_NAME,
+						SupplierNodeImpl.class,
+						"Failed to get label for SupplierSourceProperty 0 (NAME) from SupplierSourceSpecification for "
+								+ MockSupplierSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -266,30 +284,6 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.loadSpecification(true, "NAME", "LABEL", "NO LABEL", "NO LABEL");
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
-				issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
-				issueDescription, cause);
 	}
 
 	/**
