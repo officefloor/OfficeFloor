@@ -19,10 +19,10 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link EscalationNode} implementation.
@@ -37,9 +37,9 @@ public class EscalationNodeImpl implements EscalationNode {
 	private final String escalationType;
 
 	/**
-	 * Location of the {@link Office}.
+	 * Parent {@link OfficeNode}.
 	 */
-	private final String officeLocation;
+	private final OfficeNode parentOffice;
 
 	/**
 	 * {@link NodeContext}.
@@ -51,16 +51,52 @@ public class EscalationNodeImpl implements EscalationNode {
 	 * 
 	 * @param escalationType
 	 *            {@link Escalation} type.
-	 * @param officeLocation
-	 *            {@link Office} location.
+	 * @param parentOffice
+	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public EscalationNodeImpl(String escalationType, String officeLocation,
+	public EscalationNodeImpl(String escalationType, OfficeNode parentOffice,
 			NodeContext context) {
 		this.escalationType = escalationType;
-		this.officeLocation = officeLocation;
+		this.parentOffice = parentOffice;
 		this.context = context;
+	}
+
+	/*
+	 * ======================== Node =======================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -88,10 +124,7 @@ public class EscalationNodeImpl implements EscalationNode {
 		if (this.linkedFlowNode != null) {
 			// Office Escalation linked
 			this.context.getCompilerIssues().addIssue(
-					LocationType.OFFICE,
-					this.officeLocation,
-					null,
-					null,
+					this,
 					"Office escalation " + this.escalationType
 							+ " linked more than once");
 			return false; // already linked

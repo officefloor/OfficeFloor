@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -61,8 +62,52 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	}
 
 	/*
+	 * ===================== Node =================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
+	}
+
+	/*
 	 * ===================== SuppliedManagedObjectNode =================
 	 */
+
+	@Override
+	public SupplierNode getSupplierNode() {
+		// TODO implement SuppliedManagedObjectNode.getSupplierNode
+		throw new UnsupportedOperationException(
+				"TODO implement SuppliedManagedObjectNode.getSupplierNode");
+
+	}
 
 	@Override
 	public void loadSuppliedManagedObject() {

@@ -45,7 +45,7 @@ public interface OfficeArchitect {
 	 *            {@link OfficeInput}.
 	 * @return Added {@link OfficeInput}.
 	 */
-	OfficeInput addInput(String inputName, String parameterType);
+	OfficeInput addOfficeInput(String inputName, String parameterType);
 
 	/**
 	 * Adds a {@link OfficeOutput}.
@@ -57,7 +57,7 @@ public interface OfficeArchitect {
 	 *            {@link OfficeOutput}.
 	 * @return Added {@link OfficeOutput}.
 	 */
-	OfficeOutput addOutput(String outputName, String argumentType);
+	OfficeOutput addOfficeOutput(String outputName, String argumentType);
 
 	/**
 	 * Adds an {@link OfficeObject}.

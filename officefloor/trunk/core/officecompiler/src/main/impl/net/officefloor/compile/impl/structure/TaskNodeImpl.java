@@ -30,6 +30,7 @@ import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
@@ -151,18 +152,6 @@ public class TaskNodeImpl implements TaskNode {
 				+ this.taskName, this, this.context);
 	}
 
-	/**
-	 * Adds an issue regarding the {@link OfficeSection} being built.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
-				this.sectionLocation, AssetType.TASK, this.taskName,
-				issueDescription);
-	}
-
 	/*
 	 * ========================== TaskNode ===================================
 	 */
@@ -206,15 +195,15 @@ public class TaskNodeImpl implements TaskNode {
 		// Obtain the task factory for this task
 		TaskType<?, ?, ?> taskType = this.getTaskType();
 		if (taskType == null) {
-			this.addIssue("Can not find task type '" + this.taskTypeName + "'");
+			this.context.getCompilerIssues().addIssue(this,
+					"Can not find task type '" + this.taskTypeName + "'");
 			return; // must have task type
 		}
 
 		// Obtain the office team for the task
-		OfficeTeam officeTeam = LinkUtil.retrieveTarget(this.teamResponsible,
-				OfficeTeam.class, "Team for task " + this.taskName,
-				LocationType.SECTION, this.sectionLocation, AssetType.TASK,
-				this.taskName, this.context.getCompilerIssues());
+		OfficeTeamNode officeTeam = LinkUtil.retrieveTarget(
+				this.teamResponsible, OfficeTeamNode.class,
+				this.context.getCompilerIssues());
 		if (officeTeam == null) {
 			return; // must have team for the task
 		}
@@ -244,9 +233,7 @@ public class TaskNodeImpl implements TaskNode {
 			// Obtain the linked task for the flow
 			TaskFlowNode flowNode = this.taskFlows.get(flowName);
 			TaskNode linkedTask = LinkUtil.retrieveTarget(flowNode,
-					TaskNode.class, "Flow " + flowName, LocationType.SECTION,
-					this.sectionLocation, AssetType.TASK, this.taskName,
-					this.context.getCompilerIssues());
+					TaskNode.class, this.context.getCompilerIssues());
 			if (linkedTask == null) {
 				continue; // must have linked task
 			}
@@ -256,8 +243,11 @@ public class TaskNodeImpl implements TaskNode {
 			FlowInstigationStrategyEnum instigationStrategy = flowNode
 					.getFlowInstigationStrategy();
 			if (instigationStrategy == null) {
-				this.addIssue("No instigation strategy provided for flow "
-						+ flowName);
+				this.context.getCompilerIssues()
+						.addIssue(
+								this,
+								"No instigation strategy provided for flow "
+										+ flowName);
 				continue; // must have instigation strategy
 			}
 
@@ -289,8 +279,6 @@ public class TaskNodeImpl implements TaskNode {
 		if (this.linkedFlowNode != null) {
 			// Have next task so link to it
 			TaskNode nextTask = LinkUtil.retrieveTarget(this, TaskNode.class,
-					"Next task ", LocationType.SECTION, this.sectionLocation,
-					AssetType.TASK, this.taskName,
 					this.context.getCompilerIssues());
 			if (nextTask != null) {
 
@@ -339,9 +327,7 @@ public class TaskNodeImpl implements TaskNode {
 			// Obtain the managed object for the object
 			BoundManagedObjectNode linkedManagedObject = LinkUtil
 					.retrieveTarget(objectNode, BoundManagedObjectNode.class,
-							"Object " + objectName, LocationType.SECTION,
-							this.sectionLocation, AssetType.TASK,
-							this.taskName, this.context.getCompilerIssues());
+							this.context.getCompilerIssues());
 			if (linkedManagedObject == null) {
 				continue; // must have linked managed object
 			}
@@ -372,9 +358,7 @@ public class TaskNodeImpl implements TaskNode {
 			TaskFlowNode escalationNode = this.taskEscalations
 					.get(escalationName);
 			TaskNode linkedTask = LinkUtil.findTarget(escalationNode,
-					TaskNode.class, "Escalation " + escalationName,
-					LocationType.SECTION, this.sectionLocation, AssetType.TASK,
-					this.taskName, this.context.getCompilerIssues());
+					TaskNode.class, this.context.getCompilerIssues());
 			if (linkedTask != null) {
 				// Obtain the configuration details for linking
 				String linkedTaskName = linkedTask.getOfficeTaskName();
@@ -395,10 +379,8 @@ public class TaskNodeImpl implements TaskNode {
 				boolean isEscalatedToOffice = false;
 				SectionOutputNode sectionOutputNode = LinkUtil
 						.findFurtherestTarget(escalationNode,
-								SectionOutputNode.class, "Escalation "
-										+ escalationName, LocationType.SECTION,
-								this.sectionLocation, AssetType.TASK,
-								this.taskName, this.context.getCompilerIssues());
+								SectionOutputNode.class,
+								this.context.getCompilerIssues());
 				if (sectionOutputNode != null) {
 					// Determine if object of top level section (the office)
 					SectionNode sectionNode = sectionOutputNode
@@ -410,10 +392,7 @@ public class TaskNodeImpl implements TaskNode {
 					this.context
 							.getCompilerIssues()
 							.addIssue(
-									LocationType.SECTION,
-									this.sectionLocation,
-									AssetType.TASK,
-									this.taskName,
+									this,
 									"Escalation "
 											+ escalationClass.getName()
 											+ " not handled by a Task nor propagated to the Office");
@@ -457,8 +436,7 @@ public class TaskNodeImpl implements TaskNode {
 		TaskFlowNode flow = this.taskFlows.get(taskFlowName);
 		if (flow == null) {
 			// Add the task flow
-			flow = new TaskFlowNodeImpl(taskFlowName, false,
-					this.sectionLocation, this.context);
+			flow = this.context.createTaskFlowNode(taskFlowName, false, this);
 			this.taskFlows.put(taskFlowName, flow);
 		}
 		return flow;
@@ -470,12 +448,7 @@ public class TaskNodeImpl implements TaskNode {
 		TaskObjectNode object = this.taskObjects.get(taskObjectName);
 		if (object == null) {
 			// Create the task object
-			object = new TaskObjectNodeImpl(this, taskObjectName,
-					this.sectionLocation, this.context);
-			if (this.isOfficeContextLoaded) {
-				// Add the office context to the task
-				object.addOfficeContext(this.officeLocation);
-			}
+			object = this.context.createTaskObjectNode(taskObjectName, this);
 
 			// Add the task object
 			this.taskObjects.put(taskObjectName, object);
@@ -489,8 +462,8 @@ public class TaskNodeImpl implements TaskNode {
 		TaskFlowNode escalation = this.taskEscalations.get(taskEscalationName);
 		if (escalation == null) {
 			// Add the task escalation
-			escalation = new TaskFlowNodeImpl(taskEscalationName, true,
-					this.sectionLocation, this.context);
+			escalation = this.context.createTaskFlowNode(taskEscalationName,
+					true, this);
 			this.taskEscalations.put(taskEscalationName, escalation);
 		}
 		return escalation;

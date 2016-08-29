@@ -17,15 +17,12 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.office.OfficeTeamType;
-import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 
 /**
- * {@link OfficeTeam} node.
+ * {@link TaskTeam} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskTeamNode extends Node, OfficeTeam, OfficeTeamType,
-		TaskTeam, LinkTeamNode {
+public interface TaskTeamNode extends LinkTeamNode, TaskTeam {
 }

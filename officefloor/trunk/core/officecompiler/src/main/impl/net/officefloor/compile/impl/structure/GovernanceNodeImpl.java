@@ -24,18 +24,17 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.GovernerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeGovernance;
-import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.governance.Governance;
 
@@ -69,11 +68,6 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	private final PropertyList properties = new PropertyListImpl();
 
 	/**
-	 * Location of the {@link Office} containing this {@link OfficeGovernance}.
-	 */
-	private final String officeLocation;
-
-	/**
 	 * {@link OfficeNode} of the {@link Office} containing this
 	 * {@link Governance}.
 	 */
@@ -96,9 +90,9 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 *            Name of this {@link OfficeGovernance}.
 	 * @param governanceSourceClassName
 	 *            Class name of the {@link GovernanceSource}.
-	 * @param officeLocation
-	 *            Location of the {@link Office} containing this
-	 *            {@link OfficeGovernance}.
+	 * @param governanceSource
+	 *            Optional instantiated {@link GovernanceSource} to use. May be
+	 *            <code>null</code>.
 	 * @param officeNode
 	 *            {@link OfficeNode} of the {@link Office} containing this
 	 *            {@link Governance}.
@@ -106,41 +100,50 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 *            {@link NodeContext}.
 	 */
 	public GovernanceNodeImpl(String governanceName,
-			String governanceSourceClassName, String officeLocation,
-			OfficeNode officeNode, NodeContext context) {
+			String governanceSourceClassName,
+			GovernanceSource<?, ?> governanceSource, OfficeNode officeNode,
+			NodeContext context) {
 		this.governanceName = governanceName;
 		this.governanceSourceClassName = governanceSourceClassName;
-		this.governanceSource = null;
-		this.officeLocation = officeLocation;
+		this.governanceSource = governanceSource;
 		this.officeNode = officeNode;
 		this.context = context;
 	}
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param governanceName
-	 *            Name of this {@link OfficeGovernance}.
-	 * @param governanceSource
-	 *            {@link GovernanceSource} instance to use.
-	 * @param officeLocation
-	 *            Location of the {@link Office} containing this
-	 *            {@link OfficeGovernance}.
-	 * @param officeNode
-	 *            {@link OfficeNode} of the {@link Office} containing this
-	 *            {@link Governance}.
-	 * @param context
-	 *            {@link NodeContext}.
+	/*
+	 * ========================== Node ==============================
 	 */
-	public GovernanceNodeImpl(String governanceName,
-			GovernanceSource<?, ?> governanceSource, String officeLocation,
-			OfficeNode officeNode, NodeContext context) {
-		this.governanceName = governanceName;
-		this.governanceSourceClassName = null;
-		this.governanceSource = governanceSource;
-		this.officeLocation = officeLocation;
-		this.officeNode = officeNode;
-		this.context = context;
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -158,15 +161,13 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 		// Obtain the governance source class
 		Class governanceSourceClass = this.context.getGovernanceSourceClass(
-				this.governanceSourceClassName, this.officeLocation,
-				this.governanceName);
+				this.governanceSourceClassName, this);
 		if (governanceSourceClass == null) {
 			return null; // must obtain source class
 		}
 
 		// Load the governance type
-		GovernanceLoader loader = this.context.getGovernanceLoader(
-				this.officeLocation, this.governanceName);
+		GovernanceLoader loader = this.context.getGovernanceLoader(this);
 		this.governanceType = loader.loadGovernanceType(governanceSourceClass,
 				this.properties);
 
@@ -190,10 +191,8 @@ public class GovernanceNodeImpl implements GovernanceNode {
 				govType.getExtensionInterface());
 
 		// Obtain the office team responsible for this governance
-		OfficeTeam officeTeam = LinkUtil.retrieveTarget(this, OfficeTeam.class,
-				"Governance " + this.governanceName, LocationType.OFFICE,
-				this.officeLocation, AssetType.GOVERNANCE, this.governanceName,
-				this.context.getCompilerIssues());
+		OfficeTeamNode officeTeam = LinkUtil.retrieveTarget(this,
+				OfficeTeamNode.class, this.context.getCompilerIssues());
 		if (officeTeam != null) {
 			// Build the team responsible for the governance
 			govBuilder.setTeam(officeTeam.getOfficeTeamName());
@@ -231,10 +230,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		} else {
 			// Unknown governerable managed object node
 			this.context.getCompilerIssues().addIssue(
-					LocationType.OFFICE,
-					this.officeLocation,
-					AssetType.GOVERNANCE,
-					this.governanceName,
+					this,
 					"Unknown "
 							+ GovernerableManagedObject.class.getSimpleName()
 							+ " node");
@@ -256,9 +252,8 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		// Ensure not already linked
 		if (this.linkedTeamNode != null) {
 			// Team already linked
-			this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-					this.officeLocation, AssetType.GOVERNANCE,
-					this.governanceName, "Team already assigned");
+			this.context.getCompilerIssues().addIssue(this,
+					"Team already assigned");
 			return false; // already linked
 		}
 

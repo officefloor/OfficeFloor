@@ -18,16 +18,12 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionObjectType;
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.SectionObject;
-import net.officefloor.compile.spi.section.SubSectionObject;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionObjectNode} implementation.
@@ -40,12 +36,6 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * Name of the {@link SectionObjectType}.
 	 */
 	private final String objectName;
-
-	/**
-	 * Location of the {@link OfficeSection} containing this
-	 * {@link SubSectionObject}.
-	 */
-	private final String sectionLocation;
 
 	/**
 	 * {@link SectionNode} containing this {@link SectionObjectNode}.
@@ -73,59 +63,56 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	private String typeQualifier = null;
 
 	/**
-	 * Flags whether within the {@link Office} context.
-	 */
-	private boolean isInOfficeContext = false;
-
-	/**
-	 * Location of the {@link Office} containing this
-	 * {@link OfficeSectionObject}.
-	 */
-	private String officeLocation;
-
-	/**
-	 * Initiate not initialised.
+	 * Instantiate.
 	 * 
 	 * @param objectName
 	 *            Name of the {@link SectionObject}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection} containing this
-	 *            {@link SubSectionObject}.
 	 * @param section
 	 *            {@link SectionNode} containing this {@link SectionObjectNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionObjectNodeImpl(String objectName, String sectionLocation,
-			SectionNode section, NodeContext context) {
+	public SectionObjectNodeImpl(String objectName, SectionNode section,
+			NodeContext context) {
 		this.objectName = objectName;
-		this.sectionLocation = sectionLocation;
 		this.section = section;
 		this.context = context;
 	}
 
-	/**
-	 * Initiate initialised.
-	 * 
-	 * @param objectName
-	 *            Name of the {@link SectionObjectType}.
-	 * @param objectType
-	 *            Object type.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection} containing this
-	 *            {@link SubSectionObject}.
-	 * @param section
-	 *            {@link SectionNode} containing this {@link SectionObjectNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	/*
+	 * ==================== Node =========================
 	 */
-	public SectionObjectNodeImpl(String objectName, String objectType,
-			String sectionLocation, SectionNode section, NodeContext context) {
-		this.objectName = objectName;
-		this.sectionLocation = sectionLocation;
-		this.section = section;
-		this.context = context;
-		this.initialise(objectType);
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -147,15 +134,10 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	}
 
 	@Override
-	public void initialise(String objectType) {
+	public SectionObjectNode initialise(String objectType) {
 		this.objectType = objectType;
 		this.isInitialised = true;
-	}
-
-	@Override
-	public void addOfficeContext(String officeLocation) {
-		this.officeLocation = officeLocation;
-		this.isInOfficeContext = true;
+		return this;
 	}
 
 	@Override
@@ -214,25 +196,11 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 		// Ensure not already linked
 		if (this.linkedObjectNode != null) {
-			if (this.isInOfficeContext) {
-				// Office section object already linked
-				this.context.getCompilerIssues().addIssue(
-						LocationType.OFFICE,
-						this.officeLocation,
-						null,
-						null,
-						"Office section object " + this.objectName
-								+ " linked more than once");
-			} else {
-				// Sub section object already linked
-				this.context.getCompilerIssues().addIssue(
-						LocationType.SECTION,
-						this.sectionLocation,
-						null,
-						null,
-						"Sub section object " + this.objectName
-								+ " linked more than once");
-			}
+			// Office section object already linked
+			this.context.getCompilerIssues().addIssue(
+					this,
+					"Section object " + this.objectName
+							+ " linked more than once");
 			return false; // already linked
 		}
 

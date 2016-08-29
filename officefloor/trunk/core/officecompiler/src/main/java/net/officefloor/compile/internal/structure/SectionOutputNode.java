@@ -21,23 +21,20 @@ import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSectionOutput;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionOutput} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionOutputNode extends Node, SectionOutputType,
-		SectionOutput, SubSectionOutput, OfficeSectionOutput, LinkFlowNode {
+public interface SectionOutputNode extends LinkFlowNode, SectionOutput,
+		SubSectionOutput, OfficeSectionOutput, SectionOutputType {
 
 	/**
 	 * Indicates if this {@link SectionOutputType} has been initialised.
 	 * 
 	 * @return <code>true</code> if initialised.
 	 */
-	@Deprecated
-	// TODO use add method SectionOutputType loadSectionOutputType
 	boolean isInitialised();
 
 	/**
@@ -47,20 +44,9 @@ public interface SectionOutputNode extends Node, SectionOutputType,
 	 *            Argument type.
 	 * @param isEscalationOnly
 	 *            Flag indicating if escalation only.
+	 * @return <code>this</code> for builder pattern.
 	 */
-	@Deprecated
-	// TODO add method OfficeSectionOutputType loadOfficeSectionOutputType
-	void initialise(String argumentType, boolean isEscalationOnly);
-
-	/**
-	 * Adds the context of the {@link Office} containing this
-	 * {@link OfficeSectionOutput}.
-	 * 
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 */
-	@Deprecated
-	void addOfficeContext(String officeLocation);
+	SectionOutputNode initialise(String argumentType, boolean isEscalationOnly);
 
 	/**
 	 * Obtains {@link SectionNode} containing this {@link SectionOutputNode}.

@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectTeam;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
@@ -34,17 +35,19 @@ import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectRegistry;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
 import net.officefloor.compile.internal.structure.ManagingOfficeNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
-import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.WorkNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -69,7 +72,6 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -98,17 +100,17 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final SuppliedManagedObjectNode suppliedManagedObjectNode;
 
 	/**
+	 * Class name of the {@link ManagedObjectSource}.
+	 */
+	private final String managedObjectSourceClassName;
+
+	/**
 	 * {@link ManagedObjectSource} instance to use. If this is specified its use
 	 * overrides the {@link Class}. Will be <code>null</code> if not to
 	 * override.
 	 */
 	@SuppressWarnings("rawtypes")
 	private final ManagedObjectSource managedObjectSource;
-
-	/**
-	 * Class name of the {@link ManagedObjectSource}.
-	 */
-	private final String managedObjectSourceClassName;
 
 	/**
 	 * {@link PropertyList} to load the {@link ManagedObjectSource}.
@@ -122,10 +124,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final Map<String, ManagedObjectFlowNode> flows = new HashMap<String, ManagedObjectFlowNode>();
 
 	/**
-	 * {@link TaskTeamNode} instances by their {@link ManagedObjectTeam}
-	 * names.
+	 * {@link ManagedObjectTeamNode} instances by their
+	 * {@link ManagedObjectTeam} names.
 	 */
-	private final Map<String, TaskTeamNode> teams = new HashMap<String, TaskTeamNode>();
+	private final Map<String, ManagedObjectTeamNode> teams = new HashMap<String, ManagedObjectTeamNode>();
 
 	/**
 	 * {@link ManagedObjectDependencyNode} instances by their
@@ -135,27 +137,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final Map<String, ManagedObjectDependencyNode> inputDependencies = new HashMap<String, ManagedObjectDependencyNode>();
 
 	/**
-	 * Registry of all {@link ManagedObjectNode} instances within a location.
-	 * This allows to check that no other {@link ManagedObjectNode} instances
-	 * are added by other {@link ManagedObjectSourceNode} with the same name.
-	 */
-	private final Map<String, ManagedObjectNode> locationManagedObjects;
-
-	/**
 	 * {@link ManagedObjectNode} instances by their {@link ManagedObject} name.
 	 */
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
-
-	/**
-	 * {@link LocationType} of the location containing this
-	 * {@link ManagedObjectSource}.
-	 */
-	private final LocationType locationType;
-
-	/**
-	 * Location containing this {@link ManagedObjectSource}.
-	 */
-	private final String location;
 
 	/**
 	 * Containing {@link SectionNode}. <code>null</code> if contained in the
@@ -168,6 +152,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * {@link OfficeFloor}.
 	 */
 	private final OfficeNode containingOfficeNode;
+
+	/**
+	 * Containing {@link OfficeFloorNode}.
+	 */
+	private final OfficeFloorNode containingOfficeFloorNode;
+
+	/**
+	 * {@link ManagedObjectRegistry}.
+	 */
+	private final ManagedObjectRegistry managedObjectRegistry;
 
 	/**
 	 * {@link NodeContext}.
@@ -210,164 +204,58 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private InputManagedObjectNode inputManagedObjectNode = null;
 
 	/**
-	 * Flags whether within the {@link Office} context.
-	 */
-	private boolean isInOfficeContext = false;
-
-	/**
-	 * Location of the {@link Office} containing this
-	 * {@link OfficeManagedObject}.
-	 */
-	private String officeLocation;
-
-	/**
-	 * Flags whether within the {@link OfficeFloor} context.
-	 */
-	private boolean isInOfficeFloorContext = false;
-
-	/**
-	 * Location of the {@link OfficeFloor} containing this
-	 * {@link OfficeFloorManagedObject}.
-	 */
-	private String officeFloorLocation;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectSourceName
 	 *            Name of this {@link ManagedObjectSource}.
+	 * @param suppliedManagedObjectNode
+	 *            Optional {@link SuppliedManagedObjectNode} providing the
+	 *            {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClassName
 	 *            Class name of the {@link ManagedObjectSource}.
-	 * @param locationType
-	 *            {@link LocationType} of the location containing this
-	 *            {@link ManagedObjectSource}.
-	 * @param location
-	 *            Location containing this {@link ManagedObjectSource}.
-	 * @param containingOfficeNode
-	 *            {@link OfficeNode} containing this
-	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
-	 *            contained in the {@link OfficeFloor}.
-	 * @param containingSectionNode
-	 *            {@link SectionNode} containing this
-	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
-	 *            contained in the {@link Office} or {@link OfficeFloor}.
-	 * @param locationManagedObjects
-	 *            Registry of all {@link ManagedObjectNode} instances within a
-	 *            location. This allows to check that no other
-	 *            {@link ManagedObjectNode} instances are added by other
-	 *            {@link ManagedObjectSourceNode} with the same name.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	public ManagedObjectSourceNodeImpl(String managedObjectSourceName,
-			String managedObjectSourceClassName, LocationType locationType,
-			String location, SectionNode containingSectionNode,
-			OfficeNode containingOfficeNode,
-			Map<String, ManagedObjectNode> locationManagedObjects,
-			NodeContext context) {
-		this.managedObjectSourceName = managedObjectSourceName;
-		this.suppliedManagedObjectNode = null;
-		this.managedObjectSource = null;
-		this.managedObjectSourceClassName = managedObjectSourceClassName;
-		this.locationType = locationType;
-		this.location = location;
-		this.containingSectionNode = containingSectionNode;
-		this.containingOfficeNode = containingOfficeNode;
-		this.locationManagedObjects = locationManagedObjects;
-		this.context = context;
-	}
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param managedObjectSourceName
-	 *            Name of this {@link ManagedObjectSource}.
 	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance to use.
-	 * @param locationType
-	 *            {@link LocationType} of the location containing this
-	 *            {@link ManagedObjectSource}.
-	 * @param location
-	 *            Location containing this {@link ManagedObjectSource}.
-	 * @param containingOfficeNode
-	 *            {@link OfficeNode} containing this
-	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
-	 *            contained in the {@link OfficeFloor}.
+	 *            Optional instantiated {@link ManagedObjectSource}. May be
+	 *            <code>null</code>.
 	 * @param containingSectionNode
 	 *            {@link SectionNode} containing this
 	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
 	 *            contained in the {@link Office} or {@link OfficeFloor}.
-	 * @param locationManagedObjects
-	 *            Registry of all {@link ManagedObjectNode} instances within a
-	 *            location. This allows to check that no other
-	 *            {@link ManagedObjectNode} instances are added by other
-	 *            {@link ManagedObjectSourceNode} with the same name.
+	 * @param containingOfficeNode
+	 *            {@link OfficeNode} containing this
+	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
+	 *            contained in the {@link OfficeFloor}.
+	 * @param containingSuppliedManagedObjectNode
+	 *            {@link SuppliedManagedObjectNode} containing this
+	 *            {@link ManagedObjectSource}. <code>null</code> if not provided
+	 *            from {@link SupplierSource}.
+	 * @param containingOfficeFloorNode
+	 *            {@link OfficeFloorNode} containing this
+	 *            {@link ManagedObjectSourceNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectSourceNodeImpl(String managedObjectSourceName,
+			SuppliedManagedObjectNode suppliedManagedObjectNode,
+			String managedObjectSourceClassName,
 			ManagedObjectSource<?, ?> managedObjectSource,
-			LocationType locationType, String location,
 			SectionNode containingSectionNode, OfficeNode containingOfficeNode,
-			Map<String, ManagedObjectNode> locationManagedObjects,
-			NodeContext context) {
+			OfficeFloorNode containingOfficeFloorNode, NodeContext context) {
 		this.managedObjectSourceName = managedObjectSourceName;
-		this.suppliedManagedObjectNode = null;
+		this.suppliedManagedObjectNode = suppliedManagedObjectNode;
+		this.managedObjectSourceClassName = managedObjectSourceClassName;
 		this.managedObjectSource = managedObjectSource;
-		this.managedObjectSourceClassName = null;
-		this.locationType = locationType;
-		this.location = location;
 		this.containingSectionNode = containingSectionNode;
 		this.containingOfficeNode = containingOfficeNode;
-		this.locationManagedObjects = locationManagedObjects;
+		this.containingOfficeFloorNode = containingOfficeFloorNode;
 		this.context = context;
-	}
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param managedObjectSourceName
-	 *            Name of this {@link ManagedObjectSource}.
-	 * @param suppliedManagedobjectNode
-	 *            {@link SuppliedManagedObjectNode} to use to supply this
-	 *            {@link ManagedObjectSource}.
-	 * @param locationType
-	 *            {@link LocationType} of the location containing this
-	 *            {@link ManagedObjectSource}.
-	 * @param location
-	 *            Location containing this {@link ManagedObjectSource}.
-	 * @param containingOfficeNode
-	 *            {@link OfficeNode} containing this
-	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
-	 *            contained in the {@link OfficeFloor}.
-	 * @param containingSectionNode
-	 *            {@link SectionNode} containing this
-	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
-	 *            contained in the {@link Office} or {@link OfficeFloor}.
-	 * @param locationManagedObjects
-	 *            Registry of all {@link ManagedObjectNode} instances within a
-	 *            location. This allows to check that no other
-	 *            {@link ManagedObjectNode} instances are added by other
-	 *            {@link ManagedObjectSourceNode} with the same name.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	public ManagedObjectSourceNodeImpl(String managedObjectSourceName,
-			SuppliedManagedObjectNode suppliedManagedobjectNode,
-			LocationType locationType, String location,
-			SectionNode containingSectionNode, OfficeNode containingOfficeNode,
-			Map<String, ManagedObjectNode> locationManagedObjects,
-			NodeContext context) {
-		this.managedObjectSourceName = managedObjectSourceName;
-		this.suppliedManagedObjectNode = suppliedManagedobjectNode;
-		this.managedObjectSource = null;
-		this.managedObjectSourceClassName = null;
-		this.locationType = locationType;
-		this.location = location;
-		this.containingSectionNode = containingSectionNode;
-		this.containingOfficeNode = containingOfficeNode;
-		this.locationManagedObjects = locationManagedObjects;
-		this.context = context;
+		// Specify the registry
+		this.managedObjectRegistry = (this.containingSectionNode != null ? this.containingSectionNode
+				: (this.containingOfficeNode != null ? this.containingOfficeNode
+						: this.containingOfficeFloorNode));
+
+		// Create the additional objects
+		this.managingOffice = this.context.createManagingOfficeNode(this);
 	}
 
 	/**
@@ -382,49 +270,84 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public ManagedObjectNode addManagedObject(String managedObjectName,
 			ManagedObjectScope managedObjectScope) {
 		// Obtain and return the managed object for the name
-		ManagedObjectNode managedObject = this.locationManagedObjects
-				.get(managedObjectName);
+		ManagedObjectNode managedObject = this.managedObjectRegistry
+				.getManagedObjectNode(managedObjectName);
 		if (managedObject == null) {
 			// Add the managed object and register it
-			managedObject = new ManagedObjectNodeImpl(managedObjectName,
-					managedObjectScope, this.locationType, this.location, this,
-					this.containingSectionNode, this.containingOfficeNode,
-					this.context);
-			this.locationManagedObjects.put(managedObjectName, managedObject);
+			managedObject = this.managedObjectRegistry.createManagedObjectNode(
+					managedObjectName, managedObjectScope);
 			this.managedObjects.put(managedObjectName, managedObject);
 		} else {
-			// Obtain managed object location type description
-			String locationTypeDesc;
-			switch (this.locationType) {
-			case OFFICE_FLOOR:
-				locationTypeDesc = "Office floor";
-				break;
-			case OFFICE:
-				locationTypeDesc = "Office";
-				break;
-			case SECTION:
-				locationTypeDesc = "Section";
-				break;
-			default:
-				throw new IllegalStateException("Unknown location type "
-						+ this.locationType);
-			}
-
 			// Managed object already added
-			this.context.getCompilerIssues().addIssue(
-					this.locationType,
-					this.location,
-					AssetType.MANAGED_OBJECT,
-					managedObjectName,
-					locationTypeDesc + " managed object " + managedObjectName
-							+ " already added");
+			this.context.getCompilerIssues().addIssue(this,
+					"Managed object " + managedObjectName + " already added");
 		}
 		return managedObject;
 	}
 
 	/*
+	 * =========================== Node ===================================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
+	}
+
+	/*
 	 * ================ ManagedObjectSourceNode ===============================
 	 */
+
+	@Override
+	public SectionNode getSectionNode() {
+		// TODO implement ManagedObjectSourceNode.getSectionNode
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectSourceNode.getSectionNode");
+
+	}
+
+	@Override
+	public OfficeNode getOfficeNode() {
+		// TODO implement ManagedObjectSourceNode.getOfficeNode
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectSourceNode.getOfficeNode");
+
+	}
+
+	@Override
+	public OfficeFloorNode getOfficeFloorNode() {
+		// TODO implement ManagedObjectSourceNode.getOfficeFloorNode
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectSourceNode.getOfficeFloorNode");
+
+	}
 
 	@Override
 	public boolean hasManagedObjectSource() {
@@ -457,9 +380,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		} else {
 
 			// Create the loader to obtain the managed object type
-			ManagedObjectLoader loader = this.context.getManagedObjectLoader(
-					this.locationType, this.location,
-					this.managedObjectSourceName);
+			ManagedObjectLoader loader = this.context
+					.getManagedObjectLoader(this);
 
 			// Load the managed object type
 			if (this.managedObjectSource != null) {
@@ -471,9 +393,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				// Obtain the managed object source class
 				Class managedObjectSourceClass = this.context
 						.getManagedObjectSourceClass(
-								this.managedObjectSourceClassName,
-								this.locationType, this.location,
-								this.managedObjectSourceName);
+								this.managedObjectSourceClassName, this);
 				if (managedObjectSourceClass == null) {
 					return; // must have managed object source class
 				}
@@ -518,8 +438,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		this.isOfficeFloorManagedObjectSourceTypeLoaded = true;
 
 		// Create the loader to obtain the managed object type
-		ManagedObjectLoader loader = this.context.getManagedObjectLoader(
-				this.locationType, this.location, this.managedObjectSourceName);
+		ManagedObjectLoader loader = this.context.getManagedObjectLoader(this);
 
 		// Load the managed object type
 		if (this.managedObjectSource != null) {
@@ -532,9 +451,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			// Obtain the managed object source class
 			Class managedObjectSourceClass = this.context
 					.getManagedObjectSourceClass(
-							this.managedObjectSourceClassName,
-							this.locationType, this.location,
-							this.managedObjectSourceName);
+							this.managedObjectSourceClassName, this);
 			if (managedObjectSourceClass == null) {
 				return; // must have managed object source class
 			}
@@ -560,51 +477,23 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public void addOfficeContext(String officeLocation) {
-		this.officeLocation = officeLocation;
-		this.isInOfficeContext = true;
-	}
-
-	@Override
-	public void addOfficeFloorContext(String officeFloorLocation) {
-		this.officeFloorLocation = officeFloorLocation;
-
-		// Load the managing office
-		this.managingOffice = new ManagingOfficeNodeImpl(
-				this.managedObjectSourceName, this.officeFloorLocation,
-				this.context);
-
-		// Flag all existing teams within office floor context
-		for (TaskTeamNode team : this.teams.values()) {
-			team.addOfficeFloorContext(this.officeFloorLocation);
-		}
-
-		// Now in office floor context
-		this.isInOfficeFloorContext = true;
-	}
-
-	@Override
 	public String getManagedObjectSourceName() {
 		// Obtain the name based on location
-		switch (this.locationType) {
-		case OFFICE_FLOOR:
-			// Use name unqualified
-			return this.managedObjectSourceName;
-
-		case OFFICE:
-			// Use name qualified with office name
-			return this.containingOfficeNode.getDeployedOfficeName() + "."
-					+ this.managedObjectSourceName;
-
-		case SECTION:
+		if (this.containingSectionNode != null) {
 			// Use name qualified with both office and section
 			return this.containingOfficeNode.getDeployedOfficeName()
 					+ "."
 					+ this.containingSectionNode
 							.getSectionQualifiedName(this.managedObjectSourceName);
 
-		default:
-			throw new IllegalStateException("Unknown location type");
+		} else if (this.containingOfficeNode != null) {
+			// Use name qualified with office name
+			return this.containingOfficeNode.getDeployedOfficeName() + "."
+					+ this.managedObjectSourceName;
+
+		} else {
+			// Use name unqualified
+			return this.managedObjectSourceName;
 		}
 	}
 
@@ -613,10 +502,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 		// Obtain the managing office
 		OfficeNode managingOffice = LinkUtil.retrieveTarget(
-				this.managingOffice, OfficeNode.class, "Managed Object Source "
-						+ this.managedObjectSourceName,
-				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-				AssetType.MANAGED_OBJECT, this.managedObjectSourceName,
+				this.managingOffice, OfficeNode.class,
 				this.context.getCompilerIssues());
 
 		// Return the managing office
@@ -631,10 +517,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		if (this.inputManagedObjectNode != null) {
 			// Already linked
 			this.context.getCompilerIssues().addIssue(
-					this.locationType,
-					this.location,
-					null,
-					null,
+					this,
 					"Managed object source " + this.managedObjectSourceName
 							+ " already linked to an input managed object");
 			return false;
@@ -675,12 +558,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			if (suppliedManagedObject == null) {
 				// Must have supplied managed object
 				this.context.getCompilerIssues().addIssue(
-						this.locationType,
-						this.location,
-						AssetType.MANAGED_OBJECT,
-						managedObjectSourceName,
+						this,
 						"No " + SuppliedManagedObject.class.getSimpleName()
-								+ " available");
+								+ " available for managed object source "
+								+ managedObjectSourceName);
 				return; // must have supplied managed object
 			}
 
@@ -710,8 +591,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 				// Obtain the team source class
 				Class teamSourceClass = this.context.getTeamSourceClass(
-						suppliedTeam.getTeamSourceClassName(), this.location,
-						qualifiedTeamName);
+						suppliedTeam.getTeamSourceClassName(), this);
 				if (teamSourceClass == null) {
 					continue; // must have team source class
 				}
@@ -738,9 +618,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			// No instance, so obtain by managed object source class
 			Class managedObjectSourceClass = this.context
 					.getManagedObjectSourceClass(
-							this.managedObjectSourceClassName,
-							LocationType.OFFICE_FLOOR,
-							this.officeFloorLocation, managedObjectSourceName);
+							this.managedObjectSourceClassName, this);
 			if (managedObjectSourceClass == null) {
 				return; // must have managed object source class
 			}
@@ -773,12 +651,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			// Ensure have Input ManagedObject name
 			String inputBoundManagedObjectName = null;
-			switch (this.locationType) {
-			case OFFICE_FLOOR:
+			if ((this.containingSectionNode != null)
+					|| (this.containingOfficeNode != null)) {
+				// Can not link to managed object initiating flow.
+				// Use name of managed object source.
+				inputBoundManagedObjectName = managedObjectSourceName;
+
+			} else {
 				// Determine if require configuring as Input Managed Object
 				ManagedObjectLoader loader = this.context
-						.getManagedObjectLoader(this.locationType,
-								this.location, this.managedObjectSourceName);
+						.getManagedObjectLoader(this);
 				if (loader.isInputManagedObject(managedObjectType)) {
 					// Must configure as Input Managed Object (as shared)
 					if (this.inputManagedObjectNode != null) {
@@ -789,26 +671,15 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					// Never shared (tasks specific to Managed Object Source)
 					inputBoundManagedObjectName = managedObjectSourceName;
 				}
-				break;
-			case OFFICE:
-			case SECTION:
-				// Can not link to managed object initiating flow.
-				// Use name of managed object source.
-				inputBoundManagedObjectName = managedObjectSourceName;
-				break;
-			default:
-				throw new IllegalStateException("Unknown location type: "
-						+ this.locationType);
 			}
+
 			if (CompileUtil.isBlank(inputBoundManagedObjectName)) {
 				// Provide issue as should be input
-				this.context
-						.getCompilerIssues()
-						.addIssue(LocationType.OFFICE_FLOOR,
-								this.officeFloorLocation,
-								AssetType.MANAGED_OBJECT,
-								this.managedObjectSourceName,
-								"Must provide input managed object as managed object source has flows/teams");
+				this.context.getCompilerIssues().addIssue(
+						this,
+						"Must provide input managed object for managed object source "
+								+ this.managedObjectSourceName
+								+ " as managed object source has flows/teams");
 			} else {
 				// Bind the managed object to process state of managing office
 				DependencyMappingBuilder inputDependencyMappings = managingOfficeBuilder
@@ -849,11 +720,6 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						BoundManagedObjectNode dependency = LinkUtil
 								.retrieveTarget(dependencyNode,
 										BoundManagedObjectNode.class,
-										"Dependency " + dependencyName,
-										this.locationType, this.location,
-										AssetType.MANAGED_OBJECT,
-										this.managedObjectSourceName + "->"
-												+ inputBoundManagedObjectName,
 										this.context.getCompilerIssues());
 						if (dependency == null) {
 							continue; // must have dependency
@@ -890,10 +756,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			// Obtain the task for the flow
 			ManagedObjectFlowNode flowNode = this.flows.get(flowName);
 			TaskNode taskNode = LinkUtil.retrieveTarget(flowNode,
-					TaskNode.class, "Managed object flow " + flowName,
-					this.locationType, this.location, AssetType.MANAGED_OBJECT,
-					this.managedObjectSourceName,
-					this.context.getCompilerIssues());
+					TaskNode.class, this.context.getCompilerIssues());
 			if (taskNode == null) {
 				continue; // must have task node
 			}
@@ -903,16 +766,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			SectionNode section = workNode.getSectionNode();
 			OfficeNode taskOffice = section.getOfficeNode();
 			if (taskOffice != managingOffice) {
-				this.context
-						.getCompilerIssues()
-						.addIssue(
-								this.locationType,
-								this.location,
-								AssetType.MANAGED_OBJECT,
-								this.managedObjectSourceName,
-								"Flow "
-										+ flowName
-										+ " linked task must be within the managing office");
+				this.context.getCompilerIssues().addIssue(
+						this,
+						"Linked task of flow " + flowName
+								+ " from managed object source "
+								+ this.managedObjectSourceName
+								+ " must be within the managing office");
 				continue; // task must be within managing office
 			}
 
@@ -979,12 +838,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			}
 
 			// Obtain the team
-			TaskTeamNode managedObjectTeam = this.teams.get(teamName);
+			ManagedObjectTeamNode managedObjectTeam = this.teams.get(teamName);
 			TeamNode team = LinkUtil.retrieveTarget(managedObjectTeam,
-					TeamNode.class, "Managed object team " + teamName,
-					this.locationType, this.location, AssetType.MANAGED_OBJECT,
-					this.managedObjectSourceName,
-					this.context.getCompilerIssues());
+					TeamNode.class, this.context.getCompilerIssues());
 			if (team == null) {
 				continue; // must have the team
 			}
@@ -1031,8 +887,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				.get(managedObjectSourceFlowName);
 		if (flow == null) {
 			// Create the managed object flow
-			flow = new ManagedObjectFlowNodeImpl(managedObjectSourceFlowName,
-					this.locationType, this.location, this.context);
+			flow = this.context.createManagedObjectFlowNode(
+					managedObjectSourceFlowName, this);
 
 			// Add the managed object flow
 			this.flows.put(managedObjectSourceFlowName, flow);
@@ -1044,22 +900,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public ManagedObjectTeam getManagedObjectTeam(
 			String managedObjectSourceTeamName) {
 
-		// Must be in office or office floor context
-		if ((!this.isInOfficeContext) && (!this.isInOfficeFloorContext)) {
-			throw new IllegalStateException(
-					"Must not obtain team unless in office or office floor context");
-		}
-
 		// Obtain and return the team for the name
-		TaskTeamNode team = this.teams.get(managedObjectSourceTeamName);
+		ManagedObjectTeamNode team = this.teams
+				.get(managedObjectSourceTeamName);
 		if (team == null) {
 			// Create the office team
-			team = new TaskTeamNodeImpl(managedObjectSourceTeamName,
-					this.officeLocation, this.context);
-			if (this.isInOfficeFloorContext) {
-				// Add office floor context as within office floor context
-				team.addOfficeFloorContext(this.officeFloorLocation);
-			}
+			team = this.context.createManagedObjectTeamNode(
+					managedObjectSourceTeamName, this);
 
 			// Add the managed object team
 			this.teams.put(managedObjectSourceTeamName, team);
@@ -1075,9 +922,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				.get(managedObjectDependencyName);
 		if (dependency == null) {
 			// Create the managed object dependency
-			dependency = new ManagedObjectDependencyNodeImpl(
-					managedObjectDependencyName, this.locationType,
-					this.location, this.context);
+			dependency = this.context.createManagedObjectDependencyNode(
+					managedObjectDependencyName, this);
 
 			// Add the managed object dependency
 			this.inputDependencies.put(managedObjectDependencyName, dependency);
@@ -1148,14 +994,6 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public ManagingOffice getManagingOffice() {
-
-		// Must be in office context
-		if (!this.isInOfficeFloorContext) {
-			throw new IllegalStateException(
-					"Must not obtain managing office unless in office floor context");
-		}
-
-		// Return the managing office
 		return this.managingOffice;
 	}
 

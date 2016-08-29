@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SuppliedManagedObjectNode extends SupplyOrder {
+public interface SuppliedManagedObjectNode extends Node, SupplyOrder {
 
 	/**
 	 * <p>
@@ -45,5 +45,13 @@ public interface SuppliedManagedObjectNode extends SupplyOrder {
 	 *         in loading the {@link SuppliedManagedObject}.
 	 */
 	SuppliedManagedObject<?, ?> getSuppliedManagedObject();
+
+	/**
+	 * Obtains the {@link SupplierNode} containing this
+	 * {@link SuppliedManagedObject}.
+	 * 
+	 * @return Parent {@link SupplierNode}.
+	 */
+	SupplierNode getSupplierNode();
 
 }

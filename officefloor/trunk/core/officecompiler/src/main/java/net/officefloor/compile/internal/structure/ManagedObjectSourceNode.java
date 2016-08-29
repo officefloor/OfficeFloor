@@ -21,11 +21,10 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
-import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
-import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -83,26 +82,6 @@ public interface ManagedObjectSourceNode extends Node,
 	OfficeFloorManagedObjectSourceType getOfficeFloorManagedObjectSourceType();
 
 	/**
-	 * Adds the context of the {@link Office} containing this
-	 * {@link SectionManagedObject}.
-	 *
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 */
-	@Deprecated
-	// TODO REMOVE
-	void addOfficeContext(String officeLocation);
-
-	/**
-	 * Adds the context of the {@link OfficeFloor} containing this
-	 * {@link OfficeFloorManagedObject}.
-	 *
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 */
-	void addOfficeFloorContext(String officeFloorLocation);
-
-	/**
 	 * Obtains the name that this {@link ManagedObjectSource} was added to the
 	 * {@link OfficeFloor}.
 	 *
@@ -110,6 +89,37 @@ public interface ManagedObjectSourceNode extends Node,
 	 *         {@link OfficeFloor}.
 	 */
 	String getManagedObjectSourceName();
+
+	/**
+	 * Obtains the {@link SectionNode} containing this
+	 * {@link ManagedObjectSourceNode}.
+	 * 
+	 * @return {@link SectionNode} containing this
+	 *         {@link ManagedObjectSourceNode}. May be <code>null</code> if not
+	 *         contained within an {@link OfficeSection} (in other words
+	 *         included above the {@link SectionNode} instances).
+	 */
+	SectionNode getSectionNode();
+
+	/**
+	 * Obtains the {@link OfficeNode} containing this
+	 * {@link ManagedObjectSourceNode}.
+	 * 
+	 * @return {@link OfficeNode} containing this
+	 *         {@link ManagedObjectSourceNode}. May be <code>null</code> if not
+	 *         contained within an {@link Office} (in other words included above
+	 *         the {@link OfficeNode} instances).
+	 */
+	OfficeNode getOfficeNode();
+
+	/**
+	 * Obtains the {@link OfficeFloorNode} containing this
+	 * {@link ManagedObjectSourceNode}.
+	 * 
+	 * @return {@link OfficeFloorNode} containing this
+	 *         {@link ManagedObjectSourceNode}.
+	 */
+	OfficeFloorNode getOfficeFloorNode();
 
 	/**
 	 * Obtains the {@link OfficeNode} of the {@link ManagingOffice} for this

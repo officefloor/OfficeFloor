@@ -19,13 +19,13 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeInputNode;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * Implementation of the {@link OfficeFloorInputNode}.
@@ -45,9 +45,9 @@ public class OfficeInputNodeImpl implements OfficeInputNode, OfficeInputType {
 	private final String parameterType;
 
 	/**
-	 * Location of the {@link Office} containing this {@link OfficeInputNode}.
+	 * Parent {@link OfficeNode}.
 	 */
-	private final String officeLocation;
+	private final OfficeNode officeNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -71,18 +71,53 @@ public class OfficeInputNodeImpl implements OfficeInputNode, OfficeInputType {
 	 *            Name of {@link OfficeFloorInput}.
 	 * @param parameterType
 	 *            Parameter type of {@link OfficeFloorInput}.
-	 * @param officeLocation
-	 *            Location of the {@link Office} containing this
-	 *            {@link OfficeInputNode}.
+	 * @param officeNode
+	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public OfficeInputNodeImpl(String name, String parameterType,
-			String officeLocation, NodeContext context) {
+			OfficeNode officeNode, NodeContext context) {
 		this.name = name;
 		this.parameterType = parameterType;
-		this.officeLocation = officeLocation;
+		this.officeNode = officeNode;
 		this.context = context;
+	}
+
+	/*
+	 * ========================== Node ===============================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -103,8 +138,7 @@ public class OfficeInputNodeImpl implements OfficeInputNode, OfficeInputType {
 
 		// Ensure not already linked
 		if (this.linkedSynchronousNode != null) {
-			this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-					this.officeLocation, null, null,
+			this.context.getCompilerIssues().addIssue(this,
 					"Input " + this.name + " linked more than once");
 			return false; // already linked
 		}
@@ -112,10 +146,7 @@ public class OfficeInputNodeImpl implements OfficeInputNode, OfficeInputType {
 		// Ensure is an output
 		if (!(node instanceof OfficeOutputNode)) {
 			this.context.getCompilerIssues().addIssue(
-					LocationType.OFFICE,
-					this.officeLocation,
-					null,
-					null,
+					this,
 					"Input " + this.name
 							+ " may only be synchronously linked to an "
 							+ OfficeOutputNode.class.getSimpleName());
@@ -141,8 +172,7 @@ public class OfficeInputNodeImpl implements OfficeInputNode, OfficeInputType {
 
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
-			this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-					this.officeLocation, null, null,
+			this.context.getCompilerIssues().addIssue(this,
 					"Input " + this.name + " linked more than once");
 			return false; // already linked
 		}

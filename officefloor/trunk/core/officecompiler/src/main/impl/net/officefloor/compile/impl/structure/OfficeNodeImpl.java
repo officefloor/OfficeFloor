@@ -26,9 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.easymock.internal.ObjectMethodsFilter;
+
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
 import net.officefloor.compile.impl.office.OfficeTypeImpl;
-import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
@@ -41,16 +42,19 @@ import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
-import net.officefloor.compile.internal.structure.TaskTeamNode;
+import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.internal.structure.TaskTeamNode;
+import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
@@ -80,16 +84,14 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.UnknownClassError;
@@ -128,6 +130,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 * Location of the {@link Office}.
 	 */
 	private final String officeLocation;
+
+	/**
+	 * Parent {@link OfficeFloorNode}.
+	 */
+	private final OfficeFloorNode officeFloor;
 
 	/**
 	 * {@link NodeContext}.
@@ -193,16 +200,6 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private final Map<String, OfficeStartNode> starts = new HashMap<String, OfficeStartNode>();
 
 	/**
-	 * Flag indicating if in the {@link OfficeFloor} context.
-	 */
-	private boolean isInOfficeFloorContext = false;
-
-	/**
-	 * Location of the {@link OfficeFloor}.
-	 */
-	private String officeFloorLocation;
-
-	/**
 	 * Initialise with all parameters.
 	 * 
 	 * @param officeName
@@ -211,104 +208,93 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 *            {@link OfficeSource} instance.
 	 * @param officeSourceClassName
 	 *            {@link OfficeSource} class name.
-	 * @param properties
-	 *            {@link PropertyList}.
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
+	 * @param officeFloor
+	 *            Parent {@link OfficeFloorNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	private OfficeNodeImpl(String officeName, OfficeSource officeSource,
-			String officeSourceClassName, PropertyList properties,
-			String officeLocation, NodeContext context) {
+			String officeSourceClassName, String officeLocation,
+			OfficeFloorNode officeFloor, NodeContext context) {
 		this.officeName = officeName;
 		this.officeSource = officeSource;
-		this.officeSourceClassName = (officeSource == null ? officeSourceClassName
-				: null);
-		this.properties = (properties != null ? properties
-				: new PropertyListImpl());
+		this.officeSourceClassName = officeSourceClassName;
 		this.officeLocation = officeLocation;
+		this.properties = context.createPropertyList();
+		this.officeFloor = officeFloor;
 		this.context = context;
 	}
 
-	/**
-	 * Allows loading the {@link OfficeType}.
-	 * 
-	 * @param officeSource
-	 *            {@link OfficeSource} instance.
-	 * @param properties
-	 *            {@link PropertyList} to configure the {@link OfficeSource}.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	public OfficeNodeImpl(OfficeSource officeSource, PropertyList properties,
-			String officeLocation, NodeContext context) {
-		this(null, officeSource, null, properties, officeLocation, context);
-	}
-
-	/**
-	 * Allow adding the {@link DeployedOffice}.
-	 * 
-	 * @param officeName
-	 *            Name of this {@link DeployedOffice}.
-	 * @param officeSourceClassName
-	 *            Class name of the {@link OfficeSource}.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	public OfficeNodeImpl(String officeName, String officeSourceClassName,
-			String officeLocation, NodeContext context) {
-		this(officeName, null, officeSourceClassName, null, officeLocation,
-				context);
-	}
-
-	/**
-	 * Allow adding the {@link DeployedOffice}.
-	 * 
-	 * @param officeName
-	 *            Name of this {@link DeployedOffice}.
-	 * @param officeSource
-	 *            {@link OfficeSource} instance.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	public OfficeNodeImpl(String officeName, OfficeSource officeSource,
-			String officeLocation, NodeContext context) {
-		this(officeName, officeSource, null, null, officeLocation, context);
-	}
-
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	protected void addIssue(String issueDescription, Throwable cause) {
-		this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-				this.officeLocation, null, null, issueDescription, cause);
-	}
-
 	/*
-	 * =================== AbstractNode ================================
+	 * ================== Node ===================================
 	 */
 
 	@Override
-	protected void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-				this.officeLocation, null, null, issueDescription);
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
+	}
+
+	/*
+	 * ================== ManagedObjectRegistry ==================
+	 */
+
+	@Override
+	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
+		// TODO implement ManagedObjectRegistry.getManagedObjectNode
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectRegistry.getManagedObjectNode");
+
+	}
+
+	@Override
+	public ManagedObjectNode createManagedObjectNode(String managedObjectName,
+			ManagedObjectScope managedObjectScope) {
+		// TODO implement ManagedObjectRegistry.createManagedObjectNode
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectRegistry.createManagedObjectNode");
+
 	}
 
 	/*
 	 * ================== OfficeNode ===================================
 	 */
+
+	@Override
+	public OfficeFloorNode getOfficeFloorNode() {
+		// TODO implement OfficeNode.getOfficeFloorNode
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeNode.getOfficeFloorNode");
+
+	}
 
 	@Override
 	public boolean sourceOffice() {
@@ -319,17 +305,14 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 			// Obtain the office source class
 			Class<? extends OfficeSource> officeSourceClass = this.context
-					.getOfficeSourceClass(this.officeSourceClassName,
-							this.officeLocation, this.officeName);
+					.getOfficeSourceClass(this.officeSourceClassName, this);
 			if (officeSourceClass == null) {
 				return false; // must have office source class
 			}
 
 			// Obtain the office source
 			source = CompileUtil.newInstance(officeSourceClass,
-					OfficeSource.class, LocationType.OFFICE,
-					this.officeLocation, AssetType.OFFICE, this.officeName,
-					this.context.getCompilerIssues());
+					OfficeSource.class, this, this.context.getCompilerIssues());
 			if (source == null) {
 				return false; // must have office source
 			}
@@ -538,18 +521,6 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public void addOfficeFloorContext(String officeFloorLocation) {
-		this.officeFloorLocation = officeFloorLocation;
-
-		// Flag all the teams within office floor context
-		for (TeamStruct struct : this.teams.values()) {
-			struct.team.addOfficeFloorContext(this.officeFloorLocation);
-		}
-
-		this.isInOfficeFloorContext = true;
-	}
-
-	@Override
 	public OfficeBuilder buildOffice(OfficeFloorBuilder builder) {
 
 		// Build this office
@@ -561,14 +532,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			// Obtain the office team name
 			String officeTeamName = struct.team.getOfficeTeamName();
 
-			// Obtain the office floor team name
-			OfficeFloorTeam officeFloorTeam = LinkUtil.retrieveTarget(
-					struct.team, OfficeFloorTeam.class, "Office team "
-							+ officeTeamName, LocationType.OFFICE,
-					this.officeLocation, AssetType.TEAM, officeTeamName,
-					this.context.getCompilerIssues());
+			// Obtain the OfficeFloor team name
+			TeamNode officeFloorTeam = LinkUtil.retrieveTarget(struct.team,
+					TeamNode.class, this.context.getCompilerIssues());
 			if (officeFloorTeam == null) {
-				continue; // office floor team not linked
+				continue; // OfficeFloor team not linked
 			}
 			String officeFloorTeamName = officeFloorTeam
 					.getOfficeFloorTeamName();
@@ -611,10 +579,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 			// Obtain the office floor managed object node
 			BoundManagedObjectNode managedObjectNode = LinkUtil.retrieveTarget(
-					objectNode, BoundManagedObjectNode.class, "Office object "
-							+ officeObjectName, LocationType.OFFICE,
-					this.officeLocation, AssetType.MANAGED_OBJECT,
-					officeObjectName, this.context.getCompilerIssues());
+					objectNode, BoundManagedObjectNode.class,
+					this.context.getCompilerIssues());
 			if (managedObjectNode == null) {
 				continue; // office floor managed object not linked
 			}
@@ -702,13 +668,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			String escalationTypeName = node.getOfficeEscalationType();
 			Class<? extends Throwable> type = CompileUtil.obtainClass(
 					escalationTypeName, Throwable.class, null,
-					this.context.getSourceContext(), LocationType.OFFICE,
-					this.officeLocation, null, null,
+					this.context.getRootSourceContext(), this,
 					this.context.getCompilerIssues());
 			if (type == null) {
 				// Failed to obtain escalation type
-				this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-						this.officeLocation, null, null,
+				this.context.getCompilerIssues().addIssue(this,
 						"Unknown escalation type " + escalationTypeName);
 				continue; // ignore this escalation
 			}
@@ -743,9 +707,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 			// Obtain the target task
 			TaskNode task = LinkUtil.findTarget(escalation.node,
-					TaskNode.class, "Escalation " + escalation.type.getName(),
-					LocationType.OFFICE, this.officeLocation, null, null,
-					this.context.getCompilerIssues());
+					TaskNode.class, this.context.getCompilerIssues());
 			if (task == null) {
 				continue; // task not linked
 			}
@@ -769,8 +731,6 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 			// Obtain the target task
 			TaskNode task = LinkUtil.findTarget(start, TaskNode.class,
-					"Office start-up trigger " + start.getOfficeStartName(),
-					LocationType.OFFICE, this.officeLocation, null, null,
 					this.context.getCompilerIssues());
 			if (task == null) {
 				continue; // task not linked
@@ -798,9 +758,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		if (struct == null) {
 
 			// Add the object
-			OfficeObjectNode object = new OfficeObjectNodeImpl(
-					officeManagedObjectName, objectType, this.officeLocation,
-					this.context);
+			OfficeObjectNode object = this.context.createOfficeObjectNode(
+					officeManagedObjectName, this).initialise(objectType);
 			struct = new OfficeObjectStruct(object, true);
 			this.objects.put(officeManagedObjectName, struct);
 
@@ -823,13 +782,13 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeInput addInput(String inputName, String parameterType) {
+	public OfficeInput addOfficeInput(String inputName, String parameterType) {
 		// Obtain and return the input for the name
 		OfficeInputNode input = this.inputs.get(inputName);
 		if (input == null) {
 			// Create the input
-			input = new OfficeInputNodeImpl(inputName, parameterType,
-					this.officeLocation, this.context);
+			input = this.context.createOfficeInputNode(inputName,
+					parameterType, this);
 
 			// Add the input
 			this.inputs.put(inputName, input);
@@ -841,13 +800,13 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeOutput addOutput(String outputName, String argumentType) {
+	public OfficeOutput addOfficeOutput(String outputName, String argumentType) {
 		// Obtain and return the output for the name
 		OfficeOutputNode output = this.outputs.get(outputName);
 		if (output == null) {
 			// Create the output
-			output = new OfficeOutputNodeImpl(outputName, argumentType,
-					this.officeLocation, this.context);
+			output = this.context.createOfficeOutputNode(outputName,
+					argumentType, this);
 
 			// Add the output
 			this.outputs.put(outputName, output);
@@ -864,13 +823,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		TeamStruct struct = this.teams.get(officeTeamName);
 		if (struct == null) {
 			// Create the team
-			TaskTeamNode team = new TaskTeamNodeImpl(officeTeamName,
-					this.officeLocation, this.context);
+			OfficeTeamNode team = this.context.createOfficeTeamNode(
+					officeTeamName, this);
 			struct = new TeamStruct(team, true); // added by architect
-			if (this.isInOfficeFloorContext) {
-				// Add office floor context as within office floor context
-				struct.team.addOfficeFloorContext(this.officeFloorLocation);
-			}
 
 			// Add the team
 			this.teams.put(officeTeamName, struct);
@@ -897,7 +852,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			// Create the section and have it loaded
 			section = this.context.createSectionNode(sectionName, this)
 					.initialise(null, sectionSourceClassName, sectionLocation,
-							properties, null);
+							properties);
 			// Add the section
 			this.sections.put(sectionName, section);
 		} else {
@@ -917,7 +872,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			// Create the section and have it loaded
 			section = this.context.createSectionNode(sectionName, this)
 					.initialise(sectionSource, null, sectionLocation,
-							properties, null);
+							properties);
 			// Add the section
 			this.sections.put(sectionName, section);
 		} else {
@@ -934,13 +889,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		ManagedObjectSourceNode managedObjectSource = this.managedObjectSources
 				.get(managedObjectSourceName);
 		if (managedObjectSource == null) {
-
-			// Create the office managed object source (within office context)
-			managedObjectSource = new ManagedObjectSourceNodeImpl(
+			// Create the office managed object source
+			managedObjectSource = this.context.createManagedObjectSourceNode(
 					managedObjectSourceName, managedObjectSourceClassName,
-					LocationType.OFFICE, this.officeLocation, null, this,
-					this.managedObjects, this.context);
-			managedObjectSource.addOfficeContext(this.officeLocation);
+					null, this);
 
 			// Add the office managed object source
 			this.managedObjectSources.put(managedObjectSourceName,
@@ -962,13 +914,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		ManagedObjectSourceNode managedObjectSourceNode = this.managedObjectSources
 				.get(managedObjectSourceName);
 		if (managedObjectSourceNode == null) {
-
 			// Create the office managed object source (within office context)
-			managedObjectSourceNode = new ManagedObjectSourceNodeImpl(
-					managedObjectSourceName, managedObjectSource,
-					LocationType.OFFICE, this.officeLocation, null, this,
-					this.managedObjects, this.context);
-			managedObjectSourceNode.addOfficeContext(this.officeLocation);
+			managedObjectSourceNode = this.context
+					.createManagedObjectSourceNode(managedObjectSourceName,
+							managedObjectSource.getClass().getName(),
+							managedObjectSource, officeFloor);
 
 			// Add the office managed object source
 			this.managedObjectSources.put(managedObjectSourceName,
@@ -989,9 +939,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		GovernanceNode governance = this.governances.get(governanceName);
 		if (governance == null) {
 			// Add the governance
-			governance = new GovernanceNodeImpl(governanceName,
-					governanceSourceClassName, this.officeLocation, this,
-					this.context);
+			governance = this.context.createGovernanceNode(governanceName,
+					governanceSourceClassName, null, this);
 			this.governances.put(governanceName, governance);
 		} else {
 			// Governance already added and initialised
@@ -1007,8 +956,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		GovernanceNode governance = this.governances.get(governanceName);
 		if (governance == null) {
 			// Add the governance
-			governance = new GovernanceNodeImpl(governanceName,
-					governanceSource, this.officeLocation, this, this.context);
+			governance = this.context.createGovernanceNode(governanceName,
+					governanceSource.getClass().getName(), governanceSource,
+					this);
 			this.governances.put(governanceName, governance);
 		} else {
 			// Governance already added and initialised
@@ -1025,9 +975,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 				.get(administratorName);
 		if (administrator == null) {
 			// Add the administrator
-			administrator = new AdministratorNodeImpl(administratorName,
-					administratorSourceClassName, this.officeLocation,
-					this.context);
+			administrator = this.context
+					.createAdministratorNode(administratorName,
+							administratorSourceClassName, null, this);
 			this.administrators.put(administratorName, administrator);
 		} else {
 			// Administrator already added and initialised
@@ -1045,8 +995,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 				.get(administratorName);
 		if (administrator == null) {
 			// Add the administrator
-			administrator = new AdministratorNodeImpl(administratorName,
-					administratorSource, this.officeLocation, this.context);
+			administrator = this.context.createAdministratorNode(
+					administratorName,
+					administratorSource.getClass().getName(),
+					administratorSource, this);
 			this.administrators.put(administratorName, administrator);
 		} else {
 			// Administrator already added and initialised
@@ -1062,8 +1014,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		EscalationNode escalation = this.escalations.get(escalationTypeName);
 		if (escalation == null) {
 			// Add the escalation
-			escalation = new EscalationNodeImpl(escalationTypeName,
-					this.officeLocation, this.context);
+			escalation = this.context.createEscalationNode(escalationTypeName,
+					this);
 			this.escalations.put(escalationTypeName, escalation);
 		} else {
 			// Escalation already added
@@ -1078,8 +1030,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		OfficeStartNode start = this.starts.get(startName);
 		if (start == null) {
 			// Add the start
-			start = new OfficeStartNodeImpl(startName, this.officeLocation,
-					this.context);
+			start = this.context.createOfficeStartNode(startName, this);
 			this.starts.put(startName, start);
 		} else {
 			// Start already added
@@ -1174,18 +1125,14 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public void addIssue(String issueDescription, AssetType assetType,
-			String assetName) {
-		this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-				this.officeLocation, assetType, assetName, issueDescription);
+	public void addIssue(String issueDescription) {
+		this.context.getCompilerIssues().addIssue(this, issueDescription);
 	}
 
 	@Override
-	public void addIssue(String issueDescription, Throwable cause,
-			AssetType assetType, String assetName) {
-		this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-				this.officeLocation, assetType, assetName, issueDescription,
-				cause);
+	public void addIssue(String issueDescription, Throwable cause) {
+		this.context.getCompilerIssues()
+				.addIssue(this, issueDescription, cause);
 	}
 
 	/*
@@ -1206,17 +1153,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	public DeployedOfficeInput getDeployedOfficeInput(String sectionName,
 			String inputName) {
 
-		// Ensure in office floor context
-		if (!this.isInOfficeFloorContext) {
-			throw new IllegalStateException(
-					"Must be in office floor context to obtain office input");
-		}
-
 		// Obtain the section
 		SectionNode section = this.sections.get(sectionName);
 		if (section == null) {
 			// Add the section
-			section = new SectionNodeImpl(sectionName, this, this.context);
+			section = this.context.createSectionNode(sectionName, this);
 			this.sections.put(sectionName, section);
 		}
 
@@ -1227,19 +1168,12 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public OfficeObject getDeployedOfficeObject(String officeManagedObjectName) {
 
-		// Ensure in office floor context
-		if (!this.isInOfficeFloorContext) {
-			throw new IllegalStateException(
-					"Must be in office floor context to obtain required managed object");
-		}
-
 		// Obtain and return the office object
 		OfficeObjectStruct struct = this.objects.get(officeManagedObjectName);
 		if (struct == null) {
 			// Create the object within the office floor context
-			OfficeObjectNode object = new OfficeObjectNodeImpl(
-					officeManagedObjectName, this.officeLocation, this.context);
-			object.addOfficeFloorContext(this.officeFloorLocation);
+			OfficeObjectNode object = this.context.createOfficeObjectNode(
+					officeManagedObjectName, this);
 
 			// Add the object
 			struct = new OfficeObjectStruct(object, false);
@@ -1251,20 +1185,13 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public OfficeTeam getDeployedOfficeTeam(String officeTeamName) {
 
-		// Ensure in office floor context
-		if (!this.isInOfficeFloorContext) {
-			throw new IllegalStateException(
-					"Must be in office floor context to obtain team");
-		}
-
 		// Obtain and return the office team
 		TeamStruct struct = this.teams.get(officeTeamName);
 		if (struct == null) {
 			// Create the team within the office floor context
-			TaskTeamNode team = new TaskTeamNodeImpl(officeTeamName,
-					this.officeLocation, this.context);
+			OfficeTeamNode team = this.context.createOfficeTeamNode(
+					officeTeamName, this);
 			struct = new TeamStruct(team, false); // not added by architect
-			team.addOfficeFloorContext(this.officeFloorLocation);
 
 			// Add the office team
 			this.teams.put(officeTeamName, struct);
@@ -1330,9 +1257,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private class TeamStruct {
 
 		/**
-		 * {@link TaskTeamNode}.
+		 * {@link OfficeTeamNode}.
 		 */
-		public final TaskTeamNode team;
+		public final OfficeTeamNode team;
 
 		/**
 		 * Flag indicating if has been added by {@link OfficeArchitect}.
@@ -1343,12 +1270,12 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		 * Initiate.
 		 * 
 		 * @param team
-		 *            {@link TaskTeamNode}.
+		 *            {@link OfficeTeamNode}.
 		 * @param isAdded
 		 *            <code>true</code> if has been added by
 		 *            {@link OfficeArchitect}.
 		 */
-		public TeamStruct(TaskTeamNode team, boolean isAdded) {
+		public TeamStruct(OfficeTeamNode team, boolean isAdded) {
 			this.team = team;
 			this.isAdded = isAdded;
 		}

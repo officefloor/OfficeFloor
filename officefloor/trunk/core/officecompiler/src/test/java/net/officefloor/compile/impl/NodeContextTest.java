@@ -1,0 +1,704 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2013 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.compile.impl;
+
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.internal.structure.AdministratorNode;
+import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.GovernanceNode;
+import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
+import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
+import net.officefloor.compile.internal.structure.ManagingOfficeNode;
+import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
+import net.officefloor.compile.internal.structure.OfficeInputNode;
+import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.OfficeObjectNode;
+import net.officefloor.compile.internal.structure.OfficeOutputNode;
+import net.officefloor.compile.internal.structure.OfficeStartNode;
+import net.officefloor.compile.internal.structure.SectionInputNode;
+import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.SectionObjectNode;
+import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
+import net.officefloor.compile.internal.structure.SupplierNode;
+import net.officefloor.compile.internal.structure.TaskFlowNode;
+import net.officefloor.compile.internal.structure.TaskNode;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+
+/**
+ * Tests the {@link OfficeFloorCompiler}.
+ *
+ * @author Daniel Sagenschneider
+ */
+public class NodeContextTest extends OfficeFrameTestCase {
+
+	/**
+	 * {@link NodeContext}.
+	 */
+	private final NodeContext context = new OfficeFloorCompilerImpl();
+
+	/**
+	 * Mock {@link OfficeFloorNode}.
+	 */
+	private final OfficeFloorNode officeFloor = this
+			.createMock(OfficeFloorNode.class);
+
+	/**
+	 * Mock {@link Office}.
+	 */
+	private final OfficeNode office = this.createMock(OfficeNode.class);
+
+	/**
+	 * Mock {@link SectionNode}.
+	 */
+	private final SectionNode section = this.createMock(SectionNode.class);
+
+	/**
+	 * Mock {@link TaskNode}.
+	 */
+	private final TaskNode task = this.createMock(TaskNode.class);
+
+	/**
+	 * Mock {@link ManagedObjectSourceNode}.
+	 */
+	private final ManagedObjectSourceNode managedObjectSource = this
+			.createMock(ManagedObjectSourceNode.class);
+
+	/**
+	 * Ensure create {@link SectionNode} within {@link OfficeNode}.
+	 */
+	public void testCreateSectionNode_withinOffice() {
+
+		SectionNode node = this.doTest(() -> this.context.createSectionNode(
+				"SECTION", this.office));
+
+		// Ensure section node valid
+		assertNode(node, "SECTION", "Section", null, this.office);
+		assertEquals("Incorrect section name", "Section",
+				node.getOfficeSectionName());
+		assertSame("Incorrect office node", this.office, node.getOfficeNode());
+		assertNull("Should not have parent section",
+				node.getParentSectionNode());
+		assertEquals("Incorrect qualified name", "QUALIFIED.SECTIN",
+				node.getSectionQualifiedName("QUALIFIED"));
+
+		// Ensure provide location
+		assertFalse("Should not be initialised", node.isInitialised());
+		node = node.initialise(null, null, "LOCATION", null);
+		assertTrue("Now initialised", node.isInitialised());
+		assertEquals("Incorrect location", "LOCATION", node.getLocation());
+	}
+
+	/**
+	 * Ensure create {@link SectionNode} within another {@link SectionNode}.
+	 */
+	public void testCreateSectionNode_withinSection() {
+
+		// Record creating the section
+		this.recordReturn(section, section.getOfficeNode(), this.office);
+
+		// Ensure section node valid
+		SectionNode node = this.doTest(() -> this.context.createSectionNode(
+				"SECTION", this.office));
+		assertNode(node, "SECTION", "Section", null, this.section);
+		assertSame("Incorrect office", this.office, node.getOfficeNode());
+		assertSame("Incorrect parent section", this.section,
+				node.getParentSectionNode());
+	}
+
+	/**
+	 * Ensure create {@link AdministratorNode}.
+	 */
+	public void testCreateAdministratorNode() {
+		AdministratorNode node = this.doTest(() -> this.context
+				.createAdministratorNode("ADMINISTRATOR",
+						"ExampleAdministratorSource", null, this.office));
+		assertNode(node, "ADMINISTRATOR", "Administrator", null, this.office);
+		assertEquals("Incorrect administrator name", "ADMINISTRATOR",
+				node.getOfficeAdministratorName());
+	}
+
+	/**
+	 * Ensure create {@link EscalationNode}.
+	 */
+	public void testCreateEscalationNode() {
+		EscalationNode node = this.doTest(() -> this.context
+				.createEscalationNode("java.sql.SQLException", this.office));
+		assertNode(node, "java.sql.SQLException", "Escalation", null,
+				this.office);
+		assertEquals("Incorrect escalation type", "java.sql.SQLException",
+				node.getOfficeEscalationType());
+	}
+
+	/**
+	 * Ensure create {@link GovernanceNode}.
+	 */
+	public void testCreateGovernanceNode() {
+		GovernanceNode node = this.doTest(() -> this.context
+				.createGovernanceNode("GOVERNANCE", "ExampleGovernanceSource",
+						null, this.office));
+		assertNode(node, "GOVERNANCE", "Governance", null, this.office);
+		assertEquals("Incorrect governance name", "GOVERNANCE",
+				node.getOfficeGovernanceName());
+	}
+
+	/**
+	 * Ensure create {@link InputManagedObjectNode}.
+	 */
+	public void testCreateInputManagedObjectNode() {
+		InputManagedObjectNode node = this.doTest(() -> this.context
+				.createInputManagedNode("INPUT", this.officeFloor));
+		assertNode(node, "INPUT", "Input Managed Object", null,
+				this.officeFloor);
+		assertEquals("Incorrect bound managed object name", "INPUT",
+				node.getBoundManagedObjectName());
+	}
+
+	/*
+	 * Ensure create {@link ManagedObjectDependencyNode} for a {@link
+	 * ManagedObject}.
+	 */
+	public void testCreateManagedObjectDependencyNode_forManagedObject() {
+		ManagedObjectNode managedObject = this
+				.createMock(ManagedObjectNode.class);
+		ManagedObjectDependencyNode node = this
+				.doTest(() -> this.context.createManagedObjectDependencyNode(
+						"DEPENDENCY", managedObject));
+		assertNode(node, "DEPENDENCY", "Managed Object Dependency", null,
+				managedObject);
+		assertEquals("Incorrect managed object dependency name", "DEPENDENCY",
+				node.getManagedObjectDependencyName());
+		assertEquals("Incorrect object dependency name", "DEPENDENCY",
+				node.getObjectDependencyName());
+	}
+
+	/*
+	 * Ensure create {@link ManagedObjectDependencyNode} for a {@link
+	 * InputManagedObject}.
+	 */
+	public void testCreateManagedObjectDependencyNode_forInputManagedObject() {
+		ManagedObjectSourceNode mos = this
+				.createMock(ManagedObjectSourceNode.class);
+		ManagedObjectDependencyNode node = this.doTest(() -> this.context
+				.createManagedObjectDependencyNode("DEPENDENCY", mos));
+		assertNode(node, "DEPENDENCY", "Managed Object Dependency", null, mos);
+		assertEquals("Incorrect managed object dependency name", "DEPENDENCY",
+				node.getManagedObjectDependencyName());
+		assertEquals("Incorrect object dependency name", "DEPENDENCY",
+				node.getObjectDependencyName());
+	}
+
+	/**
+	 * Ensure create {@link ManagedObjectFlowNode}.
+	 */
+	public void testCreateManagedObjectFlowNode() {
+		ManagedObjectFlowNode node = this.doTest(() -> this.context
+				.createManagedObjectFlowNode("FLOW", this.managedObjectSource));
+		assertNode(node, "FLOW", "Managed Object Source Flow", null,
+				this.managedObjectSource);
+		assertEquals("Incorrect managed object flow name", "FLOW",
+				node.getManagedObjectFlowName());
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectNode} within {@link SectionNode}.
+	 */
+	public void testCreateManagedObjectNode_withinSection() {
+		this.recordReturn(this.managedObjectSource,
+				this.managedObjectSource.getSectionNode(), this.section);
+		this.recordReturn(this.section, this.section.getOfficeNode(),
+				this.office);
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(),
+				this.officeFloor);
+		this.recordReturn(this.office, this.office.getDeployedOfficeName(),
+				"OFFICE");
+		this.recordReturn(this.section,
+				this.section.getSectionQualifiedName("MO"), "SECTION.MO");
+		ManagedObjectNode node = this.doTest(() -> {
+			ManagedObjectNode mo = this.context.createManagedObjectNode("MO",
+					ManagedObjectScope.THREAD, this.managedObjectSource);
+			assertEquals("Incorrect office name", "OFFICE.MO",
+					mo.getOfficeManagedObjectName());
+			assertEquals("Incorrect section name", "SECTION.MO",
+					mo.getSectionManagedObjectName());
+			return mo;
+		});
+		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
+		assertEquals("Incorrect administerable name", "MO",
+				node.getAdministerableManagedObjectName());
+		assertEquals("Incorrect bound name", "MO",
+				node.getBoundManagedObjectName());
+		assertEquals("Incorrect dependency name", "MO",
+				node.getDependentManagedObjectName());
+		assertEquals("Incorrect governerable name", "MO",
+				node.getGovernerableManagedObjectName());
+		assertEquals("Incorrect OfficeFloor name", "MO",
+				node.getOfficeFloorManagedObjectName());
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectNode} within {@link OfficeNode}.
+	 */
+	public void testCreateManagedObjectNode_withinOffice() {
+		this.recordReturn(this.managedObjectSource,
+				this.managedObjectSource.getSectionNode(), null);
+		this.recordReturn(this.managedObjectSource,
+				this.managedObjectSource.getOfficeNode(), this.office);
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(),
+				this.officeFloor);
+		this.recordReturn(this.office, this.office.getDeployedOfficeName(),
+				"OFFICE");
+		ManagedObjectNode node = this.doTest(() -> {
+			ManagedObjectNode mo = this.context.createManagedObjectNode("MO",
+					ManagedObjectScope.THREAD, this.managedObjectSource);
+			assertEquals("Incorrect office name", "OFFICE.MO",
+					mo.getOfficeManagedObjectName());
+			assertNull("Not in section, so should not have section name",
+					mo.getSectionManagedObjectName());
+			return mo;
+		});
+		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectNode} within
+	 * {@link OfficeFloorNode}.
+	 */
+	public void testCreateManagedObjectNode_withinOfficeFloor() {
+		this.recordReturn(this.managedObjectSource,
+				this.managedObjectSource.getSectionNode(), null);
+		this.recordReturn(this.managedObjectSource,
+				this.managedObjectSource.getOfficeNode(), null);
+		this.recordReturn(this.managedObjectSource,
+				this.managedObjectSource.getOfficeFloorNode(), this.officeFloor);
+		this.recordReturn(this.office, this.office.getDeployedOfficeName(),
+				"OFFICE");
+		ManagedObjectNode node = this.doTest(() -> {
+			ManagedObjectNode mo = this.context.createManagedObjectNode("MO",
+					ManagedObjectScope.THREAD, this.managedObjectSource);
+			assertNull("Not in office, so should not have office name",
+					mo.getOfficeManagedObjectName());
+			assertNull("Not in section, so should not have section name",
+					mo.getSectionManagedObjectName());
+			return mo;
+		});
+		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectSourceNode} within a
+	 * {@link SectionNode}.
+	 */
+	public void testCreateManagedObjectSourceNode_withinSection() {
+		this.recordReturn(this.section, this.section.getOfficeNode(),
+				this.office);
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(),
+				this.officeFloor);
+		this.recordReturn(this.section,
+				this.section.getSectionQualifiedName("MOS"), "SECTION.MOS");
+		ManagedObjectSourceNode node = this.doTest(() -> {
+			ManagedObjectSourceNode mos = this.context
+					.createManagedObjectSourceNode("MOS",
+							"ExampleManagedObjectSource", null, this.section);
+			assertEquals("Incorrect managed object source name", "SECTION.MOS",
+					mos.getManagedObjectSourceName());
+			return mos;
+		});
+		assertNode(node, "MOS", "Managed Object Source", null, this.section);
+		assertEquals("Incorrect OfficeFloor managed object source name", "MOS",
+				node.getOfficeFloorManagedObjectSourceName());
+		assertSame("Incorrect containing OfficeFloor", this.officeFloor,
+				node.getOfficeFloorNode());
+		assertEquals("Incorrect office managed object source name", "MOS",
+				node.getOfficeManagedObjectSourceName());
+		assertSame("Incorrect containing office", this.office,
+				node.getOfficeNode());
+		assertEquals("Incorrect office section managed object source name",
+				"MOS", node.getOfficeSectionManagedObjectSourceName());
+		assertEquals("Incorrect section managed object source name", "MOS",
+				node.getSectionManagedObjectSourceName());
+		assertSame("Incorrect parent section", this.section,
+				node.getSectionNode());
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectSourceNode} within a
+	 * {@link OfficeNode}.
+	 */
+	public void testCreateManagedObjectSourceNode_withinOffice() {
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(),
+				this.officeFloor);
+		this.recordReturn(this.office, this.office.getDeployedOfficeName(),
+				"OFFICE");
+		ManagedObjectSourceNode node = this.doTest(() -> {
+			ManagedObjectSourceNode mos = this.context
+					.createManagedObjectSourceNode("MOS",
+							"ExampleManagedObjectSource", null, this.office);
+			assertEquals("Incorrect managed object source name", "OFFICE.MOS",
+					mos.getManagedObjectSourceName());
+			return mos;
+		});
+		assertNode(node, "MOS", "Managed Object Source", null, this.office);
+		assertEquals("Incorrect OfficeFloor managed object source name", "MOS",
+				node.getOfficeFloorManagedObjectSourceName());
+		assertSame("Incorrect containing OfficeFloor", this.officeFloor,
+				node.getOfficeFloorNode());
+		assertEquals("Incorrect office managed object source name", "MOS",
+				node.getOfficeManagedObjectSourceName());
+		assertSame("Incorrect containing office", this.office,
+				node.getOfficeNode());
+		assertNull(
+				"Should not have office section name, as not contained in section",
+				node.getOfficeSectionManagedObjectSourceName());
+		assertNull("Should not have section name, as not contained in section",
+				node.getSectionManagedObjectSourceName());
+		assertNull(
+				"Should not have parent section, as not contained in section",
+				node.getSectionNode());
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectSourceNode} from
+	 * {@link SupplierNode}.
+	 */
+	public void testCreateManagedObjectSourceNode_fromSupplier() {
+		SuppliedManagedObjectNode suppliedManagedObject = this
+				.createMock(SuppliedManagedObjectNode.class);
+		SupplierNode supplier = this.createMock(SupplierNode.class);
+		this.recordReturn(suppliedManagedObject,
+				suppliedManagedObject.getSupplierNode(), supplier);
+		this.recordReturn(supplier, supplier.getOfficeFloorNode(),
+				this.officeFloor);
+		ManagedObjectSourceNode node = this.doTest(() -> {
+			ManagedObjectSourceNode mos = this.context
+					.createManagedObjectSourceNode("MOS",
+							"ExampleManagedObjectSource", null,
+							suppliedManagedObject);
+			assertEquals("Incorrect managed object source name", "MOS",
+					mos.getManagedObjectSourceName());
+			return mos;
+		});
+		assertNode(node, "MOS", "Managed Object Source", null,
+				suppliedManagedObject);
+		assertEquals("Incorrect OfficeFloor managed object source name", "MOS",
+				node.getOfficeFloorManagedObjectSourceName());
+		assertSame("Incorrect containing OfficeFloor", this.officeFloor,
+				node.getOfficeFloorNode());
+		assertNull("Should not have office name, as not contained in office",
+				node.getOfficeManagedObjectSourceName());
+		assertNull("Should not have parent office, as not contained in office",
+				node.getOfficeNode());
+		assertNull(
+				"Should not have office section name, as not contained in section",
+				node.getOfficeSectionManagedObjectSourceName());
+		assertNull("Should not have section name, as not contained in section",
+				node.getSectionManagedObjectSourceName());
+		assertNull(
+				"Should not have parent section, as not contained in section",
+				node.getSectionNode());
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectSourceNode} within a
+	 * {@link OfficeFloorNode}.
+	 */
+	public void testCreateManagedObjectSourceNode_withinOfficeFloor() {
+		ManagedObjectSourceNode node = this.doTest(() -> {
+			ManagedObjectSourceNode mos = this.context
+					.createManagedObjectSourceNode("MOS",
+							"ExampleManagedObjectSource", null,
+							this.officeFloor);
+			assertEquals("Incorrect managed object source name", "MOS",
+					mos.getManagedObjectSourceName());
+			return mos;
+		});
+		assertNode(node, "MOS", "Managed Object Source", null, this.office);
+		assertEquals("Incorrect OfficeFloor managed object source name", "MOS",
+				node.getOfficeFloorManagedObjectSourceName());
+		assertSame("Incorrect containing OfficeFloor", this.officeFloor,
+				node.getOfficeFloorNode());
+		assertNull("Should not have office name, as not contained in office",
+				node.getOfficeManagedObjectSourceName());
+		assertNull("Should not have parent office, as not contained in office",
+				node.getOfficeNode());
+		assertNull(
+				"Should not have office section name, as not contained in section",
+				node.getOfficeSectionManagedObjectSourceName());
+		assertNull("Should not have section name, as not contained in section",
+				node.getSectionManagedObjectSourceName());
+		assertNull(
+				"Should not have parent section, as not contained in section",
+				node.getSectionNode());
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectTeamNode}.
+	 */
+	public void testCreateManagedObjectTeamNode() {
+		ManagedObjectTeamNode node = this.doTest(() -> this.context
+				.createManagedObjectTeamNode("TEAM", this.managedObjectSource));
+		assertNode(node, "TEAM", "Managed Object Source Team", null,
+				this.managedObjectSource);
+		assertEquals("Incorrect managed object team name", "TEAM",
+				node.getManagedObjectTeamName());
+	}
+
+	/**
+	 * Ensure can create {@link ManagingOfficeNode}.
+	 */
+	public void testCreateManagingOfficeNode() {
+		ManagingOfficeNode node = this.doTest(() -> this.context
+				.createManagingOfficeNode(this.managedObjectSource));
+		assertNode(node, "MANAGING_OFFICE", "Managing Office", null,
+				this.managedObjectSource);
+	}
+
+	/**
+	 * Ensure can create {@link OfficeFloorNode}.
+	 */
+	public void testCreateOfficeFloorNode() {
+		OfficeFloorNode node = this.doTest(() -> this.context
+				.createOfficeFloorNode("ExampleOfficeFloorSource", null,
+						"LOCATION"));
+		assertNode(node, OfficeFloorNode.OFFICE_FLOOR_NAME, "OfficeFloor",
+				"LOCATION", null);
+	}
+
+	/**
+	 * Ensure can create {@link OfficeInputNode}.
+	 */
+	public void testCreateOfficeInputNode() {
+		OfficeInputNode node = this
+				.doTest(() -> this.context.createOfficeInputNode("INPUT",
+						"java.lang.String", this.office));
+		assertNode(node, "INPUT", "Office Input", null, this.office);
+		assertEquals("Incorrect office input name", "INPUT",
+				node.getOfficeInputName());
+		assertEquals("Incorrect office input parameter type",
+				"java.lang.String", node.getParameterType());
+	}
+
+	/**
+	 * Ensure can create {@link OfficeNode}.
+	 */
+	public void testCreateOfficeNode() {
+		OfficeNode node = this.doTest(() -> this.context.createOfficeNode(
+				"OFFICE", "ExampleOfficeSource", null, "LOCATION",
+				this.officeFloor));
+		assertNode(node, "OFFICE", "Office", "LOCATION", this.officeFloor);
+		assertEquals("Incorrect office name", "OFFICE",
+				node.getDeployedOfficeName());
+	}
+
+	/**
+	 * Ensure can create {@link OfficeObjectNode}.
+	 */
+	public void testCreateOfficeObjectNode() {
+		OfficeObjectNode node = this.doTest(() -> this.context
+				.createOfficeObjectNode("OBJECT", this.office));
+		assertNode(node, "OBJECT", "Office Object", null, this.office);
+		assertEquals("Incorrect administerable object name", "OBJECT",
+				node.getAdministerableManagedObjectName());
+		assertEquals("Incorrect dependent object name", "OBJECT",
+				node.getDependentManagedObjectName());
+		assertEquals("Incorrect governerable object name", "OBJECT",
+				node.getGovernerableManagedObjectName());
+		assertNull("Should not be created with type", node.getObjectType());
+		node.getOfficeManagedObjectName();
+		node.getOfficeObjectName();
+
+		// Validate initialised
+		assertFalse("Not yet initialsied", node.isInitialised());
+		node = node.initialise("java.lang.Integer");
+		assertTrue("Now initialised", node.isInitialised());
+		assertEquals("Incorrect object type", "java.lang.Integer",
+				node.getObjectType());
+	}
+
+	/**
+	 * Ensure can create {@link OfficeOutputNode}.
+	 */
+	public void testCreateOfficeOutputNode() {
+		OfficeOutputNode node = this.doTest(() -> this.context
+				.createOfficeOutputNode("OUTPUT", "java.lang.Character",
+						this.office));
+		assertNode(node, "OUTPUT", "Office Output", null, this.office);
+		assertEquals("Incorrect argument type", "java.lang.Character",
+				node.getArgumentType());
+		assertEquals("Incorrect output name", "OUTPUT",
+				node.getOfficeOutputName());
+	}
+
+	/**
+	 * Ensure can create {@link OfficeStartNode}.
+	 */
+	public void testCreateOfficeStartNode() {
+		OfficeStartNode node = this.doTest(() -> this.context
+				.createOfficeStartNode("START", this.office));
+		assertNode(node, "START", "Office Start", null, this.office);
+		assertEquals("Incorrect start name", "START", node.getOfficeStartName());
+	}
+
+	/**
+	 * Ensure can create {@link SectionInputNode}.
+	 */
+	public void testCreateSectionInputNode() {
+		this.recordReturn(this.section, this.section.getOfficeSectionName(),
+				"SECTION");
+		SectionInputNode node = this.doTest(() -> {
+			SectionInputNode input = this.context.createSectionInputNode(
+					"INPUT", this.section);
+			assertEquals("Incorrect office section name", "SECTION",
+					input.getOfficeSectionName());
+			return input;
+		});
+		assertNode(node, "INPUT", "Section Input", null, this.section);
+		assertEquals("Incorrect deployed input name", "INPUT",
+				node.getDeployedOfficeInputName());
+		assertEquals("Incorrect section input name", "INPUT",
+				node.getOfficeSectionInputName());
+		assertNull("Should not have parameter type on creation",
+				node.getParameterType());
+
+		// Validate initialised
+		assertFalse("Not yet initialsied", node.isInitialised());
+		node = node.initialise("java.lang.Short");
+		assertTrue("Now initialised", node.isInitialised());
+		assertEquals("Incorrect input type", "java.lang.Short",
+				node.getParameterType());
+	}
+
+	/**
+	 * Ensure can create {@link SectionObjectNode}.
+	 */
+	public void testCreateSectionObjectNode() {
+		SectionObjectNode node = this.doTest(() -> this.context
+				.createSectionObjectNode("OBJECT", this.section));
+		assertNode(node, "OBJECT", "Section Object", null, this.section);
+		assertNull("Should not have type on instantiation",
+				node.getObjectType());
+		assertEquals("Incorrect office section object name", "OBJECT",
+				node.getOfficeSectionObjectName());
+		assertEquals("Incorrect section object name", "OBJECT",
+				node.getSectionObjectName());
+		assertEquals("Incorrect sub section object name", "OBJECT",
+				node.getSubSectionObjectName());
+
+		// Validate initialised
+		assertFalse("Not yet initialsied", node.isInitialised());
+		node = node.initialise("java.lang.Byte");
+		assertTrue("Now initialised", node.isInitialised());
+		assertEquals("Incorrect input type", "java.lang.Byte",
+				node.getObjectType());
+	}
+
+	/**
+	 * Ensure can create {@link SectionOutputNode}.
+	 */
+	public void testCreateSectionOutputNode() {
+		SectionOutputNode node = this.doTest(() -> this.context
+				.createSectionOutputNode("OUTPUT", this.section));
+		assertNode(node, "OUTPUT", "Section Output", null, this.section);
+		assertNull("Should not have type on instantiation",
+				node.getArgumentType());
+		assertEquals("Incorrect office section output name", "OUTPUT",
+				node.getOfficeSectionOutputName());
+		assertEquals("Incorrect section output name", "OUTPUT",
+				node.getSectionOutputName());
+		assertEquals("Incorrect sub section output name", "OUTPUT",
+				node.getSubSectionOutputName());
+
+		// Validate initialised
+		assertFalse("Not yet initialsied", node.isInitialised());
+		node = node.initialise("java.lang.Float", true);
+		assertTrue("Now initialised", node.isInitialised());
+		assertEquals("Incorrect input type", "java.lang.Float",
+				node.getArgumentType());
+		assertTrue("Should be escalation", node.isEscalationOnly());
+	}
+
+	/**
+	 * Ensure can create {@link SuppliedManagedObjectNode}.
+	 */
+	public void testCreateSuppliedManagedObjectNode() {
+		AutoWire autoWire = new AutoWire("TYPE");
+		SupplierNode supplier = this.createMock(SupplierNode.class);
+		SuppliedManagedObjectNode node = this.doTest(() -> this.context
+				.createSuppliedManagedObjectNode(autoWire, supplier));
+		assertNode(node, autoWire.getQualifiedType(),
+				"Supplied Managed Object", null, supplier);
+		assertSame("Incorrect auto wire", autoWire, node.getAutoWire());
+	}
+
+	/**
+	 * Ensure can create {@link SupplierNode}.
+	 */
+	public void testCreateSupplierNode() {
+		SupplierNode node = this.doTest(() -> this.context.createSupplierNode(
+				"SUPPLIER", "ExampleSupplierSource", this.officeFloor));
+		assertNode(node, "SUPPLIER", "Supplier", null, this.officeFloor);
+		assertEquals("Incorrect supplier name", "SUPPLIER",
+				node.getOfficeFloorSupplierName());
+	}
+
+	/**
+	 * Ensure can create {@link TaskFlowNode}.
+	 */
+	public void testCreateTaskFlowNode() {
+		TaskFlowNode node = this.doTest(() -> this.context.createTaskFlowNode(
+				"FLOW", true, this.task));
+		assertNode(node, "FLOW", "Task Flow", null, this.task);
+		assertEquals("Escalation is sequential",
+				FlowInstigationStrategyEnum.SEQUENTIAL,
+				node.getFlowInstigationStrategy());
+		assertEquals("Incorrect task flow name", "FLOW", node.getTaskFlowName());
+	}
+
+	/**
+	 * Asserts the {@link Node} is correct.
+	 * 
+	 * @param node
+	 *            {@link Node} to validate.
+	 * @param name
+	 *            Expected name.
+	 * @param type
+	 *            Expected type.
+	 * @param location
+	 *            Expected location.
+	 * @param parent
+	 *            Parent {@link Node}.
+	 */
+	private static void assertNode(Node node, String name, String type,
+			String location, Node parent) {
+		assertEquals("Incorrect node name", name, node.getNodeName());
+		assertEquals("Incorrect node type", type, node.getNodeType());
+		assertEquals("Incorrect node location", location, node.getLocation());
+		assertSame("Incorrect node parent", parent, node.getParentNode());
+	}
+
+}

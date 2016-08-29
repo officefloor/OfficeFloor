@@ -19,8 +19,9 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 
 /**
@@ -36,15 +37,9 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 	private final String managedObjectFlowName;
 
 	/**
-	 * {@link LocationType} of the location containing this
-	 * {@link ManagedObjectFlowNode}.
+	 * Parent {@link ManagedObjectSourceNode}.
 	 */
-	private final LocationType locationType;
-
-	/**
-	 * Location containing this {@link ManagedObjectFlowNode}.
-	 */
-	private final String location;
+	private final ManagedObjectSourceNode managedObjectSource;
 
 	/**
 	 * {@link NodeContext}.
@@ -56,20 +51,52 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 	 * 
 	 * @param managedObjectFlowName
 	 *            Name of this {@link ManagedObjectFlow}.
-	 * @param locationType
-	 *            {@link LocationType} of the location containing this
-	 *            {@link ManagedObjectFlowNode}.
-	 * @param location
-	 *            Location containing this {@link ManagedObjectFlowNode}.
+	 * @param managedObjectSource
+	 *            Parent {@link ManagedObjectSourceNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectFlowNodeImpl(String managedObjectFlowName,
-			LocationType locationType, String location, NodeContext context) {
+			ManagedObjectSourceNode managedObjectSource, NodeContext context) {
 		this.managedObjectFlowName = managedObjectFlowName;
-		this.locationType = locationType;
-		this.location = location;
+		this.managedObjectSource = managedObjectSource;
 		this.context = context;
+	}
+
+	/*
+	 * =================== Node =============================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -97,10 +124,7 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 		if (this.linkedFlowNode != null) {
 			// Office floor managed object flow
 			this.context.getCompilerIssues().addIssue(
-					this.locationType,
-					this.location,
-					null,
-					null,
+					this,
 					"Managed object source flow " + this.managedObjectFlowName
 							+ " linked more than once");
 			return false; // already linked

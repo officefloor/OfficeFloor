@@ -28,13 +28,13 @@ import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
@@ -57,10 +57,10 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -142,13 +142,60 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	/*
-	 * =================== AbstractNode =====================================
+	 * =========================== Node =====================================
 	 */
 
 	@Override
-	protected void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, null, null, issueDescription);
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
+	}
+
+	/*
+	 * ===================== ManagedObjectRegistry =============================
+	 */
+
+	@Override
+	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
+		// TODO implement ManagedObjectRegistry.getManagedObjectName
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectRegistry.getManagedObjectNode");
+
+	}
+
+	@Override
+	public ManagedObjectNode createManagedObjectNode(String managedObjectName,
+			ManagedObjectScope managedObjectScope) {
+		// TODO implement ManagedObjectRegistry.createManagedObjectNode
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectRegistry.createManagedObjectNode");
+
 	}
 
 	/*
@@ -162,12 +209,10 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		ManagedObjectSourceNode mo = this.managedObjectSources
 				.get(managedObjectSourceName);
 		if (mo == null) {
-			// Create the managed object source and have in office floor context
-			mo = new ManagedObjectSourceNodeImpl(managedObjectSourceName,
-					managedObjectSourceClassName, LocationType.OFFICE_FLOOR,
-					this.officeFloorLocation, null, null, this.managedObjects,
-					this.context);
-			mo.addOfficeFloorContext(this.officeFloorLocation);
+			// Create the managed object source
+			mo = this.context.createManagedObjectSourceNode(
+					managedObjectSourceName, managedObjectSourceClassName,
+					null, this);
 
 			// Add the managed object source
 			this.managedObjectSources.put(managedObjectSourceName, mo);
@@ -188,11 +233,11 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 				.get(managedObjectSourceName);
 		if (mo == null) {
 			// Create the managed object source and have in office floor context
-			mo = new ManagedObjectSourceNodeImpl(managedObjectSourceName,
-					managedObjectSource, LocationType.OFFICE_FLOOR,
-					this.officeFloorLocation, null, null, this.managedObjects,
-					this.context);
-			mo.addOfficeFloorContext(this.officeFloorLocation);
+			String managedObjectSourceClassName = managedObjectSource
+					.getClass().getName();
+			mo = this.context.createManagedObjectSourceNode(
+					managedObjectSourceName, managedObjectSourceClassName,
+					managedObjectSource, this);
 
 			// Add the managed object source
 			this.managedObjectSources.put(managedObjectSourceName, mo);
@@ -212,8 +257,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 				.get(inputManagedObjectName);
 		if (inputMo == null) {
 			// Create the input managed object and have in office floor context
-			inputMo = new InputManagedObjectNodeImpl(inputManagedObjectName,
-					this.officeFloorLocation, this.context);
+			inputMo = this.context.createInputManagedNode(
+					inputManagedObjectName, this);
 
 			// Add the input managed object
 			this.inputManagedObjects.put(inputManagedObjectName, inputMo);
@@ -267,9 +312,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		OfficeNode office = this.offices.get(officeName);
 		if (office == null) {
 			// Create the office within the office floor context
-			office = new OfficeNodeImpl(officeName, officeSource,
-					officeLocation, this.context);
-			office.addOfficeFloorContext(this.officeFloorLocation);
+			office = this.context.createOfficeNode(officeName, officeSource
+					.getClass().getName(), officeSource, officeLocation, this);
 
 			// Add the office
 			this.offices.put(officeName, office);
@@ -287,9 +331,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		OfficeNode office = this.offices.get(officeName);
 		if (office == null) {
 			// Create the office within the office floor context
-			office = new OfficeNodeImpl(officeName, officeSourceClassName,
-					officeLocation, this.context);
-			office.addOfficeFloorContext(this.officeFloorLocation);
+			office = this.context.createOfficeNode(officeName,
+					officeSourceClassName, null, officeLocation, this);
 
 			// Add the office
 			this.offices.put(officeName, office);
@@ -352,24 +395,27 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public void addIssue(String issueDescription, AssetType assetType,
-			String assetName) {
-		this.context.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, assetType, assetName,
-				issueDescription);
+	public void addIssue(String issueDescription) {
+		this.context.getCompilerIssues().addIssue(this, issueDescription);
 	}
 
 	@Override
-	public void addIssue(String issueDescription, Throwable cause,
-			AssetType assetType, String assetName) {
-		this.context.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, assetType, assetName,
-				issueDescription, cause);
+	public void addIssue(String issueDescription, Throwable cause) {
+		this.context.getCompilerIssues()
+				.addIssue(this, issueDescription, cause);
 	}
 
 	/*
 	 * ===================== OfficeFloorNode ==================================
 	 */
+
+	@Override
+	public void addProfiler(String officeName, Profiler profiler) {
+		// TODO implement OfficeFloorNode.addProfiler
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeFloorNode.addProfiler");
+
+	}
 
 	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(
@@ -380,17 +426,14 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 				.get(managedObjectSourceName);
 		if (mo == null) {
 			// Create the managed object source and have in office floor context
-			mo = new ManagedObjectSourceNodeImpl(managedObjectSourceName,
-					suppliedManagedObject, LocationType.OFFICE_FLOOR,
-					this.officeFloorLocation, null, null, this.managedObjects,
-					this.context);
-			mo.addOfficeFloorContext(this.officeFloorLocation);
+			mo = this.context.createManagedObjectSourceNode(
+					managedObjectSourceName, null, null, suppliedManagedObject);
 
 			// Add the managed object source
 			this.managedObjectSources.put(managedObjectSourceName, mo);
 		} else {
 			// Managed object source already added
-			this.addIssue("Office floor managed object source "
+			this.addIssue("OfficeFloor managed object source "
 					+ managedObjectSourceName + " already added");
 		}
 		return mo;
@@ -459,7 +502,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			// Ensure have the team source
 			if (!team.hasTeamSource()) {
 				this.addIssue("Null source for team " + teamName + " (team "
-						+ teamIndex + ")", AssetType.TEAM, teamName);
+						+ teamIndex + ")");
 				return false; // must have source
 			}
 
@@ -590,7 +633,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			// Ensure have the team source
 			if (!team.hasTeamSource()) {
 				this.addIssue("Null source for team " + teamName + " (team "
-						+ teamIndex + ")", AssetType.TEAM, teamName);
+						+ teamIndex + ")");
 				return null; // must have source
 			}
 
@@ -677,18 +720,14 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		public void addIssue(AssetType assetType, String assetName,
 				String issueDescription) {
 			OfficeFloorNodeImpl.this.context.getCompilerIssues().addIssue(
-					LocationType.OFFICE_FLOOR,
-					OfficeFloorNodeImpl.this.officeFloorLocation, assetType,
-					assetName, issueDescription);
+					OfficeFloorNodeImpl.this, issueDescription);
 		}
 
 		@Override
 		public void addIssue(AssetType assetType, String assetName,
 				String issueDescription, Throwable cause) {
 			OfficeFloorNodeImpl.this.context.getCompilerIssues().addIssue(
-					LocationType.OFFICE_FLOOR,
-					OfficeFloorNodeImpl.this.officeFloorLocation, assetType,
-					assetName, issueDescription, cause);
+					OfficeFloorNodeImpl.this, issueDescription, cause);
 		}
 	}
 

@@ -19,13 +19,13 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeInputNode;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * Implementation of the {@link OfficeOutputNode}.
@@ -45,9 +45,9 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 	private final String argumentType;
 
 	/**
-	 * Location of the {@link Office} containing this {@link OfficeOutputNode}.
+	 * Parent {@link OfficeNode}.
 	 */
-	private final String officeLocation;
+	private final OfficeNode officeNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -65,24 +65,59 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 	private LinkFlowNode linkedFlowNode = null;
 
 	/**
-	 * Initialise.
+	 * Instantiate.
 	 * 
 	 * @param name
 	 *            Name of this {@link OfficeFloorOutput}.
 	 * @param argumentType
 	 *            Argument type from this {@link OfficeFloorOutput}.
-	 * @param officeLocation
-	 *            Location of the {@link Office} containing this
-	 *            {@link OfficeOutputNode}.
+	 * @param office
+	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public OfficeOutputNodeImpl(String name, String argumentType,
-			String officeLocation, NodeContext context) {
+			OfficeNode office, NodeContext context) {
 		this.name = name;
 		this.argumentType = argumentType;
-		this.officeLocation = officeLocation;
+		this.officeNode = office;
 		this.context = context;
+	}
+
+	/*
+	 * ================= Node =============================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -103,8 +138,7 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 
 		// Ensure not already linked
 		if (this.linkedSynchronousNode != null) {
-			this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-					this.officeLocation, null, null,
+			this.context.getCompilerIssues().addIssue(this,
 					"Output " + this.name + " linked more than once");
 			return false; // already linked
 		}
@@ -112,10 +146,7 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 		// Ensure is an input
 		if (!(node instanceof OfficeInputNode)) {
 			this.context.getCompilerIssues().addIssue(
-					LocationType.OFFICE,
-					this.officeLocation,
-					null,
-					null,
+					this,
 					"Output " + this.name
 							+ " may only be synchronously linked to an "
 							+ OfficeInputNode.class.getSimpleName());
@@ -141,8 +172,7 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
-			this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-					this.officeLocation, null, null,
+			this.context.getCompilerIssues().addIssue(this,
 					"Output " + this.name + " linked more than once");
 			return false; // already linked
 		}

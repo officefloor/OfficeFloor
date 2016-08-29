@@ -28,19 +28,16 @@ import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeObject;
-import net.officefloor.compile.spi.office.OfficeSectionObject;
-import net.officefloor.compile.spi.officefloor.DeployedOffice;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
@@ -58,7 +55,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	/**
 	 * Listing of the {@link AdministratorNode} instances of the
 	 * {@link OfficeAdministrator} instances administering this
-	 * {@link OfficeManagedObjectType}.
+	 * {@link OfficeObjectNode}.
 	 */
 	private final List<AdministratorNode> administrators = new LinkedList<AdministratorNode>();
 
@@ -70,10 +67,9 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
 	/**
-	 * Location of the {@link Office} containing this
-	 * {@link OfficeSectionObject}.
+	 * Parent {@link OfficeNode}.
 	 */
-	private String officeLocation;
+	private final OfficeNode officeNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -96,50 +92,56 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	private String typeQualifier = null;
 
 	/**
-	 * Flags whether within the {@link OfficeFloor} context
-	 */
-	private boolean isInOfficeFloorContext = false;
-
-	/**
-	 * Location of the {@link OfficeFloor} containing this {@link OfficeObject}.
-	 */
-	private String officeFloorLocation;
-
-	/**
 	 * Allow adding a {@link OfficeObject} via the {@link OfficeArchitect}.
 	 * 
 	 * @param objectName
 	 *            Name of the {@link OfficeObject}.
-	 * @param objectType
-	 *            Type of the {@link OfficeObject}.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
+	 * @param office
+	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeObjectNodeImpl(String objectName, String objectType,
-			String officeLocation, NodeContext context) {
-		this.objectName = objectName;
-		this.officeLocation = officeLocation;
-		this.context = context;
-		this.initialise(objectType);
-	}
-
-	/**
-	 * Allow obtaining {@link Office} from the {@link DeployedOffice}.
-	 * 
-	 * @param objectName
-	 *            Name of the {@link OfficeObject}.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	public OfficeObjectNodeImpl(String objectName, String officeLocation,
+	public OfficeObjectNodeImpl(String objectName, OfficeNode office,
 			NodeContext context) {
 		this.objectName = objectName;
-		this.officeLocation = officeLocation;
+		this.officeNode = office;
 		this.context = context;
+	}
+
+	/*
+	 * ================== Node ========================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -152,9 +154,10 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	}
 
 	@Override
-	public void initialise(String objectType) {
+	public OfficeObjectNode initialise(String objectType) {
 		this.objectType = objectType;
 		this.isInitialised = true;
+		return this;
 	}
 
 	@Override
@@ -171,12 +174,6 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	public GovernanceNode[] getGovernances() {
 		return this.governances.toArray(new GovernanceNode[this.governances
 				.size()]);
-	}
-
-	@Override
-	public void addOfficeFloorContext(String officeFloorLocation) {
-		this.officeFloorLocation = officeFloorLocation;
-		this.isInOfficeFloorContext = true;
 	}
 
 	/*
@@ -293,25 +290,11 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 		// Ensure not already linked
 		if (this.linkedObjectNode != null) {
-			if (this.isInOfficeFloorContext) {
-				// Office object already linked
-				this.context.getCompilerIssues().addIssue(
-						LocationType.OFFICE_FLOOR,
-						this.officeFloorLocation,
-						null,
-						null,
-						"Office object " + this.objectName
-								+ " linked more than once");
-			} else {
-				// Office object already linked
-				this.context.getCompilerIssues().addIssue(
-						LocationType.OFFICE,
-						this.officeLocation,
-						null,
-						null,
-						"Office section object " + this.objectName
-								+ " linked more than once");
-			}
+			// Office object already linked
+			this.context.getCompilerIssues().addIssue(
+					this,
+					"Office object " + this.objectName
+							+ " linked more than once");
 			return false; // already linked
 		}
 

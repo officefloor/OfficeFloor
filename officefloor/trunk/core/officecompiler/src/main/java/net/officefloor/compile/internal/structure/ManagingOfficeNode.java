@@ -24,5 +24,5 @@ import net.officefloor.compile.spi.officefloor.ManagingOffice;
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagingOfficeNode extends ManagingOffice, LinkOfficeNode {
+public interface ManagingOfficeNode extends LinkOfficeNode, ManagingOffice {
 }

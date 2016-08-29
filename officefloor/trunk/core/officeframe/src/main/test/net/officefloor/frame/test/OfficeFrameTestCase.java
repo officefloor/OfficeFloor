@@ -58,6 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -1379,6 +1380,22 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			synchronized (control) {
 				control.verify();
 			}
+		}
+	}
+
+	/**
+	 * Undertakes test wrapping with mock object replay and verify.
+	 * 
+	 * @param supplier
+	 *            {@link Supplier} with test logic to wrap in replay/verify.
+	 * @return Result of test logic.
+	 */
+	protected final <T> T doTest(Supplier<T> test) {
+		this.replayMockObjects();
+		try {
+			return test.get();
+		} finally {
+			this.verifyMockObjects();
 		}
 	}
 

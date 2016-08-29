@@ -51,8 +51,8 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
@@ -77,7 +77,6 @@ import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
@@ -625,12 +624,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 				if (inputAutoWiring.length != 1) {
 					String inputManagedObjectName = (inputAutoWiring.length == 0 ? "UNKNOWN"
 							: inputAutoWiring[0].getQualifiedType());
-					deployer.addIssue(
-							OfficeFloorInputManagedObject.class.getSimpleName()
-									+ " " + inputManagedObjectName
-									+ " must have only one "
-									+ AutoWire.class.getSimpleName(),
-							AssetType.MANAGED_OBJECT, inputManagedObjectName);
+					deployer.addIssue(OfficeFloorInputManagedObject.class
+							.getSimpleName()
+							+ " "
+							+ inputManagedObjectName
+							+ " must have only one "
+							+ AutoWire.class.getSimpleName());
 					continue; // do not include
 				}
 
@@ -730,9 +729,7 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					.getAppropriateObjectInstance(qualifier, type);
 			if (autoWireObjectInstance == null) {
 				deployer.addIssue("No auto-wire object available for "
-						+ usedObjectAutoWire.getQualifiedType(),
-						AssetType.MANAGED_OBJECT,
-						usedObjectAutoWire.getQualifiedType());
+						+ usedObjectAutoWire.getQualifiedType());
 				continue; // must have auto-wire object to load managed object
 			}
 
@@ -742,17 +739,12 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 			} else if (usedInputAutoWiring.contains(usedObjectAutoWire)) {
 				// Auto-wire already loaded as input managed object
-				deployer.addIssue(
-						"Auto-wire "
-								+ usedObjectAutoWire.getQualifiedType()
-								+ " has both "
-								+ OfficeFloorInputManagedObject.class
-										.getSimpleName()
-								+ " and "
-								+ OfficeFloorManagedObject.class
-										.getSimpleName() + " mapped to it",
-						AssetType.MANAGED_OBJECT,
-						autoWireObjectInstance.managedObjectName);
+				deployer.addIssue("Auto-wire "
+						+ usedObjectAutoWire.getQualifiedType() + " has both "
+						+ OfficeFloorInputManagedObject.class.getSimpleName()
+						+ " and "
+						+ OfficeFloorManagedObject.class.getSimpleName()
+						+ " mapped to it");
 				continue;
 			}
 
@@ -1635,14 +1627,11 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 					OfficeFloorInputManagedObject inputMo = objectInstance.inputManagedObject;
 					if (inputMo == null) {
 						// Must be handled Input Managed Object
-						state.deployer.addIssue(
-								"May only depend on "
-										+ OfficeFloorInputManagedObject.class
-												.getSimpleName() + " "
-										+ objectInstance.managedObjectName
-										+ " if all of its flows are handled",
-								AssetType.MANAGED_OBJECT,
-								this.managedObjectName);
+						state.deployer.addIssue("May only depend on "
+								+ OfficeFloorInputManagedObject.class
+										.getSimpleName() + " "
+								+ objectInstance.managedObjectName
+								+ " if all of its flows are handled");
 						return;
 					}
 
@@ -1663,13 +1652,14 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 			}
 
 			// As here, no managed object for dependency
-			state.deployer.addIssue(
-					"No dependent managed object for auto-wiring dependency "
+			state.deployer
+					.addIssue("Managed object "
+							+ this.managedObjectName
+							+ " has no dependent managed object for auto-wiring dependency "
 							+ dependency.getManagedObjectDependencyName()
 							+ " (qualifier="
 							+ dependencyAutoWire.getQualifier() + ", type="
-							+ dependencyAutoWire.getType() + ")",
-					AssetType.MANAGED_OBJECT, this.managedObjectName);
+							+ dependencyAutoWire.getType() + ")");
 		}
 
 		/*

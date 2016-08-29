@@ -39,8 +39,8 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionNode extends Node, SectionDesigner, SubSection,
-		OfficeSection {
+public interface SectionNode extends Node, ManagedObjectRegistry,
+		SectionDesigner, SubSection, OfficeSection {
 
 	/**
 	 * Initialises this {@link SectionNode}.
@@ -53,14 +53,12 @@ public interface SectionNode extends Node, SectionDesigner, SubSection,
 	 *            Location of the {@link OfficeSection}.
 	 * @param propertyList
 	 *            {@link PropertyList} to configure the {@link SectionSource}.
-	 * @param parentSection
-	 *            Optional parent {@link SectionNode}.
 	 * @return This {@link SectionNode} to enable stringing together with
 	 *         constructor.
 	 */
 	SectionNode initialise(SectionSource sectionSource,
 			String sectionSourceClassName, String sectionLocation,
-			PropertyList propertyList, SectionNode parentSection);
+			PropertyList propertyList);
 
 	/**
 	 * Indicates if this {@link SectionNode} has been initialised.

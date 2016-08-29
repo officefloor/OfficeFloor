@@ -18,12 +18,10 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagingOfficeNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.spi.officefloor.ManagingOffice;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagingOfficeNode} implementation.
@@ -33,15 +31,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 
 	/**
-	 * Name of the {@link ManagedObjectSource} for which this is the
-	 * {@link ManagingOffice}.
+	 * Parent {@link ManagedObjectSourceNode}.
 	 */
-	private final String managedObjectSourceName;
-
-	/**
-	 * Location of the {@link OfficeFloor}.
-	 */
-	private final String officeFloorLocation;
+	private final ManagedObjectSourceNode managedObjectSourceNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -51,19 +43,51 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	/**
 	 * Initiate.
 	 *
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource} for which this is the
-	 *            {@link ManagingOffice}.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
+	 * @param managedObjectSource
+	 *            Parent {@link ManagedObjectSourceNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagingOfficeNodeImpl(String managedObjectSourceName,
-			String officeFloorLocation, NodeContext context) {
-		this.managedObjectSourceName = managedObjectSourceName;
-		this.officeFloorLocation = officeFloorLocation;
+	public ManagingOfficeNodeImpl(ManagedObjectSourceNode managedObjectSource,
+			NodeContext context) {
+		this.managedObjectSourceNode = managedObjectSource;
 		this.context = context;
+	}
+
+	/*
+	 * ======================== Node ===============================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -81,12 +105,10 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 		// Ensure not already linked
 		if (this.linkedOfficeNode != null) {
 			this.context.getCompilerIssues().addIssue(
-					LocationType.OFFICE_FLOOR,
-					this.officeFloorLocation,
-					null,
-					null,
+					this,
 					"Managing office for managed object source "
-							+ this.managedObjectSourceName
+							+ this.managedObjectSourceNode
+									.getManagedObjectSourceName()
 							+ " linked more than once");
 			return false; // already linked
 		}

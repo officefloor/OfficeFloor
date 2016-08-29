@@ -23,9 +23,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.source.SourceContext;
 
 /**
@@ -130,14 +129,8 @@ public class CompileUtil {
 	 *            Map of alias name to {@link Class}. May be <code>null</code>.
 	 * @param context
 	 *            {@link SourceContext}.
-	 * @param locationType
-	 *            {@link LocationType}.
-	 * @param location
-	 *            Location.
-	 * @param assetType
-	 *            {@link AssetType}.
-	 * @param assetName
-	 *            Name of asset.
+	 * @param node
+	 *            {@link Node}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 * @return {@link Class}.
@@ -145,8 +138,7 @@ public class CompileUtil {
 	@SuppressWarnings("unchecked")
 	public static <T> Class<? extends T> obtainClass(String className,
 			Class<T> expectedType, Map<String, Class<?>> aliases,
-			SourceContext context, LocationType locationType, String location,
-			AssetType assetType, String assetName, CompilerIssues issues) {
+			SourceContext context, Node node, CompilerIssues issues) {
 		try {
 
 			// Obtain the class (first checking for an alias)
@@ -159,7 +151,7 @@ public class CompileUtil {
 			// Ensure class of expected type
 			if (!expectedType.isAssignableFrom(clazz)) {
 				// Not of expected type
-				issues.addIssue(locationType, location, assetType, assetName,
+				issues.addIssue(node,
 						"Must implement " + expectedType.getSimpleName()
 								+ " (class=" + clazz.getName() + ")");
 				return null; // instance not of type
@@ -170,8 +162,7 @@ public class CompileUtil {
 
 		} catch (Throwable ex) {
 			// Indicate issue
-			issues.addIssue(locationType, location, assetType, assetName,
-					"Failed to obtain class " + className, ex);
+			issues.addIssue(node, "Failed to obtain class " + className, ex);
 			return null; // no class
 		}
 	}
@@ -189,21 +180,14 @@ public class CompileUtil {
 	 *            {@link Class} to instantiate.
 	 * @param expectedType
 	 *            Expected type that is to be instantiated.
-	 * @param locationType
-	 *            {@link LocationType}.
-	 * @param location
-	 *            Location.
-	 * @param assetType
-	 *            {@link AssetType}.
-	 * @param assetName
-	 *            Name of asset.
+	 * @param node
+	 *            {@link Node}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
 	public static <T, E> T newInstance(Class<T> clazz, Class<E> expectedType,
-			LocationType locationType, String location, AssetType assetType,
-			String assetName, CompilerIssues issues) {
+			Node node, CompilerIssues issues) {
 		try {
 			// Create the instance
 			T instance = clazz.newInstance();
@@ -211,7 +195,7 @@ public class CompileUtil {
 			// Ensure the instance is of the expected type
 			if (!expectedType.isInstance(instance)) {
 				// Indicate issue
-				issues.addIssue(locationType, location, assetType, assetName,
+				issues.addIssue(node,
 						"Must implement " + expectedType.getSimpleName()
 								+ " (class=" + clazz.getName() + ")");
 				return null; // instance not of type
@@ -222,10 +206,9 @@ public class CompileUtil {
 
 		} catch (Throwable ex) {
 			// Indicate issue (catching exception from constructor)
-			issues.addIssue(locationType, location, assetType, assetName,
-					"Failed to instantiate "
-							+ (clazz != null ? clazz.getName() : null)
-							+ " by default constructor", ex);
+			issues.addIssue(node, "Failed to instantiate "
+					+ (clazz != null ? clazz.getName() : null)
+					+ " by default constructor", ex);
 			return null; // no instance
 		}
 	}
@@ -244,34 +227,25 @@ public class CompileUtil {
 	 *            Map of alias name to {@link Class}. May be <code>null</code>.
 	 * @param context
 	 *            {@link SourceContext}.
-	 * @param locationType
-	 *            {@link LocationType}.
-	 * @param location
-	 *            Location.
-	 * @param assetType
-	 *            {@link AssetType}.
-	 * @param assetName
-	 *            Name of asset.
+	 * @param node
+	 *            {@link Node}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
 	public static <T> T newInstance(String className, Class<T> expectedType,
-			Map<String, Class<?>> aliases, SourceContext context,
-			LocationType locationType, String location, AssetType assetType,
-			String assetName, CompilerIssues issues) {
+			Map<String, Class<?>> aliases, SourceContext context, Node node,
+			CompilerIssues issues) {
 
 		// Obtain the class
 		Class<? extends T> clazz = obtainClass(className, expectedType,
-				aliases, context, locationType, location, assetType, assetName,
-				issues);
+				aliases, context, node, issues);
 		if (clazz == null) {
 			return null; // must have class
 		}
 
 		// Create an instance of the class
-		T instance = newInstance(clazz, expectedType, locationType, location,
-				assetType, assetName, issues);
+		T instance = newInstance(clazz, expectedType, node, issues);
 		if (instance == null) {
 			return null; // must have instance
 		}

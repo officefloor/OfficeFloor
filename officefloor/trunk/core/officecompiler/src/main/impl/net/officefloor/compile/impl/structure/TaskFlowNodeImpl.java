@@ -18,10 +18,10 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -44,9 +44,9 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 	private final boolean isEscalation;
 
 	/**
-	 * Location of the {@link OfficeSection} containing this {@link TaskFlow}.
+	 * {@link SectionNode} containing this {@link TaskFlow}.
 	 */
-	private final String sectionLocation;
+	private final SectionNode section;
 
 	/**
 	 * {@link NodeContext}.
@@ -61,21 +61,56 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 	 * @param isEscalation
 	 *            Indicates if this {@link TaskFlow} is for a
 	 *            {@link TaskEscalationType}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection} containing this
-	 *            {@link TaskFlow}.
+	 * @param section
+	 *            {@link SectionNode} containing this {@link TaskFlow}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public TaskFlowNodeImpl(String flowName, boolean isEscalation,
-			String sectionLocation, NodeContext context) {
+			SectionNode section, NodeContext context) {
 		this.flowName = flowName;
 		this.isEscalation = isEscalation;
-		this.sectionLocation = sectionLocation;
+		this.section = section;
 		this.context = context;
 
 		// If escalation, then flow instigation strategy always sequential
 		this.instigationStrategy = FlowInstigationStrategyEnum.SEQUENTIAL;
+	}
+
+	/*
+	 * ================== Node ======================================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -124,8 +159,7 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
-			this.context.getCompilerIssues().addIssue(LocationType.SECTION,
-					this.sectionLocation, null, null,
+			this.context.getCompilerIssues().addIssue(this,
 					"Task flow " + this.flowName + " linked more than once");
 			return false; // already linked
 		}

@@ -40,7 +40,6 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
@@ -174,8 +173,9 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 				try {
 					mos.setTimeout(Long.valueOf(timeoutValue));
 				} catch (NumberFormatException ex) {
-					designer.addIssue("Invalid timeout value: " + timeoutValue,
-							AssetType.MANAGED_OBJECT, mosName);
+					designer.addIssue("Invalid timeout value " + timeoutValue
+							+ " for managed object source " + mosName
+							+ ". Must be an integer.");
 				}
 			}
 
@@ -530,8 +530,8 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 		}
 
 		// Unknown scope if at this point
-		designer.addIssue("Unknown managed object scope " + managedObjectScope,
-				AssetType.MANAGED_OBJECT, managedObjectName);
+		designer.addIssue("Unknown managed object scope " + managedObjectScope
+				+ " for managed object " + managedObjectName);
 		return null;
 	}
 

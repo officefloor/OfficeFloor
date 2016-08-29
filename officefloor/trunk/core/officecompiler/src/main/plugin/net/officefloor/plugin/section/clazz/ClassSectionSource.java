@@ -711,9 +711,7 @@ public class ClassSectionSource extends AbstractSectionSource implements
 		String sectionClassName = this.getSectionClassName();
 		if ((sectionClassName == null)
 				|| (sectionClassName.trim().length() == 0)) {
-			designer.addIssue(
-					"Must specify section class name within the location",
-					null, null);
+			designer.addIssue("Must specify section class name within the location");
 			return; // not able to load if no section class specified
 		}
 
@@ -784,7 +782,9 @@ public class ClassSectionSource extends AbstractSectionSource implements
 				try {
 					dependencyTypeQualifier = dependency.getTypeQualifier();
 				} catch (IllegalArgumentException ex) {
-					designer.addIssue(ex.getMessage(), null, null);
+					designer.addIssue(
+							"Unable to obtain type qualifier for dependency "
+									+ dependencyName, ex);
 					return; // invalid section
 				}
 
@@ -858,9 +858,8 @@ public class ClassSectionSource extends AbstractSectionSource implements
 			}
 		}
 		if (!hasTaskMethod) {
-			designer.addIssue(
-					"Must have at least one public method on template logic class "
-							+ sectionClassName, null, null);
+			designer.addIssue("Must have at least one public method on template logic class "
+					+ sectionClassName);
 		}
 
 		// Load the work type for the class

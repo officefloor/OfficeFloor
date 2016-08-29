@@ -24,19 +24,32 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.profile.Profiler;
 
 /**
  * {@link OfficeFloor} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorNode extends Node, OfficeFloorDeployer {
+public interface OfficeFloorNode extends Node, ManagedObjectRegistry,
+		OfficeFloorDeployer {
 
 	/**
 	 * Default name of the {@link OfficeFloorNode}.
 	 */
 	static final String OFFICE_FLOOR_NAME = "OfficeFloor";
+
+	/**
+	 * Adds a {@link Profiler} for an {@link Office}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office} to profile.
+	 * @param profiler
+	 *            {@link Profiler}.
+	 */
+	void addProfiler(String officeName, Profiler profiler);
 
 	/**
 	 * Adds a {@link OfficeFloorManagedObjectSource} supplied from an

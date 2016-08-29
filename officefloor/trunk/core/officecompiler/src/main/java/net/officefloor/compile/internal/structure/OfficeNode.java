@@ -24,15 +24,14 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link Office} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeNode extends Node, OfficeArchitect, DeployedOffice,
-		LinkOfficeNode {
+public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
+		OfficeArchitect, DeployedOffice {
 
 	/**
 	 * Sources this {@link Office} into this {@link OfficeNode}.
@@ -44,21 +43,19 @@ public interface OfficeNode extends Node, OfficeArchitect, DeployedOffice,
 	boolean sourceOffice();
 
 	/**
+	 * Obtains the {@link OfficeFloorNode} containing this {@link OfficeNode}.
+	 * 
+	 * @return {@link OfficeFloorNode} containing this {@link OfficeNode}.
+	 */
+	OfficeFloorNode getOfficeFloorNode();
+
+	/**
 	 * Loads the {@link OfficeType}.
 	 * 
 	 * @return {@link OfficeType} or <code>null</code> if issue loading with
 	 *         issue reported to the {@link CompilerIssues}.
 	 */
 	OfficeType loadOfficeType();
-
-	/**
-	 * Adds the context of the {@link OfficeFloor} containing this
-	 * {@link DeployedOffice}.
-	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 */
-	void addOfficeFloorContext(String officeFloorLocation);
 
 	/**
 	 * Builds the {@link Office} for this {@link OfficeNode}.

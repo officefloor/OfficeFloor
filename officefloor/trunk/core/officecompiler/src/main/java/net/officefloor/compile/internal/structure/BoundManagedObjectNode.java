@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface BoundManagedObjectNode {
+public interface BoundManagedObjectNode extends LinkObjectNode {
 
 	/**
 	 * Obtains the name under which this {@link ManagedObject} is made available

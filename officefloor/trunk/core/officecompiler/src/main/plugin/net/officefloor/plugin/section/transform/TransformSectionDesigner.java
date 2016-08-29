@@ -38,7 +38,6 @@ import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -318,15 +317,13 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public void addIssue(String issueDescription, AssetType assetType,
-			String assetName) {
-		this.delegate.addIssue(issueDescription, assetType, assetName);
+	public void addIssue(String issueDescription) {
+		this.delegate.addIssue(issueDescription);
 	}
 
 	@Override
-	public void addIssue(String issueDescription, Throwable cause,
-			AssetType assetType, String assetName) {
-		this.delegate.addIssue(issueDescription, cause, assetType, assetName);
+	public void addIssue(String issueDescription, Throwable cause) {
+		this.delegate.addIssue(issueDescription, cause);
 	}
 
 }

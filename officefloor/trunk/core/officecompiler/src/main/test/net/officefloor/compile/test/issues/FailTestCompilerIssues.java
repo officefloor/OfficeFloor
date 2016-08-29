@@ -21,8 +21,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 
 /**
  * {@link CompilerIssues} that invokes {@link TestCase#fail()} for issues
@@ -30,33 +31,27 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
  * 
  * @author Daniel Sagenschneider
  */
-public class FailTestCompilerIssues implements CompilerIssues {
+public class FailTestCompilerIssues extends AbstractCompilerIssues {
 
 	/*
-	 * =================== CompilerIssues =================================
+	 * =================== AbstractCompilerIssues ===================
 	 */
 
 	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Fail because of the issue
-		TestCase.fail(issueDescription + " [" + locationType + ":" + location
-				+ ", " + assetType + ":" + assetName + "]");
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
+	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
 
 		// Obtain the stack trace
+		Throwable cause = issue.getCause();
 		StringWriter stackTrace = new StringWriter();
-		cause.printStackTrace(new PrintWriter(stackTrace));
+		if (cause != null) {
+			stackTrace.append("\n");
+			cause.printStackTrace(new PrintWriter(stackTrace));
+		}
 
 		// Fail because of the issue
-		TestCase.fail(issueDescription + " [" + locationType + ":" + location
-				+ ", " + assetType + ":" + assetName + "]\n"
+		Node node = issue.getNode();
+		TestCase.fail(issue.getIssueDescription() + " [" + node.getNodeName()
+				+ " (" + node.getClass().getSimpleName() + "]"
 				+ stackTrace.toString());
 	}
-
 }
