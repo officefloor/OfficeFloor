@@ -19,8 +19,9 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 
 /**
@@ -37,15 +38,9 @@ public class ManagedObjectDependencyNodeImpl implements
 	private final String dependencyName;
 
 	/**
-	 * {@link LocationType} of the location containing this
-	 * {@link ManagedObjectDependencyNode}.
+	 * Parent {@link ManagedObjectNode}.
 	 */
-	private final LocationType locationType;
-
-	/**
-	 * Location containing this {@link ManagedObjectDependencyNode}.
-	 */
-	private final String location;
+	private final ManagedObjectNode managedObject;
 
 	/**
 	 * {@link NodeContext}.
@@ -57,20 +52,52 @@ public class ManagedObjectDependencyNodeImpl implements
 	 * 
 	 * @param dependencyName
 	 *            Name of this {@link ManagedObjectDependency}.
-	 * @param locationType
-	 *            {@link LocationType} of the location containing this
-	 *            {@link ManagedObjectDependencyNode}.
-	 * @param location
-	 *            Location containing this {@link ManagedObjectDependencyNode}.
+	 * @param managedObject
+	 *            Parent {@link ManagedObjectNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectDependencyNodeImpl(String dependencyName,
-			LocationType locationType, String location, NodeContext context) {
+			ManagedObjectNode managedObject, NodeContext context) {
 		this.dependencyName = dependencyName;
-		this.locationType = locationType;
-		this.location = location;
+		this.managedObject = managedObject;
 		this.context = context;
+	}
+
+	/*
+	 * ==================== Node ============================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -106,10 +133,7 @@ public class ManagedObjectDependencyNodeImpl implements
 		// Ensure not already linked
 		if (this.linkedObjectNode != null) {
 			this.context.getCompilerIssues().addIssue(
-					this.locationType,
-					this.location,
-					null,
-					null,
+					this,
 					"Managed object dependency " + this.dependencyName
 							+ " linked more than once");
 			return false; // already linked

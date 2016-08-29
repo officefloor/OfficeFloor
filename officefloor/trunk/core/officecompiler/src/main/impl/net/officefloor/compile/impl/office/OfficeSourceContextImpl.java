@@ -66,7 +66,7 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 	public OfficeSourceContextImpl(boolean isLoadingType,
 			String officeLocation, PropertyList propertyList,
 			NodeContext nodeContext) {
-		super(isLoadingType, nodeContext.getSourceContext(),
+		super(isLoadingType, nodeContext.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
 		this.officeLocation = officeLocation;
 		this.context = nodeContext;

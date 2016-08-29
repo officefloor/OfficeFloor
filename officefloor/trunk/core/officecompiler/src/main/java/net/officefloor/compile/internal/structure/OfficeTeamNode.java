@@ -17,45 +17,14 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.office.OfficeTeamType;
+import net.officefloor.compile.spi.office.OfficeTeam;
+
 /**
- * Node within the compilation tree.
+ * {@link OfficeTeam} node.
  *
  * @author Daniel Sagenschneider
  */
-public interface Node {
-
-	/**
-	 * Name used for {@link Node} when loaded as type.
-	 */
-	static final String TYPE_NAME = "TYPE";
-
-	/**
-	 * Obtains the name of the {@link Node}.
-	 * 
-	 * @return Name of the {@link Node}.
-	 */
-	String getNodeName();
-
-	/**
-	 * Obtains the {@link Node} type.
-	 * 
-	 * @return {@link Node} type.
-	 */
-	String getNodeType();
-
-	/**
-	 * Obtains the location of the {@link Node}.
-	 * 
-	 * @return Location of the {@link Node}. May be <code>null</code> if
-	 *         {@link Node} does not support a location.
-	 */
-	String getLocation();
-
-	/**
-	 * Obtains the {@link Node} containing this {@link Node}.
-	 * 
-	 * @return {@link Node} containing this {@link Node}.
-	 */
-	Node getParentNode();
-
+public interface OfficeTeamNode extends LinkTeamNode, OfficeTeam,
+		OfficeTeamType {
 }

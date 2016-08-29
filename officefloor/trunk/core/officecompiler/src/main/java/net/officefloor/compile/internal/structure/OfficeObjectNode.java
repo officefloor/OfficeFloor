@@ -20,7 +20,6 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
@@ -28,8 +27,8 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeObjectNode extends Node, OfficeManagedObjectType,
-		OfficeObject, LinkObjectNode {
+public interface OfficeObjectNode extends LinkObjectNode, OfficeObject,
+		OfficeManagedObjectType {
 
 	/**
 	 * Indicates if this {@link OfficeManagedObjectType} has been initialised.
@@ -43,8 +42,9 @@ public interface OfficeObjectNode extends Node, OfficeManagedObjectType,
 	 * 
 	 * @param objectType
 	 *            Object type.
+	 * @return <code>this</code> for builder pattern.
 	 */
-	void initialise(String objectType);
+	OfficeObjectNode initialise(String objectType);
 
 	/**
 	 * <p>
@@ -82,14 +82,5 @@ public interface OfficeObjectNode extends Node, OfficeManagedObjectType,
 	 * @return {@link GovernanceNode} instances.
 	 */
 	GovernanceNode[] getGovernances();
-
-	/**
-	 * Adds the context of the {@link OfficeFloor} containing this
-	 * {@link OfficeObject}.
-	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 */
-	void addOfficeFloorContext(String officeFloorLocation);
 
 }

@@ -21,23 +21,20 @@ import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSectionObject;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionObject} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionObjectNode extends Node, SectionObjectType,
-		SubSectionObject, SectionObject, OfficeSectionObject, LinkObjectNode {
+public interface SectionObjectNode extends LinkObjectNode, SubSectionObject,
+		SectionObject, OfficeSectionObject, SectionObjectType {
 
 	/**
 	 * Indicates if this {@link SectionObjectType} has been initialised.
 	 * 
 	 * @return <code>true</code> if initialised.
 	 */
-	@Deprecated
-	// TODO add method loadSectionObjectType()
 	boolean isInitialised();
 
 	/**
@@ -45,18 +42,9 @@ public interface SectionObjectNode extends Node, SectionObjectType,
 	 * 
 	 * @param objectType
 	 *            Object type.
+	 * @return <code>this</code> for builder pattern.
 	 */
-	void initialise(String objectType);
-
-	/**
-	 * Adds the context of the {@link Office} containing this
-	 * {@link OfficeSectionObject}.
-	 * 
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 */
-	@Deprecated
-	void addOfficeContext(String officeLocation);
+	SectionObjectNode initialise(String objectType);
 
 	/**
 	 * Obtains {@link SectionNode} containing this {@link SectionObjectNode}.

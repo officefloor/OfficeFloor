@@ -19,16 +19,14 @@ package net.officefloor.compile.impl.issues;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.Asset;
 
 /**
  * {@link CompilerIssues} that fails on an issue.
  * 
  * @author Daniel Sagenschneider
  */
-public class FailCompilerIssues extends Exception implements CompilerIssues {
+public class FailCompilerIssues extends AbstractCompilerIssues {
 
 	/**
 	 * Compiles with exception of first issue.
@@ -38,65 +36,30 @@ public class FailCompilerIssues extends Exception implements CompilerIssues {
 	 * @param officeFloorLocation
 	 *            {@link OfficeFloor} location.
 	 * @return {@link OfficeFloor}.
-	 * @throws Exception
+	 * @throws CompileException
 	 *             If fails to compile.
 	 */
 	public static OfficeFloor compile(OfficeFloorCompiler compiler,
-			String officeFloorLocation) throws Exception {
+			String officeFloorLocation) throws CompileException {
 
 		// Override the compiler issues
-		compiler.setCompilerIssues(new FailCompilerIssues(null, null, null,
-				null));
+		compiler.setCompilerIssues(new FailCompilerIssues());
 
 		// Compile
 		try {
 			return compiler.compile(officeFloorLocation);
 		} catch (CompileError propagate) {
-			throw (Exception) propagate.getCause();
+			throw new CompileException(propagate.issue);
 		}
-	}
-
-	/**
-	 * Only initialise via compiling.
-	 * 
-	 * @param assetType
-	 *            {@link AssetType}
-	 * @param assetName
-	 *            {@link Asset} name.
-	 * @param issueDescription
-	 *            Issue description.
-	 * @param cause
-	 *            Cause. May be <code>null</code>.
-	 */
-	private FailCompilerIssues(AssetType assetType, String assetName,
-			String issueDescription, Throwable cause) {
-		super(assetType + " " + assetName + ": " + issueDescription, cause);
 	}
 
 	/*
-	 * ========================= CompilerIssues =======================
+	 * ======================== AbstractCompilerIssues ========================
 	 */
 
 	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		throw new CompileError(new FailCompilerIssues(assetType, assetName,
-				issueDescription, null));
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-
-		// Ensure if issue due to existing issue
-		if (cause instanceof CompileError) {
-			throw (CompileError) cause;
-		}
-
-		// Propagate compiler error
-		throw new CompileError(new FailCompilerIssues(assetType, assetName,
-				issueDescription, cause));
+	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+		throw new CompileError(issue);
 	}
 
 	/**
@@ -105,13 +68,18 @@ public class FailCompilerIssues extends Exception implements CompilerIssues {
 	private static class CompileError extends Error {
 
 		/**
+		 * {@link DefaultCompilerIssue}.
+		 */
+		private final DefaultCompilerIssue issue;
+
+		/**
 		 * Initiate.
 		 * 
-		 * @param cause
-		 *            Cause.
+		 * @param issue
+		 *            {@link DefaultCompilerIssue}.
 		 */
-		public CompileError(Throwable cause) {
-			super(cause);
+		public CompileError(DefaultCompilerIssue issue) {
+			this.issue = issue;
 		}
 	}
 

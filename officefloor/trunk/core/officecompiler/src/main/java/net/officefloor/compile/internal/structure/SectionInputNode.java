@@ -29,9 +29,9 @@ import net.officefloor.compile.spi.section.SubSectionInput;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionInputNode extends Node, SectionInputType, SectionInput,
-		SubSectionInput, OfficeSectionInput, OfficeSectionInputType,
-		DeployedOfficeInput, LinkFlowNode {
+public interface SectionInputNode extends LinkFlowNode, SectionInput,
+		SubSectionInput, OfficeSectionInput, DeployedOfficeInput,
+		SectionInputType, OfficeSectionInputType {
 
 	/**
 	 * Indicates if this {@link SectionInputType} has been initialised.
@@ -45,7 +45,8 @@ public interface SectionInputNode extends Node, SectionInputType, SectionInput,
 	 * 
 	 * @param parameterType
 	 *            Parameter type.
+	 * @return <code>this</code> for builder pattern.
 	 */
-	void initialise(String parameterType);
+	SectionInputNode initialise(String parameterType);
 
 }

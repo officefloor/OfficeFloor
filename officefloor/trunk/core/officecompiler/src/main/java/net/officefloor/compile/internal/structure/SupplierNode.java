@@ -32,4 +32,11 @@ public interface SupplierNode extends Node, OfficeFloorSupplier {
 	 */
 	void fillSupplyOrders();
 
+	/**
+	 * Obtains the parent {@link OfficeFloorNode}.
+	 * 
+	 * @return Parent {@link OfficeFloorNode}.
+	 */
+	OfficeFloorNode getOfficeFloorNode();
+
 }

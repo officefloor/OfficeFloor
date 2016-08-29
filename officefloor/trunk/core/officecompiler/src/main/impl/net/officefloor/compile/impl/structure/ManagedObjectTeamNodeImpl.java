@@ -18,20 +18,19 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskTeamNode;
-import net.officefloor.compile.internal.structure.TaskNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link TaskTeamNode} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectTeamNodeImpl implements TaskTeamNode {
+public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 
 	/**
 	 * Name of this {@link OfficeTeam}.
@@ -39,9 +38,10 @@ public class ManagedObjectTeamNodeImpl implements TaskTeamNode {
 	private final String teamName;
 
 	/**
-	 * {@link TaskNode} containing this {@link TaskTeamNode}.
+	 * {@link ManagedObjectSourceNode} containing this
+	 * {@link ManagedObjectTeamNode}.
 	 */
-	private final TaskNode taskNode;
+	private final ManagedObjectSourceNode managedObjectSourceNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -53,25 +53,53 @@ public class ManagedObjectTeamNodeImpl implements TaskTeamNode {
 	 * 
 	 * @param teamName
 	 *            Name of this {@link OfficeTeam}.
-	 * @param taskNode
-	 *            {@link TaskNode} containing this {@link TaskTeamNode}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSourceNode} containing this
+	 *            {@link ManagedObjectTeamNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectTeamNodeImpl(String teamName, TaskNode taskNode,
-			NodeContext context) {
+	public ManagedObjectTeamNodeImpl(String teamName,
+			ManagedObjectSourceNode managedObjectSource, NodeContext context) {
 		this.teamName = teamName;
-		this.taskNode = taskNode;
+		this.managedObjectSourceNode = managedObjectSource;
 		this.context = context;
 	}
 
 	/*
-	 * ================= OfficeTeam ==============================
+	 * ================== Node =========================
 	 */
 
 	@Override
-	public String getOfficeTeamName() {
-		return this.teamName;
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -97,17 +125,9 @@ public class ManagedObjectTeamNodeImpl implements TaskTeamNode {
 
 		// Ensure not already linked
 		if (this.linkedTeamNode != null) {
-			if (this.isInOfficeFloorContext) {
-				// Deployed office team
-				this.context.getCompilerIssues().addIssue(
-						LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-						null, null, this.teamName + " already assigned");
-			} else {
-				// Office required team
-				this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-						this.officeLocation, null, null,
-						this.teamName + " already assigned");
-			}
+			// Deployed office team
+			this.context.getCompilerIssues().addIssue(this,
+					this.teamName + " already assigned");
 			return false; // already linked
 		}
 

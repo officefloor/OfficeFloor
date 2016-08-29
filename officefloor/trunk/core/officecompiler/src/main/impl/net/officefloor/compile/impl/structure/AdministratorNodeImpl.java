@@ -33,18 +33,18 @@ import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeDuty;
-import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -79,10 +79,9 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	private final PropertyList properties = new PropertyListImpl();
 
 	/**
-	 * Location of the {@link Office} containing this
-	 * {@link OfficeAdministrator}.
+	 * Parent {@link Office}.
 	 */
-	private final String officeLocation;
+	private final OfficeNode parentOffice;
 
 	/**
 	 * {@link NodeContext}.
@@ -106,43 +105,59 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	 *            Name of this {@link OfficeAdministrator}.
 	 * @param administratorSourceClassName
 	 *            Class name of the {@link AdministratorSource}.
-	 * @param officeLocation
-	 *            Location of the {@link Office} containing this
-	 *            {@link OfficeAdministrator}.
+	 * @param administratorSource
+	 *            Optional instantiated {@link AdministratorSource}. May be
+	 *            <code>null</code>.
+	 * @param parentOffice
+	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public AdministratorNodeImpl(String administratorName,
-			String administratorSourceClassName, String officeLocation,
-			NodeContext context) {
+			String administratorSourceClassName,
+			AdministratorSource<?, ?> administratorSource,
+			OfficeNode parentOffice, NodeContext context) {
 		this.administratorName = administratorName;
 		this.administratorSourceClassName = administratorSourceClassName;
-		this.administratorSource = null;
-		this.officeLocation = officeLocation;
+		this.administratorSource = administratorSource;
+		this.parentOffice = parentOffice;
 		this.context = context;
 	}
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param administratorName
-	 *            Name of this {@link OfficeAdministrator}.
-	 * @param administratorSource
-	 *            {@link AdministratorSource} instance to use.
-	 * @param officeLocation
-	 *            Location of the {@link Office} containing this
-	 *            {@link OfficeAdministrator}.
-	 * @param context
-	 *            {@link NodeContext}.
+	/*
+	 * ======================= Node ========================
 	 */
-	public AdministratorNodeImpl(String administratorName,
-			AdministratorSource<?, ?> administratorSource,
-			String officeLocation, NodeContext context) {
-		this.administratorName = administratorName;
-		this.administratorSourceClassName = null;
-		this.administratorSource = administratorSource;
-		this.officeLocation = officeLocation;
-		this.context = context;
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -203,15 +218,14 @@ public class AdministratorNodeImpl implements AdministratorNode {
 			// Obtain the administrator source class
 			Class administratorSourceClass = this.context
 					.getAdministratorSourceClass(
-							this.administratorSourceClassName,
-							this.officeLocation, this.administratorName);
+							this.administratorSourceClassName, this);
 			if (administratorSourceClass == null) {
 				return null; // must obtain source class
 			}
 
 			// Load the administrator type
-			AdministratorLoader loader = this.context.getAdministratorLoader(
-					this.officeLocation, this.administratorName);
+			AdministratorLoader loader = this.context
+					.getAdministratorLoader(this);
 			this.administratorType = loader.loadAdministratorType(
 					administratorSourceClass, this.properties);
 		}
@@ -227,7 +241,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 		// Obtain the administrator source class
 		Class administratorSourceClass = this.context
 				.getAdministratorSourceClass(this.administratorSourceClassName,
-						this.officeLocation, this.administratorName);
+						this);
 		if (administratorSourceClass == null) {
 			return; // must obtain source class
 		}
@@ -241,10 +255,8 @@ public class AdministratorNodeImpl implements AdministratorNode {
 		}
 
 		// Obtain the office team responsible for this administration
-		OfficeTeam officeTeam = LinkUtil.retrieveTarget(this, OfficeTeam.class,
-				"Administrator " + this.administratorName, LocationType.OFFICE,
-				this.officeLocation, AssetType.ADMINISTRATOR,
-				this.administratorName, this.context.getCompilerIssues());
+		OfficeTeamNode officeTeam = LinkUtil.retrieveTarget(this,
+				OfficeTeamNode.class, this.context.getCompilerIssues());
 		if (officeTeam != null) {
 			// Build the team responsible for the administrator
 			adminBuilder.setTeam(officeTeam.getOfficeTeamName());
@@ -263,14 +275,8 @@ public class AdministratorNodeImpl implements AdministratorNode {
 				managedObject = (BoundManagedObjectNode) linkObject;
 			} else {
 				// Locate the managed object
-				managedObject = LinkUtil.retrieveTarget(
-						linkObject,
+				managedObject = LinkUtil.retrieveTarget(linkObject,
 						BoundManagedObjectNode.class,
-						"Managed Object "
-								+ administerableManagedObject
-										.getAdministerableManagedObjectName(),
-						LocationType.OFFICE, this.officeLocation,
-						AssetType.ADMINISTRATOR, this.administratorName,
 						this.context.getCompilerIssues());
 			}
 			if (managedObject == null) {
@@ -310,9 +316,8 @@ public class AdministratorNodeImpl implements AdministratorNode {
 		// Ensure not already linked
 		if (this.linkedTeamNode != null) {
 			// Team already linked
-			this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-					this.officeLocation, AssetType.ADMINISTRATOR,
-					this.administratorName, "Team already assigned");
+			this.context.getCompilerIssues().addIssue(this,
+					"Team already assigned");
 			return false; // already linked
 		}
 

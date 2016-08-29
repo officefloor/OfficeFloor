@@ -18,11 +18,11 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeStart;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link OfficeStartNode} implementation.
@@ -37,9 +37,9 @@ public class OfficeStartNodeImpl implements OfficeStartNode {
 	private final String startName;
 
 	/**
-	 * Location of the {@link Office}.
+	 * Parent {@link OfficeNode}.
 	 */
-	private final String officeLocation;
+	private final OfficeNode officeNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -51,16 +51,52 @@ public class OfficeStartNodeImpl implements OfficeStartNode {
 	 * 
 	 * @param startName
 	 *            {@link OfficeStart} name.
-	 * @param officeLocation
-	 *            {@link Office} location.
+	 * @param office
+	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeStartNodeImpl(String startName, String officeLocation,
+	public OfficeStartNodeImpl(String startName, OfficeNode office,
 			NodeContext context) {
 		this.startName = startName;
-		this.officeLocation = officeLocation;
+		this.officeNode = office;
 		this.context = context;
+	}
+
+	/*
+	 * ==================== Node ===========================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -88,10 +124,7 @@ public class OfficeStartNodeImpl implements OfficeStartNode {
 		if (this.linkedFlowNode != null) {
 			// Office Start linked
 			this.context.getCompilerIssues().addIssue(
-					LocationType.OFFICE,
-					this.officeLocation,
-					null,
-					null,
+					this,
 					"Office start-up trigger " + this.startName
 							+ " linked more than once");
 			return false; // already linked

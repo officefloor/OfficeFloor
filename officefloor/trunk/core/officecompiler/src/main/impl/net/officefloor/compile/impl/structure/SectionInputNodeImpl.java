@@ -18,12 +18,11 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionInputType;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 
 /**
@@ -42,12 +41,6 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * {@link SectionNode} containing this {@link SectionInputNode}.
 	 */
 	private final SectionNode section;
-
-	/**
-	 * Location of the {@link OfficeSection} containing this
-	 * {@link SectionInputNode}.
-	 */
-	private final String sectionLocation;
 
 	/**
 	 * {@link NodeContext}.
@@ -72,42 +65,50 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 *            {@link SectionInputType}).
 	 * @param section
 	 *            {@link SectionNode} containing this {@link SectionInputNode}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection} containing this
-	 *            {@link SectionInputNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionInputNodeImpl(String inputName, SectionNode section,
-			String sectionLocation, NodeContext context) {
+			NodeContext context) {
 		this.inputName = inputName;
 		this.section = section;
-		this.sectionLocation = sectionLocation;
 		this.context = context;
 	}
 
-	/**
-	 * Initiate initialised.
-	 * 
-	 * @param inputName
-	 *            Name of the {@link SectionInputType}.
-	 * @param section
-	 *            {@link SectionNode} containing this {@link SectionInputNode}.
-	 * @param parameterType
-	 *            Parameter type.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection} containing this
-	 *            {@link SectionInputNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	/*
+	 * ================== Node ========================
 	 */
-	public SectionInputNodeImpl(String inputName, SectionNode section,
-			String parameterType, String sectionLocation, NodeContext context) {
-		this.inputName = inputName;
-		this.section = section;
-		this.sectionLocation = sectionLocation;
-		this.context = context;
-		this.initialise(parameterType);
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -129,9 +130,10 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	@Override
-	public void initialise(String parameterType) {
+	public SectionInputNode initialise(String parameterType) {
 		this.parameterType = parameterType;
 		this.isInitialised = true;
+		return this;
 	}
 
 	/*
@@ -189,8 +191,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
-			this.context.getCompilerIssues().addIssue(LocationType.SECTION,
-					this.sectionLocation, null, null,
+			this.context.getCompilerIssues().addIssue(this,
 					"Input " + this.inputName + " linked more than once");
 			return false; // already linked
 		}

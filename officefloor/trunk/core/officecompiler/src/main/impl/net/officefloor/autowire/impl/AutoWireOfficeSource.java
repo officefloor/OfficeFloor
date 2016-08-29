@@ -72,7 +72,6 @@ import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.execute.Task;
@@ -534,7 +533,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 							+ objectName + " (qualifier=" + typeQualifier
 							+ ", type=" + objectType + ") from "
 							+ OfficeSection.class.getSimpleName() + " "
-							+ sectionName, null, null);
+							+ sectionName);
 					continue; // no available auto-wiring for section object
 				}
 
@@ -659,10 +658,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 							.iterator(); iterator.hasNext();) {
 						hierarchyLog.append(iterator.next() + " : ");
 					}
-					architect.addIssue(
-							"Cyclic section inheritance hierarchy ( "
-									+ hierarchyLog.toString() + "... )", null,
-							null);
+					architect
+							.addIssue("Cyclic section inheritance hierarchy ( "
+									+ hierarchyLog.toString() + "... )");
 				}
 
 				// Provide issue if no link
@@ -674,7 +672,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 					// Issue as require link configuration
 					architect.addIssue("Section output '" + logOutputName
-							+ "' is not linked", AssetType.TASK, logOutputName);
+							+ "' is not linked");
 					continue NEXT_OUTPUT;
 				}
 
@@ -696,7 +694,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				if (sectionInput == null) {
 					architect.addIssue("Unknown section input '" + logInputName
 							+ "' for linking section output '" + logOutputName
-							+ "'", AssetType.TASK, logInputName);
+							+ "'");
 					continue; // no input so can not link
 				}
 
@@ -723,8 +721,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			String logInputName = link.targetSection.getSectionName() + ":"
 					+ link.targetInputName;
 			architect.addIssue("Unknown section output '" + logOutputName
-					+ "' to link to section input '" + logInputName + "'",
-					AssetType.TASK, logOutputName);
+					+ "' to link to section input '" + logInputName + "'");
 		}
 
 		// Only configure if have escalations
@@ -770,7 +767,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				if (sectionInput == null) {
 					architect.addIssue("Unknown section input '" + sectionName
 							+ ":" + inputName + "' for linking escalation '"
-							+ escalationTypeName + "'", null, null);
+							+ escalationTypeName + "'");
 					continue; // no input so can not link
 				}
 
@@ -888,8 +885,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 						.get(sectionName);
 				if (officeSection == null) {
 					architect.addIssue("Unknown section '" + sectionName
-							+ "' to be governed", AssetType.GOVERNANCE,
-							governanceName);
+							+ "' to be governed by governance "
+							+ governanceName);
 					continue; // can not govern unknown section
 				}
 
@@ -956,8 +953,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			if (input == null) {
 				architect.addIssue("Unknown section '" + startupSection
 						+ "' input '" + startupInput
-						+ "' to be triggered on start-up", AssetType.OFFICE,
-						"startup");
+						+ "' to be triggered on start-up");
 				continue; // can not trigger flow on start-up
 			}
 
