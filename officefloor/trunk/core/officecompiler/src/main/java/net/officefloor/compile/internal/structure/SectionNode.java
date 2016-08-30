@@ -19,7 +19,6 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeSectionInputType;
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.SectionType;
@@ -39,26 +38,23 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionNode extends Node, ManagedObjectRegistry,
+public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 		SectionDesigner, SubSection, OfficeSection {
 
 	/**
 	 * Initialises this {@link SectionNode}.
 	 * 
-	 * @param sectionSource
-	 *            Optional {@link SectionSource} instance.
 	 * @param sectionSourceClassName
 	 *            {@link SectionSource} class name.
+	 * @param sectionSource
+	 *            Optional instantiated {@link SectionSource}. May be
+	 *            <code>null</code>.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
-	 * @param propertyList
-	 *            {@link PropertyList} to configure the {@link SectionSource}.
-	 * @return This {@link SectionNode} to enable stringing together with
-	 *         constructor.
+	 * @return <code>this</code> for builder pattern.
 	 */
-	SectionNode initialise(SectionSource sectionSource,
-			String sectionSourceClassName, String sectionLocation,
-			PropertyList propertyList);
+	SectionNode initialise(String sectionSourceClassName,
+			SectionSource sectionSource, String sectionLocation);
 
 	/**
 	 * Indicates if this {@link SectionNode} has been initialised.

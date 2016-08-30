@@ -21,6 +21,9 @@ import java.sql.Connection;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
+import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.section.SubSectionInputModel;
@@ -36,12 +39,34 @@ import net.officefloor.model.section.SubSectionOutputModel;
 public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 
 	/**
+	 * {@link SectionNode} name.
+	 */
+	private static final String SECTION_NAME = "SECTION";
+
+	/**
+	 * Mock parent {@link SectionNode}.
+	 */
+	private final SectionNode parentSection = this
+			.createMock(SectionNode.class);
+
+	/**
+	 * Mock {@link OfficeNode}.
+	 */
+	private final OfficeNode officeNode = this.createMock(OfficeNode.class);
+
+	/**
+	 * Mock {@link NodeContext}.
+	 */
+	private final NodeContext context = this.createMock(NodeContext.class);
+
+	/**
 	 * Ensure can add a {@link SubSectionModel} that only has properties.
 	 */
 	public void testAddSubSectionWithPropertiesOnly() {
 
 		// Create the sub section
-		SectionType sectionType = new SectionNodeImpl(null, null, null)
+		SectionType sectionType = new SectionNodeImpl(SECTION_NAME,
+				this.parentSection, this.officeNode, this.context)
 				.loadSectionType();
 
 		// Ensure can add
@@ -65,7 +90,8 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	public void testAddSubSectionWithInputsOutputsObjects() {
 
 		// Create the sub section with inputs, outputs, objects
-		SectionNodeImpl sectionNode = new SectionNodeImpl(null, null, null);
+		SectionNodeImpl sectionNode = new SectionNodeImpl(SECTION_NAME,
+				this.parentSection, this.officeNode, this.context);
 		sectionNode.addSectionInput("INPUT_B", Integer.class.getName());
 		sectionNode.addSectionInput("INPUT_A", Double.class.getName());
 		sectionNode.addSectionOutput("OUTPUT_B", String.class.getName(), false);
@@ -88,7 +114,8 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	public void testAddMultipleSubSections() {
 
 		// Create the section type
-		SectionType sectionType = new SectionNodeImpl(null, null, null)
+		SectionType sectionType = new SectionNodeImpl(SECTION_NAME,
+				this.parentSection, this.officeNode, this.context)
 				.loadSectionType();
 
 		// Add multiple section types

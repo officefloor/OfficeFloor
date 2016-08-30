@@ -17,12 +17,12 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -31,7 +31,6 @@ import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 
@@ -55,12 +54,12 @@ public class TeamNodeImpl implements TeamNode {
 	/**
 	 * {@link PropertyList} to source the {@link Team}.
 	 */
-	private final PropertyList propertyList = new PropertyListImpl();
+	private final PropertyList propertyList;
 
 	/**
-	 * Location of the {@link OfficeFloor}.
+	 * {@link OfficeFloorNode} containing this {@link TeamNode}.
 	 */
-	private final String officeFloorLocation;
+	private final OfficeFloorNode officeFloorNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -94,17 +93,56 @@ public class TeamNodeImpl implements TeamNode {
 	 *            Name of this {@link OfficeFloorTeam}.
 	 * @param teamSourceClassName
 	 *            Class name of the {@link TeamSource}.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
+	 * @param officeFloor
+	 *            {@link OfficeFloorNode} containing this {@link TeamNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public TeamNodeImpl(String teamName, String teamSourceClassName,
-			String officeFloorLocation, NodeContext context) {
+			OfficeFloorNode officeFloor, NodeContext context) {
 		this.teamName = teamName;
 		this.teamSourceClassName = teamSourceClassName;
-		this.officeFloorLocation = officeFloorLocation;
+		this.officeFloorNode = officeFloor;
 		this.context = context;
+
+		// Create objects
+		this.propertyList = this.context.createPropertyList();
+	}
+
+	/*
+	 * ========================= Node ======================================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -126,14 +164,11 @@ public class TeamNodeImpl implements TeamNode {
 		this.isTeamTypeLoaded = true;
 
 		// Obtain the loader
-		TeamLoader loader = this.context.getTeamLoader(
-				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-				this.teamName);
+		TeamLoader loader = this.context.getTeamLoader(this);
 
 		// Obtain the team source class
 		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(
-				this.teamSourceClassName, this.officeFloorLocation,
-				this.teamName);
+				this.teamSourceClassName, this);
 		if (teamSourceClass == null) {
 			return; // must have source class
 		}
@@ -164,14 +199,11 @@ public class TeamNodeImpl implements TeamNode {
 		this.isOfficeFloorTeamSourceTypeLoaded = true;
 
 		// Obtain the loader
-		TeamLoader loader = this.context.getTeamLoader(
-				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-				this.teamName);
+		TeamLoader loader = this.context.getTeamLoader(this);
 
 		// Obtain the team source class
 		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(
-				this.teamSourceClassName, this.officeFloorLocation,
-				this.teamName);
+				this.teamSourceClassName, this);
 		if (teamSourceClass == null) {
 			return; // must have source class
 		}
@@ -198,8 +230,7 @@ public class TeamNodeImpl implements TeamNode {
 
 		// Obtain the team source class
 		Class<? extends TeamSource> teamSourceClass = this.context
-				.getTeamSourceClass(this.teamSourceClassName,
-						this.officeFloorLocation, this.teamName);
+				.getTeamSourceClass(this.teamSourceClassName, this);
 		if (teamSourceClass == null) {
 			return; // must obtain team source class
 		}

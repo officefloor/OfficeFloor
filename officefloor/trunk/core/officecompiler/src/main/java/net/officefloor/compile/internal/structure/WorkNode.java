@@ -22,7 +22,6 @@ import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionWork} node.
@@ -30,18 +29,6 @@ import net.officefloor.frame.api.manage.Office;
  * @author Daniel Sagenschneider
  */
 public interface WorkNode extends Node, SectionWork {
-
-	/**
-	 * <p>
-	 * Adds context of the {@link Office}.
-	 * <p>
-	 * The {@link WorkType} can not be retrieved until the {@link Office}
-	 * context is provided.
-	 * 
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 */
-	void addOfficeContext(String officeLocation);
 
 	/**
 	 * Obtains the {@link SectionNode} containing this {@link WorkNode}.

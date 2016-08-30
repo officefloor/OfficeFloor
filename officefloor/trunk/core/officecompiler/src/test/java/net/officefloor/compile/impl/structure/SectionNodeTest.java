@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 
 import java.sql.Connection;
 
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
@@ -77,11 +78,17 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	private static final String SECTION_LOCATION = "SECTION_LOCATION";
 
 	/**
+	 * Mock {@link OfficeNode}.
+	 */
+	private final OfficeNode office = this.createMock(OfficeNode.class);
+
+	/**
 	 * {@link SectionDesigner} to be tested.
 	 */
 	private final SectionNode node = this.nodeContext.createSectionNode(
-			SECTION_NAME, null).initialise(new ClassSectionSource(), null,
-			SECTION_LOCATION, null, null);
+			SECTION_NAME, this.office).initialise(
+			ClassSectionSource.class.getName(), new ClassSectionSource(),
+			SECTION_LOCATION);
 
 	/**
 	 * Ensure allow {@link SectionSource} to report issues via the

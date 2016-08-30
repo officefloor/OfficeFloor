@@ -24,9 +24,9 @@ import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.structure.PropertyNode;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.Property;
@@ -51,6 +51,11 @@ import net.officefloor.frame.spi.source.UnknownResourceError;
 public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 	/**
+	 * {@link Node} requiring the {@link OfficeFloor}.
+	 */
+	private final Node node;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -63,13 +68,16 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	/**
 	 * Initiate.
 	 * 
+	 * @param node
+	 *            {@link Node} requiring the {@link OfficeFloor}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 * @param profilers
 	 *            Mapping of {@link Profiler} by their {@link Office} name.
 	 */
-	public OfficeFloorLoaderImpl(NodeContext nodeContext,
+	public OfficeFloorLoaderImpl(Node node, NodeContext nodeContext,
 			Map<String, Profiler> profilers) {
+		this.node = node;
 		this.nodeContext = nodeContext;
 		this.profilers = profilers;
 	}
@@ -91,8 +99,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	private <OF extends OfficeFloorSource> OfficeFloorSource newOfficeFloorSource(
 			Class<OF> officeFloorSourceClass, String officeFloorLocation) {
 		return CompileUtil.newInstance(officeFloorSourceClass,
-				OfficeFloorSource.class, LocationType.OFFICE_FLOOR,
-				officeFloorLocation, null, null,
+				OfficeFloorSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 	}
 
@@ -274,7 +281,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 		// Create the office floor source context
 		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
-				true, officeFloorLocation, propertyList, this.nodeContext);
+				true, officeFloorLocation, propertyList, this.node,
+				this.nodeContext);
 
 		// Create the required properties
 		final PropertyList requiredPropertyList = new PropertyListImpl();
@@ -452,7 +460,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 
 		// Create the OfficeFloor source context
 		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
-				false, officeFloorLocation, propertyList, this.nodeContext);
+				false, officeFloorLocation, propertyList, this.node,
+				this.nodeContext);
 
 		// Obtain the OfficeFloor source class for logging
 		Class<?> officeFloorSourceClass = officeFloorSource.getClass();
@@ -520,8 +529,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	 *            Location of the {@link OfficeFloor}.
 	 */
 	private void addIssue(String issueDescription, String officeFloorLocation) {
-		this.nodeContext.getCompilerIssues().addIssue(
-				LocationType.OFFICE_FLOOR, officeFloorLocation, null, null,
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
 				issueDescription);
 	}
 
@@ -537,8 +545,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	 */
 	private void addIssue(String issueDescription, Throwable cause,
 			String officeFloorLocation) {
-		this.nodeContext.getCompilerIssues().addIssue(
-				LocationType.OFFICE_FLOOR, officeFloorLocation, null, null,
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
 				issueDescription, cause);
 	}
 

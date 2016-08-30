@@ -40,6 +40,8 @@ import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -207,6 +209,17 @@ public interface NodeContext {
 	OfficeStartNode createOfficeStartNode(String startName, OfficeNode office);
 
 	/**
+	 * Creates the {@link OfficeTeamNode}.
+	 * 
+	 * @param officeTeamName
+	 *            Name of the {@link OfficeTeamNode}.
+	 * @param office
+	 *            Parent {@link OfficeNode}.
+	 * @return {@link OfficeTeamNode}.
+	 */
+	OfficeTeamNode createOfficeTeamNode(String officeTeamName, OfficeNode office);
+
+	/**
 	 * Obtains the {@link SectionSource} class.
 	 * 
 	 * @param <S>
@@ -318,6 +331,23 @@ public interface NodeContext {
 	WorkLoader getWorkLoader(Node node);
 
 	/**
+	 * Creates the {@link WorkNode}.
+	 * 
+	 * @param workName
+	 *            Name of the {@link WorkNode}.
+	 * @param workSourceClassName
+	 *            {@link Class} name of the {@link WorkSource}.
+	 * @param workSource
+	 *            Optional instantiated {@link WorkSource}. May be
+	 *            <code>null</code>.
+	 * @param section
+	 *            Parent {@link SectionNode}.
+	 * @return {@link WorkNode}.
+	 */
+	WorkNode createWorkNode(String workName, String workSourceClassName,
+			WorkSource<?> workSource, SectionNode section);
+
+	/**
 	 * Creates the {@link TaskFlowNode}.
 	 * 
 	 * @param flowName
@@ -330,6 +360,41 @@ public interface NodeContext {
 	 */
 	TaskFlowNode createTaskFlowNode(String flowName, boolean isEscalation,
 			TaskNode task);
+
+	/**
+	 * Creates the {@link TaskNode}.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link TaskNode}.
+	 * @param taskTypeName
+	 *            Type name of the {@link Task} within the {@link Work}.
+	 * @param work
+	 *            Parent {@link WorkNode}.
+	 * @return {@link TaskNode}.
+	 */
+	TaskNode createTaskNode(String taskName, String taskTypeName, WorkNode work);
+
+	/**
+	 * Creates the {@link TaskObjectNode}.
+	 * 
+	 * @param objectName
+	 *            Name of the {@link TaskObjectNode}.
+	 * @param taskNode
+	 *            Parent {@link TaskNode}.
+	 * @return {@link TaskObjectNode}.
+	 */
+	TaskObjectNode createTaskObjectNode(String objectName, TaskNode taskNode);
+
+	/**
+	 * Creates the {@link TaskTeamNode}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link TaskTeamNode}.
+	 * @param task
+	 *            Parent {@link TaskNode}.
+	 * @return {@link TaskTeamNode}.
+	 */
+	TaskTeamNode createTaskTeamNode(String teamName, TaskNode task);
 
 	/**
 	 * Obtains the {@link ManagedObjectSource} class.
@@ -696,6 +761,20 @@ public interface NodeContext {
 	 * @return {@link TeamLoader}.
 	 */
 	TeamLoader getTeamLoader(Node node);
+
+	/**
+	 * Creates the {@link TeamNode}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link TeamNode}.
+	 * @param teamSourceClassName
+	 *            {@link Class} name of the {@link TeamSource}.
+	 * @param officeFloor
+	 *            Parent {@link OfficeFloorNode}.
+	 * @return {@link TeamNode}.
+	 */
+	TeamNode createTeamNode(String teamName, String teamSourceClassName,
+			OfficeFloorNode officeFloor);
 
 	/**
 	 * Creates an {@link EscalationNode}.

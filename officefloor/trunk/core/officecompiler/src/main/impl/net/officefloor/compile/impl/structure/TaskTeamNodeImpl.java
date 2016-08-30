@@ -18,13 +18,11 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.TaskNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.spi.office.OfficeTeam;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link TaskTeamNode} implementation.
@@ -66,12 +64,39 @@ public class TaskTeamNodeImpl implements TaskTeamNode {
 	}
 
 	/*
-	 * ================= OfficeTeam ==============================
+	 * ================== Node ============================
 	 */
 
 	@Override
-	public String getOfficeTeamName() {
-		return this.teamName;
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -88,18 +113,8 @@ public class TaskTeamNodeImpl implements TaskTeamNode {
 
 		// Ensure not already linked
 		if (this.linkedTeamNode != null) {
-			if (this.isInOfficeFloorContext) {
-				// Deployed office team
-				this.context.getCompilerIssues().addIssue(
-						LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-						null, null, this.teamName + " already assigned");
-			} else {
-				// Office required team
-				this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
-						this.officeLocation, null, null,
-						this.teamName + " already assigned");
-			}
-			return false; // already linked
+			this.context.getCompilerIssues().addIssue(this,
+					this.teamName + " already assigned");
 		}
 
 		// Link

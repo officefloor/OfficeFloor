@@ -18,17 +18,14 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link TaskObjectNode} implementation.
@@ -38,19 +35,14 @@ import net.officefloor.frame.api.manage.Office;
 public class TaskObjectNodeImpl implements TaskObjectNode {
 
 	/**
-	 * {@link TaskNode} containing this {@link TaskObjectNode}.
-	 */
-	private final TaskNode taskNode;
-
-	/**
 	 * Name of this {@link TaskObject}.
 	 */
 	private final String objectName;
 
 	/**
-	 * Location of the {@link OfficeSection} containing this {@link TaskObject}.
+	 * {@link TaskNode} containing this {@link TaskObjectNode}.
 	 */
-	private final String sectionLocation;
+	private final TaskNode taskNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -64,46 +56,60 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	private boolean isParameter = false;
 
 	/**
-	 * Flags whether within the {@link Office} context.
-	 */
-	private boolean isInOfficeContext = false;
-
-	/**
-	 * Location of the {@link Office} containing this
-	 * {@link OfficeSectionObject}.
-	 */
-	private String officeLocation;
-
-	/**
 	 * Initiate.
 	 * 
-	 * @param taskNode
-	 *            {@link TaskNode} containing this {@link TaskObjectNode}.
 	 * @param objectName
 	 *            Name of this {@link TaskObject}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection} containing this
-	 *            {@link TaskObject}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param taskNode
+	 *            {@link TaskNode} containing this {@link TaskObjectNode}. F * @param
+	 *            context {@link NodeContext}.
 	 */
-	public TaskObjectNodeImpl(TaskNode taskNode, String objectName,
-			String sectionLocation, NodeContext context) {
-		this.taskNode = taskNode;
+	public TaskObjectNodeImpl(String objectName, TaskNode taskNode,
+			NodeContext context) {
 		this.objectName = objectName;
-		this.sectionLocation = sectionLocation;
+		this.taskNode = taskNode;
 		this.context = context;
+	}
+
+	/*
+	 * ==================== Node ============================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
 	 * ==================== TaskObjectNode ============================
 	 */
-
-	@Override
-	public void addOfficeContext(String officeLocation) {
-		this.officeLocation = officeLocation;
-		this.isInOfficeContext = true;
-	}
 
 	@Override
 	public boolean isParameter() {
@@ -142,11 +148,6 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	 */
 	private TaskObjectType<?> getTaskObjectType() {
 
-		// Ensure in office context
-		if (!this.isInOfficeContext) {
-			throw new IllegalStateException("Must be in office context");
-		}
-
 		// Obtain the task type for this task node
 		TaskType<?, ?, ?> taskType = this.taskNode.getTaskType();
 		if (taskType == null) {
@@ -181,10 +182,7 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 		if (this.linkedObjectNode != null) {
 			this.context.getCompilerIssues()
 					.addIssue(
-							LocationType.SECTION,
-							this.sectionLocation,
-							null,
-							null,
+							this,
 							"Task object " + this.objectName
 									+ " linked more than once");
 			return false; // already linked

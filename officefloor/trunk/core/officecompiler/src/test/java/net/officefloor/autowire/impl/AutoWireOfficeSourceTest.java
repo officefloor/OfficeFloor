@@ -166,9 +166,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.context, this.context.loadOfficeSectionType(
 				SectionSource.class.getName(), SECTION_LOCATION, properties),
 				officeSectionType);
-		this.recordReturn(this.architect, this.architect.addOfficeSection(
-				SECTION, SectionSource.class.getName(), SECTION_LOCATION,
-				properties), officeSection);
+		this.recordReturn(
+				this.architect,
+				this.architect.addOfficeSection(SECTION,
+						SectionSource.class.getName(), SECTION_LOCATION),
+				officeSection);
+		officeSection.addProperty("TODO", "record add property"); // TODO
 		this.recordReturn(officeSectionType,
 				officeSectionType.getOfficeSectionObjectTypes(),
 				new OfficeSectionObjectType[0]);
@@ -265,9 +268,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.context, this.context.loadOfficeSectionType(
 				SectionSource.class.getName(), SECTION_LOCATION, properties),
 				officeSectionType);
-		this.recordReturn(this.architect, this.architect.addOfficeSection(
-				SECTION, SectionSource.class.getName(), SECTION_LOCATION,
-				properties), officeSection);
+		this.recordReturn(
+				this.architect,
+				this.architect.addOfficeSection(SECTION,
+						SectionSource.class.getName(), SECTION_LOCATION),
+				officeSection);
+		officeSection.addProperty("TODO", "record add property"); // TODO
 		this.recordReturn(officeSectionType,
 				officeSectionType.getOfficeSectionObjectTypes(),
 				new OfficeSectionObjectType[0]);
@@ -1680,7 +1686,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		OfficeSection officeSection = this.createMock(OfficeSection.class);
 		this.recordReturn(this.architect, this.architect.addOfficeSection(
 				SECTION_NAME, ClassSectionSource.class.getName(),
-				sectionClass.getName(), properties), officeSection);
+				sectionClass.getName()), officeSection);
+		officeSection.addProperty("TODO", "record add property"); // TODO
 		this.sections.put(SECTION_NAME, officeSection);
 
 		// Record obtaining the office objects
@@ -1753,7 +1760,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 					outputTypeName);
 			OfficeOutput officeOutput = this.createMock(OfficeOutput.class);
 			this.recordReturn(this.architect,
-					this.architect.addOutput(outputName, outputTypeName),
+					this.architect.addOfficeOutput(outputName, outputTypeName),
 					officeOutput);
 
 			// Record the link
@@ -1894,8 +1901,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		// Record creating the section
 		OfficeSection section = this.createMock(OfficeSection.class);
 		this.recordReturn(this.architect, this.architect.addOfficeSection(
-				sectionName, SectionSource.class.getName(), sectionLocation,
-				properties), section);
+				sectionName, SectionSource.class.getName(), sectionLocation),
+				section);
+		section.addProperty("TODO", "record property"); // TODO
 		this.sections.put(sectionName, section);
 	}
 

@@ -22,6 +22,7 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 

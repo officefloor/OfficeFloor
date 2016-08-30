@@ -29,6 +29,7 @@ import java.util.Set;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
 
 /**
@@ -201,6 +202,13 @@ public class PropertyListImpl implements PropertyList {
 
 			// Property to stay in list
 			propertyNames.add(propertyName);
+		}
+	}
+
+	@Override
+	public void configureProperties(PropertyConfigurable configurable) {
+		for (Property property : this.properties) {
+			configurable.addProperty(property.getName(), property.getValue());
 		}
 	}
 

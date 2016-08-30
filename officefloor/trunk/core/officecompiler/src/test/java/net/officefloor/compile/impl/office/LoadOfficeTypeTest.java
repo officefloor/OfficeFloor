@@ -330,7 +330,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.addInput("INPUT", Integer.class.getName());
+				office.addOfficeInput("INPUT", Integer.class.getName());
 			}
 		});
 
@@ -358,9 +358,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				OfficeInput inputOne = office.addInput("TEST",
+				OfficeInput inputOne = office.addOfficeInput("TEST",
 						String.class.getName());
-				OfficeInput inputTwo = office.addInput("TEST",
+				OfficeInput inputTwo = office.addOfficeInput("TEST",
 						Integer.class.getName());
 				assertSame("Should be the same object", inputOne, inputTwo);
 			}
@@ -383,7 +383,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.addOutput("OUTPUT", Long.class.getName());
+				office.addOfficeOutput("OUTPUT", Long.class.getName());
 			}
 		});
 
@@ -411,9 +411,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				OfficeOutput outputOne = office.addOutput("TEST",
+				OfficeOutput outputOne = office.addOfficeOutput("TEST",
 						String.class.getName());
-				OfficeOutput outputTwo = office.addOutput("TEST",
+				OfficeOutput outputTwo = office.addOfficeOutput("TEST",
 						Integer.class.getName());
 				assertSame("Should be the same object", outputOne, outputTwo);
 			}
@@ -437,9 +437,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				OfficeInput input = office.addInput("INPUT",
+				OfficeInput input = office.addOfficeInput("INPUT",
 						Integer.class.getName());
-				OfficeOutput output = office.addOutput("OUTPUT",
+				OfficeOutput output = office.addOfficeOutput("OUTPUT",
 						Long.class.getName());
 				office.link(input, output);
 			}
@@ -471,9 +471,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				OfficeOutput output = office.addOutput("OUTPUT",
+				OfficeOutput output = office.addOfficeOutput("OUTPUT",
 						Long.class.getName());
-				OfficeInput input = office.addInput("INPUT",
+				OfficeInput input = office.addOfficeInput("INPUT",
 						Integer.class.getName());
 				office.link(output, input);
 			}
@@ -951,8 +951,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				// Add section
 				OfficeSection section = office.addOfficeSection("SECTION",
 						ClassSectionSource.class.getName(),
-						MockOfficeSection.class.getName(),
-						context.createPropertyList());
+						MockOfficeSection.class.getName());
 
 				// Link section object to office managed object
 				OfficeSectionObject object = section

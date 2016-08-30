@@ -24,7 +24,9 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.ManagedObjectTeamType;
@@ -58,11 +60,6 @@ import net.officefloor.model.repository.ConfigurationContext;
  * @author Daniel Sagenschneider
  */
 public class SectionLoaderUtil {
-
-	/**
-	 * Name of the {@link OfficeSection} used in testing.
-	 */
-	public static final String SECTION_NAME = "TEST";
 
 	/**
 	 * Validates the {@link SectionSourceSpecification} for the
@@ -128,7 +125,7 @@ public class SectionLoaderUtil {
 			Class<S> sectionSourceClass) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return context.createSectionNode(SECTION_NAME, null);
+		return context.createSectionNode(Node.TYPE_NAME, (OfficeNode) null);
 	}
 
 	/**
@@ -301,7 +298,7 @@ public class SectionLoaderUtil {
 		OfficeSectionType eSection = (OfficeSectionType) designer;
 
 		// Load the actual section type
-		OfficeSectionType aSection = loadOfficeSectionType(SECTION_NAME,
+		OfficeSectionType aSection = loadOfficeSectionType(Node.TYPE_NAME,
 				sectionSourceClass, sectionLocation, propertyNameValuePairs);
 
 		// Validate the office section

@@ -122,7 +122,7 @@ public interface PropertyList extends Iterable<Property> {
 
 	/**
 	 * <p>
-	 * Normalises the {@link Property} instances.
+	 * Normalises the {@link Property}the instances.
 	 * <p>
 	 * This will remove:
 	 * <ol>
@@ -133,5 +133,15 @@ public interface PropertyList extends Iterable<Property> {
 	 * </ol>
 	 */
 	void normalise();
+
+	/**
+	 * Loads the {@link Property} values of this {@link PropertyList} to
+	 * {@link PropertyConfigurable}.
+	 * 
+	 * @param configurable
+	 *            {@link PropertyConfigurable} to be configured with the
+	 *            {@link Property} values.
+	 */
+	void configureProperties(PropertyConfigurable configurable);
 
 }

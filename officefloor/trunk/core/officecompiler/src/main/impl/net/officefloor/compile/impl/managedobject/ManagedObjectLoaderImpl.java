@@ -25,13 +25,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.structure.PropertyNode;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -42,7 +41,6 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -77,19 +75,9 @@ import net.officefloor.frame.spi.source.UnknownResourceError;
 public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 	/**
-	 * {@link LocationType}.
+	 * {@link Node} requiring the {@link ManagedObject}.
 	 */
-	private LocationType locationType;
-
-	/**
-	 * Location.
-	 */
-	private final String location;
-
-	/**
-	 * Name of the {@link ManagedObject}.
-	 */
-	private final String managedObjectName;
+	private final Node node;
 
 	/**
 	 * {@link NodeContext}.
@@ -97,33 +85,16 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	private final NodeContext nodeContext;
 
 	/**
-	 * Initiate for building.
+	 * Instantiate.
 	 * 
-	 * @param locationType
-	 *            {@link LocationType}.
-	 * @param location
-	 *            Location.
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
+	 * @param node
+	 *            {@link Node} requiring the {@link ManagedObject}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectLoaderImpl(LocationType locationType, String location,
-			String managedObjectName, NodeContext nodeContext) {
-		this.locationType = locationType;
-		this.location = location;
-		this.managedObjectName = managedObjectName;
+	public ManagedObjectLoaderImpl(Node node, NodeContext nodeContext) {
+		this.node = node;
 		this.nodeContext = nodeContext;
-	}
-
-	/**
-	 * Initiate from {@link OfficeFloorCompiler}.
-	 * 
-	 * @param nodeContext
-	 *            {@link NodeContext}.
-	 */
-	public ManagedObjectLoaderImpl(NodeContext nodeContext) {
-		this(null, null, null, nodeContext);
 	}
 
 	/*
@@ -137,9 +108,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		// Instantiate the managed object source
 		ManagedObjectSource<D, H> managedObjectSource = CompileUtil
 				.newInstance(managedObjectSourceClass,
-						ManagedObjectSource.class, this.locationType,
-						this.location, AssetType.MANAGED_OBJECT,
-						this.managedObjectName,
+						ManagedObjectSource.class, this.node,
 						this.nodeContext.getCompilerIssues());
 		if (managedObjectSource == null) {
 			return null; // failed to instantiate
@@ -285,9 +254,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 		// Create an instance of the managed object source
 		MS managedObjectSource = CompileUtil.newInstance(
-				managedObjectSourceClass, ManagedObjectSource.class,
-				this.locationType, this.location, AssetType.MANAGED_OBJECT,
-				this.managedObjectName, this.nodeContext.getCompilerIssues());
+				managedObjectSourceClass, ManagedObjectSource.class, this.node,
+				this.nodeContext.getCompilerIssues());
 		if (managedObjectSource == null) {
 			return null; // failed to instantiate
 		}
@@ -309,7 +277,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		String namespaceName = null; // stops the name spacing
 		ManagedObjectSourceContext<F> sourceContext = new ManagedObjectSourceContextImpl<F>(
 				true, namespaceName, new PropertyListSourceProperties(
-						propertyList), this.nodeContext.getSourceContext(),
+						propertyList), this.nodeContext.getRootSourceContext(),
 				managingOffice.getBuilder(), office.getBuilder());
 
 		try {
@@ -443,9 +411,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 		// Create an instance of the managed object source
 		MS managedObjectSource = CompileUtil.newInstance(
-				managedObjectSourceClass, ManagedObjectSource.class,
-				this.locationType, this.location, AssetType.MANAGED_OBJECT,
-				this.managedObjectName, this.nodeContext.getCompilerIssues());
+				managedObjectSourceClass, ManagedObjectSource.class, this.node,
+				this.nodeContext.getCompilerIssues());
 		if (managedObjectSource == null) {
 			return null; // failed to instantiate
 		}
@@ -473,8 +440,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		}
 
 		// Create and return the managed object source type
-		return new OfficeFloorManagedObjectSourceTypeImpl(
-				this.managedObjectName,
+		return new OfficeFloorManagedObjectSourceTypeImpl(Node.TYPE_NAME,
 				PropertyNode.constructPropertyNodes(properties));
 	}
 
@@ -1140,9 +1106,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(this.locationType,
-				this.location, AssetType.MANAGED_OBJECT,
-				this.managedObjectName, issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription);
 	}
 
 	/**
@@ -1154,9 +1119,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(this.locationType,
-				this.location, AssetType.MANAGED_OBJECT,
-				this.managedObjectName, issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription, cause);
 	}
 
 }

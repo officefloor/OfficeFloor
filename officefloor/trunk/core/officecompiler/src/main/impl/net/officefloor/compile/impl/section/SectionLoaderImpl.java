@@ -19,9 +19,10 @@ package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
@@ -39,6 +40,11 @@ import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 public class SectionLoaderImpl implements SectionLoader {
 
 	/**
+	 * {@link Node} requiring the {@link OfficeSection}.
+	 */
+	private final Node node;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -46,10 +52,13 @@ public class SectionLoaderImpl implements SectionLoader {
 	/**
 	 * Initiate.
 	 * 
+	 * @param node
+	 *            {@link Node} requiring the {@link OfficeSection}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public SectionLoaderImpl(NodeContext nodeContext) {
+	public SectionLoaderImpl(Node node, NodeContext nodeContext) {
+		this.node = node;
 		this.nodeContext = nodeContext;
 	}
 
@@ -63,8 +72,8 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Instantiate the section source
 		SectionSource sectionSource = CompileUtil.newInstance(
-				sectionSourceClass, SectionSource.class, LocationType.SECTION,
-				null, null, null, this.nodeContext.getCompilerIssues());
+				sectionSourceClass, SectionSource.class, this.node,
+				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
 		}
@@ -172,8 +181,7 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Instantiate the section source
 		SectionSource sectionSource = CompileUtil.newInstance(
-				sectionSourceClass, SectionSource.class, LocationType.SECTION,
-				sectionLocation, null, null,
+				sectionSourceClass, SectionSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
@@ -189,9 +197,11 @@ public class SectionLoaderImpl implements SectionLoader {
 			String sectionLocation, PropertyList propertyList) {
 
 		// Create the section node
-		SectionNode sectionNode = this.nodeContext.createSectionNode("type",
-				null).initialise(sectionSource, null, sectionLocation,
-				propertyList, null);
+		SectionNode sectionNode = this.nodeContext.createSectionNode(
+				Node.TYPE_NAME, (OfficeNode) null).initialise(
+				sectionSource.getClass().getName(), sectionSource,
+				sectionLocation);
+		propertyList.configureProperties(sectionNode);
 
 		// Source the section
 		boolean isSourced = sectionNode.sourceSection();
@@ -210,8 +220,7 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Instantiate the section source
 		SectionSource sectionSource = CompileUtil.newInstance(
-				sectionSourceClass, SectionSource.class, LocationType.SECTION,
-				sectionLocation, null, null,
+				sectionSourceClass, SectionSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (sectionSource == null) {
 			return null; // failed to instantiate
@@ -229,8 +238,10 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Create the section node
 		SectionNode sectionNode = this.nodeContext.createSectionNode(
-				sectionName, null).initialise(sectionSource, null,
-				sectionLocation, propertyList, null);
+				sectionName, (OfficeNode) null).initialise(
+				sectionSource.getClass().getName(), sectionSource,
+				sectionLocation);
+		propertyList.configureProperties(sectionNode);
 
 		// Source the section
 		boolean isSourced = sectionNode.sourceSectionTree();
@@ -251,8 +262,8 @@ public class SectionLoaderImpl implements SectionLoader {
 	 *            Location of the {@link OfficeSection}.
 	 */
 	private void addIssue(String issueDescription, String sectionLocation) {
-		this.nodeContext.getCompilerIssues().addIssue(LocationType.SECTION,
-				sectionLocation, null, null, issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription);
 	}
 
 	/**
@@ -267,8 +278,8 @@ public class SectionLoaderImpl implements SectionLoader {
 	 */
 	private void addIssue(String issueDescription, Throwable cause,
 			String sectionLocation) {
-		this.nodeContext.getCompilerIssues().addIssue(LocationType.SECTION,
-				sectionLocation, null, null, issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription, cause);
 	}
 
 }

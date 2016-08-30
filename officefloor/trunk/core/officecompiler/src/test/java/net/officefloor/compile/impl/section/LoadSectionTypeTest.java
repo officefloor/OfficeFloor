@@ -545,28 +545,24 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure section type correct
-		assertList(
-				new String[] { "getSectionInputName", "getParameterType" },
-				type.getSectionInputTypes(),
-				new SectionInputNodeImpl("INPUT_A", null, Integer.class
-						.getName(), null, null),
-				new SectionInputNodeImpl("INPUT_B", null, String.class
-						.getName(), null, null), new SectionInputNodeImpl(
-						"INPUT_C", null, null, null));
+		assertList(new String[] { "getSectionInputName", "getParameterType" },
+				type.getSectionInputTypes(), new SectionInputNodeImpl(
+						"INPUT_A", null, null).initialise(Integer.class
+						.getName()), new SectionInputNodeImpl("INPUT_B", null,
+						null).initialise(String.class.getName()),
+				new SectionInputNodeImpl("INPUT_C", null, null));
 		assertList(new String[] { "getSectionOutputName", "getArgumentType",
 				"isEscalationOnly" }, type.getSectionOutputTypes(),
-				new SectionOutputNodeImpl("OUTPUT_A",
-						Exception.class.getName(), true, null, null, null),
-				new SectionOutputNodeImpl("OUTPUT_B", Double.class.getName(),
-						false, null, null, null), new SectionOutputNodeImpl(
-						"OUTPUT_C", null, false, null, null, null));
-		assertList(
-				new String[] { "getSectionObjectName", "getObjectType" },
-				type.getSectionObjectTypes(),
-				new SectionObjectNodeImpl("OBJECT_A", Object.class.getName(),
-						null, null, null),
-				new SectionObjectNodeImpl("OBJECT_B", Connection.class
-						.getName(), null, null, null));
+				new SectionOutputNodeImpl("OUTPUT_A", null, null).initialise(
+						Exception.class.getName(), true),
+				new SectionOutputNodeImpl("OUTPUT_B", null, null).initialise(
+						Double.class.getName(), false),
+				new SectionOutputNodeImpl("OUTPUT_C", null, null));
+		assertList(new String[] { "getSectionObjectName", "getObjectType" },
+				type.getSectionObjectTypes(), new SectionObjectNodeImpl(
+						"OBJECT_A", null, null).initialise(Object.class
+						.getName()), new SectionObjectNodeImpl("OBJECT_B",
+						null, null).initialise(Connection.class.getName()));
 	}
 
 	/**
