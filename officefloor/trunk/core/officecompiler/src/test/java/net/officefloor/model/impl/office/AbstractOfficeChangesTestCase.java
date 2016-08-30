@@ -208,6 +208,11 @@ public abstract class AbstractOfficeChangesTestCase extends
 		}
 
 		@Override
+		public void addProperty(String name, String value) {
+			fail("Should not require to set properties in testing");
+		}
+
+		@Override
 		public OfficeSectionInput getOfficeSectionInput(String inputName) {
 			return this.inputs.get(inputName);
 		}

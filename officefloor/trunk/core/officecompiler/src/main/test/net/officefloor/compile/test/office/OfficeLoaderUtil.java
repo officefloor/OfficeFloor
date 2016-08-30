@@ -21,12 +21,13 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.office.OfficeSectionInputType;
-import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
@@ -47,6 +48,12 @@ import net.officefloor.model.repository.ConfigurationContext;
  * @author Daniel Sagenschneider
  */
 public class OfficeLoaderUtil {
+
+	/**
+	 * {@link Office} location for loading.
+	 */
+	private static final String OFFICE_LOCATION = OfficeLoaderUtil.class
+			.getSimpleName();
 
 	/**
 	 * Validates the {@link OfficeSourceSpecification} for the
@@ -104,8 +111,8 @@ public class OfficeLoaderUtil {
 			String officeSourceClassName) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return new OfficeNodeImpl(null, officeSourceClassName, "TEST_LOCATION",
-				context);
+		return new OfficeNodeImpl(Node.TYPE_NAME, officeSourceClassName, null,
+				OFFICE_LOCATION, null, context);
 	}
 
 	/**
@@ -122,7 +129,8 @@ public class OfficeLoaderUtil {
 			O officeSource) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return new OfficeNodeImpl(null, officeSource, "TEST_LOCATION", context);
+		return new OfficeNodeImpl(Node.TYPE_NAME, officeSource.getClass()
+				.getName(), officeSource, OFFICE_LOCATION, null, context);
 	}
 
 	/**

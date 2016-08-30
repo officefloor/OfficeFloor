@@ -277,9 +277,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		SupplierNode supplier = this.suppliers.get(supplierName);
 		if (supplier == null) {
 			// Add the supplier
-			supplier = new SupplierNodeImpl(supplierName,
-					supplierSourceClassName, this, this.officeFloorLocation,
-					this.context);
+			supplier = this.context.createSupplierNode(supplierName,
+					supplierSourceClassName, this);
 			this.suppliers.put(supplierName, supplier);
 		} else {
 			// Supplier already added
@@ -295,8 +294,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		TeamNode team = this.teams.get(teamName);
 		if (team == null) {
 			// Add the team
-			team = new TeamNodeImpl(teamName, teamSourceClassName,
-					this.officeFloorLocation, this.context);
+			team = this.context.createTeamNode(teamName, teamSourceClassName,
+					this);
 			this.teams.put(teamName, team);
 		} else {
 			// Team already added

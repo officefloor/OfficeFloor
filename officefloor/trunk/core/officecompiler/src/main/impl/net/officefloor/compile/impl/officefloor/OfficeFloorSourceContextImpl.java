@@ -21,8 +21,8 @@ import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
@@ -48,6 +48,11 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	private final String officeFloorLocation;
 
 	/**
+	 * {@link Node} requiring the {@link OfficeFloor}.
+	 */
+	private final Node node;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
@@ -61,15 +66,18 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	 *            Location of the {@link OfficeFloor}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
+	 * @param node
+	 *            {@link Node} requiring the {@link OfficeFloor}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
 	public OfficeFloorSourceContextImpl(boolean isLoadingType,
-			String officeFloorLocation, PropertyList propertyList,
+			String officeFloorLocation, PropertyList propertyList, Node node,
 			NodeContext nodeContext) {
-		super(isLoadingType, nodeContext.getSourceContext(),
+		super(isLoadingType, nodeContext.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
 		this.officeFloorLocation = officeFloorLocation;
+		this.node = node;
 		this.context = nodeContext;
 	}
 
@@ -95,8 +103,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 
 		// Load the managed object type
 		ManagedObjectLoader managedObjectLoader = this.context
-				.getManagedObjectLoader(LocationType.OFFICE_FLOOR,
-						this.officeFloorLocation, "loadManagedObjectType");
+				.getManagedObjectLoader(this.node);
 		ManagedObjectType managedObjectType = managedObjectLoader
 				.loadManagedObjectType(managedObjectSource, properties);
 
@@ -118,8 +125,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 		// Obtain the managed object source class
 		Class managedObjectSourceClass = this.context
 				.getManagedObjectSourceClass(managedObjectSourceClassName,
-						LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-						"loadManagedObjectType");
+						this.node);
 
 		// Ensure have the managed object source class
 		if (managedObjectSourceClass == null) {
@@ -129,8 +135,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 
 		// Load the managed object type
 		ManagedObjectLoader managedObjectLoader = this.context
-				.getManagedObjectLoader(LocationType.OFFICE_FLOOR,
-						this.officeFloorLocation, "loadManagedObjectType");
+				.getManagedObjectLoader(this.node);
 		ManagedObjectType<?> managedObjectType = managedObjectLoader
 				.loadManagedObjectType(managedObjectSourceClass, properties);
 
@@ -149,8 +154,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 
 		// Obtain the managed object loader
 		ManagedObjectLoader managedObjectLoader = this.context
-				.getManagedObjectLoader(LocationType.OFFICE_FLOOR,
-						this.officeFloorLocation, "loadManagedObjectType");
+				.getManagedObjectLoader(this.node);
 
 		// Return whether should be an input managed object
 		return managedObjectLoader.isInputManagedObject(managedObjectType);
@@ -163,8 +167,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 
 		// Obtain the supplier source class
 		Class supplierSourceClass = this.context.getSupplierSourceClass(
-				supplierSourceClassName, this.officeFloorLocation,
-				"loadSupplierType");
+				supplierSourceClassName, this.node);
 
 		// Ensure have the supplier source class
 		if (supplierSourceClass == null) {
@@ -172,8 +175,8 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 		}
 
 		// Load the supplier type
-		SupplierLoader supplierLoader = this.context.getSupplierLoader(
-				this.officeFloorLocation, "loadSupplierType");
+		SupplierLoader supplierLoader = this.context
+				.getSupplierLoader(this.node);
 		SupplierType supplierType = supplierLoader.loadSupplierType(
 				supplierSourceClass, properties);
 
@@ -193,8 +196,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 
 		// Obtain the office source class
 		Class officeSourceClass = this.context.getOfficeSourceClass(
-				officeSourceClassName, this.officeFloorLocation,
-				"loadOfficeType");
+				officeSourceClassName, this.node);
 
 		// Ensure have the office source class
 		if (officeSourceClass == null) {
@@ -202,7 +204,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 		}
 
 		// Load the office type
-		OfficeLoader officeLoader = this.context.getOfficeLoader();
+		OfficeLoader officeLoader = this.context.getOfficeLoader(this.node);
 		OfficeType officeType = officeLoader.loadOfficeType(officeSourceClass,
 				location, properties);
 
@@ -220,7 +222,7 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 			String location, PropertyList properties) {
 
 		// Load the office type
-		OfficeLoader officeLoader = this.context.getOfficeLoader();
+		OfficeLoader officeLoader = this.context.getOfficeLoader(this.node);
 		OfficeType officeType = officeLoader.loadOfficeType(officeSource,
 				location, properties);
 

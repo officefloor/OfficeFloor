@@ -496,7 +496,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			// Add the section
 			OfficeSection officeSection = architect.addOfficeSection(
 					sectionName, section.getSectionSourceClassName(),
-					section.getSectionLocation(), section.getProperties());
+					section.getSectionLocation());
+			section.getProperties().configureProperties(officeSection);
 
 			// Register the section
 			officeSectionsByName.put(sectionName, officeSection);
@@ -793,7 +794,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 										.getSimpleName(),
 								WorkSectionSource.class.getName(),
 								AutoWireEscalationCauseRouteWorkSource.class
-										.getName(), failedToSourceProperties);
+										.getName());
+				failedToSourceProperties
+						.configureProperties(failedToSourceSection);
 
 				// Obtain the type
 				OfficeSectionType failedToSourceSectionType = context

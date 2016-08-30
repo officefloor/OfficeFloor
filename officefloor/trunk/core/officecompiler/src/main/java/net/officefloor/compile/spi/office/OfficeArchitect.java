@@ -17,7 +17,6 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -88,13 +87,10 @@ public interface OfficeArchitect {
 	 *            Fully qualified class name of the {@link SectionSource}.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
-	 * @param properties
-	 *            {@link PropertyList} to load the {@link OfficeSection}.
 	 * @return Added {@link OfficeSection}.
 	 */
 	OfficeSection addOfficeSection(String sectionName,
-			String sectionSourceClassName, String sectionLocation,
-			PropertyList properties);
+			String sectionSourceClassName, String sectionLocation);
 
 	/**
 	 * Adds an {@link OfficeSection}.
@@ -105,13 +101,10 @@ public interface OfficeArchitect {
 	 *            {@link SectionSource} instance to use.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
-	 * @param properties
-	 *            {@link PropertyList} to load the {@link OfficeSection}.
 	 * @return Added {@link OfficeSection}.
 	 */
 	OfficeSection addOfficeSection(String sectionName,
-			SectionSource sectionSource, String sectionLocation,
-			PropertyList properties);
+			SectionSource sectionSource, String sectionLocation);
 
 	/**
 	 * Adds a {@link OfficeManagedObjectSource}.

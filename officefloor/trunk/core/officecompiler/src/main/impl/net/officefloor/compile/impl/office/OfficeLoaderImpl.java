@@ -18,11 +18,10 @@
 package net.officefloor.compile.impl.office;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
@@ -39,6 +38,11 @@ import net.officefloor.frame.api.manage.Office;
 public class OfficeLoaderImpl implements OfficeLoader {
 
 	/**
+	 * {@link Node} requiring the {@link Office}.
+	 */
+	private final Node node;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext nodeContext;
@@ -46,10 +50,13 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	/**
 	 * Initiate.
 	 * 
+	 * @param node
+	 *            {@link Node} requiring the {@link Office}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public OfficeLoaderImpl(NodeContext nodeContext) {
+	public OfficeLoaderImpl(Node node, NodeContext nodeContext) {
+		this.node = node;
 		this.nodeContext = nodeContext;
 	}
 
@@ -63,7 +70,7 @@ public class OfficeLoaderImpl implements OfficeLoader {
 
 		// Instantiate the office source
 		OfficeSource officeSource = CompileUtil.newInstance(officeSourceClass,
-				OfficeSource.class, LocationType.OFFICE, null, null, null,
+				OfficeSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (officeSource == null) {
 			return null; // failed to instantiate
@@ -173,8 +180,8 @@ public class OfficeLoaderImpl implements OfficeLoader {
 
 		// Instantiate the office source
 		OfficeSource officeSource = CompileUtil.newInstance(officeSourceClass,
-				OfficeSource.class, LocationType.OFFICE, officeLocation, null,
-				null, this.nodeContext.getCompilerIssues());
+				OfficeSource.class, this.node,
+				this.nodeContext.getCompilerIssues());
 		if (officeSource == null) {
 			return null; // failed to instantiate
 		}
@@ -188,8 +195,9 @@ public class OfficeLoaderImpl implements OfficeLoader {
 			String officeLocation, PropertyList propertyList) {
 
 		// Create the office node
-		OfficeNode officeNode = new OfficeNodeImpl(officeSource, propertyList,
-				officeLocation, this.nodeContext);
+		OfficeNode officeNode = this.nodeContext.createOfficeNode(
+				Node.TYPE_NAME, officeSource.getClass().getName(),
+				officeSource, officeLocation, null);
 
 		// Source the office
 		boolean isSourced = officeNode.sourceOffice();
@@ -210,8 +218,8 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	 *            Location of the {@link Office}.
 	 */
 	private void addIssue(String issueDescription, String officeLocation) {
-		this.nodeContext.getCompilerIssues().addIssue(LocationType.OFFICE,
-				officeLocation, null, null, issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription);
 	}
 
 	/**
@@ -226,8 +234,8 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	 */
 	private void addIssue(String issueDescription, Throwable cause,
 			String officeLocation) {
-		this.nodeContext.getCompilerIssues().addIssue(LocationType.OFFICE,
-				officeLocation, null, null, issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription, cause);
 	}
 
 }

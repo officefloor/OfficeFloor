@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.structure;
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 
-import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
@@ -82,11 +82,17 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	private static final String OFFICE_LOCATION = "OFFICE_LOCATION";
 
 	/**
+	 * Mock {@link OfficeFloorNode}.
+	 */
+	private final OfficeFloorNode officeFloor = this
+			.createMock(OfficeFloorNode.class);
+
+	/**
 	 * {@link OfficeNode} to be tested.
 	 */
 	private final OfficeNode node = new OfficeNodeImpl(OFFICE_NAME,
-			MakerOfficeSource.class.getName(), OFFICE_LOCATION,
-			this.nodeContext);
+			MakerOfficeSource.class.getName(), null, OFFICE_LOCATION,
+			this.officeFloor, this.nodeContext);
 
 	/**
 	 * Ensure allow {@link OfficeSource} to report issues via the
@@ -166,12 +172,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddInput() {
 		// Add two different inputs verifying details
 		this.replayMockObjects();
-		OfficeInput input = this.node.addInput("INPUT", String.class.getName());
+		OfficeInput input = this.node.addOfficeInput("INPUT",
+				String.class.getName());
 		assertNotNull("Must have input", input);
 		assertEquals("Incorrect input name", "INPUT",
 				input.getOfficeInputName());
 		assertNotSame("Should obtain another input", input,
-				this.node.addInput("ANOTHER", Integer.class.getName()));
+				this.node.addOfficeInput("ANOTHER", Integer.class.getName()));
 		this.verifyMockObjects();
 	}
 
@@ -186,9 +193,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add the input twice
 		this.replayMockObjects();
-		OfficeInput inputFirst = this.node.addInput("INPUT",
+		OfficeInput inputFirst = this.node.addOfficeInput("INPUT",
 				Integer.class.getName());
-		OfficeInput inputSecond = this.node.addInput("INPUT",
+		OfficeInput inputSecond = this.node.addOfficeInput("INPUT",
 				Integer.class.getName());
 		this.verifyMockObjects();
 
@@ -203,13 +210,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	public void testAddOutput() {
 		// Add two different outputs verifying details
 		this.replayMockObjects();
-		OfficeOutput output = this.node.addOutput("OUTPUT",
+		OfficeOutput output = this.node.addOfficeOutput("OUTPUT",
 				String.class.getName());
 		assertNotNull("Must have output", output);
 		assertEquals("Incorrect output name", "OUTPUT",
 				output.getOfficeOutputName());
 		assertNotSame("Should obtain another output", output,
-				this.node.addOutput("ANOTHER", Integer.class.getName()));
+				this.node.addOfficeOutput("ANOTHER", Integer.class.getName()));
 		this.verifyMockObjects();
 	}
 
@@ -224,9 +231,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add the output twice
 		this.replayMockObjects();
-		OfficeOutput outputFirst = this.node.addOutput("OUTPUT",
+		OfficeOutput outputFirst = this.node.addOfficeOutput("OUTPUT",
 				Integer.class.getName());
-		OfficeOutput outputSecond = this.node.addOutput("OUTPUT",
+		OfficeOutput outputSecond = this.node.addOfficeOutput("OUTPUT",
 				Integer.class.getName());
 		this.verifyMockObjects();
 
@@ -322,15 +329,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Add two different sections verifying details
 		this.replayMockObjects();
 		OfficeSection section = this.node.addOfficeSection("SECTION",
-				new SectionModelSectionSource(), "location",
-				OfficeFloorCompiler.newPropertyList());
+				new SectionModelSectionSource(), "location");
 		assertNotNull("Must have section", section);
 		assertEquals("Incorrect section name", "SECTION",
 				section.getOfficeSectionName());
 		assertNotSame("Should obtain another section", section,
 				this.node.addOfficeSection("ANOTHER",
-						new SectionModelSectionSource(), "location",
-						OfficeFloorCompiler.newPropertyList()));
+						new SectionModelSectionSource(), "location"));
 		this.verifyMockObjects();
 	}
 
@@ -349,11 +354,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Add the section twice
 		this.replayMockObjects();
 		OfficeSection sectionFirst = this.node.addOfficeSection("SECTION",
-				new SectionModelSectionSource(), "location",
-				OfficeFloorCompiler.newPropertyList());
+				new SectionModelSectionSource(), "location");
 		OfficeSection sectionSecond = this.node.addOfficeSection("SECTION",
-				new SectionModelSectionSource(), "location",
-				OfficeFloorCompiler.newPropertyList());
+				new SectionModelSectionSource(), "location");
 		this.verifyMockObjects();
 
 		// Should be the same section
@@ -754,8 +757,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		OfficeInput input = this.node
-				.addInput("INPUT", Integer.class.getName());
+		OfficeInput input = this.node.addOfficeInput("INPUT",
+				Integer.class.getName());
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
 		OfficeSectionInput sectionInput = section
 				.getOfficeSectionInput("SECTION_INPUT");
@@ -787,15 +790,17 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
 		OfficeSectionOutput sectionOutput = section
 				.getOfficeSectionOutput("SECTION_OUTPUT");
-		OfficeOutput output = this.node.addOutput("OUTPUT",
+		OfficeOutput output = this.node.addOfficeOutput("OUTPUT",
 				Integer.class.getName());
 
 		this.node.link(sectionOutput, output);
 		assertFlowLink("section output -> output", sectionOutput, output);
 
 		// Ensure only can link once
-		this.node.link(sectionOutput,
-				this.node.addOutput("ANOTHER", Character.class.getName()));
+		this.node
+				.link(sectionOutput,
+						this.node.addOfficeOutput("ANOTHER",
+								Character.class.getName()));
 		assertFlowLink("Can only link once", sectionOutput, output);
 
 		this.verifyMockObjects();
@@ -814,16 +819,18 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		OfficeInput input = this.node
-				.addInput("INPUT", Integer.class.getName());
-		OfficeOutput output = this.node.addOutput("OUTPUT",
+		OfficeInput input = this.node.addOfficeInput("INPUT",
+				Integer.class.getName());
+		OfficeOutput output = this.node.addOfficeOutput("OUTPUT",
 				Long.class.getName());
 		this.node.link(input, output);
 		assertSynchronousLink("input -> output", input, output);
 
 		// Ensure only can link once
-		this.node.link(input,
-				this.node.addOutput("ANOHTER", Character.class.getName()));
+		this.node
+				.link(input,
+						this.node.addOfficeOutput("ANOHTER",
+								Character.class.getName()));
 		assertSynchronousLink("input -> output", input, output);
 
 		this.verifyMockObjects();
@@ -842,16 +849,16 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		OfficeOutput output = this.node.addOutput("OUTPUT",
+		OfficeOutput output = this.node.addOfficeOutput("OUTPUT",
 				Long.class.getName());
-		OfficeInput input = this.node
-				.addInput("INPUT", Integer.class.getName());
+		OfficeInput input = this.node.addOfficeInput("INPUT",
+				Integer.class.getName());
 		this.node.link(output, input);
 		assertSynchronousLink("output -> input", output, input);
 
 		// Ensure only can link once
 		this.node.link(output,
-				this.node.addInput("ANOTHER", Character.class.getName()));
+				this.node.addOfficeInput("ANOTHER", Character.class.getName()));
 		assertSynchronousLink("output -> input", output, input);
 
 		this.verifyMockObjects();

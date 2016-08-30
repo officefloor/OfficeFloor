@@ -71,8 +71,8 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionOutputNodeImpl(String outputName, String sectionLocation,
-			SectionNode section, NodeContext context) {
+	public SectionOutputNodeImpl(String outputName, SectionNode section,
+			NodeContext context) {
 		this.outputName = outputName;
 		this.section = section;
 		this.context = context;

@@ -23,11 +23,10 @@ import javax.transaction.xa.XAResource;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.office.OfficeSectionInputType;
-import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeType;
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeInput;
@@ -133,10 +132,10 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 		context.getProperty(PROPERTY_REQUIRED);
 
 		// Add the input
-		PropertyList properties = context.createPropertyList();
-		architect.addOfficeSection("section",
-				ClassSectionSource.class.getName(),
-				MockSection.class.getName(), properties);
+		architect
+				.addOfficeSection("section",
+						ClassSectionSource.class.getName(),
+						MockSection.class.getName());
 
 		// Add the object
 		OfficeObject object = architect.addOfficeObject("object",
@@ -151,16 +150,18 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 		architect.addOfficeTeam("team");
 
 		// Add the input
-		OfficeInput input = architect
-				.addInput("INPUT", Integer.class.getName());
-		architect.link(input,
-				architect.addOutput("OUTPUT_LINK", Character.class.getName()));
+		OfficeInput input = architect.addOfficeInput("INPUT",
+				Integer.class.getName());
+		architect.link(
+				input,
+				architect.addOfficeOutput("OUTPUT_LINK",
+						Character.class.getName()));
 
 		// Add the output
-		OfficeOutput output = architect.addOutput("OUTPUT",
+		OfficeOutput output = architect.addOfficeOutput("OUTPUT",
 				Long.class.getName());
 		architect.link(output,
-				architect.addInput("INPUT_LINK", Short.class.getName()));
+				architect.addOfficeInput("INPUT_LINK", Short.class.getName()));
 	}
 
 	/**

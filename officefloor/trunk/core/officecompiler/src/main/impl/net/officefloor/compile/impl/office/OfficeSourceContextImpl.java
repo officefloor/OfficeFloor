@@ -23,8 +23,8 @@ import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -47,12 +47,17 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 	private final String officeLocation;
 
 	/**
+	 * {@link Node} requiring the {@link Office}.
+	 */
+	private final Node node;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
 
 	/**
-	 * Initiate.
+	 * Instantiate.
 	 * 
 	 * @param isLoadingType
 	 *            Indicates if loading type.
@@ -60,15 +65,18 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 	 *            Location of the {@link Office}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
+	 * @param node
+	 *            {@link Node} requiring the {@link Office}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
 	public OfficeSourceContextImpl(boolean isLoadingType,
-			String officeLocation, PropertyList propertyList,
+			String officeLocation, PropertyList propertyList, Node node,
 			NodeContext nodeContext) {
 		super(isLoadingType, nodeContext.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
 		this.officeLocation = officeLocation;
+		this.node = node;
 		this.context = nodeContext;
 	}
 
@@ -103,8 +111,7 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 		// Obtain the managed object source class
 		Class managedObjectSourceClass = this.context
 				.getManagedObjectSourceClass(managedObjectSourceClassName,
-						LocationType.OFFICE, this.officeLocation,
-						"loadManagedObjectType");
+						this.node);
 
 		// Ensure have the managed object source class
 		if (managedObjectSourceClass == null) {
@@ -114,8 +121,7 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 
 		// Load the managed object type
 		ManagedObjectLoader managedObjectLoader = this.context
-				.getManagedObjectLoader(LocationType.OFFICE,
-						this.officeLocation, "loadManagedObjectType");
+				.getManagedObjectLoader(this.node);
 		ManagedObjectType<?> managedObjectType = managedObjectLoader
 				.loadManagedObjectType(managedObjectSourceClass, properties);
 
@@ -136,8 +142,7 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 
 		// Obtain the governance source class
 		Class governanceSourceClass = this.context.getGovernanceSourceClass(
-				governanceSourceClassName, this.officeLocation,
-				"loadAdministratorType");
+				governanceSourceClassName, this.node);
 
 		// Ensure have the governance source class
 		if (governanceSourceClass == null) {
@@ -146,8 +151,8 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 		}
 
 		// Load the governance type
-		GovernanceLoader governanceLoader = this.context.getGovernanceLoader(
-				this.officeLocation, "loadGovernanceType");
+		GovernanceLoader governanceLoader = this.context
+				.getGovernanceLoader(this.node);
 		GovernanceType<?, ?> governanceType = governanceLoader
 				.loadGovernanceType(governanceSourceClass, properties);
 
@@ -169,7 +174,7 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 		// Obtain the administrator source class
 		Class administratorSourceClass = this.context
 				.getAdministratorSourceClass(administratorSourceClassName,
-						this.officeLocation, "loadAdministratorType");
+						this.node);
 
 		// Ensure have the administrator source class
 		if (administratorSourceClass == null) {
@@ -179,8 +184,7 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 
 		// Load the administrator type
 		AdministratorLoader administratorLoader = this.context
-				.getAdministratorLoader(this.officeLocation,
-						"loadAdministratorType");
+				.getAdministratorLoader(this.node);
 		AdministratorType<?, ?> administratorType = administratorLoader
 				.loadAdministratorType(administratorSourceClass, properties);
 

@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.easymock.internal.ObjectMethodsFilter;
-
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
 import net.officefloor.compile.impl.office.OfficeTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -204,10 +202,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 * 
 	 * @param officeName
 	 *            Name of the {@link DeployedOffice}.
-	 * @param officeSource
-	 *            {@link OfficeSource} instance.
 	 * @param officeSourceClassName
 	 *            {@link OfficeSource} class name.
+	 * @param officeSource
+	 *            Optional instantiated {@link OfficeSource}. May be
+	 *            <code>null</code>.
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 * @param officeFloor
@@ -215,16 +214,18 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	private OfficeNodeImpl(String officeName, OfficeSource officeSource,
-			String officeSourceClassName, String officeLocation,
+	public OfficeNodeImpl(String officeName, String officeSourceClassName,
+			OfficeSource officeSource, String officeLocation,
 			OfficeFloorNode officeFloor, NodeContext context) {
 		this.officeName = officeName;
-		this.officeSource = officeSource;
 		this.officeSourceClassName = officeSourceClassName;
+		this.officeSource = officeSource;
 		this.officeLocation = officeLocation;
-		this.properties = context.createPropertyList();
 		this.officeFloor = officeFloor;
 		this.context = context;
+
+		// Create additional objects
+		this.properties = this.context.createPropertyList();
 	}
 
 	/*

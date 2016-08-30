@@ -17,20 +17,19 @@
  */
 package net.officefloor.autowire.impl.supplier;
 
+import java.util.function.Supplier;
+
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.autowire.spi.supplier.source.SupplierSourceSpecification;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.autowire.supplier.SupplyOrder;
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
-import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link SupplierLoader} implementation.
@@ -40,14 +39,9 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public class SupplierLoaderImpl implements SupplierLoader {
 
 	/**
-	 * {@link OfficeFloor} Location.
+	 * {@link Node} requiring the {@link Supplier}.
 	 */
-	private final String officeFloorLocation;
-
-	/**
-	 * {@link OfficeFloorSupplier} name.
-	 */
-	private final String supplierName;
+	private final Node node;
 
 	/**
 	 * {@link NodeContext}.
@@ -55,30 +49,16 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	private final NodeContext nodeContext;
 
 	/**
-	 * Initiate for building.
+	 * Instantiate.
 	 * 
-	 * @param officeFloorLocation
-	 *            {@link OfficeFloor} location.
-	 * @param supplierName
-	 *            {@link OfficeFloorSupplier} name.
+	 * @param node
+	 *            {@link Node} requiring the {@link Supplier}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public SupplierLoaderImpl(String officeFloorLocation, String supplierName,
-			NodeContext nodeContext) {
-		this.officeFloorLocation = officeFloorLocation;
-		this.supplierName = supplierName;
+	public SupplierLoaderImpl(Node node, NodeContext nodeContext) {
+		this.node = node;
 		this.nodeContext = nodeContext;
-	}
-
-	/**
-	 * Initiate from {@link OfficeFloorCompiler}.
-	 * 
-	 * @param nodeContext
-	 *            {@link NodeContext}.
-	 */
-	public SupplierLoaderImpl(NodeContext nodeContext) {
-		this(null, null, nodeContext);
 	}
 
 	/*
@@ -91,9 +71,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Instantiate the supplier source
 		SupplierSource supplierSource = CompileUtil.newInstance(
-				supplierSourceClass, SupplierSource.class,
-				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
-				this.supplierName, this.nodeContext.getCompilerIssues());
+				supplierSourceClass, SupplierSource.class, this.node,
+				this.nodeContext.getCompilerIssues());
 		if (supplierSource == null) {
 			return null; // failed to instantiate
 		}
@@ -194,8 +173,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Create the supplier source context
 		SupplierSourceContextImpl supplierSourceContext = new SupplierSourceContextImpl(
-				true, this.supplierName, this.officeFloorLocation,
-				propertyList, this.nodeContext);
+				true, this.node, propertyList, this.nodeContext);
 
 		// Load and return the supplier type
 		return supplierSourceContext.loadSupplier(supplierSourceClass,
@@ -209,8 +187,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 
 		// Create the supplier source context
 		SupplierSourceContextImpl supplierSourceContext = new SupplierSourceContextImpl(
-				true, this.supplierName, this.officeFloorLocation,
-				propertyList, this.nodeContext);
+				true, this.node, propertyList, this.nodeContext);
 
 		// Fill the supply orders
 		supplierSourceContext.loadSupplier(supplierSourceClass, propertyList,
@@ -224,9 +201,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 *            Issue description.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(
-				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
-				null, issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription);
 	}
 
 	/**
@@ -238,9 +214,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	 *            Cause of issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(
-				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
-				null, issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription, cause);
 	}
 
 }

@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -24,7 +25,7 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeSection extends OfficeSubSection {
+public interface OfficeSection extends OfficeSubSection, PropertyConfigurable {
 
 	/**
 	 * Obtains the {@link OfficeSectionInput}.

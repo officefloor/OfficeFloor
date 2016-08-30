@@ -231,6 +231,27 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	/*
+	 * ======================= TaskRegistry =======================
+	 */
+
+	@Override
+	public TaskNode getTaskNode(String taskName) {
+		// TODO implement TaskRegistry.getTaskNode
+		throw new UnsupportedOperationException(
+				"TODO implement TaskRegistry.getTaskNode");
+
+	}
+
+	@Override
+	public TaskNode createTaskNode(String taskName, String taskTypeName,
+			WorkNode work) {
+		// TODO implement TaskRegistry.createTaskNode
+		throw new UnsupportedOperationException(
+				"TODO implement TaskRegistry.createTaskNode");
+
+	}
+
+	/*
 	 * ======================= MangedObjectRegistry =======================
 	 */
 

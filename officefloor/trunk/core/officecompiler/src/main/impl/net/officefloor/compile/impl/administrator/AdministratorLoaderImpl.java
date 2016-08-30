@@ -24,18 +24,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.administrator.AdministratorSourceContextImpl;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
@@ -58,14 +55,9 @@ import net.officefloor.frame.spi.source.UnknownResourceError;
 public class AdministratorLoaderImpl implements AdministratorLoader {
 
 	/**
-	 * {@link Office} location.
+	 * {@link Node} requiring the {@link Administrator}.
 	 */
-	private final String officeLocation;
-
-	/**
-	 * Name of the {@link Administrator}.
-	 */
-	private final String administratorName;
+	private final Node node;
 
 	/**
 	 * {@link NodeContext}.
@@ -73,30 +65,16 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	private final NodeContext nodeContext;
 
 	/**
-	 * Initiate for building.
+	 * Instantiate.
 	 * 
-	 * @param officeLocation
-	 *            {@link Office} location.
-	 * @param administratorName
-	 *            Name of the {@link Administrator}.
+	 * @param node
+	 *            {@link Node} requiring the {@link Administrator}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public AdministratorLoaderImpl(String officeLocation,
-			String administratorName, NodeContext nodeContext) {
-		this.officeLocation = officeLocation;
-		this.administratorName = administratorName;
+	public AdministratorLoaderImpl(Node node, NodeContext nodeContext) {
+		this.node = node;
 		this.nodeContext = nodeContext;
-	}
-
-	/**
-	 * Initiate from {@link OfficeFloorCompiler}.
-	 * 
-	 * @param nodeContext
-	 *            {@link NodeContext}.
-	 */
-	public AdministratorLoaderImpl(NodeContext nodeContext) {
-		this(null, null, nodeContext);
 	}
 
 	/*
@@ -110,9 +88,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 		// Instantiate the administrator source
 		AdministratorSource<I, A> administratorSource = CompileUtil
 				.newInstance(administratorSourceClass,
-						AdministratorSource.class, LocationType.OFFICE,
-						this.officeLocation, AssetType.ADMINISTRATOR,
-						this.administratorName,
+						AdministratorSource.class, this.node,
 						this.nodeContext.getCompilerIssues());
 		if (administratorSource == null) {
 			return null; // failed to instantiate
@@ -235,16 +211,14 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 
 		// Create an instance of the administrator source
 		AS administratorSource = CompileUtil.newInstance(
-				administratorSourceClass, AdministratorSource.class,
-				LocationType.OFFICE, this.officeLocation,
-				AssetType.ADMINISTRATOR, this.administratorName,
+				administratorSourceClass, AdministratorSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (administratorSource == null) {
 			return null; // failed to instantiate
 		}
 
 		// Obtain the source context
-		SourceContext sourceContext = this.nodeContext.getSourceContext();
+		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
 
 		// Create the administrator source context
 		SourceProperties properties = new PropertyListSourceProperties(
@@ -423,9 +397,8 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(LocationType.OFFICE,
-				this.officeLocation, AssetType.ADMINISTRATOR,
-				this.administratorName, issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription);
 	}
 
 	/**
@@ -437,9 +410,8 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(LocationType.OFFICE,
-				this.officeLocation, AssetType.ADMINISTRATOR,
-				this.administratorName, issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription, cause);
 	}
 
 }

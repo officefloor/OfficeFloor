@@ -19,16 +19,14 @@ package net.officefloor.compile.impl.pool;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceProperty;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceSpecification;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 
 /**
@@ -39,53 +37,26 @@ import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 
 	/**
-	 * {@link LocationType}.
+	 * {@link Node} requiring the {@link ManagedObjectPool}.
 	 */
-	private LocationType locationType;
+	private Node node;
 
 	/**
-	 * Location.
+	 * {@link NodeContext}.
 	 */
-	private final String location;
+	private final NodeContext context;
 
 	/**
-	 * Name of the {@link ManagedObjectPool}.
-	 */
-	private final String managedObjectPoolName;
-
-	/**
-	 * {@link CompilerIssues}.
-	 */
-	private final CompilerIssues issues;
-
-	/**
-	 * Initiate.
+	 * Instantiate.
 	 * 
+	 * @param node
+	 *            {@link Node} requiring the {@link ManagedObjectPool}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectPoolLoaderImpl(NodeContext context) {
-		this(null, null, null, context);
-	}
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param locationType
-	 *            {@link LocationType}.
-	 * @param location
-	 *            Location.
-	 * @param managedObjectPoolName
-	 *            Name of the {@link ManagedObjectPool}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 */
-	public ManagedObjectPoolLoaderImpl(LocationType locationType,
-			String location, String managedObjectPoolName, NodeContext context) {
-		this.locationType = locationType;
-		this.location = location;
-		this.managedObjectPoolName = managedObjectPoolName;
-		this.issues = context.getCompilerIssues();
+	public ManagedObjectPoolLoaderImpl(Node node, NodeContext context) {
+		this.node = node;
+		this.context = context;
 	}
 
 	/*
@@ -99,9 +70,8 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 		// Instantiate the managed object pool source
 		ManagedObjectPoolSource managedObjectPoolSource = CompileUtil
 				.newInstance(managedObjectPoolSourceClass,
-						ManagedObjectPoolSource.class, this.locationType,
-						this.location, AssetType.MANAGED_OBJECT_POOL,
-						this.managedObjectPoolName, this.issues);
+						ManagedObjectPoolSource.class, this.node,
+						this.context.getCompilerIssues());
 		if (managedObjectPoolSource == null) {
 			return null; // failed to instantiate
 		}
@@ -115,18 +85,16 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 					"Failed to obtain "
 							+ ManagedObjectPoolSourceSpecification.class
 									.getSimpleName() + " from "
-							+ managedObjectPoolSourceClass.getName(), ex,
-					this.issues);
+							+ managedObjectPoolSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue(
-					"No "
-							+ ManagedObjectPoolSourceSpecification.class
-									.getSimpleName() + " returned from "
-							+ managedObjectPoolSourceClass.getName(), issues);
+			this.addIssue("No "
+					+ ManagedObjectPoolSourceSpecification.class
+							.getSimpleName() + " returned from "
+					+ managedObjectPoolSourceClass.getName());
 			return null; // no specification obtained
 		}
 
@@ -142,8 +110,7 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 							+ " instances from "
 							+ ManagedObjectPoolSourceSpecification.class
 									.getSimpleName() + " for "
-							+ managedObjectPoolSourceClass.getName(), ex,
-					this.issues);
+							+ managedObjectPoolSourceClass.getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -155,17 +122,15 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 
 				// Ensure have the managed object pool source property
 				if (mopProperty == null) {
-					this.addIssue(
-							ManagedObjectPoolSourceProperty.class
+					this.addIssue(ManagedObjectPoolSourceProperty.class
+							.getSimpleName()
+							+ " "
+							+ i
+							+ " is null from "
+							+ ManagedObjectPoolSourceSpecification.class
 									.getSimpleName()
-									+ " "
-									+ i
-									+ " is null from "
-									+ ManagedObjectPoolSourceSpecification.class
-											.getSimpleName()
-									+ " for "
-									+ managedObjectPoolSourceClass.getName(),
-							this.issues);
+							+ " for "
+							+ managedObjectPoolSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -184,21 +149,19 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 									+ ManagedObjectPoolSourceSpecification.class
 											.getSimpleName() + " for "
 									+ managedObjectPoolSourceClass.getName(),
-							ex, this.issues);
+							ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(
-							ManagedObjectPoolSourceProperty.class
+					this.addIssue(ManagedObjectPoolSourceProperty.class
+							.getSimpleName()
+							+ " "
+							+ i
+							+ " provided blank name from "
+							+ ManagedObjectPoolSourceSpecification.class
 									.getSimpleName()
-									+ " "
-									+ i
-									+ " provided blank name from "
-									+ ManagedObjectPoolSourceSpecification.class
-											.getSimpleName()
-									+ " for "
-									+ managedObjectPoolSourceClass.getName(),
-							this.issues);
+							+ " for "
+							+ managedObjectPoolSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -219,7 +182,7 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 									+ ManagedObjectPoolSourceSpecification.class
 											.getSimpleName() + " for "
 									+ managedObjectPoolSourceClass.getName(),
-							ex, this.issues);
+							ex);
 					return null; // must have complete property details
 				}
 
@@ -245,13 +208,9 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 */
-	private void addIssue(String issueDescription, CompilerIssues issues) {
-		issues.addIssue(this.locationType, this.location,
-				AssetType.MANAGED_OBJECT_POOL, this.managedObjectPoolName,
-				issueDescription);
+	private void addIssue(String issueDescription) {
+		this.context.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
 	/**
@@ -261,14 +220,10 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 */
-	private void addIssue(String issueDescription, Throwable cause,
-			CompilerIssues issues) {
-		issues.addIssue(this.locationType, this.location,
-				AssetType.MANAGED_OBJECT_POOL, this.managedObjectPoolName,
-				issueDescription, cause);
+	private void addIssue(String issueDescription, Throwable cause) {
+		this.context.getCompilerIssues().addIssue(this.node, issueDescription,
+				cause);
 	}
 
 }

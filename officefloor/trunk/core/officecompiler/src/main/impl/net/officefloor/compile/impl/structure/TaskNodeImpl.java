@@ -17,8 +17,6 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,25 +27,21 @@ import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
-import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
+import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.WorkNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.OfficeTaskType;
-import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeGovernance;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeTask;
-import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
-import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
@@ -56,12 +50,10 @@ import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.governance.Governance;
 
@@ -150,6 +142,42 @@ public class TaskNodeImpl implements TaskNode {
 		this.context = context;
 		this.teamResponsible = new TaskTeamNodeImpl("Team for task "
 				+ this.taskName, this, this.context);
+	}
+
+	/*
+	 * ========================== Node ===================================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
 	}
 
 	/*
@@ -483,8 +511,7 @@ public class TaskNodeImpl implements TaskNode {
 
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
-			this.context.getCompilerIssues().addIssue(LocationType.SECTION,
-					this.sectionLocation, null, null,
+			this.context.getCompilerIssues().addIssue(this,
 					"Task " + this.taskName + " linked more than once");
 			return false; // already linked
 		}
@@ -510,13 +537,6 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	public TaskTeam getTeamResponsible() {
-
-		// Ensure have office context
-		if (!this.isOfficeContextLoaded) {
-			throw new IllegalStateException("Office context has not been added");
-		}
-
-		// Return the team responsible
 		return this.teamResponsible;
 	}
 
@@ -525,8 +545,11 @@ public class TaskNodeImpl implements TaskNode {
 
 		// Ensure duty node
 		if (!(duty instanceof DutyNode)) {
-			this.addIssue("Invalid duty: " + duty + " ["
-					+ (duty == null ? null : duty.getClass().getName()) + "]");
+			this.context.getCompilerIssues().addIssue(
+					this,
+					"Invalid duty: " + duty + " ["
+							+ (duty == null ? null : duty.getClass().getName())
+							+ "]");
 			return; // can not add duty
 		}
 		DutyNode dutyNode = (DutyNode) duty;
@@ -540,8 +563,11 @@ public class TaskNodeImpl implements TaskNode {
 
 		// Ensure duty node
 		if (!(duty instanceof DutyNode)) {
-			this.addIssue("Invalid duty: " + duty + " ["
-					+ (duty == null ? null : duty.getClass().getName()) + "]");
+			this.context.getCompilerIssues().addIssue(
+					this,
+					"Invalid duty: " + duty + " ["
+							+ (duty == null ? null : duty.getClass().getName())
+							+ "]");
 			return; // can not add duty
 		}
 		DutyNode dutyNode = (DutyNode) duty;
@@ -555,11 +581,13 @@ public class TaskNodeImpl implements TaskNode {
 
 		// Ensure governance node
 		if (!(governance instanceof GovernanceNode)) {
-			this.addIssue("Invalid governance: "
-					+ governance
-					+ " ["
-					+ (governance == null ? null : governance.getClass()
-							.getName()) + "]");
+			this.context.getCompilerIssues().addIssue(
+					this,
+					"Invalid governance: "
+							+ governance
+							+ " ["
+							+ (governance == null ? null : governance
+									.getClass().getName()) + "]");
 			return; // can not add governance
 		}
 		GovernanceNode governanceNode = (GovernanceNode) governance;

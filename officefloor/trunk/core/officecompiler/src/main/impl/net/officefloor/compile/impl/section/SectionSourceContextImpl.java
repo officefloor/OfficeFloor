@@ -19,14 +19,15 @@ package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
@@ -41,9 +42,14 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 		SectionSourceContext {
 
 	/**
-	 * Location of the {@link section}.
+	 * Location of the {@link OfficeSection}.
 	 */
 	private final String sectionLocation;
+
+	/**
+	 * {@link Node} requiring the {@link OfficeSection}.
+	 */
+	private final Node node;
 
 	/**
 	 * {@link NodeContext}.
@@ -59,15 +65,18 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 	 *            Location of the {@link SectionNode}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
+	 * @param node
+	 *            {@link Node} requiring the {@link OfficeSection}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionSourceContextImpl(boolean isLoadingType,
-			String sectionLocation, PropertyList propertyList,
+			String sectionLocation, PropertyList propertyList, Node node,
 			NodeContext context) {
-		super(isLoadingType, context.getSourceContext(),
+		super(isLoadingType, context.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
 		this.sectionLocation = sectionLocation;
+		this.node = node;
 		this.context = context;
 	}
 
@@ -92,7 +101,7 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 
 		// Obtain the work source class
 		Class workSourceClass = this.context.getWorkSourceClass(
-				workSourceClassName, this.sectionLocation, "loadWorkType");
+				workSourceClassName, this.node);
 
 		// Ensure have the work source class
 		if (workSourceClass == null) {
@@ -100,8 +109,7 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 		}
 
 		// Load the work type
-		WorkLoader workLoader = this.context.getWorkLoader(
-				this.sectionLocation, "loadWorkType");
+		WorkLoader workLoader = this.context.getWorkLoader(this.node);
 		WorkType<?> workType = workLoader.loadWorkType(workSourceClass,
 				properties);
 
@@ -122,8 +130,7 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 		// Obtain the managed object source class
 		Class managedObjectSourceClass = this.context
 				.getManagedObjectSourceClass(managedObjectSourceClassName,
-						LocationType.SECTION, this.sectionLocation,
-						"loadManagedObjectType");
+						this.node);
 
 		// Ensure have the managed object source class
 		if (managedObjectSourceClass == null) {
@@ -133,8 +140,7 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 
 		// Load the managed object type
 		ManagedObjectLoader managedObjectLoader = this.context
-				.getManagedObjectLoader(LocationType.SECTION,
-						this.sectionLocation, "loadManagedObjectType");
+				.getManagedObjectLoader(this.node);
 		ManagedObjectType<?> managedObjectType = managedObjectLoader
 				.loadManagedObjectType(managedObjectSourceClass, properties);
 
@@ -154,9 +160,8 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 			String location, PropertyList properties) {
 
 		// Obtain the section source class
-		Class sectionSourceClass = this.context
-				.getSectionSourceClass(sectionSourceClassName,
-						this.sectionLocation, "loadSectionType");
+		Class sectionSourceClass = this.context.getSectionSourceClass(
+				sectionSourceClassName, this.node);
 
 		// Ensure have the section source class
 		if (sectionSourceClass == null) {
@@ -164,7 +169,7 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 		}
 
 		// Load the section type
-		SectionLoader sectionLoader = this.context.getSectionLoader();
+		SectionLoader sectionLoader = this.context.getSectionLoader(this.node);
 		SectionType sectionType = sectionLoader.loadSectionType(
 				sectionSourceClass, location, properties);
 

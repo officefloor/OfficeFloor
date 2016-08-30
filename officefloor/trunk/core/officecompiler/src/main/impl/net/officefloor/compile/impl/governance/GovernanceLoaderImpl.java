@@ -22,7 +22,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceEscalationType;
 import net.officefloor.compile.governance.GovernanceFlowType;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -30,8 +29,8 @@ import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceFlowMetaData;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
@@ -42,8 +41,6 @@ import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecificati
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -60,14 +57,9 @@ import net.officefloor.frame.spi.source.UnknownResourceError;
 public class GovernanceLoaderImpl implements GovernanceLoader {
 
 	/**
-	 * Location of the {@link Office}.
+	 * {@link Node} requiring the {@link Governance}.
 	 */
-	private final String officeLocation;
-
-	/**
-	 * Name of the {@link Governance}.
-	 */
-	private final String governanceName;
+	private final Node node;
 
 	/**
 	 * {@link NodeContext}.
@@ -75,30 +67,16 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 	private final NodeContext nodeContext;
 
 	/**
-	 * Initiate for building.
+	 * Instantiate.
 	 * 
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 * @param governanceName
-	 *            Name of the {@link Governance}.
+	 * @param node
+	 *            {@link Node} requiring the {@link Governance}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public GovernanceLoaderImpl(String officeLocation, String governanceName,
-			NodeContext nodeContext) {
-		this.officeLocation = officeLocation;
-		this.governanceName = governanceName;
+	public GovernanceLoaderImpl(Node node, NodeContext nodeContext) {
+		this.node = node;
 		this.nodeContext = nodeContext;
-	}
-
-	/**
-	 * Initiate from {@link OfficeFloorCompiler}.
-	 * 
-	 * @param nodeContext
-	 *            {@link NodeContext}.
-	 */
-	public GovernanceLoaderImpl(NodeContext nodeContext) {
-		this(null, null, nodeContext);
 	}
 
 	/*
@@ -111,8 +89,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 
 		// Instantiate the governance source
 		GS governanceSource = CompileUtil.newInstance(governanceSourceClass,
-				GovernanceSource.class, LocationType.OFFICE,
-				this.officeLocation, AssetType.GOVERNANCE, this.governanceName,
+				GovernanceSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (governanceSource == null) {
 			return null; // failed to instantiate
@@ -237,15 +214,14 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 
 		// Instantiate the governance source
 		GovernanceSource<I, F> governanceSource = CompileUtil.newInstance(
-				governanceSourceClass, GovernanceSource.class,
-				LocationType.OFFICE, this.officeLocation, AssetType.GOVERNANCE,
-				this.governanceName, this.nodeContext.getCompilerIssues());
+				governanceSourceClass, GovernanceSource.class, this.node,
+				this.nodeContext.getCompilerIssues());
 		if (governanceSource == null) {
 			return null; // failed to instantiate
 		}
 
 		// Create the context for the governance source
-		SourceContext sourceContext = this.nodeContext.getSourceContext();
+		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
 		SourceProperties sourceProperties = new PropertyListSourceProperties(
 				properties);
 		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(
@@ -515,8 +491,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(LocationType.OFFICE,
-				this.officeLocation, AssetType.GOVERNANCE, this.governanceName,
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
 				issueDescription);
 	}
 
@@ -529,8 +504,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(LocationType.OFFICE,
-				this.officeLocation, AssetType.GOVERNANCE, this.governanceName,
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
 				issueDescription, cause);
 	}
 

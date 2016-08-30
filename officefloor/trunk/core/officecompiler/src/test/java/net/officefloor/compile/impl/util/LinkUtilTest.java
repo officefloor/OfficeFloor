@@ -400,6 +400,12 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		}
 
 		@Override
+		public String getNodeType() {
+			fail("Should not require node type");
+			return null;
+		}
+
+		@Override
 		public String getLocation() {
 			fail("Should not require location");
 			return null;

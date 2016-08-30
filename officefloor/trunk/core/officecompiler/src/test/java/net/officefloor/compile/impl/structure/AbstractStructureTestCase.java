@@ -383,9 +383,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		// Register the section maker
 		PropertyList propertyList = MakerSectionSource.register(maker);
 
-		// Add and return the office section
-		return officeArchitect.addOfficeSection(sectionName,
-				MakerSectionSource.class.getName(), sectionName, propertyList);
+		// Add and return the section
+		OfficeSection section = officeArchitect.addOfficeSection(sectionName,
+				MakerSectionSource.class.getName(), sectionName);
+		for (Property property : propertyList) {
+			section.addProperty(property.getName(), property.getValue());
+		}
+		return section;
 	}
 
 	/**

@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
@@ -43,8 +44,8 @@ import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.autowire.supplier.SupplyOrder;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -53,8 +54,6 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -74,14 +73,9 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 		SupplierSourceContext {
 
 	/**
-	 * {@link OfficeFloorSupplier} name.
+	 * {@link Node} requiring the {@link Supplier}.
 	 */
-	private final String supplierName;
-
-	/**
-	 * {@link OfficeFloor} location.
-	 */
-	private final String officeFloorLocation;
+	private final Node node;
 
 	/**
 	 * {@link NodeContext}.
@@ -98,22 +92,18 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	 * 
 	 * @param isLoadingType
 	 *            Indicates if loading type.
-	 * @param supplierName
-	 *            {@link OfficeFloorSupplier} name.
-	 * @param officeFloorLocation
-	 *            {@link OfficeFloor} location.
+	 * @param node
+	 *            {@link Node}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SupplierSourceContextImpl(boolean isLoadingType,
-			String supplierName, String officeFloorLocation,
+	public SupplierSourceContextImpl(boolean isLoadingType, Node node,
 			PropertyList propertyList, NodeContext context) {
-		super(isLoadingType, context.getSourceContext(),
+		super(isLoadingType, context.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
-		this.supplierName = supplierName;
-		this.officeFloorLocation = officeFloorLocation;
+		this.node = node;
 		this.context = context;
 	}
 
@@ -157,8 +147,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 
 		// Instantiate the supplier source
 		S supplierSource = CompileUtil.newInstance(supplierSourceClass,
-				SupplierSource.class, LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, null, null,
+				SupplierSource.class, this.node,
 				this.context.getCompilerIssues());
 		if (supplierSource == null) {
 			return null; // failed to instantiate
@@ -227,8 +216,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 
 			// Obtain the managed object loader
 			ManagedObjectLoader managedObjectLoader = this.context
-					.getManagedObjectLoader(LocationType.OFFICE_FLOOR,
-							this.officeFloorLocation, managedObjectName);
+					.getManagedObjectLoader(this.node);
 
 			// Load the managed object type
 			ManagedObjectType moType = managedObjectLoader
@@ -404,9 +392,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	 *            Issue description.
 	 */
 	private void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, null, this.supplierName,
-				issueDescription);
+		this.context.getCompilerIssues().addIssue(this.node, issueDescription);
 	}
 
 	/**
@@ -418,9 +404,8 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 	 *            Cause of issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.context.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, null, this.supplierName,
-				issueDescription, cause);
+		this.context.getCompilerIssues().addIssue(this.node, issueDescription,
+				cause);
 	}
 
 	/*
@@ -519,7 +504,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 				ManagedObjectSource<?, ?> managedObjectSource,
 				PropertyList properties, ManagedObjectSourceWirer wirer,
 				AutoWire[] autoWiring, NodeContext context) {
-			super(context.getSourceContext().getClassLoader(), properties);
+			super(context.getRootSourceContext().getClassLoader(), properties);
 			this.managedObjectSource = managedObjectSource;
 			this.properties = properties;
 			this.wirer = wirer;
@@ -631,7 +616,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 		public SuppliedAutoWireTeam(String teamName,
 				String teamSourceClassName, PropertyList properties,
 				NodeContext context) {
-			super(context.getSourceContext().getClassLoader(), properties);
+			super(context.getRootSourceContext().getClassLoader(), properties);
 			this.teamName = teamName;
 			this.teamSourceClassName = teamSourceClassName;
 		}

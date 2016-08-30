@@ -37,6 +37,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
+import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
@@ -45,6 +46,10 @@ import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
+import net.officefloor.compile.internal.structure.TaskObjectNode;
+import net.officefloor.compile.internal.structure.TaskTeamNode;
+import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -109,7 +114,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Ensure provide location
 		assertFalse("Should not be initialised", node.isInitialised());
-		node = node.initialise(null, null, "LOCATION", null);
+		node = node.initialise(null, null, "LOCATION");
 		assertTrue("Now initialised", node.isInitialised());
 		assertEquals("Incorrect location", "LOCATION", node.getLocation());
 	}
@@ -565,6 +570,15 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can create {@link OfficeTeamNode}.
+	 */
+	public void testCreateOfficeTeamNode() {
+		OfficeTeamNode node = this.doTest(() -> this.context
+				.createOfficeTeamNode("TEAM", this.office));
+		assertNode(node, "TEAM", "Office Team", null, this.office);
+	}
+
+	/**
 	 * Ensure can create {@link SectionInputNode}.
 	 */
 	public void testCreateSectionInputNode() {
@@ -677,6 +691,72 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				FlowInstigationStrategyEnum.SEQUENTIAL,
 				node.getFlowInstigationStrategy());
 		assertEquals("Incorrect task flow name", "FLOW", node.getTaskFlowName());
+	}
+
+	/**
+	 * Ensure can create {@link TaskNode}.
+	 */
+	public void testCreateTaskNode() {
+		WorkNode work = this.createMock(WorkNode.class);
+		TaskNode node = this.doTest(() -> this.context.createTaskNode("TASK",
+				"TYPE", work));
+		assertNode(node, "TASK", "Task", null, work);
+		assertEquals("Incorrct office task name", "TASK",
+				node.getOfficeTaskName());
+		assertEquals("Incorrect section task name", "TASK",
+				node.getSectionTaskName());
+		assertSame("Incorrect work", work, node.getWorkNode());
+	}
+
+	/**
+	 * Ensure can create {@link TaskObjectNode}.
+	 */
+	public void testCreateTaskObjectNode() {
+		TaskObjectNode node = this.doTest(() -> this.context
+				.createTaskObjectNode("OBJECT", this.task));
+		assertNode(node, "OBJECT", "Task Object", null, this.task);
+		assertEquals("Incorrect object dependency name", "OBJECT",
+				node.getObjectDependencyName());
+		assertEquals("Incorrect task object name", "OBJECT",
+				node.getTaskObjectName());
+	}
+
+	/**
+	 * Ensure can create {@link TaskTeamNode}.
+	 */
+	public void testCreateTaskTeamNode() {
+		TaskTeamNode node = this.doTest(() -> this.context.createTaskTeamNode(
+				"TEAM", this.task));
+		assertNode(node, "TEAM", "Task Team", null, this.task);
+	}
+
+	/**
+	 * Ensure can create {@link TeamNode}.
+	 */
+	public void testCreateTeamNode() {
+		TeamNode node = this.context.createTeamNode("TEAM",
+				"ExampleTeamSource", this.officeFloor);
+		assertNode(node, "TEAM", "Team", null, this.officeFloor);
+		assertEquals("TEAM", node.getOfficeFloorTeamName());
+	}
+
+	/**
+	 * Ensure can create {@link WorkNode}.
+	 */
+	public void testCreateWorkNode() {
+		this.recordReturn(this.section,
+				this.section.getSectionQualifiedName("WORK"), "SECTION.WORK");
+		WorkNode node = this.doTest(() -> {
+			WorkNode work = this.context.createWorkNode("WORK",
+					"ExampleWorkSource", null, this.section);
+			assertEquals("Incorrect qualified work name", "SECTION.WORK",
+					work.getQualifiedWorkName());
+			return work;
+		});
+		assertNode(node, "WORK", "Work", null, this.section);
+		assertSame("Incorrect section", this.section, node.getSectionNode());
+		assertEquals("Incorrect section work name", "WORK",
+				node.getSectionWorkName());
 	}
 
 	/**
