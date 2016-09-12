@@ -59,7 +59,6 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Duty;
@@ -256,9 +255,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				try {
 					mos.setTimeout(Long.valueOf(timeoutValue));
 				} catch (NumberFormatException ex) {
-					architect.addIssue(
-							"Invalid timeout value: " + timeoutValue,
-							AssetType.MANAGED_OBJECT, mosName);
+					architect.addIssue("Invalid timeout value: " + timeoutValue
+							+ " for managed object source " + mosName);
 				}
 			}
 
@@ -441,7 +439,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			String sectionName = sectionModel.getOfficeSectionName();
 			OfficeSection section = architect.addOfficeSection(sectionName,
 					sectionModel.getSectionSourceClassName(),
-					sectionModel.getSectionLocation(), propertyList);
+					sectionModel.getSectionLocation());
+			propertyList.configureProperties(section);
 			sections.put(sectionName, section);
 
 			// Obtain the section type (register for later)
@@ -970,9 +969,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		// Unknown scope if at this point
-		architect.addIssue(
-				"Unknown managed object scope " + managedObjectScope,
-				AssetType.MANAGED_OBJECT, managedObjectName);
+		architect.addIssue("Unknown managed object scope " + managedObjectScope
+				+ " for managed object " + managedObjectName);
 		return null;
 	}
 
@@ -1111,11 +1109,12 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				}
 			}
 			if (managedObject == null) {
-				architect.addIssue(
-						"Office model is out of sync with sections. Can not find managed object '"
-								+ managedObjectName + "' [" + subSectionPath
-								+ "]", AssetType.MANAGED_OBJECT,
-						managedObjectName);
+				architect
+						.addIssue("Office model is out of sync with sections. Can not find managed object '"
+								+ managedObjectName
+								+ "' ["
+								+ subSectionPath
+								+ "]");
 				continue; // must have managed object
 			}
 
@@ -1156,10 +1155,12 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				}
 			}
 			if (subSubSectionType == null) {
-				architect.addIssue(
-						"Office model is out of sync with sections. Can not find sub section '"
-								+ subSubSectionName + "' [" + subSectionPath
-								+ "]", AssetType.OFFICE, subSubSectionName);
+				architect
+						.addIssue("Office model is out of sync with sections. Can not find sub section '"
+								+ subSubSectionName
+								+ "' ["
+								+ subSectionPath
+								+ "]");
 				continue; // must have sub section
 			}
 
@@ -1388,7 +1389,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				if (preTaskDuty == null) {
 					architect.addIssue("Can not find pre duty " + i
 							+ " for task '" + taskName + "' [" + subSectionPath
-							+ "]", AssetType.TASK, taskName);
+							+ "]");
 					continue; // must have duty
 				}
 
@@ -1415,7 +1416,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				if (postTaskDuty == null) {
 					architect.addIssue("Can not find post duty " + i
 							+ " for task '" + taskName + "' [" + subSectionPath
-							+ "]", AssetType.TASK, taskName);
+							+ "]");
 					continue; // must have duty
 				}
 

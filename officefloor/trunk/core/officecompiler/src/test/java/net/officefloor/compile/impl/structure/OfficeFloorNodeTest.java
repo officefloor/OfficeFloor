@@ -67,7 +67,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	 * {@link OfficeFloorNode} implementation.
 	 */
 	private final OfficeFloorNode node = new OfficeFloorNodeImpl(
-			OFFICE_FLOOR_LOCATION, this.nodeContext, this.profilers);
+			OfficeFloorSource.class.getName(), null, OFFICE_FLOOR_LOCATION,
+			this.nodeContext, this.profilers);
 
 	/**
 	 * Ensure allow {@link OfficeFloorSource} to report issues via the

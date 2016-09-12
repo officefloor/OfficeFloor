@@ -59,7 +59,6 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 * {@link GovernanceSource} instance to use. Should this be specified it
 	 * overrides the {@link Class}.
 	 */
-	@SuppressWarnings("unused")
 	private final GovernanceSource<?, ?> governanceSource;
 
 	/**
@@ -77,11 +76,6 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
-
-	/**
-	 * {@link GovernanceType} for this {@link GovernanceNode}.
-	 */
-	private GovernanceType<?, ?> governanceType = null;
 
 	/**
 	 * Initiate.
@@ -116,34 +110,22 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.governanceName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.officeNode;
 	}
 
 	/*
@@ -152,12 +134,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public GovernanceType<?, ?> getGovernanceType() {
-
-		// Lazy load the governance type
-		if (this.governanceType != null) {
-			return this.governanceType; // already loaded
-		}
+	public GovernanceType<?, ?> loadGovernanceType() {
 
 		// Obtain the governance source class
 		Class governanceSourceClass = this.context.getGovernanceSourceClass(
@@ -166,13 +143,10 @@ public class GovernanceNodeImpl implements GovernanceNode {
 			return null; // must obtain source class
 		}
 
-		// Load the governance type
+		// Load and return the governance type
 		GovernanceLoader loader = this.context.getGovernanceLoader(this);
-		this.governanceType = loader.loadGovernanceType(governanceSourceClass,
-				this.properties);
-
-		// Return the governance type
-		return this.governanceType;
+		return loader
+				.loadGovernanceType(governanceSourceClass, this.properties);
 	}
 
 	@Override
@@ -180,7 +154,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	public void buildGovernance(OfficeBuilder officeBuilder) {
 
 		// Obtain the governance type
-		GovernanceType govType = this.getGovernanceType();
+		GovernanceType govType = this.loadGovernanceType();
 		if (govType == null) {
 			return; // must obtain governance type
 		}

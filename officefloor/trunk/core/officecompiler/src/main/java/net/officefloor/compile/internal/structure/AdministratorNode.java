@@ -28,8 +28,12 @@ import net.officefloor.frame.spi.administration.Administrator;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministratorNode extends Node, OfficeAdministrator,
-		LinkTeamNode {
+public interface AdministratorNode extends LinkTeamNode, OfficeAdministrator {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Administrator";
 
 	/**
 	 * <p>
@@ -40,7 +44,7 @@ public interface AdministratorNode extends Node, OfficeAdministrator,
 	 * 
 	 * @return {@link AdministratorType} for this {@link AdministratorNode}.
 	 */
-	AdministratorType<?, ?> getAdministratorType();
+	AdministratorType<?, ?> loadAdministratorType();
 
 	/**
 	 * Builds this {@link Administrator} into the {@link OfficeBuilder}.

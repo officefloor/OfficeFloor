@@ -81,7 +81,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	/**
 	 * Parent {@link Office}.
 	 */
-	private final OfficeNode parentOffice;
+	private final OfficeNode officeNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -108,7 +108,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	 * @param administratorSource
 	 *            Optional instantiated {@link AdministratorSource}. May be
 	 *            <code>null</code>.
-	 * @param parentOffice
+	 * @param officeNode
 	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
@@ -116,11 +116,11 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	public AdministratorNodeImpl(String administratorName,
 			String administratorSourceClassName,
 			AdministratorSource<?, ?> administratorSource,
-			OfficeNode parentOffice, NodeContext context) {
+			OfficeNode officeNode, NodeContext context) {
 		this.administratorName = administratorName;
 		this.administratorSourceClassName = administratorSourceClassName;
 		this.administratorSource = administratorSource;
-		this.parentOffice = parentOffice;
+		this.officeNode = officeNode;
 		this.context = context;
 	}
 
@@ -130,34 +130,22 @@ public class AdministratorNodeImpl implements AdministratorNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.administratorName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.officeNode;
 	}
 
 	/*
@@ -203,35 +191,22 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	 * ===================== AdministratorNode ==============================
 	 */
 
-	/**
-	 * Lazy loaded {@link AdministratorType}.
-	 */
-	private AdministratorType<?, ?> administratorType = null;
-
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public AdministratorType<?, ?> getAdministratorType() {
+	public AdministratorType<?, ?> loadAdministratorType() {
 
-		// Lazy load the administrator type
-		if (this.administratorType == null) {
-
-			// Obtain the administrator source class
-			Class administratorSourceClass = this.context
-					.getAdministratorSourceClass(
-							this.administratorSourceClassName, this);
-			if (administratorSourceClass == null) {
-				return null; // must obtain source class
-			}
-
-			// Load the administrator type
-			AdministratorLoader loader = this.context
-					.getAdministratorLoader(this);
-			this.administratorType = loader.loadAdministratorType(
-					administratorSourceClass, this.properties);
+		// Obtain the administrator source class
+		Class administratorSourceClass = this.context
+				.getAdministratorSourceClass(this.administratorSourceClassName,
+						this);
+		if (administratorSourceClass == null) {
+			return null; // must obtain source class
 		}
 
-		// Return administrator type
-		return this.administratorType;
+		// Load and return the administrator type
+		AdministratorLoader loader = this.context.getAdministratorLoader(this);
+		return loader.loadAdministratorType(administratorSourceClass,
+				this.properties);
 	}
 
 	@Override

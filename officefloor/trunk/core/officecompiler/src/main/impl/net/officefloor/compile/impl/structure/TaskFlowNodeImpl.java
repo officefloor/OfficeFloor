@@ -20,8 +20,8 @@ package net.officefloor.compile.impl.structure;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
+import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -44,9 +44,9 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 	private final boolean isEscalation;
 
 	/**
-	 * {@link SectionNode} containing this {@link TaskFlow}.
+	 * Parent {@link TaskNode}.
 	 */
-	private final SectionNode section;
+	private final TaskNode task;
 
 	/**
 	 * {@link NodeContext}.
@@ -61,16 +61,16 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 	 * @param isEscalation
 	 *            Indicates if this {@link TaskFlow} is for a
 	 *            {@link TaskEscalationType}.
-	 * @param section
-	 *            {@link SectionNode} containing this {@link TaskFlow}.
+	 * @param task
+	 *            Parent {@link TaskNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public TaskFlowNodeImpl(String flowName, boolean isEscalation,
-			SectionNode section, NodeContext context) {
+			TaskNode task, NodeContext context) {
 		this.flowName = flowName;
 		this.isEscalation = isEscalation;
-		this.section = section;
+		this.task = task;
 		this.context = context;
 
 		// If escalation, then flow instigation strategy always sequential
@@ -83,34 +83,22 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.flowName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.task;
 	}
 
 	/*

@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -30,8 +31,12 @@ import net.officefloor.compile.spi.section.SubSectionInput;
  * @author Daniel Sagenschneider
  */
 public interface SectionInputNode extends LinkFlowNode, SectionInput,
-		SubSectionInput, OfficeSectionInput, DeployedOfficeInput,
-		SectionInputType, OfficeSectionInputType {
+		SubSectionInput, OfficeSectionInput, DeployedOfficeInput {
+
+	/**
+	 * {@link Node} type.
+	 */
+	String TYPE = "Section Input";
 
 	/**
 	 * Indicates if this {@link SectionInputType} has been initialised.
@@ -48,5 +53,21 @@ public interface SectionInputNode extends LinkFlowNode, SectionInput,
 	 * @return <code>this</code> for builder pattern.
 	 */
 	SectionInputNode initialise(String parameterType);
+
+	/**
+	 * Loads the {@link SectionInputType}.
+	 * 
+	 * @return {@link SectionInputType} or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	SectionInputType loadSectionInputType();
+
+	/**
+	 * Loads the {@link OfficeSectionInputType}.
+	 * 
+	 * @return {@link OfficeSectionInputType} or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	OfficeSectionInputType loadOfficeSectionInputType();
 
 }

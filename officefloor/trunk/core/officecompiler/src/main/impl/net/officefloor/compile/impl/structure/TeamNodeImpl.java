@@ -67,26 +67,6 @@ public class TeamNodeImpl implements TeamNode {
 	private final NodeContext context;
 
 	/**
-	 * Indicates if the {@link TeamType} is loaded.
-	 */
-	private boolean isTeamTypeLoaded = false;
-
-	/**
-	 * Loaded {@link TeamType}.
-	 */
-	private TeamType teamType;
-
-	/**
-	 * Indicates if the {@link OfficeFloorTeamSourceType} is loaded.
-	 */
-	private boolean isOfficeFloorTeamSourceTypeLoaded = false;
-
-	/**
-	 * Loaded {@link OfficeFloorTeamSourceType}.
-	 */
-	private OfficeFloorTeamSourceType teamSourceType;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param teamName
@@ -115,34 +95,22 @@ public class TeamNodeImpl implements TeamNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.teamName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.officeFloorNode;
 	}
 
 	/*
@@ -155,13 +123,7 @@ public class TeamNodeImpl implements TeamNode {
 	}
 
 	@Override
-	public void loadTeamType() {
-
-		// Only load the team type once (whether successful or not)
-		if (this.isTeamTypeLoaded) {
-			return;
-		}
-		this.isTeamTypeLoaded = true;
+	public TeamType loadTeamType() {
 
 		// Obtain the loader
 		TeamLoader loader = this.context.getTeamLoader(this);
@@ -170,33 +132,15 @@ public class TeamNodeImpl implements TeamNode {
 		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(
 				this.teamSourceClassName, this);
 		if (teamSourceClass == null) {
-			return; // must have source class
+			return null; // must have source class
 		}
 
-		// Load the team type
-		this.teamType = loader.loadTeamType(teamSourceClass, this.propertyList);
+		// Load and return the team type
+		return loader.loadTeamType(teamSourceClass, this.propertyList);
 	}
 
 	@Override
-	public TeamType getTeamType() {
-
-		// Ensure the team type is loaded
-		if (!this.isTeamTypeLoaded) {
-			throw new IllegalStateException("Team type must be loaded");
-		}
-
-		// Return the loaded team type (if loaded, otherwise null)
-		return this.teamType;
-	}
-
-	@Override
-	public void loadOfficeFloorTeamSourceType() {
-
-		// Only load the team source type once (whether successful or not)
-		if (this.isOfficeFloorTeamSourceTypeLoaded) {
-			return;
-		}
-		this.isOfficeFloorTeamSourceTypeLoaded = true;
+	public OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType() {
 
 		// Obtain the loader
 		TeamLoader loader = this.context.getTeamLoader(this);
@@ -205,24 +149,12 @@ public class TeamNodeImpl implements TeamNode {
 		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(
 				this.teamSourceClassName, this);
 		if (teamSourceClass == null) {
-			return; // must have source class
+			return null; // must have source class
 		}
 
-		// Load the team source type
-		this.teamSourceType = loader.loadOfficeFloorTeamSourceType(
-				teamSourceClass, this.propertyList);
-	}
-
-	@Override
-	public OfficeFloorTeamSourceType getOfficeFloorTeamSourceType() {
-
-		// Ensure the team source type is loaded
-		if (!this.isOfficeFloorTeamSourceTypeLoaded) {
-			throw new IllegalStateException("Team source type must be loaded");
-		}
-
-		// Return the loaded team source type (if loaded, otherwise null)
-		return this.teamSourceType;
+		// Load and return the team source type
+		return loader.loadOfficeFloorTeamSourceType(teamSourceClass,
+				this.propertyList);
 	}
 
 	@Override

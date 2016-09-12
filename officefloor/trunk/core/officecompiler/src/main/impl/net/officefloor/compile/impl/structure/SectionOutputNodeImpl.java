@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.section.SectionOutputTypeImpl;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -47,19 +48,38 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	private final NodeContext context;
 
 	/**
-	 * Indicates if this {@link SectionOutputType} is initialised.
+	 * {@link InitialisedState}.
 	 */
-	private boolean isInitialised = false;
+	private InitialisedState state;
 
 	/**
-	 * Argument type.
+	 * Initialised state.
 	 */
-	private String argumentType;
+	private static class InitialisedState {
 
-	/**
-	 * Flag indicating if escalation only.
-	 */
-	private boolean isEscalationOnly;
+		/**
+		 * Argument type.
+		 */
+		private final String argumentType;
+
+		/**
+		 * Flag indicating if escalation only.
+		 */
+		private final boolean isEscalationOnly;
+
+		/**
+		 * Initialised state.
+		 * 
+		 * @param argumentType
+		 *            Argument type.
+		 * @param isEscalationOnly
+		 *            Flag indicating if escalation only.
+		 */
+		public InitialisedState(String argumentType, boolean isEscalationOnly) {
+			this.argumentType = argumentType;
+			this.isEscalationOnly = isEscalationOnly;
+		}
+	}
 
 	/**
 	 * Instantiate.
@@ -84,34 +104,22 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.outputName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.section;
 	}
 
 	/*
@@ -120,15 +128,21 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 
 	@Override
 	public boolean isInitialised() {
-		return this.isInitialised;
+		return (this.state != null);
 	}
 
 	@Override
 	public SectionOutputNode initialise(String argumentType,
 			boolean isEscalationOnly) {
-		this.argumentType = argumentType;
-		this.isEscalationOnly = isEscalationOnly;
-		this.isInitialised = true;
+
+		// Ensure not already initialise
+		if (this.isInitialised()) {
+			throw new IllegalStateException("SectionOutputNode "
+					+ this.outputName + " already initialised");
+		}
+
+		// Initialise
+		this.state = new InitialisedState(argumentType, isEscalationOnly);
 		return this;
 	}
 
@@ -137,23 +151,19 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 		return this.section;
 	}
 
+	@Override
+	public SectionOutputType loadSectionOutputType() {
+		return new SectionOutputTypeImpl(this.outputName,
+				this.state.argumentType, this.state.isEscalationOnly);
+	}
+
 	/*
-	 * ================ SectionOutputType =========================
+	 * ================ SectionOutput =========================
 	 */
 
 	@Override
 	public String getSectionOutputName() {
 		return this.outputName;
-	}
-
-	@Override
-	public String getArgumentType() {
-		return this.argumentType;
-	}
-
-	@Override
-	public boolean isEscalationOnly() {
-		return this.isEscalationOnly;
 	}
 
 	/*

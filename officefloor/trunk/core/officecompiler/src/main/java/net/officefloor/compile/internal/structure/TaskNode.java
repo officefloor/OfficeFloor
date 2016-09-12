@@ -31,7 +31,12 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskNode extends Node, SectionTask, OfficeTask, LinkFlowNode {
+public interface TaskNode extends LinkFlowNode, SectionTask, OfficeTask {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Task";
 
 	/**
 	 * Loads the {@link OfficeTaskType}.
@@ -49,12 +54,12 @@ public interface TaskNode extends Node, SectionTask, OfficeTask, LinkFlowNode {
 	WorkNode getWorkNode();
 
 	/**
-	 * Obtains the {@link TaskType} for this {@link TaskNode}.
+	 * Loads the {@link TaskType} for this {@link TaskNode}.
 	 * 
 	 * @return {@link TaskType} for this {@link TaskNode}. May be
 	 *         <code>null</code> if can not determine {@link TaskType}.
 	 */
-	TaskType<?, ?, ?> getTaskType();
+	TaskType<?, ?, ?> loadTaskType();
 
 	/**
 	 * Builds the {@link Task} for this {@link TaskNode}.

@@ -31,6 +31,11 @@ import net.officefloor.frame.api.execute.Work;
 public interface WorkNode extends Node, SectionWork {
 
 	/**
+	 * {@link Node} type.
+	 */
+	String TYPE = "Work";
+
+	/**
 	 * Obtains the {@link SectionNode} containing this {@link WorkNode}.
 	 * 
 	 * @return {@link SectionNode} containing this {@link WorkNode}.
@@ -51,7 +56,7 @@ public interface WorkNode extends Node, SectionWork {
 	 * @return {@link WorkType} for this {@link WorkNode}. May be
 	 *         <code>null</code> if can not load the {@link WorkType}.
 	 */
-	WorkType<?> getWorkType();
+	WorkType<?> loadWorkType();
 
 	/**
 	 * Builds the {@link Work} for this {@link SectionWork}.

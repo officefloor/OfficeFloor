@@ -106,6 +106,11 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private final String sectionName;
 
 	/**
+	 * {@link PropertyList} to source this {@link OfficeSection}.
+	 */
+	private final PropertyList propertyList;
+
+	/**
 	 * Parent {@link OfficeSection} containing this {@link OfficeSection}.
 	 */
 	private final SectionNode parentSection;
@@ -123,7 +128,47 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	/**
 	 * {@link InitialisedState} for this {@link SectionNode}.
 	 */
-	private InitialisedState state = null;
+	private InitialisedState state;
+
+	/**
+	 * Initialised state of the {@link SectionNode}.
+	 */
+	private class InitialisedState {
+
+		/**
+		 * Class name of the {@link SectionSource}.
+		 */
+		private final String sectionSourceClassName;
+
+		/**
+		 * {@link SectionSource} for this {@link SectionNode}.
+		 */
+		private final SectionSource sectionSource;
+
+		/**
+		 * Location of the {@link OfficeSection} being built by this
+		 * {@link SectionDesigner}.
+		 */
+		private final String sectionLocation;
+
+		/**
+		 * Initialise the state.
+		 * 
+		 * @param sectionSourceClassName
+		 *            Class name of the {@link SectionSource}.
+		 * @param sectionSource
+		 *            {@link SectionSource} for this {@link SectionNode}.
+		 * @param sectionLocation
+		 *            Location of the {@link OfficeSection} being built by this
+		 *            {@link SectionDesigner}.
+		 */
+		private InitialisedState(String sectionSourceClassName,
+				SectionSource sectionSource, String sectionLocation) {
+			this.sectionSourceClassName = sectionSourceClassName;
+			this.sectionSource = sectionSource;
+			this.sectionLocation = sectionLocation;
+		}
+	}
 
 	/**
 	 * {@link SectionInput} instances by their names.
@@ -192,6 +237,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		this.parentSection = parentSection;
 		this.office = office;
 		this.context = context;
+
+		// Create the additional objects
+		this.propertyList = this.context.createPropertyList();
 	}
 
 	/*
@@ -200,34 +248,22 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.sectionName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return (this.state != null ? this.state.sectionLocation : null);
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return (this.parentSection != null ? this.parentSection : this.office);
 	}
 
 	/*
@@ -277,9 +313,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 */
 
 	@Override
-	public SectionNode initialise(SectionSource sectionSource,
-			String sectionSourceClassName, String sectionLocation,
-			PropertyList propertyList) {
+	public SectionNode initialise(String sectionSourceClassName,
+			SectionSource sectionSource, String sectionLocation) {
 
 		// Ensure not already initialise
 		if (this.isInitialised()) {
@@ -287,11 +322,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 					+ " already initialised");
 		}
 
-		// Load the initialised state
+		// Initialised
 		this.state = new InitialisedState(sectionSourceClassName,
-				sectionSource, sectionLocation, propertyList);
-
-		// Return this for stringing together with constructor
+				sectionSource, sectionLocation);
 		return this;
 	}
 
@@ -326,7 +359,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 		// Create the section source context
 		SectionSourceContext context = new SectionSourceContextImpl(true,
-				this.state.sectionLocation, this.state.propertyList,
+				this.state.sectionLocation, this.propertyList, this,
 				this.context);
 
 		try {
@@ -676,7 +709,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public void addProperty(String name, String value) {
-		this.state.propertyList.addProperty(name).setValue(value);
+		this.propertyList.addProperty(name).setValue(value);
 	}
 
 	@Override
@@ -697,8 +730,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		SectionOutputNode output = this.outputs.get(outputName);
 		if (output == null) {
 			// Add the output
-			output = new SectionOutputNodeImpl(outputName,
-					this.state.sectionLocation, this, this.context);
+			output = this.context.createSectionOutputNode(outputName, this);
 			this.outputs.put(outputName, output);
 		}
 		return output;
@@ -898,9 +930,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		SectionNode subSection = this.subSections.get(subSectionName);
 		if (subSection == null) {
 			// Add the sub section
-			subSection = this.context.createSectionNode(subSectionName, this)
-					.initialise(sectionSource, sectionSourceClassName,
-							location, null);
+			subSection = this.context
+					.createSectionNode(subSectionName, this)
+					.initialise(sectionSourceClassName, sectionSource, location);
 			this.subSections.put(subSectionName, subSection);
 		} else {
 			// Sub section already added
@@ -1126,56 +1158,6 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 		// Add the governance
 		this.governances.add(governanceNode);
-	}
-
-	/**
-	 * Initialised state of the {@link SectionNode}.
-	 */
-	private class InitialisedState {
-
-		/**
-		 * Class name of the {@link SectionSource}.
-		 */
-		private final String sectionSourceClassName;
-
-		/**
-		 * {@link SectionSource} for this {@link SectionNode}.
-		 */
-		private final SectionSource sectionSource;
-
-		/**
-		 * Location of the {@link OfficeSection} being built by this
-		 * {@link SectionDesigner}.
-		 */
-		private final String sectionLocation;
-
-		/**
-		 * {@link PropertyList} to source this {@link OfficeSection}.
-		 */
-		private final PropertyList propertyList;
-
-		/**
-		 * Initialise the state.
-		 * 
-		 * @param sectionSourceClassName
-		 *            Class name of the {@link SectionSource}.
-		 * @param sectionSource
-		 *            {@link SectionSource} for this {@link SectionNode}.
-		 * @param sectionLocation
-		 *            Location of the {@link OfficeSection} being built by this
-		 *            {@link SectionDesigner}.
-		 * @param propertyList
-		 *            {@link PropertyList} to source this {@link OfficeSection}.
-		 */
-		private InitialisedState(String sectionSourceClassName,
-				SectionSource sectionSource, String sectionLocation,
-				PropertyList propertyList) {
-			this.sectionSourceClassName = sectionSourceClassName;
-			this.sectionSource = sectionSource;
-			this.sectionLocation = sectionLocation;
-			this.propertyList = (propertyList != null ? propertyList
-					: SectionNodeImpl.this.context.createPropertyList());
-		}
 	}
 
 }

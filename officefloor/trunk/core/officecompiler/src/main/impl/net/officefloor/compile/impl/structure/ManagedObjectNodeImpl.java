@@ -118,7 +118,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 *            Name of this {@link ManagedObject}.
 	 * @param managedObjectScope
 	 *            {@link ManagedObjectScope} of the {@link ManagedObjectNode}.
-	 * @param managedObjectSourcNode
+	 * @param managedObjectSourceNode
 	 *            {@link ManagedObjectSourceNode} for the
 	 *            {@link ManagedObjectSource} to source this
 	 *            {@link ManagedObject}.
@@ -127,10 +127,10 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 */
 	public ManagedObjectNodeImpl(String managedObjectName,
 			ManagedObjectScope managedObjectScope,
-			ManagedObjectSourceNode managedObjectSourcNode, NodeContext context) {
+			ManagedObjectSourceNode managedObjectSourceNode, NodeContext context) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectScope = managedObjectScope;
-		this.managedObjectSourceNode = managedObjectSourcNode;
+		this.managedObjectSourceNode = managedObjectSourceNode;
 		this.containingSectionNode = this.managedObjectSourceNode
 				.getSectionNode();
 		this.containingOfficeNode = (this.containingSectionNode != null ? this.containingSectionNode
@@ -147,34 +147,22 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.managedObjectName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.managedObjectSourceNode;
 	}
 
 	/*
@@ -237,7 +225,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = this.managedObjectSourceNode
-				.getManagedObjectType();
+				.loadManagedObjectType();
 		if (managedObjectType == null) {
 			return; // must have managed object type
 		}
@@ -344,7 +332,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getSectionManagedObjectName() {
-		return this.managedObjectName;
+		return (this.containingSectionNode != null ? this.managedObjectName
+				: null);
 	}
 
 	/*
@@ -353,7 +342,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getOfficeSectionManagedObjectName() {
-		return this.managedObjectName;
+		return (this.containingSectionNode != null ? this.managedObjectName
+				: null);
 	}
 
 	/*
@@ -362,7 +352,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getOfficeManagedObjectName() {
-		return this.managedObjectName;
+		return (this.containingOfficeNode != null ? this.managedObjectName
+				: null);
 	}
 
 	/*

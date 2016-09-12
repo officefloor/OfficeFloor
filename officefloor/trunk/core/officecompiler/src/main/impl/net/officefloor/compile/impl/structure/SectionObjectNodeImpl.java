@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.section.SectionObjectTypeImpl;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -48,14 +49,30 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	private final NodeContext context;
 
 	/**
-	 * Indicates if this {@link SectionObjectType} is initialised.
+	 * {@link InitialisedState}.
 	 */
-	private boolean isInitialised = false;
+	private InitialisedState state;
 
 	/**
-	 * Object type.
+	 * Initialised state.
 	 */
-	private String objectType;
+	private static class InitialisedState {
+
+		/**
+		 * Object type.
+		 */
+		private final String objectType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param objectType
+		 *            Object type.
+		 */
+		public InitialisedState(String objectType) {
+			this.objectType = objectType;
+		}
+	}
 
 	/**
 	 * Type qualifier.
@@ -85,34 +102,22 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.objectName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.section;
 	}
 
 	/*
@@ -130,13 +135,20 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 	@Override
 	public boolean isInitialised() {
-		return this.isInitialised;
+		return (this.state != null);
 	}
 
 	@Override
 	public SectionObjectNode initialise(String objectType) {
-		this.objectType = objectType;
-		this.isInitialised = true;
+
+		// Ensure not already initialise
+		if (this.isInitialised()) {
+			throw new IllegalStateException("SectionObjectNode "
+					+ this.objectName + " already initialised");
+		}
+
+		// Initialise
+		this.state = new InitialisedState(objectType);
 		return this;
 	}
 
@@ -145,23 +157,19 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 		return this.section;
 	}
 
+	@Override
+	public SectionObjectType loadSectionObjectType() {
+		return new SectionObjectTypeImpl(this.objectName,
+				this.state.objectType, this.typeQualifier);
+	}
+
 	/*
-	 * =============== SectionObjectType ===========================
+	 * =============== SectionObject ===========================
 	 */
 
 	@Override
 	public String getSectionObjectName() {
 		return this.objectName;
-	}
-
-	@Override
-	public String getObjectType() {
-		return this.objectType;
-	}
-
-	@Override
-	public String getTypeQualifier() {
-		return this.typeQualifier;
 	}
 
 	/*

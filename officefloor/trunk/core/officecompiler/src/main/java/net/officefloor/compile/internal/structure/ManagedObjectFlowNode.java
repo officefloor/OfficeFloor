@@ -24,6 +24,11 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectFlowNode extends Node, ManagedObjectFlow,
-		LinkFlowNode {
+public interface ManagedObjectFlowNode extends LinkFlowNode, ManagedObjectFlow {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Managed Object Source Flow";
+
 }

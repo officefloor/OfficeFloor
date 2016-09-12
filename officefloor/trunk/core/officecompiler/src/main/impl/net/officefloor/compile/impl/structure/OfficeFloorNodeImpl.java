@@ -22,8 +22,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.impl.officefloor.OfficeFloorSourceContextImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -35,10 +37,13 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -51,6 +56,8 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.OfficeFrame;
@@ -62,6 +69,9 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.UnknownClassError;
+import net.officefloor.frame.spi.source.UnknownPropertyError;
+import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link OfficeFloorNode} implementation.
@@ -72,9 +82,24 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		OfficeFloorNode {
 
 	/**
+	 * {@link Class} name of the {@link OfficeFloorSource}.
+	 */
+	private final String officeFloorSourceClassName;
+
+	/**
+	 * Optionally provided instantiated {@link OfficeFloorSource}.
+	 */
+	private final OfficeFloorSource officeFloorSource;
+
+	/**
 	 * Location of the {@link OfficeFloor}.
 	 */
 	private final String officeFloorLocation;
+
+	/**
+	 * {@link PropertyList} to configure the {@link OfficeFloor}.
+	 */
+	private final PropertyList properties;
 
 	/**
 	 * {@link NodeContext}.
@@ -120,13 +145,13 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	private final Map<String, OfficeNode> offices = new HashMap<String, OfficeNode>();
 
 	/**
-	 * {@link OfficeFloorType}.
-	 */
-	private OfficeFloorType officeFloorType = null;
-
-	/**
 	 * Initiate.
 	 * 
+	 * @param officeFloorSourceClassName
+	 *            {@link OfficeFloorSource} class name.
+	 * @param officeFloorSource
+	 *            Optional instantiated {@link OfficeFloorSource}. May be
+	 *            <code>null</code>.
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
 	 * @param context
@@ -134,11 +159,17 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	 * @param profilers
 	 *            Mapping of {@link Profiler} by their {@link Office} name.
 	 */
-	public OfficeFloorNodeImpl(String officeFloorLocation, NodeContext context,
-			Map<String, Profiler> profilers) {
+	public OfficeFloorNodeImpl(String officeFloorSourceClassName,
+			OfficeFloorSource officeFloorSource, String officeFloorLocation,
+			NodeContext context, Map<String, Profiler> profilers) {
+		this.officeFloorSourceClassName = officeFloorSourceClassName;
+		this.officeFloorSource = officeFloorSource;
 		this.officeFloorLocation = officeFloorLocation;
 		this.context = context;
 		this.profilers = profilers;
+
+		// Create the additional objects
+		this.properties = this.context.createPropertyList();
 	}
 
 	/*
@@ -147,34 +178,22 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return OFFICE_FLOOR_NAME;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return this.officeFloorLocation;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return null;
 	}
 
 	/*
@@ -405,6 +424,18 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	/*
+	 * ===================== PropertyConfigurable =============================
+	 */
+
+	@Override
+	public void addProperty(String name, String value) {
+		// TODO implement PropertyConfigurable.addProperty
+		throw new UnsupportedOperationException(
+				"TODO implement PropertyConfigurable.addProperty");
+
+	}
+
+	/*
 	 * ===================== OfficeFloorNode ==================================
 	 */
 
@@ -439,20 +470,124 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public boolean loadOfficeFloorType(OfficeFloorPropertyType[] properties) {
+	public boolean sourceOfficeFloor() {
+
+		// Determine if must instantiate
+		OfficeFloorSource source = this.officeFloorSource;
+		if (source == null) {
+
+			// Obtain the OfficeFloor source class
+			Class<? extends OfficeFloorSource> officeFloorSourceClass = this.context
+					.getOfficeFloorSourceClass(this.officeFloorSourceClassName,
+							this);
+			if (officeFloorSourceClass == null) {
+				return false; // must have OfficeFloor source class
+			}
+
+			// Instantiate the office floor source
+			source = CompileUtil.newInstance(officeFloorSourceClass,
+					OfficeFloorSource.class, this,
+					this.context.getCompilerIssues());
+			if (officeFloorSource == null) {
+				return false; // failed to instantiate
+			}
+		}
+
+		// Create the OfficeFloor source context
+		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
+				false, this.officeFloorLocation, this.properties, this,
+				this.context);
+
+		try {
+			// Source the OfficeFloor
+			source.sourceOfficeFloor(this, sourceContext);
+
+		} catch (UnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
+					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
+					+ source.getClass().getName());
+			return false; // must have property
+
+		} catch (UnknownClassError ex) {
+			this.addIssue("Can not load class '" + ex.getUnknownClassName()
+					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
+					+ source.getClass().getName());
+			return false; // must have class
+
+		} catch (UnknownResourceError ex) {
+			this.addIssue("Can not obtain resource at location '"
+					+ ex.getUnknownResourceLocation() + "' for "
+					+ OfficeFloorSource.class.getSimpleName() + " "
+					+ source.getClass().getName());
+			return false; // must have resource
+
+		} catch (LoadTypeError ex) {
+			this.addIssue("Failure loading " + ex.getType().getSimpleName()
+					+ " from source " + ex.getSourceClassName());
+			return false; // must not fail in loading types
+
+		} catch (Throwable ex) {
+			this.addIssue(
+					"Failed to source " + OfficeFloor.class.getSimpleName()
+							+ " from "
+							+ OfficeFloorSource.class.getSimpleName()
+							+ " (source=" + source.getClass().getName()
+							+ ", location=" + officeFloorLocation + ")", ex);
+			return false; // must be successful
+		}
+
+		// As here, successful
+		return true;
+	}
+
+	@Override
+	public boolean sourceOfficeFloorTree() {
+		// TODO implement OfficeFloorNode.sourceOfficeFloorTree
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeFloorNode.sourceOfficeFloorTree");
+
+	}
+
+	@Override
+	public OfficeFloorType loadOfficeFloorType() {
+
+		// Obtain the OfficeFloor source class
+		Class<? extends OfficeFloorSource> officeFloorSourceClass = this.context
+				.getOfficeFloorSourceClass(this.officeFloorSourceClassName,
+						this);
+
+		// Obtain the loader to load properties
+		OfficeFloorLoader loader = this.context.getOfficeFloorLoader(this);
+
+		// Load the specification properties
+		PropertyList properties = loader
+				.loadSpecification(officeFloorSourceClass);
+
+		// Load the required properties
+		PropertyList requiredProperties = loader.loadRequiredProperties(
+				officeFloorSourceClass, officeFloorLocation, this.properties);
+		for (Property property : requiredProperties) {
+			String propertyName = property.getName();
+			if (properties.getProperty(propertyName) == null) {
+				properties.addProperty(propertyName, property.getLabel());
+			}
+		}
+
+		// Load optional properties
+		for (Property property : this.properties) {
+			properties.getOrAddProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Load the properties
+		OfficeFloorPropertyType[] propertyTypes = PropertyNode
+				.constructPropertyNodes(properties);
 
 		// Load the managed object sources (in deterministic order)
 		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
 				.toSortedArray(this.managedObjectSources.values(),
 						new ManagedObjectSourceNode[0],
-						new StringExtractor<ManagedObjectSourceNode>() {
-							@Override
-							public String toString(
-									ManagedObjectSourceNode object) {
-								return object
-										.getOfficeFloorManagedObjectSourceName();
-							}
-						});
+						(mo) -> mo.getOfficeFloorManagedObjectSourceName());
 		int managedObjectSourceIndex = 0;
 		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
 
@@ -462,7 +597,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			if (CompileUtil.isBlank(managedObjectSourceName)) {
 				this.addIssue("Null name for managed object source "
 						+ managedObjectSourceIndex);
-				return false; // must have name
+				return null; // must have name
 			}
 
 			// Ensure have the managed object source
@@ -470,7 +605,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 				this.addIssue("Null source for managed object source "
 						+ managedObjectSourceName + " (managed object source "
 						+ managedObjectSourceIndex + ")");
-				return false; // must have source
+				return null; // must have source
 			}
 
 			// Load the managed object source type
@@ -482,12 +617,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 		// Load the team sources (in deterministic order)
 		TeamNode[] teams = CompileUtil.toSortedArray(this.teams.values(),
-				new TeamNode[0], new StringExtractor<TeamNode>() {
-					@Override
-					public String toString(TeamNode object) {
-						return object.getOfficeFloorTeamName();
-					}
-				});
+				new TeamNode[0], (team) -> team.getOfficeFloorTeamName());
 		int teamIndex = 0;
 		for (TeamNode team : teams) {
 
@@ -495,14 +625,14 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			String teamName = team.getOfficeFloorTeamName();
 			if (CompileUtil.isBlank(teamName)) {
 				this.addIssue("Null name for team " + teamIndex);
-				return false; // must have name
+				return null; // must have name
 			}
 
 			// Ensure have the team source
 			if (!team.hasTeamSource()) {
 				this.addIssue("Null source for team " + teamName + " (team "
 						+ teamIndex + ")");
-				return false; // must have source
+				return null; // must have source
 			}
 
 			// Load team type
@@ -516,7 +646,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		List<OfficeFloorManagedObjectSourceType> mosTypes = new LinkedList<OfficeFloorManagedObjectSourceType>();
 		for (ManagedObjectSourceNode mos : managedObjectSources) {
 			OfficeFloorManagedObjectSourceType mosType = mos
-					.getOfficeFloorManagedObjectSourceType();
+					.loadOfficeFloorManagedObjectSourceType();
 			if (mosType != null) {
 				mosTypes.add(mosType);
 			}
@@ -526,27 +656,19 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		List<OfficeFloorTeamSourceType> teamTypes = new LinkedList<OfficeFloorTeamSourceType>();
 		for (TeamNode team : teams) {
 			OfficeFloorTeamSourceType teamType = team
-					.getOfficeFloorTeamSourceType();
+					.loadOfficeFloorTeamSourceType();
 			if (teamType != null) {
 				teamTypes.add(teamType);
 			}
 		}
 
-		// Load the type
-		this.officeFloorType = new OfficeFloorTypeImpl(
-				properties,
+		// Load and return the type
+		return new OfficeFloorTypeImpl(
+				propertyTypes,
 				mosTypes.toArray(new OfficeFloorManagedObjectSourceType[mosTypes
 						.size()]),
 				teamTypes.toArray(new OfficeFloorTeamSourceType[teamTypes
 						.size()]));
-
-		// Loaded successfully
-		return true;
-	}
-
-	@Override
-	public OfficeFloorType getOfficeFloorType() {
-		return this.officeFloorType;
 	}
 
 	@Override

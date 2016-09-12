@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.spi.office.OfficeTeam;
 
@@ -25,6 +26,19 @@ import net.officefloor.compile.spi.office.OfficeTeam;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeTeamNode extends LinkTeamNode, OfficeTeam,
-		OfficeTeamType {
+public interface OfficeTeamNode extends LinkTeamNode, OfficeTeam {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Office Team";
+
+	/**
+	 * Loads the {@link OfficeTeamType}.
+	 * 
+	 * @return {@link OfficeTeamType} or <code>null</code> with issues reported
+	 *         to the {@link CompilerIssues}.
+	 */
+	OfficeTeamType loadOfficeTeamType();
+
 }

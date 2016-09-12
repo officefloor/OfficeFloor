@@ -85,17 +85,6 @@ public class WorkNodeImpl implements WorkNode {
 	private SectionTask initialTask = null;
 
 	/**
-	 * {@link WorkType} for this {@link WorkNode}.
-	 */
-	private WorkType<?> workType = null;
-
-	/**
-	 * Flag indicating if the {@link WorkType} is loaded (or at least attempted
-	 * to be loaded).
-	 */
-	private boolean isWorkTypeLoaded = false;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param workName
@@ -128,34 +117,22 @@ public class WorkNodeImpl implements WorkNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.workName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.section;
 	}
 
 	/*
@@ -209,15 +186,7 @@ public class WorkNodeImpl implements WorkNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public WorkType<?> getWorkType() {
-
-		// Determine if work type already loaded
-		if (this.isWorkTypeLoaded) {
-			return this.workType;
-		}
-
-		// Flag work type loaded (as now attempting to load it)
-		this.isWorkTypeLoaded = true;
+	public WorkType<?> loadWorkType() {
 
 		// Obtain the work source class
 		Class<? extends WorkSource> workSourceClass = this.context
@@ -226,13 +195,9 @@ public class WorkNodeImpl implements WorkNode {
 			return null; // must obtain work source class
 		}
 
-		// Load the work type
+		// Load and return the work type
 		WorkLoader workLoader = this.context.getWorkLoader(this);
-		this.workType = workLoader.loadWorkType(workSourceClass,
-				this.propertyList);
-
-		// Return the work type
-		return this.workType;
+		return workLoader.loadWorkType(workSourceClass, this.propertyList);
 	}
 
 	@Override
@@ -240,7 +205,7 @@ public class WorkNodeImpl implements WorkNode {
 	public void buildWork(OfficeBuilder builder) {
 
 		// Obtain the work type
-		WorkType<?> workType = this.getWorkType();
+		WorkType<?> workType = this.loadWorkType();
 		if (workType == null) {
 			return; // must have WorkType to build work
 		}

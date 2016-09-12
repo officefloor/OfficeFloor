@@ -25,6 +25,7 @@ import java.util.Set;
 
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.governance.GovernanceType;
+import net.officefloor.compile.impl.office.OfficeManagedObjectTypeImpl;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -77,14 +78,30 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	private NodeContext context;
 
 	/**
-	 * Indicates if this {@link OfficeManagedObjectType} is initialised.
+	 * {@link InitialisedState}.
 	 */
-	private boolean isInitialised = false;
+	private InitialisedState state;
 
 	/**
-	 * Object type.
+	 * Initialised state.
 	 */
-	private String objectType;
+	private static class InitialisedState {
+
+		/**
+		 * Object type.
+		 */
+		private String objectType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param objectType
+		 *            Object type.
+		 */
+		public InitialisedState(String objectType) {
+			this.objectType = objectType;
+		}
+	}
 
 	/**
 	 * Type qualifier.
@@ -114,34 +131,22 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.objectName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.officeNode;
 	}
 
 	/*
@@ -150,13 +155,20 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 	@Override
 	public boolean isInitialised() {
-		return this.isInitialised;
+		return (this.state != null);
 	}
 
 	@Override
 	public OfficeObjectNode initialise(String objectType) {
-		this.objectType = objectType;
-		this.isInitialised = true;
+
+		// Ensure not already initialise
+		if (this.isInitialised()) {
+			throw new IllegalStateException("SectionObjectNode "
+					+ this.objectName + " already initialised");
+		}
+
+		// Initialise
+		this.state = new InitialisedState(objectType);
 		return this;
 	}
 
@@ -176,27 +188,8 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 				.size()]);
 	}
 
-	/*
-	 * ===================== OfficeManagedObjectType ===========================
-	 */
-
 	@Override
-	public String getOfficeManagedObjectName() {
-		return this.objectName;
-	}
-
-	@Override
-	public String getObjectType() {
-		return this.objectType;
-	}
-
-	@Override
-	public String getTypeQualifier() {
-		return this.typeQualifier;
-	}
-
-	@Override
-	public String[] getExtensionInterfaces() {
+	public OfficeManagedObjectType loadOfficeManagedObjectType() {
 
 		// Obtain the set of extension interfaces to be supported
 		Set<String> extensionInterfaces = new HashSet<String>();
@@ -205,7 +198,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		for (AdministratorNode admin : this.administrators) {
 
 			// Attempt to obtain the administrator type
-			AdministratorType<?, ?> adminType = admin.getAdministratorType();
+			AdministratorType<?, ?> adminType = admin.loadAdministratorType();
 			if (adminType == null) {
 				continue; // problem loading administrator type
 			}
@@ -219,7 +212,7 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		for (GovernanceNode governance : this.governances) {
 
 			// Attempt to obtain the governance type
-			GovernanceType<?, ?> govType = governance.getGovernanceType();
+			GovernanceType<?, ?> govType = governance.loadGovernanceType();
 			if (govType == null) {
 				continue; // problem loading governance type
 			}
@@ -232,7 +225,11 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		// Create and return the listing of sorted extension interfaces
 		String[] listing = extensionInterfaces.toArray(new String[0]);
 		Arrays.sort(listing);
-		return listing;
+
+		// Create and return the extension interfaces
+		return new OfficeManagedObjectTypeImpl(this.objectName,
+				(this.state != null ? this.state.objectType : null),
+				this.typeQualifier, listing);
 	}
 
 	/*

@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
@@ -27,8 +28,12 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeObjectNode extends LinkObjectNode, OfficeObject,
-		OfficeManagedObjectType {
+public interface OfficeObjectNode extends LinkObjectNode, OfficeObject {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Office Object";
 
 	/**
 	 * Indicates if this {@link OfficeManagedObjectType} has been initialised.
@@ -82,5 +87,14 @@ public interface OfficeObjectNode extends LinkObjectNode, OfficeObject,
 	 * @return {@link GovernanceNode} instances.
 	 */
 	GovernanceNode[] getGovernances();
+
+	/**
+	 * Loads the {@link OfficeManagedObjectType} for this
+	 * {@link OfficeObjectNode}.
+	 * 
+	 * @return {@link OfficeManagedObjectType} or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	OfficeManagedObjectType loadOfficeManagedObjectType();
 
 }

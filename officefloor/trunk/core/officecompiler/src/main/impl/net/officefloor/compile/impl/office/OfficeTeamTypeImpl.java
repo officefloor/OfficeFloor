@@ -15,36 +15,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.impl.office;
 
-import net.officefloor.autowire.supplier.SupplyOrder;
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.office.OfficeTeamType;
+import net.officefloor.compile.spi.office.OfficeTeam;
 
 /**
- * Supplier {@link Node}.
- * 
+ * {@link OfficeTeamType} implementation.
+ *
  * @author Daniel Sagenschneider
  */
-public interface SupplierNode extends Node, OfficeFloorSupplier {
+public class OfficeTeamTypeImpl implements OfficeTeamType {
 
 	/**
-	 * {@link Node} type.
+	 * Name of the {@link OfficeTeam}.
 	 */
-	static String TYPE = "Supplier";
+	private final String teamName;
 
 	/**
-	 * Fill {@link SupplyOrder} instances.
+	 * Instantiate.
 	 * 
-	 * @param supplyOrders
-	 *            {@link SupplyOrder} instances to fill.
+	 * @param teamName
+	 *            Name of the {@link OfficeTeam}.
 	 */
-	void fillSupplyOrders(SupplyOrder... supplyOrders);
+	public OfficeTeamTypeImpl(String teamName) {
+		this.teamName = teamName;
+	}
 
-	/**
-	 * Obtains the parent {@link OfficeFloorNode}.
-	 * 
-	 * @return Parent {@link OfficeFloorNode}.
+	/*
+	 * ==================== OfficeTeamType =========================
 	 */
-	OfficeFloorNode getOfficeFloorNode();
+
+	@Override
+	public String getOfficeTeamName() {
+		// TODO implement OfficeTeamType.getOfficeTeamName
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeTeamType.getOfficeTeamName");
+
+	}
 
 }

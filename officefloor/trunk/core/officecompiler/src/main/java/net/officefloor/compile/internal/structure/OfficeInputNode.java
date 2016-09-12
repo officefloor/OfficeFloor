@@ -25,8 +25,13 @@ import net.officefloor.compile.spi.office.OfficeInput;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeInputNode extends OfficeInput, LinkSynchronousNode,
-		LinkFlowNode {
+public interface OfficeInputNode extends LinkFlowNode, LinkSynchronousNode,
+		OfficeInput {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Office Input";
 
 	/**
 	 * Obtains the {@link OfficeInputType}.
@@ -34,6 +39,6 @@ public interface OfficeInputNode extends OfficeInput, LinkSynchronousNode,
 	 * @return {@link OfficeInputType} or <code>null</code> if can not
 	 *         determine.
 	 */
-	OfficeInputType getOfficeInputType();
+	OfficeInputType loadOfficeInputType();
 
 }

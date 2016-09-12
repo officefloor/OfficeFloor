@@ -19,7 +19,9 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
+import net.officefloor.autowire.supplier.SupplyOrder;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -42,9 +44,9 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	private final SupplierNode supplierNode;
 
 	/**
-	 * {@link SuppliedManagedObject}.
+	 * {@link NodeContext}.
 	 */
-	private SuppliedManagedObject<?, ?> suppliedManagedObject = null;
+	private final NodeContext context;
 
 	/**
 	 * Initiate.
@@ -54,11 +56,14 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	 *            {@link ManagedObjectSource}.
 	 * @param supplierNode
 	 *            {@link SupplierNode}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public SuppliedManagedObjectNodeImpl(AutoWire autoWire,
-			SupplierNode supplierNode) {
+			SupplierNode supplierNode, NodeContext context) {
 		this.autoWire = autoWire;
 		this.supplierNode = supplierNode;
+		this.context = context;
 	}
 
 	/*
@@ -67,34 +72,22 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.autoWire.getQualifiedType();
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.supplierNode;
 	}
 
 	/*
@@ -110,29 +103,36 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	}
 
 	@Override
-	public void loadSuppliedManagedObject() {
-		// Load the supplier (to fill this supply order)
-		this.supplierNode.fillSupplyOrders();
+	public SuppliedManagedObject<?, ?> loadSuppliedManagedObject() {
+		SupplyOrderImpl order = new SupplyOrderImpl();
+		this.supplierNode.fillSupplyOrders(order);
+		return order.suppliedManagedObject;
 	}
 
-	@Override
-	public SuppliedManagedObject<?, ?> getSuppliedManagedObject() {
-		return this.suppliedManagedObject;
-	}
-
-	/*
-	 * =========================== SupplyOrder =========================
+	/**
+	 * {@link SupplyOrder} implementation.
 	 */
+	private class SupplyOrderImpl implements SupplyOrder {
 
-	@Override
-	public AutoWire getAutoWire() {
-		return this.autoWire;
-	}
+		/**
+		 * {@link SuppliedManagedObject}.
+		 */
+		private SuppliedManagedObject<?, ?> suppliedManagedObject = null;
 
-	@Override
-	public <D extends Enum<D>, F extends Enum<F>> void fillOrder(
-			SuppliedManagedObject<D, F> suppliedManagedObject) {
-		this.suppliedManagedObject = suppliedManagedObject;
+		/*
+		 * =========================== SupplyOrder =========================
+		 */
+
+		@Override
+		public AutoWire getAutoWire() {
+			return SuppliedManagedObjectNodeImpl.this.autoWire;
+		}
+
+		@Override
+		public <D extends Enum<D>, F extends Enum<F>> void fillOrder(
+				SuppliedManagedObject<D, F> suppliedManagedObject) {
+			this.suppliedManagedObject = suppliedManagedObject;
+		}
 	}
 
 }

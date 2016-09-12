@@ -17,19 +17,17 @@
  */
 package net.officefloor.compile.impl.team;
 
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.structure.PropertyNode;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
@@ -54,14 +52,14 @@ public class TeamLoaderImpl implements TeamLoader {
 	};
 
 	/**
-	 * Location.
-	 */
-	private final String officeFloorLocation;
-
-	/**
 	 * Name of the {@link Team}.
 	 */
 	private final String teamName;
+
+	/**
+	 * {@link Node} requiring the {@link Team}.
+	 */
+	private final Node node;
 
 	/**
 	 * {@link NodeContext}.
@@ -71,28 +69,17 @@ public class TeamLoaderImpl implements TeamLoader {
 	/**
 	 * Initiate for building.
 	 * 
-	 * @param officeFloorLocation
-	 *            Location.
 	 * @param teamName
 	 *            Name of the {@link Team}.
+	 * @param node
+	 *            {@link Node} requiring the {@link Team}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public TeamLoaderImpl(String officeFloorLocation, String teamName,
-			NodeContext nodeContext) {
-		this.officeFloorLocation = officeFloorLocation;
+	public TeamLoaderImpl(String teamName, Node node, NodeContext nodeContext) {
 		this.teamName = teamName;
+		this.node = node;
 		this.nodeContext = nodeContext;
-	}
-
-	/**
-	 * Initiate from {@link OfficeFloorCompiler}.
-	 * 
-	 * @param nodeContext
-	 *            {@link NodeContext}.
-	 */
-	public TeamLoaderImpl(NodeContext nodeContext) {
-		this(null, null, nodeContext);
 	}
 
 	/*
@@ -105,8 +92,7 @@ public class TeamLoaderImpl implements TeamLoader {
 
 		// Instantiate the team source
 		TeamSource teamSource = CompileUtil.newInstance(teamSourceClass,
-				TeamSource.class, LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, AssetType.TEAM, this.teamName,
+				TeamSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (teamSource == null) {
 			return null; // failed to instantiate
@@ -212,8 +198,7 @@ public class TeamLoaderImpl implements TeamLoader {
 
 		// Instantiate the team source
 		TeamSource teamSource = CompileUtil.newInstance(teamSourceClass,
-				TeamSource.class, LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, AssetType.TEAM, this.teamName,
+				TeamSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (teamSource == null) {
 			return null; // failed to instantiate
@@ -221,40 +206,30 @@ public class TeamLoaderImpl implements TeamLoader {
 
 		// Attempt to create the team
 		try {
-			teamSource
-					.createTeam(new TeamSourceContextImpl(true, this.teamName,
-							TYPE_TEAM, new PropertyListSourceProperties(
-									propertyList), this.nodeContext
-									.getSourceContext()));
+			teamSource.createTeam(new TeamSourceContextImpl(true,
+					this.teamName, TYPE_TEAM, new PropertyListSourceProperties(
+							propertyList), this.nodeContext
+							.getRootSourceContext()));
 
 		} catch (UnknownPropertyError ex) {
-			this.nodeContext.getCompilerIssues().addIssue(
-					LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-					AssetType.TEAM, this.teamName,
+			this.nodeContext.getCompilerIssues().addIssue(this.node,
 					"Missing property '" + ex.getUnknownPropertyName() + "'");
 			return null; // must have property
 
 		} catch (UnknownClassError ex) {
-			this.nodeContext.getCompilerIssues().addIssue(
-					LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-					AssetType.TEAM, this.teamName,
+			this.nodeContext.getCompilerIssues().addIssue(this.node,
 					"Can not load class '" + ex.getUnknownClassName() + "'");
 			return null; // must have class
 
 		} catch (UnknownResourceError ex) {
 			this.nodeContext.getCompilerIssues().addIssue(
-					LocationType.OFFICE_FLOOR,
-					this.officeFloorLocation,
-					AssetType.TEAM,
-					this.teamName,
+					this.node,
 					"Can not obtain resource at location '"
 							+ ex.getUnknownResourceLocation() + "'");
 			return null; // must have resource
 
 		} catch (Throwable ex) {
-			this.nodeContext.getCompilerIssues().addIssue(
-					LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-					AssetType.TEAM, this.teamName,
+			this.nodeContext.getCompilerIssues().addIssue(this.node,
 					"Failed to initialise " + teamSourceClass.getName(), ex);
 			return null; // failed loading team
 		}
@@ -292,9 +267,8 @@ public class TeamLoaderImpl implements TeamLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(
-				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-				AssetType.TEAM, this.teamName, issueDescription);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription);
 	}
 
 	/**
@@ -306,9 +280,8 @@ public class TeamLoaderImpl implements TeamLoader {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(
-				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-				AssetType.TEAM, this.teamName, issueDescription, cause);
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
+				issueDescription, cause);
 	}
 
 }

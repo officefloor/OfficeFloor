@@ -33,6 +33,11 @@ import net.officefloor.frame.spi.team.source.TeamSource;
 public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 
 	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Team";
+
+	/**
 	 * Indicates if have the {@link TeamSource} configured.
 	 * 
 	 * @return <code>true</code> if have the {@link TeamSource} configured.
@@ -40,29 +45,20 @@ public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 	boolean hasTeamSource();
 
 	/**
-	 * Loads the type information for this {@link Team}.
-	 */
-	void loadTeamType();
-
-	/**
-	 * Obtains the {@link TeamType} for the {@link TeamSource}.
+	 * Loads the {@link TeamType} for the {@link TeamSource}.
 	 * 
-	 * @return {@link TeamType} for the {@link TeamSource}.
+	 * @return {@link TeamType} or <code>null</code> with issues reported to the
+	 *         {@link CompilerIssues}.
 	 */
-	TeamType getTeamType();
+	TeamType loadTeamType();
 
 	/**
 	 * Loads the {@link OfficeFloorTeamSourceType}.
-	 */
-	public void loadOfficeFloorTeamSourceType();
-
-	/**
-	 * Obtains the {@link OfficeFloorTeamSourceType}.
 	 * 
-	 * @return {@link OfficeFloorTeamSourceType} or <code>null</code> if issue
-	 *         loading with issue reported to the {@link CompilerIssues}.
+	 * @return {@link OfficeFloorTeamSourceType} or <code>null</code> with
+	 *         issues reported to th {@link CompilerIssues}.
 	 */
-	OfficeFloorTeamSourceType getOfficeFloorTeamSourceType();
+	OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType();
 
 	/**
 	 * Builds the {@link Team} for this {@link TeamNode}.

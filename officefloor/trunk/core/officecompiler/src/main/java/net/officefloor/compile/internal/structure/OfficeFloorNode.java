@@ -20,6 +20,8 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
+import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
@@ -33,13 +35,18 @@ import net.officefloor.frame.api.profile.Profiler;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorNode extends Node, ManagedObjectRegistry,
-		OfficeFloorDeployer {
+public interface OfficeFloorNode extends Node, PropertyConfigurable,
+		ManagedObjectRegistry, OfficeFloorDeployer {
 
 	/**
 	 * Default name of the {@link OfficeFloorNode}.
 	 */
-	static final String OFFICE_FLOOR_NAME = "OfficeFloor";
+	static String OFFICE_FLOOR_NAME = "OfficeFloor";
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "OfficeFloor";
 
 	/**
 	 * Adds a {@link Profiler} for an {@link Office}.
@@ -67,22 +74,33 @@ public interface OfficeFloorNode extends Node, ManagedObjectRegistry,
 			SuppliedManagedObjectNode suppliedManagedObject);
 
 	/**
-	 * Loads the {@link OfficeFloorType}.
+	 * <p>
+	 * Sources the {@link OfficeFloor} into this {@link OfficeFloorNode}.
+	 * <p>
+	 * This will only source the top level {@link OfficeSection}.
 	 * 
-	 * @param properties
-	 *            {@link OfficeFloorPropertyType} instances to configure the
-	 *            {@link OfficeFloor}.
-	 * @return <code>true</code> if the {@link OfficeFloorType} was loaded.
+	 * @return <code>true</code> if successfully sourced. Otherwise
+	 *         <code>false</code> with issue reported to the
+	 *         {@link CompilerIssues}.
 	 */
-	boolean loadOfficeFloorType(OfficeFloorPropertyType[] properties);
+	boolean sourceOfficeFloor();
 
 	/**
-	 * Obtains the {@link OfficeFloorType}.
+	 * Sources this {@link OfficeFloorNode} and all its descendant {@link Node}
+	 * instances recursively.
 	 * 
-	 * @return {@link OfficeFloorType} or <code>null</code> if issue loading
-	 *         with issue reported to the {@link CompilerIssues}.
+	 * @return <code>true</code> if successfully sourced. Otherwise
+	 *         <code>false</code> with issue reported to the
+	 *         {@link CompilerIssues}.
 	 */
-	OfficeFloorType getOfficeFloorType();
+	boolean sourceOfficeFloorTree();
+
+	/**
+	 * Loads the {@link OfficeFloorType}.
+	 * 
+	 * @return <code>true</code> if the {@link OfficeFloorType} was loaded.
+	 */
+	OfficeFloorType loadOfficeFloorType();
 
 	/**
 	 * Deploys the {@link OfficeFloor}.

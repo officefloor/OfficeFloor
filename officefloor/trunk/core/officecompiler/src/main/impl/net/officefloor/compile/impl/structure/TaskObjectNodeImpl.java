@@ -22,9 +22,8 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
+import net.officefloor.compile.section.ObjectDependencyType;
 import net.officefloor.compile.spi.section.TaskObject;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.execute.Task;
 
 /**
@@ -77,34 +76,22 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.objectName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.taskNode;
 	}
 
 	/*
@@ -114,6 +101,14 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	@Override
 	public boolean isParameter() {
 		return this.isParameter;
+	}
+
+	@Override
+	public ObjectDependencyType loadObjectDependencyType() {
+		// TODO implement TaskObjectNode.loadObjectDependencyType
+		throw new UnsupportedOperationException(
+				"TODO implement TaskObjectNode.loadObjectDependencyType");
+
 	}
 
 	/*
@@ -128,42 +123,6 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	@Override
 	public void flagAsParameter() {
 		this.isParameter = true;
-	}
-
-	/*
-	 * ======================= ObjectDependency ===========================
-	 */
-
-	@Override
-	public String getObjectDependencyName() {
-		// Return the object name
-		return this.objectName;
-	}
-
-	/**
-	 * Obtains the {@link TaskObjectType} for this {@link TaskObjectNode}.
-	 * 
-	 * @return {@link TaskObjectType} for this {@link TaskObjectNode}. May be
-	 *         <code>null</code> if can not obtain.
-	 */
-	private TaskObjectType<?> getTaskObjectType() {
-
-		// Obtain the task type for this task node
-		TaskType<?, ?, ?> taskType = this.taskNode.getTaskType();
-		if (taskType == null) {
-			return null; // must have task type containing object type
-		}
-
-		// Find the corresponding object type for this task object
-		for (TaskObjectType<?> objectType : taskType.getObjectTypes()) {
-			if (this.objectName.equals(objectType.getObjectName())) {
-				// Found the object type, so return the type
-				return objectType;
-			}
-		}
-
-		// As here, did not find the object type
-		return null;
 	}
 
 	/*

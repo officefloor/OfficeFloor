@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.section.SectionOutput;
@@ -28,7 +29,12 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
  * @author Daniel Sagenschneider
  */
 public interface SectionOutputNode extends LinkFlowNode, SectionOutput,
-		SubSectionOutput, OfficeSectionOutput, SectionOutputType {
+		SubSectionOutput, OfficeSectionOutput {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Section Output";
 
 	/**
 	 * Indicates if this {@link SectionOutputType} has been initialised.
@@ -54,5 +60,13 @@ public interface SectionOutputNode extends LinkFlowNode, SectionOutput,
 	 * @return {@link SectionNode} containing this {@link SectionOutputNode}.
 	 */
 	SectionNode getSectionNode();
+
+	/**
+	 * Loads the {@link SectionOutputType}.
+	 * 
+	 * @return {@link SectionOutputType} or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	SectionOutputType loadSectionOutputType();
 
 }

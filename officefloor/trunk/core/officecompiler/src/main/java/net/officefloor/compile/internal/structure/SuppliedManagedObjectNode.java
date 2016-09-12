@@ -18,8 +18,6 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
-import net.officefloor.autowire.supplier.SupplyOrder;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -27,24 +25,20 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SuppliedManagedObjectNode extends Node, SupplyOrder {
+public interface SuppliedManagedObjectNode extends Node {
 
 	/**
-	 * <p>
-	 * Loads the {@link SuppliedManagedObject}.
-	 * <p>
-	 * Any issue in loading the {@link SuppliedManagedObject} will be reported
-	 * to the {@link CompilerIssues} of this node.
+	 * {@link Node} type.
 	 */
-	void loadSuppliedManagedObject();
+	String TYPE = "Supplied Managed Object";
 
 	/**
-	 * Obtains the {@link SuppliedManagedObject}.
+	 * Loads the {@link SuppliedManagedObject}.
 	 * 
 	 * @return {@link SuppliedManagedObject}. May be <code>null</code> if issue
 	 *         in loading the {@link SuppliedManagedObject}.
 	 */
-	SuppliedManagedObject<?, ?> getSuppliedManagedObject();
+	SuppliedManagedObject<?, ?> loadSuppliedManagedObject();
 
 	/**
 	 * Obtains the {@link SupplierNode} containing this
