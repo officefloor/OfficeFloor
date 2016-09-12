@@ -1392,11 +1392,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	protected final <T> T doTest(Supplier<T> test) {
 		this.replayMockObjects();
-		try {
-			return test.get();
-		} finally {
-			this.verifyMockObjects();
-		}
+		T result = test.get();
+		this.verifyMockObjects();
+		return result;
 	}
 
 	/**
