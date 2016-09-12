@@ -17,11 +17,14 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.section.OfficeSectionInputTypeImpl;
+import net.officefloor.compile.impl.section.SectionInputTypeImpl;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.section.SubSectionInput;
 
@@ -48,17 +51,33 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	private final NodeContext context;
 
 	/**
-	 * Indicates if this {@link SectionInputType} is initialised.
+	 * {@link InitialisedState}.
 	 */
-	private boolean isInitialised = false;
+	private InitialisedState state;
 
 	/**
-	 * Parameter type.
+	 * Initialised state.
 	 */
-	private String parameterType;
+	private static class InitialisedState {
+
+		/**
+		 * Parameter type.
+		 */
+		private String parameterType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param parameterType
+		 *            Parameter type.
+		 */
+		public InitialisedState(String parameterType) {
+			this.parameterType = parameterType;
+		}
+	}
 
 	/**
-	 * Initiate not initialised.
+	 * Instantiate.
 	 * 
 	 * @param inputName
 	 *            Name of the {@link SubSectionInput} (which is the name of the
@@ -81,43 +100,22 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.inputName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
-	}
-
-	/*
-	 * ================== OfficeSectionInputType ========================
-	 */
-
-	@Override
-	public String getOfficeSectionName() {
-		return this.section.getOfficeSectionName();
+		return this.section;
 	}
 
 	/*
@@ -126,28 +124,43 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public boolean isInitialised() {
-		return this.isInitialised;
+		return (this.state != null);
 	}
 
 	@Override
 	public SectionInputNode initialise(String parameterType) {
-		this.parameterType = parameterType;
-		this.isInitialised = true;
+
+		// Ensure not already initialise
+		if (this.isInitialised()) {
+			throw new IllegalStateException("SectionInputNode "
+					+ this.inputName + " already initialised");
+		}
+
+		// Initialise
+		this.state = new InitialisedState(parameterType);
 		return this;
 	}
 
+	@Override
+	public SectionInputType loadSectionInputType() {
+		return new SectionInputTypeImpl(this.inputName,
+				this.state.parameterType);
+	}
+
+	@Override
+	public OfficeSectionInputType loadOfficeSectionInputType() {
+		return new OfficeSectionInputTypeImpl(
+				this.section.getOfficeSectionName(), this.inputName,
+				this.state.parameterType);
+	}
+
 	/*
-	 * ================= SectionInputType =========================
+	 * ================= SectionInput =========================
 	 */
 
 	@Override
 	public String getSectionInputName() {
 		return this.inputName;
-	}
-
-	@Override
-	public String getParameterType() {
-		return this.parameterType;
 	}
 
 	/*

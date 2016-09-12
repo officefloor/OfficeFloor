@@ -42,6 +42,11 @@ public interface ManagedObjectSourceNode extends Node,
 		OfficeSectionManagedObjectSource, OfficeFloorManagedObjectSource {
 
 	/**
+	 * {@link Node} type.
+	 */
+	String TYPE = "Managed Object Source";
+
+	/**
 	 * Indicates if have a {@link ManagedObjectSource} configured.
 	 * 
 	 * @return <code>true</code> if have the {@link ManagedObjectSource}
@@ -51,35 +56,20 @@ public interface ManagedObjectSourceNode extends Node,
 
 	/**
 	 * Loads the {@link ManagedObjectType}.
-	 */
-	// TODO refactor to return ManagedObjectType
-	void loadManagedObjectType();
-
-	/**
-	 * Obtains {@link ManagedObjectType} for the {@link ManagedObjectSource}.
-	 *
+	 * 
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
 	 */
-	@Deprecated
-	// TODO return type from loadManagedObjectType()
-	ManagedObjectType<?> getManagedObjectType();
+	ManagedObjectType<?> loadManagedObjectType();
 
 	/**
 	 * Loads the {@link OfficeFloorManagedObjectSourceType}.
-	 */
-	public void loadOfficeFloorManagedObjectSourceType();
-
-	/**
-	 * Obtains the {@link OfficeFloorManagedObjectSourceType}.
 	 * 
 	 * @return {@link OfficeFloorManagedObjectSourceType} or <code>null</code>
 	 *         if issue loading with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	@Deprecated
-	// TODO return type from loadOfficeFloorManagedObjectSourceType()
-	OfficeFloorManagedObjectSourceType getOfficeFloorManagedObjectSourceType();
+	OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType();
 
 	/**
 	 * Obtains the name that this {@link ManagedObjectSource} was added to the

@@ -26,6 +26,7 @@ import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
+import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
@@ -98,21 +99,27 @@ public interface NodeContext {
 	PropertyList createPropertyList();
 
 	/**
-	 * Obtains the {@link OfficeSource} class.
+	 * Obtains the {@link OfficeFloorSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link OfficeSource} type.
-	 * @param officeSourceClassName
-	 *            {@link OfficeSource} class name or an alias to an
-	 *            {@link OfficeSource} class.
+	 * @param officeFloorSourceClassName
+	 *            {@link Class} name of the {@link OfficeFloorSource}.
 	 * @param node
-	 *            {@link Node} requiring the {@link OfficeSource} class.
-	 * @return {@link OfficeSource} class, or <code>null</code> with issues
+	 *            {@link Node} requirining the {@link OfficeFloorSource} class.
+	 * @return {@link OfficeFloorSource} class, or <code>null</code> with issues
 	 *         reported to the {@link CompilerIssues} of this
 	 *         {@link NodeContext}.
 	 */
-	<S extends OfficeSource> Class<S> getOfficeSourceClass(
-			String officeSourceClassName, Node node);
+	<S extends OfficeFloorSource> Class<S> getOfficeFloorSourceClass(
+			String officeFloorSourceClassName, Node node);
+
+	/**
+	 * Obtains the {@link OfficeFloorLoader}.
+	 * 
+	 * @param node
+	 *            {@link Node} requiring the {@link OfficeFloorLoader}.
+	 * @return {@link OfficeFloorLoader}.
+	 */
+	OfficeFloorLoader getOfficeFloorLoader(Node node);
 
 	/**
 	 * Creates the {@link OfficeFloorNode}.
@@ -128,6 +135,23 @@ public interface NodeContext {
 	 */
 	OfficeFloorNode createOfficeFloorNode(String officeFloorSourceClassName,
 			OfficeFloorSource officeFloorSource, String officeFloorLocation);
+
+	/**
+	 * Obtains the {@link OfficeSource} class.
+	 * 
+	 * @param <S>
+	 *            {@link OfficeSource} type.
+	 * @param officeSourceClassName
+	 *            {@link OfficeSource} class name or an alias to an
+	 *            {@link OfficeSource} class.
+	 * @param node
+	 *            {@link Node} requiring the {@link OfficeSource} class.
+	 * @return {@link OfficeSource} class, or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues} of this
+	 *         {@link NodeContext}.
+	 */
+	<S extends OfficeSource> Class<S> getOfficeSourceClass(
+			String officeSourceClassName, Node node);
 
 	/**
 	 * Obtains the {@link OfficeLoader}.

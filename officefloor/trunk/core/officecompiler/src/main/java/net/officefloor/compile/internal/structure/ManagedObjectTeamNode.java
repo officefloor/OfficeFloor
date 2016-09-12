@@ -26,4 +26,10 @@ import net.officefloor.compile.spi.office.OfficeTeam;
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectTeamNode extends LinkTeamNode, ManagedObjectTeam {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Managed Object Source Team";
+
 }

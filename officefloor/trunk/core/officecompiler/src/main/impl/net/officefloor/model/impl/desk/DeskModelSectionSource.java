@@ -39,7 +39,6 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -172,8 +171,8 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 				try {
 					mos.setTimeout(Long.valueOf(timeoutValue));
 				} catch (NumberFormatException ex) {
-					designer.addIssue("Invalid timeout value: " + timeoutValue,
-							AssetType.MANAGED_OBJECT, mosName);
+					designer.addIssue("Invalid timeout value: " + timeoutValue
+							+ " for managed object source " + mosName);
 				}
 			}
 
@@ -518,8 +517,8 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 					workTask = conn.getWorkTask();
 				}
 				if (workTask == null) {
-					designer.addIssue("Task not linked to a work task",
-							AssetType.TASK, task.getTaskName());
+					designer.addIssue("Task " + task.getTaskName()
+							+ " not linked to a work task");
 					continue; // must have work task
 				}
 
@@ -627,8 +626,8 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 
 		// Unknown flow instigation strategy if at this point
 		designer.addIssue("Unknown flow instigation strategy '"
-				+ instigationStrategyName + "' for flow " + flowName,
-				AssetType.TASK, taskName);
+				+ instigationStrategyName + "' for flow " + flowName
+				+ " of task " + taskName);
 		return null;
 	}
 
@@ -660,8 +659,8 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 		}
 
 		// Unknown scope if at this point
-		designer.addIssue("Unknown managed object scope " + managedObjectScope,
-				AssetType.MANAGED_OBJECT, managedObjectName);
+		designer.addIssue("Unknown managed object scope " + managedObjectScope
+				+ " for managed object " + managedObjectName);
 		return null;
 	}
 

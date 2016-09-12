@@ -23,7 +23,6 @@ import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SubSection;
@@ -40,6 +39,11 @@ import net.officefloor.frame.spi.governance.Governance;
  */
 public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 		SectionDesigner, SubSection, OfficeSection {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Section";
 
 	/**
 	 * Initialises this {@link SectionNode}.
@@ -77,7 +81,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 	boolean sourceSection();
 
 	/**
-	 * Sources this {@link SectionNode} and all the {@link OfficeSubSection}
+	 * Sources this {@link SectionNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
 	 * @return <code>true</code> if successfully sourced. Otherwise

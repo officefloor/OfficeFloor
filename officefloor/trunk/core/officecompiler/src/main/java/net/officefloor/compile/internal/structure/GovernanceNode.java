@@ -27,15 +27,20 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceNode extends Node, OfficeGovernance, LinkTeamNode {
+public interface GovernanceNode extends LinkTeamNode, OfficeGovernance {
 
 	/**
-	 * Obtains the {@link GovernanceType} for this {@link GovernanceNode}.
+	 * {@link Node} type.
+	 */
+	String TYPE = "Governance";
+
+	/**
+	 * Loads the {@link GovernanceType} for this {@link GovernanceNode}.
 	 * 
 	 * @return {@link GovernanceType} for this {@link GovernanceNode} or
 	 *         <code>null</code> if fails to load the {@link GovernanceType}.
 	 */
-	GovernanceType<?, ?> getGovernanceType();
+	GovernanceType<?, ?> loadGovernanceType();
 
 	/**
 	 * Builds this {@link Governance} into the {@link OfficeBuilder}.

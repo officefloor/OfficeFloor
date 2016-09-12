@@ -34,6 +34,11 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 		OfficeArchitect, DeployedOffice {
 
 	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Office";
+
+	/**
 	 * Sources this {@link Office} into this {@link OfficeNode}.
 	 * 
 	 * @return <code>true</code> if successfully sourced. Otherwise
@@ -41,6 +46,15 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 	 *         {@link CompilerIssues}.
 	 */
 	boolean sourceOffice();
+
+	/**
+	 * Sources this {@link Office} and all descendant {@link Node} instances.
+	 * 
+	 * @return <code>true</code> if successfully sourced. Otherwise
+	 *         <code>false</code> with issue reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceOfficeTree();
 
 	/**
 	 * Obtains the {@link OfficeFloorNode} containing this {@link OfficeNode}.

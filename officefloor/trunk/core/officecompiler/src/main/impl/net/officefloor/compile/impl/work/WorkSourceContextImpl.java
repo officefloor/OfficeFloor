@@ -43,7 +43,7 @@ public class WorkSourceContextImpl extends SourceContextImpl implements
 	 */
 	public WorkSourceContextImpl(boolean isLoadingType,
 			PropertyList propertyList, NodeContext context) {
-		super(isLoadingType, context.getSourceContext(),
+		super(isLoadingType, context.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
 	}
 

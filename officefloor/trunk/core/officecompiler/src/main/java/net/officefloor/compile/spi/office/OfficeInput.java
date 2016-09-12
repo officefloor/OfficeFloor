@@ -33,11 +33,4 @@ public interface OfficeInput {
 	 */
 	String getOfficeInputName();
 
-	/**
-	 * Obtains the parameter type for this {@link OfficeInput}.
-	 * 
-	 * @return Parameter type for this {@link OfficeInput}.
-	 */
-	String getParameterType();
-
 }

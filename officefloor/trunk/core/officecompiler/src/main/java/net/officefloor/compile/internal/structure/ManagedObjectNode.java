@@ -28,7 +28,14 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectNode extends BoundManagedObjectNode,
-		SectionManagedObject, OfficeSectionManagedObject, OfficeManagedObject,
-		OfficeFloorManagedObject, LinkObjectNode {
+public interface ManagedObjectNode extends LinkObjectNode,
+		BoundManagedObjectNode, SectionManagedObject,
+		OfficeSectionManagedObject, OfficeManagedObject,
+		OfficeFloorManagedObject {
+
+	/**
+	 * {@link Node} type.
+	 */
+	String TYPE = "Managed Object";
+
 }

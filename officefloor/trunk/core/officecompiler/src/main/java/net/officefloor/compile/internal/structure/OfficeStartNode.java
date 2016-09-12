@@ -24,5 +24,11 @@ import net.officefloor.compile.spi.office.OfficeStart;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeStartNode extends Node, OfficeStart, LinkFlowNode {
+public interface OfficeStartNode extends LinkFlowNode, OfficeStart {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Office Start";
+
 }

@@ -26,8 +26,13 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface InputManagedObjectNode extends BoundManagedObjectNode,
-		OfficeFloorInputManagedObject, LinkObjectNode {
+public interface InputManagedObjectNode extends LinkObjectNode,
+		BoundManagedObjectNode, OfficeFloorInputManagedObject {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Input Managed Object";
 
 	/**
 	 * Obtains the bound {@link ManagedObjectSourceNode} for this

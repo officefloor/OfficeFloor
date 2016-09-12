@@ -39,7 +39,7 @@ public class EscalationNodeImpl implements EscalationNode {
 	/**
 	 * Parent {@link OfficeNode}.
 	 */
-	private final OfficeNode parentOffice;
+	private final OfficeNode officeNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -51,15 +51,15 @@ public class EscalationNodeImpl implements EscalationNode {
 	 * 
 	 * @param escalationType
 	 *            {@link Escalation} type.
-	 * @param parentOffice
+	 * @param officeNode
 	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public EscalationNodeImpl(String escalationType, OfficeNode parentOffice,
+	public EscalationNodeImpl(String escalationType, OfficeNode officeNode,
 			NodeContext context) {
 		this.escalationType = escalationType;
-		this.parentOffice = parentOffice;
+		this.officeNode = officeNode;
 		this.context = context;
 	}
 
@@ -69,34 +69,22 @@ public class EscalationNodeImpl implements EscalationNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.escalationType;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.officeNode;
 	}
 
 	/*

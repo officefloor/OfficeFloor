@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.office.OfficeOutputTypeImpl;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -24,7 +25,6 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
-import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeOutputType;
 
 /**
@@ -32,7 +32,7 @@ import net.officefloor.compile.office.OfficeOutputType;
  *
  * @author Daniel Sagenschneider
  */
-public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType {
+public class OfficeOutputNodeImpl implements OfficeOutputNode {
 
 	/**
 	 * Name of this {@link OfficeFloorOutput}.
@@ -90,34 +90,31 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.name;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
+		return this.officeNode;
+	}
 
+	/*
+	 * =================== OfficeOuput ===============================
+	 */
+
+	@Override
+	public String getOfficeOutputName() {
+		return this.name;
 	}
 
 	/*
@@ -125,8 +122,10 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 	 */
 
 	@Override
-	public OfficeOutputType getOfficeOutputType() {
-		return this;
+	public OfficeOutputType loadOfficeOutputType() {
+		return new OfficeOutputTypeImpl(this.name, this.argumentType,
+				(this.linkedSynchronousNode == null ? null
+						: this.linkedSynchronousNode.loadOfficeInputType()));
 	}
 
 	/*
@@ -185,30 +184,6 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode, OfficeOutputType 
 	@Override
 	public LinkFlowNode getLinkedFlowNode() {
 		return this.linkedFlowNode;
-	}
-
-	/*
-	 * =================== OfficeOuput ===============================
-	 */
-
-	@Override
-	public String getOfficeOutputName() {
-		return this.name;
-	}
-
-	@Override
-	public String getArgumentType() {
-		return this.argumentType;
-	}
-
-	/*
-	 * ================= OfficeOuputType =============================
-	 */
-
-	@Override
-	public OfficeInputType getHandlingOfficeInputType() {
-		return (this.linkedSynchronousNode == null ? null
-				: this.linkedSynchronousNode.getOfficeInputType());
 	}
 
 }

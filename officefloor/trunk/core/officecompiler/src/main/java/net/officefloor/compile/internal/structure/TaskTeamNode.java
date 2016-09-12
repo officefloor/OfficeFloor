@@ -25,4 +25,10 @@ import net.officefloor.compile.spi.office.TaskTeam;
  * @author Daniel Sagenschneider
  */
 public interface TaskTeamNode extends LinkTeamNode, TaskTeam {
+
+	/**
+	 * {@link Node} type.
+	 */
+	String TYPE = "Task Team";
+
 }

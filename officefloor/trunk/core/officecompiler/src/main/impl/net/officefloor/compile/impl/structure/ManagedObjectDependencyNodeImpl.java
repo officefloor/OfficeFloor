@@ -20,8 +20,10 @@ package net.officefloor.compile.impl.structure;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.section.ObjectDependencyType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 
 /**
@@ -38,9 +40,9 @@ public class ManagedObjectDependencyNodeImpl implements
 	private final String dependencyName;
 
 	/**
-	 * Parent {@link ManagedObjectNode}.
+	 * Parent {@link ManagedObjectNode} or {@link ManagedObjectSourceNode}.
 	 */
-	private final ManagedObjectNode managedObject;
+	private final Node parent;
 
 	/**
 	 * {@link NodeContext}.
@@ -60,7 +62,24 @@ public class ManagedObjectDependencyNodeImpl implements
 	public ManagedObjectDependencyNodeImpl(String dependencyName,
 			ManagedObjectNode managedObject, NodeContext context) {
 		this.dependencyName = dependencyName;
-		this.managedObject = managedObject;
+		this.parent = managedObject;
+		this.context = context;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param dependencyName
+	 *            Name of this {@link ManagedObjectDependency}.
+	 * @param managedObjectSource
+	 *            Parent {@link ManagedObjectSourceNode}.
+	 * @param context
+	 *            {@link NodeContext}.
+	 */
+	public ManagedObjectDependencyNodeImpl(String dependencyName,
+			ManagedObjectSourceNode managedObjectSource, NodeContext context) {
+		this.dependencyName = dependencyName;
+		this.parent = managedObjectSource;
 		this.context = context;
 	}
 
@@ -70,33 +89,33 @@ public class ManagedObjectDependencyNodeImpl implements
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.dependencyName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
+		return this.parent;
+	}
+
+	/*
+	 * =================== ManagedObjectDependencyNode ======================
+	 */
+
+	@Override
+	public ObjectDependencyType loadObjectDependencyType() {
+		// TODO implement ManagedObjectDependencyNode.loadObjectDependencyType
 		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
+				"TODO implement ManagedObjectDependencyNode.loadObjectDependencyType");
 
 	}
 
@@ -106,15 +125,6 @@ public class ManagedObjectDependencyNodeImpl implements
 
 	@Override
 	public String getManagedObjectDependencyName() {
-		return this.dependencyName;
-	}
-
-	/*
-	 * ========================= ObjectDependency =============================
-	 */
-
-	@Override
-	public String getObjectDependencyName() {
 		return this.dependencyName;
 	}
 

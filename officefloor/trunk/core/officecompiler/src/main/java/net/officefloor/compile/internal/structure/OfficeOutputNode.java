@@ -25,15 +25,20 @@ import net.officefloor.compile.spi.office.OfficeOutput;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeOutputNode extends OfficeOutput, LinkSynchronousNode,
-		LinkFlowNode {
+public interface OfficeOutputNode extends LinkFlowNode, LinkSynchronousNode,
+		OfficeOutput {
 
 	/**
-	 * Obtains the {@link OfficeOutputType}.
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Office Output";
+
+	/**
+	 * Loads the {@link OfficeOutputType}.
 	 * 
 	 * @return {@link OfficeOutputType} or <code>null</code> if can not
 	 *         determine.
 	 */
-	OfficeOutputType getOfficeOutputType();
+	OfficeOutputType loadOfficeOutputType();
 
 }

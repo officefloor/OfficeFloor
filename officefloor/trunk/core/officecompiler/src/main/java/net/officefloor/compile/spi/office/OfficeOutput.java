@@ -31,11 +31,4 @@ public interface OfficeOutput {
 	 */
 	String getOfficeOutputName();
 
-	/**
-	 * Obtains the argument type from this {@link OfficeOutput}.
-	 * 
-	 * @return Argument type from this {@link OfficeOutput}.
-	 */
-	String getArgumentType();
-
 }

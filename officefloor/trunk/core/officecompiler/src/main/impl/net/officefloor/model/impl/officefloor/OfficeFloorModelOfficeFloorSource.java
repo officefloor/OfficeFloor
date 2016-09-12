@@ -49,7 +49,6 @@ import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
@@ -162,8 +161,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 
 						// Provide warning of missing tag
 						deployer.addIssue("Property '" + tagName
-								+ "' must be specified",
-								AssetType.OFFICE_FLOOR, "OfficeFloor");
+								+ "' must be specified");
 
 						// Now warned of missing tag
 						warnedTagNames.add(tagName);
@@ -221,8 +219,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 					// Must have supplier
 					deployer.addIssue("No supplier '" + supplierName
 							+ "' for managed object source "
-							+ managedObjectSourceName,
-							AssetType.MANAGED_OBJECT, managedObjectSourceName);
+							+ managedObjectSourceName);
 					continue; // must have supplier to add managed object source
 				}
 
@@ -253,8 +250,9 @@ public class OfficeFloorModelOfficeFloorSource extends
 				try {
 					managedObjectSource.setTimeout(Long.valueOf(timeoutValue));
 				} catch (NumberFormatException ex) {
-					deployer.addIssue("Invalid timeout value: " + timeoutValue,
-							AssetType.MANAGED_OBJECT, managedObjectSourceName);
+					deployer.addIssue("Invalid timeout value: " + timeoutValue
+							+ " for managed object source "
+							+ managedObjectSourceName);
 				}
 			}
 
@@ -725,8 +723,8 @@ public class OfficeFloorModelOfficeFloorSource extends
 		}
 
 		// Unknown scope if at this point
-		deployer.addIssue("Unknown managed object scope " + managedObjectScope,
-				AssetType.MANAGED_OBJECT, managedObjectName);
+		deployer.addIssue("Unknown managed object scope " + managedObjectScope
+				+ " for managed object " + managedObjectName);
 		return null;
 	}
 

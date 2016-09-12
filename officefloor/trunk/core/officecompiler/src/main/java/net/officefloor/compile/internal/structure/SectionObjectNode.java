@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -28,7 +29,12 @@ import net.officefloor.compile.spi.section.SubSectionObject;
  * @author Daniel Sagenschneider
  */
 public interface SectionObjectNode extends LinkObjectNode, SubSectionObject,
-		SectionObject, OfficeSectionObject, SectionObjectType {
+		SectionObject, OfficeSectionObject {
+
+	/**
+	 * {@link Node} type.
+	 */
+	String TYPE = "Section Object";
 
 	/**
 	 * Indicates if this {@link SectionObjectType} has been initialised.
@@ -52,5 +58,13 @@ public interface SectionObjectNode extends LinkObjectNode, SubSectionObject,
 	 * @return {@link SectionNode} containing this {@link SectionObjectNode}.
 	 */
 	SectionNode getSectionNode();
+
+	/**
+	 * Loads the {@link SectionObjectType}.
+	 * 
+	 * @return {@link SectionObjectType} or <code>null</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	SectionObjectType loadSectionObjectType();
 
 }

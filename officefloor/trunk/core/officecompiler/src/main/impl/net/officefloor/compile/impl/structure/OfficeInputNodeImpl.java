@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.office.OfficeInputTypeImpl;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -25,14 +26,13 @@ import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.office.OfficeInputType;
-import net.officefloor.compile.office.OfficeOutputType;
 
 /**
  * Implementation of the {@link OfficeFloorInputNode}.
  *
  * @author Daniel Sagenschneider
  */
-public class OfficeInputNodeImpl implements OfficeInputNode, OfficeInputType {
+public class OfficeInputNodeImpl implements OfficeInputNode {
 
 	/**
 	 * Name of this {@link OfficeFloorInput}.
@@ -90,34 +90,22 @@ public class OfficeInputNodeImpl implements OfficeInputNode, OfficeInputType {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.name;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.officeNode;
 	}
 
 	/*
@@ -125,8 +113,10 @@ public class OfficeInputNodeImpl implements OfficeInputNode, OfficeInputType {
 	 */
 
 	@Override
-	public OfficeInputType getOfficeInputType() {
-		return this;
+	public OfficeInputType loadOfficeInputType() {
+		return new OfficeInputTypeImpl(this.name, this.parameterType,
+				(this.linkedSynchronousNode == null ? null
+						: this.linkedSynchronousNode.loadOfficeOutputType()));
 	}
 
 	/*
@@ -194,21 +184,6 @@ public class OfficeInputNodeImpl implements OfficeInputNode, OfficeInputType {
 	@Override
 	public String getOfficeInputName() {
 		return this.name;
-	}
-
-	@Override
-	public String getParameterType() {
-		return this.parameterType;
-	}
-
-	/*
-	 * ======================= OfficeInputType ===========================
-	 */
-
-	@Override
-	public OfficeOutputType getResponseOfficeOutputType() {
-		return (this.linkedSynchronousNode == null ? null
-				: this.linkedSynchronousNode.getOfficeOutputType());
 	}
 
 }

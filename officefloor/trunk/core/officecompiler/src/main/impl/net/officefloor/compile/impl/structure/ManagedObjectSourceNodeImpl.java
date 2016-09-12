@@ -169,34 +169,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final NodeContext context;
 
 	/**
+	 * {@link ManagingOffice}.
+	 */
+	private final ManagingOfficeNode managingOffice;
+
+	/**
 	 * Timeout for the {@link ManagedObject}.
 	 */
 	private long timeout = 0;
-
-	/**
-	 * Indicates if the {@link ManagedObjectType} is loaded.
-	 */
-	private boolean isManagedObjectTypeLoaded = false;
-
-	/**
-	 * Loaded {@link ManagedObjectType}.
-	 */
-	private ManagedObjectType<?> managedObjectType;
-
-	/**
-	 * Indicates if the {@link OfficeFloorManagedObjectSourceType} is loaded.
-	 */
-	private boolean isOfficeFloorManagedObjectSourceTypeLoaded = false;
-
-	/**
-	 * Loaded {@link OfficeFloorManagedObjectSourceType}.
-	 */
-	private OfficeFloorManagedObjectSourceType managedObjectSourceType;
-
-	/**
-	 * {@link ManagingOffice}.
-	 */
-	private ManagingOfficeNode managingOffice;
 
 	/**
 	 * {@link InputManagedObjectNode}.
@@ -291,34 +271,25 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.managedObjectSourceName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return (this.containingSectionNode != null ? this.containingSectionNode
+				: (this.containingOfficeNode != null ? this.containingOfficeNode
+						: (this.suppliedManagedObjectNode != null ? this.suppliedManagedObjectNode
+								: this.containingOfficeFloorNode)));
 	}
 
 	/*
@@ -327,26 +298,17 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public SectionNode getSectionNode() {
-		// TODO implement ManagedObjectSourceNode.getSectionNode
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectSourceNode.getSectionNode");
-
+		return this.containingSectionNode;
 	}
 
 	@Override
 	public OfficeNode getOfficeNode() {
-		// TODO implement ManagedObjectSourceNode.getOfficeNode
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectSourceNode.getOfficeNode");
-
+		return this.containingOfficeNode;
 	}
 
 	@Override
 	public OfficeFloorNode getOfficeFloorNode() {
-		// TODO implement ManagedObjectSourceNode.getOfficeFloorNode
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectSourceNode.getOfficeFloorNode");
-
+		return this.containingOfficeFloorNode;
 	}
 
 	@Override
@@ -358,24 +320,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void loadManagedObjectType() {
-
-		// Only load the managed object type once (whether successful or not)
-		if (this.isManagedObjectTypeLoaded) {
-			return;
-		}
-		this.isManagedObjectTypeLoaded = true;
+	public ManagedObjectType<?> loadManagedObjectType() {
 
 		// Determine if supplied
 		if (this.suppliedManagedObjectNode != null) {
-			// Ensure supplied managed object is loaded
-			this.suppliedManagedObjectNode.loadSuppliedManagedObject();
-
-			// Obtain the supplied managed object type
+			// Obtain and return the supplied managed object type
 			SuppliedManagedObject<?, ?> suppliedManagedObject = this.suppliedManagedObjectNode
-					.getSuppliedManagedObject();
-			this.managedObjectType = suppliedManagedObject
-					.getManagedObjectType();
+					.loadSuppliedManagedObject();
+			return suppliedManagedObject.getManagedObjectType();
 
 		} else {
 
@@ -385,9 +337,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			// Load the managed object type
 			if (this.managedObjectSource != null) {
-				// Load the managed object type from instance
-				this.managedObjectType = loader.loadManagedObjectType(
-						this.managedObjectSource, this.propertyList);
+				// Load and return the managed object type from instance
+				return loader.loadManagedObjectType(this.managedObjectSource,
+						this.propertyList);
 
 			} else {
 				// Obtain the managed object source class
@@ -395,57 +347,28 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						.getManagedObjectSourceClass(
 								this.managedObjectSourceClassName, this);
 				if (managedObjectSourceClass == null) {
-					return; // must have managed object source class
+					return null; // must have managed object source class
 				}
 
-				// Load the managed object type from class
-				this.managedObjectType = loader.loadManagedObjectType(
-						managedObjectSourceClass, this.propertyList);
-			}
-
-			// Ensure all the teams are made available
-			if (this.managedObjectType != null) {
-				for (ManagedObjectTeamType teamType : this.managedObjectType
-						.getTeamTypes()) {
-					// Obtain team (ensures any missing teams are added)
-					this.getManagedObjectTeam(teamType.getTeamName());
-				}
+				// Load and return the managed object type from class
+				return loader.loadManagedObjectType(managedObjectSourceClass,
+						this.propertyList);
 			}
 		}
-	}
-
-	@Override
-	public ManagedObjectType<?> getManagedObjectType() {
-
-		// Ensure the managed object type is loaded
-		if (!this.isManagedObjectTypeLoaded) {
-			throw new IllegalStateException(
-					"Managed object type must be loaded");
-		}
-
-		// Return the loaded managed object type
-		return this.managedObjectType;
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void loadOfficeFloorManagedObjectSourceType() {
-
-		// Only load managed object source type once (whether successful or not)
-		if (this.isOfficeFloorManagedObjectSourceTypeLoaded) {
-			return;
-		}
-		this.isOfficeFloorManagedObjectSourceTypeLoaded = true;
+	public OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType() {
 
 		// Create the loader to obtain the managed object type
 		ManagedObjectLoader loader = this.context.getManagedObjectLoader(this);
 
 		// Load the managed object type
 		if (this.managedObjectSource != null) {
-			// Load the managed object type from instance
-			this.managedObjectSourceType = loader
-					.loadOfficeFloorManagedObjectSourceType(
-							this.managedObjectSource, this.propertyList);
+			// Load and return the managed object type from instance
+			return loader.loadOfficeFloorManagedObjectSourceType(
+					this.managedObjectSource, this.propertyList);
 
 		} else {
 			// Obtain the managed object source class
@@ -453,27 +376,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					.getManagedObjectSourceClass(
 							this.managedObjectSourceClassName, this);
 			if (managedObjectSourceClass == null) {
-				return; // must have managed object source class
+				return null; // must have managed object source class
 			}
 
-			// Load the managed object type from class
-			this.managedObjectSourceType = loader
-					.loadOfficeFloorManagedObjectSourceType(
-							managedObjectSourceClass, this.propertyList);
+			// Load and return the managed object type from class
+			return loader.loadOfficeFloorManagedObjectSourceType(
+					managedObjectSourceClass, this.propertyList);
 		}
-	}
-
-	@Override
-	public OfficeFloorManagedObjectSourceType getOfficeFloorManagedObjectSourceType() {
-
-		// Ensure the managed object source type is loaded
-		if (!this.isOfficeFloorManagedObjectSourceTypeLoaded) {
-			throw new IllegalStateException(
-					"Managed object source type must be loaded");
-		}
-
-		// Return the loaded managed object source type
-		return this.managedObjectSourceType;
 	}
 
 	@Override
@@ -543,9 +452,15 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				.getManagedObjectSourceName();
 
 		// Obtain the managed object type
-		ManagedObjectType<?> managedObjectType = this.getManagedObjectType();
+		ManagedObjectType<?> managedObjectType = this.loadManagedObjectType();
 		if (managedObjectType == null) {
 			return; // must have managed object type
+		}
+
+		// Ensure all the teams are made available
+		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
+			// Obtain team (ensures any missing teams are added)
+			this.getManagedObjectTeam(teamType.getTeamName());
 		}
 
 		// Obtain the Managed Object Builder
@@ -554,7 +469,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		if (this.suppliedManagedObjectNode != null) {
 			// Obtain the supplied managed object for managed object builder
 			SuppliedManagedObject<?, ?> suppliedManagedObject = this.suppliedManagedObjectNode
-					.getSuppliedManagedObject();
+					.loadSuppliedManagedObject();
 			if (suppliedManagedObject == null) {
 				// Must have supplied managed object
 				this.context.getCompilerIssues().addIssue(
@@ -937,7 +852,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public String getSectionManagedObjectSourceName() {
-		return this.managedObjectSourceName;
+		return (this.containingSectionNode != null ? this.managedObjectSourceName
+				: null);
 	}
 
 	@Override
@@ -952,7 +868,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public String getOfficeSectionManagedObjectSourceName() {
-		return this.managedObjectSourceName;
+		return (this.containingSectionNode != null ? this.managedObjectSourceName
+				: null);
 	}
 
 	@Override
@@ -974,7 +891,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public String getOfficeManagedObjectSourceName() {
-		return this.managedObjectSourceName;
+		return (this.containingOfficeNode != null ? this.managedObjectSourceName
+				: null);
 	}
 
 	@Override

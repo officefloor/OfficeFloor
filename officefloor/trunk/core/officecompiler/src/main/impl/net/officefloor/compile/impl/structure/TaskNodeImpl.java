@@ -140,8 +140,10 @@ public class TaskNodeImpl implements TaskNode {
 		this.taskTypeName = taskTypeName;
 		this.workNode = workNode;
 		this.context = context;
-		this.teamResponsible = new TaskTeamNodeImpl("Team for task "
-				+ this.taskName, this, this.context);
+
+		// Create additional objects
+		this.teamResponsible = this.context.createTaskTeamNode("Team for task "
+				+ this.taskName, this);
 	}
 
 	/*
@@ -150,34 +152,22 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.taskName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.workNode;
 	}
 
 	/*
@@ -190,10 +180,10 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
-	public TaskType<?, ?, ?> getTaskType() {
+	public TaskType<?, ?, ?> loadTaskType() {
 
 		// Obtain the work type
-		WorkType<?> workType = this.workNode.getWorkType();
+		WorkType<?> workType = this.workNode.loadWorkType();
 		if (workType == null) {
 			return null; // must have work type for task
 		}
@@ -221,7 +211,7 @@ public class TaskNodeImpl implements TaskNode {
 	public void buildTask(WorkBuilder<?> workBuilder) {
 
 		// Obtain the task factory for this task
-		TaskType<?, ?, ?> taskType = this.getTaskType();
+		TaskType<?, ?, ?> taskType = this.loadTaskType();
 		if (taskType == null) {
 			this.context.getCompilerIssues().addIssue(this,
 					"Can not find task type '" + this.taskTypeName + "'");

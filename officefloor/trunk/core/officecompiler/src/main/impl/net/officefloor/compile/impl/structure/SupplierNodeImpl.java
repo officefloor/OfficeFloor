@@ -24,7 +24,6 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplyOrder;
-import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
@@ -59,22 +58,17 @@ public class SupplierNodeImpl implements SupplierNode {
 	/**
 	 * {@link PropertyList} to source the supplier.
 	 */
-	private final PropertyList propertyList = new PropertyListImpl();
+	private final PropertyList propertyList;
 
 	/**
-	 * {@link SupplyOrder} instances.
+	 * {@link SuppliedManagedObjectNode} instances.
 	 */
-	private final List<SupplyOrder> supplyOrders = new LinkedList<SupplyOrder>();
+	private final List<SuppliedManagedObjectNode> suppliedManagedObjects = new LinkedList<SuppliedManagedObjectNode>();
 
 	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
-
-	/**
-	 * Indicates if the {@link SupplyOrder} instances have been filled.
-	 */
-	private boolean isSupplyOrdersFilled = false;
 
 	/**
 	 * Instantiate.
@@ -95,6 +89,9 @@ public class SupplierNodeImpl implements SupplierNode {
 		this.supplierSourceClassName = supplierSourceClassName;
 		this.officeFloorNode = officeFloorNode;
 		this.context = context;
+
+		// Create the additional objects
+		this.propertyList = this.context.createPropertyList();
 	}
 
 	/*
@@ -103,34 +100,22 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.supplierName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.officeFloorNode;
 	}
 
 	/*
@@ -151,20 +136,12 @@ public class SupplierNodeImpl implements SupplierNode {
 	public OfficeFloorManagedObjectSource addManagedObjectSource(
 			String managedObjectSourceName, AutoWire autoWire) {
 
-		// Ensure supply orders not yet filled
-		if (this.isSupplyOrdersFilled) {
-			throw new IllegalStateException("Can not add "
-					+ OfficeFloorManagedObjectSource.class.getSimpleName()
-					+ " once " + SupplyOrder.class.getSimpleName()
-					+ " instances are filled");
-		}
-
 		// Create the supplied managed object node
-		SuppliedManagedObjectNode suppliedManagedObjectNode = new SuppliedManagedObjectNodeImpl(
-				autoWire, this);
+		SuppliedManagedObjectNode suppliedManagedObjectNode = this.context
+				.createSuppliedManagedObjectNode(autoWire, this);
 
-		// Register the supply order
-		this.supplyOrders.add(suppliedManagedObjectNode);
+		// Register the supplied managed object
+		this.suppliedManagedObjects.add(suppliedManagedObjectNode);
 
 		// Add and return the managed object source
 		return this.officeFloorNode.addManagedObjectSource(
@@ -185,13 +162,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void fillSupplyOrders() {
-
-		// Only fill supply orders once (whether successful or not)
-		if (this.isSupplyOrdersFilled) {
-			return;
-		}
-		this.isSupplyOrdersFilled = true;
+	public void fillSupplyOrders(SupplyOrder... supplyOrders) {
 
 		// Load the supplier source class
 		Class supplierSourceClass = this.context.getSupplierSourceClass(
@@ -203,8 +174,7 @@ public class SupplierNodeImpl implements SupplierNode {
 		// Fill the supply orders
 		SupplierLoader supplierLoader = this.context.getSupplierLoader(this);
 		supplierLoader.fillSupplyOrders(supplierSourceClass, this.propertyList,
-				this.supplyOrders.toArray(new SupplyOrder[this.supplyOrders
-						.size()]));
+				supplyOrders);
 	}
 
 }

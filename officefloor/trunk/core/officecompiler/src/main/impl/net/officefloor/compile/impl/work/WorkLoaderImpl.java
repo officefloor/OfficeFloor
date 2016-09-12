@@ -22,14 +22,12 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSourceProperty;
@@ -41,7 +39,6 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
@@ -59,14 +56,9 @@ import net.officefloor.frame.spi.source.UnknownResourceError;
 public class WorkLoaderImpl implements WorkLoader {
 
 	/**
-	 * Location of the {@link OfficeSection} containing the {@link Work}.
+	 * {@link Node} requiring the {@link Work}.
 	 */
-	private final String sectionLocation;
-
-	/**
-	 * Name of the {@link Work}.
-	 */
-	private final String workName;
+	private final Node node;
 
 	/**
 	 * {@link NodeContext}.
@@ -76,29 +68,14 @@ public class WorkLoaderImpl implements WorkLoader {
 	/**
 	 * Initiate for building.
 	 * 
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection} containing the
-	 *            {@link Work}.
-	 * @param workName
-	 *            Name of the {@link Work}.
+	 * @param node
+	 *            {@link Node} requiring the {@link Work}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public WorkLoaderImpl(String sectionLocation, String workName,
-			NodeContext nodeContext) {
-		this.sectionLocation = sectionLocation;
-		this.workName = workName;
+	public WorkLoaderImpl(Node node, NodeContext nodeContext) {
+		this.node = node;
 		this.nodeContext = nodeContext;
-	}
-
-	/**
-	 * Initiate from {@link OfficeFloorCompiler}.
-	 * 
-	 * @param nodeContext
-	 *            {@link NodeContext}.
-	 */
-	public WorkLoaderImpl(NodeContext nodeContext) {
-		this(null, null, nodeContext);
 	}
 
 	/*
@@ -111,8 +88,7 @@ public class WorkLoaderImpl implements WorkLoader {
 
 		// Instantiate the work source
 		WorkSource<W> workSource = CompileUtil.newInstance(workSourceClass,
-				WorkSource.class, LocationType.SECTION, this.sectionLocation,
-				AssetType.WORK, this.workName,
+				WorkSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (workSource == null) {
 			return null; // failed to instantiate
@@ -218,8 +194,7 @@ public class WorkLoaderImpl implements WorkLoader {
 
 		// Instantiate the work source
 		WorkSource<W> workSource = CompileUtil.newInstance(workSourceClass,
-				WorkSource.class, LocationType.SECTION, this.sectionLocation,
-				AssetType.WORK, this.workName,
+				WorkSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (workSource == null) {
 			return null; // failed to instantiate
@@ -842,10 +817,7 @@ public class WorkLoaderImpl implements WorkLoader {
 	private void addTaskIssue(String issueDescription, int taskIndex,
 			String taskName, Class<?> workSourceClass) {
 		this.nodeContext.getCompilerIssues().addIssue(
-				LocationType.SECTION,
-				this.sectionLocation,
-				AssetType.WORK,
-				this.workName,
+				this.node,
 				this.getTaskIssueDescription(issueDescription, taskIndex,
 						taskName, workSourceClass));
 	}
@@ -857,8 +829,7 @@ public class WorkLoaderImpl implements WorkLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.nodeContext.getCompilerIssues().addIssue(LocationType.SECTION,
-				this.sectionLocation, AssetType.WORK, this.workName,
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
 				issueDescription);
 	}
 
@@ -869,8 +840,7 @@ public class WorkLoaderImpl implements WorkLoader {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.nodeContext.getCompilerIssues().addIssue(LocationType.SECTION,
-				this.sectionLocation, AssetType.WORK, this.workName,
+		this.nodeContext.getCompilerIssues().addIssue(this.node,
 				issueDescription, cause);
 	}
 
