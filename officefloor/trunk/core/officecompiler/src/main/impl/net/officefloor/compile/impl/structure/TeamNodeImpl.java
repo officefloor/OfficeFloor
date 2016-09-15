@@ -136,7 +136,8 @@ public class TeamNodeImpl implements TeamNode {
 		}
 
 		// Load and return the team type
-		return loader.loadTeamType(teamSourceClass, this.propertyList);
+		return loader.loadTeamType(this.teamName, teamSourceClass,
+				this.propertyList);
 	}
 
 	@Override
@@ -153,8 +154,8 @@ public class TeamNodeImpl implements TeamNode {
 		}
 
 		// Load and return the team source type
-		return loader.loadOfficeFloorTeamSourceType(teamSourceClass,
-				this.propertyList);
+		return loader.loadOfficeFloorTeamSourceType(this.teamName,
+				teamSourceClass, this.propertyList);
 	}
 
 	@Override

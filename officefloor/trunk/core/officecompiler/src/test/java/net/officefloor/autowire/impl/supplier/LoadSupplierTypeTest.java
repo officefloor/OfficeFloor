@@ -36,8 +36,6 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
-import net.officefloor.compile.impl.structure.SupplierNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
@@ -77,9 +75,9 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
-				"Failed to instantiate " + MockSupplierSource.class.getName()
-						+ " by default constructor", failure);
+		this.issues.recordIssue("Failed to instantiate "
+				+ MockSupplierSource.class.getName()
+				+ " by default constructor", failure);
 
 		// Attempt to load
 		MockSupplierSource.instantiateFailure = failure;
@@ -92,8 +90,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
-				"Missing property 'missing' for SupplierSource "
+		this.issues
+				.recordIssue("Missing property 'missing' for SupplierSource "
 						+ MockSupplierSource.class.getName());
 
 		// Attempt to load
@@ -137,8 +135,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
-				"Can not load class 'missing' for SupplierSource "
+		this.issues
+				.recordIssue("Can not load class 'missing' for SupplierSource "
 						+ MockSupplierSource.class.getName());
 
 		// Attempt to load
@@ -156,8 +154,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record missing resource
-		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
-				"Can not obtain resource at location 'missing' for SupplierSource "
+		this.issues
+				.recordIssue("Can not obtain resource at location 'missing' for SupplierSource "
 						+ MockSupplierSource.class.getName());
 
 		// Attempt to load
@@ -199,7 +197,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				"Fail init SupplierSource");
 
 		// Record failure to init the Supplier Source
-		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to source SupplierType definition from SupplierSource "
 						+ MockSupplierSource.class.getName(), failure);
 
@@ -238,8 +236,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testNoAutoWiring() {
 
 		// Record no auto-wiring
-		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
-				"Must provide auto-wiring for ManagedObject 1");
+		this.issues.recordIssue("Must provide auto-wiring for ManagedObject 1");
 
 		// Attempt to load
 		this.loadEmptySupplierType(new Init() {
@@ -258,8 +255,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		final AutoWire autoWire = new AutoWire(Connection.class);
 
 		// Record no null managed object source
-		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
-				"Must provide a ManagedObjectSource for ManagedObject "
+		this.issues
+				.recordIssue("Must provide a ManagedObjectSource for ManagedObject "
 						+ autoWire.getQualifiedType());
 
 		// Attempt to load
@@ -285,7 +282,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue(autoWire.getQualifiedType(),
 				ManagedObjectSourceNodeImpl.class,
 				"Missing property 'class.name'");
-		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
+		this.issues.recordIssue(
 				"Could not load ManagedObjectType for ManagedObject "
 						+ autoWire.getQualifiedType(), capturedIssues);
 

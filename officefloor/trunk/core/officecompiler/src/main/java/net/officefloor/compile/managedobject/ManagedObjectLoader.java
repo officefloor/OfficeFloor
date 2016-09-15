@@ -104,6 +104,8 @@ public interface ManagedObjectLoader {
 	 *            Flow key type.
 	 * @param <MS>
 	 *            {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClass
 	 *            Class of the {@link ManagedObjectSource}.
 	 * @param propertyList
@@ -113,7 +115,8 @@ public interface ManagedObjectLoader {
 	 *         if issues, which are reported to the {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
-			Class<MS> managedObjectSourceClass, PropertyList propertyList);
+			String managedObjectSourceName, Class<MS> managedObjectSourceClass,
+			PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link OfficeFloorManagedObjectSourceType} for the
@@ -125,6 +128,8 @@ public interface ManagedObjectLoader {
 	 *            Flow key type.
 	 * @param <MS>
 	 *            {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource} instances to use.
 	 * @param propertyList
@@ -134,7 +139,8 @@ public interface ManagedObjectLoader {
 	 *         if issues, which are reported to the {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
-			MS managedObjectSource, PropertyList propertyList);
+			String managedObjectSourceName, MS managedObjectSource,
+			PropertyList propertyList);
 
 	/**
 	 * Determines if the {@link ManagedObjectType} requires to be configured as

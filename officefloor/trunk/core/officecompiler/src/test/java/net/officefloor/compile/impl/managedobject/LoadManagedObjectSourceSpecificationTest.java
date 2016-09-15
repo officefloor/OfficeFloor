@@ -19,8 +19,6 @@ package net.officefloor.compile.impl.managedobject;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
-import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.Property;
@@ -75,10 +73,9 @@ public class LoadManagedObjectSourceSpecificationTest extends
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME,
-				ManagedObjectSourceNodeImpl.class, "Failed to instantiate "
-						+ MockManagedObjectSource.class.getName()
-						+ " by default constructor", failure);
+		this.issues.recordIssue("Failed to instantiate "
+				+ MockManagedObjectSource.class.getName()
+				+ " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockManagedObjectSource.instantiateFailure = failure;
@@ -96,8 +93,7 @@ public class LoadManagedObjectSourceSpecificationTest extends
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME,
-				ManagedObjectSourceNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to obtain ManagedObjectSourceSpecification from "
 						+ MockManagedObjectSource.class.getName(), failure);
 
@@ -114,9 +110,8 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	public void testNoManagedObjectSourceSpecification() {
 
 		// Record no specification returned
-		this.issues.recordIssue(Node.TYPE_NAME,
-				ManagedObjectSourceNodeImpl.class,
-				"No ManagedObjectSourceSpecification returned from "
+		this.issues
+				.recordIssue("No ManagedObjectSourceSpecification returned from "
 						+ MockManagedObjectSource.class.getName());
 
 		// Attempt to obtain specification
@@ -140,8 +135,6 @@ public class LoadManagedObjectSourceSpecificationTest extends
 				this.specification.getProperties(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						ManagedObjectSourceNodeImpl.class,
 						"Failed to obtain ManagedObjectSourceProperty instances from ManagedObjectSourceSpecification for "
 								+ MockManagedObjectSource.class.getName(),
 						failure);
@@ -179,11 +172,8 @@ public class LoadManagedObjectSourceSpecificationTest extends
 				this.specification.getProperties(),
 				new ManagedObjectSourceProperty[] { null });
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						ManagedObjectSourceNodeImpl.class,
-						"ManagedObjectSourceProperty 0 is null from ManagedObjectSourceSpecification for "
-								+ MockManagedObjectSource.class.getName());
+				.recordIssue("ManagedObjectSourceProperty 0 is null from ManagedObjectSourceSpecification for "
+						+ MockManagedObjectSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -206,11 +196,8 @@ public class LoadManagedObjectSourceSpecificationTest extends
 				new ManagedObjectSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						ManagedObjectSourceNodeImpl.class,
-						"ManagedObjectSourceProperty 0 provided blank name from ManagedObjectSourceSpecification for "
-								+ MockManagedObjectSource.class.getName());
+				.recordIssue("ManagedObjectSourceProperty 0 provided blank name from ManagedObjectSourceSpecification for "
+						+ MockManagedObjectSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -236,8 +223,6 @@ public class LoadManagedObjectSourceSpecificationTest extends
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						ManagedObjectSourceNodeImpl.class,
 						"Failed to get name for ManagedObjectSourceProperty 0 from ManagedObjectSourceSpecification for "
 								+ MockManagedObjectSource.class.getName(),
 						failure);
@@ -267,8 +252,6 @@ public class LoadManagedObjectSourceSpecificationTest extends
 		this.control(property).expectAndThrow(property.getLabel(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						ManagedObjectSourceNodeImpl.class,
 						"Failed to get label for ManagedObjectSourceProperty 0 (NAME) from ManagedObjectSourceSpecification for "
 								+ MockManagedObjectSource.class.getName(),
 						failure);

@@ -20,8 +20,6 @@ package net.officefloor.compile.impl.governance;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
-import net.officefloor.compile.impl.structure.GovernanceNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -67,9 +65,9 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
-				"Failed to instantiate " + MockGovernanceSource.class.getName()
-						+ " by default constructor", failure);
+		this.issues.recordIssue("Failed to instantiate "
+				+ MockGovernanceSource.class.getName()
+				+ " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockGovernanceSource.instantiateFailure = failure;
@@ -87,7 +85,7 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to obtain GovernanceSourceSpecification from "
 						+ MockGovernanceSource.class.getName(), failure);
 
@@ -104,8 +102,8 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNoGovernanceSourceSpecification() {
 
 		// Record no specification returned
-		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
-				"No GovernanceSourceSpecification returned from "
+		this.issues
+				.recordIssue("No GovernanceSourceSpecification returned from "
 						+ MockGovernanceSource.class.getName());
 
 		// Attempt to obtain specification
@@ -129,8 +127,6 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						GovernanceNodeImpl.class,
 						"Failed to obtain GovernanceSourceProperty instances from GovernanceSourceSpecification for "
 								+ MockGovernanceSource.class.getName(), failure);
 
@@ -166,8 +162,8 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new GovernanceSourceProperty[] { null });
-		this.issues.recordIssue(Node.TYPE_NAME, GovernanceNodeImpl.class,
-				"GovernanceSourceProperty 0 is null from GovernanceSourceSpecification for "
+		this.issues
+				.recordIssue("GovernanceSourceProperty 0 is null from GovernanceSourceSpecification for "
 						+ MockGovernanceSource.class.getName());
 
 		// Attempt to obtain specification
@@ -190,11 +186,8 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 				new GovernanceSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						GovernanceNodeImpl.class,
-						"GovernanceSourceProperty 0 provided blank name from GovernanceSourceSpecification for "
-								+ MockGovernanceSource.class.getName());
+				.recordIssue("GovernanceSourceProperty 0 provided blank name from GovernanceSourceSpecification for "
+						+ MockGovernanceSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -219,8 +212,6 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						GovernanceNodeImpl.class,
 						"Failed to get name for GovernanceSourceProperty 0 from GovernanceSourceSpecification for "
 								+ MockGovernanceSource.class.getName(), failure);
 
@@ -248,8 +239,6 @@ public class LoadGovernanceSourceSpecificationTest extends OfficeFrameTestCase {
 		this.control(property).expectAndThrow(property.getLabel(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						GovernanceNodeImpl.class,
 						"Failed to get label for GovernanceSourceProperty 0 (NAME) from GovernanceSourceSpecification for "
 								+ MockGovernanceSource.class.getName(), failure);
 

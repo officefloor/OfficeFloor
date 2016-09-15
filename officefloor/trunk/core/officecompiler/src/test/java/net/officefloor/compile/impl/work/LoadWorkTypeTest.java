@@ -23,8 +23,6 @@ import java.util.Properties;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.WorkNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -89,7 +87,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to instantiate " + MockWorkSource.class.getName()
 						+ " by default constructor", failure);
 
@@ -104,9 +102,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"Missing property 'missing' for WorkSource "
-						+ MockWorkSource.class.getName());
+		this.issues.recordIssue("Missing property 'missing' for WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -160,9 +157,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"Can not load class 'missing' for WorkSource "
-						+ MockWorkSource.class.getName());
+		this.issues.recordIssue("Can not load class 'missing' for WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -180,8 +176,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record missing resource
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"Can not obtain resource at location 'missing' for WorkSource "
+		this.issues
+				.recordIssue("Can not obtain resource at location 'missing' for WorkSource "
 						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
@@ -224,7 +220,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				"Fail source work type");
 
 		// Record failure to source the work type
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to source WorkType definition from WorkSource "
 						+ MockWorkSource.class.getName(), failure);
 
@@ -244,11 +240,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testNoWorkFactory() {
 
 		// Record no work factory
-		this.issues.recordIssue(
-				Node.TYPE_NAME,
-				WorkNodeImpl.class,
-				"No WorkFactory provided by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.issues.recordIssue("No WorkFactory provided by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -267,8 +260,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testNoTasks() {
 
 		// Record no tasks
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"No TaskType definitions provided by WorkSource "
+		this.issues
+				.recordIssue("No TaskType definitions provided by WorkSource "
 						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
@@ -288,8 +281,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testNoTaskName() {
 
 		// Record no tasks
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"No task name provided for TaskType definition 0 by WorkSource "
+		this.issues
+				.recordIssue("No task name provided for TaskType definition 0 by WorkSource "
 						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
@@ -310,11 +303,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Record duplicate task names
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						WorkNodeImpl.class,
-						"Two or more TaskType definitions with the same name (SAME) provided by WorkSource "
-								+ MockWorkSource.class.getName());
+				.recordIssue("Two or more TaskType definitions with the same name (SAME) provided by WorkSource "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -334,8 +324,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testNoTaskFactory() {
 
 		// Record no tasks
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"No TaskFactory provided for TaskType definition 0 (TASK) by WorkSource "
+		this.issues
+				.recordIssue("No TaskFactory provided for TaskType definition 0 (TASK) by WorkSource "
 						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
@@ -413,10 +403,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"No TaskObjectType provided for key " + ObjectKey.ONE
-						+ " on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.issues.recordIssue("No TaskObjectType provided for key "
+				+ ObjectKey.ONE
+				+ " on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -439,8 +429,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"No key provided for an object on TaskType definition 0 (TASK) by WorkSource "
+		this.issues
+				.recordIssue("No key provided for an object on TaskType definition 0 (TASK) by WorkSource "
 						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
@@ -471,13 +461,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Record no tasks
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						WorkNodeImpl.class,
-						"Incorrect key type ("
-								+ WrongKey.class.getName()
-								+ ") provided for an object on TaskType definition 0 (TASK) by WorkSource "
-								+ MockWorkSource.class.getName());
+				.recordIssue("Incorrect key type ("
+						+ WrongKey.class.getName()
+						+ ") provided for an object on TaskType definition 0 (TASK) by WorkSource "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -504,8 +491,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"More objects than keys on TaskType definition 0 (TASK) by WorkSource "
+		this.issues
+				.recordIssue("More objects than keys on TaskType definition 0 (TASK) by WorkSource "
 						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
@@ -536,11 +523,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Record indexes out of order
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						WorkNodeImpl.class,
-						"Objects are not keyed but object has key on TaskType definition 0 (TASK) by WorkSource "
-								+ MockWorkSource.class.getName());
+				.recordIssue("Objects are not keyed but object has key on TaskType definition 0 (TASK) by WorkSource "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -564,11 +548,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Record no object type
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						WorkNodeImpl.class,
-						"No object type provided for object 0 on TaskType definition 0 (TASK) by WorkSource "
-								+ MockWorkSource.class.getName());
+				.recordIssue("No object type provided for object 0 on TaskType definition 0 (TASK) by WorkSource "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -593,11 +574,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Record no object type
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						WorkNodeImpl.class,
-						"Two or more TaskObjectType definitions with the same name (SAME) for TaskType definition 0 (TASK) by WorkSource "
-								+ MockWorkSource.class.getName());
+				.recordIssue("Two or more TaskObjectType definitions with the same name (SAME) for TaskType definition 0 (TASK) by WorkSource "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -727,10 +705,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"No TaskFlowType provided for key " + FlowKey.ONE
-						+ " on TaskType definition 0 (TASK) by WorkSource "
-						+ MockWorkSource.class.getName());
+		this.issues.recordIssue("No TaskFlowType provided for key "
+				+ FlowKey.ONE
+				+ " on TaskType definition 0 (TASK) by WorkSource "
+				+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -753,8 +731,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"No key provided for a flow on TaskType definition 0 (TASK) by WorkSource "
+		this.issues
+				.recordIssue("No key provided for a flow on TaskType definition 0 (TASK) by WorkSource "
 						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
@@ -785,13 +763,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Record no tasks
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						WorkNodeImpl.class,
-						"Incorrect key type ("
-								+ WrongKey.class.getName()
-								+ ") provided for a flow on TaskType definition 0 (TASK) by WorkSource "
-								+ MockWorkSource.class.getName());
+				.recordIssue("Incorrect key type ("
+						+ WrongKey.class.getName()
+						+ ") provided for a flow on TaskType definition 0 (TASK) by WorkSource "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -818,8 +793,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				.createMock(TaskFactory.class);
 
 		// Record no tasks
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"More flows than keys on TaskType definition 0 (TASK) by WorkSource "
+		this.issues
+				.recordIssue("More flows than keys on TaskType definition 0 (TASK) by WorkSource "
 						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
@@ -850,11 +825,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Record indexes out of order
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						WorkNodeImpl.class,
-						"Flows are not keyed but flow has key on TaskType definition 0 (TASK) by WorkSource "
-								+ MockWorkSource.class.getName());
+				.recordIssue("Flows are not keyed but flow has key on TaskType definition 0 (TASK) by WorkSource "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -878,11 +850,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Record no object type
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						WorkNodeImpl.class,
-						"Two or more TaskFlowType definitions with the same name (SAME) for TaskType definition 0 (TASK) by WorkSource "
-								+ MockWorkSource.class.getName());
+				.recordIssue("Two or more TaskFlowType definitions with the same name (SAME) for TaskType definition 0 (TASK) by WorkSource "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
@@ -968,8 +937,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testNoEscalationType() {
 
 		// Record no escalation type
-		this.issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
-				"No escalation type on TaskType definition 0 (TASK) by WorkSource "
+		this.issues
+				.recordIssue("No escalation type on TaskType definition 0 (TASK) by WorkSource "
 						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
@@ -995,11 +964,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Record no object type
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						WorkNodeImpl.class,
-						"Two or more TaskEscalationType definitions with the same name (SAME) for TaskType definition 0 (TASK) by WorkSource "
-								+ MockWorkSource.class.getName());
+				.recordIssue("Two or more TaskEscalationType definitions with the same name (SAME) for TaskType definition 0 (TASK) by WorkSource "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {

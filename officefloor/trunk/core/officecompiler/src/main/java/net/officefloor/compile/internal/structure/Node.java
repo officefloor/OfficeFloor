@@ -25,11 +25,6 @@ package net.officefloor.compile.internal.structure;
 public interface Node {
 
 	/**
-	 * Name used for {@link Node} when loaded as type.
-	 */
-	static final String TYPE_NAME = "TYPE";
-
-	/**
 	 * Obtains the name of the {@link Node}.
 	 * 
 	 * @return Name of the {@link Node}.

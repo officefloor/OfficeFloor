@@ -35,8 +35,6 @@ import net.officefloor.autowire.supplier.SupplyOrder;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.SupplierNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
@@ -72,8 +70,7 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	public void testNullAutoWire() {
 
 		// Ensure issue if no auto-wire
-		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
-				"SupplyOrder 0 must have an AutoWire");
+		this.issues.recordIssue("SupplyOrder 0 must have an AutoWire");
 
 		// Test
 		MockSupplyOrder order = new MockSupplyOrder(null);

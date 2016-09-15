@@ -20,6 +20,7 @@ package net.officefloor.compile.team;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceProperty;
 import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
@@ -52,6 +53,8 @@ public interface TeamLoader {
 	 * 
 	 * @param <TS>
 	 *            {@link TeamSource} type.
+	 * @param teamName
+	 *            Name of the {@link Team}.
 	 * @param teamSourceClass
 	 *            Class of the {@link TeamSource}.
 	 * @param propertyList
@@ -60,14 +63,16 @@ public interface TeamLoader {
 	 * @return {@link TeamType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<TS extends TeamSource> TeamType loadTeamType(Class<TS> teamSourceClass,
-			PropertyList propertyList);
+	<TS extends TeamSource> TeamType loadTeamType(String teamName,
+			Class<TS> teamSourceClass, PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link OfficeFloorTeamSourceType}.
 	 * 
 	 * @param <TS>
 	 *            {@link TeamSource} type.
+	 * @param teamName
+	 *            Name of the {@link Team}.
 	 * @param teamSourceClass
 	 *            Class of the {@link TeamSource}.
 	 * @param propertyList
@@ -76,6 +81,7 @@ public interface TeamLoader {
 	 *         which are reported to the {@link CompilerIssues}.
 	 */
 	<TS extends TeamSource> OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(
-			Class<TS> teamSourceClass, PropertyList propertyList);
+			String teamName, Class<TS> teamSourceClass,
+			PropertyList propertyList);
 
 }

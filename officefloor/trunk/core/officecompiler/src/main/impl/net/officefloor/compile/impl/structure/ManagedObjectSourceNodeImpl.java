@@ -368,7 +368,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		if (this.managedObjectSource != null) {
 			// Load and return the managed object type from instance
 			return loader.loadOfficeFloorManagedObjectSourceType(
-					this.managedObjectSource, this.propertyList);
+					this.managedObjectSourceName, this.managedObjectSource,
+					this.propertyList);
 
 		} else {
 			// Obtain the managed object source class
@@ -381,7 +382,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			// Load and return the managed object type from class
 			return loader.loadOfficeFloorManagedObjectSourceType(
-					managedObjectSourceClass, this.propertyList);
+					this.managedObjectSourceName, managedObjectSourceClass,
+					this.propertyList);
 		}
 	}
 

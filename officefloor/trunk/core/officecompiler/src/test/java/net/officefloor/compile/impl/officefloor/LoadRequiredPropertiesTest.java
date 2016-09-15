@@ -24,8 +24,6 @@ import java.util.Properties;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
-import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -63,12 +61,9 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(
-				Node.TYPE_NAME,
-				OfficeFloorNodeImpl.class,
-				"Failed to instantiate "
-						+ MockOfficeFloorSource.class.getName()
-						+ " by default constructor", failure);
+		this.issues.recordIssue("Failed to instantiate "
+				+ MockOfficeFloorSource.class.getName()
+				+ " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockOfficeFloorSource.instantiateFailure = failure;
@@ -95,8 +90,8 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
-				"Missing property 'missing' for OfficeFloorSource "
+		this.issues
+				.recordIssue("Missing property 'missing' for OfficeFloorSource "
 						+ MockOfficeFloorSource.class.getName());
 
 		// Attempt to load required properties
@@ -148,8 +143,8 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testMissingClass() {
 
 		// Record missing property
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
-				"Can not load class 'missing' for OfficeFloorSource "
+		this.issues
+				.recordIssue("Can not load class 'missing' for OfficeFloorSource "
 						+ MockOfficeFloorSource.class.getName());
 
 		// Attempt to load required properties
@@ -170,8 +165,8 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 		// Record missing resource
 		this.recordReturn(this.resourceSource,
 				this.resourceSource.sourceResource("missing"), null);
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
-				"Can not obtain resource at location 'missing' for OfficeFloorSource "
+		this.issues
+				.recordIssue("Can not obtain resource at location 'missing' for OfficeFloorSource "
 						+ MockOfficeFloorSource.class.getName());
 
 		// Attempt to load required properties
@@ -233,7 +228,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 				"Fail source required properties");
 
 		// Record failure to source the required properties
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to source required properties from OfficeFloorSource (source="
 						+ MockOfficeFloorSource.class.getName() + ", location="
 						+ OFFICE_FLOOR_LOCATION + ")", failure);
@@ -254,8 +249,8 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testNullPropertyName() {
 
 		// Record null property name
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
-				"Required property specified with null name (label=null)");
+		this.issues
+				.recordIssue("Required property specified with null name (label=null)");
 
 		// Attempt to load required properties
 		this.loadRequiredProperties(false, new Loader() {
@@ -274,8 +269,8 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testNullPropertyNameButWithLabel() {
 
 		// Record null property name
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
-				"Required property specified with null name (label=LABEL)");
+		this.issues
+				.recordIssue("Required property specified with null name (label=LABEL)");
 
 		// Attempt to load required properties
 		this.loadRequiredProperties(false, new Loader() {
@@ -293,8 +288,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testAddRequiredPropertyTwice() {
 
 		// Record null property name
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
-				"Required property PROPERTY already added");
+		this.issues.recordIssue("Required property PROPERTY already added");
 
 		// Attempt to load required properties
 		this.loadRequiredProperties(false, new Loader() {

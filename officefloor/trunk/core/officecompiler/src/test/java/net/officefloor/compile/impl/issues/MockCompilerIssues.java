@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.impl.issues;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -74,7 +76,7 @@ public class MockCompilerIssues implements CompilerIssues {
 	}
 
 	/**
-	 * Records an issue.
+	 * Records an issue against a {@link Node}.
 	 * 
 	 * @param nodeName
 	 *            Name of the {@link Node}.
@@ -91,7 +93,7 @@ public class MockCompilerIssues implements CompilerIssues {
 	}
 
 	/**
-	 * Records an issue.
+	 * Records an issue against a {@link Node}.
 	 * 
 	 * @param nodeName
 	 *            Name of the {@link Node}.
@@ -105,6 +107,33 @@ public class MockCompilerIssues implements CompilerIssues {
 	public void recordIssue(String nodeName, Class<? extends Node> nodeClass,
 			String issueDescription, Throwable cause) {
 		this.mock.addIssue(nodeName, nodeClass, issueDescription, cause);
+	}
+
+	/**
+	 * Records a top level issue.
+	 * 
+	 * @param issueDescription
+	 *            Expected issue description.
+	 * @param capturedIssues
+	 *            Captured {@link CompilerIssue} instances.
+	 */
+	public void recordIssue(String issueDescription,
+			CompilerIssue... capturedIssues) {
+		this.recordIssue(OfficeFloorCompiler.TYPE,
+				OfficeFloorCompilerImpl.class, issueDescription, capturedIssues);
+	}
+
+	/**
+	 * Records a top level issue.
+	 * 
+	 * @param issueDescription
+	 *            Expected issue description.
+	 * @param cause
+	 *            Expected cause.
+	 */
+	public void recordIssue(String issueDescription, Throwable cause) {
+		this.recordIssue(OfficeFloorCompiler.TYPE,
+				OfficeFloorCompilerImpl.class, issueDescription, cause);
 	}
 
 	/*

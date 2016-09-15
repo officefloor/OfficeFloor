@@ -25,11 +25,7 @@ import net.officefloor.autowire.impl.supplier.MockLoadSupplierSource;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.office.MockLoadOfficeSource;
-import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
-import net.officefloor.compile.impl.structure.OfficeNodeImpl;
-import net.officefloor.compile.impl.structure.SupplierNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
@@ -301,9 +297,7 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Ensure issue in not loading managed object type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(Node.TYPE_NAME,
-				ManagedObjectSourceNodeImpl.class,
-				"Missing property 'class.name'");
+		this.issues.recordIssue("Missing property 'class.name'");
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
 				OfficeFloorNodeImpl.class,
 				"Failure loading ManagedObjectType from source "
@@ -365,9 +359,7 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Ensure issue in not loading managed object type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(Node.TYPE_NAME,
-				ManagedObjectSourceNodeImpl.class,
-				"Missing property 'class.name'");
+		this.issues.recordIssue("Missing property 'class.name'");
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
 				OfficeFloorNodeImpl.class,
 				"Failure loading ManagedObjectType from source "
@@ -453,9 +445,8 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Ensure issue in not loading supplier type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(Node.TYPE_NAME, SupplierNodeImpl.class,
-				"Missing property 'TEST' for SupplierSource "
-						+ MockLoadSupplierSource.class.getName());
+		this.issues.recordIssue("Missing property 'TEST' for SupplierSource "
+				+ MockLoadSupplierSource.class.getName());
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
 				OfficeFloorNodeImpl.class,
 				"Failure loading SupplierType from source "
@@ -513,8 +504,8 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Ensure issue in not loading office type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeNodeImpl.class,
-				"Missing property 'required.property' for OfficeSource "
+		this.issues
+				.recordIssue("Missing property 'required.property' for OfficeSource "
 						+ MockLoadOfficeSource.class.getName());
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
 				OfficeFloorNodeImpl.class,
@@ -574,8 +565,8 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Ensure issue in not loading office type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeNodeImpl.class,
-				"Missing property 'required.property' for OfficeSource "
+		this.issues
+				.recordIssue("Missing property 'required.property' for OfficeSource "
 						+ MockLoadOfficeSource.class.getName());
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
 				OfficeFloorNodeImpl.class,

@@ -144,7 +144,7 @@ import net.officefloor.model.impl.officefloor.OfficeFloorModelOfficeFloorSource;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
-		Node, NodeContext, TypeLoader {
+		NodeContext, TypeLoader {
 
 	/**
 	 * {@link ResourceSource} instances.
@@ -283,30 +283,6 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 		// Register the alias
 		aliasMap.put(alias, aliasSourceClass);
-	}
-
-	/*
-	 * ==================== Node ==============================
-	 */
-
-	@Override
-	public String getNodeName() {
-		return "Compiler";
-	}
-
-	@Override
-	public String getNodeType() {
-		return "Compiler";
-	}
-
-	@Override
-	public String getLocation() {
-		return null;
-	}
-
-	@Override
-	public Node getParentNode() {
-		return null;
 	}
 
 	/*
@@ -467,7 +443,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public TeamLoader getTeamLoader() {
-		return new TeamLoaderImpl(Node.TYPE_NAME, this, this);
+		return new TeamLoaderImpl(this, this);
 	}
 
 	@Override
@@ -922,7 +898,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public TeamLoader getTeamLoader(Node node) {
-		return new TeamLoaderImpl(Node.TYPE_NAME, node, this);
+		return new TeamLoaderImpl(node, this);
 	}
 
 	@Override

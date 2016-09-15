@@ -70,15 +70,14 @@ public class LoadOfficeFloorTeamSourceTypeTest extends OfficeFrameTestCase {
 		// Load the officeflooor team source type
 		TeamLoader teamLoader = nodeContext.getTeamLoader(node);
 		OfficeFloorTeamSourceType teamType = teamLoader
-				.loadOfficeFloorTeamSourceType(MockLoadTeamSource.class,
-						properties);
+				.loadOfficeFloorTeamSourceType(TEAM_SOURCE_NAME,
+						MockLoadTeamSource.class, properties);
 		MockLoadTeamSource.assertOfficeFloorTeamSourceType(teamType,
 				TEAM_SOURCE_NAME, MOCK_PROPERTY_VALUE);
 	}
 
 	/**
-	 * Ensures issue if failure in obtaining the {@link TeamSourceSpecification}
-	 * .
+	 * Ensures issue if failure in obtaining {@link TeamSourceSpecification}.
 	 */
 	public void testFailGetTeamSourceSpecification() {
 
@@ -109,7 +108,7 @@ public class LoadOfficeFloorTeamSourceTypeTest extends OfficeFrameTestCase {
 		// Load the officeflooor managed object source type
 		TeamLoader teamLoader = nodeContext.getTeamLoader(node);
 		OfficeFloorTeamSourceType teamType = teamLoader
-				.loadOfficeFloorTeamSourceType(MockTeamSource.class,
+				.loadOfficeFloorTeamSourceType("team", MockTeamSource.class,
 						compiler.createPropertyList());
 
 		// Ensure not loaded

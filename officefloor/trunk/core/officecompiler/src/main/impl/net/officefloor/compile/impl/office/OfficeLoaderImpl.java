@@ -195,9 +195,9 @@ public class OfficeLoaderImpl implements OfficeLoader {
 			String officeLocation, PropertyList propertyList) {
 
 		// Create the office node
-		OfficeNode officeNode = this.nodeContext.createOfficeNode(
-				Node.TYPE_NAME, officeSource.getClass().getName(),
-				officeSource, officeLocation, null);
+		OfficeNode officeNode = this.nodeContext.createOfficeNode("Type",
+				officeSource.getClass().getName(), officeSource,
+				officeLocation, null);
 
 		// Source the office
 		boolean isSourced = officeNode.sourceOffice();

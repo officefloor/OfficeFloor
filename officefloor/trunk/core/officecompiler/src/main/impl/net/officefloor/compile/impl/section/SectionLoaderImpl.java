@@ -85,7 +85,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain "
 					+ SectionSourceSpecification.class.getSimpleName()
-					+ " from " + sectionSourceClass.getName(), ex, null);
+					+ " from " + sectionSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
@@ -108,7 +108,7 @@ public class SectionLoaderImpl implements SectionLoader {
 							+ SectionSourceProperty.class.getSimpleName()
 							+ " instances from "
 							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName(), ex, null);
+							+ " for " + sectionSourceClass.getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -141,7 +141,7 @@ public class SectionLoaderImpl implements SectionLoader {
 									+ " from "
 									+ SectionSourceSpecification.class
 											.getSimpleName() + " for "
-									+ sectionSourceClass.getName(), ex, null);
+									+ sectionSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
@@ -161,7 +161,7 @@ public class SectionLoaderImpl implements SectionLoader {
 							+ SectionSourceProperty.class.getSimpleName() + " "
 							+ i + " (" + name + ") from "
 							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName(), ex, null);
+							+ " for " + sectionSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -197,8 +197,8 @@ public class SectionLoaderImpl implements SectionLoader {
 			String sectionLocation, PropertyList propertyList) {
 
 		// Create the section node
-		SectionNode sectionNode = this.nodeContext.createSectionNode(
-				Node.TYPE_NAME, (OfficeNode) null).initialise(
+		SectionNode sectionNode = this.nodeContext.createSectionNode("Type",
+				(OfficeNode) null).initialise(
 				sectionSource.getClass().getName(), sectionSource,
 				sectionLocation);
 		propertyList.configureProperties(sectionNode);
@@ -258,10 +258,8 @@ public class SectionLoaderImpl implements SectionLoader {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
 	 */
-	private void addIssue(String issueDescription, String sectionLocation) {
+	private void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node,
 				issueDescription);
 	}
@@ -273,11 +271,8 @@ public class SectionLoaderImpl implements SectionLoader {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
 	 */
-	private void addIssue(String issueDescription, Throwable cause,
-			String sectionLocation) {
+	private void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node,
 				issueDescription, cause);
 	}

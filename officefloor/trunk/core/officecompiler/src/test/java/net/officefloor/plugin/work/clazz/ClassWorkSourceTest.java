@@ -25,8 +25,6 @@ import java.sql.SQLException;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
-import net.officefloor.compile.impl.structure.WorkNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
@@ -124,7 +122,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.recordIssue(Node.TYPE_NAME, WorkNodeImpl.class,
+		issues.recordIssue(
 				"Failed to source WorkType definition from WorkSource "
 						+ ClassWorkSource.class.getName(),
 				new IllegalArgumentException(
@@ -557,8 +555,6 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// Record issue
 		issues.recordIssue(
-				Node.TYPE_NAME,
-				WorkNodeImpl.class,
 				"Failed to source WorkType definition from WorkSource "
 						+ ClassWorkSource.class.getName(),
 				new IllegalStateException(

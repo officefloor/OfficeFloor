@@ -19,8 +19,6 @@ package net.officefloor.compile.impl.officefloor;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
-import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.Property;
@@ -66,12 +64,9 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(
-				Node.TYPE_NAME,
-				OfficeFloorNodeImpl.class,
-				"Failed to instantiate "
-						+ MockOfficeFloorSource.class.getName()
-						+ " by default constructor", failure);
+		this.issues.recordIssue("Failed to instantiate "
+				+ MockOfficeFloorSource.class.getName()
+				+ " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockOfficeFloorSource.instantiateFailure = failure;
@@ -89,7 +84,7 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to obtain OfficeFloorSourceSpecification from "
 						+ MockOfficeFloorSource.class.getName(), failure);
 
@@ -106,8 +101,8 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 	public void testNoOfficeFloorSpecification() {
 
 		// Record no specification returned
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
-				"No OfficeFloorSourceSpecification returned from "
+		this.issues
+				.recordIssue("No OfficeFloorSourceSpecification returned from "
 						+ MockOfficeFloorSource.class.getName());
 
 		// Attempt to obtain specification
@@ -131,8 +126,6 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						OfficeFloorNodeImpl.class,
 						"Failed to obtain OfficeFloorSourceProperty instances from OfficeFloorSourceSpecification for "
 								+ MockOfficeFloorSource.class.getName(),
 						failure);
@@ -169,8 +162,8 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new OfficeFloorSourceProperty[] { null });
-		this.issues.recordIssue(Node.TYPE_NAME, OfficeFloorNodeImpl.class,
-				"OfficeFloorSourceProperty 0 is null from OfficeFloorSourceSpecification for "
+		this.issues
+				.recordIssue("OfficeFloorSourceProperty 0 is null from OfficeFloorSourceSpecification for "
 						+ MockOfficeFloorSource.class.getName());
 
 		// Attempt to obtain specification
@@ -194,11 +187,8 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 				new OfficeFloorSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						OfficeFloorNodeImpl.class,
-						"OfficeFloorSourceProperty 0 provided blank name from OfficeFloorSourceSpecification for "
-								+ MockOfficeFloorSource.class.getName());
+				.recordIssue("OfficeFloorSourceProperty 0 provided blank name from OfficeFloorSourceSpecification for "
+						+ MockOfficeFloorSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -223,8 +213,6 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						OfficeFloorNodeImpl.class,
 						"Failed to get name for OfficeFloorSourceProperty 0 from OfficeFloorSourceSpecification for "
 								+ MockOfficeFloorSource.class.getName(),
 						failure);
@@ -254,8 +242,6 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 		this.control(property).expectAndThrow(property.getLabel(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						OfficeFloorNodeImpl.class,
 						"Failed to get label for OfficeFloorSourceProperty 0 (NAME) from OfficeFloorSourceSpecification for "
 								+ MockOfficeFloorSource.class.getName(),
 						failure);
