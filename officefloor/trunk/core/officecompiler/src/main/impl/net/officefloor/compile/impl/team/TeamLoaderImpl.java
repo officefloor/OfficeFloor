@@ -52,11 +52,6 @@ public class TeamLoaderImpl implements TeamLoader {
 	};
 
 	/**
-	 * Name of the {@link Team}.
-	 */
-	private final String teamName;
-
-	/**
 	 * {@link Node} requiring the {@link Team}.
 	 */
 	private final Node node;
@@ -69,15 +64,12 @@ public class TeamLoaderImpl implements TeamLoader {
 	/**
 	 * Initiate for building.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
 	 * @param node
 	 *            {@link Node} requiring the {@link Team}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */
-	public TeamLoaderImpl(String teamName, Node node, NodeContext nodeContext) {
-		this.teamName = teamName;
+	public TeamLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
 		this.nodeContext = nodeContext;
 	}
@@ -193,7 +185,7 @@ public class TeamLoaderImpl implements TeamLoader {
 	}
 
 	@Override
-	public <TS extends TeamSource> TeamType loadTeamType(
+	public <TS extends TeamSource> TeamType loadTeamType(String teamName,
 			Class<TS> teamSourceClass, PropertyList propertyList) {
 
 		// Instantiate the team source
@@ -206,10 +198,9 @@ public class TeamLoaderImpl implements TeamLoader {
 
 		// Attempt to create the team
 		try {
-			teamSource.createTeam(new TeamSourceContextImpl(true,
-					this.teamName, TYPE_TEAM, new PropertyListSourceProperties(
-							propertyList), this.nodeContext
-							.getRootSourceContext()));
+			teamSource.createTeam(new TeamSourceContextImpl(true, teamName,
+					TYPE_TEAM, new PropertyListSourceProperties(propertyList),
+					this.nodeContext.getRootSourceContext()));
 
 		} catch (UnknownPropertyError ex) {
 			this.nodeContext.getCompilerIssues().addIssue(this.node,
@@ -240,7 +231,8 @@ public class TeamLoaderImpl implements TeamLoader {
 
 	@Override
 	public <TS extends TeamSource> OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(
-			Class<TS> teamSourceClass, PropertyList propertyList) {
+			String teamName, Class<TS> teamSourceClass,
+			PropertyList propertyList) {
 
 		// Load the specification
 		PropertyList properties = this.loadSpecification(teamSourceClass);
@@ -256,7 +248,7 @@ public class TeamLoaderImpl implements TeamLoader {
 		}
 
 		// Create and return type
-		return new OfficeFloorTeamSourceTypeImpl(this.teamName,
+		return new OfficeFloorTeamSourceTypeImpl(teamName,
 				PropertyNode.constructPropertyNodes(properties));
 	}
 

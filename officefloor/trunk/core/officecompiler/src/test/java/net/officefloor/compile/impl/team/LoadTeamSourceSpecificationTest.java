@@ -19,8 +19,6 @@ package net.officefloor.compile.impl.team;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
-import net.officefloor.compile.impl.structure.TeamNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -66,9 +64,9 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
-				"Failed to instantiate " + MockLoadTeamSource.class.getName()
-						+ " by default constructor", failure);
+		this.issues.recordIssue("Failed to instantiate "
+				+ MockLoadTeamSource.class.getName()
+				+ " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockLoadTeamSource.instantiateFailure = failure;
@@ -86,7 +84,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to obtain TeamSourceSpecification from "
 						+ MockLoadTeamSource.class.getName(), failure);
 
@@ -103,9 +101,8 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNoTeamSourceSpecification() {
 
 		// Record no specification returned
-		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
-				"No TeamSourceSpecification returned from "
-						+ MockLoadTeamSource.class.getName());
+		this.issues.recordIssue("No TeamSourceSpecification returned from "
+				+ MockLoadTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		MockLoadTeamSource.specification = null;
@@ -128,8 +125,6 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						TeamNodeImpl.class,
 						"Failed to obtain TeamSourceProperty instances from TeamSourceSpecification for "
 								+ MockLoadTeamSource.class.getName(), failure);
 
@@ -163,8 +158,8 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new TeamSourceProperty[] { null });
-		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
-				"TeamSourceProperty 0 is null from TeamSourceSpecification for "
+		this.issues
+				.recordIssue("TeamSourceProperty 0 is null from TeamSourceSpecification for "
 						+ MockLoadTeamSource.class.getName());
 
 		// Attempt to obtain specification
@@ -186,8 +181,8 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new TeamSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
-				"TeamSourceProperty 0 provided blank name from TeamSourceSpecification for "
+		this.issues
+				.recordIssue("TeamSourceProperty 0 provided blank name from TeamSourceSpecification for "
 						+ MockLoadTeamSource.class.getName());
 
 		// Attempt to obtain specification
@@ -211,7 +206,7 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(),
 				new TeamSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to get name for TeamSourceProperty 0 from TeamSourceSpecification for "
 						+ MockLoadTeamSource.class.getName(), failure);
 
@@ -239,8 +234,6 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 		this.control(property).expectAndThrow(property.getLabel(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						TeamNodeImpl.class,
 						"Failed to get label for TeamSourceProperty 0 (NAME) from TeamSourceSpecification for "
 								+ MockLoadTeamSource.class.getName(), failure);
 

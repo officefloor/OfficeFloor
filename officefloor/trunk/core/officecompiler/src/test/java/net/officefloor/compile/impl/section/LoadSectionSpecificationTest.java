@@ -19,8 +19,6 @@ package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
-import net.officefloor.compile.impl.structure.SectionNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -66,7 +64,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to instantiate " + MockSectionSource.class.getName()
 						+ " by default constructor", failure);
 
@@ -86,7 +84,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
+		this.issues.recordIssue(
 				"Failed to obtain SectionSourceSpecification from "
 						+ MockSectionSource.class.getName(), failure);
 
@@ -103,9 +101,8 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	public void testNoSectionSpecification() {
 
 		// Record no specification returned
-		this.issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
-				"No SectionSourceSpecification returned from "
-						+ MockSectionSource.class.getName());
+		this.issues.recordIssue("No SectionSourceSpecification returned from "
+				+ MockSectionSource.class.getName());
 
 		// Attempt to obtain specification
 		MockSectionSource.specification = null;
@@ -128,8 +125,6 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 				this.specification.getProperties(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						SectionNodeImpl.class,
 						"Failed to obtain SectionSourceProperty instances from SectionSourceSpecification for "
 								+ MockSectionSource.class.getName(), failure);
 
@@ -164,8 +159,8 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification,
 				this.specification.getProperties(),
 				new SectionSourceProperty[] { null });
-		this.issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
-				"SectionSourceProperty 0 is null from SectionSourceSpecification for "
+		this.issues
+				.recordIssue("SectionSourceProperty 0 is null from SectionSourceSpecification for "
 						+ MockSectionSource.class.getName());
 
 		// Attempt to obtain specification
@@ -188,11 +183,8 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 				new SectionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
 		this.issues
-				.recordIssue(
-						Node.TYPE_NAME,
-						SectionNodeImpl.class,
-						"SectionSourceProperty 0 provided blank name from SectionSourceSpecification for "
-								+ MockSectionSource.class.getName());
+				.recordIssue("SectionSourceProperty 0 provided blank name from SectionSourceSpecification for "
+						+ MockSectionSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -217,8 +209,6 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						SectionNodeImpl.class,
 						"Failed to get name for SectionSourceProperty 0 from SectionSourceSpecification for "
 								+ MockSectionSource.class.getName(), failure);
 
@@ -246,8 +236,6 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		this.control(property).expectAndThrow(property.getLabel(), failure);
 		this.issues
 				.recordIssue(
-						Node.TYPE_NAME,
-						SectionNodeImpl.class,
 						"Failed to get label for SectionSourceProperty 0 (NAME) from SectionSourceSpecification for "
 								+ MockSectionSource.class.getName(), failure);
 

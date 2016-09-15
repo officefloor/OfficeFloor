@@ -407,7 +407,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
-			Class<MS> managedObjectSourceClass, PropertyList propertyList) {
+			String managedObjectSourceName, Class<MS> managedObjectSourceClass,
+			PropertyList propertyList) {
 
 		// Create an instance of the managed object source
 		MS managedObjectSource = CompileUtil.newInstance(
@@ -418,13 +419,14 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		}
 
 		// Return the loaded managed object source type
-		return this.loadOfficeFloorManagedObjectSourceType(managedObjectSource,
-				propertyList);
+		return this.loadOfficeFloorManagedObjectSourceType(
+				managedObjectSourceName, managedObjectSource, propertyList);
 	}
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
-			MS managedObjectSource, PropertyList propertyList) {
+			String managedObjectSourceName, MS managedObjectSource,
+			PropertyList propertyList) {
 
 		// Load the specification
 		PropertyList properties = this.loadSpecification(managedObjectSource);
@@ -440,7 +442,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		}
 
 		// Create and return the managed object source type
-		return new OfficeFloorManagedObjectSourceTypeImpl(Node.TYPE_NAME,
+		return new OfficeFloorManagedObjectSourceTypeImpl(
+				managedObjectSourceName,
 				PropertyNode.constructPropertyNodes(properties));
 	}
 

@@ -24,7 +24,6 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.properties.Property;
@@ -125,7 +124,8 @@ public class SectionLoaderUtil {
 			Class<S> sectionSourceClass) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return context.createSectionNode(Node.TYPE_NAME, (OfficeNode) null);
+		return context.createSectionNode(
+				SectionLoaderUtil.class.getSimpleName(), (OfficeNode) null);
 	}
 
 	/**
@@ -298,8 +298,9 @@ public class SectionLoaderUtil {
 		OfficeSectionType eSection = (OfficeSectionType) designer;
 
 		// Load the actual section type
-		OfficeSectionType aSection = loadOfficeSectionType(Node.TYPE_NAME,
-				sectionSourceClass, sectionLocation, propertyNameValuePairs);
+		OfficeSectionType aSection = loadOfficeSectionType(
+				SectionLoaderUtil.class.getSimpleName(), sectionSourceClass,
+				sectionLocation, propertyNameValuePairs);
 
 		// Validate the office section
 		TestCase.assertEquals("Incorrect section name",

@@ -21,7 +21,6 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.office.OfficeInputType;
@@ -111,8 +110,8 @@ public class OfficeLoaderUtil {
 			String officeSourceClassName) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return new OfficeNodeImpl(Node.TYPE_NAME, officeSourceClassName, null,
-				OFFICE_LOCATION, null, context);
+		return new OfficeNodeImpl(OfficeLoaderUtil.class.getSimpleName(),
+				officeSourceClassName, null, OFFICE_LOCATION, null, context);
 	}
 
 	/**
@@ -129,8 +128,9 @@ public class OfficeLoaderUtil {
 			O officeSource) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return new OfficeNodeImpl(Node.TYPE_NAME, officeSource.getClass()
-				.getName(), officeSource, OFFICE_LOCATION, null, context);
+		return new OfficeNodeImpl(OfficeLoaderUtil.class.getSimpleName(),
+				officeSource.getClass().getName(), officeSource,
+				OFFICE_LOCATION, null, context);
 	}
 
 	/**

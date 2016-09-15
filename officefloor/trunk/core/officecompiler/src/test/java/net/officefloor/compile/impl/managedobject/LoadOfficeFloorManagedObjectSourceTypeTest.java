@@ -72,10 +72,11 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		// Obtain node context
 		NodeContext nodeContext = (NodeContext) compiler;
 
-		// Load the officeflooor managed object source type
+		// Load the OfficeFloor managed object source type
 		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(node);
 		OfficeFloorManagedObjectSourceType mosType = moLoader
 				.loadOfficeFloorManagedObjectSourceType(
+						MANAGED_OBJECT_SOURCE_NAME,
 						ClassManagedObjectSource.class, properties);
 		MockLoadManagedObject.assertOfficeFloorManagedObjectSourceType(mosType,
 				MANAGED_OBJECT_SOURCE_NAME);
@@ -106,10 +107,11 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		// Obtain node context
 		NodeContext nodeContext = (NodeContext) compiler;
 
-		// Load the officeflooor managed object source type
+		// Load the OfficeFloor managed object source type
 		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(node);
 		OfficeFloorManagedObjectSourceType mosType = moLoader
 				.loadOfficeFloorManagedObjectSourceType(
+						MANAGED_OBJECT_SOURCE_NAME,
 						new ClassManagedObjectSource(), properties);
 		MockLoadManagedObject.assertOfficeFloorManagedObjectSourceType(mosType,
 				MANAGED_OBJECT_SOURCE_NAME);
@@ -146,7 +148,7 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends
 		// Load the officelooor managed object source type
 		ManagedObjectLoader moLoader = nodeContext.getManagedObjectLoader(node);
 		OfficeFloorManagedObjectSourceType mosType = moLoader
-				.loadOfficeFloorManagedObjectSourceType(
+				.loadOfficeFloorManagedObjectSourceType("mos",
 						MockManagedObjectSource.class,
 						compiler.createPropertyList());
 

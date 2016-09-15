@@ -24,8 +24,6 @@ import java.sql.Connection;
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
-import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
@@ -152,9 +150,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.recordIssue(Node.TYPE_NAME, ManagedObjectSourceNodeImpl.class,
-				"Failed to init", new IllegalArgumentException(
-						"Dependency connection has more than one Qualifier"));
+		issues.recordIssue("Failed to init", new IllegalArgumentException(
+				"Dependency connection has more than one Qualifier"));
 		this.control(issues).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {

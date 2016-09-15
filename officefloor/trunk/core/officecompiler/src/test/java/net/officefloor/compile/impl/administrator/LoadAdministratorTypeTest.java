@@ -27,8 +27,6 @@ import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.AdministratorNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -77,12 +75,9 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 				"instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(
-				Node.TYPE_NAME,
-				AdministratorNodeImpl.class,
-				"Failed to instantiate "
-						+ MockAdministratorSource.class.getName()
-						+ " by default constructor", failure);
+		this.issues.recordIssue("Failed to instantiate "
+				+ MockAdministratorSource.class.getName()
+				+ " by default constructor", failure);
 
 		// Attempt to load
 		MockAdministratorSource.instantiateFailure = failure;
@@ -95,8 +90,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Missing property 'missing'");
+		this.issues.recordIssue("Missing property 'missing'");
 
 		// Attempt to load
 		this.loadAdministratorType(false, new Init() {
@@ -142,8 +136,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Can not load class 'missing'");
+		this.issues.recordIssue("Can not load class 'missing'");
 
 		// Attempt to load
 		this.loadAdministratorType(false, new Init() {
@@ -160,8 +153,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record missing class
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Can not obtain resource at location 'missing'");
+		this.issues
+				.recordIssue("Can not obtain resource at location 'missing'");
 
 		// Attempt to load
 		this.loadAdministratorType(false, new Init() {
@@ -181,8 +174,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 				"Fail init AdministratorSource");
 
 		// Record failure to init the Administrator Source
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Failed to init", failure);
+		this.issues.recordIssue("Failed to init", failure);
 
 		// Attempt to load
 		this.loadAdministratorType(false, new Init() {
@@ -199,8 +191,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	public void testNullAdministratorSourceMetaData() {
 
 		// Record null the Administrator Source meta-data
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Returned null AdministratorSourceMetaData");
+		this.issues.recordIssue("Returned null AdministratorSourceMetaData");
 
 		// Attempt to load
 		this.loadAdministratorType(false, new Init() {
@@ -219,8 +210,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		final Error failure = new Error("Obtain meta-data failure");
 
 		// Record failure to obtain the meta-data
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Failed to get AdministratorSourceMetaData", failure);
+		this.issues.recordIssue("Failed to get AdministratorSourceMetaData",
+				failure);
 
 		// Attempt to load
 		MockAdministratorSource.metaDataFailure = failure;
@@ -235,8 +226,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		// Record no object class
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(),
 				null);
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"No extension interface provided");
+		this.issues.recordIssue("No extension interface provided");
 
 		// Attempt to load
 		this.loadAdministratorType(false, null);
@@ -252,8 +242,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		this.record_extensionInterface();
 		this.recordReturn(this.metaData,
 				this.metaData.getAdministratorDutyMetaData(), null);
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Must have at least one duty");
+		this.issues.recordIssue("Must have at least one duty");
 
 		// Attempt to load
 		this.loadAdministratorType(false, null);
@@ -269,8 +258,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData,
 				this.metaData.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[0]);
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Must have at least one duty");
+		this.issues.recordIssue("Must have at least one duty");
 
 		// Attempt to load
 		this.loadAdministratorType(false, null);
@@ -287,8 +275,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData,
 				this.metaData.getAdministratorDutyMetaData(),
 				new AdministratorDutyMetaData[] { null });
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Null meta data for duty 0");
+		this.issues.recordIssue("Null meta data for duty 0");
 
 		// Attempt to load
 		this.loadAdministratorType(false, null);
@@ -301,8 +288,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 
 		// Record null duty key
 		this.record_loadAdminType((Enum<?>) null);
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"No name for duty 0");
+		this.issues.recordIssue("No name for duty 0");
 
 		// Attempt to load
 		this.loadAdministratorType(false, null);
@@ -329,8 +315,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dutyOne, dutyOne.getDutyName(), DUPLICATE_NAME);
 		this.recordReturn(dutyOne, dutyOne.getKey(), DutyKey.ONE);
 		this.recordReturn(dutyTwo, dutyTwo.getDutyName(), DUPLICATE_NAME);
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Duplicate duty name 'duplicate'");
+		this.issues.recordIssue("Duplicate duty name 'duplicate'");
 
 		// Attempt to load
 		this.loadAdministratorType(false, null);
@@ -344,11 +329,10 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 
 		// Record invalid duty key
 		this.record_loadAdminType(DutyKey.ONE, InvalidDutyKey.INVALID_DUTY_KEY);
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Key " + InvalidDutyKey.INVALID_DUTY_KEY
-						+ " for duty 1 is invalid (type="
-						+ InvalidDutyKey.class.getName() + ", required type="
-						+ DutyKey.class.getName() + ")");
+		this.issues.recordIssue("Key " + InvalidDutyKey.INVALID_DUTY_KEY
+				+ " for duty 1 is invalid (type="
+				+ InvalidDutyKey.class.getName() + ", required type="
+				+ DutyKey.class.getName() + ")");
 
 		// Attempt to load
 		this.loadAdministratorType(false, null);
@@ -374,8 +358,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dutyOne, dutyOne.getKey(), DutyKey.ONE);
 		this.recordReturn(dutyTwo, dutyTwo.getDutyName(), DutyKey.TWO.name());
 		this.recordReturn(dutyTwo, dutyTwo.getKey(), null);
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Must have key for duty " + 1);
+		this.issues.recordIssue("Must have key for duty " + 1);
 
 		// Attempt to load
 		this.loadAdministratorType(false, null);
@@ -401,8 +384,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dutyOne, dutyOne.getKey(), null);
 		this.recordReturn(dutyTwo, dutyTwo.getDutyName(), DutyKey.TWO.name());
 		this.recordReturn(dutyTwo, dutyTwo.getKey(), DutyKey.TWO);
-		this.issues.recordIssue(Node.TYPE_NAME, AdministratorNodeImpl.class,
-				"Should not have key for duty " + 1);
+		this.issues.recordIssue("Should not have key for duty " + 1);
 
 		// Attempt to load
 		this.loadAdministratorType(false, null);

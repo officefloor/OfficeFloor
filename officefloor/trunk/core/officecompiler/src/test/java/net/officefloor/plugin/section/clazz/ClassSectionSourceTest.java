@@ -33,9 +33,7 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
-import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.structure.WorkNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -447,9 +445,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				return true;
 			}
 		});
-		issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
-				"Failure loading WorkType from source "
-						+ SectionClassWorkSource.class.getName(), cause);
+		issues.recordIssue("Failure loading WorkType from source "
+				+ SectionClassWorkSource.class.getName(), cause);
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
@@ -564,8 +561,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.recordIssue(Node.TYPE_NAME, SectionNodeImpl.class,
-				"Dependency connection has more than one Qualifier");
+		issues.recordIssue("Dependency connection has more than one Qualifier");
 
 		// Test
 		this.replayMockObjects();

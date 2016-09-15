@@ -20,8 +20,6 @@ package net.officefloor.compile.impl.team;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.TeamNodeImpl;
-import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -54,8 +52,7 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
-				"Missing property 'missing'");
+		this.issues.recordIssue("Missing property 'missing'");
 
 		// Attempt to load
 		this.loadTeamType(false, new Loader() {
@@ -72,8 +69,7 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
-				"Can not load class 'missing'");
+		this.issues.recordIssue("Can not load class 'missing'");
 
 		// Attempt to load
 		this.loadTeamType(false, new Loader() {
@@ -90,8 +86,8 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	public void testMissingResource() {
 
 		// Record missing class
-		this.issues.recordIssue(Node.TYPE_NAME, TeamNodeImpl.class,
-				"Can not obtain resource at location 'missing'");
+		this.issues
+				.recordIssue("Can not obtain resource at location 'missing'");
 
 		// Attempt to load
 		this.loadTeamType(false, new Loader() {
@@ -133,8 +129,8 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		TeamLoader teamLoader = compiler.getTeamLoader();
 		MockLoadTeamSource.loader = loader;
-		TeamType teamType = teamLoader.loadTeamType(MockLoadTeamSource.class,
-				propertyList);
+		TeamType teamType = teamLoader.loadTeamType("team",
+				MockLoadTeamSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

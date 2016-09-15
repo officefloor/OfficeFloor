@@ -30,6 +30,7 @@ import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.impl.adapt.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
@@ -69,7 +70,12 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class OfficeFloorCompiler implements PropertyConfigurable {
+public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable {
+
+	/**
+	 * {@link Node} type.
+	 */
+	public static final String TYPE = "Compiler";
 
 	/**
 	 * <p>
@@ -396,6 +402,30 @@ public abstract class OfficeFloorCompiler implements PropertyConfigurable {
 			this.addTeamSourceAlias(service.getTeamSourceAlias(),
 					service.getTeamSourceClass());
 		}
+	}
+
+	/*
+	 * ==================== Node ==============================
+	 */
+
+	@Override
+	public String getNodeName() {
+		return TYPE;
+	}
+
+	@Override
+	public String getNodeType() {
+		return "Compiler";
+	}
+
+	@Override
+	public String getLocation() {
+		return null;
+	}
+
+	@Override
+	public Node getParentNode() {
+		return null;
 	}
 
 	/*
