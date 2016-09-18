@@ -65,26 +65,17 @@ public class SectionObjectTypeImpl implements SectionObjectType {
 
 	@Override
 	public String getSectionObjectName() {
-		// TODO implement SectionObjectType.getSectionObjectName
-		throw new UnsupportedOperationException(
-				"TODO implement SectionObjectType.getSectionObjectName");
-
+		return this.objectName;
 	}
 
 	@Override
 	public String getObjectType() {
-		// TODO implement SectionObjectType.getObjectType
-		throw new UnsupportedOperationException(
-				"TODO implement SectionObjectType.getObjectType");
-
+		return this.objectType;
 	}
 
 	@Override
 	public String getTypeQualifier() {
-		// TODO implement SectionObjectType.getTypeQualifier
-		throw new UnsupportedOperationException(
-				"TODO implement SectionObjectType.getTypeQualifier");
-
+		return this.typeQualifier;
 	}
 
 }

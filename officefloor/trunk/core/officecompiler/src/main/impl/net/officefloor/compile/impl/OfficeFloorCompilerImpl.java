@@ -651,10 +651,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public SectionLoader getSectionLoader(Node node) {
-		// TODO implement NodeContext.getSectionLoader
-		throw new UnsupportedOperationException(
-				"TODO implement NodeContext.getSectionLoader");
-
+		return new SectionLoaderImpl(node, this);
 	}
 
 	@Override
@@ -770,7 +767,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 			String managedObjectSourceClassName,
 			ManagedObjectSource<?, ?> managedObjectSource, SectionNode section) {
 		OfficeNode office = section.getOfficeNode();
-		OfficeFloorNode officeFloor = office.getOfficeFloorNode();
+		OfficeFloorNode officeFloor = (office != null ? office
+				.getOfficeFloorNode() : null);
 		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null,
 				managedObjectSourceClassName, managedObjectSource, section,
 				office, officeFloor, this);

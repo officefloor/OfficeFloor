@@ -255,7 +255,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		if (managedObject == null) {
 			// Add the managed object and register it
 			managedObject = this.managedObjectRegistry.createManagedObjectNode(
-					managedObjectName, managedObjectScope);
+					managedObjectName, managedObjectScope, this);
 			this.managedObjects.put(managedObjectName, managedObject);
 		} else {
 			// Managed object already added

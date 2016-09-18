@@ -20,10 +20,12 @@ package net.officefloor.compile.impl.issues;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.IssueCapture;
 
 /**
  * Abstract {@link CompilerIssues}
@@ -60,21 +62,39 @@ public abstract class AbstractCompilerIssues implements CompilerIssues {
 	 */
 
 	@Override
-	public CompilerIssue[] captureIssues(Runnable runnable) {
+	public <R> IssueCapture<R> captureIssues(Supplier<R> supplier) {
+
 		// Create the context for this capture
 		List<CompilerIssue> invocationContext = new LinkedList<CompilerIssue>();
 		this.context.push(invocationContext);
+		final R returnValue;
 		try {
 
 			// Undertake functionality within capture context
-			runnable.run();
+			returnValue = supplier.get();
 
 		} finally {
 			// Ensure pop the context
 			this.context.pop();
 		}
-		return invocationContext.toArray(new CompilerIssue[invocationContext
-				.size()]);
+
+		// Obtain the possible captured issues
+		final CompilerIssue[] issues = invocationContext
+				.toArray(new CompilerIssue[invocationContext.size()]);
+
+		// Return the issue capture
+		return new IssueCapture<R>() {
+
+			@Override
+			public R getReturnValue() {
+				return returnValue;
+			}
+
+			@Override
+			public CompilerIssue[] getCompilerIssues() {
+				return issues;
+			}
+		};
 	}
 
 	@Override

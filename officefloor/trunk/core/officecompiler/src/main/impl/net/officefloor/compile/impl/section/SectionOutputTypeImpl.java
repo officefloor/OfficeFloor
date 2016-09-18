@@ -66,26 +66,16 @@ public class SectionOutputTypeImpl implements SectionOutputType {
 
 	@Override
 	public String getSectionOutputName() {
-		// TODO implement SectionOutputType.getSectionOutputName
-		throw new UnsupportedOperationException(
-				"TODO implement SectionOutputType.getSectionOutputName");
-
+		return this.outputName;
 	}
 
 	@Override
 	public String getArgumentType() {
-		// TODO implement SectionOutputType.getArgumentType
-		throw new UnsupportedOperationException(
-				"TODO implement SectionOutputType.getArgumentType");
-
+		return this.argumentType;
 	}
 
 	@Override
 	public boolean isEscalationOnly() {
-		// TODO implement SectionOutputType.isEscalationOnly
-		throw new UnsupportedOperationException(
-				"TODO implement SectionOutputType.isEscalationOnly");
-
+		return this.isEscalationOnly;
 	}
-
 }

@@ -267,7 +267,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public ManagedObjectNode createManagedObjectNode(String managedObjectName,
-			ManagedObjectScope managedObjectScope) {
+			ManagedObjectScope managedObjectScope,
+			ManagedObjectSourceNode managedObjectSourceNode) {
 		// TODO implement ManagedObjectRegistry.createManagedObjectNode
 		throw new UnsupportedOperationException(
 				"TODO implement ManagedObjectRegistry.createManagedObjectNode");

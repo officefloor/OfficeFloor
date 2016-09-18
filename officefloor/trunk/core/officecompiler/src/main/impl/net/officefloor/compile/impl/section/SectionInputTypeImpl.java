@@ -56,18 +56,12 @@ public class SectionInputTypeImpl implements SectionInputType {
 
 	@Override
 	public String getSectionInputName() {
-		// TODO implement SectionInputType.getSectionInputName
-		throw new UnsupportedOperationException(
-				"TODO implement SectionInputType.getSectionInputName");
-
+		return this.inputName;
 	}
 
 	@Override
 	public String getParameterType() {
-		// TODO implement SectionInputType.getParameterType
-		throw new UnsupportedOperationException(
-				"TODO implement SectionInputType.getParameterType");
-
+		return this.parameterType;
 	}
 
 }

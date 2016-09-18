@@ -91,10 +91,9 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue(
-					"No " + SectionSourceSpecification.class.getSimpleName()
-							+ " returned from " + sectionSourceClass.getName(),
-					null);
+			this.addIssue("No "
+					+ SectionSourceSpecification.class.getSimpleName()
+					+ " returned from " + sectionSourceClass.getName());
 			return null; // no specification obtained
 		}
 
@@ -123,7 +122,7 @@ public class SectionLoaderImpl implements SectionLoader {
 					this.addIssue(SectionSourceProperty.class.getSimpleName()
 							+ " " + i + " is null from "
 							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName(), null);
+							+ " for " + sectionSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -148,7 +147,7 @@ public class SectionLoaderImpl implements SectionLoader {
 					this.addIssue(SectionSourceProperty.class.getSimpleName()
 							+ " " + i + " provided blank name from "
 							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName(), null);
+							+ " for " + sectionSourceClass.getName());
 					return null; // must have complete property details
 				}
 

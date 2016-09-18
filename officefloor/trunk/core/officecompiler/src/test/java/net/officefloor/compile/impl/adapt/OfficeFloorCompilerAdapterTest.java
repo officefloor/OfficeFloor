@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.adapt;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
@@ -37,6 +38,7 @@ import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.IssueCapture;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
@@ -559,7 +561,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 			}
 
 			@Override
-			public CompilerIssue[] captureIssues(Runnable runnable) {
+			public <R> IssueCapture<R> captureIssues(Supplier<R> runnable) {
 				fail("Should not be invoked");
 				return null;
 			}
