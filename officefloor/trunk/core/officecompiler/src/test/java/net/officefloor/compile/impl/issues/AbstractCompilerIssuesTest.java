@@ -22,8 +22,11 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+import java.util.function.Supplier;
+
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
+import net.officefloor.compile.issues.IssueCapture;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -64,10 +67,13 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 	 * Ensure capture simple issue.
 	 */
 	public void testCapturedSimpleIssue() {
-		CompilerIssue[] issues = this.issues.captureIssues(() -> {
+		IssueCapture<String> capture = this.issues.captureIssues(() -> {
 			this.issues.addIssue(this.node, "TEST ISSUE");
+			return "TEST";
 		});
-		assertCompilerIssues(issues, new Issue("TEST ISSUE"));
+		assertEquals("Incorrect return value", "TEST", capture.getReturnValue());
+		assertCompilerIssues(capture.getCompilerIssues(), new Issue(
+				"TEST ISSUE"));
 	}
 
 	/**
@@ -75,10 +81,13 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 	 */
 	public void testCaptureSimpleFailure() {
 		Throwable cause = new IOException("TEST CAUSE");
-		CompilerIssue[] issues = this.issues.captureIssues(() -> {
+		IssueCapture<String> capture = this.issues.captureIssues(() -> {
 			this.issues.addIssue(this.node, "TEST FAILURE", cause);
+			return null;
 		});
-		assertCompilerIssues(issues, new Issue("TEST FAILURE", cause));
+		assertNull("Should not have return value", capture.getReturnValue());
+		assertCompilerIssues(capture.getCompilerIssues(), new Issue(
+				"TEST FAILURE", cause));
 	}
 
 	/**
@@ -86,31 +95,38 @@ public class AbstractCompilerIssuesTest extends OfficeFrameTestCase {
 	 */
 	public void testCaptureIssueAndFailure() {
 		Throwable cause = new SQLException("TEST CAUSE");
-		CompilerIssue[] issues = this.issues.captureIssues(() -> {
+		IssueCapture<String> capture = this.issues.captureIssues(() -> {
 			this.issues.addIssue(this.node, "TEST ISSUE");
 			this.issues.addIssue(this.node, "TEST FAILURE", cause);
+			return null;
 		});
-		assertCompilerIssues(issues, new Issue("TEST ISSUE"), new Issue(
-				"TEST FAILURE", cause));
+		assertCompilerIssues(capture.getCompilerIssues(), new Issue(
+				"TEST ISSUE"), new Issue("TEST FAILURE", cause));
 	}
 
 	/**
 	 * Ensure can capture issues at multiple levels.
 	 */
 	public void testCaptureIssuesAtMultipleLevels() {
-		CompilerIssue[] issues = this.issues.captureIssues(() -> {
-			this.issues.addIssue(
-					this.node,
-					"TOP",
-					this.issues.captureIssues(() -> {
-						this.issues.addIssue(this.node, "SECOND",
-								this.issues.captureIssues(() -> {
-									this.issues.addIssue(this.node, "THIRD");
-								}));
-					}));
-		});
-		assertCompilerIssues(issues, new Issue("TOP", new Issue("SECOND",
-				new Issue("THIRD"))));
+		Supplier<Object> thirdLevel = () -> {
+			this.issues.addIssue(this.node, "THIRD");
+			return null;
+		};
+		Supplier<Object> secondLevel = () -> {
+			this.issues.addIssue(this.node, "SECOND", this.issues
+					.captureIssues(thirdLevel)
+
+					.getCompilerIssues());
+			return null;
+		};
+		Supplier<Object> topLevel = () -> {
+			this.issues.addIssue(this.node, "TOP",
+					this.issues.captureIssues(secondLevel).getCompilerIssues());
+			return null;
+		};
+		IssueCapture<Object> capture = this.issues.captureIssues(topLevel);
+		assertCompilerIssues(capture.getCompilerIssues(), new Issue("TOP",
+				new Issue("SECOND", new Issue("THIRD"))));
 	}
 
 	/**

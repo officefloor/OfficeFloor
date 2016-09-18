@@ -272,19 +272,22 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public TaskNode getTaskNode(String taskName) {
-		// TODO implement TaskRegistry.getTaskNode
-		throw new UnsupportedOperationException(
-				"TODO implement TaskRegistry.getTaskNode");
-
+		return this.taskNodes.get(taskName);
 	}
 
 	@Override
 	public TaskNode createTaskNode(String taskName, String taskTypeName,
 			WorkNode work) {
-		// TODO implement TaskRegistry.createTaskNode
-		throw new UnsupportedOperationException(
-				"TODO implement TaskRegistry.createTaskNode");
 
+		// Create the task node
+		TaskNode task = this.context.createTaskNode(taskName, taskTypeName,
+				work);
+
+		// Register the task node
+		this.taskNodes.put(taskName, task);
+
+		// Return the task node
+		return task;
 	}
 
 	/*
@@ -293,19 +296,23 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
-		// TODO implement ManagedObjectRegistry.getManagedObjectNode
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectRegistry.getManagedObjectNode");
-
+		return this.managedObjects.get(managedObjectName);
 	}
 
 	@Override
 	public ManagedObjectNode createManagedObjectNode(String managedObjectName,
-			ManagedObjectScope managedObjectScope) {
-		// TODO implement ManagedObjectRegistry.createManagedObjectNode
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectRegistry.createManagedObjectNode");
+			ManagedObjectScope managedObjectScope,
+			ManagedObjectSourceNode managedObjectSourceNode) {
 
+		// Create the managed object node
+		ManagedObjectNode node = this.context.createManagedObjectNode(
+				managedObjectName, managedObjectScope, managedObjectSourceNode);
+
+		// Register the managed object node
+		this.managedObjects.put(managedObjectName, node);
+
+		// Return the managed object node
+		return node;
 	}
 
 	/*
@@ -386,8 +393,11 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			return false; // must have resource
 
 		} catch (LoadTypeError ex) {
-			this.addIssue("Failure loading " + ex.getType().getSimpleName()
-					+ " from source " + ex.getSourceClassName());
+			this.context.getCompilerIssues().addIssue(
+					this,
+					"Failure loading " + ex.getType().getSimpleName()
+							+ " from source " + ex.getSourceClassName(),
+					ex.getCauses());
 			return false; // must not fail in loading types
 
 		} catch (Throwable ex) {
@@ -430,6 +440,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getSectionInputName(), b.getSectionInputName()))
+				.map((input) -> input.loadSectionInputType())
+				.filter((type) -> (type != null))
 				.toArray(SectionInputType[]::new);
 		for (int i = 0; i < inputTypes.length; i++) {
 			if (CompileUtil.isBlank(inputTypes[i].getSectionInputName())) {
@@ -444,6 +456,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getSectionOutputName(), b.getSectionOutputName()))
+				.map((output) -> output.loadSectionOutputType())
+				.filter((type) -> (type != null))
 				.toArray(SectionOutputType[]::new);
 		for (int i = 0; i < outputTypes.length; i++) {
 			if (CompileUtil.isBlank(outputTypes[i].getSectionOutputName())) {
@@ -458,6 +472,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getSectionObjectName(), b.getSectionObjectName()))
+				.map((object) -> object.loadSectionObjectType())
+				.filter((type) -> (type != null))
 				.toArray(SectionObjectType[]::new);
 		for (int i = 0; i < objectTypes.length; i++) {
 			SectionObjectType objectType = objectTypes[i];

@@ -18,7 +18,7 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
-import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -98,88 +98,73 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public WorkType<?> loadWorkType(String workSourceClassName,
 			PropertyList properties) {
+		return CompileUtil.loadType(WorkType.class,
+				workSourceClassName,
+				this.context.getCompilerIssues(),
+				() -> {
 
-		// Obtain the work source class
-		Class workSourceClass = this.context.getWorkSourceClass(
-				workSourceClassName, this.node);
+					// Obtain the work source class
+				Class workSourceClass = this.context.getWorkSourceClass(
+						workSourceClassName, this.node);
+				if (workSourceClass == null) {
+					return null;
+				}
 
-		// Ensure have the work source class
-		if (workSourceClass == null) {
-			throw new LoadTypeError(WorkType.class, workSourceClassName);
-		}
-
-		// Load the work type
-		WorkLoader workLoader = this.context.getWorkLoader(this.node);
-		WorkType<?> workType = workLoader.loadWorkType(workSourceClass,
-				properties);
-
-		// Ensure have the work type
-		if (workType == null) {
-			throw new LoadTypeError(WorkType.class, workSourceClassName);
-		}
-
-		// Return the work type
-		return workType;
+				// Load and return the work type
+				WorkLoader workLoader = this.context.getWorkLoader(this.node);
+				return workLoader.loadWorkType(workSourceClass, properties);
+			});
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectType<?> loadManagedObjectType(
 			String managedObjectSourceClassName, PropertyList properties) {
+		return CompileUtil.loadType(
+				ManagedObjectType.class,
+				managedObjectSourceClassName,
+				this.context.getCompilerIssues(),
+				() -> {
 
-		// Obtain the managed object source class
-		Class managedObjectSourceClass = this.context
-				.getManagedObjectSourceClass(managedObjectSourceClassName,
-						this.node);
+					// Obtain the managed object source class
+					Class managedObjectSourceClass = this.context
+							.getManagedObjectSourceClass(
+									managedObjectSourceClassName, this.node);
+					if (managedObjectSourceClass == null) {
+						return null;
+					}
 
-		// Ensure have the managed object source class
-		if (managedObjectSourceClass == null) {
-			throw new LoadTypeError(ManagedObjectType.class,
-					managedObjectSourceClassName);
-		}
+					// Load and return the managed object type
+					ManagedObjectLoader managedObjectLoader = this.context
+							.getManagedObjectLoader(this.node);
+					return managedObjectLoader.loadManagedObjectType(
+							managedObjectSourceClass, properties);
+				});
 
-		// Load the managed object type
-		ManagedObjectLoader managedObjectLoader = this.context
-				.getManagedObjectLoader(this.node);
-		ManagedObjectType<?> managedObjectType = managedObjectLoader
-				.loadManagedObjectType(managedObjectSourceClass, properties);
-
-		// Ensure have the managed object type
-		if (managedObjectType == null) {
-			throw new LoadTypeError(ManagedObjectType.class,
-					managedObjectSourceClassName);
-		}
-
-		// Return the managed object type
-		return managedObjectType;
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SectionType loadSectionType(String sectionSourceClassName,
 			String location, PropertyList properties) {
+		return CompileUtil.loadType(SectionType.class,
+				sectionSourceClassName,
+				this.context.getCompilerIssues(),
+				() -> {
 
-		// Obtain the section source class
-		Class sectionSourceClass = this.context.getSectionSourceClass(
-				sectionSourceClassName, this.node);
+					// Obtain the section source class
+				Class sectionSourceClass = this.context.getSectionSourceClass(
+						sectionSourceClassName, this.node);
+				if (sectionSourceClass == null) {
+					return null;
+				}
 
-		// Ensure have the section source class
-		if (sectionSourceClass == null) {
-			throw new LoadTypeError(SectionType.class, sectionSourceClassName);
-		}
-
-		// Load the section type
-		SectionLoader sectionLoader = this.context.getSectionLoader(this.node);
-		SectionType sectionType = sectionLoader.loadSectionType(
-				sectionSourceClass, location, properties);
-
-		// Ensure have the section type
-		if (sectionType == null) {
-			throw new LoadTypeError(SectionType.class, sectionSourceClassName);
-		}
-
-		// Return the section type
-		return sectionType;
+				// Load and return the section type
+				SectionLoader sectionLoader = this.context
+						.getSectionLoader(this.node);
+				return sectionLoader.loadSectionType(sectionSourceClass,
+						location, properties);
+			});
 	}
 
 }

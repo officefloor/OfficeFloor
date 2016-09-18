@@ -22,9 +22,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.IssueCapture;
 import net.officefloor.frame.spi.source.SourceContext;
 
 /**
@@ -252,6 +254,39 @@ public class CompileUtil {
 
 		// Return the instance
 		return instance;
+	}
+
+	/**
+	 * Convenience method to load a type.
+	 * 
+	 * @param type
+	 *            Type to be loaded.
+	 * @param sourceClassName
+	 *            Source {@link Class} name for the type.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param supplier
+	 *            {@link Supplier} of the type.
+	 * @return Type.
+	 * @throws LoadTypeError
+	 *             If fails to load the type.
+	 */
+	public static <T> T loadType(Class<T> type, String sourceClassName,
+			CompilerIssues issues, Supplier<T> supplier) throws LoadTypeError {
+
+		// Load the type
+		IssueCapture<T> capture = issues.captureIssues(supplier);
+
+		// Ensure have type
+		T loadedType = capture.getReturnValue();
+		if (loadedType == null) {
+			// Failed to load type
+			throw new LoadTypeError(type, sourceClassName,
+					capture.getCompilerIssues());
+		}
+
+		// Return the loaded type
+		return loadedType;
 	}
 
 	/**

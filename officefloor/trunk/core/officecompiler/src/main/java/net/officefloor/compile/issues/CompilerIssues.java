@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.issues;
 
+import java.util.function.Supplier;
+
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -30,12 +32,12 @@ public interface CompilerIssues {
 	/**
 	 * Captures {@link CompilerIssue} instances.
 	 * 
-	 * @param runnable
-	 *            {@link Runnable} of code to capture {@link CompilerIssue}
+	 * @param supplier
+	 *            {@link Supplier} of code to capture {@link CompilerIssue}
 	 *            within.
-	 * @return Array of {@link CompilerIssue} instances.
+	 * @return {@link IssueCapture}.
 	 */
-	CompilerIssue[] captureIssues(Runnable runnable);
+	<R> IssueCapture<R> captureIssues(Supplier<R> supplier);
 
 	/**
 	 * Adds an issue regarding a particular {@link Node}.

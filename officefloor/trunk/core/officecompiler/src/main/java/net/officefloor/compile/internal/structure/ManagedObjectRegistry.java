@@ -44,9 +44,13 @@ public interface ManagedObjectRegistry {
 	 *            Name of the {@link ManagedObjectNode}.
 	 * @param managedObjectScope
 	 *            {@link ManagedObjectScope}.
+	 * @param managedObjectSourceNode
+	 *            {@link ManagedObjectSourceNode} for the
+	 *            {@link ManagedObjectNode}.
 	 * @return {@link ManagedObjectNode}.
 	 */
 	ManagedObjectNode createManagedObjectNode(String managedObjectName,
-			ManagedObjectScope managedObjectScope);
+			ManagedObjectScope managedObjectScope,
+			ManagedObjectSourceNode managedObjectSourceNode);
 
 }

@@ -17,11 +17,7 @@
  */
 package net.officefloor.compile.impl.util;
 
-import net.officefloor.compile.administrator.AdministratorType;
-import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.office.OfficeType;
-import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.work.WorkType;
+import net.officefloor.compile.issues.CompilerIssue;
 
 /**
  * Propagates a failure loading a type.
@@ -44,6 +40,11 @@ public class LoadTypeError extends Error {
 	private final String sourceClassName;
 
 	/**
+	 * {@link CompilerIssue} instances indicating cause of not loading type.
+	 */
+	private final CompilerIssue[] causes;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param type
@@ -51,22 +52,19 @@ public class LoadTypeError extends Error {
 	 * @param sourceClassName
 	 *            Name of the source class being used to load the type. May also
 	 *            be an alias.
+	 * @param causes
+	 *            {@link CompilerIssue} instances indicating cause of not
+	 *            loading type.
 	 */
-	public LoadTypeError(Class<?> type, String sourceClassName) {
+	public LoadTypeError(Class<?> type, String sourceClassName,
+			CompilerIssue[] causes) {
 		this.type = type;
 		this.sourceClassName = sourceClassName;
+		this.causes = causes;
 	}
 
 	/**
-	 * Obtains the type being attempted to be loaded. Value should be one of
-	 * following:
-	 * <ol>
-	 * <li>{@link WorkType}</li>
-	 * <li>{@link ManagedObjectType}</li>
-	 * <li>{@link SectionType}</li>
-	 * <li>{@link AdministratorType}</li>
-	 * <li>{@link OfficeType}</li>
-	 * </ol>
+	 * Obtains the type being attempted to be loaded.
 	 * 
 	 * @return Type being attempted to be loaded.
 	 */
@@ -83,6 +81,17 @@ public class LoadTypeError extends Error {
 	 */
 	public String getSourceClassName() {
 		return this.sourceClassName;
+	}
+
+	/**
+	 * Obtains the {@link CompilerIssue} instances indicating cause of not
+	 * loading type.
+	 * 
+	 * @return {@link CompilerIssue} instances indicating cause of not loading
+	 *         type.
+	 */
+	public CompilerIssue[] getCauses() {
+		return this.causes;
 	}
 
 }

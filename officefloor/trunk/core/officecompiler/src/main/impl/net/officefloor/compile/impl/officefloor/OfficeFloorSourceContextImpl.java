@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.officefloor;
 import net.officefloor.autowire.supplier.SupplierLoader;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
-import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -100,53 +100,43 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	public ManagedObjectType<?> loadManagedObjectType(
 			ManagedObjectSource<?, ?> managedObjectSource,
 			PropertyList properties) {
+		return CompileUtil.loadType(ManagedObjectType.class,
+				managedObjectSource.getClass().getName(),
+				this.context.getCompilerIssues(),
+				() -> {
 
-		// Load the managed object type
-		ManagedObjectLoader managedObjectLoader = this.context
-				.getManagedObjectLoader(this.node);
-		ManagedObjectType managedObjectType = managedObjectLoader
-				.loadManagedObjectType(managedObjectSource, properties);
-
-		// Ensure have the managed object type
-		if (managedObjectType == null) {
-			throw new LoadTypeError(ManagedObjectType.class,
-					managedObjectSource.getClass().getName());
-		}
-
-		// Return the managed object type
-		return managedObjectType;
+					// Load and return the managed object type
+				ManagedObjectLoader managedObjectLoader = this.context
+						.getManagedObjectLoader(this.node);
+				return managedObjectLoader.loadManagedObjectType(
+						managedObjectSource, properties);
+			});
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectType<?> loadManagedObjectType(
 			String managedObjectSourceClassName, PropertyList properties) {
+		return CompileUtil.loadType(
+				ManagedObjectType.class,
+				managedObjectSourceClassName,
+				this.context.getCompilerIssues(),
+				() -> {
 
-		// Obtain the managed object source class
-		Class managedObjectSourceClass = this.context
-				.getManagedObjectSourceClass(managedObjectSourceClassName,
-						this.node);
+					// Obtain the managed object source class
+					Class managedObjectSourceClass = this.context
+							.getManagedObjectSourceClass(
+									managedObjectSourceClassName, this.node);
+					if (managedObjectSourceClass == null) {
+						return null;
+					}
 
-		// Ensure have the managed object source class
-		if (managedObjectSourceClass == null) {
-			throw new LoadTypeError(ManagedObjectType.class,
-					managedObjectSourceClassName);
-		}
-
-		// Load the managed object type
-		ManagedObjectLoader managedObjectLoader = this.context
-				.getManagedObjectLoader(this.node);
-		ManagedObjectType<?> managedObjectType = managedObjectLoader
-				.loadManagedObjectType(managedObjectSourceClass, properties);
-
-		// Ensure have the managed object type
-		if (managedObjectType == null) {
-			throw new LoadTypeError(ManagedObjectType.class,
-					managedObjectSourceClassName);
-		}
-
-		// Return the managed object type
-		return managedObjectType;
+					// Load and return the managed object type
+					ManagedObjectLoader managedObjectLoader = this.context
+							.getManagedObjectLoader(this.node);
+					return managedObjectLoader.loadManagedObjectType(
+							managedObjectSourceClass, properties);
+				});
 	}
 
 	@Override
@@ -164,76 +154,67 @@ public class OfficeFloorSourceContextImpl extends SourceContextImpl implements
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public SupplierType loadSupplierType(String supplierSourceClassName,
 			PropertyList properties) {
+		return CompileUtil.loadType(
+				SupplierType.class,
+				supplierSourceClassName,
+				this.context.getCompilerIssues(),
+				() -> {
 
-		// Obtain the supplier source class
-		Class supplierSourceClass = this.context.getSupplierSourceClass(
-				supplierSourceClassName, this.node);
+					// Obtain the supplier source class
+					Class supplierSourceClass = this.context
+							.getSupplierSourceClass(supplierSourceClassName,
+									this.node);
+					if (supplierSourceClass == null) {
+						return null;
+					}
 
-		// Ensure have the supplier source class
-		if (supplierSourceClass == null) {
-			throw new LoadTypeError(SupplierType.class, supplierSourceClassName);
-		}
-
-		// Load the supplier type
-		SupplierLoader supplierLoader = this.context
-				.getSupplierLoader(this.node);
-		SupplierType supplierType = supplierLoader.loadSupplierType(
-				supplierSourceClass, properties);
-
-		// Ensure have the supplier type
-		if (supplierType == null) {
-			throw new LoadTypeError(SupplierType.class, supplierSourceClassName);
-		}
-
-		// Return the supplier type
-		return supplierType;
+					// Load and return the supplier type
+					SupplierLoader supplierLoader = this.context
+							.getSupplierLoader(this.node);
+					return supplierLoader.loadSupplierType(supplierSourceClass,
+							properties);
+				});
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public OfficeType loadOfficeType(String officeSourceClassName,
 			String location, PropertyList properties) {
+		return CompileUtil.loadType(OfficeType.class,
+				officeSourceClassName,
+				this.context.getCompilerIssues(),
+				() -> {
 
-		// Obtain the office source class
-		Class officeSourceClass = this.context.getOfficeSourceClass(
-				officeSourceClassName, this.node);
+					// Obtain the office source class
+				Class officeSourceClass = this.context.getOfficeSourceClass(
+						officeSourceClassName, this.node);
+				if (officeSourceClass == null) {
+					return null;
+				}
 
-		// Ensure have the office source class
-		if (officeSourceClass == null) {
-			throw new LoadTypeError(OfficeType.class, officeSourceClassName);
-		}
-
-		// Load the office type
-		OfficeLoader officeLoader = this.context.getOfficeLoader(this.node);
-		OfficeType officeType = officeLoader.loadOfficeType(officeSourceClass,
-				location, properties);
-
-		// Ensure have the office type
-		if (officeType == null) {
-			throw new LoadTypeError(OfficeType.class, officeSourceClassName);
-		}
-
-		// Return the office type
-		return officeType;
+				// Load and return the office type
+				OfficeLoader officeLoader = this.context
+						.getOfficeLoader(this.node);
+				return officeLoader.loadOfficeType(officeSourceClass, location,
+						properties);
+			});
 	}
 
 	@Override
 	public OfficeType loadOfficeType(OfficeSource officeSource,
 			String location, PropertyList properties) {
+		return CompileUtil.loadType(
+				OfficeType.class,
+				officeSource.getClass().getName(),
+				this.context.getCompilerIssues(),
+				() -> {
 
-		// Load the office type
-		OfficeLoader officeLoader = this.context.getOfficeLoader(this.node);
-		OfficeType officeType = officeLoader.loadOfficeType(officeSource,
-				location, properties);
-
-		// Ensure have the office type
-		if (officeType == null) {
-			throw new LoadTypeError(OfficeType.class, officeSource.getClass()
-					.getName());
-		}
-
-		// Return the office type
-		return officeType;
+					// Load and return the office type
+					OfficeLoader officeLoader = this.context
+							.getOfficeLoader(this.node);
+					return officeLoader.loadOfficeType(officeSource, location,
+							properties);
+				});
 	}
 
 }

@@ -17,11 +17,14 @@
  */
 package net.officefloor.compile.impl.issues;
 
+import java.util.function.Supplier;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.IssueCapture;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -89,7 +92,8 @@ public class MockCompilerIssues implements CompilerIssues {
 	 */
 	public void recordIssue(String nodeName, Class<? extends Node> nodeClass,
 			String issueDescription, CompilerIssue... capturedIssues) {
-		this.mock.addIssue(nodeName, nodeClass, issueDescription);
+		this.mock.addIssue(nodeName, nodeClass, issueDescription,
+				new MockCompilerIssuesArray(capturedIssues));
 	}
 
 	/**
@@ -141,14 +145,25 @@ public class MockCompilerIssues implements CompilerIssues {
 	 */
 
 	@Override
-	public CompilerIssue[] captureIssues(Runnable runnable) {
+	public <R> IssueCapture<R> captureIssues(Supplier<R> supplier) {
 
 		// Run the capture issues
 		this.mock.captureIssues();
-		runnable.run();
+		final R returnValue = supplier.get();
 
 		// Return the issues
-		return this.capturedIssues;
+		return new IssueCapture<R>() {
+
+			@Override
+			public R getReturnValue() {
+				return returnValue;
+			}
+
+			@Override
+			public CompilerIssue[] getCompilerIssues() {
+				return MockCompilerIssues.this.capturedIssues;
+			}
+		};
 	}
 
 	@Override
@@ -156,7 +171,8 @@ public class MockCompilerIssues implements CompilerIssues {
 			CompilerIssue... causes) {
 		String nodeName = node.getNodeName();
 		Class<? extends Node> nodeClass = node.getClass();
-		this.mock.addIssue(nodeName, nodeClass, issueDescription, causes);
+		this.mock.addIssue(nodeName, nodeClass, issueDescription,
+				new MockCompilerIssuesArray(causes));
 	}
 
 	@Override
@@ -186,10 +202,10 @@ public class MockCompilerIssues implements CompilerIssues {
 		 * @param issueDescription
 		 *            Expected issue description.
 		 * @param capturedIssues
-		 *            Captured {@link CompilerIssue} instances.
+		 *            {@link MockCompilerIssuesArray}.
 		 */
 		void addIssue(String nodeName, Class<? extends Node> nodeClass,
-				String issueDescription, CompilerIssue... capturedIssues);
+				String issueDescription, MockCompilerIssuesArray capturedIssues);
 
 		/**
 		 * Enable recording adding an issue for a particular type of node.
@@ -205,6 +221,63 @@ public class MockCompilerIssues implements CompilerIssues {
 		 */
 		void addIssue(String nodeName, Class<? extends Node> nodeclClass,
 				String issuedDescription, Throwable cause);
+	}
+
+	/**
+	 * Mock {@link CompilerIssue} array.
+	 */
+	private class MockCompilerIssuesArray {
+
+		/**
+		 * {@link CompilerIssue} array.
+		 */
+		private final CompilerIssue[] issues;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param issues
+		 *            {@link CompilerIssue} array.
+		 */
+		public MockCompilerIssuesArray(CompilerIssue[] issues) {
+			this.issues = issues;
+		}
+
+		/*
+		 * ================ Object ====================
+		 */
+
+		@Override
+		public boolean equals(Object obj) {
+
+			// Ensure right type
+			if (!(obj instanceof MockCompilerIssuesArray)) {
+				return false;
+			}
+			MockCompilerIssuesArray that = (MockCompilerIssuesArray) this;
+
+			// Ensure the number issues match
+			if (this.issues.length != that.issues.length) {
+				return false;
+			}
+
+			// Ensure the issues match
+			for (int i = 0; i < this.issues.length; i++) {
+				if (this.issues[i] != that.issues[i]) {
+					return false;
+				}
+			}
+
+			// As here, the same issues
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return CompilerIssue.class.getSimpleName() + "["
+					+ this.issues.length + "]";
+		}
+
 	}
 
 }
