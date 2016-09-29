@@ -430,10 +430,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	@Override
 	public void addProperty(String name, String value) {
-		// TODO implement PropertyConfigurable.addProperty
-		throw new UnsupportedOperationException(
-				"TODO implement PropertyConfigurable.addProperty");
-
+		this.properties.addProperty(name).setValue(value);
 	}
 
 	/*
@@ -523,8 +520,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			return false; // must have resource
 
 		} catch (LoadTypeError ex) {
-			this.addIssue("Failure loading " + ex.getType().getSimpleName()
-					+ " from source " + ex.getSourceClassName());
+			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());
 			return false; // must not fail in loading types
 
 		} catch (Throwable ex) {
@@ -543,10 +539,26 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	@Override
 	public boolean sourceOfficeFloorTree() {
-		// TODO implement OfficeFloorNode.sourceOfficeFloorTree
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorNode.sourceOfficeFloorTree");
 
+		// Source the OfficeFloor
+		boolean isSourced = this.sourceOfficeFloor();
+		if (!isSourced) {
+			return false;
+		}
+
+		// Source all the offices
+		isSourced = this.offices
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+				.allMatch((office) -> office.sourceOfficeTree());
+		if (!isSourced) {
+			return false;
+		}
+
+		// As here, successfully sourced
+		return true;
 	}
 
 	@Override
@@ -691,7 +703,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 					}
 				});
 		for (OfficeNode office : offices) {
-			if (!office.sourceOffice()) {
+			if (!office.sourceOfficeTree()) {
 				return null; // Must be able to source the offices
 			}
 		}

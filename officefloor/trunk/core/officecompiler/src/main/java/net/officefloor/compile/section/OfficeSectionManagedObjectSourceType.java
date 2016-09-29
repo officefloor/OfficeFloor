@@ -42,17 +42,17 @@ public interface OfficeSectionManagedObjectSourceType {
 
 	/**
 	 * <p>
-	 * Obtains the {@link ManagedObjectTeamType} instances required by this
+	 * Obtains the {@link OfficeSectionManagedObjectTeamType} instances required by this
 	 * {@link Office} {@link SectionManagedObjectSource}.
 	 * <p>
 	 * Should there be an issue by the underlying {@link ManagedObjectSource}
 	 * providing the listing, an empty array will be returned with an issue
 	 * reported to the {@link CompilerIssues}.
 	 * 
-	 * @return {@link ManagedObjectTeamType} instances required by this
+	 * @return {@link OfficeSectionManagedObjectTeamType} instances required by this
 	 *         {@link Office} {@link SectionManagedObjectSource}.
 	 */
-	ManagedObjectTeamType[] getOfficeSectionManagedObjectTeamTypes();
+	OfficeSectionManagedObjectTeamType[] getOfficeSectionManagedObjectTeamTypes();
 
 	/**
 	 * Obtains the {@link Office} {@link SectionManagedObject} instance uses of

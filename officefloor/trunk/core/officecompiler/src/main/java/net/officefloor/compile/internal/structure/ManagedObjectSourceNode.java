@@ -20,6 +20,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
@@ -61,6 +62,15 @@ public interface ManagedObjectSourceNode extends Node,
 	 *         with issue reported to the {@link CompilerIssues}.
 	 */
 	ManagedObjectType<?> loadManagedObjectType();
+
+	/**
+	 * Loads the {@link OfficeSectionManagedObjectSourceType}.
+	 * 
+	 * @return {@link OfficeSectionManagedObjectSourceType} or <code>null</code>
+	 *         if issue loading with issue reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType();
 
 	/**
 	 * Loads the {@link OfficeFloorManagedObjectSourceType}.

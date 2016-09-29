@@ -20,7 +20,7 @@ package net.officefloor.model.officefloor;
 import java.util.Map;
 
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
@@ -165,7 +165,7 @@ public interface OfficeFloorChanges {
 	 *            Mapping of {@link OfficeManagedObjectType} name to
 	 *            {@link DeployedOfficeObjectModel} name.
 	 * @param inputNameMapping
-	 *            Mapping of {@link OfficeSectionInputType} name to
+	 *            Mapping of {@link OfficeAvailableSectionInputType} name to
 	 *            {@link DeployedOfficeInputModel} name.
 	 * @param teamNameMapping
 	 *            Mapping of {@link OfficeTeamType} name to

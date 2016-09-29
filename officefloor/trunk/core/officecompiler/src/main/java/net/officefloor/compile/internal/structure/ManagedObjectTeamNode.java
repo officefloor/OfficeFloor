@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeTeam;
 
@@ -31,5 +33,13 @@ public interface ManagedObjectTeamNode extends LinkTeamNode, ManagedObjectTeam {
 	 * {@link Node} type.
 	 */
 	static String TYPE = "Managed Object Source Team";
+
+	/**
+	 * Loads the {@link OfficeSectionManagedObjectTeamType}.
+	 * 
+	 * @return {@link OfficeSectionManagedObjectTeamType} or <code>null</code>
+	 *         with issues reported to the {@link CompilerIssues}.
+	 */
+	OfficeSectionManagedObjectTeamType loadOfficeSectionManagedObjectTeamType();
 
 }

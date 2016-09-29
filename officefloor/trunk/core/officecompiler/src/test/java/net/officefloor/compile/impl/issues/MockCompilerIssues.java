@@ -110,7 +110,8 @@ public class MockCompilerIssues implements CompilerIssues {
 	 */
 	public void recordIssue(String nodeName, Class<? extends Node> nodeClass,
 			String issueDescription, Throwable cause) {
-		this.mock.addIssue(nodeName, nodeClass, issueDescription, cause);
+		this.mock.addIssue(nodeName, nodeClass, issueDescription,
+				new MockThrowable(cause));
 	}
 
 	/**
@@ -179,7 +180,8 @@ public class MockCompilerIssues implements CompilerIssues {
 	public void addIssue(Node node, String issueDescription, Throwable cause) {
 		String nodeName = node.getNodeName();
 		Class<? extends Node> nodeClass = node.getClass();
-		this.mock.addIssue(nodeName, nodeClass, issueDescription, cause);
+		this.mock.addIssue(nodeName, nodeClass, issueDescription,
+				new MockThrowable(cause));
 	}
 
 	/**
@@ -220,7 +222,7 @@ public class MockCompilerIssues implements CompilerIssues {
 		 *            Expected cause.
 		 */
 		void addIssue(String nodeName, Class<? extends Node> nodeclClass,
-				String issuedDescription, Throwable cause);
+				String issuedDescription, MockThrowable cause);
 	}
 
 	/**
@@ -254,7 +256,7 @@ public class MockCompilerIssues implements CompilerIssues {
 			if (!(obj instanceof MockCompilerIssuesArray)) {
 				return false;
 			}
-			MockCompilerIssuesArray that = (MockCompilerIssuesArray) this;
+			MockCompilerIssuesArray that = (MockCompilerIssuesArray) obj;
 
 			// Ensure the number issues match
 			if (this.issues.length != that.issues.length) {
@@ -277,7 +279,59 @@ public class MockCompilerIssues implements CompilerIssues {
 			return CompilerIssue.class.getSimpleName() + "["
 					+ this.issues.length + "]";
 		}
+	}
 
+	/**
+	 * Mock {@link Throwable} cause.
+	 */
+	private class MockThrowable {
+
+		/**
+		 * Cause.
+		 */
+		private final Throwable cause;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param cause
+		 *            {@link Throwable} cause.
+		 */
+		public MockThrowable(Throwable cause) {
+			this.cause = cause;
+		}
+
+		/*
+		 * ================ Object ====================
+		 */
+
+		@Override
+		public boolean equals(Object obj) {
+
+			// Ensure right type
+			if (!(obj instanceof MockThrowable)) {
+				return false;
+			}
+			MockThrowable that = (MockThrowable) obj;
+
+			// Ensure the same type of exception
+			if (!this.cause.getClass().equals(that.cause.getClass())) {
+				return false;
+			}
+
+			// Ensure message is the same
+			if (!this.cause.getMessage().equals(that.cause.getMessage())) {
+				return false;
+			}
+
+			// As here, the same issues
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return this.cause.toString();
+		}
 	}
 
 }

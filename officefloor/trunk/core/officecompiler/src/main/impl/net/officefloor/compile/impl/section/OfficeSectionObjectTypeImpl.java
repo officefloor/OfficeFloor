@@ -15,65 +15,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.office;
+package net.officefloor.compile.impl.section;
 
-import net.officefloor.compile.office.OfficeManagedObjectType;
-import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.section.OfficeSectionObjectType;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
 
 /**
- * {@link OfficeManagedObjectType} implementation.
+ * {@link OfficeSectionObjectTypeImpl} implementation.
  *
  * @author Daniel Sagenschneider
  */
-public class OfficeManagedObjectTypeImpl implements OfficeManagedObjectType {
+public class OfficeSectionObjectTypeImpl implements OfficeSectionObjectType {
 
 	/**
-	 * Name of the {@link OfficeManagedObject}.
+	 * Name of the {@link OfficeSectionObject}.
 	 */
 	private final String objectName;
 
 	/**
-	 * Type of the {@link OfficeManagedObject}.
+	 * Type of the {@link OfficeSectionObject}.
 	 */
 	private final String objectType;
 
 	/**
-	 * Type qualifier for the {@link OfficeManagedObject}.
+	 * Type qualifier for the {@link OfficeSectionObject}.
 	 */
 	private final String typeQualifier;
-
-	/**
-	 * Extension interfaces supported by the {@link OfficeManagedObject}.
-	 */
-	private final String[] extensionInterfaces;
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param objectName
-	 *            Name of the {@link OfficeManagedObject}.
+	 *            Name of the {@link OfficeSectionObject}.
 	 * @param objectType
-	 *            Type of the {@link OfficeManagedObject}.
+	 *            Type of the {@link OfficeSectionObject}.
 	 * @param typeQualifier
-	 *            Type qualifier for the {@link OfficeManagedObject}.
-	 * @param extensionInterfaces
-	 *            Extension interfaces supported by the
-	 *            {@link OfficeManagedObject}.
+	 *            Type qualifier for the {@link OfficeSectionObject}.
 	 */
-	public OfficeManagedObjectTypeImpl(String objectName, String objectType,
-			String typeQualifier, String[] extensionInterfaces) {
+	public OfficeSectionObjectTypeImpl(String objectName, String objectType,
+			String typeQualifier) {
 		this.objectName = objectName;
 		this.objectType = objectType;
 		this.typeQualifier = typeQualifier;
-		this.extensionInterfaces = extensionInterfaces;
 	}
 
-	/**
-	 * ======================== OfficeManagedObjectType ========================
+	/*
+	 * ================= OfficeSectionObjectType =====================
 	 */
 
 	@Override
-	public String getOfficeManagedObjectName() {
+	public String getOfficeSectionObjectName() {
 		return this.objectName;
 	}
 
@@ -85,11 +76,6 @@ public class OfficeManagedObjectTypeImpl implements OfficeManagedObjectType {
 	@Override
 	public String getTypeQualifier() {
 		return this.typeQualifier;
-	}
-
-	@Override
-	public String[] getExtensionInterfaces() {
-		return this.extensionInterfaces;
 	}
 
 }

@@ -26,6 +26,7 @@ import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectTeam;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.section.OfficeSectionManagedObjectSourceTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
@@ -56,6 +57,9 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
@@ -355,6 +359,37 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						this.propertyList);
 			}
 		}
+	}
+
+	@Override
+	public OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType() {
+
+		// Load the managed object types
+		OfficeSectionManagedObjectType[] managedObjectTypes = this.managedObjects
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionManagedObjectName(),
+						b.getOfficeSectionManagedObjectName()))
+				.map((managedObject) -> managedObject
+						.loadOfficeSectionManagedObjectType())
+				.filter((type) -> (type != null))
+				.toArray(OfficeSectionManagedObjectType[]::new);
+
+		// Load the teams types
+		OfficeSectionManagedObjectTeamType[] teamTypes = this.teams
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getManagedObjectTeamName(),
+						b.getManagedObjectTeamName()))
+				.map((team) -> team.loadOfficeSectionManagedObjectTeamType())
+				.filter((type) -> (type != null))
+				.toArray(OfficeSectionManagedObjectTeamType[]::new);
+
+		// Create and return the type
+		return new OfficeSectionManagedObjectSourceTypeImpl(
+				this.managedObjectSourceName, teamTypes, managedObjectTypes);
 	}
 
 	@Override

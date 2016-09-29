@@ -15,57 +15,59 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.office;
+package net.officefloor.compile.impl.section;
 
-import net.officefloor.compile.office.OfficeInputType;
-import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.compile.spi.office.OfficeOutput;
+import net.officefloor.compile.section.OfficeSectionOutputType;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.frame.api.escalate.Escalation;
 
 /**
- * {@link OfficeOutputType} implementation.
+ * {@link OfficeSectionOutputType} implementation.
  *
  * @author Daniel Sagenschneider
  */
-public class OfficeOutputTypeImpl implements OfficeOutputType {
+public class OfficeSectionOutputTypeImpl implements OfficeSectionOutputType {
 
 	/**
-	 * Name of the {@link OfficeOutput}.
+	 * Name of the {@link OfficeSectionOutput}.
 	 */
 	private final String outputName;
 
 	/**
-	 * Argument type of the {@link OfficeOutput}.
+	 * Argument type for the {@link OfficeSectionOutput}.
 	 */
 	private final String argumentType;
 
 	/**
-	 * Handling {@link OfficeInputType}.
+	 * Flag indicating if {@link OfficeSectionOutput} is {@link Escalation}
+	 * only.
 	 */
-	private final OfficeInputType inputType;
+	private final boolean isEscalationOnly;
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param outputName
-	 *            Name of the {@link OfficeOutput}.
+	 *            Name of the {@link OfficeSectionOutput}.
 	 * @param argumentType
-	 *            Argument type of the {@link OfficeOutput}.
-	 * @param inputType
-	 *            Handling {@link OfficeInputType}.
+	 *            Argument type for the {@link OfficeSectionOutput}.
+	 * @param isEscalationOnly
+	 *            Flag indicating if {@link OfficeSectionOutput} is
+	 *            {@link Escalation} only.
 	 */
-	public OfficeOutputTypeImpl(String outputName, String argumentType,
-			OfficeInputType inputType) {
+	public OfficeSectionOutputTypeImpl(String outputName, String argumentType,
+			boolean isEscalationOnly) {
 		this.outputName = outputName;
 		this.argumentType = argumentType;
-		this.inputType = inputType;
+		this.isEscalationOnly = isEscalationOnly;
 	}
 
 	/*
-	 * =================== OfficeOutputType =========================
+	 * =================== OfficeSectionOutputType =======================
 	 */
 
 	@Override
-	public String getOfficeOutputName() {
+	public String getOfficeSectionOutputName() {
 		return this.outputName;
 	}
 
@@ -75,8 +77,8 @@ public class OfficeOutputTypeImpl implements OfficeOutputType {
 	}
 
 	@Override
-	public OfficeInputType getHandlingOfficeInputType() {
-		return this.inputType;
+	public boolean isEscalationOnly() {
+		return this.isEscalationOnly;
 	}
 
 }

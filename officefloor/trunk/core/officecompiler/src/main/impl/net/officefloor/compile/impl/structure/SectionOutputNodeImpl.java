@@ -17,12 +17,14 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.section.OfficeSectionOutputTypeImpl;
 import net.officefloor.compile.impl.section.SectionOutputTypeImpl;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.SectionOutputType;
 
 /**
@@ -154,6 +156,12 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	@Override
 	public SectionOutputType loadSectionOutputType() {
 		return new SectionOutputTypeImpl(this.outputName,
+				this.state.argumentType, this.state.isEscalationOnly);
+	}
+
+	@Override
+	public OfficeSectionOutputType loadOfficeSectionOutputType() {
+		return new OfficeSectionOutputTypeImpl(this.outputName,
 				this.state.argumentType, this.state.isEscalationOnly);
 	}
 

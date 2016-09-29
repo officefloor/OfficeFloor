@@ -23,13 +23,13 @@ import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -96,12 +96,30 @@ public class OfficeSourceContextImpl extends SourceContextImpl implements
 	}
 
 	@Override
-	public OfficeSectionType loadOfficeSectionType(
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public OfficeSectionType loadOfficeSectionType(String sectionName,
 			String sectionSourceClassName, String sectionLocation,
 			PropertyList properties) {
-		// TODO implement loadOfficeSectionType
-		throw new UnsupportedOperationException(
-				"TODO implement loadOfficeSectionType");
+		return CompileUtil.loadType(
+				OfficeSectionType.class,
+				sectionSourceClassName,
+				this.context.getCompilerIssues(),
+				() -> {
+
+					// Obtain the section source class
+					Class sectionSourceClass = this.context
+							.getSectionSourceClass(sectionSourceClassName,
+									this.node);
+					if (sectionSourceClass == null) {
+						return null;
+					}
+
+					// Load and return the section type
+					SectionLoader sectionLoader = this.context
+							.getSectionLoader(this.node);
+					return sectionLoader.loadOfficeSectionType(sectionName,
+							sectionSourceClass, sectionLocation, properties);
+				});
 	}
 
 	@Override

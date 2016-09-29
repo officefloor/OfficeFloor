@@ -18,6 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.section.SectionOutput;
@@ -68,5 +69,13 @@ public interface SectionOutputNode extends LinkFlowNode, SectionOutput,
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	SectionOutputType loadSectionOutputType();
+
+	/**
+	 * Loads the {@link OfficeSectionOutputType}.
+	 * 
+	 * @return {@link OfficeSectionOutputType} or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	OfficeSectionOutputType loadOfficeSectionOutputType();
 
 }

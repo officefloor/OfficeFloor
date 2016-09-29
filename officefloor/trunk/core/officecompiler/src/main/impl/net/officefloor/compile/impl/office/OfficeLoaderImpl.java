@@ -199,8 +199,11 @@ public class OfficeLoaderImpl implements OfficeLoader {
 				officeSource.getClass().getName(), officeSource,
 				officeLocation, null);
 
-		// Source the office
-		boolean isSourced = officeNode.sourceOffice();
+		// Configure the office node
+		propertyList.configureProperties(officeNode);
+
+		// Source the office tree
+		boolean isSourced = officeNode.sourceOfficeWithTopLevelSections();
 		if (!isSourced) {
 			return null; // must source office successfully
 		}

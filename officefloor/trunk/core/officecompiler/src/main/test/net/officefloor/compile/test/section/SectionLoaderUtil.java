@@ -26,9 +26,10 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.section.ManagedObjectTeamType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.section.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
@@ -213,10 +214,11 @@ public class SectionLoaderUtil {
 			String sectionLocation, String... propertyNameValuePairs) {
 
 		// Cast to obtain expected section type
-		if (!(designer instanceof SectionType)) {
+		if (!(designer instanceof SectionNode)) {
 			TestCase.fail("designer must be created from createSectionDesigner");
 		}
-		SectionType expectedSection = (SectionType) designer;
+		SectionType expectedSection = ((SectionNode) designer)
+				.loadSectionType();
 
 		// Load the actual section type
 		SectionType actualSection = loadSectionType(sectionSourceClass,
@@ -292,10 +294,11 @@ public class SectionLoaderUtil {
 			String sectionLocation, String... propertyNameValuePairs) {
 
 		// Cast to obtain expected section type
-		if (!(designer instanceof OfficeSectionType)) {
+		if (!(designer instanceof SectionNode)) {
 			TestCase.fail("designer must be created from createSectionDesigner");
 		}
-		OfficeSectionType eSection = (OfficeSectionType) designer;
+		OfficeSectionType eSection = ((SectionNode) designer)
+				.loadOfficeSectionType();
 
 		// Load the actual section type
 		OfficeSectionType aSection = loadOfficeSectionType(
@@ -449,9 +452,9 @@ public class SectionLoaderUtil {
 			mosNode.loadManagedObjectType();
 
 			// Validate the managed object source teams
-			ManagedObjectTeamType[] eTeams = eMoSource
+			OfficeSectionManagedObjectTeamType[] eTeams = eMoSource
 					.getOfficeSectionManagedObjectTeamTypes();
-			ManagedObjectTeamType[] aTeams = aMoSource
+			OfficeSectionManagedObjectTeamType[] aTeams = aMoSource
 					.getOfficeSectionManagedObjectTeamTypes();
 			TestCase.assertEquals(
 					"Incorrect number of teams for managed object source " + i
@@ -460,13 +463,13 @@ public class SectionLoaderUtil {
 							+ subSectionName + ")", eTeams.length,
 					aTeams.length);
 			for (int j = 0; j < eTeams.length; j++) {
-				ManagedObjectTeamType eTeam = eTeams[j];
-				ManagedObjectTeamType aTeam = aTeams[j];
+				OfficeSectionManagedObjectTeamType eTeam = eTeams[j];
+				OfficeSectionManagedObjectTeamType aTeam = aTeams[j];
 				TestCase.assertEquals("Incorrect name for team " + j
 						+ " (managed object source=" + managedObjectSourceName
 						+ ", sub section=" + subSectionName + ")",
-						eTeam.getManagedObjectTeamName(),
-						aTeam.getManagedObjectTeamName());
+						eTeam.getOfficeSectionManagedObjectTeamName(),
+						aTeam.getOfficeSectionManagedObjectTeamName());
 			}
 
 			// Validate the managed objects

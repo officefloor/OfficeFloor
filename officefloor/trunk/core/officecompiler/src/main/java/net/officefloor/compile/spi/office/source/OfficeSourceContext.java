@@ -65,6 +65,8 @@ public interface OfficeSourceContext extends SourceContext {
 	 * {@link OfficeSection} to allow reflective configuration by the
 	 * {@link OfficeSource}.
 	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClassName
 	 *            Name of the implementing {@link SectionSource} class.
 	 * @param sectionLocation
@@ -74,8 +76,9 @@ public interface OfficeSourceContext extends SourceContext {
 	 * @return {@link OfficeSectionType} or <code>null</code> if fails to load
 	 *         the {@link OfficeSectionType}.
 	 */
-	OfficeSectionType loadOfficeSectionType(String sectionSourceClassName,
-			String sectionLocation, PropertyList properties);
+	OfficeSectionType loadOfficeSectionType(String sectionName,
+			String sectionSourceClassName, String sectionLocation,
+			PropertyList properties);
 
 	/**
 	 * <p>

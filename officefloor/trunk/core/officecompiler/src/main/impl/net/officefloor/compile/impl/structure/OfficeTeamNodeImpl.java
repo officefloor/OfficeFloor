@@ -114,20 +114,30 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	 * ====================== LinkTeamNode ===========================
 	 */
 
+	/**
+	 * Linked {@link LinkTeamNode}.
+	 */
+	private LinkTeamNode linkedTeamNode = null;
+
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-		// TODO implement LinkTeamNode.linkTeamNode
-		throw new UnsupportedOperationException(
-				"TODO implement LinkTeamNode.linkTeamNode");
 
+		// Ensure not already linked
+		if (this.linkedTeamNode != null) {
+			// Deployed office team
+			this.context.getCompilerIssues().addIssue(this,
+					this.teamName + " already assigned");
+			return false; // already linked
+		}
+
+		// Link
+		this.linkedTeamNode = node;
+		return true;
 	}
 
 	@Override
 	public LinkTeamNode getLinkedTeamNode() {
-		// TODO implement LinkTeamNode.getLinkedTeamNode
-		throw new UnsupportedOperationException(
-				"TODO implement LinkTeamNode.getLinkedTeamNode");
-
+		return this.linkedTeamNode;
 	}
 
 }

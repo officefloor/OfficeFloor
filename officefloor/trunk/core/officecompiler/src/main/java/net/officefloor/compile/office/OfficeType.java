@@ -74,6 +74,6 @@ public interface OfficeType {
 	 * @return {@link OfficeSectionInput} <code>type definition</code> available
 	 *         for this {@link OfficeType}.
 	 */
-	OfficeSectionInputType[] getOfficeSectionInputTypes();
+	OfficeAvailableSectionInputType[] getOfficeSectionInputTypes();
 
 }

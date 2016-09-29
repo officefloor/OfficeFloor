@@ -31,7 +31,7 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
@@ -138,7 +138,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		}
 
 		// Add the inputs for the office
-		for (OfficeSectionInputType input : officeType
+		for (OfficeAvailableSectionInputType input : officeType
 				.getOfficeSectionInputTypes()) {
 			office.addDeployedOfficeInput(new DeployedOfficeInputModel(input
 					.getOfficeSectionName(), input.getOfficeSectionInputName(),
@@ -415,11 +415,11 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 		}
 
 		// Create the listing of target inputs
-		OfficeSectionInputType[] inputTypes = officeType
+		OfficeAvailableSectionInputType[] inputTypes = officeType
 				.getOfficeSectionInputTypes();
 		final DeployedOfficeInputModel[] targetInputs = new DeployedOfficeInputModel[inputTypes.length];
 		for (int i = 0; i < targetInputs.length; i++) {
-			OfficeSectionInputType inputType = inputTypes[i];
+			OfficeAvailableSectionInputType inputType = inputTypes[i];
 
 			// Obtain the details of the input
 			final String sectionName = inputType.getOfficeSectionName();

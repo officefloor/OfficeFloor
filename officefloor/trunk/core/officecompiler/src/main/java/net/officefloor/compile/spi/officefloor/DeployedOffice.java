@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.spi.officefloor;
 
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.properties.PropertyConfigurable;
@@ -42,13 +42,13 @@ public interface DeployedOffice extends PropertyConfigurable {
 	String getDeployedOfficeName();
 
 	/**
-	 * Obtains the {@link DeployedOfficeInput} for the {@link OfficeSectionInputType}.
+	 * Obtains the {@link DeployedOfficeInput} for the {@link OfficeAvailableSectionInputType}.
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection} providing the
-	 *            {@link OfficeSectionInputType}.
+	 *            {@link OfficeAvailableSectionInputType}.
 	 * @param inputName
-	 *            Name of the {@link OfficeSectionInputType}.
+	 *            Name of the {@link OfficeAvailableSectionInputType}.
 	 * @return {@link DeployedOfficeInput}.
 	 */
 	DeployedOfficeInput getDeployedOfficeInput(String sectionName,

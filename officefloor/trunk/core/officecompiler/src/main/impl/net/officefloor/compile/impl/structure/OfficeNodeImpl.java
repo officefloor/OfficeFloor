@@ -54,10 +54,11 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.compile.office.OfficeSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
@@ -259,20 +260,23 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
-		// TODO implement ManagedObjectRegistry.getManagedObjectNode
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectRegistry.getManagedObjectNode");
-
+		return this.managedObjects.get(managedObjectName);
 	}
 
 	@Override
 	public ManagedObjectNode createManagedObjectNode(String managedObjectName,
 			ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-		// TODO implement ManagedObjectRegistry.createManagedObjectNode
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectRegistry.createManagedObjectNode");
 
+		// Create the managed object
+		ManagedObjectNode managedObject = this.context.createManagedObjectNode(
+				managedObjectName, managedObjectScope, managedObjectSourceNode);
+
+		// Register the managed object
+		this.managedObjects.put(managedObjectName, managedObject);
+
+		// Return the managed object
+		return managedObject;
 	}
 
 	/*
@@ -281,14 +285,16 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public OfficeFloorNode getOfficeFloorNode() {
-		// TODO implement OfficeNode.getOfficeFloorNode
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeNode.getOfficeFloorNode");
-
+		return this.officeFloor;
 	}
 
-	@Override
-	public boolean sourceOffice() {
+	/**
+	 * Sources the {@link Office}.
+	 * 
+	 * @return <true> to indicate sourced, otherwise <false> with issues
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	private boolean sourceOffice() {
 
 		// Determine if must instantiate
 		OfficeSource source = this.officeSource;
@@ -337,8 +343,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			return false; // must have resource
 
 		} catch (LoadTypeError ex) {
-			this.addIssue("Failure loading " + ex.getType().getSimpleName()
-					+ " from source " + ex.getSourceClassName());
+			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());
 			return false; // must not fail in loading types
 
 		} catch (Throwable ex) {
@@ -350,31 +355,78 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			return false; // must be successful
 		}
 
+		// As here, successfully sourced
+		return true;
+	}
+
+	@Override
+	public boolean sourceOfficeWithTopLevelSections() {
+
+		// Source the office
+		boolean isSourced = this.sourceOffice();
+		if (!isSourced) {
+			return false;
+		}
+
+		// Source the top level sections
+		isSourced = this.sections
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionName(), b.getOfficeSectionName()))
+				.allMatch((section) -> section.sourceSection());
+		if (!isSourced) {
+			return false; // must source all top level sections
+		}
+
 		// As here, successfully loaded the office
 		return true;
 	}
 
 	@Override
 	public boolean sourceOfficeTree() {
-		// TODO implement OfficeNode.sourceOfficeTree
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeNode.sourceOfficeTree");
+
+		// Source the office
+		boolean isSourced = this.sourceOffice();
+		if (!isSourced) {
+			return false;
+		}
+
+		// Source the all section trees
+		isSourced = this.sections
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionName(), b.getOfficeSectionName()))
+				.allMatch((section) -> section.sourceSectionTree());
+		if (!isSourced) {
+			return false; // must source all top level sections
+		}
+
+		// As here, successfully loaded the office
+		return true;
 	}
 
 	@Override
 	public OfficeType loadOfficeType() {
 
 		// Copy the inputs into an array (in deterministic order)
-		OfficeInputNode[] inputs = CompileUtil.toSortedArray(
-				this.inputs.values(), new OfficeInputNode[0],
-				(input) -> input.getOfficeInputName());
+		OfficeInputNode[] inputs = this.inputs
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeInputName(), b.getOfficeInputName()))
+				.toArray(OfficeInputNode[]::new);
 		OfficeInputNode[] originalInputs = new OfficeInputNode[inputs.length];
 		System.arraycopy(inputs, 0, originalInputs, 0, inputs.length);
 
 		// Copy the outputs into an array (in deterministic order)
-		OfficeOutputNode[] outputs = CompileUtil.toSortedArray(
-				this.outputs.values(), new OfficeOutputNode[0],
-				(output) -> output.getOfficeOutputName());
+		OfficeOutputNode[] outputs = this.outputs
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeOutputName(), b.getOfficeOutputName()))
+				.toArray(OfficeOutputNode[]::new);
 		OfficeOutputNode[] originalOutputs = new OfficeOutputNode[outputs.length];
 		System.arraycopy(outputs, 0, originalOutputs, 0, outputs.length);
 
@@ -473,18 +525,19 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Create the listing of office section inputs
-		List<OfficeSectionInputType> sectionInputTypeList = new LinkedList<OfficeSectionInputType>();
-		for (SectionNode section : this.sections.values()) {
-
-			// TODO implement
-			throw new UnsupportedOperationException(
-					"TODO implement creating list of OfficeSectionInputTypes");
-
-			// sectionInputTypeList.addAll(Arrays.asList(section
-			// .getOfficeInputTypes()));
-		}
-		OfficeSectionInputType[] sectionInputTypes = sectionInputTypeList
-				.toArray(new OfficeSectionInputType[0]);
+		OfficeAvailableSectionInputType[] sectionInputTypes = this.sections
+				.values()
+				.stream()
+				.map((section) -> section
+						.loadOfficeAvailableSectionInputTypes())
+				.filter((types) -> (types != null))
+				.flatMap((types) -> Arrays.asList(types).stream())
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionName() + "."
+								+ a.getOfficeSectionInputName(),
+						b.getOfficeSectionName() + "."
+								+ b.getOfficeSectionInputName()))
+				.toArray(OfficeAvailableSectionInputType[]::new);
 
 		// Load the type
 		OfficeType officeType = new OfficeTypeImpl(inputTypes, outputTypes,

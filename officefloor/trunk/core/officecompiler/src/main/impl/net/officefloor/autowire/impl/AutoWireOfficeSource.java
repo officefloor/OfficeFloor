@@ -504,7 +504,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Obtain the section type
 			OfficeSectionType officeSectionType = context
-					.loadOfficeSectionType(section.getSectionSourceClassName(),
+					.loadOfficeSectionType(sectionName,
+							section.getSectionSourceClassName(),
 							section.getSectionLocation(),
 							section.getProperties());
 
@@ -800,8 +801,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 				// Obtain the type
 				OfficeSectionType failedToSourceSectionType = context
-						.loadOfficeSectionType(WorkSectionSource.class
-								.getName(),
+						.loadOfficeSectionType(
+								FailedToSourceManagedObjectEscalation.class
+										.getSimpleName(),
+								WorkSectionSource.class.getName(),
 								AutoWireEscalationCauseRouteWorkSource.class
 										.getName(), failedToSourceProperties);
 
