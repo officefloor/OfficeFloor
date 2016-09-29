@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import net.officefloor.compile.spi.office.TypeQualification;
+import net.officefloor.compile.section.TypeQualification;
 
 /**
  * {@link TypeQualification} implementation.

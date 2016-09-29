@@ -66,26 +66,17 @@ public class OfficeInputTypeImpl implements OfficeInputType {
 
 	@Override
 	public String getOfficeInputName() {
-		// TODO implement OfficeInputType.getOfficeInputName
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeInputType.getOfficeInputName");
-
+		return this.inputName;
 	}
 
 	@Override
 	public String getParameterType() {
-		// TODO implement OfficeInputType.getParameterType
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeInputType.getParameterType");
-
+		return this.parameterType;
 	}
 
 	@Override
 	public OfficeOutputType getResponseOfficeOutputType() {
-		// TODO implement OfficeInputType.getResponseOfficeOutputType
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeInputType.getResponseOfficeOutputType");
-
+		return this.outputType;
 	}
 
 }

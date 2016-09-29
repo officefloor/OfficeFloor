@@ -18,6 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -66,5 +67,13 @@ public interface SectionObjectNode extends LinkObjectNode, SubSectionObject,
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	SectionObjectType loadSectionObjectType();
+
+	/**
+	 * Loads the {@link OfficeSectionObjectType}.
+	 * 
+	 * @return {@link OfficeSectionObjectType} or <code>null</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	OfficeSectionObjectType loadOfficeSectionObjectType();
 
 }

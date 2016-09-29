@@ -26,7 +26,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
@@ -198,15 +198,15 @@ public class OfficeLoaderUtil {
 				officeLocation, propertyNameValuePairs);
 
 		// Validate the section inputs
-		OfficeSectionInputType[] eSectionInputs = expectedOffice
+		OfficeAvailableSectionInputType[] eSectionInputs = expectedOffice
 				.getOfficeSectionInputTypes();
-		OfficeSectionInputType[] aSectionInputs = actualOffice
+		OfficeAvailableSectionInputType[] aSectionInputs = actualOffice
 				.getOfficeSectionInputTypes();
 		TestCase.assertEquals("Incorrect number of section inputs",
 				eSectionInputs.length, aSectionInputs.length);
 		for (int i = 0; i < eSectionInputs.length; i++) {
-			OfficeSectionInputType eSectionInput = eSectionInputs[i];
-			OfficeSectionInputType aSectionInput = aSectionInputs[i];
+			OfficeAvailableSectionInputType eSectionInput = eSectionInputs[i];
+			OfficeAvailableSectionInputType aSectionInput = aSectionInputs[i];
 			TestCase.assertEquals("Incorrect name for section input " + i,
 					eSectionInput.getOfficeSectionInputName(),
 					aSectionInput.getOfficeSectionInputName());

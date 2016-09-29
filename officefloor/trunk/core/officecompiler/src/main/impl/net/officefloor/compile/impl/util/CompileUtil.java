@@ -60,6 +60,7 @@ public class CompileUtil {
 	 *            Type of the array.
 	 * @return List as an array.
 	 */
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static <T> T[] toArray(Collection<T> list, Object[] type) {
 		Object[] array = list.toArray(type);
@@ -81,6 +82,7 @@ public class CompileUtil {
 	 *            {@link StringExtractor} to obtain compare key to sort.
 	 * @return Collection as a sorted array.
 	 */
+	@Deprecated
 	public static <T> T[] toSortedArray(Collection<T> collection,
 			Object[] type, final StringExtractor<? super T> extractor) {
 

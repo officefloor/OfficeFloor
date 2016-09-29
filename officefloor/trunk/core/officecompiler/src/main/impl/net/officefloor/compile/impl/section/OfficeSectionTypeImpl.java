@@ -123,22 +123,22 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 
 	@Override
 	public OfficeSectionManagedObjectSourceType[] getOfficeSectionManagedObjectSourceTypes() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.subSectionState.managedObjectSources;
 	}
 
 	@Override
 	public OfficeSectionInputType[] getOfficeSectionInputTypes() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.inputs;
 	}
 
 	@Override
 	public OfficeSectionOutputType[] getOfficeSectionOutputTypes() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.outputs;
 	}
 
 	@Override
 	public OfficeSectionObjectType[] getOfficeSectionObjectTypes() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.objects;
 	}
 
 	/**

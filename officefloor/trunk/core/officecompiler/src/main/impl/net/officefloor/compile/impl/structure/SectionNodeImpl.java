@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.impl.office.OfficeAvailableSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.OfficeSectionTypeImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.section.SectionTypeImpl;
@@ -42,6 +43,7 @@ import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
@@ -242,6 +244,24 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		this.propertyList = this.context.createPropertyList();
 	}
 
+	/**
+	 * Obtain the {@link SectionObjectNode} for the name.
+	 * 
+	 * @param objectName
+	 *            Name of the {@link SectionObjectNode}.
+	 * @return {@link SectionObjectNode} for the name.
+	 */
+	private SectionObjectNode getSectionObjectNode(String objectName) {
+		// Obtain and return the section object for the name
+		SectionObjectNode object = this.objects.get(objectName);
+		if (object == null) {
+			// Add the object
+			object = this.context.createSectionObjectNode(objectName, this);
+			this.objects.put(objectName, object);
+		}
+		return object;
+	}
+
 	/*
 	 * ======================= Node =================================
 	 */
@@ -393,11 +413,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			return false; // must have resource
 
 		} catch (LoadTypeError ex) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Failure loading " + ex.getType().getSimpleName()
-							+ " from source " + ex.getSourceClassName(),
-					ex.getCauses());
+			ex.addLoadTypeIssue(this, this.context.getCompilerIssues());
 			return false; // must not fail in loading types
 
 		} catch (Throwable ex) {
@@ -508,6 +524,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getOfficeSectionInputName(),
 						b.getOfficeSectionInputName()))
+				.map((input) -> input.loadOfficeSectionInputType())
+				.filter((type) -> (type != null))
 				.toArray(OfficeSectionInputType[]::new);
 
 		// Add the office context for the section outputs
@@ -517,6 +535,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getOfficeSectionOutputName(),
 						b.getOfficeSectionOutputName()))
+				.map((output) -> output.loadOfficeSectionOutputType())
+				.filter((type) -> (type != null))
 				.toArray(OfficeSectionOutputType[]::new);
 
 		// Add the office context for the section objects
@@ -526,6 +546,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getOfficeSectionObjectName(),
 						b.getOfficeSectionObjectName()))
+				.map((object) -> object.loadOfficeSectionObjectType())
+				.filter((type) -> (type != null))
 				.toArray(OfficeSectionObjectType[]::new);
 
 		// Create the office section type
@@ -574,23 +596,14 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.filter(t -> (t != null)).toArray(OfficeSubSectionType[]::new);
 
 		// Load managed object sources
-		OfficeSectionManagedObjectSource[] managedObjectSources = this.managedObjectSourceNodes
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionManagedObjectSourceName(),
-						b.getOfficeSectionManagedObjectSourceName()))
-				.toArray(OfficeSectionManagedObjectSource[]::new);
-		for (ManagedObjectSourceNode managedObjectSource : this.managedObjectSourceNodes
-				.values()) {
-			managedObjectSource.loadManagedObjectType();
-		}
 		OfficeSectionManagedObjectSourceType[] managedObjectSourceTypes = this.managedObjectSourceNodes
 				.values()
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getOfficeSectionManagedObjectSourceName(),
 						b.getOfficeSectionManagedObjectSourceName()))
+				.map((mos) -> mos.loadOfficeSectionManagedObjectSourceType())
+				.filter((type) -> (type != null))
 				.toArray(OfficeSectionManagedObjectSourceType[]::new);
 
 		// Add the office context for the tasks
@@ -605,6 +618,22 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		// Initialise the sub section state
 		sectionType.initialiseAsOfficeSubSectionType(parentSectionType,
 				subSections, taskTypes, managedObjectSourceTypes);
+	}
+
+	@Override
+	public OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes() {
+		return this.inputs
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionInputName(),
+						b.getOfficeSectionInputName()))
+				.map((input) -> input.loadOfficeSectionInputType())
+				.filter((type) -> (type != null))
+				.map((type) -> new OfficeAvailableSectionInputTypeImpl(
+						this.sectionName, type.getOfficeSectionInputName(),
+						type.getParameterType()))
+				.toArray(OfficeAvailableSectionInputType[]::new);
 	}
 
 	@Override
@@ -754,18 +783,11 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public SubSectionObject getSubSectionObject(String objectName) {
-		// Obtain and return the section object for the name
-		SectionObjectNode object = this.objects.get(objectName);
-		if (object == null) {
-			// Add the object
-			object = this.context.createSectionObjectNode(objectName, this);
-			this.objects.put(objectName, object);
-		}
-		return object;
+		return this.getSectionObjectNode(objectName);
 	}
 
 	/*
-	 * ======================== SectionTypeBuilder =============================
+	 * ======================== SectionDesigner =============================
 	 */
 
 	@Override
@@ -815,23 +837,20 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public SectionObject addSectionObject(String objectName, String objectType) {
-		// Obtain and return the section object for the name
-		SectionObjectNode object = this.objects.get(objectName);
-		if (object == null) {
-			// Add the object
-			object = this.context.createSectionObjectNode(objectName, this)
-					.initialise(objectType);
-			this.objects.put(objectName, object);
+
+		// Obtain the section object for the name
+		SectionObjectNode object = this.getSectionObjectNode(objectName);
+
+		// Determine if requires initialising
+		if (!object.isInitialised()) {
+			// Initialise as not yet initialised
+			object.initialise(objectType);
 		} else {
-			// Added but determine if requires initialising
-			if (!object.isInitialised()) {
-				// Initialise as not yet initialised
-				object.initialise(objectType);
-			} else {
-				// Object already added and initialised
-				this.addIssue("Object " + objectName + " already added");
-			}
+			// Object already added and initialised
+			this.addIssue("Object " + objectName + " already added");
 		}
+
+		// Return the object
 		return object;
 	}
 
@@ -1139,7 +1158,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public OfficeSectionObject getOfficeSectionObject(String objectName) {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.getSectionObjectNode(objectName);
 	}
 
 	@Override

@@ -18,21 +18,23 @@
 package net.officefloor.compile.section;
 
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * <code>Type definition</code> for a {@link ManagedObject} {@link Team}.
+ * <code>Type definition</code> for a {@link Team} of a {@link ManagedObject}
+ * within an {@link OfficeSection}.
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectTeamType {
+public interface OfficeSectionManagedObjectTeamType {
 
 	/**
 	 * Obtains the name of the {@link ManagedObjectTeam}.
 	 * 
 	 * @return Name of the {@link ManagedObjectTeam}.
 	 */
-	String getManagedObjectTeamName();
+	String getOfficeSectionManagedObjectTeamName();
 
 }

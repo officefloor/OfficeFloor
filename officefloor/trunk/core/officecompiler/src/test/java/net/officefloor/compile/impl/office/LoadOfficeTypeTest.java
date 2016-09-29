@@ -32,12 +32,14 @@ import net.officefloor.compile.impl.governance.MockLoadGovernance;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
@@ -164,8 +166,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue("Missing property 'missing' for OfficeSource "
-				+ MockOfficeSource.class.getName());
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Missing property 'missing' for OfficeSource "
+						+ MockOfficeSource.class.getName());
 
 		// Attempt to load office type
 		this.loadOfficeType(false, new Loader() {
@@ -215,8 +218,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.issues
-				.recordIssue("Can not load class 'missing' for OfficeSource "
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Can not load class 'missing' for OfficeSource "
 						+ MockOfficeSource.class.getName());
 
 		// Attempt to load office type
@@ -237,8 +240,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		// Record missing resource
 		this.recordReturn(this.resourceSource,
 				this.resourceSource.sourceResource("missing"), null);
-		this.issues
-				.recordIssue("Can not obtain resource at location 'missing' for OfficeSource "
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Can not obtain resource at location 'missing' for OfficeSource "
 						+ MockOfficeSource.class.getName());
 
 		// Attempt to load office type
@@ -300,7 +303,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				"Fail source office type");
 
 		// Record failure to source the office type
-		this.issues.recordIssue(
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
 				"Failed to source OfficeType definition from OfficeSource "
 						+ MockOfficeSource.class.getName(), failure);
 
@@ -344,7 +347,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if duplicate name for {@link OfficeInput} instances.
 	 */
 	public void testInputType_DuplicateName() {
-		this.issues.recordIssue("Office input TEST already added");
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Office input TEST already added");
 
 		// Load the type
 		OfficeType type = this.loadOfficeType(true, new Loader() {
@@ -396,7 +400,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if duplicate name for {@link OfficeOutput} instances.
 	 */
 	public void testOutputType_DuplicateName() {
-		this.issues.recordIssue("Office output TEST already added");
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Office output TEST already added");
 
 		// Load the type
 		OfficeType type = this.loadOfficeType(true, new Loader() {
@@ -493,7 +498,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testNullManagedObjectName() {
 
 		// Record null managed object name
-		this.issues.recordIssue("Null name for managed object 0");
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Null name for managed object 0");
 
 		// Attempt to load office type
 		this.loadOfficeType(false, new Loader() {
@@ -512,7 +518,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testNullManagedObjectType() {
 
 		// Record null required type
-		this.issues.recordIssue("Null type for managed object 0 (name=MO)");
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Null type for managed object 0 (name=MO)");
 
 		// Attempt to load office type
 		this.loadOfficeType(false, new Loader() {
@@ -684,7 +691,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testNullTeamName() {
 
 		// Record null required type
-		this.issues.recordIssue("Null name for team 0");
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Null name for team 0");
 
 		// Attempt to load office type
 		this.loadOfficeType(false, new Loader() {
@@ -718,7 +726,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure obtain the {@link OfficeSectionInputType}.
+	 * Ensure obtain the {@link OfficeAvailableSectionInputType}.
 	 */
 	public void testSectionInputType() {
 
@@ -740,9 +748,12 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		});
 
 		// Validate type
-		assertEquals("Incorrect number of section inputs", 1,
+		assertEquals("Incorrect number of section inputs", 0,
+				officeType.getOfficeInputTypes().length);
+		assertEquals("Incorrect number of available section inputs", 1,
 				officeType.getOfficeSectionInputTypes().length);
-		OfficeSectionInputType input = officeType.getOfficeSectionInputTypes()[0];
+		OfficeAvailableSectionInputType input = officeType
+				.getOfficeSectionInputTypes()[0];
 		assertEquals("Incorrect section name", "SECTION",
 				input.getOfficeSectionName());
 		assertEquals("Incorrect input name", "INPUT",
@@ -755,6 +766,11 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Ensure can obtain the {@link ManagedObjectType}.
 	 */
 	public void testLoadManagedObjectType() {
+
+		// Record capture issues for loading managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Load the type
 		this.loadOfficeType(true, new Loader() {
 			@Override
 			public void sourceOffice(OfficeArchitect architect,
@@ -783,10 +799,12 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testFailLoadingManagedObjectType() {
 
 		// Ensure issue in not loading managed object type
-		this.issues.recordIssue("Missing property 'class.name'");
-		this.issues
-				.recordIssue("Failure loading ManagedObjectType from source "
-						+ ClassManagedObjectSource.class.getName());
+		CompilerIssue[] causes = this.issues.recordCaptureIssues(true);
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Missing property 'class.name'");
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Failure loading ManagedObjectType from source "
+						+ ClassManagedObjectSource.class.getName(), causes);
 
 		// Fail to load the managed object type
 		this.loadOfficeType(false, new Loader() {
@@ -809,6 +827,11 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Ensure can obtain the {@link GovernanceType}.
 	 */
 	public void testLoadGovernanceType() {
+
+		// Record capture of issues for governance type
+		this.issues.recordCaptureIssues(false);
+
+		// Load the office type
 		this.loadOfficeType(true, new Loader() {
 			@Override
 			public void sourceOffice(OfficeArchitect architect,
@@ -836,9 +859,12 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testFailLoadingGovernanceType() {
 
 		// Ensure issue in not loading governance type
-		this.issues.recordIssue("Property 'class.name' must be specified");
-		this.issues.recordIssue("Failure loading GovernanceType from source "
-				+ ClassGovernanceSource.class.getName());
+		CompilerIssue[] causes = this.issues.recordCaptureIssues(true);
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Property 'class.name' must be specified");
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Failure loading GovernanceType from source "
+						+ ClassGovernanceSource.class.getName(), causes);
 
 		// Fail to load the governance type
 		this.loadOfficeType(false, new Loader() {
@@ -861,6 +887,11 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Ensure can obtain the {@link AdministratorType}.
 	 */
 	public void testLoadAdministratorType() {
+
+		// Record capture issues for loading administrator type
+		this.issues.recordCaptureIssues(false);
+
+		// Load Office type
 		this.loadOfficeType(true, new Loader() {
 			@Override
 			public void sourceOffice(OfficeArchitect architect,
@@ -889,10 +920,12 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testFailLoadingAdministratorType() {
 
 		// Ensure issue in not loading administrator type
-		this.issues.recordIssue("Missing property 'class.name'");
-		this.issues
-				.recordIssue("Failure loading AdministratorType from source "
-						+ ClassAdministratorSource.class.getName());
+		CompilerIssue[] causes = this.issues.recordCaptureIssues(true);
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Missing property 'class.name'");
+		this.issues.recordIssue("Type", OfficeNodeImpl.class,
+				"Failure loading AdministratorType from source "
+						+ ClassAdministratorSource.class.getName(), causes);
 
 		// Fail to load the administrator type
 		this.loadOfficeType(false, new Loader() {
@@ -915,6 +948,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * {@link OfficeManagedObject} should not show up in {@link OfficeType}.
 	 */
 	public void testLinkedOfficeSectionManagedObject() {
+
+		// Record capture issues for class loader to load type
+		this.issues.recordCaptureIssues(false);
 
 		// Load office type with office managed object
 		OfficeType officeType = this.loadOfficeType(true, new Loader() {

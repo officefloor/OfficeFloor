@@ -20,6 +20,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -39,13 +40,14 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 	static String TYPE = "Office";
 
 	/**
-	 * Sources this {@link Office} into this {@link OfficeNode}.
+	 * Sources this {@link Office} along with its top level
+	 * {@link OfficeSection} instances into this {@link OfficeNode}.
 	 * 
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	boolean sourceOffice();
+	boolean sourceOfficeWithTopLevelSections();
 
 	/**
 	 * Sources this {@link Office} and all descendant {@link Node} instances.

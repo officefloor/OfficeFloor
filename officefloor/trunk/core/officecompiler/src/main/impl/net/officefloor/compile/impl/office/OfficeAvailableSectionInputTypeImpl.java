@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.section;
+package net.officefloor.compile.impl.office;
 
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
-import net.officefloor.compile.section.OfficeSectionInputType;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 
 /**
@@ -26,7 +26,13 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
  *
  * @author Daniel Sagenschneider
  */
-public class OfficeSectionInputTypeImpl implements OfficeSectionInputType {
+public class OfficeAvailableSectionInputTypeImpl implements
+		OfficeAvailableSectionInputType {
+
+	/**
+	 * Name of the {@link OfficeSection}.
+	 */
+	private final String sectionName;
 
 	/**
 	 * Name of the {@link OfficeSectionInput}.
@@ -34,26 +40,35 @@ public class OfficeSectionInputTypeImpl implements OfficeSectionInputType {
 	private final String inputName;
 
 	/**
-	 * Parameter type of the {@link OfficeSectionInput}.
+	 * Parameter type for the {@link OfficeSectionInput}.
 	 */
 	private final String parameterType;
 
 	/**
 	 * Instantiate.
 	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
 	 * @param inputName
 	 *            Name of the {@link OfficeSectionInput}.
 	 * @param parameterType
-	 *            Parameter type of the {@link OfficeSectionInput}.
+	 *            Parameter type for the {@link OfficeSectionInput}.
 	 */
-	public OfficeSectionInputTypeImpl(String inputName, String parameterType) {
+	public OfficeAvailableSectionInputTypeImpl(String sectionName,
+			String inputName, String parameterType) {
+		this.sectionName = sectionName;
 		this.inputName = inputName;
 		this.parameterType = parameterType;
 	}
 
 	/*
-	 * ====================== OfficeSectionInputType ======================
+	 * =================== OfficeAvailableSectionInputType =============
 	 */
+
+	@Override
+	public String getOfficeSectionName() {
+		return this.sectionName;
+	}
 
 	@Override
 	public String getOfficeSectionInputName() {

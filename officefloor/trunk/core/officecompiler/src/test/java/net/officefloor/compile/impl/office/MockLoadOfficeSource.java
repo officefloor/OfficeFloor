@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -62,7 +62,7 @@ public class MockLoadOfficeSource extends AbstractOfficeSource {
 		// Ensure correct section inputs
 		TestCase.assertEquals("Incorrect number of inputs", 1,
 				officeType.getOfficeSectionInputTypes().length);
-		OfficeSectionInputType sectionInput = officeType
+		OfficeAvailableSectionInputType sectionInput = officeType
 				.getOfficeSectionInputTypes()[0];
 		TestCase.assertEquals("Incorrect section name", "section",
 				sectionInput.getOfficeSectionName());

@@ -445,7 +445,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 			// Obtain the section type (register for later)
 			OfficeSectionType sectionType = context.loadOfficeSectionType(
-					sectionModel.getSectionSourceClassName(),
+					sectionName, sectionModel.getSectionSourceClassName(),
 					sectionModel.getSectionLocation(), propertyList);
 			sectionTypes.put(sectionName, sectionType);
 

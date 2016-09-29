@@ -20,7 +20,7 @@ package net.officefloor.plugin.section.clazz;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 
-import net.officefloor.compile.spi.office.TypeQualification;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**

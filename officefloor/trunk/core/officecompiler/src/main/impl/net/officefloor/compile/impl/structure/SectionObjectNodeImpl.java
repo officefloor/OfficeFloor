@@ -17,12 +17,14 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.section.OfficeSectionObjectTypeImpl;
 import net.officefloor.compile.impl.section.SectionObjectTypeImpl;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
+import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.section.SectionObject;
 
@@ -160,6 +162,12 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	@Override
 	public SectionObjectType loadSectionObjectType() {
 		return new SectionObjectTypeImpl(this.objectName,
+				this.state.objectType, this.typeQualifier);
+	}
+
+	@Override
+	public OfficeSectionObjectType loadOfficeSectionObjectType() {
+		return new OfficeSectionObjectTypeImpl(this.objectName,
 				this.state.objectType, this.typeQualifier);
 	}
 

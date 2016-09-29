@@ -17,7 +17,9 @@
  */
 package net.officefloor.compile.impl.util;
 
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
+import net.officefloor.compile.issues.CompilerIssues;
 
 /**
  * Propagates a failure loading a type.
@@ -61,6 +63,19 @@ public class LoadTypeError extends Error {
 		this.type = type;
 		this.sourceClassName = sourceClassName;
 		this.causes = causes;
+	}
+
+	/**
+	 * Convenience method to add this as an issue to the {@link CompilerIssues}.
+	 * 
+	 * @param node
+	 *            {@link Node} handling this.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 */
+	public void addLoadTypeIssue(Node node, CompilerIssues issues) {
+		issues.addIssue(node, "Failure loading " + this.type.getSimpleName()
+				+ " from source " + this.sourceClassName, this.causes);
 	}
 
 	/**

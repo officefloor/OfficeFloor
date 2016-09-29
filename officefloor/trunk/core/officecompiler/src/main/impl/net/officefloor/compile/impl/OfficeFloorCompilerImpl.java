@@ -32,6 +32,7 @@ import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.administrator.AdministratorLoaderImpl;
 import net.officefloor.compile.impl.governance.GovernanceLoaderImpl;
+import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.impl.issues.StderrCompilerIssues;
 import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.office.OfficeLoaderImpl;
@@ -185,6 +186,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	 * {@link PropertyList}.
 	 */
 	private final PropertyList properties = new PropertyListImpl();
+
+	/**
+	 * {@link OfficeFloorSource} {@link Class} instances by their alias name.
+	 */
+	private final Map<String, Class<?>> officeFloorAliases = new HashMap<String, Class<?>>();
 
 	/**
 	 * {@link OfficeSource} {@link Class} instances by their alias name.
@@ -532,7 +538,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	public CompilerIssues getCompilerIssues() {
 		// Ensure have compiler issues
 		if (this.issues == null) {
-			this.issues = new StderrCompilerIssues();
+			this.issues = new FailCompilerIssues();
 		}
 
 		// Return the issues
@@ -558,19 +564,17 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <S extends OfficeFloorSource> Class<S> getOfficeFloorSourceClass(
 			String officeFloorSourceClassName, Node node) {
-		// TODO implement NodeContext.getOfficeFloorSourceClass
-		throw new UnsupportedOperationException(
-				"TODO implement NodeContext.getOfficeFloorSourceClass");
-
+		return (Class<S>) CompileUtil.obtainClass(officeFloorSourceClassName,
+				OfficeFloorSource.class, this.officeFloorAliases,
+				this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
 	public OfficeFloorLoader getOfficeFloorLoader(Node node) {
-		// TODO implement NodeContext.getOfficeFloorLoader
-		throw new UnsupportedOperationException(
-				"TODO implement NodeContext.getOfficeFloorLoader");
+		return new OfficeFloorLoaderImpl(node, this, this.profilers);
 	}
 
 	@Override

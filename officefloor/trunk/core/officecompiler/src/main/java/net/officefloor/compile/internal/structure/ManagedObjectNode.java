@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
@@ -37,5 +39,13 @@ public interface ManagedObjectNode extends LinkObjectNode,
 	 * {@link Node} type.
 	 */
 	String TYPE = "Managed Object";
+
+	/**
+	 * Loads the {@link OfficeSectionManagedObjectType}.
+	 * 
+	 * @return {@link OfficeSectionManagedObjectType} or <code>null</code> with
+	 *         issues reported to the {@link CompilerIssues}.
+	 */
+	OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType();
 
 }

@@ -23,6 +23,7 @@ import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskTeamNode;
+import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.spi.office.OfficeTeam;
 
 /**
@@ -88,6 +89,19 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 	@Override
 	public Node getParentNode() {
 		return this.managedObjectSourceNode;
+	}
+
+	/*
+	 * ================ ManagedObjectTeamNode =======================
+	 */
+
+	@Override
+	public OfficeSectionManagedObjectTeamType loadOfficeSectionManagedObjectTeamType() {
+		// TODO implement
+		// ManagedObjectTeamNode.loadOfficeSectionManagedObjectTeamType
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectTeamNode.loadOfficeSectionManagedObjectTeamType");
+
 	}
 
 	/*

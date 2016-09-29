@@ -23,7 +23,7 @@ import java.util.List;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.spi.office.OfficeInput;
@@ -114,7 +114,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 	protected interface OfficeTypeContext {
 
 		/**
-		 * Add {@link OfficeSectionInputType}.
+		 * Add {@link OfficeAvailableSectionInputType}.
 		 * 
 		 * @param name
 		 *            Name of {@link OfficeSection}.
@@ -193,9 +193,9 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		private final List<OfficeOutputType> outputs = new LinkedList<OfficeOutputType>();
 
 		/**
-		 * {@link OfficeSectionInputType} instances.
+		 * {@link OfficeAvailableSectionInputType} instances.
 		 */
-		private final List<OfficeSectionInputType> sectionInputs = new LinkedList<OfficeSectionInputType>();
+		private final List<OfficeAvailableSectionInputType> sectionInputs = new LinkedList<OfficeAvailableSectionInputType>();
 
 		/**
 		 * {@link OfficeManagedObjectType} instances.
@@ -249,8 +249,8 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		 */
 
 		@Override
-		public OfficeSectionInputType[] getOfficeSectionInputTypes() {
-			return this.sectionInputs.toArray(new OfficeSectionInputType[0]);
+		public OfficeAvailableSectionInputType[] getOfficeSectionInputTypes() {
+			return this.sectionInputs.toArray(new OfficeAvailableSectionInputType[0]);
 		}
 
 		@Override
@@ -279,7 +279,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 	/**
 	 * {@link OfficeType} item.
 	 */
-	private class OfficeTypeItem implements OfficeSectionInputType,
+	private class OfficeTypeItem implements OfficeAvailableSectionInputType,
 			OfficeManagedObjectType, OfficeTeamType, OfficeInputType,
 			OfficeOutputType {
 
@@ -319,7 +319,7 @@ public abstract class AbstractOfficeFloorChangesTestCase extends
 		private final OfficeOutputType outputType;
 
 		/**
-		 * Initialise for {@link OfficeSectionInputType}.
+		 * Initialise for {@link OfficeAvailableSectionInputType}.
 		 * 
 		 * @param name
 		 *            Name.

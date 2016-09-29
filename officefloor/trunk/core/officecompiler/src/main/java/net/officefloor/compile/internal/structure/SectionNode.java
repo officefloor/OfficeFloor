@@ -18,7 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.SectionType;
@@ -122,10 +122,19 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 			OfficeSubSectionType parentSectionType);
 
 	/**
+	 * Loads the {@link OfficeAvailableSectionInputType} instances.
+	 * 
+	 * @return {@link OfficeAvailableSectionInputType} instances or
+	 *         <code>null</code> with issues reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes();
+
+	/**
 	 * Obtains the {@link DeployedOfficeInput}.
 	 * 
 	 * @param inputName
-	 *            Input name as per the {@link OfficeSectionInputType}.
+	 *            Input name as per the {@link OfficeAvailableSectionInputType}.
 	 * @return {@link DeployedOfficeInput}.
 	 */
 	DeployedOfficeInput getDeployedOfficeInput(String inputName);

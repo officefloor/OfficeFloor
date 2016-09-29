@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.impl.issues;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -80,6 +83,37 @@ public class FailCompilerIssues extends AbstractCompilerIssues {
 		 */
 		public CompileError(DefaultCompilerIssue issue) {
 			this.issue = issue;
+		}
+
+		/*
+		 * ======================= Throwable ============================
+		 * 
+		 * Mimic compile exception, as may not be handled.
+		 */
+
+		@Override
+		public String toString() {
+			return new CompileException(this.issue).toString();
+		}
+
+		@Override
+		public void printStackTrace() {
+			new CompileException(this.issue).printStackTrace();
+		}
+
+		@Override
+		public void printStackTrace(PrintStream stream) {
+			new CompileException(this.issue).printStackTrace(stream);
+		}
+
+		@Override
+		public void printStackTrace(PrintWriter writer) {
+			new CompileException(this.issue).printStackTrace(writer);
+		}
+
+		@Override
+		public StackTraceElement[] getStackTrace() {
+			return new CompileException(this.issue).getStackTrace();
 		}
 	}
 

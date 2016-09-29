@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.office;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 
@@ -52,9 +52,9 @@ public class OfficeTypeImpl implements OfficeType {
 	private final OfficeManagedObjectType[] managedObjects;
 
 	/**
-	 * {@link OfficeSectionInputType} instances.
+	 * {@link OfficeAvailableSectionInputType} instances.
 	 */
-	private final OfficeSectionInputType[] sectionInputs;
+	private final OfficeAvailableSectionInputType[] sectionInputs;
 
 	/**
 	 * Initiate.
@@ -68,11 +68,11 @@ public class OfficeTypeImpl implements OfficeType {
 	 * @param managedObjects
 	 *            {@link OfficeManagedObjectType} instances.
 	 * @param sectionInputs
-	 *            {@link OfficeSectionInputType} instances.
+	 *            {@link OfficeAvailableSectionInputType} instances.
 	 */
 	public OfficeTypeImpl(OfficeInputType[] inputs, OfficeOutputType[] outputs,
 			OfficeTeamType[] teams, OfficeManagedObjectType[] managedObjects,
-			OfficeSectionInputType[] sectionInputs) {
+			OfficeAvailableSectionInputType[] sectionInputs) {
 		this.inputs = inputs;
 		this.outputs = outputs;
 		this.teams = teams;
@@ -105,7 +105,7 @@ public class OfficeTypeImpl implements OfficeType {
 	}
 
 	@Override
-	public OfficeSectionInputType[] getOfficeSectionInputTypes() {
+	public OfficeAvailableSectionInputType[] getOfficeSectionInputTypes() {
 		return this.sectionInputs;
 	}
 

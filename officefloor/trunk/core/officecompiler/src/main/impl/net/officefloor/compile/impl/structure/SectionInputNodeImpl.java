@@ -24,7 +24,7 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.section.SubSectionInput;
 
@@ -149,8 +149,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public OfficeSectionInputType loadOfficeSectionInputType() {
-		return new OfficeSectionInputTypeImpl(
-				this.section.getOfficeSectionName(), this.inputName,
+		return new OfficeSectionInputTypeImpl(this.inputName,
 				this.state.parameterType);
 	}
 

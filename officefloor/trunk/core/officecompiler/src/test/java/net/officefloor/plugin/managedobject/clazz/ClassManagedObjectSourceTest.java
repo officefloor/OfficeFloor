@@ -152,34 +152,6 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Record issue
 		issues.recordIssue("Failed to init", new IllegalArgumentException(
 				"Dependency connection has more than one Qualifier"));
-		this.control(issues).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-
-				// Match initial parameters
-				for (int i = 0; i < 5; i++) {
-					Object e = expected[i];
-					Object a = actual[i];
-					if ((e == null) && (a == null)) {
-						continue; // match on null
-					} else if ((e != null) && (e.equals(actual[i]))) {
-						continue; // match not null
-					} else {
-						return false; // not match
-					}
-				}
-
-				// Match exception
-				IllegalArgumentException eEx = (IllegalArgumentException) expected[5];
-				IllegalArgumentException aEx = (IllegalArgumentException) actual[5];
-				if (!eEx.getMessage().equals(aEx.getMessage())) {
-					return false; // not match
-				}
-
-				// As here, matches
-				return true;
-			}
-		});
 
 		// Test
 		this.replayMockObjects();

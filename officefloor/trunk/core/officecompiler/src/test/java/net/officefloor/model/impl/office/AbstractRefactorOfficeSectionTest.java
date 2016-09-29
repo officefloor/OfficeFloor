@@ -238,9 +238,14 @@ public abstract class AbstractRefactorOfficeSectionTest extends
 		OfficeSectionType officeSectionType = OfficeFloorCompiler
 				.newOfficeFloorCompiler(null)
 				.getSectionLoader()
-				.loadOfficeSectionType(this.sectionName,
-						ClassSectionSource.class, Object.class.getName(),
-						this.properties);
+				.loadOfficeSectionType(
+						this.sectionName,
+						ClassSectionSource.class,
+						Object.class.getName(),
+						this.properties == null ? new PropertyListImpl()
+								: this.properties);
+		assertNotNull("Failed to load the Office Section Type",
+				officeSectionType);
 
 		// Create the property list
 		PropertyList propertyList = this.properties;

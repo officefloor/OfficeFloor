@@ -48,10 +48,7 @@ public class OfficeTeamTypeImpl implements OfficeTeamType {
 
 	@Override
 	public String getOfficeTeamName() {
-		// TODO implement OfficeTeamType.getOfficeTeamName
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeTeamType.getOfficeTeamName");
-
+		return this.teamName;
 	}
 
 }

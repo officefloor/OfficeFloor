@@ -164,8 +164,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				SECTION_LOCATION);
 		this.recordReturn(overridden, overridden.getProperties(), properties);
 		this.recordReturn(this.context, this.context.loadOfficeSectionType(
-				SectionSource.class.getName(), SECTION_LOCATION, properties),
-				officeSectionType);
+				SECTION, SectionSource.class.getName(), SECTION_LOCATION,
+				properties), officeSectionType);
 		this.recordReturn(
 				this.architect,
 				this.architect.addOfficeSection(SECTION,
@@ -266,8 +266,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(secondTransformed, secondTransformed.getProperties(),
 				properties);
 		this.recordReturn(this.context, this.context.loadOfficeSectionType(
-				SectionSource.class.getName(), SECTION_LOCATION, properties),
-				officeSectionType);
+				SECTION, SectionSource.class.getName(), SECTION_LOCATION,
+				properties), officeSectionType);
 		this.recordReturn(
 				this.architect,
 				this.architect.addOfficeSection(SECTION,
@@ -1675,11 +1675,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		// Record obtaining the office section type
 		OfficeSectionType officeSectionType = this
 				.createMock(OfficeSectionType.class);
-		this.recordReturn(
-				this.context,
-				this.context.loadOfficeSectionType(
-						ClassSectionSource.class.getName(),
-						sectionClass.getName(), properties), officeSectionType);
+		this.recordReturn(this.context, this.context.loadOfficeSectionType(
+				SECTION_NAME, ClassSectionSource.class.getName(),
+				sectionClass.getName(), properties), officeSectionType);
 		this.sectionTypes.put(SECTION_NAME, officeSectionType);
 
 		// Record adding the office section
@@ -1894,8 +1892,8 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		OfficeSectionType sectionType = this
 				.createMock(OfficeSectionType.class);
 		this.recordReturn(this.context, this.context.loadOfficeSectionType(
-				SectionSource.class.getName(), sectionLocation, properties),
-				sectionType);
+				sectionName, SectionSource.class.getName(), sectionLocation,
+				properties), sectionType);
 		this.sectionTypes.put(sectionName, sectionType);
 
 		// Record creating the section

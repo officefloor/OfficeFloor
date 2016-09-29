@@ -29,7 +29,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeSectionInputType {
+public interface OfficeAvailableSectionInputType {
 
 	/**
 	 * Obtains the name of the {@link OfficeSection} containing the
@@ -49,9 +49,9 @@ public interface OfficeSectionInputType {
 
 	/**
 	 * Obtains the fully qualified class name of the parameter type to this
-	 * {@link OfficeSectionInputType}.
+	 * {@link OfficeAvailableSectionInputType}.
 	 * 
-	 * @return Parameter type to this {@link OfficeSectionInputType}.
+	 * @return Parameter type to this {@link OfficeAvailableSectionInputType}.
 	 */
 	String getParameterType();
 

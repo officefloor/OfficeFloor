@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.impl.section.OfficeSectionManagedObjectTypeImpl;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
@@ -38,7 +39,9 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.spi.office.TypeQualification;
+import net.officefloor.compile.section.ObjectDependencyType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -163,6 +166,34 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public Node getParentNode() {
 		return this.managedObjectSourceNode;
+	}
+
+	/*
+	 * ======================== ManagedObjectNode ============================
+	 */
+
+	@Override
+	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType() {
+
+		// Create the type qualifications
+		TypeQualification[] qualifications = this.typeQualifications.stream()
+				.toArray(TypeQualification[]::new);
+
+		// Load the managed object source type
+		ManagedObjectType<?> managedObjectType = this.managedObjectSourceNode
+				.loadManagedObjectType();
+		Class<?>[] extensionInterfaces = managedObjectType
+				.getExtensionInterfaces();
+
+		// TODO obtain the object dependencies
+		ObjectDependencyType[] objectDependencyTypes = null;
+		if (true)
+			throw new UnsupportedOperationException(
+					"TODO load object dependency types");
+
+		// Create and return the managed object type
+		return new OfficeSectionManagedObjectTypeImpl(this.managedObjectName,
+				qualifications, extensionInterfaces, objectDependencyTypes);
 	}
 
 	/*

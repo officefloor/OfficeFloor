@@ -43,7 +43,7 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.office.OfficeSectionInputType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
@@ -713,7 +713,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 	}
 
 	/**
-	 * Records the {@link OfficeSectionInputType}.
+	 * Records the {@link OfficeAvailableSectionInputType}.
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
@@ -755,10 +755,10 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 		final OfficeType officeType = this.createMock(OfficeType.class);
 
 		// Create the office input types
-		final OfficeSectionInputType[] officeInputs = new OfficeSectionInputType[this.officeInputTypes
+		final OfficeAvailableSectionInputType[] officeInputs = new OfficeAvailableSectionInputType[this.officeInputTypes
 				.size()];
 		for (int i = 0; i < officeInputs.length; i++) {
-			officeInputs[i] = this.createMock(OfficeSectionInputType.class);
+			officeInputs[i] = this.createMock(OfficeAvailableSectionInputType.class);
 		}
 
 		// Create the office team types
@@ -800,7 +800,7 @@ public abstract class AbstractAutoWireOfficeFloorSourceTestCase extends
 		this.recordReturn(officeType, officeType.getOfficeSectionInputTypes(),
 				officeInputs);
 		for (int i = 0; i < officeInputs.length; i++) {
-			OfficeSectionInputType officeInput = officeInputs[i];
+			OfficeAvailableSectionInputType officeInput = officeInputs[i];
 			AutoWire handledInput = this.officeInputTypes.get(i);
 			this.recordReturn(officeInput, officeInput.getOfficeSectionName(),
 					handledInput.getQualifier());
