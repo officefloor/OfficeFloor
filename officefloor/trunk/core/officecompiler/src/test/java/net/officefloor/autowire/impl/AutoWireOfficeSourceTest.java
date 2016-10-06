@@ -287,7 +287,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				new OfficeSubSectionType[0]);
 		this.recordReturn(officeSectionType,
 				officeSectionType.getOfficeSectionOutputTypes(),
-				new OfficeSectionOutput[0]);
+				new OfficeSectionOutputType[0]);
 
 		// Test
 		this.replayMockObjects();

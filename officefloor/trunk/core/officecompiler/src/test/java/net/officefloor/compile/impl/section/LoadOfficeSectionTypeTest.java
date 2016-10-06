@@ -25,8 +25,8 @@ import javax.transaction.xa.XAResource;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.TaskNodeImpl;
-import net.officefloor.compile.section.DependentManagedObjectType;
-import net.officefloor.compile.section.ObjectDependencyType;
+import net.officefloor.compile.object.DependentObjectType;
+import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
@@ -187,11 +187,13 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				section.getOfficeTaskTypes().length);
 		OfficeTaskType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect task name", "TASK", task.getOfficeTaskName());
+		assertSame("Incorrect parent section for task", section,
+				task.getOfficeSubSectionType());
 	}
 
 	/**
-	 * Ensure no {@link DependentManagedObjectType} if {@link TaskObjectType}
-	 * not linked.
+	 * Ensure no {@link DependentObjectType} if {@link TaskObjectType} not
+	 * linked.
 	 */
 	public void testTaskObjectDependencyNotLinked() {
 
@@ -246,8 +248,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 
 		// Validate not linked to dependent managed object
 		assertNull(
-				"Qualified dependency should not be linked to dependent managed object",
-				qualified.getDependentManagedObject());
+				"Qualified dependency should not be linked to dependent object",
+				qualified.getDependentObjectType());
 
 		// Validate the unqualified object
 		ObjectDependencyType unqualified = task.getObjectDependencies()[1];
@@ -260,8 +262,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 
 		// Validate not linked to dependent managed object
 		assertNull(
-				"Unqualified dependency should not be linked to dependent managed object",
-				unqualified.getDependentManagedObject());
+				"Unqualified dependency should not be linked to dependent object",
+				unqualified.getDependentObjectType());
 
 		// Verify the mocks
 		this.verifyMockObjects();
@@ -511,7 +513,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect qualified dependency type qualifier",
 				"QUALIFIED", qualified.getObjectDependencyTypeQualifier());
 		assertNull("Qualified dependency should not be linked",
-				qualified.getDependentManagedObject());
+				qualified.getDependentObjectType());
 
 		// Validate unqualified dependency
 		ObjectDependencyType unqualified = mo.getObjectDependencies()[1];
@@ -522,7 +524,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		assertNull("Unqualified dependency should not have type qualifier",
 				unqualified.getObjectDependencyTypeQualifier());
 		assertNull("Unqualified dependency should not be linked",
-				unqualified.getDependentManagedObject());
+				unqualified.getDependentObjectType());
 
 		// Verify
 		this.verifyMockObjects();
@@ -609,9 +611,9 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		ObjectDependencyType dependency = task.getObjectDependencies()[0];
 		assertEquals("Incorrect object dependency", "OBJECT",
 				dependency.getObjectDependencyName());
-		DependentManagedObjectType mo = dependency.getDependentManagedObject();
+		DependentObjectType mo = dependency.getDependentObjectType();
 		assertEquals("Incorrect dependent managed object", "MO",
-				mo.getDependentManagedObjectName());
+				mo.getDependentObjectName());
 		assertTrue("Incorrect managed object type",
 				mo instanceof OfficeSectionManagedObjectType);
 
@@ -668,9 +670,9 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		ObjectDependencyType dependency = task.getObjectDependencies()[0];
 		assertEquals("Incorrect object dependency", "OBJECT",
 				dependency.getObjectDependencyName());
-		DependentManagedObjectType mo = dependency.getDependentManagedObject();
+		DependentObjectType mo = dependency.getDependentObjectType();
 		assertEquals("Incorrect dependent managed object", "MO",
-				mo.getDependentManagedObjectName());
+				mo.getDependentObjectName());
 		assertTrue("Incorrect managed object type",
 				mo instanceof OfficeSectionManagedObjectType);
 
@@ -750,9 +752,9 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		ObjectDependencyType dependency = task.getObjectDependencies()[0];
 		assertEquals("Incorrect object dependency", "OBJECT",
 				dependency.getObjectDependencyName());
-		DependentManagedObjectType mo = dependency.getDependentManagedObject();
+		DependentObjectType mo = dependency.getDependentObjectType();
 		assertEquals("Incorrect dependent managed object", "MO",
-				mo.getDependentManagedObjectName());
+				mo.getDependentObjectName());
 		assertTrue("Incorrect managed object type",
 				mo instanceof OfficeSectionManagedObjectType);
 	}
@@ -834,7 +836,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect dependency type", Connection.class,
 				dependency.getObjectDependencyType());
 		assertNotNull("Dependency should be linked",
-				dependency.getDependentManagedObject());
+				dependency.getDependentObjectType());
 
 		// Validate managed object two
 		assertEquals("Incorrect managed object source name", "MO_SOURCE_TWO",
@@ -849,8 +851,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				moTwo.getObjectDependencies().length);
 
 		// Ensure dependency is linked to correct managed object
-		assertEquals("Incorrect dependent managed object",
-				dependency.getDependentManagedObject(), moTwo);
+		assertEquals("Incorrect dependent object",
+				dependency.getDependentObjectType(), moTwo);
 	}
 
 	/**
@@ -918,10 +920,9 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				taskDependency.getObjectDependencyName());
 		assertEquals("Incorrect task object dependency type", Connection.class,
 				taskDependency.getObjectDependencyType());
-		DependentManagedObjectType mo = taskDependency
-				.getDependentManagedObject();
+		DependentObjectType mo = taskDependency.getDependentObjectType();
 		assertEquals("Incorrect task dependent managed object", "MO_ONE",
-				mo.getDependentManagedObjectName());
+				mo.getDependentObjectName());
 		assertEquals("Incorrect number of managed object dependencies", 1,
 				mo.getObjectDependencies().length);
 		ObjectDependencyType moDependency = mo.getObjectDependencies()[0];
@@ -929,10 +930,9 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				moDependency.getObjectDependencyName());
 		assertEquals("Incorrect managed object dependency type",
 				DataSource.class, moDependency.getObjectDependencyType());
-		DependentManagedObjectType dependentMo = moDependency
-				.getDependentManagedObject();
+		DependentObjectType dependentMo = moDependency.getDependentObjectType();
 		assertEquals("Incorrect managed object dependent managed object",
-				"MO_TWO", dependentMo.getDependentManagedObjectName());
+				"MO_TWO", dependentMo.getDependentObjectName());
 		assertEquals("Incorrect number of dependencies for managed object", 0,
 				dependentMo.getObjectDependencies().length);
 	}
@@ -960,7 +960,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 					}
 				});
 
-		// Validate no dependent managed object
+		// Validate no dependent object
 		OfficeTaskType task = section.getOfficeTaskTypes()[0];
 		assertEquals("Incorrect number of task object dependencies", 1,
 				task.getObjectDependencies().length);
@@ -969,10 +969,65 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				taskDependency.getObjectDependencyName());
 		assertEquals("Incorrect task object dependency type", Connection.class,
 				taskDependency.getObjectDependencyType());
+		assertTrue("Should be a paramaeter", taskDependency.isParameter());
 
 		// Ensure no dependent managed object for parameter
 		assertNull("Should be no dependent for task parameter",
-				taskDependency.getDependentManagedObject());
+				taskDependency.getDependentObjectType());
 	}
 
+	/**
+	 * Ensure {@link TaskObject} not flagged as parameter.
+	 */
+	public void testTaskObjectNotParameter() {
+
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactory<Work, ?, ?> taskFactory = this
+				.createMockTaskFactory();
+
+		// Load the task object dependent on section object
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						// Add the task object as parameter
+						TaskObject taskObject = context.addTaskObject("WORK",
+								workFactory, "TASK", taskFactory, "OBJECT",
+								Connection.class, null);
+						SectionObject sectionObject = context.getBuilder()
+								.addSectionObject("SECTION_OBJECT",
+										Connection.class.getName());
+						sectionObject.setTypeQualifier("QUALIFIER");
+						context.getBuilder().link(taskObject, sectionObject);
+					}
+				});
+
+		// Validate dependent object
+		OfficeTaskType task = section.getOfficeTaskTypes()[0];
+		assertEquals("Incorrect number of task object dependencies", 1,
+				task.getObjectDependencies().length);
+		ObjectDependencyType taskDependency = task.getObjectDependencies()[0];
+		assertEquals("Incorrect task object dependency", "OBJECT",
+				taskDependency.getObjectDependencyName());
+		assertEquals("Incorrect task object dependency type", Connection.class,
+				taskDependency.getObjectDependencyType());
+		assertFalse("Should not be a paramaeter", taskDependency.isParameter());
+
+		// Ensure no dependent managed object for parameter
+		DependentObjectType dependentObject = taskDependency
+				.getDependentObjectType();
+		assertNotNull("Should have dependent for object", dependentObject);
+		assertEquals("Incorrect dependent object name", "SECTION_OBJECT",
+				dependentObject.getDependentObjectName());
+		assertEquals("Should not have dependent object dependencies", 0,
+				dependentObject.getObjectDependencies().length);
+		TypeQualification[] typeQualifications = dependentObject
+				.getTypeQualifications();
+		assertEquals("Incorrect number of dependent type qualifications", 1,
+				typeQualifications.length);
+		assertEquals("Incorrect dependent type", Connection.class.getName(),
+				typeQualifications[0].getType());
+		assertEquals("Incorrect dependent qualification", "QUALIFIER",
+				typeQualifications[0].getQualifier());
+	}
 }

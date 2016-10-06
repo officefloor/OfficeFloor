@@ -15,46 +15,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.section;
+package net.officefloor.compile.object;
 
-import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.spi.office.DependentManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.compile.section.TypeQualification;
 
 /**
- * <code>Type definition</code> for a dependent {@link ManagedObject}.
+ * <code>Type definition</code> for a dependent object.
  *
  * @author Daniel Sagenschneider
  */
-public interface DependentManagedObjectType {
+public interface DependentObjectType {
 
 	/**
-	 * Obtains the name of this dependent {@link ManagedObject}.
+	 * Obtains the name of this dependent object.
 	 * 
-	 * @return Name of this dependent {@link ManagedObject}.
+	 * @return Name of this dependent object.
 	 */
-	String getDependentManagedObjectName();
+	String getDependentObjectName();
 
 	/**
 	 * <p>
 	 * Obtains the {@link TypeQualification} instances for this
-	 * {@link DependentManagedObject}.
+	 * {@link DependentObject}.
 	 * <p>
 	 * Should no {@link TypeQualification} instances be manually assigned, the
-	 * {@link TypeQualification} should be derived from the
-	 * {@link ManagedObjectType} (i.e. type without qualifier).
+	 * {@link TypeQualification} should be derived from the object type (i.e.
+	 * type without qualifier).
 	 * 
-	 * @return {@link TypeQualification} instances for this
-	 *         {@link DependentManagedObject}.
+	 * @return {@link TypeQualification} instances for this dependent object.
 	 */
 	TypeQualification[] getTypeQualifications();
 
 	/**
 	 * Obtains the {@link ObjectDependencyType} instances for this dependent
-	 * {@link ManagedObject}.
+	 * object.
 	 * 
-	 * @return {@link ObjectDependencyType} instances for this dependent
-	 *         {@link ManagedObject}.
+	 * @return {@link ObjectDependencyType} instances for this dependent object.
 	 */
 	ObjectDependencyType[] getObjectDependencies();
 

@@ -86,18 +86,17 @@ public class CompileException extends Exception {
 
 	@Override
 	public void printStackTrace() {
-		printNodeTrace(this.issue.getNode(), new PrintStreamOutput(System.err),
-				0);
+		printIssue(this.issue, new PrintStreamOutput(System.err), 0);
 	}
 
 	@Override
 	public void printStackTrace(PrintStream stream) {
-		printNodeTrace(this.issue.getNode(), new PrintStreamOutput(stream), 0);
+		printIssue(this.issue, new PrintStreamOutput(stream), 0);
 	}
 
 	@Override
 	public void printStackTrace(PrintWriter writer) {
-		printNodeTrace(this.issue.getNode(), new PrintWriterOutput(writer), 0);
+		printIssue(this.issue, new PrintWriterOutput(writer), 0);
 	}
 
 	@Override

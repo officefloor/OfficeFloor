@@ -30,6 +30,8 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
  *
  * @author Daniel Sagenschneider
  */
+@Deprecated
+// TODO move methods to LinkUtil
 public abstract class AbstractNode {
 
 	/**

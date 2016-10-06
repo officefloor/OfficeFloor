@@ -17,8 +17,6 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.section.ObjectDependencyType;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.frame.api.execute.Task;
 
@@ -27,7 +25,7 @@ import net.officefloor.frame.api.execute.Task;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskObjectNode extends LinkObjectNode, TaskObject {
+public interface TaskObjectNode extends ObjectDependencyNode, TaskObject {
 
 	/**
 	 * {@link Node} type.
@@ -41,13 +39,5 @@ public interface TaskObjectNode extends LinkObjectNode, TaskObject {
 	 *         the {@link Task}.
 	 */
 	boolean isParameter();
-
-	/**
-	 * Loads the {@link ObjectDependencyType} for this {@link TaskNode}.
-	 * 
-	 * @return {@link ObjectDependencyType} or <code>null</code> with issues
-	 *         reported to the {@link CompilerIssues}.
-	 */
-	ObjectDependencyType loadObjectDependencyType();
 
 }

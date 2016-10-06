@@ -15,25 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.spi.office;
+package net.officefloor.compile.internal.structure;
+
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.object.ObjectDependencyType;
 
 /**
- * <p>
- * Special class returned by {@link ObjectDependencyNode} to indicate the type is
- * unknown.
- * <p>
- * The class is <code>final</code> and with a <code>private</code> constructor
- * to ensure it stays only as a type indicator (not to actually be used and
- * therefore never a real dependency).
- * 
+ * Object dependency.
+ *
  * @author Daniel Sagenschneider
  */
-public final class UnknownType {
+public interface ObjectDependencyNode extends LinkObjectNode {
 
 	/**
-	 * Ensure can not initiate this class as is only an type indicator.
+	 * Loads the {@link ObjectDependencyType}.
+	 * 
+	 * @return {@link ObjectDependencyType} or <code>null</code> with issue
+	 *         reported to the {@link CompilerIssues}.
 	 */
-	private UnknownType() {
-	}
+	ObjectDependencyType loadObjectDependencyType();
 
 }

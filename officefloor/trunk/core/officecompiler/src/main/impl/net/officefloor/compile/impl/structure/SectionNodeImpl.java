@@ -612,8 +612,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getOfficeTaskName(), b.getOfficeTaskName()))
-				.map(t -> t.loadOfficeTaskType()).filter(t -> (t != null))
-				.toArray(OfficeTaskType[]::new);
+				.map(t -> t.loadOfficeTaskType(sectionType))
+				.filter(t -> (t != null)).toArray(OfficeTaskType[]::new);
 
 		// Initialise the sub section state
 		sectionType.initialiseAsOfficeSubSectionType(parentSectionType,

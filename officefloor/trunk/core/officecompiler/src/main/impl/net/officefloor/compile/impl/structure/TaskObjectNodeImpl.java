@@ -22,7 +22,7 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
-import net.officefloor.compile.section.ObjectDependencyType;
+import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.frame.api.execute.Task;
 
@@ -102,6 +102,10 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	public boolean isParameter() {
 		return this.isParameter;
 	}
+
+	/*
+	 * ================= ObjectDependencyNode =========================
+	 */
 
 	@Override
 	public ObjectDependencyType loadObjectDependencyType() {

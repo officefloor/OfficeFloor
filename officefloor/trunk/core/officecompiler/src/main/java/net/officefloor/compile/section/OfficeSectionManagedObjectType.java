@@ -18,6 +18,7 @@
 package net.officefloor.compile.section;
 
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.manage.Office;
@@ -29,8 +30,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeSectionManagedObjectType extends
-		DependentManagedObjectType {
+public interface OfficeSectionManagedObjectType extends DependentObjectType {
 
 	/**
 	 * Obtains the name of this {@link Office} {@link SectionManagedObject}.
