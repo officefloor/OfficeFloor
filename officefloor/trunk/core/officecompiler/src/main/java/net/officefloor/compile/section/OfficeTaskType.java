@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.section;
 
+import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.frame.spi.team.Team;

@@ -37,10 +37,10 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
+import net.officefloor.compile.object.DependentObjectType;
+import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.section.DependentManagedObjectType;
-import net.officefloor.compile.section.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
@@ -1321,7 +1321,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		 */
 		public boolean isResponsible(OfficeTaskType taskType) {
 			return this.isResponsible(taskType.getObjectDependencies(),
-					new HashSet<DependentManagedObjectType>());
+					new HashSet<DependentObjectType>());
 		}
 
 		/**
@@ -1357,7 +1357,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		 *         responsible for the {@link ObjectDependencyType} instances.
 		 */
 		private boolean isResponsible(ObjectDependencyType[] dependencies,
-				Set<DependentManagedObjectType> objects) {
+				Set<DependentObjectType> objects) {
 
 			// Obtain details of auto-wire
 			String autoWireQualifier = this.dependencyAutoWire.getQualifier();
@@ -1367,8 +1367,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			for (ObjectDependencyType dependencyType : dependencies) {
 
 				// Obtain the dependent object
-				DependentManagedObjectType objectType = dependencyType
-						.getDependentManagedObject();
+				DependentObjectType objectType = dependencyType
+						.getDependentObjectType();
 				if (objectType == null) {
 					continue; // ignore if dependency not linked
 				}

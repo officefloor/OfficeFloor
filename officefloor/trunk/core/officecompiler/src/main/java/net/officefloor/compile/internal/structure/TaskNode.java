@@ -18,6 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -41,10 +42,13 @@ public interface TaskNode extends LinkFlowNode, SectionTask, OfficeTask {
 	/**
 	 * Loads the {@link OfficeTaskType}.
 	 * 
+	 * @param parentSubSectionType
+	 *            Containing {@link OfficeSubSectionType} to this
+	 *            {@link OfficeTask}.
 	 * @return {@link OfficeTaskType} or <code>null</code> with issues reported
 	 *         to the {@link CompilerIssues}.
 	 */
-	OfficeTaskType loadOfficeTaskType();
+	OfficeTaskType loadOfficeTaskType(OfficeSubSectionType parentSubSectionType);
 
 	/**
 	 * Obtains the {@link WorkNode} containing this {@link TaskNode}.

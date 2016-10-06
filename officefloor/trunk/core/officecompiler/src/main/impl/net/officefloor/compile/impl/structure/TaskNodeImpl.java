@@ -22,6 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.impl.office.OfficeTaskTypeImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.DutyNode;
@@ -37,6 +39,8 @@ import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.WorkNode;
+import net.officefloor.compile.object.ObjectDependencyType;
+import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -201,9 +205,22 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
-	public OfficeTaskType loadOfficeTaskType() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+	public OfficeTaskType loadOfficeTaskType(
+			OfficeSubSectionType parentSubSectionType) {
+
+		// Load the object dependencies
+		ObjectDependencyType[] dependencies = this.taskObjects
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getTaskObjectName(), b.getTaskObjectName()))
+				.map((object) -> object.loadObjectDependencyType())
+				.filter((type) -> (type != null))
+				.toArray(ObjectDependencyType[]::new);
+
+		// Create and return the type
+		return new OfficeTaskTypeImpl(this.taskName, parentSubSectionType,
+				dependencies);
 	}
 
 	@Override

@@ -57,7 +57,10 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 				SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
-		// Compile the office floor
+		// Capture issues for managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -80,7 +83,10 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 				SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
-		// Compile the office floor
+		// Capture issues for managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -108,6 +114,9 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 				"OFFICE.DESK.DEPENDENT_SOURCE", ClassManagedObjectSource.class,
 				0, "class.name", DependencyManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Capture issues for managed object type
+		this.issues.recordCaptureIssues(false);
 
 		// Compile the office floor
 		this.compile(true);
@@ -145,7 +154,10 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
-		// Compile the office floor
+		// Capture issues for managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -181,7 +193,10 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 				0, "class.name", DependencyManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
-		// Compile the office floor
+		// Capture issues for managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -203,7 +218,10 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 				ManagedObjectSourceNodeImpl.class,
 				"Managed object flow doProcess is not linked to a TaskNode");
 
-		// Compile the office floor
+		// Capture issues for managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -231,7 +249,10 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.DESK.MANAGED_OBJECT_SOURCE");
 		managingOffice.linkProcess(0, "DESK.WORK", "INPUT");
 
-		// Compile the office floor
+		// Capture issues for managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -259,7 +280,10 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 
-		// Compile the office floor
+		// Capture issues for managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 

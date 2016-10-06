@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectTypeImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
@@ -39,7 +40,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.section.ObjectDependencyType;
+import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -185,11 +186,16 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		Class<?>[] extensionInterfaces = managedObjectType
 				.getExtensionInterfaces();
 
-		// TODO obtain the object dependencies
-		ObjectDependencyType[] objectDependencyTypes = null;
-		if (true)
-			throw new UnsupportedOperationException(
-					"TODO load object dependency types");
+		// Obtain the dependencies
+		ObjectDependencyType[] objectDependencyTypes = this.dependencies
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getManagedObjectDependencyName(),
+						b.getManagedObjectDependencyName()))
+				.map((dependency) -> dependency.loadObjectDependencyType())
+				.filter((type) -> (type != null))
+				.toArray(ObjectDependencyType[]::new);
 
 		// Create and return the managed object type
 		return new OfficeSectionManagedObjectTypeImpl(this.managedObjectName,

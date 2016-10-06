@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.impl.section;
 
-import net.officefloor.compile.section.ObjectDependencyType;
+import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
@@ -95,7 +95,7 @@ public class OfficeSectionManagedObjectTypeImpl implements
 	 */
 
 	@Override
-	public String getDependentManagedObjectName() {
+	public String getDependentObjectName() {
 		// TODO implement
 		// DependentManagedObjectType.getDependentManagedObjectName
 		throw new UnsupportedOperationException(

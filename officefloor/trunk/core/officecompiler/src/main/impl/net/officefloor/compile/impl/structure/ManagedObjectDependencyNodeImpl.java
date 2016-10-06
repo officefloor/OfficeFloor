@@ -23,7 +23,7 @@ import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.section.ObjectDependencyType;
+import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 
 /**
@@ -108,24 +108,24 @@ public class ManagedObjectDependencyNodeImpl implements
 	}
 
 	/*
-	 * =================== ManagedObjectDependencyNode ======================
-	 */
-
-	@Override
-	public ObjectDependencyType loadObjectDependencyType() {
-		// TODO implement ManagedObjectDependencyNode.loadObjectDependencyType
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectDependencyNode.loadObjectDependencyType");
-
-	}
-
-	/*
 	 * ==================== ManagedObjectDependency ============================
 	 */
 
 	@Override
 	public String getManagedObjectDependencyName() {
 		return this.dependencyName;
+	}
+
+	/**
+	 * ===================== ObjectDependencyNode ==============================
+	 */
+
+	@Override
+	public ObjectDependencyType loadObjectDependencyType() {
+		// TODO implement ObjectDependencyNode.loadObjectDependencyType
+		throw new UnsupportedOperationException(
+				"TODO implement ObjectDependencyNode.loadObjectDependencyType");
+
 	}
 
 	/*

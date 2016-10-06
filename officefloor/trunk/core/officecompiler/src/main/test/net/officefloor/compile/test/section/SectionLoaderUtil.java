@@ -27,12 +27,12 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
-import net.officefloor.compile.section.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
@@ -495,8 +495,8 @@ public class SectionLoaderUtil {
 								+ " (managed object source="
 								+ managedObjectSourceName + ", sub section="
 								+ subSectionName + ")",
-						eMo.getDependentManagedObjectName(),
-						aMo.getDependentManagedObjectName());
+						eMo.getDependentObjectName(),
+						aMo.getDependentObjectName());
 				String managedObjectName = eMo
 						.getOfficeSectionManagedObjectName();
 

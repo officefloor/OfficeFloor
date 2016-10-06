@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.section;
+package net.officefloor.compile.object;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
@@ -59,23 +59,22 @@ public interface ObjectDependencyType {
 	String getObjectDependencyTypeQualifier();
 
 	/**
+	 * Indicates if the object dependency is a parameter.
+	 * 
+	 * @return <code>true</code> if object dependency is a parameter.
+	 */
+	boolean isParameter();
+
+	/**
 	 * <p>
-	 * Obtains the {@link ManagedObject} that full fills the dependency.
+	 * Obtains the object that fulfills the dependency.
 	 * <p>
 	 * Should the {@link ObjectDependencyType} represent a parameter then no
-	 * {@link DependentManagedObjectType} will be provided.
-	 * <p>
-	 * Expected return types are:
-	 * <ol>
-	 * <li>{@link OfficeSectionManagedObject}</li>
-	 * <li>{@link OfficeManagedObject}</li>
-	 * <li>{@link OfficeObject}</li>
-	 * <li><code>null</code> if not yet linked (or issue in linking)</li>
-	 * </ol>
+	 * {@link DependentObjectType} will be provided.
 	 * 
-	 * @return {@link DependentManagedObjectType} or <code>null</code> if a
-	 *         parameter.
+	 * @return {@link DependentObjectType} or <code>null</code> if parameter or
+	 *         unable to obtain {@link DependentObjectType}.
 	 */
-	DependentManagedObjectType getDependentManagedObject();
+	DependentObjectType getDependentObjectType();
 
 }
