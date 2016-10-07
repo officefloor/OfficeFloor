@@ -17,12 +17,16 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.object.ObjectDependencyTypeImpl;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 
@@ -121,11 +125,42 @@ public class ManagedObjectDependencyNodeImpl implements
 	 */
 
 	@Override
-	public ObjectDependencyType loadObjectDependencyType() {
-		// TODO implement ObjectDependencyNode.loadObjectDependencyType
-		throw new UnsupportedOperationException(
-				"TODO implement ObjectDependencyNode.loadObjectDependencyType");
+	public ObjectDependencyType loadObjectDependencyType(
+			ManagedObjectType<?> managedObjectType) {
 
+		// Obtain the dependency type
+		ManagedObjectDependencyType<?> dependency = null;
+		for (ManagedObjectDependencyType<?> moDependency : managedObjectType
+				.getDependencyTypes()) {
+			if (this.dependencyName.equals(moDependency.getDependencyName())) {
+				dependency = moDependency;
+			}
+		}
+		if (dependency == null) {
+			this.context.getCompilerIssues().addIssue(
+					this,
+					ManagedObjectSourceNode.TYPE + " does not have dependency "
+							+ this.dependencyName);
+			return null;
+		}
+
+		// Obtain the type information
+		String dependencyType = dependency.getDependencyType().getName();
+		String typeQualifier = dependency.getTypeQualifier();
+
+		// Obtain the dependent object
+		DependentObjectType dependentObjectType = null;
+		if (this.linkedObjectNode != null) {
+
+			// TODO implement
+			throw new UnsupportedOperationException("TODO implement "
+					+ this.getClass().getSimpleName() + " dependent object");
+
+		}
+
+		// Create and return the dependency type
+		return new ObjectDependencyTypeImpl(this.dependencyName,
+				dependencyType, typeQualifier, false, dependentObjectType);
 	}
 
 	/*

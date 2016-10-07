@@ -24,6 +24,8 @@ import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.work.TaskObjectType;
+import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.execute.Task;
 
 /**
@@ -108,7 +110,10 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	 */
 
 	@Override
-	public ObjectDependencyType loadObjectDependencyType() {
+	public ObjectDependencyType loadObjectDependencyType(
+			TaskType<?, ?, ?> taskType) {
+		
+		
 		// TODO implement TaskObjectNode.loadObjectDependencyType
 		throw new UnsupportedOperationException(
 				"TODO implement TaskObjectNode.loadObjectDependencyType");

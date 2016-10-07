@@ -364,6 +364,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@Override
 	public OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType() {
 
+		// Load the managed object type
+		ManagedObjectType<?> managedObjectType = this.loadManagedObjectType();
+		if (managedObjectType == null) {
+			return null;
+		}
+
 		// Load the managed object types
 		OfficeSectionManagedObjectType[] managedObjectTypes = this.managedObjects
 				.values()
@@ -372,7 +378,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						a.getOfficeSectionManagedObjectName(),
 						b.getOfficeSectionManagedObjectName()))
 				.map((managedObject) -> managedObject
-						.loadOfficeSectionManagedObjectType())
+						.loadOfficeSectionManagedObjectType(managedObjectType))
 				.filter((type) -> (type != null))
 				.toArray(OfficeSectionManagedObjectType[]::new);
 

@@ -84,6 +84,7 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
@@ -606,14 +607,41 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.filter((type) -> (type != null))
 				.toArray(OfficeSectionManagedObjectSourceType[]::new);
 
+		// Obtain the mapping of work to types
+		Map<WorkNode, WorkType<?>> workTypes = new HashMap<WorkNode, WorkType<?>>();
+		this.workNodes
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getSectionWorkName(), b.getSectionWorkName()))
+				.forEachOrdered((work) -> {
+					// Load the work type
+						WorkType<?> workType = work.loadWorkType();
+						if (workType == null) {
+							return;
+						}
+
+						// Register the work type
+						workTypes.put(work, workType);
+					});
+
 		// Add the office context for the tasks
 		OfficeTaskType[] taskTypes = this.taskNodes
 				.values()
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getOfficeTaskName(), b.getOfficeTaskName()))
-				.map(t -> t.loadOfficeTaskType(sectionType))
-				.filter(t -> (t != null)).toArray(OfficeTaskType[]::new);
+				.map(task -> {
+					// Obtain the work type of the work for the task
+					WorkType<?> workType = workTypes.get(task.getWorkNode());
+					if (workType == null) {
+						return null;
+					}
+
+					// Load and return the task type
+					return task.loadOfficeTaskType(sectionType, workType);
+				}).filter(type -> (type != null))
+				.toArray(OfficeTaskType[]::new);
 
 		// Initialise the sub section state
 		sectionType.initialiseAsOfficeSubSectionType(parentSectionType,
