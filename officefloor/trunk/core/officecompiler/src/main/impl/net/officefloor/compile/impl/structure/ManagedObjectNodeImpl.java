@@ -174,17 +174,16 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 */
 
 	@Override
-	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType() {
+	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(
+			ManagedObjectType<?> managedObjectType) {
+
+		// Obtain the extension interfaces
+		Class<?>[] extensionInterfaces = managedObjectType
+				.getExtensionInterfaces();
 
 		// Create the type qualifications
 		TypeQualification[] qualifications = this.typeQualifications.stream()
 				.toArray(TypeQualification[]::new);
-
-		// Load the managed object source type
-		ManagedObjectType<?> managedObjectType = this.managedObjectSourceNode
-				.loadManagedObjectType();
-		Class<?>[] extensionInterfaces = managedObjectType
-				.getExtensionInterfaces();
 
 		// Obtain the dependencies
 		ObjectDependencyType[] objectDependencyTypes = this.dependencies
@@ -193,7 +192,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getManagedObjectDependencyName(),
 						b.getManagedObjectDependencyName()))
-				.map((dependency) -> dependency.loadObjectDependencyType())
+				.map((dependency) -> dependency
+						.loadObjectDependencyType(managedObjectType))
 				.filter((type) -> (type != null))
 				.toArray(ObjectDependencyType[]::new);
 

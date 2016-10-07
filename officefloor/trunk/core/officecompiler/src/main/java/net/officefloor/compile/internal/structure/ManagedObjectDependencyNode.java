@@ -17,19 +17,34 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link ManagedObjectDependency} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectDependencyNode extends ObjectDependencyNode,
+public interface ManagedObjectDependencyNode extends LinkObjectNode,
 		ManagedObjectDependency {
 
 	/**
 	 * {@link Node} type.
 	 */
 	static String TYPE = "Managed Object Dependency";
+
+	/**
+	 * Loads the {@link ObjectDependencyType}.
+	 * 
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType} for the {@link ManagedObject}.
+	 * @return {@link ObjectDependencyType} or <code>null</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	ObjectDependencyType loadObjectDependencyType(
+			ManagedObjectType<?> managedObjectType);
 
 }

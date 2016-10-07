@@ -58,6 +58,7 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.governance.Governance;
 
@@ -184,16 +185,10 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
-	public TaskType<?, ?, ?> loadTaskType() {
-
-		// Obtain the work type
-		WorkType<?> workType = this.workNode.loadWorkType();
-		if (workType == null) {
-			return null; // must have work type for task
-		}
+	public <W extends Work> TaskType<W, ?, ?> loadTaskType(WorkType<W> workType) {
 
 		// Find the task type for this task node
-		for (TaskType<?, ?, ?> type : workType.getTaskTypes()) {
+		for (TaskType<W, ?, ?> type : workType.getTaskTypes()) {
 			if (this.taskTypeName.equals(type.getTaskName())) {
 				// Found the type for this task
 				return type;
@@ -206,7 +201,13 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	public OfficeTaskType loadOfficeTaskType(
-			OfficeSubSectionType parentSubSectionType) {
+			OfficeSubSectionType parentSubSectionType, WorkType<?> workType) {
+
+		// Load the task type
+		TaskType<?, ?, ?> taskType = this.loadTaskType(workType);
+		if (taskType == null) {
+			return null;
+		}
 
 		// Load the object dependencies
 		ObjectDependencyType[] dependencies = this.taskObjects
@@ -214,7 +215,7 @@ public class TaskNodeImpl implements TaskNode {
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getTaskObjectName(), b.getTaskObjectName()))
-				.map((object) -> object.loadObjectDependencyType())
+				.map((object) -> object.loadObjectDependencyType(taskType))
 				.filter((type) -> (type != null))
 				.toArray(ObjectDependencyType[]::new);
 
@@ -225,10 +226,11 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void buildTask(WorkBuilder<?> workBuilder) {
+	public <W extends Work> void buildTask(WorkBuilder<W> workBuilder,
+			WorkType<W> workType) {
 
 		// Obtain the task factory for this task
-		TaskType<?, ?, ?> taskType = this.loadTaskType();
+		TaskType<?, ?, ?> taskType = this.loadTaskType(workType);
 		if (taskType == null) {
 			this.context.getCompilerIssues().addIssue(this,
 					"Can not find task type '" + this.taskTypeName + "'");

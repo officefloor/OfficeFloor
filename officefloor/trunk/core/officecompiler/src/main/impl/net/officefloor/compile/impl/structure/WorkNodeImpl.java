@@ -201,7 +201,7 @@ public class WorkNodeImpl implements WorkNode {
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void buildWork(OfficeBuilder builder) {
 
 		// Obtain the work type
@@ -220,7 +220,7 @@ public class WorkNodeImpl implements WorkNode {
 
 		// Build the tasks
 		for (TaskNode task : this.taskNodes) {
-			task.buildTask(workBuilder);
+			task.buildTask(workBuilder, workType);
 		}
 
 		// Determine if initial task for work
