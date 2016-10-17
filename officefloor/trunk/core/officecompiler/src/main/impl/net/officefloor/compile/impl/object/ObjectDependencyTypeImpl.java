@@ -82,42 +82,27 @@ public class ObjectDependencyTypeImpl implements ObjectDependencyType {
 
 	@Override
 	public String getObjectDependencyName() {
-		// TODO implement ObjectDependencyType.getObjectDependencyName
-		throw new UnsupportedOperationException(
-				"TODO implement ObjectDependencyType.getObjectDependencyName");
-
+		return this.dependencyName;
 	}
 
 	@Override
-	public Class<?> getObjectDependencyType() {
-		// TODO implement ObjectDependencyType.getObjectDependencyType
-		throw new UnsupportedOperationException(
-				"TODO implement ObjectDependencyType.getObjectDependencyType");
-
+	public String getObjectDependencyType() {
+		return this.dependencyType;
 	}
 
 	@Override
 	public String getObjectDependencyTypeQualifier() {
-		// TODO implement ObjectDependencyType.getObjectDependencyTypeQualifier
-		throw new UnsupportedOperationException(
-				"TODO implement ObjectDependencyType.getObjectDependencyTypeQualifier");
-
+		return this.typeQualifier;
 	}
 
 	@Override
 	public boolean isParameter() {
-		// TODO implement ObjectDependencyType.isParameter
-		throw new UnsupportedOperationException(
-				"TODO implement ObjectDependencyType.isParameter");
-
+		return this.isParameter;
 	}
 
 	@Override
 	public DependentObjectType getDependentObjectType() {
-		// TODO implement ObjectDependencyType.getDependentManagedObject
-		throw new UnsupportedOperationException(
-				"TODO implement ObjectDependencyType.getDependentManagedObject");
-
+		return this.dependentObjectType;
 	}
 
 }

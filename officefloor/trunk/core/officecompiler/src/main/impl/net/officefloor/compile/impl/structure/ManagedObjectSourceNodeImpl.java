@@ -68,6 +68,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -362,10 +363,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType() {
+	public OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType(
+			TypeContext typeContext) {
 
 		// Load the managed object type
-		ManagedObjectType<?> managedObjectType = this.loadManagedObjectType();
+		ManagedObjectType<?> managedObjectType = typeContext
+				.getOrLoadManagedObjectType(this);
 		if (managedObjectType == null) {
 			return null;
 		}
@@ -378,7 +381,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						a.getOfficeSectionManagedObjectName(),
 						b.getOfficeSectionManagedObjectName()))
 				.map((managedObject) -> managedObject
-						.loadOfficeSectionManagedObjectType(managedObjectType))
+						.loadOfficeSectionManagedObjectType(typeContext))
 				.filter((type) -> (type != null))
 				.toArray(OfficeSectionManagedObjectType[]::new);
 
@@ -389,7 +392,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getManagedObjectTeamName(),
 						b.getManagedObjectTeamName()))
-				.map((team) -> team.loadOfficeSectionManagedObjectTeamType())
+				.map((team) -> team
+						.loadOfficeSectionManagedObjectTeamType(typeContext))
 				.filter((type) -> (type != null))
 				.toArray(OfficeSectionManagedObjectTeamType[]::new);
 
@@ -400,7 +404,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType() {
+	public OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
+			TypeContext typeContext) {
 
 		// Create the loader to obtain the managed object type
 		ManagedObjectLoader loader = this.context.getManagedObjectLoader(this);
@@ -488,14 +493,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildManagedObject(OfficeFloorBuilder builder,
-			OfficeNode managingOffice, OfficeBuilder officeBuilder) {
+			OfficeNode managingOffice, OfficeBuilder officeBuilder,
+			TypeContext typeContext) {
 
 		// Obtain the name to add this managed object source
 		final String managedObjectSourceName = this
 				.getManagedObjectSourceName();
 
 		// Obtain the managed object type
-		ManagedObjectType<?> managedObjectType = this.loadManagedObjectType();
+		ManagedObjectType<?> managedObjectType = typeContext
+				.getOrLoadManagedObjectType(this);
 		if (managedObjectType == null) {
 			return; // must have managed object type
 		}
@@ -685,7 +692,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 						// Ensure dependent managed object is built into office
 						dependency.buildOfficeManagedObject(managingOffice,
-								officeBuilder);
+								officeBuilder, typeContext);
 
 						// Link the dependency
 						String dependentManagedObjectName = dependency
@@ -819,7 +826,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					}
 				});
 		for (ManagedObjectNode mo : managedObjectNodes) {
-			mo.buildOfficeManagedObject(managingOffice, officeBuilder);
+			mo.buildOfficeManagedObject(managingOffice, officeBuilder,
+					typeContext);
 		}
 	}
 

@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.office;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -209,7 +210,7 @@ public class OfficeLoaderImpl implements OfficeLoader {
 		}
 
 		// Return the office type
-		return officeNode.loadOfficeType();
+		return officeNode.loadOfficeType(new TypeContextImpl());
 	}
 
 	/**

@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.section.OfficeSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.SectionInputTypeImpl;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -27,6 +28,7 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link SectionInputNode} node.
@@ -142,13 +144,14 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	@Override
-	public SectionInputType loadSectionInputType() {
+	public SectionInputType loadSectionInputType(TypeContext typeContext) {
 		return new SectionInputTypeImpl(this.inputName,
 				this.state.parameterType);
 	}
 
 	@Override
-	public OfficeSectionInputType loadOfficeSectionInputType() {
+	public OfficeSectionInputType loadOfficeSectionInputType(
+			TypeContext typeContext) {
 		return new OfficeSectionInputTypeImpl(this.inputName,
 				this.state.parameterType);
 	}
@@ -200,17 +203,9 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-
-		// Ensure not already linked
-		if (this.linkedFlowNode != null) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Input " + this.inputName + " linked more than once");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedFlowNode = node;
-		return true;
+		return LinkUtil.linkFlowNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedFlowNode = link);
 	}
 
 	@Override

@@ -19,6 +19,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Work;
@@ -63,7 +64,9 @@ public interface WorkNode extends Node, SectionWork {
 	 * 
 	 * @param builder
 	 *            {@link OfficeBuilder}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 */
-	void buildWork(OfficeBuilder builder);
+	void buildWork(OfficeBuilder builder, TypeContext typeContext);
 
 }

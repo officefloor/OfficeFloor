@@ -15,33 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.impl.type;
 
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.office.OfficeTeamType;
-import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.team.TeamType;
 import net.officefloor.compile.type.TypeContext;
 
 /**
- * {@link OfficeTeam} node.
+ * Tests loading the {@link TeamType} from the {@link TypeContext}.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeTeamNode extends LinkTeamNode, OfficeTeam {
+public class TeamTypeContextTest extends
+		AbstractTestTypeContext<TeamNode, TeamType> {
 
 	/**
-	 * {@link Node} type.
+	 * Instantiate.
 	 */
-	static String TYPE = "Office Team";
-
-	/**
-	 * Loads the {@link OfficeTeamType}.
-	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
-	 * @return {@link OfficeTeamType} or <code>null</code> with issues reported
-	 *         to the {@link CompilerIssues}.
-	 */
-	OfficeTeamType loadOfficeTeamType(TypeContext typeContext);
+	public TeamTypeContextTest() {
+		super(TeamNode.class, TeamType.class, (node) -> (TeamType) node
+				.loadTeamType(), (context, node) -> (TeamType) context
+				.getOrLoadTeamType(node));
+	}
 
 }

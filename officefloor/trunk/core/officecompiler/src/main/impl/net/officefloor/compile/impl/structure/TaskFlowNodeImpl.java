@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -144,17 +145,9 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-
-		// Ensure not already linked
-		if (this.linkedFlowNode != null) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Task flow " + this.flowName + " linked more than once");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedFlowNode = node;
-		return true;
+		return LinkUtil.linkFlowNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedFlowNode = link);
 	}
 
 	@Override

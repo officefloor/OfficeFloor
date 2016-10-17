@@ -15,33 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.impl.type;
 
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.office.OfficeTeamType;
-import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.type.TypeContext;
+import net.officefloor.compile.work.WorkType;
 
 /**
- * {@link OfficeTeam} node.
+ * Tests loading the {@link WorkType} from the {@link TypeContext}.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeTeamNode extends LinkTeamNode, OfficeTeam {
+@SuppressWarnings("rawtypes")
+public class WorkTypeContextTest extends
+		AbstractTestTypeContext<WorkNode, WorkType> {
 
 	/**
-	 * {@link Node} type.
+	 * Instantiate.
 	 */
-	static String TYPE = "Office Team";
-
-	/**
-	 * Loads the {@link OfficeTeamType}.
-	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
-	 * @return {@link OfficeTeamType} or <code>null</code> with issues reported
-	 *         to the {@link CompilerIssues}.
-	 */
-	OfficeTeamType loadOfficeTeamType(TypeContext typeContext);
+	public WorkTypeContextTest() {
+		super(WorkNode.class, WorkType.class, (node) -> (WorkType) node
+				.loadWorkType(), (context, node) -> (WorkType) context
+				.getOrLoadWorkType(node));
+	}
 
 }

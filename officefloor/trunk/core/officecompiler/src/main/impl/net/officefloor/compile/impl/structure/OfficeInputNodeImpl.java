@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.office.OfficeInputTypeImpl;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkSynchronousNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -26,6 +27,7 @@ import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * Implementation of the {@link OfficeFloorInputNode}.
@@ -58,11 +60,6 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	 * {@link LinkSynchronousNode} being the {@link OfficeOutputNode}.
 	 */
 	private OfficeOutputNode linkedSynchronousNode = null;
-
-	/**
-	 * {@link LinkFlowNode}.
-	 */
-	private LinkFlowNode linkedFlowNode = null;
 
 	/**
 	 * Initialise.
@@ -113,10 +110,11 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	 */
 
 	@Override
-	public OfficeInputType loadOfficeInputType() {
+	public OfficeInputType loadOfficeInputType(TypeContext typeContext) {
 		return new OfficeInputTypeImpl(this.name, this.parameterType,
 				(this.linkedSynchronousNode == null ? null
-						: this.linkedSynchronousNode.loadOfficeOutputType()));
+						: this.linkedSynchronousNode
+								.loadOfficeOutputType(typeContext)));
 	}
 
 	/*
@@ -157,19 +155,16 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	 * ======================== LinkFlowNode =============================
 	 */
 
+	/**
+	 * {@link LinkFlowNode}.
+	 */
+	private LinkFlowNode linkedFlowNode = null;
+
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-
-		// Ensure not already linked
-		if (this.linkedFlowNode != null) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Input " + this.name + " linked more than once");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedFlowNode = node;
-		return true;
+		return LinkUtil.linkFlowNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedFlowNode = link);
 	}
 
 	@Override

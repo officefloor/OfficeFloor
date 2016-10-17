@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link SectionInput} node.
@@ -57,17 +58,21 @@ public interface SectionInputNode extends LinkFlowNode, SectionInput,
 	/**
 	 * Loads the {@link SectionInputType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link SectionInputType} or <code>null</code> with issues
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	SectionInputType loadSectionInputType();
+	SectionInputType loadSectionInputType(TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeSectionInputType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeSectionInputType} or <code>null</code> with issues
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	OfficeSectionInputType loadOfficeSectionInputType();
+	OfficeSectionInputType loadOfficeSectionInputType(TypeContext typeContext);
 
 }

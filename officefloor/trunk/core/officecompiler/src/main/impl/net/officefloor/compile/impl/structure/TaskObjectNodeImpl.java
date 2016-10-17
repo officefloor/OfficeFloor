@@ -17,13 +17,18 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.object.ObjectDependencyTypeImpl;
+import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.DependentObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
+import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.execute.Task;
@@ -110,14 +115,58 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	 */
 
 	@Override
-	public ObjectDependencyType loadObjectDependencyType(
-			TaskType<?, ?, ?> taskType) {
-		
-		
-		// TODO implement TaskObjectNode.loadObjectDependencyType
-		throw new UnsupportedOperationException(
-				"TODO implement TaskObjectNode.loadObjectDependencyType");
+	public ObjectDependencyType loadObjectDependencyType(TypeContext typeContext) {
 
+		// Obtain the task type
+		TaskType<?, ?, ?> taskType = this.taskNode.loadTaskType(typeContext);
+		if (taskType == null) {
+			return null;
+		}
+
+		// Obtain the task object type
+		TaskObjectType<?> object = null;
+		for (TaskObjectType<?> objectType : taskType.getObjectTypes()) {
+			if (this.objectName.equals(objectType.getObjectName())) {
+				object = objectType;
+			}
+		}
+		if (object == null) {
+			this.context.getCompilerIssues().addIssue(
+					this,
+					TaskObjectNode.TYPE + " does not have object "
+							+ this.objectName);
+			return null;
+		}
+
+		// Obtain the type information
+		String dependencyType = object.getObjectType().getName();
+		String typeQualifier = object.getTypeQualifier();
+
+		// Obtain the dependent object type
+		DependentObjectType dependentObjectType = null;
+		if (!this.isParameter) {
+
+			// Not parameter, so must obtain dependent object
+			DependentObjectNode dependentObjectNode = LinkUtil
+					.retrieveFurtherestTarget(this, DependentObjectNode.class,
+							this.context.getCompilerIssues());
+			if (dependentObjectNode == null) {
+				this.context.getCompilerIssues().addIssue(
+						this,
+						TaskObjectNode.TYPE + " " + this.objectName
+								+ " is not linked to a "
+								+ DependentObjectNode.TYPE);
+				return null;
+			}
+
+			// Obtain the dependent object type
+			dependentObjectType = dependentObjectNode
+					.loadDependentObjectType(typeContext);
+		}
+
+		// Create and return the type
+		return new ObjectDependencyTypeImpl(this.objectName, dependencyType,
+				typeQualifier, this.isParameter, dependentObjectType);
 	}
 
 	/*
@@ -145,20 +194,9 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-
-		// Ensure not already linked
-		if (this.linkedObjectNode != null) {
-			this.context.getCompilerIssues()
-					.addIssue(
-							this,
-							"Task object " + this.objectName
-									+ " linked more than once");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedObjectNode = node;
-		return true;
+		return LinkUtil.linkObjectNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedObjectNode = link);
 	}
 
 	@Override

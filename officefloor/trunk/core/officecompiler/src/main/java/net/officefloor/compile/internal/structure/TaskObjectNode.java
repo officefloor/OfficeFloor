@@ -20,7 +20,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.TaskObject;
-import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.execute.Task;
 
 /**
@@ -46,12 +46,11 @@ public interface TaskObjectNode extends LinkObjectNode, TaskObject {
 	/**
 	 * Loads the {@link ObjectDependencyType}.
 	 * 
-	 * @param taskType
-	 *            {@link TaskType} for the {@link Task} of this
-	 *            {@link TaskObject}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link ObjectDependencyType} or <code>null</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	ObjectDependencyType loadObjectDependencyType(TaskType<?, ?, ?> taskType);
+	ObjectDependencyType loadObjectDependencyType(TypeContext typeContext);
 
 }

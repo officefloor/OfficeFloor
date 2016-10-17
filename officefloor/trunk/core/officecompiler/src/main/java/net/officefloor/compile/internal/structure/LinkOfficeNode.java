@@ -39,4 +39,5 @@ public interface LinkOfficeNode extends Node {
 	 * @return {@link LinkOfficeNode} linked to this {@link LinkOfficeNode}.
 	 */
 	LinkOfficeNode getLinkedOfficeNode();
+
 }

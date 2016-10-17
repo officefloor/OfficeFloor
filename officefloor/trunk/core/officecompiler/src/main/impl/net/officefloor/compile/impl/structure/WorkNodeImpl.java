@@ -30,6 +30,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -202,10 +203,10 @@ public class WorkNodeImpl implements WorkNode {
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void buildWork(OfficeBuilder builder) {
+	public void buildWork(OfficeBuilder builder, TypeContext typeContext) {
 
 		// Obtain the work type
-		WorkType<?> workType = this.loadWorkType();
+		WorkType<?> workType = typeContext.getOrLoadWorkType(this);
 		if (workType == null) {
 			return; // must have WorkType to build work
 		}
@@ -220,7 +221,7 @@ public class WorkNodeImpl implements WorkNode {
 
 		// Build the tasks
 		for (TaskNode task : this.taskNodes) {
-			task.buildTask(workBuilder, workType);
+			task.buildTask(workBuilder, typeContext);
 		}
 
 		// Determine if initial task for work

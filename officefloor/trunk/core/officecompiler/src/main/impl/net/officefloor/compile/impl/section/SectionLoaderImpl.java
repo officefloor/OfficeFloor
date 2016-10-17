@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -209,7 +210,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		}
 
 		// Return the section type
-		return sectionNode.loadSectionType();
+		return sectionNode.loadSectionType(new TypeContextImpl());
 	}
 
 	@Override
@@ -249,7 +250,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		}
 
 		// Return the office section type
-		return sectionNode.loadOfficeSectionType();
+		return sectionNode.loadOfficeSectionType(new TypeContextImpl());
 	}
 
 	/**

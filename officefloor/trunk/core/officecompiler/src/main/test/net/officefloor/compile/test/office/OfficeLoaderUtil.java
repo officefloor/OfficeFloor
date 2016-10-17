@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.office.OfficeInputType;
@@ -191,7 +192,8 @@ public class OfficeLoaderUtil {
 		if (!(architect instanceof OfficeNode)) {
 			TestCase.fail("architect must be created from createOfficeArchitect");
 		}
-		OfficeType expectedOffice = ((OfficeNode) architect).loadOfficeType();
+		OfficeType expectedOffice = ((OfficeNode) architect)
+				.loadOfficeType(new TypeContextImpl());
 
 		// Load the actual office type
 		OfficeType actualOffice = loadOfficeType(officeSourceClass,
