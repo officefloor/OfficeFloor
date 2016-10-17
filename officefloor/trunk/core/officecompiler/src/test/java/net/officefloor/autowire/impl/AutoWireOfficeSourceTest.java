@@ -186,7 +186,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(overridden, overridden.getSectionName(), SECTION);
 		this.recordReturn(officeSectionType,
 				officeSectionType.getOfficeSectionOutputTypes(),
-				new OfficeSectionOutput[0]);
+				new OfficeSectionOutputType[0]);
 
 		// Test
 		this.replayMockObjects();
