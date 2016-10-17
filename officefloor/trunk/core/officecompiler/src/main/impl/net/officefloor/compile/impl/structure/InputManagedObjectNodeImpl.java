@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -33,6 +34,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -151,7 +153,7 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 	@Override
 	public void buildOfficeManagedObject(OfficeNode office,
-			OfficeBuilder officeBuilder) {
+			OfficeBuilder officeBuilder, TypeContext typeContext) {
 
 		// Determine if already built into the office
 		if (this.builtOffices.contains(office)) {
@@ -167,6 +169,18 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 		// Flag that built into the office
 		this.builtOffices.add(office);
+	}
+
+	@Override
+	public GovernanceNode[] getGovernances(OfficeNode managingOffice) {
+
+		// Obtain the governances
+		List<GovernanceNode> governances = this.governancesPerOffice
+				.get(managingOffice);
+
+		// Return the governances
+		return (governances == null ? new GovernanceNode[0] : governances
+				.toArray(new GovernanceNode[governances.size()]));
 	}
 
 	/*
@@ -216,30 +230,18 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	/**
 	 * Linked {@link LinkObjectNode}.
 	 */
-	private LinkObjectNode linkedObjectName;
+	private LinkObjectNode linkedObjectNode;
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-		// Link
-		this.linkedObjectName = node;
-		return true;
+		return LinkUtil.linkObjectNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedObjectNode = link);
 	}
 
 	@Override
 	public LinkObjectNode getLinkedObjectNode() {
-		return this.linkedObjectName;
-	}
-
-	@Override
-	public GovernanceNode[] getGovernances(OfficeNode managingOffice) {
-
-		// Obtain the governances
-		List<GovernanceNode> governances = this.governancesPerOffice
-				.get(managingOffice);
-
-		// Return the governances
-		return (governances == null ? new GovernanceNode[0] : governances
-				.toArray(new GovernanceNode[governances.size()]));
+		return this.linkedObjectNode;
 	}
 
 }

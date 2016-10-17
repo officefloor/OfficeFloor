@@ -288,6 +288,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getSectionManagedObjectName());
 		assertNull("Not in section, so should not have office section name",
 				node.getOfficeSectionManagedObjectName());
+		assertEquals("Incorrect managed object source",
+				this.managedObjectSource, node.getManagedObjectSourceNode());
 	}
 
 	/**
@@ -311,6 +313,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			return mo;
 		});
 		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
+		assertEquals("Incorrect managed object source",
+				this.managedObjectSource, node.getManagedObjectSourceNode());
 	}
 
 	/**

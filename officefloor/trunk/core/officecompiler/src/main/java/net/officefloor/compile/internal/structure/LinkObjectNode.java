@@ -39,4 +39,5 @@ public interface LinkObjectNode extends Node {
 	 * @return {@link LinkObjectNode} linked to this {@link LinkObjectNode}.
 	 */
 	LinkObjectNode getLinkedObjectNode();
+
 }

@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.section.OfficeSectionOutputTypeImpl;
 import net.officefloor.compile.impl.section.SectionOutputTypeImpl;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -26,6 +27,7 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.SectionOutputType;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link SectionOutputNode} implementation.
@@ -154,13 +156,14 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	}
 
 	@Override
-	public SectionOutputType loadSectionOutputType() {
+	public SectionOutputType loadSectionOutputType(TypeContext typeContext) {
 		return new SectionOutputTypeImpl(this.outputName,
 				this.state.argumentType, this.state.isEscalationOnly);
 	}
 
 	@Override
-	public OfficeSectionOutputType loadOfficeSectionOutputType() {
+	public OfficeSectionOutputType loadOfficeSectionOutputType(
+			TypeContext typeContext) {
 		return new OfficeSectionOutputTypeImpl(this.outputName,
 				this.state.argumentType, this.state.isEscalationOnly);
 	}
@@ -203,19 +206,9 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-
-		// Ensure not already linked
-		if (this.linkedFlowNode != null) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Section output " + this.outputName
-							+ " linked more than once");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedFlowNode = node;
-		return true;
+		return LinkUtil.linkFlowNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedFlowNode = link);
 	}
 
 	@Override

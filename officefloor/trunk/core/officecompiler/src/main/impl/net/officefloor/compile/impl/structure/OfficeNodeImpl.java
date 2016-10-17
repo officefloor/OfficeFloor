@@ -87,6 +87,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -408,7 +409,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeType loadOfficeType() {
+	public OfficeType loadOfficeType(TypeContext typeContext) {
 
 		// Copy the inputs into an array (in deterministic order)
 		OfficeInputNode[] inputs = this.inputs
@@ -461,14 +462,14 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		// Create the listing of input types
 		OfficeInputType[] inputTypes = Arrays.asList(inputs).stream()
 				.filter((input) -> (input != null))
-				.map((input) -> input.loadOfficeInputType())
+				.map((input) -> input.loadOfficeInputType(typeContext))
 				.filter((inputType) -> (inputType != null))
 				.toArray(OfficeInputType[]::new);
 
 		// Create the listing of output types
 		OfficeOutputType[] outputTypes = Arrays.asList(outputs).stream()
 				.filter((output) -> (output != null))
-				.map((output) -> output.loadOfficeOutputType())
+				.map((output) -> output.loadOfficeOutputType(typeContext))
 				.filter((outputType) -> (outputType != null))
 				.toArray(OfficeOutputType[]::new);
 
@@ -481,7 +482,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 						b.officeObject.getOfficeObjectName()))
 				.filter((object) -> object.isAdded)
 				.map((object) -> object.officeObject
-						.loadOfficeManagedObjectType())
+						.loadOfficeManagedObjectType(typeContext))
 				.filter((type) -> (type != null))
 				.toArray(OfficeManagedObjectType[]::new);
 
@@ -511,7 +512,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.team.getOfficeTeamName(), b.team.getOfficeTeamName()))
 				.filter((team) -> team.isAdded)
-				.map((team) -> team.team.loadOfficeTeamType())
+				.map((team) -> team.team.loadOfficeTeamType(typeContext))
 				.filter((type) -> (type != null))
 				.toArray(OfficeTeamType[]::new);
 
@@ -529,7 +530,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 				.values()
 				.stream()
 				.map((section) -> section
-						.loadOfficeAvailableSectionInputTypes())
+						.loadOfficeAvailableSectionInputTypes(typeContext))
 				.filter((types) -> (types != null))
 				.flatMap((types) -> Arrays.asList(types).stream())
 				.sorted((a, b) -> CompileUtil.sortCompare(
@@ -548,7 +549,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeBuilder buildOffice(OfficeFloorBuilder builder) {
+	public OfficeBuilder buildOffice(OfficeFloorBuilder builder,
+			TypeContext typeContext) {
 
 		// Build this office
 		OfficeBuilder officeBuilder = builder.addOffice(this.officeName);
@@ -582,7 +584,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 					}
 				});
 		for (GovernanceNode governance : governanceNodes) {
-			governance.buildGovernance(officeBuilder);
+			governance.buildGovernance(officeBuilder, typeContext);
 		}
 
 		// Load the office objects (in deterministic order)
@@ -632,7 +634,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			}
 
 			// Have the managed object build itself into this office
-			managedObjectNode.buildOfficeManagedObject(this, officeBuilder);
+			managedObjectNode.buildOfficeManagedObject(this, officeBuilder,
+					typeContext);
 			builtManagedObjects.add(managedObjectNode);
 		}
 
@@ -649,12 +652,12 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 							}
 						});
 		for (ManagedObjectSourceNode mos : managedObjectSources) {
-			mos.loadManagedObjectType();
+			typeContext.getOrLoadManagedObjectType(mos);
 		}
 
 		// Build the managed object sources for office (in deterministic order)
 		for (ManagedObjectSourceNode mos : managedObjectSources) {
-			mos.buildManagedObject(builder, this, officeBuilder);
+			mos.buildManagedObject(builder, this, officeBuilder, typeContext);
 		}
 
 		// Build the sections of the office (in deterministic order)
@@ -667,7 +670,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 					}
 				});
 		for (SectionNode section : sections) {
-			section.buildSection(builder, this, officeBuilder);
+			section.buildSection(builder, officeBuilder, typeContext);
 		}
 
 		// Build the administrators for the office (in deterministic order)

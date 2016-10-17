@@ -18,12 +18,8 @@
 package net.officefloor.compile.object;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.spi.office.OfficeManagedObject;
-import net.officefloor.compile.spi.office.OfficeObject;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * <code>Type definition</code> of a dependent object of an {@link OfficeTask}.
@@ -48,7 +44,7 @@ public interface ObjectDependencyType {
 	 * 
 	 * @return Type required of this object dependency.
 	 */
-	Class<?> getObjectDependencyType();
+	String getObjectDependencyType();
 
 	/**
 	 * Obtains the type qualifier required of this object dependency.

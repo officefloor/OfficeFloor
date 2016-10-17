@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.governance.Governance;
@@ -65,7 +66,10 @@ public interface BoundManagedObjectNode extends LinkObjectNode {
 	 *            {@link ManagedObject} is to build itself into.
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder} for the {@link Office}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 */
-	void buildOfficeManagedObject(OfficeNode office, OfficeBuilder officeBuilder);
+	void buildOfficeManagedObject(OfficeNode office,
+			OfficeBuilder officeBuilder, TypeContext typeContext);
 
 }

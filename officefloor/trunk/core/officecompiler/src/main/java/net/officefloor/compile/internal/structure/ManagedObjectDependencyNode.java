@@ -18,10 +18,9 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link ManagedObjectDependency} node.
@@ -39,12 +38,11 @@ public interface ManagedObjectDependencyNode extends LinkObjectNode,
 	/**
 	 * Loads the {@link ObjectDependencyType}.
 	 * 
-	 * @param managedObjectType
-	 *            {@link ManagedObjectType} for the {@link ManagedObject}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link ObjectDependencyType} or <code>null</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	ObjectDependencyType loadObjectDependencyType(
-			ManagedObjectType<?> managedObjectType);
+	ObjectDependencyType loadObjectDependencyType(TypeContext typeContext);
 
 }

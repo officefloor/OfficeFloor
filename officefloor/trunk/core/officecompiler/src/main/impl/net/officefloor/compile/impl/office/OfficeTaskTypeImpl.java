@@ -79,10 +79,7 @@ public class OfficeTaskTypeImpl implements OfficeTaskType {
 
 	@Override
 	public ObjectDependencyType[] getObjectDependencies() {
-		// TODO implement OfficeTaskType.getObjectDependencies
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeTaskType.getObjectDependencies");
-
+		return this.dependencies;
 	}
 
 }

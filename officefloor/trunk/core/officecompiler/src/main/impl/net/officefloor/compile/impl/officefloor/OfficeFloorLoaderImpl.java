@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.officefloor;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -369,7 +370,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 		}
 
 		// Load and return the OfficeFloor type
-		return node.loadOfficeFloorType();
+		return node.loadOfficeFloorType(new TypeContextImpl());
 	}
 
 	@Override
@@ -405,7 +406,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 		}
 
 		// Deploy and return the OfficeFloor
-		return node.deployOfficeFloor(this.nodeContext.getOfficeFrame());
+		return node.deployOfficeFloor(this.nodeContext.getOfficeFrame(),
+				new TypeContextImpl());
 	}
 
 	/**

@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
@@ -66,20 +67,26 @@ public interface ManagedObjectSourceNode extends Node,
 	/**
 	 * Loads the {@link OfficeSectionManagedObjectSourceType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeSectionManagedObjectSourceType} or <code>null</code>
 	 *         if issue loading with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType();
+	OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType(
+			TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeFloorManagedObjectSourceType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeFloorManagedObjectSourceType} or <code>null</code>
 	 *         if issue loading with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType();
+	OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
+			TypeContext typeContext);
 
 	/**
 	 * Obtains the name that this {@link ManagedObjectSource} was added to the
@@ -161,8 +168,11 @@ public interface ManagedObjectSourceNode extends Node,
 	 *            {@link ManagedObjectSource}.
 	 * @param managingOfficeBuilder
 	 *            {@link OfficeBuilder} for the {@link ManagingOffice}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 */
 	void buildManagedObject(OfficeFloorBuilder builder,
-			OfficeNode managingOffice, OfficeBuilder managingOfficeBuilder);
+			OfficeNode managingOffice, OfficeBuilder managingOfficeBuilder,
+			TypeContext typeContext);
 
 }

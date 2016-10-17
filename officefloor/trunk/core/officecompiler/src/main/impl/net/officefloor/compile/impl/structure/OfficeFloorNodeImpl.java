@@ -60,6 +60,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -562,7 +563,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public OfficeFloorType loadOfficeFloorType() {
+	public OfficeFloorType loadOfficeFloorType(TypeContext typeContext) {
 
 		// Obtain the OfficeFloor source class
 		Class<? extends OfficeFloorSource> officeFloorSourceClass = this.context
@@ -622,7 +623,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			}
 
 			// Load the managed object source type
-			managedObjectSource.loadOfficeFloorManagedObjectSourceType();
+			managedObjectSource
+					.loadOfficeFloorManagedObjectSourceType(typeContext);
 
 			// Increment for next managed object source
 			managedObjectSourceIndex++;
@@ -659,7 +661,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		List<OfficeFloorManagedObjectSourceType> mosTypes = new LinkedList<OfficeFloorManagedObjectSourceType>();
 		for (ManagedObjectSourceNode mos : managedObjectSources) {
 			OfficeFloorManagedObjectSourceType mosType = mos
-					.loadOfficeFloorManagedObjectSourceType();
+					.loadOfficeFloorManagedObjectSourceType(typeContext);
 			if (mosType != null) {
 				mosTypes.add(mosType);
 			}
@@ -685,7 +687,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame) {
+	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame,
+			TypeContext typeContext) {
 
 		// Obtain the OfficeFloor builder
 		OfficeFloorBuilder builder = officeFrame
@@ -740,7 +743,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			}
 
 			// Load the managed object source type
-			managedObjectSource.loadManagedObjectType();
+			typeContext.getOrLoadManagedObjectType(managedObjectSource);
 
 			// Increment for next managed object source
 			managedObjectSourceIndex++;
@@ -772,7 +775,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			}
 
 			// Load team type
-			team.loadTeamType();
+			typeContext.getOrLoadTeamType(team);
 
 			// Increment for next team
 			teamIndex++;
@@ -787,7 +790,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		Map<OfficeNode, OfficeBuilder> officeBuilders = new HashMap<OfficeNode, OfficeBuilder>();
 		for (OfficeNode office : offices) {
 			// Build the office
-			OfficeBuilder officeBuilder = office.buildOffice(builder);
+			OfficeBuilder officeBuilder = office.buildOffice(builder,
+					typeContext);
 
 			// Provide profiler to office
 			String officeName = office.getDeployedOfficeName();
@@ -824,7 +828,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 			// Build the managed object source
 			managedObjectSource.buildManagedObject(builder, managingOffice,
-					officeBuilder);
+					officeBuilder, typeContext);
 
 			// Bind the input managed objects (for this managed object source)
 			for (InputManagedObjectNode inputMo : inputMos) {
@@ -832,7 +836,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 						.getBoundManagedObjectSourceNode()) {
 					// Bind managed object source for the input managed object
 					inputMo.buildOfficeManagedObject(managingOffice,
-							officeBuilder);
+							officeBuilder, typeContext);
 				}
 			}
 		}

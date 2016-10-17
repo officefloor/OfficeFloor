@@ -22,8 +22,8 @@ import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionTask;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -46,13 +46,13 @@ public interface TaskNode extends LinkFlowNode, SectionTask, OfficeTask {
 	 * @param parentSubSectionType
 	 *            Containing {@link OfficeSubSectionType} to this
 	 *            {@link OfficeTask}.
-	 * @param workType
-	 *            {@link WorkType} for the containing {@link WorkNode}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeTaskType} or <code>null</code> with issues reported
 	 *         to the {@link CompilerIssues}.
 	 */
 	OfficeTaskType loadOfficeTaskType(
-			OfficeSubSectionType parentSubSectionType, WorkType<?> workType);
+			OfficeSubSectionType parentSubSectionType, TypeContext typeContext);
 
 	/**
 	 * Obtains the {@link WorkNode} containing this {@link TaskNode}.
@@ -64,22 +64,22 @@ public interface TaskNode extends LinkFlowNode, SectionTask, OfficeTask {
 	/**
 	 * Loads the {@link TaskType} for this {@link TaskNode}.
 	 * 
-	 * @param workType
-	 *            {@link WorkType} of the containing {@link WorkNode}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link TaskType} for this {@link TaskNode}. May be
 	 *         <code>null</code> if can not determine {@link TaskType}.
 	 */
-	<W extends Work> TaskType<W, ?, ?> loadTaskType(WorkType<W> workType);
+	TaskType<?, ?, ?> loadTaskType(TypeContext typeContext);
 
 	/**
 	 * Builds the {@link Task} for this {@link TaskNode}.
 	 * 
 	 * @param workBuilder
 	 *            {@link WorkBuilder} for the {@link Work} of this {@link Task}.
-	 * @param workType
-	 *            {@link WorkType} of the containing {@link WorkNode}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 */
 	<W extends Work> void buildTask(WorkBuilder<W> workBuilder,
-			WorkType<W> workType);
+			TypeContext typeContext);
 
 }

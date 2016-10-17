@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.section.OfficeSectionObjectTypeImpl;
 import net.officefloor.compile.impl.section.SectionObjectTypeImpl;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -27,6 +28,7 @@ import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.section.SectionObject;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link SectionObjectNode} implementation.
@@ -160,13 +162,14 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	}
 
 	@Override
-	public SectionObjectType loadSectionObjectType() {
+	public SectionObjectType loadSectionObjectType(TypeContext typeContext) {
 		return new SectionObjectTypeImpl(this.objectName,
 				this.state.objectType, this.typeQualifier);
 	}
 
 	@Override
-	public OfficeSectionObjectType loadOfficeSectionObjectType() {
+	public OfficeSectionObjectType loadOfficeSectionObjectType(
+			TypeContext typeContext) {
 		return new OfficeSectionObjectTypeImpl(this.objectName,
 				this.state.objectType, this.typeQualifier);
 	}
@@ -209,20 +212,9 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-
-		// Ensure not already linked
-		if (this.linkedObjectNode != null) {
-			// Office section object already linked
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Section object " + this.objectName
-							+ " linked more than once");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedObjectNode = node;
-		return true;
+		return LinkUtil.linkObjectNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedObjectNode = link);
 	}
 
 	@Override

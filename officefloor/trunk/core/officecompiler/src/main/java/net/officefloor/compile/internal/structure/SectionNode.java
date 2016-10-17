@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
@@ -93,42 +94,51 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 	/**
 	 * Loads the {@link SectionType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link SectionType} or <code>null</code> if issue loading with
 	 *         issue reported to the {@link CompilerIssues}.
 	 * 
 	 * @see #sourceSection()
 	 */
-	SectionType loadSectionType();
+	SectionType loadSectionType(TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeSectionType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeSectionType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
 	 * 
 	 * @see #sourceSectionTree()
 	 */
-	OfficeSectionType loadOfficeSectionType();
+	OfficeSectionType loadOfficeSectionType(TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeSubSectionType}.
 	 * 
 	 * @param parentSectionType
 	 *            Parent {@link OfficeSubSectionType}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeSubSectionType} or <code>null</code> if issue
 	 *         loading with issue reported to the {@link CompilerIssues}.
 	 */
 	OfficeSubSectionType loadOfficeSubSectionType(
-			OfficeSubSectionType parentSectionType);
+			OfficeSubSectionType parentSectionType, TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeAvailableSectionInputType} instances.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeAvailableSectionInputType} instances or
 	 *         <code>null</code> with issues reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes();
+	OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(
+			TypeContext typeContext);
 
 	/**
 	 * Obtains the {@link DeployedOfficeInput}.
@@ -188,13 +198,13 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 	 * 
 	 * @param officeFloorBuilder
 	 *            {@link OfficeFloorBuilder}.
-	 * @param officeNode
-	 *            {@link OfficeNode} containing this {@link SectionNode}.
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder} of the {@link Office} containing this
 	 *            {@link SectionNode}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 */
 	void buildSection(OfficeFloorBuilder officeFloorBuilder,
-			OfficeNode officeNode, OfficeBuilder officeBuilder);
+			OfficeBuilder officeBuilder, TypeContext typeContext);
 
 }

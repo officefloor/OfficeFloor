@@ -18,6 +18,8 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.object.ObjectDependencyTypeImpl;
+import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.DependentObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -29,6 +31,7 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link ManagedObjectDependencyNode} implementation.
@@ -54,6 +57,12 @@ public class ManagedObjectDependencyNodeImpl implements
 	private final NodeContext context;
 
 	/**
+	 * {@link ManagedObjectSourceNode} for this
+	 * {@link ManagedObjectDependencyNode}.
+	 */
+	private final ManagedObjectSourceNode managedObjectSource;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param dependencyName
@@ -68,6 +77,9 @@ public class ManagedObjectDependencyNodeImpl implements
 		this.dependencyName = dependencyName;
 		this.parent = managedObject;
 		this.context = context;
+
+		// Store the managed object source
+		this.managedObjectSource = managedObject.getManagedObjectSourceNode();
 	}
 
 	/**
@@ -85,6 +97,9 @@ public class ManagedObjectDependencyNodeImpl implements
 		this.dependencyName = dependencyName;
 		this.parent = managedObjectSource;
 		this.context = context;
+
+		// Keep track of the managed object source
+		this.managedObjectSource = managedObjectSource;
 	}
 
 	/*
@@ -125,8 +140,14 @@ public class ManagedObjectDependencyNodeImpl implements
 	 */
 
 	@Override
-	public ObjectDependencyType loadObjectDependencyType(
-			ManagedObjectType<?> managedObjectType) {
+	public ObjectDependencyType loadObjectDependencyType(TypeContext typeContext) {
+
+		// Obtain the managed object type
+		ManagedObjectType<?> managedObjectType = typeContext
+				.getOrLoadManagedObjectType(this.managedObjectSource);
+		if (managedObjectType == null) {
+			return null; // must have type
+		}
 
 		// Obtain the dependency type
 		ManagedObjectDependencyType<?> dependency = null;
@@ -148,15 +169,22 @@ public class ManagedObjectDependencyNodeImpl implements
 		String dependencyType = dependency.getDependencyType().getName();
 		String typeQualifier = dependency.getTypeQualifier();
 
-		// Obtain the dependent object
-		DependentObjectType dependentObjectType = null;
-		if (this.linkedObjectNode != null) {
-
-			// TODO implement
-			throw new UnsupportedOperationException("TODO implement "
-					+ this.getClass().getSimpleName() + " dependent object");
-
+		// Obtain dependent object
+		DependentObjectNode dependentObjectNode = LinkUtil
+				.retrieveFurtherestTarget(this, DependentObjectNode.class,
+						this.context.getCompilerIssues());
+		if (dependentObjectNode == null) {
+			this.context.getCompilerIssues().addIssue(
+					this,
+					ManagedObjectDependencyNode.TYPE + " "
+							+ this.dependencyName + " is not linked to a "
+							+ DependentObjectNode.TYPE);
+			return null;
 		}
+
+		// Obtain the dependent object type
+		DependentObjectType dependentObjectType = dependentObjectNode
+				.loadDependentObjectType(typeContext);
 
 		// Create and return the dependency type
 		return new ObjectDependencyTypeImpl(this.dependencyName,
@@ -174,19 +202,9 @@ public class ManagedObjectDependencyNodeImpl implements
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-
-		// Ensure not already linked
-		if (this.linkedObjectNode != null) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Managed object dependency " + this.dependencyName
-							+ " linked more than once");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedObjectNode = node;
-		return true;
+		return LinkUtil.linkObjectNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedObjectNode = link);
 	}
 
 	@Override

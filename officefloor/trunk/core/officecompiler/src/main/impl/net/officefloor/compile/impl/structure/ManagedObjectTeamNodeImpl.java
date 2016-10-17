@@ -25,6 +25,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link TaskTeamNode} implementation.
@@ -96,7 +97,8 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 	 */
 
 	@Override
-	public OfficeSectionManagedObjectTeamType loadOfficeSectionManagedObjectTeamType() {
+	public OfficeSectionManagedObjectTeamType loadOfficeSectionManagedObjectTeamType(
+			TypeContext typeContext) {
 		// TODO implement
 		// ManagedObjectTeamNode.loadOfficeSectionManagedObjectTeamType
 		throw new UnsupportedOperationException(

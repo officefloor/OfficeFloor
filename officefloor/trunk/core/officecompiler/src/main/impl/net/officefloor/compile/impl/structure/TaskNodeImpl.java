@@ -49,6 +49,7 @@ import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
@@ -185,10 +186,16 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
-	public <W extends Work> TaskType<W, ?, ?> loadTaskType(WorkType<W> workType) {
+	public TaskType<?, ?, ?> loadTaskType(TypeContext typeContext) {
+
+		// Obtain the work type
+		WorkType<?> workType = typeContext.getOrLoadWorkType(this.workNode);
+		if (workType == null) {
+			return null;
+		}
 
 		// Find the task type for this task node
-		for (TaskType<W, ?, ?> type : workType.getTaskTypes()) {
+		for (TaskType<?, ?, ?> type : workType.getTaskTypes()) {
 			if (this.taskTypeName.equals(type.getTaskName())) {
 				// Found the type for this task
 				return type;
@@ -201,10 +208,10 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	public OfficeTaskType loadOfficeTaskType(
-			OfficeSubSectionType parentSubSectionType, WorkType<?> workType) {
+			OfficeSubSectionType parentSubSectionType, TypeContext typeContext) {
 
 		// Load the task type
-		TaskType<?, ?, ?> taskType = this.loadTaskType(workType);
+		TaskType<?, ?, ?> taskType = this.loadTaskType(typeContext);
 		if (taskType == null) {
 			return null;
 		}
@@ -215,7 +222,7 @@ public class TaskNodeImpl implements TaskNode {
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getTaskObjectName(), b.getTaskObjectName()))
-				.map((object) -> object.loadObjectDependencyType(taskType))
+				.map((object) -> object.loadObjectDependencyType(typeContext))
 				.filter((type) -> (type != null))
 				.toArray(ObjectDependencyType[]::new);
 
@@ -227,10 +234,10 @@ public class TaskNodeImpl implements TaskNode {
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <W extends Work> void buildTask(WorkBuilder<W> workBuilder,
-			WorkType<W> workType) {
+			TypeContext typeContext) {
 
 		// Obtain the task factory for this task
-		TaskType<?, ?, ?> taskType = this.loadTaskType(workType);
+		TaskType<?, ?, ?> taskType = this.loadTaskType(typeContext);
 		if (taskType == null) {
 			this.context.getCompilerIssues().addIssue(this,
 					"Can not find task type '" + this.taskTypeName + "'");
@@ -517,17 +524,9 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-
-		// Ensure not already linked
-		if (this.linkedFlowNode != null) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Task " + this.taskName + " linked more than once");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedFlowNode = node;
-		return true;
+		return LinkUtil.linkFlowNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedFlowNode = link);
 	}
 
 	@Override

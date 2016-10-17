@@ -18,13 +18,13 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorType;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -98,17 +98,22 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable,
 	/**
 	 * Loads the {@link OfficeFloorType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return <code>true</code> if the {@link OfficeFloorType} was loaded.
 	 */
-	OfficeFloorType loadOfficeFloorType();
+	OfficeFloorType loadOfficeFloorType(TypeContext typeContext);
 
 	/**
 	 * Deploys the {@link OfficeFloor}.
 	 * 
 	 * @param officeFrame
 	 *            {@link OfficeFrame} to deploy the {@link OfficeFloor} within.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeFloor}.
 	 */
-	OfficeFloor deployOfficeFloor(OfficeFrame officeFrame);
+	OfficeFloor deployOfficeFloor(OfficeFrame officeFrame,
+			TypeContext typeContext);
 
 }

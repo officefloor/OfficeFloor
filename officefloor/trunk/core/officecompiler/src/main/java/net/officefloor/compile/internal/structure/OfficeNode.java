@@ -22,6 +22,7 @@ import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
@@ -68,18 +69,23 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 	/**
 	 * Loads the {@link OfficeType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeType} or <code>null</code> if issue loading with
 	 *         issue reported to the {@link CompilerIssues}.
 	 */
-	OfficeType loadOfficeType();
+	OfficeType loadOfficeType(TypeContext typeContext);
 
 	/**
 	 * Builds the {@link Office} for this {@link OfficeNode}.
 	 * 
 	 * @param builder
 	 *            {@link OfficeFloorBuilder}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeBuilder} for the built {@link Office}.
 	 */
-	OfficeBuilder buildOffice(OfficeFloorBuilder builder);
+	OfficeBuilder buildOffice(OfficeFloorBuilder builder,
+			TypeContext typeContext);
 
 }

@@ -23,6 +23,7 @@ import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSectionObject;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link SectionObject} node.
@@ -63,17 +64,21 @@ public interface SectionObjectNode extends LinkObjectNode, SubSectionObject,
 	/**
 	 * Loads the {@link SectionObjectType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link SectionObjectType} or <code>null</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	SectionObjectType loadSectionObjectType();
+	SectionObjectType loadSectionObjectType(TypeContext typeContext);
 
 	/**
 	 * Loads the {@link OfficeSectionObjectType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeSectionObjectType} or <code>null</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	OfficeSectionObjectType loadOfficeSectionObjectType();
+	OfficeSectionObjectType loadOfficeSectionObjectType(TypeContext typeContext);
 
 }

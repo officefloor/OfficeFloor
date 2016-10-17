@@ -21,6 +21,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
@@ -92,9 +93,11 @@ public interface OfficeObjectNode extends LinkObjectNode, OfficeObject {
 	 * Loads the {@link OfficeManagedObjectType} for this
 	 * {@link OfficeObjectNode}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeManagedObjectType} or <code>null</code> with issues
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	OfficeManagedObjectType loadOfficeManagedObjectType();
+	OfficeManagedObjectType loadOfficeManagedObjectType(TypeContext typeContext);
 
 }

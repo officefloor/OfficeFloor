@@ -19,6 +19,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.office.OfficeOutputType;
 import net.officefloor.compile.spi.office.OfficeOutput;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link OfficeOutput} node.
@@ -36,9 +37,11 @@ public interface OfficeOutputNode extends LinkFlowNode, LinkSynchronousNode,
 	/**
 	 * Loads the {@link OfficeOutputType}.
 	 * 
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeOutputType} or <code>null</code> if can not
 	 *         determine.
 	 */
-	OfficeOutputType loadOfficeOutputType();
+	OfficeOutputType loadOfficeOutputType(TypeContext typeContext);
 
 }

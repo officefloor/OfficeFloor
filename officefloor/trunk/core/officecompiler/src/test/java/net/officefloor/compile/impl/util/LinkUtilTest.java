@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.impl.util;
 
+import java.util.function.Function;
+
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -129,9 +131,31 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to find the furtherest target.
+	 * Ensure able to find the furtherest target.
 	 */
-	public void testFindFurtherestTarget() {
+	public void testFindFurtherestFlowTarget() {
+		this.doFindFurtherestTargetTest((link) -> LinkUtil
+				.findFurtherestTarget((LinkFlowNode) link,
+						TargetLinkNode.class, this.issues));
+	}
+
+	/**
+	 * Ensure able to find the furtherest target.
+	 */
+	public void testFindFurtherestObjectTarget() {
+		this.doFindFurtherestTargetTest((link) -> LinkUtil
+				.retrieveFurtherestTarget((LinkObjectNode) link,
+						TargetLinkNode.class, this.issues));
+	}
+
+	/**
+	 * Undertakes finding the furtherest target.
+	 * 
+	 * @param finder
+	 *            Finds the furtherest target.
+	 */
+	private void doFindFurtherestTargetTest(
+			Function<Node, TargetLinkNode> finder) {
 
 		// Create extra links without target
 		LinkNode link = new LinkNode("EXTRA_LINK", null);
@@ -148,27 +172,48 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 
 		// Find the target
 		this.replayMockObjects();
-		TargetLinkNode found = LinkUtil.findFurtherestTarget(link,
-				TargetLinkNode.class, this.issues);
+		TargetLinkNode found = finder.apply(link);
 		this.verifyMockObjects();
 		assertSame("Incorrect target", target, found);
+	}
+
+	/**
+	 * Ensure issue if not find a node on retrieving furtherest node.
+	 */
+	public void testNotFindFurtherestNode() {
+
+		// Create extra links without target
+		LinkNode link = new LinkNode("LINK", null);
+		for (int i = 0; i < 10; i++) {
+			link = new LinkNode("LINK_" + i, link);
+		}
+
+		// Record issue in not finding target
+		this.issues.recordIssue(
+				"LINK",
+				LinkNode.class,
+				"Breaks linking chain to a "
+						+ TargetLinkNode.class.getSimpleName());
+
+		// Find the target
+		this.replayMockObjects();
+		TargetLinkNode target = LinkUtil.retrieveFurtherestTarget(link,
+				TargetLinkNode.class, this.issues);
+		this.verifyMockObjects();
+		assertNull("Should not find target", target);
 	}
 
 	/**
 	 * Ensure can handle <code>null</code> starting link.
 	 */
 	public void testNullStartingLink() {
-
-		// Record not retrieving target
-		this.issues.recordIssue(
-				"",
-				Node.class,
-				"TaskFlow FLOW is not linked to a "
-						+ TargetLinkNode.class.getSimpleName());
-
-		// Attempt to obtain the target (from null)
-		TargetLinkNode retrieved = this.retrieveFlowTarget(null);
-		assertNull("Should not retrieve target", retrieved);
+		try {
+			this.retrieveFlowTarget(null);
+			fail("Should not be successful if null initial node");
+		} catch (IllegalArgumentException ex) {
+			assertEquals("Incorrect cause",
+					"No starting link to find TargetLinkNode", ex.getMessage());
+		}
 	}
 
 	/**
@@ -226,8 +271,27 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue on detecting a cycle in the links are returns
-	 * <code>null</code>.
+	 * Ensure issue on detecting cycle to itself.
+	 */
+	public void testDetectCycleToSelf() {
+
+		// Create the cycle to itself
+		LinkNode loopLink = new LinkNode("LOOP", null);
+		loopLink.linkNode(loopLink);
+
+		// Record detecting cycle
+		this.issues.recordIssue("LOOP", LinkNode.class,
+				"LOOP results in a cycle on linking to a "
+						+ TargetLinkNode.class.getSimpleName());
+
+		// Attempt to obtain the target
+		TargetLinkNode retrieved = this.retrieveFlowTarget(loopLink);
+		assertNull("Should not retrieve target", retrieved);
+
+	}
+
+	/**
+	 * Ensures issue on detecting a cycle in the links.
 	 */
 	public void testDetectCycleInLinks() {
 
@@ -243,15 +307,142 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		}
 
 		// Record detecting cycle
-		this.issues.recordIssue(
-				"LOOP",
-				LinkNode.class,
-				"Linking cycle on linking to a "
+		this.issues.recordIssue("LOOP", LinkNode.class,
+				"LOOP results in a cycle on linking to a "
 						+ TargetLinkNode.class.getSimpleName());
 
 		// Attempt to obtain the target
 		TargetLinkNode retrieved = this.retrieveFlowTarget(link);
 		assertNull("Should not retrieve target", retrieved);
+	}
+
+	/**
+	 * Ensures issue on detecting a cycle in the furtherest links.
+	 */
+	public void testDetectCycleInFurtherestLinks() {
+
+		// Create extra links without target
+		LinkNode loopLink = new LinkNode("LOOP", null);
+		LinkNode link = new LinkNode("EXTRA_LINK", loopLink);
+		for (int i = 0; i < 10; i++) {
+			link = new LinkNode("EXTRA_" + i, link);
+		}
+		TargetLinkNode target = new TargetLinkNode("FURTHEST_TARGET", link);
+		link = new LinkNode("BEFORE_TARGET", target);
+		for (int i = 0; i < 20; i++) {
+			link = ((i % 2 == 0) ? new LinkNode("LINK_" + i, link)
+					: new TargetLinkNode("TARGET_" + i, link));
+		}
+		loopLink.linkNode(link);
+
+		// Record detecting cycle
+		this.issues.recordIssue("LOOP", LinkNode.class,
+				"LOOP results in a cycle on linking to a "
+						+ TargetLinkNode.class.getSimpleName());
+
+		// Attempt to obtain the target
+		this.replayMockObjects();
+		TargetLinkNode found = LinkUtil.findFurtherestTarget(link,
+				TargetLinkNode.class, this.issues);
+		this.verifyMockObjects();
+		assertNull("Should not retrieve target", found);
+	}
+
+	/**
+	 * Ensures issue on detecting a cycle in the furtherest links when target
+	 * link.
+	 */
+	public void testDetectCycleWhenTargetInFurtherestLinks() {
+
+		// Create extra links without target
+		TargetLinkNode loopLink = new TargetLinkNode("LOOP", null);
+		LinkNode link = new LinkNode("EXTRA_LINK", loopLink);
+		for (int i = 0; i < 10; i++) {
+			link = new LinkNode("EXTRA_" + i, link);
+		}
+		TargetLinkNode target = new TargetLinkNode("FURTHEST_TARGET", link);
+		link = new LinkNode("BEFORE_TARGET", target);
+		for (int i = 0; i < 20; i++) {
+			link = ((i % 2 == 0) ? new LinkNode("LINK_" + i, link)
+					: new TargetLinkNode("TARGET_" + i, link));
+		}
+		loopLink.linkNode(link);
+
+		// Record detecting cycle
+		this.issues.recordIssue("LOOP", TargetLinkNode.class,
+				"LOOP results in a cycle on linking to a "
+						+ TargetLinkNode.class.getSimpleName());
+
+		// Attempt to obtain the target
+		this.replayMockObjects();
+		TargetLinkNode found = LinkUtil.findFurtherestTarget(link,
+				TargetLinkNode.class, this.issues);
+		this.verifyMockObjects();
+		assertNull("Should not retrieve target", found);
+	}
+
+	/**
+	 * Ensure can successfully link {@link LinkFlowNode}.
+	 */
+	public void testLinkFlowNode() {
+		LinkNode node = new LinkNode("NODE", null);
+		LinkNode linkNode = new LinkNode("LINK", null);
+		LinkFlowNode[] loadedNode = new LinkFlowNode[1];
+		LinkUtil.linkFlowNode(node, linkNode, this.issues,
+				(link) -> loadedNode[0] = link);
+		assertSame("Ensure link loaded", linkNode, loadedNode[0]);
+	}
+
+	/**
+	 * Ensure issue if duplicate {@link LinkFlowNode} loaded.
+	 */
+	public void testDuplicateFlowLinkLoaded() {
+		LinkNode existingLink = new LinkNode("EXISTING", null);
+		LinkNode node = new LinkNode("NODE", existingLink);
+		LinkNode newLinkNode = new LinkNode("LINK", null);
+
+		// Issue in linking
+		this.issues.recordIssue("NODE", LinkNode.class,
+				"Link NODE linked more than once");
+
+		// Undertake link
+		this.replayMockObjects();
+		LinkUtil.linkFlowNode(node, newLinkNode, this.issues, (link) -> {
+			fail("Should not link node");
+		});
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can successfully link {@link LinkObjectNode}.
+	 */
+	public void testLinkObjectNode() {
+		LinkNode node = new LinkNode("NODE", null);
+		LinkNode linkNode = new LinkNode("LINK", null);
+		LinkObjectNode[] loadedNode = new LinkObjectNode[1];
+		LinkUtil.linkObjectNode(node, linkNode, this.issues,
+				(link) -> loadedNode[0] = link);
+		assertSame("Ensure link loaded", linkNode, loadedNode[0]);
+	}
+
+	/**
+	 * Ensure issue if duplicate {@link LinkObjectNode} loaded.
+	 */
+	public void testDuplicateObjectLinkLoaded() {
+		LinkNode existingLink = new LinkNode("EXISTING", null);
+		LinkNode node = new LinkNode("NODE", existingLink);
+		LinkNode newLinkNode = new LinkNode("LINK", null);
+
+		// Issue in linking
+		this.issues.recordIssue("NODE", LinkNode.class,
+				"Link NODE linked more than once");
+
+		// Undertake link
+		this.replayMockObjects();
+		LinkUtil.linkObjectNode(node, newLinkNode, this.issues, (link) -> {
+			fail("Should not link node");
+		});
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -401,8 +592,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 
 		@Override
 		public String getNodeType() {
-			fail("Should not require node type");
-			return null;
+			return "Link";
 		}
 
 		@Override

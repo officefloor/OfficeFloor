@@ -33,6 +33,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.GovernerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
@@ -151,10 +152,11 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void buildGovernance(OfficeBuilder officeBuilder) {
+	public void buildGovernance(OfficeBuilder officeBuilder,
+			TypeContext typeContext) {
 
 		// Obtain the governance type
-		GovernanceType govType = this.loadGovernanceType();
+		GovernanceType govType = typeContext.getOrLoadGovernanceType(this);
 		if (govType == null) {
 			return; // must obtain governance type
 		}

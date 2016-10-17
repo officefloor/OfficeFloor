@@ -47,8 +47,11 @@ public interface DependentObjectType {
 	TypeQualification[] getTypeQualifications();
 
 	/**
+	 * <p>
 	 * Obtains the {@link ObjectDependencyType} instances for this dependent
 	 * object.
+	 * <p>
+	 * This allows determining transitive dependencies.
 	 * 
 	 * @return {@link ObjectDependencyType} instances for this dependent object.
 	 */

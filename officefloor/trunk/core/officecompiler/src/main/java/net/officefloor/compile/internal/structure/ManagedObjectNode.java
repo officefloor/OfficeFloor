@@ -18,12 +18,12 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -31,7 +31,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectNode extends LinkObjectNode,
+public interface ManagedObjectNode extends DependentObjectNode,
 		BoundManagedObjectNode, SectionManagedObject,
 		OfficeSectionManagedObject, OfficeManagedObject,
 		OfficeFloorManagedObject {
@@ -42,16 +42,23 @@ public interface ManagedObjectNode extends LinkObjectNode,
 	String TYPE = "Managed Object";
 
 	/**
+	 * Obtains the {@link ManagedObjectSourceNode} for this
+	 * {@link ManagedObjectNode}.
+	 * 
+	 * @return {@link ManagedObjectSourceNode} for this
+	 *         {@link ManagedObjectNode}.
+	 */
+	ManagedObjectSourceNode getManagedObjectSourceNode();
+
+	/**
 	 * Loads the {@link OfficeSectionManagedObjectType}.
 	 * 
-	 * @param managedObjectType
-	 *            {@link ManagedObjectType} for the
-	 *            {@link ManagedObjectSourceNode} of this
-	 *            {@link ManagedObjectNode}.
+	 * @param typeContext
+	 *            {@link TypeContext}.
 	 * @return {@link OfficeSectionManagedObjectType} or <code>null</code> with
 	 *         issues reported to the {@link CompilerIssues}.
 	 */
 	OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(
-			ManagedObjectType<?> managedObjectType);
+			TypeContext typeContext);
 
 }

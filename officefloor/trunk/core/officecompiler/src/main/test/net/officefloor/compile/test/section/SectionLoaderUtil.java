@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -218,7 +219,7 @@ public class SectionLoaderUtil {
 			TestCase.fail("designer must be created from createSectionDesigner");
 		}
 		SectionType expectedSection = ((SectionNode) designer)
-				.loadSectionType();
+				.loadSectionType(new TypeContextImpl());
 
 		// Load the actual section type
 		SectionType actualSection = loadSectionType(sectionSourceClass,
@@ -298,7 +299,7 @@ public class SectionLoaderUtil {
 			TestCase.fail("designer must be created from createSectionDesigner");
 		}
 		OfficeSectionType eSection = ((SectionNode) designer)
-				.loadOfficeSectionType();
+				.loadOfficeSectionType(new TypeContextImpl());
 
 		// Load the actual section type
 		OfficeSectionType aSection = loadOfficeSectionType(

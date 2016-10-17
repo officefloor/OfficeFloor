@@ -39,4 +39,5 @@ public interface LinkTeamNode extends Node {
 	 * @return {@link LinkTeamNode} linked to this {@link LinkTeamNode}.
 	 */
 	LinkTeamNode getLinkedTeamNode();
+
 }

@@ -17,40 +17,30 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.governance.GovernanceType;
-import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.type.TypeContext;
-import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
- * {@link OfficeGovernance} node.
- * 
+ * {@link Node} of the object fulfilling a dependency.
+ *
  * @author Daniel Sagenschneider
  */
-public interface GovernanceNode extends LinkTeamNode, OfficeGovernance {
+public interface DependentObjectNode extends LinkObjectNode {
 
 	/**
 	 * {@link Node} type.
 	 */
-	String TYPE = "Governance";
+	String TYPE = "Dependent Object";
 
 	/**
-	 * Loads the {@link GovernanceType} for this {@link GovernanceNode}.
+	 * Loads the {@link DependentObjectType}.
 	 * 
-	 * @return {@link GovernanceType} for this {@link GovernanceNode} or
-	 *         <code>null</code> if fails to load the {@link GovernanceType}.
-	 */
-	GovernanceType<?, ?> loadGovernanceType();
-
-	/**
-	 * Builds this {@link Governance} into the {@link OfficeBuilder}.
-	 * 
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder}.
 	 * @param typeContext
 	 *            {@link TypeContext}.
+	 * @return {@link DependentObjectType} or <code>null</code> with issue
+	 *         reported to the {@link CompilerIssues}.
 	 */
-	void buildGovernance(OfficeBuilder officeBuilder, TypeContext typeContext);
+	DependentObjectType loadDependentObjectType(TypeContext typeContext);
 
 }

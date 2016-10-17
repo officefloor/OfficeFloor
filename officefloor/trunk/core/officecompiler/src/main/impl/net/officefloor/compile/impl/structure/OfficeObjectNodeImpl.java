@@ -26,6 +26,7 @@ import java.util.Set;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.office.OfficeManagedObjectTypeImpl;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -39,6 +40,7 @@ import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeObject;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
@@ -189,7 +191,8 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	}
 
 	@Override
-	public OfficeManagedObjectType loadOfficeManagedObjectType() {
+	public OfficeManagedObjectType loadOfficeManagedObjectType(
+			TypeContext typeContext) {
 
 		// Obtain the set of extension interfaces to be supported
 		Set<String> extensionInterfaces = new HashSet<String>();
@@ -198,7 +201,8 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		for (AdministratorNode admin : this.administrators) {
 
 			// Attempt to obtain the administrator type
-			AdministratorType<?, ?> adminType = admin.loadAdministratorType();
+			AdministratorType<?, ?> adminType = typeContext
+					.getOrLoadAdministratorType(admin);
 			if (adminType == null) {
 				continue; // problem loading administrator type
 			}
@@ -212,7 +216,8 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		for (GovernanceNode governance : this.governances) {
 
 			// Attempt to obtain the governance type
-			GovernanceType<?, ?> govType = governance.loadGovernanceType();
+			GovernanceType<?, ?> govType = typeContext
+					.getOrLoadGovernanceType(governance);
 			if (govType == null) {
 				continue; // problem loading governance type
 			}
@@ -284,20 +289,9 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-
-		// Ensure not already linked
-		if (this.linkedObjectNode != null) {
-			// Office object already linked
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Office object " + this.objectName
-							+ " linked more than once");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedObjectNode = node;
-		return true;
+		return LinkUtil.linkObjectNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedObjectNode = link);
 	}
 
 	@Override

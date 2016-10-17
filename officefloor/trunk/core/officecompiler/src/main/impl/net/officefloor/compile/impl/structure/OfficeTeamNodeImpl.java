@@ -25,6 +25,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.type.TypeContext;
 
 /**
  * {@link OfficeTeamNode} implementation.
@@ -106,7 +107,7 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	 */
 
 	@Override
-	public OfficeTeamType loadOfficeTeamType() {
+	public OfficeTeamType loadOfficeTeamType(TypeContext typeContext) {
 		return new OfficeTeamTypeImpl(this.teamName);
 	}
 
