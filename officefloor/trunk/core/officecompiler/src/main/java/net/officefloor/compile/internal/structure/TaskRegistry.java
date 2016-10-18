@@ -32,22 +32,13 @@ public interface TaskRegistry {
 	 * 
 	 * @param taskName
 	 *            Name of the {@link TaskNode} to obtain.
-	 * @return {@link TaskNode} or <code>null</code> if no {@link TaskNode}
-	 *         registered.
-	 */
-	TaskNode getTaskNode(String taskName);
-
-	/**
-	 * Creates a new {@link TaskNode} and registers it.
-	 * 
-	 * @param taskName
-	 *            Name of the {@link TaskNode}.
 	 * @param taskTypeName
 	 *            Type name of the {@link Task} within the {@link Work}.
 	 * @param work
 	 *            Parent {@link WorkNode}.
-	 * @return {@link TaskNode}.
+	 * @return {@link TaskNode} by the name.
 	 */
-	TaskNode createTaskNode(String taskName, String taskTypeName, WorkNode work);
+	TaskNode getOrCreateTaskNode(String taskName, String taskTypeName,
+			WorkNode workNode);
 
 }

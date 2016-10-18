@@ -191,6 +191,9 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	public void testCreateManagedObjectDependencyNode_forManagedObject() {
 		ManagedObjectNode managedObject = this
 				.createMock(ManagedObjectNode.class);
+		this.recordReturn(managedObject,
+				managedObject.getManagedObjectSourceNode(),
+				this.managedObjectSource);
 		ManagedObjectDependencyNode node = this
 				.doTest(() -> this.context.createManagedObjectDependencyNode(
 						"DEPENDENCY", managedObject));
@@ -684,13 +687,16 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateTaskNode() {
 		WorkNode work = this.createMock(WorkNode.class);
-		TaskNode node = this.doTest(() -> this.context.createTaskNode("TASK",
-				"TYPE", work));
-		assertNode(node, "TASK", "Task", null, work);
+		TaskNode node = this.doTest(() -> this.context.createTaskNode("TASK"));
+		assertNode(node, "TASK", "Task", null, null);
 		assertEquals("Incorrct office task name", "TASK",
 				node.getOfficeTaskName());
 		assertEquals("Incorrect section task name", "TASK",
 				node.getSectionTaskName());
+		assertNull("Should not have work", node.getWorkNode());
+		assertFalse("Should not be initialised", node.isInitialised());
+		assertSame(node, node.initialise("TYPE", work));
+		assertTrue("Should be initialised", node.isInitialised());
 		assertSame("Incorrect work", work, node.getWorkNode());
 	}
 

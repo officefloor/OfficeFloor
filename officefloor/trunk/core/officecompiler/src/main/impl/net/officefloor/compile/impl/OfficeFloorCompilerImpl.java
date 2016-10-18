@@ -928,9 +928,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public TaskNode createTaskNode(String taskName, String taskTypeName,
-			WorkNode work) {
-		return new TaskNodeImpl(taskName, taskTypeName, work, this);
+	public TaskNode createTaskNode(String taskName) {
+		return new TaskNodeImpl(taskName, this);
 	}
 
 	@Override
