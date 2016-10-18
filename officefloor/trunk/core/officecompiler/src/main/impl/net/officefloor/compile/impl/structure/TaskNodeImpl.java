@@ -76,19 +76,43 @@ public class TaskNodeImpl implements TaskNode {
 	private final String taskName;
 
 	/**
-	 * Name of the {@link TaskType} for this {@link SectionTask}.
-	 */
-	private final String taskTypeName;
-
-	/**
-	 * {@link WorkNode} containing this {@link TaskNode}.
-	 */
-	private final WorkNode workNode;
-
-	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
+
+	/**
+	 * {@link InitialisedState} for this {@link TaskNode}.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state of the {@link TaskNode}.
+	 */
+	private class InitialisedState {
+
+		/**
+		 * Name of the {@link TaskType} for this {@link SectionTask}.
+		 */
+		private final String taskTypeName;
+
+		/**
+		 * {@link WorkNode} containing this {@link TaskNode}.
+		 */
+		private final WorkNode workNode;
+
+		/**
+		 * Initialise the state.
+		 * 
+		 * @param taskTypeName
+		 *            Name of the {@link TaskType} for this {@link SectionTask}.
+		 * @param workNode
+		 *            {@link WorkNode} containing this {@link TaskNode}.
+		 */
+		private InitialisedState(String taskTypeName, WorkNode workNode) {
+			this.taskTypeName = taskTypeName;
+			this.workNode = workNode;
+		}
+	}
 
 	/**
 	 * {@link TaskFlowNode} instances by their {@link TaskFlow} names.
@@ -133,18 +157,11 @@ public class TaskNodeImpl implements TaskNode {
 	 * 
 	 * @param taskName
 	 *            Name of this {@link SectionTask}.
-	 * @param taskTypeName
-	 *            Name of the {@link TaskType} for this {@link SectionTask}.
-	 * @param workNode
-	 *            {@link WorkNode} containing this {@link TaskNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public TaskNodeImpl(String taskName, String taskTypeName,
-			WorkNode workNode, NodeContext context) {
+	public TaskNodeImpl(String taskName, NodeContext context) {
 		this.taskName = taskName;
-		this.taskTypeName = taskTypeName;
-		this.workNode = workNode;
 		this.context = context;
 
 		// Create additional objects
@@ -173,7 +190,7 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	public Node getParentNode() {
-		return this.workNode;
+		return (this.state != null ? this.state.workNode : null);
 	}
 
 	/*
@@ -181,22 +198,42 @@ public class TaskNodeImpl implements TaskNode {
 	 */
 
 	@Override
+	public TaskNode initialise(String taskTypeName, WorkNode workNode) {
+
+		// Ensure not already initialise
+		if (this.isInitialised()) {
+			throw new IllegalStateException("TaskNode " + this.taskName
+					+ " already initialised");
+		}
+
+		// Initialised
+		this.state = new InitialisedState(taskTypeName, workNode);
+		return this;
+	}
+
+	@Override
+	public boolean isInitialised() {
+		return (this.state != null);
+	}
+
+	@Override
 	public WorkNode getWorkNode() {
-		return this.workNode;
+		return (this.state != null ? this.state.workNode : null);
 	}
 
 	@Override
 	public TaskType<?, ?, ?> loadTaskType(TypeContext typeContext) {
 
 		// Obtain the work type
-		WorkType<?> workType = typeContext.getOrLoadWorkType(this.workNode);
+		WorkType<?> workType = typeContext
+				.getOrLoadWorkType(this.state.workNode);
 		if (workType == null) {
 			return null;
 		}
 
 		// Find the task type for this task node
 		for (TaskType<?, ?, ?> type : workType.getTaskTypes()) {
-			if (this.taskTypeName.equals(type.getTaskName())) {
+			if (this.state.taskTypeName.equals(type.getTaskName())) {
 				// Found the type for this task
 				return type;
 			}
@@ -240,7 +277,7 @@ public class TaskNodeImpl implements TaskNode {
 		TaskType<?, ?, ?> taskType = this.loadTaskType(typeContext);
 		if (taskType == null) {
 			this.context.getCompilerIssues().addIssue(this,
-					"Can not find task type '" + this.taskTypeName + "'");
+					"Can not find task type '" + this.state.taskTypeName + "'");
 			return; // must have task type
 		}
 
@@ -297,7 +334,7 @@ public class TaskNodeImpl implements TaskNode {
 
 			// Determine if same work
 			WorkNode linkedWork = linkedTask.getWorkNode();
-			if (this.workNode == linkedWork) {
+			if (this.state.workNode == linkedWork) {
 				// Link to task on same work
 				if (flowKey != null) {
 					taskBuilder.linkFlow(flowKey, linkedTaskName,
@@ -332,7 +369,7 @@ public class TaskNodeImpl implements TaskNode {
 
 				// Determine if linked task is on the same work
 				WorkNode nextWork = nextTask.getWorkNode();
-				if (this.workNode == nextWork) {
+				if (this.state.workNode == nextWork) {
 					// Link to next task on same work
 					taskBuilder.setNextTaskInFlow(nextTaskName, argumentType);
 				} else {
@@ -409,7 +446,7 @@ public class TaskNodeImpl implements TaskNode {
 
 				// Determine if same work
 				WorkNode linkedWork = linkedTask.getWorkNode();
-				if (this.workNode == linkedWork) {
+				if (this.state.workNode == linkedWork) {
 					// Link to task on same work
 					taskBuilder.addEscalation(escalationClass, linkedTaskName);
 				} else {
@@ -455,7 +492,7 @@ public class TaskNodeImpl implements TaskNode {
 		}
 
 		// Build the governance (first inherited then specific for task)
-		SectionNode section = this.workNode.getSectionNode();
+		SectionNode section = this.state.workNode.getSectionNode();
 		GovernanceNode[] sectionGovernances = section.getGoverningGovernances();
 		for (GovernanceNode governance : sectionGovernances) {
 			taskBuilder.addGovernance(governance.getOfficeGovernanceName());

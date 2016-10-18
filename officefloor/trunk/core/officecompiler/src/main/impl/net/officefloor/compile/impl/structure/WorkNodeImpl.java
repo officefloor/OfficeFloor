@@ -152,17 +152,9 @@ public class WorkNodeImpl implements WorkNode {
 
 	@Override
 	public SectionTask addSectionTask(String taskName, String taskTypeName) {
-		// Obtain and return the section task for the name
-		TaskNode task = this.section.getTaskNode(taskName);
-		if (task == null) {
-			// Add the section task
-			task = this.section.createTaskNode(taskName, taskTypeName, this);
-			this.taskNodes.add(task);
-		} else {
-			// Section task already added
-			this.context.getCompilerIssues().addIssue(this,
-					"Section task " + taskName + " already added");
-		}
+		TaskNode task = this.section.getOrCreateTaskNode(taskName,
+				taskTypeName, this);
+		this.taskNodes.add(task);
 		return task;
 	}
 

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import net.officefloor.compile.impl.office.OfficeAvailableSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.OfficeSectionTypeImpl;
@@ -247,21 +248,36 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	/**
+	 * Obtains the particular {@link Node}.
+	 * 
+	 * @param nodeName
+	 *            Name of the {@link Node}.
+	 * @param nodes
+	 *            Existing {@link Map} of {@link Node} instances by their names.
+	 * @param create
+	 *            {@link Supplier} to create the {@link Node}.
+	 * @return {@link Node} for the name.
+	 */
+	private <N extends Node> N getOrCreateNode(String nodeName,
+			Map<String, N> nodes, Supplier<N> create) {
+		N node = nodes.get(nodeName);
+		if (node == null) {
+			node = create.get();
+			nodes.put(nodeName, node);
+		}
+		return node;
+	}
+
+	/**
 	 * Obtain the {@link SectionInputNode} for the name.
 	 * 
 	 * @param inputName
 	 *            Name of the {@link SectionInputNode}.
 	 * @return {@link SectionInputNode} for the name.
 	 */
-	private SectionInputNode getSectionInputNode(String inputName) {
-		// Obtain and return the section input for the name
-		SectionInputNode input = this.inputs.get(inputName);
-		if (input == null) {
-			// Add the input
-			input = this.context.createSectionInputNode(inputName, this);
-			this.inputs.put(inputName, input);
-		}
-		return input;
+	private SectionInputNode getOrCreateSectionInputNode(String inputName) {
+		return this.getOrCreateNode(inputName, this.inputs,
+				() -> this.context.createSectionInputNode(inputName, this));
 	}
 
 	/**
@@ -271,15 +287,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            Name of the {@link SectionOutputNode}.
 	 * @return {@link SectionOutputNode} for the name.
 	 */
-	private SectionOutputNode getSectionOutputNode(String outputName) {
-		// Obtain and return the section output for the name
-		SectionOutputNode output = this.outputs.get(outputName);
-		if (output == null) {
-			// Add the output
-			output = this.context.createSectionOutputNode(outputName, this);
-			this.outputs.put(outputName, output);
-		}
-		return output;
+	private SectionOutputNode getOrCreateSectionOutputNode(String outputName) {
+		return this.getOrCreateNode(outputName, this.outputs,
+				() -> this.context.createSectionOutputNode(outputName, this));
 	}
 
 	/**
@@ -289,15 +299,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            Name of the {@link SectionObjectNode}.
 	 * @return {@link SectionObjectNode} for the name.
 	 */
-	private SectionObjectNode getSectionObjectNode(String objectName) {
-		// Obtain and return the section object for the name
-		SectionObjectNode object = this.objects.get(objectName);
-		if (object == null) {
-			// Add the object
-			object = this.context.createSectionObjectNode(objectName, this);
-			this.objects.put(objectName, object);
-		}
-		return object;
+	private SectionObjectNode getOrCreateSectionObjectNode(String objectName) {
+		return this.getOrCreateNode(objectName, this.objects,
+				() -> this.context.createSectionObjectNode(objectName, this));
 	}
 
 	/**
@@ -307,15 +311,21 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            Name of the {@link SectionNode}.
 	 * @return {@link SectionNode} for the name.
 	 */
-	private SectionNode getSubSectionNode(String subSectionName) {
-		// Obtain and return the sub section for the name
-		SectionNode section = this.subSections.get(subSectionName);
-		if (section == null) {
-			// Add the section
-			section = this.context.createSectionNode(subSectionName, this);
-			this.subSections.put(subSectionName, section);
-		}
-		return section;
+	private SectionNode getOrCreateSubSectionNode(String subSectionName) {
+		return this.getOrCreateNode(subSectionName, this.subSections,
+				() -> this.context.createSectionNode(subSectionName, this));
+	}
+
+	/**
+	 * Obtains the {@link TaskNode} for the name.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link TaskNode}.
+	 * @return {@link TaskNode} for the name.
+	 */
+	private TaskNode getOrCreateTaskNode(String taskName) {
+		return this.getOrCreateNode(taskName, this.taskNodes,
+				() -> this.context.createTaskNode(taskName));
 	}
 
 	/*
@@ -347,22 +357,22 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 */
 
 	@Override
-	public TaskNode getTaskNode(String taskName) {
-		return this.taskNodes.get(taskName);
-	}
-
-	@Override
-	public TaskNode createTaskNode(String taskName, String taskTypeName,
+	public TaskNode getOrCreateTaskNode(String taskName, String taskTypeName,
 			WorkNode work) {
 
-		// Create the task node
-		TaskNode task = this.context.createTaskNode(taskName, taskTypeName,
-				work);
+		// Obtain the task for the name
+		TaskNode task = this.getOrCreateTaskNode(taskName);
 
-		// Register the task node
-		this.taskNodes.put(taskName, task);
+		// Determine if requires initialising
+		if (!task.isInitialised()) {
+			// Initialise as not yet initialised
+			task.initialise(taskTypeName, work);
+		} else {
+			// Task already added and initialised
+			this.addIssue("Task " + taskName + " already added");
+		}
 
-		// Return the task node
+		// Return the task
 		return task;
 	}
 
@@ -850,31 +860,17 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public SubSectionInput getSubSectionInput(String inputName) {
-		// Obtain and return the section input for the name
-		SectionInputNode input = this.inputs.get(inputName);
-		if (input == null) {
-			// Add the input
-			input = this.context.createSectionInputNode(inputName, this);
-			this.inputs.put(inputName, input);
-		}
-		return input;
+		return this.getOrCreateSectionInputNode(inputName);
 	}
 
 	@Override
 	public SubSectionOutput getSubSectionOutput(String outputName) {
-		// Obtain and return the section output for the name
-		SectionOutputNode output = this.outputs.get(outputName);
-		if (output == null) {
-			// Add the output
-			output = this.context.createSectionOutputNode(outputName, this);
-			this.outputs.put(outputName, output);
-		}
-		return output;
+		return this.getOrCreateSectionOutputNode(outputName);
 	}
 
 	@Override
 	public SubSectionObject getSubSectionObject(String objectName) {
-		return this.getSectionObjectNode(objectName);
+		return this.getOrCreateSectionObjectNode(objectName);
 	}
 
 	/*
@@ -885,7 +881,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	public SectionInput addSectionInput(String inputName, String parameterType) {
 
 		// Obtain the section input for the name
-		SectionInputNode input = this.getSectionInputNode(inputName);
+		SectionInputNode input = this.getOrCreateSectionInputNode(inputName);
 
 		// Determine if requires initialising
 		if (!input.isInitialised()) {
@@ -905,7 +901,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			String argumentType, boolean isEscalationOnly) {
 
 		// Obtain the section output for the name
-		SectionOutputNode output = this.getSectionOutputNode(outputName);
+		SectionOutputNode output = this
+				.getOrCreateSectionOutputNode(outputName);
 
 		// Determine if requires initialising
 		if (!output.isInitialised()) {
@@ -924,7 +921,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	public SectionObject addSectionObject(String objectName, String objectType) {
 
 		// Obtain the section object for the name
-		SectionObjectNode object = this.getSectionObjectNode(objectName);
+		SectionObjectNode object = this
+				.getOrCreateSectionObjectNode(objectName);
 
 		// Determine if requires initialising
 		if (!object.isInitialised()) {
@@ -1048,7 +1046,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			String location) {
 
 		// Obtain the sub section for the name
-		SectionNode subSection = this.getSubSectionNode(subSectionName);
+		SectionNode subSection = this.getOrCreateSubSectionNode(subSectionName);
 
 		// Determine if initialised
 		if (!subSection.isInitialised()) {
@@ -1236,27 +1234,27 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public OfficeSectionInput getOfficeSectionInput(String inputName) {
-		return this.getSectionInputNode(inputName);
+		return this.getOrCreateSectionInputNode(inputName);
 	}
 
 	@Override
 	public OfficeSectionOutput getOfficeSectionOutput(String outputName) {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.getOrCreateSectionOutputNode(outputName);
 	}
 
 	@Override
 	public OfficeSectionObject getOfficeSectionObject(String objectName) {
-		return this.getSectionObjectNode(objectName);
+		return this.getOrCreateSectionObjectNode(objectName);
 	}
 
 	@Override
 	public OfficeSubSection getOfficeSubSection(String sectionName) {
-		return this.getSubSectionNode(sectionName);
+		return this.getOrCreateSubSectionNode(sectionName);
 	}
 
 	@Override
 	public OfficeTask getOfficeTask(String taskName) {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.getOrCreateTaskNode(taskName);
 	}
 
 	@Override

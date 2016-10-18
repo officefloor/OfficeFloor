@@ -41,8 +41,6 @@ import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -390,13 +388,9 @@ public interface NodeContext {
 	 * 
 	 * @param taskName
 	 *            Name of the {@link TaskNode}.
-	 * @param taskTypeName
-	 *            Type name of the {@link Task} within the {@link Work}.
-	 * @param work
-	 *            Parent {@link WorkNode}.
 	 * @return {@link TaskNode}.
 	 */
-	TaskNode createTaskNode(String taskName, String taskTypeName, WorkNode work);
+	TaskNode createTaskNode(String taskName);
 
 	/**
 	 * Creates the {@link TaskObjectNode}.
