@@ -33,6 +33,11 @@ public interface TaskFlowNode extends LinkFlowNode, TaskFlow {
 	String TYPE = "Task Flow";
 
 	/**
+	 * Initialises the {@link TaskFlowNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Obtains the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.
 	 * 
 	 * @return {@link FlowInstigationStrategyEnum} for this {@link TaskFlow}.

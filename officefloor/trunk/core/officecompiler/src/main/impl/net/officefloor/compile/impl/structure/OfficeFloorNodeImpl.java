@@ -197,26 +197,39 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		return null;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement OfficeFloorNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeFloorNode.initialise");
+
+	}
+
 	/*
 	 * ===================== ManagedObjectRegistry =============================
 	 */
 
 	@Override
-	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
-		// TODO implement ManagedObjectRegistry.getManagedObjectName
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectRegistry.getManagedObjectNode");
-
-	}
-
-	@Override
-	public ManagedObjectNode createManagedObjectNode(String managedObjectName,
-			ManagedObjectScope managedObjectScope,
+	public ManagedObjectNode getOrCreateManagedObjectNode(
+			String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-		// TODO implement ManagedObjectRegistry.createManagedObjectNode
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectRegistry.createManagedObjectNode");
-
+		ManagedObjectNode managedObject = this.managedObjects
+				.get(managedObjectName);
+		if (managedObject == null) {
+			managedObject = this.context.createManagedObjectNode(
+					managedObjectName, managedObjectScope,
+					managedObjectSourceNode);
+			this.managedObjects.put(managedObjectName, managedObject);
+		}
+		return managedObject;
 	}
 
 	/*

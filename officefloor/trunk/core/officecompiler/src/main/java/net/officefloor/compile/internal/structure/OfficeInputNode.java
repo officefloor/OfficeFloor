@@ -35,6 +35,11 @@ public interface OfficeInputNode extends LinkFlowNode, LinkSynchronousNode,
 	static String TYPE = "Office Input";
 
 	/**
+	 * Initialises the {@link OfficeInputNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Obtains the {@link OfficeInputType}.
 	 * 
 	 * @param typeContext

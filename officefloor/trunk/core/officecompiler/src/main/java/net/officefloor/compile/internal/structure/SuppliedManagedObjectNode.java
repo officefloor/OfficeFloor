@@ -33,6 +33,11 @@ public interface SuppliedManagedObjectNode extends Node {
 	String TYPE = "Supplied Managed Object";
 
 	/**
+	 * Initialises the {@link SuppliedManagedObjectNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Loads the {@link SuppliedManagedObject}.
 	 * 
 	 * @return {@link SuppliedManagedObject}. May be <code>null</code> if issue

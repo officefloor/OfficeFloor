@@ -88,6 +88,22 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 		return this.managedObjectSource;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement ManagedObjectFlowNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectFlowNode.initialise");
+
+	}
+
 	/*
 	 * =================== ManagedObjectFlow =============================
 	 */

@@ -114,7 +114,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Ensure provide location
 		assertFalse("Should not be initialised", node.isInitialised());
-		node = node.initialise(null, null, "LOCATION");
+		node.initialise(null, null, "LOCATION");
 		assertTrue("Now initialised", node.isInitialised());
 		assertEquals("Incorrect location", "LOCATION", node.getLocation());
 	}
@@ -548,7 +548,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Validate initialised
 		assertFalse("Not yet initialsied", node.isInitialised());
-		node = node.initialise("java.lang.Integer");
+		node.initialise("java.lang.Integer");
 		assertTrue("Now initialised", node.isInitialised());
 	}
 
@@ -622,7 +622,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Validate initialised
 		assertFalse("Not yet initialsied", node.isInitialised());
-		node = node.initialise("java.lang.Byte");
+		node.initialise("java.lang.Byte");
 		assertTrue("Now initialised", node.isInitialised());
 	}
 
@@ -642,7 +642,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 		// Validate initialised
 		assertFalse("Not yet initialsied", node.isInitialised());
-		node = node.initialise("java.lang.Float", true);
+		node.initialise("java.lang.Float", true);
 		assertTrue("Now initialised", node.isInitialised());
 	}
 
@@ -695,7 +695,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getSectionTaskName());
 		assertNull("Should not have work", node.getWorkNode());
 		assertFalse("Should not be initialised", node.isInitialised());
-		assertSame(node, node.initialise("TYPE", work));
+		node.initialise("TYPE", work);
 		assertTrue("Should be initialised", node.isInitialised());
 		assertSame("Incorrect work", work, node.getWorkNode());
 	}

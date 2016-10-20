@@ -53,4 +53,13 @@ public interface Node {
 	 */
 	Node getParentNode();
 
+	/**
+	 * Indicates if the {@link Node} has been initialised. {@link Node}
+	 * instances should only be initialised once. Initialising the {@link Node}
+	 * twice is an issue.
+	 * 
+	 * @return <code>true</code> if initialised.
+	 */
+	boolean isInitialised();
+
 }

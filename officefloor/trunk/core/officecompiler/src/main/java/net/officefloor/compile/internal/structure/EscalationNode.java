@@ -32,4 +32,9 @@ public interface EscalationNode extends LinkFlowNode, OfficeEscalation {
 	 */
 	static String TYPE = "Escalation";
 
+	/**
+	 * Initialises the {@link EscalationNode}.
+	 */
+	void initialise();
+
 }

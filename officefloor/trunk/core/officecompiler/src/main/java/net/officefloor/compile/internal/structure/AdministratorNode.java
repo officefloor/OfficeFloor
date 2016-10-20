@@ -36,6 +36,11 @@ public interface AdministratorNode extends LinkTeamNode, OfficeAdministrator {
 	static String TYPE = "Administrator";
 
 	/**
+	 * Initialises this {@link AdministratorNode}.
+	 */
+	void initialise();
+
+	/**
 	 * <p>
 	 * Obtains the {@link AdministratorType} for this {@link AdministratorNode}.
 	 * <p>

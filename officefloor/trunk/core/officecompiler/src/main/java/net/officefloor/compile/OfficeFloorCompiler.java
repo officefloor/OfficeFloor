@@ -428,6 +428,14 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 		return null;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
 	/*
 	 * ======= Methods to be implemented by the OfficeFloorCompiler ===========
 	 */

@@ -148,6 +148,22 @@ public class AdministratorNodeImpl implements AdministratorNode {
 		return this.officeNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement AdministratorNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement AdministratorNode.initialise");
+
+	}
+
 	/*
 	 * ======================= OfficeAdministrator ========================
 	 */

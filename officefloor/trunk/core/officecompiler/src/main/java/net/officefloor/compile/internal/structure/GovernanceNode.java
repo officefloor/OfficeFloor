@@ -33,7 +33,12 @@ public interface GovernanceNode extends LinkTeamNode, OfficeGovernance {
 	/**
 	 * {@link Node} type.
 	 */
-	String TYPE = "Governance";
+	static String TYPE = "Governance";
+
+	/**
+	 * Initialises the {@link GovernanceNode}.
+	 */
+	void initialise();
 
 	/**
 	 * Loads the {@link GovernanceType} for this {@link GovernanceNode}.

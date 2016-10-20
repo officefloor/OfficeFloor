@@ -41,6 +41,11 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 	static String TYPE = "Office";
 
 	/**
+	 * Initialises the {@link OfficeNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Sources this {@link Office} along with its top level
 	 * {@link OfficeSection} instances into this {@link OfficeNode}.
 	 * 

@@ -105,6 +105,22 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 		return this.officeNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement OfficeInputNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeInputNode.initialise");
+
+	}
+
 	/*
 	 * ======================= OfficeInputNode ===========================
 	 */

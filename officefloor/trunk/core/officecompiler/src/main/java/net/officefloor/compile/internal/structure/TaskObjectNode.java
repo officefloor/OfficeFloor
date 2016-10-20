@@ -36,6 +36,11 @@ public interface TaskObjectNode extends LinkObjectNode, TaskObject {
 	String TYPE = "Task Object";
 
 	/**
+	 * Initialises the {@link TaskObjectNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Indicates if this {@link TaskObject} is a parameter to the {@link Task}.
 	 * 
 	 * @return <code>true</code> if this {@link TaskObject} is a parameter to

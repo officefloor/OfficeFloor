@@ -47,16 +47,8 @@ public interface TaskNode extends LinkFlowNode, SectionTask, OfficeTask {
 	 *            {@link TaskType} name.
 	 * @param work
 	 *            {@link WorkNode} for the {@link TaskNode}.
-	 * @return <code>this</code> for builder pattern.
 	 */
-	TaskNode initialise(String taskTypeName, WorkNode work);
-
-	/**
-	 * Indicates if this {@link TaskNode} has been initialised.
-	 * 
-	 * @return <code>true</code> if this {@link TaskNode} has been initialised.
-	 */
-	boolean isInitialised();
+	void initialise(String taskTypeName, WorkNode work);
 
 	/**
 	 * Loads the {@link OfficeTaskType}.

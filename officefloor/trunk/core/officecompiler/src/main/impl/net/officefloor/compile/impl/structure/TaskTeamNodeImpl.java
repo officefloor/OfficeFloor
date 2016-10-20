@@ -87,6 +87,22 @@ public class TaskTeamNodeImpl implements TaskTeamNode {
 		return this.taskNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement TaskTeamNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement TaskTeamNode.initialise");
+
+	}
+
 	/*
 	 * ================== LinkTeamNode ============================
 	 */

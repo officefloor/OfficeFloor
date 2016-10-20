@@ -145,12 +145,12 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	/**
 	 * {@link OfficeObjectNode} instances by their {@link OfficeObject} name.
 	 */
-	private final Map<String, OfficeObjectStruct> objects = new HashMap<String, OfficeObjectStruct>();
+	private final Map<String, OfficeObjectNode> objects = new HashMap<String, OfficeObjectNode>();
 
 	/**
-	 * {@link TaskTeamNode} instances by their {@link OfficeTeam} name.
+	 * {@link OfficeTeamNode} instances by their {@link OfficeTeam} name.
 	 */
-	private final Map<String, TeamStruct> teams = new HashMap<String, TeamStruct>();
+	private final Map<String, OfficeTeamNode> teams = new HashMap<String, OfficeTeamNode>();
 
 	/**
 	 * {@link OfficeInputNode} instances by their name.
@@ -255,29 +255,35 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		return this.officeFloor;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement OfficeNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeNode.initialise");
+
+	}
+
 	/*
 	 * ================== ManagedObjectRegistry ==================
 	 */
 
 	@Override
-	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
-		return this.managedObjects.get(managedObjectName);
-	}
-
-	@Override
-	public ManagedObjectNode createManagedObjectNode(String managedObjectName,
-			ManagedObjectScope managedObjectScope,
+	public ManagedObjectNode getOrCreateManagedObjectNode(
+			String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-
-		// Create the managed object
-		ManagedObjectNode managedObject = this.context.createManagedObjectNode(
-				managedObjectName, managedObjectScope, managedObjectSourceNode);
-
-		// Register the managed object
-		this.managedObjects.put(managedObjectName, managedObject);
-
-		// Return the managed object
-		return managedObject;
+		return NodeUtil.getInitialisedNode(managedObjectName,
+				this.managedObjects, this.context, () -> this.context
+						.createManagedObjectNode(managedObjectName,
+								managedObjectScope, managedObjectSourceNode), (
+						managedObject) -> managedObject.initialise());
 	}
 
 	/*
@@ -478,10 +484,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 				.values()
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.officeObject.getOfficeObjectName(),
-						b.officeObject.getOfficeObjectName()))
-				.filter((object) -> object.isAdded)
-				.map((object) -> object.officeObject
+						a.getOfficeObjectName(), b.getOfficeObjectName()))
+				.map((object) -> object
 						.loadOfficeManagedObjectType(typeContext))
 				.filter((type) -> (type != null))
 				.toArray(OfficeManagedObjectType[]::new);
@@ -510,9 +514,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 				.values()
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.team.getOfficeTeamName(), b.team.getOfficeTeamName()))
-				.filter((team) -> team.isAdded)
-				.map((team) -> team.team.loadOfficeTeamType(typeContext))
+						a.getOfficeTeamName(), b.getOfficeTeamName()))
+				.map((team) -> team.loadOfficeTeamType(typeContext))
 				.filter((type) -> (type != null))
 				.toArray(OfficeTeamType[]::new);
 
@@ -556,13 +559,13 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		OfficeBuilder officeBuilder = builder.addOffice(this.officeName);
 
 		// Register the teams for the office
-		for (TeamStruct struct : this.teams.values()) {
+		for (OfficeTeamNode team : this.teams.values()) {
 
 			// Obtain the office team name
-			String officeTeamName = struct.team.getOfficeTeamName();
+			String officeTeamName = team.getOfficeTeamName();
 
 			// Obtain the OfficeFloor team name
-			TeamNode officeFloorTeam = LinkUtil.retrieveTarget(struct.team,
+			TeamNode officeFloorTeam = LinkUtil.retrieveTarget(team,
 					TeamNode.class, this.context.getCompilerIssues());
 			if (officeFloorTeam == null) {
 				continue; // OfficeFloor team not linked
@@ -588,17 +591,16 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Load the office objects (in deterministic order)
-		OfficeObjectStruct[] officeObjects = CompileUtil.toSortedArray(
-				this.objects.values(), new OfficeObjectStruct[0],
-				(object) -> object.officeObject.getOfficeObjectName());
+		OfficeObjectNode[] officeObjects = CompileUtil.toSortedArray(
+				this.objects.values(), new OfficeObjectNode[0],
+				(object) -> object.getOfficeObjectName());
 
 		// Configure governance for the linked office floor managed objects.
 		// Must be before managed objects as building them builds dependencies.
-		Map<OfficeObjectStruct, BoundManagedObjectNode> officeObjectToBoundMo = new HashMap<OfficeNodeImpl.OfficeObjectStruct, BoundManagedObjectNode>();
-		for (OfficeObjectStruct struct : officeObjects) {
+		Map<OfficeObjectNode, BoundManagedObjectNode> officeObjectToBoundMo = new HashMap<OfficeObjectNode, BoundManagedObjectNode>();
+		for (OfficeObjectNode objectNode : officeObjects) {
 
 			// Obtain the office object name
-			OfficeObjectNode objectNode = struct.officeObject;
 			String officeObjectName = objectNode.getOfficeObjectName();
 
 			// Obtain the office floor managed object node
@@ -619,11 +621,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		// Build the office floor managed objects for the office.
 		// Ensure the managed objects are only built into the office once.
 		Set<BoundManagedObjectNode> builtManagedObjects = new HashSet<BoundManagedObjectNode>();
-		for (OfficeObjectStruct struct : officeObjects) {
+		for (OfficeObjectNode objectNode : officeObjects) {
 
-			// Obtain the office floor managed object node
+			// Obtain the OfficeFloor managed object node
 			BoundManagedObjectNode managedObjectNode = officeObjectToBoundMo
-					.get(struct);
+					.get(objectNode);
 			if (managedObjectNode == null) {
 				continue; // not linked and reported in adding governance
 			}
@@ -778,288 +780,131 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public OfficeObject addOfficeObject(String officeManagedObjectName,
 			String objectType) {
-		// Obtain and return the required object for the name
-		OfficeObjectStruct struct = this.objects.get(officeManagedObjectName);
-		if (struct == null) {
-
-			// Add the object
-			OfficeObjectNode object = this.context.createOfficeObjectNode(
-					officeManagedObjectName, this).initialise(objectType);
-			struct = new OfficeObjectStruct(object, true);
-			this.objects.put(officeManagedObjectName, struct);
-
-		} else {
-
-			// Flag the office object added by office architect
-			struct.isAdded = true;
-
-			// Added but determine if requires initialising
-			if (!struct.officeObject.isInitialised()) {
-				// Initialise as not yet initialised
-				struct.officeObject.initialise(objectType);
-			} else {
-				// Object already added and initialised
-				this.addIssue("Object " + officeManagedObjectName
-						+ " already added");
-			}
-		}
-		return struct.officeObject;
+		return NodeUtil.getInitialisedNode(officeManagedObjectName,
+				this.objects, this.context, () -> this.context
+						.createOfficeObjectNode(officeManagedObjectName, this),
+				(managedObject) -> managedObject.initialise(objectType));
 	}
 
 	@Override
 	public OfficeInput addOfficeInput(String inputName, String parameterType) {
-		// Obtain and return the input for the name
-		OfficeInputNode input = this.inputs.get(inputName);
-		if (input == null) {
-			// Create the input
-			input = this.context.createOfficeInputNode(inputName,
-					parameterType, this);
-
-			// Add the input
-			this.inputs.put(inputName, input);
-		} else {
-			// Input already added
-			this.addIssue("Office input " + inputName + " already added");
-		}
-		return input;
+		return NodeUtil.getInitialisedNode(inputName, this.inputs,
+				this.context, () -> this.context.createOfficeInputNode(
+						inputName, parameterType, this), (input) -> input
+						.initialise());
 	}
 
 	@Override
 	public OfficeOutput addOfficeOutput(String outputName, String argumentType) {
-		// Obtain and return the output for the name
-		OfficeOutputNode output = this.outputs.get(outputName);
-		if (output == null) {
-			// Create the output
-			output = this.context.createOfficeOutputNode(outputName,
-					argumentType, this);
-
-			// Add the output
-			this.outputs.put(outputName, output);
-		} else {
-			// Output already added
-			this.addIssue("Office output " + outputName + " already added");
-		}
-		return output;
+		return NodeUtil.getInitialisedNode(outputName, this.outputs,
+				this.context, () -> this.context.createOfficeOutputNode(
+						outputName, argumentType, this), (output) -> output
+						.initialise());
 	}
 
 	@Override
 	public OfficeTeam addOfficeTeam(String officeTeamName) {
-		// Obtain and return the team for the name
-		TeamStruct struct = this.teams.get(officeTeamName);
-		if (struct == null) {
-			// Create the team
-			OfficeTeamNode team = this.context.createOfficeTeamNode(
-					officeTeamName, this);
-			struct = new TeamStruct(team, true); // added by architect
-
-			// Add the team
-			this.teams.put(officeTeamName, struct);
-		} else {
-			// Determine if added by architect
-			if (!struct.isAdded) {
-				// Now added by architect
-				struct.isAdded = true;
-			} else {
-				// Team already added by architect
-				this.addIssue("Team " + officeTeamName + " already added");
-			}
-		}
-		return struct.team;
+		return NodeUtil.getInitialisedNode(officeTeamName, this.teams,
+				this.context,
+				() -> this.context.createOfficeTeamNode(officeTeamName, this),
+				(team) -> team.initialise());
 	}
 
 	@Override
 	public OfficeSection addOfficeSection(String sectionName,
 			String sectionSourceClassName, String sectionLocation) {
-		// Obtain and return the section for the name
-		SectionNode section = this.sections.get(sectionName);
-		if (section == null) {
-			// Create the section and have it loaded
-			section = this.context.createSectionNode(sectionName, this)
-					.initialise(sectionSourceClassName, null, sectionLocation);
-			// Add the section
-			this.sections.put(sectionName, section);
-		} else {
-			// Section already added
-			this.addIssue("Section " + sectionName + " already added");
-		}
-		return section;
+		return NodeUtil.getInitialisedNode(sectionName, this.sections, context,
+				() -> this.context.createSectionNode(sectionName, this), (
+						section) -> section.initialise(sectionSourceClassName,
+						null, sectionLocation));
 	}
 
 	@Override
 	public OfficeSection addOfficeSection(String sectionName,
 			SectionSource sectionSource, String sectionLocation) {
-		// Obtain and return the section for the name
-		SectionNode section = this.sections.get(sectionName);
-		if (section == null) {
-			// Create the section and have it loaded
-			section = this.context.createSectionNode(sectionName, this)
-					.initialise(sectionSource.getClass().getName(),
-							sectionSource, sectionLocation);
-			// Add the section
-			this.sections.put(sectionName, section);
-		} else {
-			// Section already added and initialised
-			this.addIssue("Section " + sectionName + " already added");
-		}
-		return section;
+		return NodeUtil.getInitialisedNode(sectionName, this.sections, context,
+				() -> this.context.createSectionNode(sectionName, this), (
+						section) -> section.initialise(sectionSource.getClass()
+						.getName(), sectionSource, sectionLocation));
 	}
 
 	@Override
 	public OfficeManagedObjectSource addOfficeManagedObjectSource(
 			String managedObjectSourceName, String managedObjectSourceClassName) {
-		// Obtain and return the section managed object source for the name
-		ManagedObjectSourceNode managedObjectSource = this.managedObjectSources
-				.get(managedObjectSourceName);
-		if (managedObjectSource == null) {
-			// Create the office managed object source
-			managedObjectSource = this.context.createManagedObjectSourceNode(
-					managedObjectSourceName, managedObjectSourceClassName,
-					null, this);
-
-			// Add the office managed object source
-			this.managedObjectSources.put(managedObjectSourceName,
-					managedObjectSource);
-
-		} else {
-			// Managed object source already added
-			this.addIssue("Managed object source " + managedObjectSourceName
-					+ " already added");
-		}
-		return managedObjectSource;
+		return NodeUtil.getInitialisedNode(managedObjectSourceName,
+				this.managedObjectSources, this.context, () -> this.context
+						.createManagedObjectSourceNode(managedObjectSourceName,
+								managedObjectSourceClassName, null, this), (
+						managedObjectSource) -> managedObjectSource
+						.initialise());
 	}
 
 	@Override
 	public OfficeManagedObjectSource addOfficeManagedObjectSource(
 			String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource) {
-		// Obtain and return the section managed object source for the name
-		ManagedObjectSourceNode managedObjectSourceNode = this.managedObjectSources
-				.get(managedObjectSourceName);
-		if (managedObjectSourceNode == null) {
-			// Create the office managed object source (within office context)
-			managedObjectSourceNode = this.context
-					.createManagedObjectSourceNode(managedObjectSourceName,
-							managedObjectSource.getClass().getName(),
-							managedObjectSource, officeFloor);
-
-			// Add the office managed object source
-			this.managedObjectSources.put(managedObjectSourceName,
-					managedObjectSourceNode);
-
-		} else {
-			// Managed object source already added
-			this.addIssue("Managed object source " + managedObjectSourceName
-					+ " already added");
-		}
-		return managedObjectSourceNode;
+		return NodeUtil.getInitialisedNode(managedObjectSourceName,
+				this.managedObjectSources, this.context, () -> this.context
+						.createManagedObjectSourceNode(managedObjectSourceName,
+								managedObjectSource.getClass().getName(),
+								managedObjectSource, this), (
+						managedObjectSourceNode) -> managedObjectSourceNode
+						.initialise());
 	}
 
 	@Override
 	public OfficeGovernance addOfficeGovernance(String governanceName,
 			String governanceSourceClassName) {
-		// Obtain and return the governance for the name
-		GovernanceNode governance = this.governances.get(governanceName);
-		if (governance == null) {
-			// Add the governance
-			governance = this.context.createGovernanceNode(governanceName,
-					governanceSourceClassName, null, this);
-			this.governances.put(governanceName, governance);
-		} else {
-			// Governance already added and initialised
-			this.addIssue("Governance " + governanceName + " already added");
-		}
-		return governance;
+		return NodeUtil.getInitialisedNode(governanceName, this.governances,
+				this.context, () -> this.context.createGovernanceNode(
+						governanceName, governanceSourceClassName, null, this),
+				(governance) -> governance.initialise());
 	}
 
 	@Override
 	public OfficeGovernance addOfficeGovernance(String governanceName,
 			GovernanceSource<?, ?> governanceSource) {
-		// Obtain and return the governance for the name
-		GovernanceNode governance = this.governances.get(governanceName);
-		if (governance == null) {
-			// Add the governance
-			governance = this.context.createGovernanceNode(governanceName,
-					governanceSource.getClass().getName(), governanceSource,
-					this);
-			this.governances.put(governanceName, governance);
-		} else {
-			// Governance already added and initialised
-			this.addIssue("Governance " + governanceName + " already added");
-		}
-		return governance;
+		return NodeUtil.getInitialisedNode(governanceName, this.governances,
+				this.context, () -> this.context.createGovernanceNode(
+						governanceName, governanceSource.getClass().getName(),
+						governanceSource, this), (governance) -> governance
+						.initialise());
 	}
 
 	@Override
 	public OfficeAdministrator addOfficeAdministrator(String administratorName,
 			String administratorSourceClassName) {
-		// Obtain and return the administrator for the name
-		AdministratorNode administrator = this.administrators
-				.get(administratorName);
-		if (administrator == null) {
-			// Add the administrator
-			administrator = this.context
-					.createAdministratorNode(administratorName,
-							administratorSourceClassName, null, this);
-			this.administrators.put(administratorName, administrator);
-		} else {
-			// Administrator already added and initialised
-			this.addIssue("Administrator " + administratorName
-					+ " already added");
-		}
-		return administrator;
+		return NodeUtil.getInitialisedNode(administratorName,
+				this.administrators, this.context, () -> this.context
+						.createAdministratorNode(administratorName,
+								administratorSourceClassName, null, this), (
+						administrator) -> administrator.initialise());
 	}
 
 	@Override
 	public OfficeAdministrator addOfficeAdministrator(String administratorName,
 			AdministratorSource<?, ?> administratorSource) {
-		// Obtain and return the administrator for the name
-		AdministratorNode administrator = this.administrators
-				.get(administratorName);
-		if (administrator == null) {
-			// Add the administrator
-			administrator = this.context.createAdministratorNode(
-					administratorName,
-					administratorSource.getClass().getName(),
-					administratorSource, this);
-			this.administrators.put(administratorName, administrator);
-		} else {
-			// Administrator already added and initialised
-			this.addIssue("Administrator " + administratorName
-					+ " already added");
-		}
-		return administrator;
+		return NodeUtil.getInitialisedNode(administratorName,
+				this.administrators, this.context, () -> this.context
+						.createAdministratorNode(administratorName,
+								administratorSource.getClass().getName(),
+								administratorSource, this),
+				(administrator) -> administrator.initialise());
 	}
 
 	@Override
 	public OfficeEscalation addOfficeEscalation(String escalationTypeName) {
-		// Obtain and return the escalation for type
-		EscalationNode escalation = this.escalations.get(escalationTypeName);
-		if (escalation == null) {
-			// Add the escalation
-			escalation = this.context.createEscalationNode(escalationTypeName,
-					this);
-			this.escalations.put(escalationTypeName, escalation);
-		} else {
-			// Escalation already added
-			this.addIssue("Escalation " + escalationTypeName + " already added");
-		}
-		return escalation;
+		return NodeUtil.getInitialisedNode(escalationTypeName,
+				this.escalations, this.context, () -> this.context
+						.createEscalationNode(escalationTypeName, this), (
+						escalation) -> escalation.initialise());
 	}
 
 	@Override
 	public OfficeStart addOfficeStart(String startName) {
-		// Obtain and return the start-up trigger
-		OfficeStartNode start = this.starts.get(startName);
-		if (start == null) {
-			// Add the start
-			start = this.context.createOfficeStartNode(startName, this);
-			this.starts.put(startName, start);
-		} else {
-			// Start already added
-			this.addIssue("Office start-up trigger " + startName
-					+ " already added");
-		}
-		return start;
+		return NodeUtil.getInitialisedNode(startName, this.starts,
+				this.context, () -> this.context.createOfficeStartNode(
+						startName, this), (start) -> start.initialise());
 	}
 
 	@Override
@@ -1174,51 +1019,22 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public DeployedOfficeInput getDeployedOfficeInput(String sectionName,
 			String inputName) {
-
-		// Obtain the section
-		SectionNode section = this.sections.get(sectionName);
-		if (section == null) {
-			// Add the section
-			section = this.context.createSectionNode(sectionName, this);
-			this.sections.put(sectionName, section);
-		}
-
-		// Obtain and return the section input
+		SectionNode section = NodeUtil.getNode(sectionName, this.sections,
+				() -> this.context.createSectionNode(sectionName, this));
 		return section.getDeployedOfficeInput(inputName);
 	}
 
 	@Override
 	public OfficeObject getDeployedOfficeObject(String officeManagedObjectName) {
-
-		// Obtain and return the office object
-		OfficeObjectStruct struct = this.objects.get(officeManagedObjectName);
-		if (struct == null) {
-			// Create the object within the office floor context
-			OfficeObjectNode object = this.context.createOfficeObjectNode(
-					officeManagedObjectName, this);
-
-			// Add the object
-			struct = new OfficeObjectStruct(object, false);
-			this.objects.put(officeManagedObjectName, struct);
-		}
-		return struct.officeObject;
+		return NodeUtil.getNode(officeManagedObjectName, this.objects,
+				() -> this.context.createOfficeObjectNode(
+						officeManagedObjectName, this));
 	}
 
 	@Override
 	public OfficeTeam getDeployedOfficeTeam(String officeTeamName) {
-
-		// Obtain and return the office team
-		TeamStruct struct = this.teams.get(officeTeamName);
-		if (struct == null) {
-			// Create the team within the office floor context
-			OfficeTeamNode team = this.context.createOfficeTeamNode(
-					officeTeamName, this);
-			struct = new TeamStruct(team, false); // not added by architect
-
-			// Add the office team
-			this.teams.put(officeTeamName, struct);
-		}
-		return struct.team;
+		return NodeUtil.getNode(officeTeamName, this.teams,
+				() -> this.context.createOfficeTeamNode(officeTeamName, this));
 	}
 
 	/*
@@ -1241,66 +1057,6 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public LinkOfficeNode getLinkedOfficeNode() {
 		return this.linkedOfficeNode;
-	}
-
-	/**
-	 * Structure containing details of an {@link OfficeObjectNode}.
-	 */
-	private class OfficeObjectStruct {
-
-		/**
-		 * {@link OfficeObjectNode}.
-		 */
-		public final OfficeObjectNode officeObject;
-
-		/**
-		 * Flag indicating if has been added by {@link OfficeArchitect}.
-		 */
-		public boolean isAdded = false;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param officeObject
-		 *            {@link OfficeObjectNode}.
-		 * @param isAdded
-		 *            <code>true</code> if has been added by
-		 *            {@link OfficeArchitect}.
-		 */
-		public OfficeObjectStruct(OfficeObjectNode officeObject, boolean isAdded) {
-			this.officeObject = officeObject;
-			this.isAdded = isAdded;
-		}
-	}
-
-	/**
-	 * Structure containing details of an {@link TaskTeamNode}.
-	 */
-	private class TeamStruct {
-
-		/**
-		 * {@link OfficeTeamNode}.
-		 */
-		public final OfficeTeamNode team;
-
-		/**
-		 * Flag indicating if has been added by {@link OfficeArchitect}.
-		 */
-		public boolean isAdded = false;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param team
-		 *            {@link OfficeTeamNode}.
-		 * @param isAdded
-		 *            <code>true</code> if has been added by
-		 *            {@link OfficeArchitect}.
-		 */
-		public TeamStruct(OfficeTeamNode team, boolean isAdded) {
-			this.team = team;
-			this.isAdded = isAdded;
-		}
 	}
 
 	/**

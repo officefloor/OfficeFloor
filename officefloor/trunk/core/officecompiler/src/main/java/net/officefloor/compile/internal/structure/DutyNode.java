@@ -27,7 +27,17 @@ import net.officefloor.frame.api.execute.Task;
  * 
  * @author Daniel Sagenschneider
  */
-public interface DutyNode extends OfficeDuty {
+public interface DutyNode extends Node, OfficeDuty {
+
+	/**
+	 * {@link Node} type.
+	 */
+	static String TYPE = "Duty";
+
+	/**
+	 * Initialises the {@link DutyNode}.
+	 */
+	void initialise();
 
 	/**
 	 * Builds the pre {@link Task} administration.

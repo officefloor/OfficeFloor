@@ -102,6 +102,22 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 		return this.task;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement TaskFlowNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement TaskFlowNode.initialise");
+
+	}
+
 	/*
 	 * ================== TaskFlow ======================================
 	 */

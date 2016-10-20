@@ -39,22 +39,14 @@ public interface SectionOutputNode extends LinkFlowNode, SectionOutput,
 	static String TYPE = "Section Output";
 
 	/**
-	 * Indicates if this {@link SectionOutputType} has been initialised.
-	 * 
-	 * @return <code>true</code> if initialised.
-	 */
-	boolean isInitialised();
-
-	/**
 	 * Initialises this {@link SectionOutputType}.
 	 * 
 	 * @param argumentType
 	 *            Argument type.
 	 * @param isEscalationOnly
 	 *            Flag indicating if escalation only.
-	 * @return <code>this</code> for builder pattern.
 	 */
-	SectionOutputNode initialise(String argumentType, boolean isEscalationOnly);
+	void initialise(String argumentType, boolean isEscalationOnly);
 
 	/**
 	 * Obtains {@link SectionNode} containing this {@link SectionOutputNode}.

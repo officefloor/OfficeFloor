@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import net.officefloor.compile.impl.office.OfficeAvailableSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.OfficeSectionTypeImpl;
@@ -247,87 +246,6 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		this.propertyList = this.context.createPropertyList();
 	}
 
-	/**
-	 * Obtains the particular {@link Node}.
-	 * 
-	 * @param nodeName
-	 *            Name of the {@link Node}.
-	 * @param nodes
-	 *            Existing {@link Map} of {@link Node} instances by their names.
-	 * @param create
-	 *            {@link Supplier} to create the {@link Node}.
-	 * @return {@link Node} for the name.
-	 */
-	private <N extends Node> N getOrCreateNode(String nodeName,
-			Map<String, N> nodes, Supplier<N> create) {
-		N node = nodes.get(nodeName);
-		if (node == null) {
-			node = create.get();
-			nodes.put(nodeName, node);
-		}
-		return node;
-	}
-
-	/**
-	 * Obtain the {@link SectionInputNode} for the name.
-	 * 
-	 * @param inputName
-	 *            Name of the {@link SectionInputNode}.
-	 * @return {@link SectionInputNode} for the name.
-	 */
-	private SectionInputNode getOrCreateSectionInputNode(String inputName) {
-		return this.getOrCreateNode(inputName, this.inputs,
-				() -> this.context.createSectionInputNode(inputName, this));
-	}
-
-	/**
-	 * Obtain the {@link SectionOutputNode} for the name.
-	 * 
-	 * @param outputName
-	 *            Name of the {@link SectionOutputNode}.
-	 * @return {@link SectionOutputNode} for the name.
-	 */
-	private SectionOutputNode getOrCreateSectionOutputNode(String outputName) {
-		return this.getOrCreateNode(outputName, this.outputs,
-				() -> this.context.createSectionOutputNode(outputName, this));
-	}
-
-	/**
-	 * Obtain the {@link SectionObjectNode} for the name.
-	 * 
-	 * @param objectName
-	 *            Name of the {@link SectionObjectNode}.
-	 * @return {@link SectionObjectNode} for the name.
-	 */
-	private SectionObjectNode getOrCreateSectionObjectNode(String objectName) {
-		return this.getOrCreateNode(objectName, this.objects,
-				() -> this.context.createSectionObjectNode(objectName, this));
-	}
-
-	/**
-	 * Obtain the {@link SectionNode} for the name.
-	 * 
-	 * @param subSectionName
-	 *            Name of the {@link SectionNode}.
-	 * @return {@link SectionNode} for the name.
-	 */
-	private SectionNode getOrCreateSubSectionNode(String subSectionName) {
-		return this.getOrCreateNode(subSectionName, this.subSections,
-				() -> this.context.createSectionNode(subSectionName, this));
-	}
-
-	/**
-	 * Obtains the {@link TaskNode} for the name.
-	 * 
-	 * @param taskName
-	 *            Name of the {@link TaskNode}.
-	 * @return {@link TaskNode} for the name.
-	 */
-	private TaskNode getOrCreateTaskNode(String taskName) {
-		return this.getOrCreateNode(taskName, this.taskNodes,
-				() -> this.context.createTaskNode(taskName));
-	}
-
 	/*
 	 * ======================= Node =================================
 	 */
@@ -352,6 +270,19 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		return (this.parentSection != null ? this.parentSection : this.office);
 	}
 
+	@Override
+	public boolean isInitialised() {
+		return (this.state != null);
+	}
+
+	@Override
+	public void initialise(String sectionSourceClassName,
+			SectionSource sectionSource, String sectionLocation) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(sectionSourceClassName,
+						sectionSource, sectionLocation));
+	}
+
 	/*
 	 * ======================= TaskRegistry =======================
 	 */
@@ -359,21 +290,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	@Override
 	public TaskNode getOrCreateTaskNode(String taskName, String taskTypeName,
 			WorkNode work) {
-
-		// Obtain the task for the name
-		TaskNode task = this.getOrCreateTaskNode(taskName);
-
-		// Determine if requires initialising
-		if (!task.isInitialised()) {
-			// Initialise as not yet initialised
-			task.initialise(taskTypeName, work);
-		} else {
-			// Task already added and initialised
-			this.addIssue("Task " + taskName + " already added");
-		}
-
-		// Return the task
-		return task;
+		return NodeUtil.getInitialisedNode(taskName, this.taskNodes,
+				this.context, () -> this.context.createTaskNode(taskName), (
+						task) -> task.initialise(taskTypeName, work));
 	}
 
 	/*
@@ -381,50 +300,21 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 */
 
 	@Override
-	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
-		return this.managedObjects.get(managedObjectName);
-	}
-
-	@Override
-	public ManagedObjectNode createManagedObjectNode(String managedObjectName,
-			ManagedObjectScope managedObjectScope,
+	public ManagedObjectNode getOrCreateManagedObjectNode(
+			String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-
-		// Create the managed object node
-		ManagedObjectNode node = this.context.createManagedObjectNode(
-				managedObjectName, managedObjectScope, managedObjectSourceNode);
-
-		// Register the managed object node
-		this.managedObjects.put(managedObjectName, node);
-
-		// Return the managed object node
-		return node;
+		return NodeUtil.getInitialisedNode(managedObjectName,
+				this.managedObjects, this.context, () -> this.context
+						.createManagedObjectNode(managedObjectName,
+								managedObjectScope, managedObjectSourceNode), (
+						managedObject) -> {
+					return;
+				});
 	}
 
 	/*
 	 * ======================= SectionNode =================================
 	 */
-
-	@Override
-	public SectionNode initialise(String sectionSourceClassName,
-			SectionSource sectionSource, String sectionLocation) {
-
-		// Ensure not already initialise
-		if (this.isInitialised()) {
-			throw new IllegalStateException("SectionNode " + this.sectionName
-					+ " already initialised");
-		}
-
-		// Initialised
-		this.state = new InitialisedState(sectionSourceClassName,
-				sectionSource, sectionLocation);
-		return this;
-	}
-
-	@Override
-	public boolean isInitialised() {
-		return (this.state != null);
-	}
 
 	@Override
 	public boolean sourceSection() {
@@ -834,14 +724,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public DeployedOfficeInput getDeployedOfficeInput(String inputName) {
-		// Obtain and return the section input
-		SectionInputNode input = this.inputs.get(inputName);
-		if (input == null) {
-			// Add the section input
-			input = this.context.createSectionInputNode(inputName, this);
-			this.inputs.put(inputName, input);
-		}
-		return input;
+		return NodeUtil.getNode(inputName, this.inputs,
+				() -> this.context.createSectionInputNode(inputName, this));
 	}
 
 	/*
@@ -860,17 +744,20 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public SubSectionInput getSubSectionInput(String inputName) {
-		return this.getOrCreateSectionInputNode(inputName);
+		return NodeUtil.getNode(inputName, this.inputs,
+				() -> this.context.createSectionInputNode(inputName, this));
 	}
 
 	@Override
 	public SubSectionOutput getSubSectionOutput(String outputName) {
-		return this.getOrCreateSectionOutputNode(outputName);
+		return NodeUtil.getNode(outputName, this.outputs,
+				() -> this.context.createSectionOutputNode(outputName, this));
 	}
 
 	@Override
 	public SubSectionObject getSubSectionObject(String objectName) {
-		return this.getOrCreateSectionObjectNode(objectName);
+		return NodeUtil.getNode(objectName, this.objects,
+				() -> this.context.createSectionObjectNode(objectName, this));
 	}
 
 	/*
@@ -879,187 +766,93 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public SectionInput addSectionInput(String inputName, String parameterType) {
-
-		// Obtain the section input for the name
-		SectionInputNode input = this.getOrCreateSectionInputNode(inputName);
-
-		// Determine if requires initialising
-		if (!input.isInitialised()) {
-			// Initialise as not yet initialised
-			input.initialise(parameterType);
-		} else {
-			// Input already added and initialised
-			this.addIssue("Input " + inputName + " already added");
-		}
-
-		// Return the input
-		return input;
+		return NodeUtil.getInitialisedNode(inputName, this.inputs,
+				this.context, () -> this.context.createSectionInputNode(
+						inputName, this), (input) -> input
+						.initialise(parameterType));
 	}
 
 	@Override
 	public SectionOutput addSectionOutput(String outputName,
 			String argumentType, boolean isEscalationOnly) {
-
-		// Obtain the section output for the name
-		SectionOutputNode output = this
-				.getOrCreateSectionOutputNode(outputName);
-
-		// Determine if requires initialising
-		if (!output.isInitialised()) {
-			// Initialise as not yet initialised
-			output.initialise(argumentType, isEscalationOnly);
-		} else {
-			// Output already added and initialised
-			this.addIssue("Output " + outputName + " already added");
-		}
-
-		// Return the output
-		return output;
+		return NodeUtil.getInitialisedNode(outputName, this.outputs,
+				this.context, () -> this.context.createSectionOutputNode(
+						outputName, this), (output) -> output.initialise(
+						argumentType, isEscalationOnly));
 	}
 
 	@Override
 	public SectionObject addSectionObject(String objectName, String objectType) {
-
-		// Obtain the section object for the name
-		SectionObjectNode object = this
-				.getOrCreateSectionObjectNode(objectName);
-
-		// Determine if requires initialising
-		if (!object.isInitialised()) {
-			// Initialise as not yet initialised
-			object.initialise(objectType);
-		} else {
-			// Object already added and initialised
-			this.addIssue("Object " + objectName + " already added");
-		}
-
-		// Return the object
-		return object;
+		return NodeUtil.getInitialisedNode(objectName, this.objects,
+				this.context, () -> this.context.createSectionObjectNode(
+						objectName, this), (object) -> object
+						.initialise(objectType));
 	}
 
 	@Override
 	public SectionManagedObjectSource addSectionManagedObjectSource(
 			String managedObjectSourceName, String managedObjectSourceClassName) {
-		// Obtain and return the section managed object source for the name
-		ManagedObjectSourceNode managedObjectSource = this.managedObjectSourceNodes
-				.get(managedObjectSourceName);
-		if (managedObjectSource == null) {
-			// Add the section managed object source
-			managedObjectSource = this.context.createManagedObjectSourceNode(
-					managedObjectSourceName, managedObjectSourceClassName,
-					null, this);
-			this.managedObjectSourceNodes.put(managedObjectSourceName,
-					managedObjectSource);
-		} else {
-			// Section managed object source already added
-			this.addIssue("Section managed object source "
-					+ managedObjectSourceName + " already added");
-		}
-		return managedObjectSource;
+		return NodeUtil.getInitialisedNode(managedObjectSourceName,
+				this.managedObjectSourceNodes, this.context, () -> this.context
+						.createManagedObjectSourceNode(managedObjectSourceName,
+								managedObjectSourceClassName, null, this), (
+						managedObjectSource) -> {
+					return;
+				});
 	}
 
 	@Override
 	public SectionManagedObjectSource addSectionManagedObjectSource(
 			String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource) {
-		// Obtain and return the section managed object source for the name
-		ManagedObjectSourceNode managedObjectSourceNode = this.managedObjectSourceNodes
-				.get(managedObjectSourceName);
-		if (managedObjectSourceNode == null) {
-			// Add the section managed object source
-			managedObjectSourceNode = this.context
-					.createManagedObjectSourceNode(managedObjectSourceName,
-							managedObjectSource.getClass().getName(),
-							managedObjectSource, this);
-			this.managedObjectSourceNodes.put(managedObjectSourceName,
-					managedObjectSourceNode);
-		} else {
-			// Section managed object source already added
-			this.addIssue("Section managed object source "
-					+ managedObjectSourceName + " already added");
-		}
-		return managedObjectSourceNode;
+		return NodeUtil.getInitialisedNode(managedObjectSourceName,
+				this.managedObjectSourceNodes, this.context, () -> this.context
+						.createManagedObjectSourceNode(managedObjectSourceName,
+								managedObjectSource.getClass().getName(),
+								managedObjectSource, this), (
+						managedObjectSourceNode) -> {
+					return;
+				});
 	}
 
 	@Override
 	public SectionWork addSectionWork(String workName,
 			String workSourceClassName) {
-		// Obtain and return the section work for the name
-		WorkNode work = this.workNodes.get(workName);
-		if (work == null) {
-			// Add the section work
-			work = this.context.createWorkNode(workName, workSourceClassName,
-					null, this);
-			this.workNodes.put(workName, work);
-		} else {
-			// Section work already added
-			this.addIssue("Section work " + workName + " already added");
-		}
-		return work;
+		return NodeUtil.getInitialisedNode(workName, this.workNodes,
+				this.context, () -> this.context.createWorkNode(workName,
+						workSourceClassName, null, this), (work) -> {
+					return;
+				});
 	}
 
 	@Override
 	public SectionWork addSectionWork(String workName, WorkSource<?> workSource) {
-		// Obtain and return the section work for the name
-		WorkNode work = this.workNodes.get(workName);
-		if (work == null) {
-			// Add the section work
-			work = this.context.createWorkNode(workName, workSource.getClass()
-					.getName(), workSource, this);
-			this.workNodes.put(workName, work);
-		} else {
-			// Section work already added
-			this.addIssue("Section work " + workName + " already added");
-		}
-		return work;
+		return NodeUtil.getInitialisedNode(workName, this.workNodes,
+				this.context, () -> this.context.createWorkNode(workName,
+						workSource.getClass().getName(), workSource, this), (
+						work) -> {
+					return;
+				});
+
 	}
 
 	@Override
 	public SubSection addSubSection(String subSectionName,
 			String sectionSourceClassName, String location) {
-		return this.addSubSection(subSectionName, sectionSourceClassName, null,
-				location);
+		return NodeUtil.getInitialisedNode(subSectionName, this.subSections,
+				this.context, () -> this.context.createSectionNode(
+						subSectionName, this), (section) -> section.initialise(
+						sectionSourceClassName, null, location));
 	}
 
 	@Override
 	public SubSection addSubSection(String subSectionName,
 			SectionSource sectionSource, String location) {
-		return this.addSubSection(subSectionName, sectionSource.getClass()
-				.getName(), sectionSource, location);
-	}
-
-	/**
-	 * Adds a {@link SubSection}.
-	 * 
-	 * @param subSectionName
-	 *            Name of the {@link SubSection}.
-	 * @param sectionSourceClassName
-	 *            Class name of the {@link SectionSource}.
-	 * @param sectionSource
-	 *            {@link SectionSource} instance. May be <code>null</code>.
-	 * @param location
-	 *            Location of the {@link SubSection}.
-	 * @return {@link SubSection}.
-	 */
-	private SubSection addSubSection(String subSectionName,
-			String sectionSourceClassName, SectionSource sectionSource,
-			String location) {
-
-		// Obtain the sub section for the name
-		SectionNode subSection = this.getOrCreateSubSectionNode(subSectionName);
-
-		// Determine if initialised
-		if (!subSection.isInitialised()) {
-			// Initialise the not yet initialised sub section
-			subSection.initialise(sectionSourceClassName, sectionSource,
-					location);
-		} else {
-			// Sub section already added
-			this.addIssue("Sub section " + subSectionName + " already added");
-		}
-
-		// Return the sub section
-		return subSection;
+		return NodeUtil.getInitialisedNode(subSectionName, this.subSections,
+				this.context, () -> this.context.createSectionNode(
+						subSectionName, this), (section) -> section.initialise(
+						sectionSource.getClass().getName(), sectionSource,
+						location));
 	}
 
 	@Override
@@ -1234,27 +1027,32 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	public OfficeSectionInput getOfficeSectionInput(String inputName) {
-		return this.getOrCreateSectionInputNode(inputName);
+		return NodeUtil.getNode(inputName, this.inputs,
+				() -> this.context.createSectionInputNode(inputName, this));
 	}
 
 	@Override
 	public OfficeSectionOutput getOfficeSectionOutput(String outputName) {
-		return this.getOrCreateSectionOutputNode(outputName);
+		return NodeUtil.getNode(outputName, this.outputs,
+				() -> this.context.createSectionOutputNode(outputName, this));
 	}
 
 	@Override
 	public OfficeSectionObject getOfficeSectionObject(String objectName) {
-		return this.getOrCreateSectionObjectNode(objectName);
+		return NodeUtil.getNode(objectName, this.objects,
+				() -> this.context.createSectionObjectNode(objectName, this));
 	}
 
 	@Override
 	public OfficeSubSection getOfficeSubSection(String sectionName) {
-		return this.getOrCreateSubSectionNode(sectionName);
+		return NodeUtil.getNode(sectionName, this.subSections,
+				() -> this.context.createSectionNode(sectionName, this));
 	}
 
 	@Override
 	public OfficeTask getOfficeTask(String taskName) {
-		return this.getOrCreateTaskNode(taskName);
+		return NodeUtil.getNode(taskName, this.taskNodes,
+				() -> this.context.createTaskNode(taskName));
 	}
 
 	@Override

@@ -90,6 +90,22 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 		return this.office;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement OfficeTeamNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeTeamNode.initialise");
+
+	}
+
 	/*
 	 * ====================== OfficeTeam ===========================
 	 */

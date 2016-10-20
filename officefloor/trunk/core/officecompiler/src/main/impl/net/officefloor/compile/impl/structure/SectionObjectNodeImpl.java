@@ -124,6 +124,17 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 		return this.section;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		return (this.state != null);
+	}
+
+	@Override
+	public void initialise(String objectType) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(objectType));
+	}
+
 	/*
 	 * ==================== SectionObject =========================
 	 */
@@ -136,25 +147,6 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	/*
 	 * ================== SectionObjectNode ========================
 	 */
-
-	@Override
-	public boolean isInitialised() {
-		return (this.state != null);
-	}
-
-	@Override
-	public SectionObjectNode initialise(String objectType) {
-
-		// Ensure not already initialise
-		if (this.isInitialised()) {
-			throw new IllegalStateException("SectionObjectNode "
-					+ this.objectName + " already initialised");
-		}
-
-		// Initialise
-		this.state = new InitialisedState(objectType);
-		return this;
-	}
 
 	@Override
 	public SectionNode getSectionNode() {

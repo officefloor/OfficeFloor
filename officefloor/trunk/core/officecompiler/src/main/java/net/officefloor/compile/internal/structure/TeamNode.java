@@ -38,6 +38,11 @@ public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 	static String TYPE = "Team";
 
 	/**
+	 * Initialises the {@link TeamNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Indicates if have the {@link TeamSource} configured.
 	 * 
 	 * @return <code>true</code> if have the {@link TeamSource} configured.

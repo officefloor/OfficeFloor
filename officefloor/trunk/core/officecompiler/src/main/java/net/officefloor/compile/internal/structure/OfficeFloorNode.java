@@ -49,6 +49,11 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable,
 	static String TYPE = "OfficeFloor";
 
 	/**
+	 * Initialises the {@link OfficeFloorNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Adds a {@link Profiler} for an {@link Office}.
 	 * 
 	 * @param officeName

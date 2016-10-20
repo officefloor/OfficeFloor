@@ -118,6 +118,22 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 		return this.officeFloor;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement InputManagedObjectNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement InputManagedObjectNode.initialise");
+
+	}
+
 	/*
 	 * ======================= InputManagedObjectNode =========================
 	 */

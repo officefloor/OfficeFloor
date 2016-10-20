@@ -198,9 +198,9 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Create the section node
 		SectionNode sectionNode = this.nodeContext.createSectionNode("Type",
-				(OfficeNode) null).initialise(
-				sectionSource.getClass().getName(), sectionSource,
-				sectionLocation);
+				(OfficeNode) null);
+		sectionNode.initialise(sectionSource.getClass().getName(),
+				sectionSource, sectionLocation);
 		propertyList.configureProperties(sectionNode);
 
 		// Source the section
@@ -238,9 +238,9 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Create the section node
 		SectionNode sectionNode = this.nodeContext.createSectionNode(
-				sectionName, (OfficeNode) null).initialise(
-				sectionSource.getClass().getName(), sectionSource,
-				sectionLocation);
+				sectionName, (OfficeNode) null);
+		sectionNode.initialise(sectionSource.getClass().getName(),
+				sectionSource, sectionLocation);
 		propertyList.configureProperties(sectionNode);
 
 		// Source the section

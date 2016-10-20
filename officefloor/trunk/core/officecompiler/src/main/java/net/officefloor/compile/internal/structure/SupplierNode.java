@@ -33,6 +33,11 @@ public interface SupplierNode extends Node, OfficeFloorSupplier {
 	static String TYPE = "Supplier";
 
 	/**
+	 * Initialises the {@link SupplierNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Fill {@link SupplyOrder} instances.
 	 * 
 	 * @param supplyOrders
