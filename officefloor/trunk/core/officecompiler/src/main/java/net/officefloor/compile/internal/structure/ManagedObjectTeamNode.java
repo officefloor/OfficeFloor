@@ -36,6 +36,11 @@ public interface ManagedObjectTeamNode extends LinkTeamNode, ManagedObjectTeam {
 	static String TYPE = "Managed Object Source Team";
 
 	/**
+	 * Initialises the {@link ManagedObjectTeamNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Loads the {@link OfficeSectionManagedObjectTeamType}.
 	 * 
 	 * @param typeContext

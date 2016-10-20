@@ -193,28 +193,20 @@ public class TaskNodeImpl implements TaskNode {
 		return (this.state != null ? this.state.workNode : null);
 	}
 
-	/*
-	 * ========================== TaskNode ===================================
-	 */
-
-	@Override
-	public TaskNode initialise(String taskTypeName, WorkNode workNode) {
-
-		// Ensure not already initialise
-		if (this.isInitialised()) {
-			throw new IllegalStateException("TaskNode " + this.taskName
-					+ " already initialised");
-		}
-
-		// Initialised
-		this.state = new InitialisedState(taskTypeName, workNode);
-		return this;
-	}
-
 	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
+
+	@Override
+	public void initialise(String taskTypeName, WorkNode workNode) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(taskTypeName, workNode));
+	}
+
+	/*
+	 * ========================== TaskNode ===================================
+	 */
 
 	@Override
 	public WorkNode getWorkNode() {
@@ -513,41 +505,22 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	public TaskFlow getTaskFlow(String taskFlowName) {
-		// Obtain and return the task flow for the name
-		TaskFlowNode flow = this.taskFlows.get(taskFlowName);
-		if (flow == null) {
-			// Add the task flow
-			flow = this.context.createTaskFlowNode(taskFlowName, false, this);
-			this.taskFlows.put(taskFlowName, flow);
-		}
-		return flow;
+		return NodeUtil.getNode(taskFlowName, this.taskFlows,
+				() -> this.context
+						.createTaskFlowNode(taskFlowName, false, this));
 	}
 
 	@Override
 	public TaskObject getTaskObject(String taskObjectName) {
-		// Obtain and return the task object for the name
-		TaskObjectNode object = this.taskObjects.get(taskObjectName);
-		if (object == null) {
-			// Create the task object
-			object = this.context.createTaskObjectNode(taskObjectName, this);
-
-			// Add the task object
-			this.taskObjects.put(taskObjectName, object);
-		}
-		return object;
+		return NodeUtil.getNode(taskObjectName, this.taskObjects,
+				() -> this.context.createTaskObjectNode(taskObjectName, this));
 	}
 
 	@Override
 	public TaskFlow getTaskEscalation(String taskEscalationName) {
-		// Obtain and return the task escalation for the name
-		TaskFlowNode escalation = this.taskEscalations.get(taskEscalationName);
-		if (escalation == null) {
-			// Add the task escalation
-			escalation = this.context.createTaskFlowNode(taskEscalationName,
-					true, this);
-			this.taskEscalations.put(taskEscalationName, escalation);
-		}
-		return escalation;
+		return NodeUtil.getNode(taskEscalationName, this.taskEscalations,
+				() -> this.context.createTaskFlowNode(taskEscalationName, true,
+						this));
 	}
 
 	/*

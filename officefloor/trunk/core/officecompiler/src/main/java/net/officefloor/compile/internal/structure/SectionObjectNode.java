@@ -39,20 +39,12 @@ public interface SectionObjectNode extends LinkObjectNode, SubSectionObject,
 	String TYPE = "Section Object";
 
 	/**
-	 * Indicates if this {@link SectionObjectType} has been initialised.
-	 * 
-	 * @return <code>true</code> if initialised.
-	 */
-	boolean isInitialised();
-
-	/**
 	 * Initialises this {@link SectionObjectType}.
 	 * 
 	 * @param objectType
 	 *            Object type.
-	 * @return <code>this</code> for builder pattern.
 	 */
-	SectionObjectNode initialise(String objectType);
+	void initialise(String objectType);
 
 	/**
 	 * Obtains {@link SectionNode} containing this {@link SectionObjectNode}.

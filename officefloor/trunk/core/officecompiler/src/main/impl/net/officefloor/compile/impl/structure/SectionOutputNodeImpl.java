@@ -126,29 +126,20 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 		return this.section;
 	}
 
-	/*
-	 * ================== SectionOutputNode =======================
-	 */
-
 	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
-	public SectionOutputNode initialise(String argumentType,
-			boolean isEscalationOnly) {
-
-		// Ensure not already initialise
-		if (this.isInitialised()) {
-			throw new IllegalStateException("SectionOutputNode "
-					+ this.outputName + " already initialised");
-		}
-
-		// Initialise
-		this.state = new InitialisedState(argumentType, isEscalationOnly);
-		return this;
+	public void initialise(String argumentType, boolean isEscalationOnly) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(argumentType, isEscalationOnly));
 	}
+
+	/*
+	 * ================== SectionOutputNode =======================
+	 */
 
 	@Override
 	public SectionNode getSectionNode() {

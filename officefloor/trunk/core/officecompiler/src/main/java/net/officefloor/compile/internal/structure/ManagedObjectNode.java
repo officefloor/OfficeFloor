@@ -42,6 +42,11 @@ public interface ManagedObjectNode extends DependentObjectNode,
 	String TYPE = "Managed Object";
 
 	/**
+	 * Initialises the {@link ManagedObjectNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Obtains the {@link ManagedObjectSourceNode} for this
 	 * {@link ManagedObjectNode}.
 	 * 

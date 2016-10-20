@@ -126,6 +126,22 @@ public class ManagedObjectDependencyNodeImpl implements
 		return this.parent;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement ManagedObjectDependencyNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectDependencyNode.initialise");
+
+	}
+
 	/*
 	 * ==================== ManagedObjectDependency ============================
 	 */

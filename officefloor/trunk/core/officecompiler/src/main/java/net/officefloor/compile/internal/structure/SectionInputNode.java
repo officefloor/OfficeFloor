@@ -40,13 +40,6 @@ public interface SectionInputNode extends LinkFlowNode, SectionInput,
 	String TYPE = "Section Input";
 
 	/**
-	 * Indicates if this {@link SectionInputType} has been initialised.
-	 * 
-	 * @return <code>true</code> if initialised.
-	 */
-	boolean isInitialised();
-
-	/**
 	 * Initialises this {@link SectionInputType}.
 	 * 
 	 * @param parameterType

@@ -29,6 +29,11 @@ public interface TaskTeamNode extends LinkTeamNode, TaskTeam {
 	/**
 	 * {@link Node} type.
 	 */
-	String TYPE = "Task Team";
+	static String TYPE = "Task Team";
+
+	/**
+	 * Initialises the {@link TaskTeamNode}.
+	 */
+	void initialise();
 
 }

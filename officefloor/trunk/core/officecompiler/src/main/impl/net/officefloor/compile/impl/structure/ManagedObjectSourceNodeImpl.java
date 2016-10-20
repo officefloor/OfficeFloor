@@ -254,19 +254,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 */
 	public ManagedObjectNode addManagedObject(String managedObjectName,
 			ManagedObjectScope managedObjectScope) {
-		// Obtain and return the managed object for the name
 		ManagedObjectNode managedObject = this.managedObjectRegistry
-				.getManagedObjectNode(managedObjectName);
-		if (managedObject == null) {
-			// Add the managed object and register it
-			managedObject = this.managedObjectRegistry.createManagedObjectNode(
-					managedObjectName, managedObjectScope, this);
-			this.managedObjects.put(managedObjectName, managedObject);
-		} else {
-			// Managed object already added
-			this.context.getCompilerIssues().addIssue(this,
-					"Managed object " + managedObjectName + " already added");
-		}
+				.getOrCreateManagedObjectNode(managedObjectName,
+						managedObjectScope, this);
+		this.managedObjects.put(managedObjectName, managedObject);
 		return managedObject;
 	}
 
@@ -295,6 +286,22 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				: (this.containingOfficeNode != null ? this.containingOfficeNode
 						: (this.suppliedManagedObjectNode != null ? this.suppliedManagedObjectNode
 								: this.containingOfficeFloorNode)));
+	}
+
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement ManagedObjectSourceNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectSourceNode.initialise");
+
 	}
 
 	/*

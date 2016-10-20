@@ -92,6 +92,22 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 		return this.managedObjectSourceNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement ManagedObjectTeamNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectTeamNode.initialise");
+
+	}
+
 	/*
 	 * ================ ManagedObjectTeamNode =======================
 	 */

@@ -607,6 +607,12 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 			return null;
 		}
 
+		@Override
+		public boolean isInitialised() {
+			fail("Should not require initialisation");
+			return false;
+		}
+
 		/*
 		 * ============= LinkFlowNode =========================
 		 */

@@ -35,6 +35,11 @@ public interface OfficeOutputNode extends LinkFlowNode, LinkSynchronousNode,
 	static String TYPE = "Office Output";
 
 	/**
+	 * Initialises the {@link OfficeOutputNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Loads the {@link OfficeOutputType}.
 	 * 
 	 * @param typeContext

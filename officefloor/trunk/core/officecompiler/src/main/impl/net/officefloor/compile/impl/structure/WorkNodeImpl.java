@@ -136,6 +136,22 @@ public class WorkNodeImpl implements WorkNode {
 		return this.section;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement WorkNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement WorkNode.initialise");
+
+	}
+
 	/*
 	 * ======================== SectionWork ============================
 	 */

@@ -49,6 +49,11 @@ public interface ManagedObjectSourceNode extends Node,
 	String TYPE = "Managed Object Source";
 
 	/**
+	 * Initialises the {@link ManagedObjectSourceNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Indicates if have a {@link ManagedObjectSource} configured.
 	 * 
 	 * @return <code>true</code> if have the {@link ManagedObjectSource}

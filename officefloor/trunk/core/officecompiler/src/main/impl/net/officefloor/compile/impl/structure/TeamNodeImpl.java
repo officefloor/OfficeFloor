@@ -113,6 +113,22 @@ public class TeamNodeImpl implements TeamNode {
 		return this.officeFloorNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement TeamNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement TeamNode.initialise");
+
+	}
+
 	/*
 	 * =============== TeamNode ======================================
 	 */

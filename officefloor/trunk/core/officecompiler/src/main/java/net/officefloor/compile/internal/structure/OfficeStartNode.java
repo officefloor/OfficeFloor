@@ -31,4 +31,9 @@ public interface OfficeStartNode extends LinkFlowNode, OfficeStart {
 	 */
 	static String TYPE = "Office Start";
 
+	/**
+	 * Initialises the {@link OfficeStartNode}.
+	 */
+	void initialise();
+
 }

@@ -36,6 +36,11 @@ public interface ManagedObjectDependencyNode extends LinkObjectNode,
 	static String TYPE = "Managed Object Dependency";
 
 	/**
+	 * Initialises the {@link ManagedObjectDependencyNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Loads the {@link ObjectDependencyType}.
 	 * 
 	 * @param typeContext

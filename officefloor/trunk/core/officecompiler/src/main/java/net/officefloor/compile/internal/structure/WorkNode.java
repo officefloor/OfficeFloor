@@ -34,7 +34,12 @@ public interface WorkNode extends Node, SectionWork {
 	/**
 	 * {@link Node} type.
 	 */
-	String TYPE = "Work";
+	static String TYPE = "Work";
+
+	/**
+	 * Initialises the {@link WorkNode}.
+	 */
+	void initialise();
 
 	/**
 	 * Obtains the {@link SectionNode} containing this {@link WorkNode}.

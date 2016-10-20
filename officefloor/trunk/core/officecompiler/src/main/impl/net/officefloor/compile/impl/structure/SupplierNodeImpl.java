@@ -118,6 +118,22 @@ public class SupplierNodeImpl implements SupplierNode {
 		return this.officeFloorNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement SupplierNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement SupplierNode.initialise");
+
+	}
+
 	/*
 	 * =============== OfficeFloorSupplier ======================
 	 */

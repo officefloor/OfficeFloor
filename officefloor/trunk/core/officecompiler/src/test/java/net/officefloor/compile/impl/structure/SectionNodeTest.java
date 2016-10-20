@@ -86,9 +86,14 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	 * {@link SectionDesigner} to be tested.
 	 */
 	private final SectionNode node = this.nodeContext.createSectionNode(
-			SECTION_NAME, this.office).initialise(
-			ClassSectionSource.class.getName(), new ClassSectionSource(),
-			SECTION_LOCATION);
+			SECTION_NAME, this.office);
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		this.node.initialise(ClassSectionSource.class.getName(),
+				new ClassSectionSource(), SECTION_LOCATION);
+	}
 
 	/**
 	 * Ensure allow {@link SectionSource} to report issues via the

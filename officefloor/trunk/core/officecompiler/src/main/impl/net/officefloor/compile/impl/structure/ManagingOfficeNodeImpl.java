@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagingOfficeNode;
@@ -77,6 +78,22 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	@Override
 	public Node getParentNode() {
 		return this.managedObjectSourceNode;
+	}
+
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement ManagingOfficeNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement ManagingOfficeNode.initialise");
+
 	}
 
 	/*

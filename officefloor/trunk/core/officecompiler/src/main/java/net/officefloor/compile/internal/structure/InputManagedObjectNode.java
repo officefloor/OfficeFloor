@@ -35,6 +35,11 @@ public interface InputManagedObjectNode extends LinkObjectNode,
 	static String TYPE = "Input Managed Object";
 
 	/**
+	 * Initialises the {@link InputManagedObjectNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Obtains the bound {@link ManagedObjectSourceNode} for this
 	 * {@link InputManagedObjectNode}.
 	 * 

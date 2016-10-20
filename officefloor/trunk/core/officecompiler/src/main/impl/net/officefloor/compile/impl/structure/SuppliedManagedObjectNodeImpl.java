@@ -90,6 +90,22 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 		return this.supplierNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement SuppliedManagedObjectNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement SuppliedManagedObjectNode.initialise");
+
+	}
+
 	/*
 	 * ===================== SuppliedManagedObjectNode =================
 	 */

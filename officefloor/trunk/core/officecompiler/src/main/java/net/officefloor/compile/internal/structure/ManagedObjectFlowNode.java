@@ -31,4 +31,9 @@ public interface ManagedObjectFlowNode extends LinkFlowNode, ManagedObjectFlow {
 	 */
 	static String TYPE = "Managed Object Source Flow";
 
+	/**
+	 * Initialises the {@link ManagedObjectFlowNode}.
+	 */
+	void initialise();
+
 }

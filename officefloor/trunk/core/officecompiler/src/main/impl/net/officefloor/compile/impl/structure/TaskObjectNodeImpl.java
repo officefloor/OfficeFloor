@@ -101,6 +101,22 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 		return this.taskNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement TaskObjectNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement TaskObjectNode.initialise");
+
+	}
+
 	/*
 	 * ==================== TaskObjectNode ============================
 	 */

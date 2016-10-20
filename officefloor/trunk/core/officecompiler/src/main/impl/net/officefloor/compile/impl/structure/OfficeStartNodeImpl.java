@@ -88,6 +88,22 @@ public class OfficeStartNodeImpl implements OfficeStartNode {
 		return this.officeNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement OfficeStartNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeStartNode.initialise");
+
+	}
+
 	/*
 	 * ==================== OfficeStart ===========================
 	 */

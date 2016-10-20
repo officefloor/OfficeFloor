@@ -120,10 +120,6 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		return this.section;
 	}
 
-	/*
-	 * ===================== SectionInputNode ===========================
-	 */
-
 	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
@@ -142,6 +138,10 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		this.state = new InitialisedState(parameterType);
 		return this;
 	}
+
+	/*
+	 * ===================== SectionInputNode ===========================
+	 */
 
 	@Override
 	public SectionInputType loadSectionInputType(TypeContext typeContext) {

@@ -35,6 +35,11 @@ public interface OfficeTeamNode extends LinkTeamNode, OfficeTeam {
 	static String TYPE = "Office Team";
 
 	/**
+	 * Initialises the {@link OfficeTeamNode}.
+	 */
+	void initialise();
+
+	/**
 	 * Loads the {@link OfficeTeamType}.
 	 * 
 	 * @param typeContext

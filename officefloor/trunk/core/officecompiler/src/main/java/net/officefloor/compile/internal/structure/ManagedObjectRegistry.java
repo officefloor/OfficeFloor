@@ -32,24 +32,15 @@ public interface ManagedObjectRegistry {
 	 * 
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObjectNode} to obtain.
-	 * @return {@link ManagedObjectNode} or <code>null</code> if no
-	 *         {@link ManagedObjectNode} registered.
-	 */
-	ManagedObjectNode getManagedObjectNode(String managedObjectName);
-
-	/**
-	 * Creates a new {@link ManagedObjectNode} and registers it.
-	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObjectNode}.
 	 * @param managedObjectScope
 	 *            {@link ManagedObjectScope}.
 	 * @param managedObjectSourceNode
 	 *            {@link ManagedObjectSourceNode} for the
 	 *            {@link ManagedObjectNode}.
-	 * @return {@link ManagedObjectNode}.
+	 * @return {@link ManagedObjectNode} or <code>null</code> if no
+	 *         {@link ManagedObjectNode} registered.
 	 */
-	ManagedObjectNode createManagedObjectNode(String managedObjectName,
+	ManagedObjectNode getOrCreateManagedObjectNode(String managedObjectName,
 			ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode);
 

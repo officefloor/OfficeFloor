@@ -56,18 +56,9 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 	 *            <code>null</code>.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
-	 * @return <code>this</code> for builder pattern.
 	 */
-	SectionNode initialise(String sectionSourceClassName,
-			SectionSource sectionSource, String sectionLocation);
-
-	/**
-	 * Indicates if this {@link SectionNode} has been initialised.
-	 * 
-	 * @return <code>true</code> if this {@link SectionNode} has been
-	 *         initialised.
-	 */
-	boolean isInitialised();
+	void initialise(String sectionSourceClassName, SectionSource sectionSource,
+			String sectionLocation);
 
 	/**
 	 * <p>

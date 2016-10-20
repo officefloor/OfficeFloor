@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.DutyNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
@@ -54,6 +55,58 @@ public class DutyNodeImpl implements DutyNode {
 	}
 
 	/*
+	 * ========================== Node =============================
+	 */
+
+	@Override
+	public String getNodeName() {
+		// TODO implement Node.getNodeName
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeName");
+
+	}
+
+	@Override
+	public String getNodeType() {
+		// TODO implement Node.getNodeType
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getNodeType");
+
+	}
+
+	@Override
+	public String getLocation() {
+		// TODO implement Node.getLocation
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getLocation");
+
+	}
+
+	@Override
+	public Node getParentNode() {
+		// TODO implement Node.getParentNode
+		throw new UnsupportedOperationException(
+				"TODO implement Node.getParentNode");
+
+	}
+
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement DutyNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement DutyNode.initialise");
+
+	}
+
+	/*
 	 * ======================= OfficeDuty ==============================
 	 */
 
@@ -71,8 +124,8 @@ public class DutyNodeImpl implements DutyNode {
 			TaskBuilder<?, ?, ?> taskBuilder) {
 
 		// Link the pre task duty
-		taskBuilder.linkPreTaskAdministration(this.administrator
-				.getOfficeAdministratorName(), this.dutyName);
+		taskBuilder.linkPreTaskAdministration(
+				this.administrator.getOfficeAdministratorName(), this.dutyName);
 	}
 
 	@Override
@@ -80,8 +133,8 @@ public class DutyNodeImpl implements DutyNode {
 			TaskBuilder<?, ?, ?> taskBuilder) {
 
 		// Link the post task duty
-		taskBuilder.linkPostTaskAdministration(this.administrator
-				.getOfficeAdministratorName(), this.dutyName);
+		taskBuilder.linkPostTaskAdministration(
+				this.administrator.getOfficeAdministratorName(), this.dutyName);
 	}
 
 }

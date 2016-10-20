@@ -29,6 +29,11 @@ public interface ManagingOfficeNode extends LinkOfficeNode, ManagingOffice {
 	/**
 	 * {@link Node} type.
 	 */
-	String TYPE = "Managing Office";
+	static String TYPE = "Managing Office";
+
+	/**
+	 * Initialises the {@link ManagingOfficeNode}.
+	 */
+	void initialise();
 
 }

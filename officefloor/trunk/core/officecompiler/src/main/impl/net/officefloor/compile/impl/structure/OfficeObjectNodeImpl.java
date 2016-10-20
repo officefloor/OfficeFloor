@@ -151,17 +151,13 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		return this.officeNode;
 	}
 
-	/*
-	 * ================== OfficeObjectNode ========================
-	 */
-
 	@Override
 	public boolean isInitialised() {
 		return (this.state != null);
 	}
 
 	@Override
-	public OfficeObjectNode initialise(String objectType) {
+	public void initialise(String objectType) {
 
 		// Ensure not already initialise
 		if (this.isInitialised()) {
@@ -171,8 +167,11 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 		// Initialise
 		this.state = new InitialisedState(objectType);
-		return this;
 	}
+
+	/*
+	 * ================== OfficeObjectNode ========================
+	 */
 
 	@Override
 	public void addAdministrator(AdministratorNode administrator) {

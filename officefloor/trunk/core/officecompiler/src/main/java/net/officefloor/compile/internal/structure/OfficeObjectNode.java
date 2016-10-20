@@ -37,20 +37,12 @@ public interface OfficeObjectNode extends LinkObjectNode, OfficeObject {
 	static String TYPE = "Office Object";
 
 	/**
-	 * Indicates if this {@link OfficeManagedObjectType} has been initialised.
-	 * 
-	 * @return <code>true</code> if initialised.
-	 */
-	boolean isInitialised();
-
-	/**
 	 * Initialises this {@link OfficeManagedObjectType}.
 	 * 
 	 * @param objectType
 	 *            Object type.
-	 * @return <code>this</code> for builder pattern.
 	 */
-	OfficeObjectNode initialise(String objectType);
+	void initialise(String objectType);
 
 	/**
 	 * <p>

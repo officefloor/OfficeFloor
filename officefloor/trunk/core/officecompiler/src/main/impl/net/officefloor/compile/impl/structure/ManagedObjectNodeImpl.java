@@ -173,6 +173,22 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		return this.managedObjectSourceNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement ManagedObjectNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectNode.initialise");
+
+	}
+
 	/*
 	 * ======================== ManagedObjectNode ============================
 	 */

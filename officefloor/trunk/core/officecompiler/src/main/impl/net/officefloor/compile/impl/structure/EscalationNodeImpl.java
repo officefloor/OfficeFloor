@@ -88,6 +88,22 @@ public class EscalationNodeImpl implements EscalationNode {
 		return this.officeNode;
 	}
 
+	@Override
+	public boolean isInitialised() {
+		// TODO implement Node.isInitialised
+		throw new UnsupportedOperationException(
+				"TODO implement Node.isInitialised");
+
+	}
+
+	@Override
+	public void initialise() {
+		// TODO implement EscalationNode.initialise
+		throw new UnsupportedOperationException(
+				"TODO implement EscalationNode.initialise");
+
+	}
+
 	/*
 	 * ======================== OfficeEscalation =======================
 	 */
