@@ -127,7 +127,6 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
@@ -759,9 +758,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public ManagedObjectNode createManagedObjectNode(String managedObjectName,
-			ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-		return new ManagedObjectNodeImpl(managedObjectName, managedObjectScope,
+		return new ManagedObjectNodeImpl(managedObjectName,
 				managedObjectSourceNode, this);
 	}
 
@@ -920,10 +918,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public WorkNode createWorkNode(String workName, String workSourceClassName,
-			WorkSource<?> workSource, SectionNode section) {
-		return new WorkNodeImpl(workName, workSourceClassName, workSource,
-				section, this);
+	public WorkNode createWorkNode(String workName, SectionNode section) {
+		return new WorkNodeImpl(workName, section, this);
 	}
 
 }

@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.type.TypeContext;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -43,8 +44,11 @@ public interface ManagedObjectNode extends DependentObjectNode,
 
 	/**
 	 * Initialises the {@link ManagedObjectNode}.
+	 * 
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
 	 */
-	void initialise();
+	void initialise(ManagedObjectScope managedObjectScope);
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceNode} for this

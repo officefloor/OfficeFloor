@@ -64,21 +64,47 @@ public class WorkNodeImpl implements WorkNode {
 	private final NodeContext context;
 
 	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+
+		/**
+		 * Class name of the {@link WorkSource}.
+		 */
+		private final String workSourceClassName;
+
+		/**
+		 * {@link WorkSource} instance to use. If this is specified it overrides
+		 * using the {@link Class} name.
+		 */
+		@SuppressWarnings("unused")
+		private final WorkSource<?> workSource;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param workSourceClassName
+		 *            Class name of the {@link WorkSource}.
+		 * @param workSource
+		 *            {@link WorkSource} instance to use. If this is specified
+		 *            it overrides using the {@link Class} name.
+		 */
+		public InitialisedState(String workSourceClassName,
+				WorkSource<?> workSource) {
+			this.workSourceClassName = workSourceClassName;
+			this.workSource = workSource;
+		}
+	}
+
+	/**
 	 * Listing of {@link TaskNode} instances for this {@link SectionWork}.
 	 */
 	private final List<TaskNode> taskNodes = new LinkedList<TaskNode>();
-
-	/**
-	 * Class name of the {@link WorkSource}.
-	 */
-	private final String workSourceClassName;
-
-	/**
-	 * {@link WorkSource} instance to use. If this is specified it overrides
-	 * using the {@link Class} name.
-	 */
-	@SuppressWarnings("unused")
-	private final WorkSource<?> workSource;
 
 	/**
 	 * Initial {@link SectionTask} for this {@link SectionWork}.
@@ -90,21 +116,14 @@ public class WorkNodeImpl implements WorkNode {
 	 * 
 	 * @param workName
 	 *            Name of this {@link SectionWork}.
-	 * @param workSourceClassName
-	 *            Class name of the {@link WorkSource}.
-	 * @param workSource
-	 *            Optional instantiated {@link WorkSource}. May be
-	 *            <code>null</code>.
 	 * @param section
 	 *            {@link OfficeSection} containing this {@link WorkNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public WorkNodeImpl(String workName, String workSourceClassName,
-			WorkSource<?> workSource, SectionNode section, NodeContext context) {
+	public WorkNodeImpl(String workName, SectionNode section,
+			NodeContext context) {
 		this.workName = workName;
-		this.workSourceClassName = workSourceClassName;
-		this.workSource = workSource;
 		this.section = section;
 		this.context = context;
 
@@ -138,18 +157,13 @@ public class WorkNodeImpl implements WorkNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
-	public void initialise() {
-		// TODO implement WorkNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement WorkNode.initialise");
-
+	public void initialise(String workSourceClassName, WorkSource<?> workSource) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(workSourceClassName, workSource));
 	}
 
 	/*
@@ -199,7 +213,7 @@ public class WorkNodeImpl implements WorkNode {
 
 		// Obtain the work source class
 		Class<? extends WorkSource> workSourceClass = this.context
-				.getWorkSourceClass(this.workSourceClassName, this);
+				.getWorkSourceClass(this.state.workSourceClassName, this);
 		if (workSourceClass == null) {
 			return null; // must obtain work source class
 		}

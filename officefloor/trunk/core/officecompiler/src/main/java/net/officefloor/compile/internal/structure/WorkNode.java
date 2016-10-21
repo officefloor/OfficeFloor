@@ -19,6 +19,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -38,8 +39,14 @@ public interface WorkNode extends Node, SectionWork {
 
 	/**
 	 * Initialises the {@link WorkNode}.
+	 * 
+	 * @param workSourceClassName
+	 *            {@link Class} name of the {@link WorkSource}.
+	 * @param workSource
+	 *            Optional instantiated {@link WorkSource}. May be
+	 *            <code>null</code>.
 	 */
-	void initialise();
+	void initialise(String workSourceClassName, WorkSource<?> workSource);
 
 	/**
 	 * Obtains the {@link SectionNode} containing this {@link WorkNode}.
