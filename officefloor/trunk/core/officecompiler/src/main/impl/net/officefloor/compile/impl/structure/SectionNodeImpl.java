@@ -795,10 +795,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		return NodeUtil.getInitialisedNode(managedObjectSourceName,
 				this.managedObjectSourceNodes, this.context, () -> this.context
 						.createManagedObjectSourceNode(managedObjectSourceName,
-								managedObjectSourceClassName, null, this), (
-						managedObjectSource) -> {
-					return;
-				});
+								this),
+				(managedObjectSource) -> managedObjectSource.initialise(
+						managedObjectSourceClassName, null));
 	}
 
 	@Override
@@ -808,11 +807,10 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		return NodeUtil.getInitialisedNode(managedObjectSourceName,
 				this.managedObjectSourceNodes, this.context, () -> this.context
 						.createManagedObjectSourceNode(managedObjectSourceName,
-								managedObjectSource.getClass().getName(),
-								managedObjectSource, this), (
-						managedObjectSourceNode) -> {
-					return;
-				});
+								this),
+				(managedObjectSourceNode) -> managedObjectSourceNode
+						.initialise(managedObjectSource.getClass().getName(),
+								managedObjectSource));
 	}
 
 	@Override
@@ -833,7 +831,6 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 						work) -> {
 					return;
 				});
-
 	}
 
 	@Override

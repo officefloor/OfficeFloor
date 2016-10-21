@@ -50,8 +50,15 @@ public interface ManagedObjectSourceNode extends Node,
 
 	/**
 	 * Initialises the {@link ManagedObjectSourceNode}.
+	 * 
+	 * @param managedObjectSourceClassName
+	 *            Class name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            Optional instantiated {@link ManagedObjectSource}. May be
+	 *            <code>null</code>.
 	 */
-	void initialise();
+	void initialise(String managedObjectSourceClassName,
+			ManagedObjectSource<?, ?> managedObjectSource);
 
 	/**
 	 * Indicates if have a {@link ManagedObjectSource} configured.
@@ -59,6 +66,7 @@ public interface ManagedObjectSourceNode extends Node,
 	 * @return <code>true</code> if have the {@link ManagedObjectSource}
 	 *         configured.
 	 */
+	@Deprecated // determine another means than exposing the method (such as isInitialised)
 	boolean hasManagedObjectSource();
 
 	/**

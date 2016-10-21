@@ -335,8 +335,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				this.section.getSectionQualifiedName("MOS"), "SECTION.MOS");
 		ManagedObjectSourceNode node = this.doTest(() -> {
 			ManagedObjectSourceNode mos = this.context
-					.createManagedObjectSourceNode("MOS",
-							"ExampleManagedObjectSource", null, this.section);
+					.createManagedObjectSourceNode("MOS", this.section);
 			assertEquals("Incorrect managed object source name",
 					"OFFICE.SECTION.MOS", mos.getManagedObjectSourceName());
 			return mos;
@@ -356,6 +355,9 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getSectionManagedObjectSourceName());
 		assertSame("Incorrect parent section", this.section,
 				node.getSectionNode());
+		assertFalse("Should not be initialised", node.isInitialised());
+		node.initialise("ExampleManagedObjectSource", null);
+		assertTrue("Should now be initialised", node.isInitialised());
 	}
 
 	/**
@@ -369,8 +371,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				"OFFICE");
 		ManagedObjectSourceNode node = this.doTest(() -> {
 			ManagedObjectSourceNode mos = this.context
-					.createManagedObjectSourceNode("MOS",
-							"ExampleManagedObjectSource", null, this.office);
+					.createManagedObjectSourceNode("MOS", this.office);
 			assertEquals("Incorrect managed object source name", "OFFICE.MOS",
 					mos.getManagedObjectSourceName());
 			return mos;
@@ -392,6 +393,9 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNull(
 				"Should not have parent section, as not contained in section",
 				node.getSectionNode());
+		assertFalse("Should not be initialised", node.isInitialised());
+		node.initialise("ExampleManagedObjectSource", null);
+		assertTrue("Should now be initialised", node.isInitialised());
 	}
 
 	/**
@@ -406,15 +410,15 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				suppliedManagedObject.getSupplierNode(), supplier);
 		this.recordReturn(supplier, supplier.getOfficeFloorNode(),
 				this.officeFloor);
-		ManagedObjectSourceNode node = this.doTest(() -> {
-			ManagedObjectSourceNode mos = this.context
-					.createManagedObjectSourceNode("MOS",
-							"ExampleManagedObjectSource", null,
-							suppliedManagedObject);
-			assertEquals("Incorrect managed object source name", "MOS",
-					mos.getManagedObjectSourceName());
-			return mos;
-		});
+		ManagedObjectSourceNode node = this
+				.doTest(() -> {
+					ManagedObjectSourceNode mos = this.context
+							.createManagedObjectSourceNode("MOS",
+									suppliedManagedObject);
+					assertEquals("Incorrect managed object source name", "MOS",
+							mos.getManagedObjectSourceName());
+					return mos;
+				});
 		assertNode(node, "MOS", "Managed Object Source", null,
 				suppliedManagedObject);
 		assertEquals("Incorrect OfficeFloor managed object source name", "MOS",
@@ -433,6 +437,9 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNull(
 				"Should not have parent section, as not contained in section",
 				node.getSectionNode());
+		assertFalse("Should not be initialised", node.isInitialised());
+		node.initialise("ExampleManagedObjectSource", null);
+		assertTrue("Should now be initialised", node.isInitialised());
 	}
 
 	/**
@@ -442,9 +449,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	public void testCreateManagedObjectSourceNode_withinOfficeFloor() {
 		ManagedObjectSourceNode node = this.doTest(() -> {
 			ManagedObjectSourceNode mos = this.context
-					.createManagedObjectSourceNode("MOS",
-							"ExampleManagedObjectSource", null,
-							this.officeFloor);
+					.createManagedObjectSourceNode("MOS", this.officeFloor);
 			assertEquals("Incorrect managed object source name", "MOS",
 					mos.getManagedObjectSourceName());
 			return mos;
@@ -466,6 +471,9 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNull(
 				"Should not have parent section, as not contained in section",
 				node.getSectionNode());
+		assertFalse("Should not be initialised", node.isInitialised());
+		node.initialise("ExampleManagedObjectSource", null);
+		assertTrue("Should now be initialised", node.isInitialised());
 	}
 
 	/**

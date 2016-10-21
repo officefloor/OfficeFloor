@@ -834,9 +834,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		return NodeUtil.getInitialisedNode(managedObjectSourceName,
 				this.managedObjectSources, this.context, () -> this.context
 						.createManagedObjectSourceNode(managedObjectSourceName,
-								managedObjectSourceClassName, null, this), (
-						managedObjectSource) -> managedObjectSource
-						.initialise());
+								this),
+				(managedObjectSource) -> managedObjectSource.initialise(
+						managedObjectSourceClassName, null));
 	}
 
 	@Override
@@ -846,10 +846,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		return NodeUtil.getInitialisedNode(managedObjectSourceName,
 				this.managedObjectSources, this.context, () -> this.context
 						.createManagedObjectSourceNode(managedObjectSourceName,
-								managedObjectSource.getClass().getName(),
-								managedObjectSource, this), (
-						managedObjectSourceNode) -> managedObjectSourceNode
-						.initialise());
+								this),
+				(managedObjectSourceNode) -> managedObjectSourceNode
+						.initialise(managedObjectSource.getClass().getName(),
+								managedObjectSource));
 	}
 
 	@Override

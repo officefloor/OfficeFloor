@@ -221,15 +221,11 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	public ManagedObjectNode getOrCreateManagedObjectNode(
 			String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-		ManagedObjectNode managedObject = this.managedObjects
-				.get(managedObjectName);
-		if (managedObject == null) {
-			managedObject = this.context.createManagedObjectNode(
-					managedObjectName, managedObjectScope,
-					managedObjectSourceNode);
-			this.managedObjects.put(managedObjectName, managedObject);
-		}
-		return managedObject;
+		return NodeUtil.getInitialisedNode(managedObjectName,
+				this.managedObjects, this.context, () -> this.context
+						.createManagedObjectNode(managedObjectName,
+								managedObjectScope, managedObjectSourceNode), (
+						managedObject) -> managedObject.initialise());
 	}
 
 	/*
@@ -239,141 +235,70 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(
 			String managedObjectSourceName, String managedObjectSourceClassName) {
-		// Obtain and return the managed object source for the name
-		ManagedObjectSourceNode mo = this.managedObjectSources
-				.get(managedObjectSourceName);
-		if (mo == null) {
-			// Create the managed object source
-			mo = this.context.createManagedObjectSourceNode(
-					managedObjectSourceName, managedObjectSourceClassName,
-					null, this);
-
-			// Add the managed object source
-			this.managedObjectSources.put(managedObjectSourceName, mo);
-		} else {
-			// Managed object source already added
-			this.addIssue("Office floor managed object source "
-					+ managedObjectSourceName + " already added");
-		}
-		return mo;
+		return NodeUtil.getInitialisedNode(managedObjectSourceName,
+				this.managedObjectSources, this.context, () -> this.context
+						.createManagedObjectSourceNode(managedObjectSourceName,
+								this),
+				(managedObjectSource) -> managedObjectSource.initialise(
+						managedObjectSourceClassName, null));
 	}
 
 	@Override
 	public OfficeFloorManagedObjectSource addManagedObjectSource(
 			String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource) {
-		// Obtain and return the managed object source for the name
-		ManagedObjectSourceNode mo = this.managedObjectSources
-				.get(managedObjectSourceName);
-		if (mo == null) {
-			// Create the managed object source and have in office floor context
-			String managedObjectSourceClassName = managedObjectSource
-					.getClass().getName();
-			mo = this.context.createManagedObjectSourceNode(
-					managedObjectSourceName, managedObjectSourceClassName,
-					managedObjectSource, this);
-
-			// Add the managed object source
-			this.managedObjectSources.put(managedObjectSourceName, mo);
-		} else {
-			// Managed object source already added
-			this.addIssue("Office floor managed object source "
-					+ managedObjectSourceName + " already added");
-		}
-		return mo;
+		return NodeUtil.getInitialisedNode(managedObjectSourceName,
+				this.managedObjectSources, this.context, () -> this.context
+						.createManagedObjectSourceNode(managedObjectSourceName,
+								this),
+				(managedObjectSourceNode) -> managedObjectSourceNode
+						.initialise(managedObjectSource.getClass().getName(),
+								managedObjectSource));
 	}
 
 	@Override
 	public OfficeFloorInputManagedObject addInputManagedObject(
 			String inputManagedObjectName) {
-		// Obtain and return the input managed object for the name
-		InputManagedObjectNode inputMo = this.inputManagedObjects
-				.get(inputManagedObjectName);
-		if (inputMo == null) {
-			// Create the input managed object and have in office floor context
-			inputMo = this.context.createInputManagedNode(
-					inputManagedObjectName, this);
-
-			// Add the input managed object
-			this.inputManagedObjects.put(inputManagedObjectName, inputMo);
-		} else {
-			// Input managed object already added
-			this.addIssue("Office floor input managed object "
-					+ inputManagedObjectName + " already added");
-		}
-		return inputMo;
+		return NodeUtil.getInitialisedNode(inputManagedObjectName,
+				this.inputManagedObjects, this.context, () -> this.context
+						.createInputManagedNode(inputManagedObjectName, this),
+				(inputManagedObject) -> inputManagedObject.initialise());
 	}
 
 	@Override
 	public OfficeFloorSupplier addSupplier(String supplierName,
 			String supplierSourceClassName) {
-		// Obtain and return the supplier for the name
-		SupplierNode supplier = this.suppliers.get(supplierName);
-		if (supplier == null) {
-			// Add the supplier
-			supplier = this.context.createSupplierNode(supplierName,
-					supplierSourceClassName, this);
-			this.suppliers.put(supplierName, supplier);
-		} else {
-			// Supplier already added
-			this.addIssue("Office floor supplier " + supplierName
-					+ " already added");
-		}
-		return supplier;
+		return NodeUtil.getInitialisedNode(supplierName, this.suppliers,
+				this.context, () -> this.context.createSupplierNode(
+						supplierName, supplierSourceClassName, this),
+				(supplier) -> supplier.initialise());
 	}
 
 	@Override
 	public OfficeFloorTeam addTeam(String teamName, String teamSourceClassName) {
-		// Obtain and return the team for the name
-		TeamNode team = this.teams.get(teamName);
-		if (team == null) {
-			// Add the team
-			team = this.context.createTeamNode(teamName, teamSourceClassName,
-					this);
-			this.teams.put(teamName, team);
-		} else {
-			// Team already added
-			this.addIssue("Office floor team " + teamName + " already added");
-		}
-		return team;
+		return NodeUtil
+				.getInitialisedNode(teamName, this.teams, this.context,
+						() -> this.context.createTeamNode(teamName,
+								teamSourceClassName, this), (team) -> team
+								.initialise());
 	}
 
 	@Override
 	public DeployedOffice addDeployedOffice(String officeName,
 			OfficeSource officeSource, String officeLocation) {
-		// Obtain and return the office for the name
-		OfficeNode office = this.offices.get(officeName);
-		if (office == null) {
-			// Create the office within the office floor context
-			office = this.context.createOfficeNode(officeName, officeSource
-					.getClass().getName(), officeSource, officeLocation, this);
-
-			// Add the office
-			this.offices.put(officeName, office);
-		} else {
-			// Office already added
-			this.addIssue("Office " + officeName + " already deployed");
-		}
-		return office;
+		return NodeUtil.getInitialisedNode(officeName, this.offices,
+				this.context, () -> this.context.createOfficeNode(officeName,
+						officeSource.getClass().getName(), officeSource,
+						officeLocation, this), (office) -> office.initialise());
 	}
 
 	@Override
 	public DeployedOffice addDeployedOffice(String officeName,
 			String officeSourceClassName, String officeLocation) {
-		// Obtain and return the office for the name
-		OfficeNode office = this.offices.get(officeName);
-		if (office == null) {
-			// Create the office within the office floor context
-			office = this.context.createOfficeNode(officeName,
-					officeSourceClassName, null, officeLocation, this);
-
-			// Add the office
-			this.offices.put(officeName, office);
-		} else {
-			// Office already added
-			this.addIssue("Office " + officeName + " already deployed");
-		}
-		return office;
+		return NodeUtil.getInitialisedNode(officeName, this.offices,
+				this.context, () -> this.context.createOfficeNode(officeName,
+						officeSourceClassName, null, officeLocation, this), (
+						office) -> office.initialise());
 	}
 
 	@Override
@@ -463,22 +388,12 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	public OfficeFloorManagedObjectSource addManagedObjectSource(
 			String managedObjectSourceName,
 			SuppliedManagedObjectNode suppliedManagedObject) {
-		// Obtain and return the managed object source for the name
-		ManagedObjectSourceNode mo = this.managedObjectSources
-				.get(managedObjectSourceName);
-		if (mo == null) {
-			// Create the managed object source and have in office floor context
-			mo = this.context.createManagedObjectSourceNode(
-					managedObjectSourceName, null, null, suppliedManagedObject);
-
-			// Add the managed object source
-			this.managedObjectSources.put(managedObjectSourceName, mo);
-		} else {
-			// Managed object source already added
-			this.addIssue("OfficeFloor managed object source "
-					+ managedObjectSourceName + " already added");
-		}
-		return mo;
+		return NodeUtil.getInitialisedNode(managedObjectSourceName,
+				this.managedObjectSources, this.context, () -> this.context
+						.createManagedObjectSourceNode(managedObjectSourceName,
+								suppliedManagedObject),
+				(managedObjectSource) -> managedObjectSource.initialise(null,
+						null));
 	}
 
 	@Override

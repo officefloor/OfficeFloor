@@ -25,7 +25,6 @@ import java.util.Set;
 import net.officefloor.autowire.spi.supplier.source.SupplierSource;
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectTeam;
-import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectSourceTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
@@ -99,28 +98,95 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final String managedObjectSourceName;
 
 	/**
+	 * {@link PropertyList} to load the {@link ManagedObjectSource}.
+	 */
+	private final PropertyList propertyList;
+
+	/**
+	 * {@link ManagingOffice}.
+	 */
+	private final ManagingOfficeNode managingOffice;
+
+	/**
+	 * {@link ManagedObjectRegistry}.
+	 */
+	private final ManagedObjectRegistry managedObjectRegistry;
+
+	/**
+	 * Timeout for the {@link ManagedObject}.
+	 */
+	private long timeout = 0;
+
+	/**
+	 * {@link InitialisedState}.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+
+		/**
+		 * Class name of the {@link ManagedObjectSource}.
+		 */
+		private final String managedObjectSourceClassName;
+
+		/**
+		 * {@link ManagedObjectSource} instance to use. If this is specified its
+		 * use overrides the {@link Class}. Will be <code>null</code> if not to
+		 * override.
+		 */
+		@SuppressWarnings("rawtypes")
+		private final ManagedObjectSource managedObjectSource;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param managedObjectSourceClassName
+		 *            {@link ManagedObjectSource} {@link Class} name.
+		 * @param managedObjectSource
+		 *            {@link ManagedObjectSource}.
+		 */
+		public InitialisedState(String managedObjectSourceClassName,
+				ManagedObjectSource managedObjectSource) {
+			this.managedObjectSourceClassName = managedObjectSourceClassName;
+			this.managedObjectSource = managedObjectSource;
+		}
+	}
+
+	/**
+	 * Containing {@link SectionNode}. <code>null</code> if contained in the
+	 * {@link Office} or {@link OfficeFloor}.
+	 */
+	private final SectionNode containingSectionNode;
+
+	/**
+	 * Containing {@link OfficeNode}. <code>null</code> if contained in the
+	 * {@link OfficeFloor}.
+	 */
+	private final OfficeNode containingOfficeNode;
+
+	/**
 	 * {@link SuppliedManagedObjectNode} should this be a supplied
 	 * {@link ManagedObjectSource}. Will be <code>null</code> if not supplied.
 	 */
 	private final SuppliedManagedObjectNode suppliedManagedObjectNode;
 
 	/**
-	 * Class name of the {@link ManagedObjectSource}.
+	 * Containing {@link OfficeFloorNode}.
 	 */
-	private final String managedObjectSourceClassName;
+	private final OfficeFloorNode containingOfficeFloorNode;
 
 	/**
-	 * {@link ManagedObjectSource} instance to use. If this is specified its use
-	 * overrides the {@link Class}. Will be <code>null</code> if not to
-	 * override.
+	 * {@link NodeContext}.
 	 */
-	@SuppressWarnings("rawtypes")
-	private final ManagedObjectSource managedObjectSource;
+	private final NodeContext context;
 
 	/**
-	 * {@link PropertyList} to load the {@link ManagedObjectSource}.
+	 * {@link InputManagedObjectNode}.
 	 */
-	private final PropertyList propertyList = new PropertyListImpl();
+	private InputManagedObjectNode inputManagedObjectNode = null;
 
 	/**
 	 * {@link ManagedObjectFlowNode} instances by their
@@ -147,60 +213,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
 
 	/**
-	 * Containing {@link SectionNode}. <code>null</code> if contained in the
-	 * {@link Office} or {@link OfficeFloor}.
-	 */
-	private final SectionNode containingSectionNode;
-
-	/**
-	 * Containing {@link OfficeNode}. <code>null</code> if contained in the
-	 * {@link OfficeFloor}.
-	 */
-	private final OfficeNode containingOfficeNode;
-
-	/**
-	 * Containing {@link OfficeFloorNode}.
-	 */
-	private final OfficeFloorNode containingOfficeFloorNode;
-
-	/**
-	 * {@link ManagedObjectRegistry}.
-	 */
-	private final ManagedObjectRegistry managedObjectRegistry;
-
-	/**
-	 * {@link NodeContext}.
-	 */
-	private final NodeContext context;
-
-	/**
-	 * {@link ManagingOffice}.
-	 */
-	private final ManagingOfficeNode managingOffice;
-
-	/**
-	 * Timeout for the {@link ManagedObject}.
-	 */
-	private long timeout = 0;
-
-	/**
-	 * {@link InputManagedObjectNode}.
-	 */
-	private InputManagedObjectNode inputManagedObjectNode = null;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectSourceName
 	 *            Name of this {@link ManagedObjectSource}.
-	 * @param suppliedManagedObjectNode
-	 *            Optional {@link SuppliedManagedObjectNode} providing the
-	 *            {@link ManagedObjectSource}.
-	 * @param managedObjectSourceClassName
-	 *            Class name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            Optional instantiated {@link ManagedObjectSource}. May be
-	 *            <code>null</code>.
 	 * @param containingSectionNode
 	 *            {@link SectionNode} containing this
 	 *            {@link ManagedObjectSourceNode}. <code>null</code> if
@@ -213,6 +229,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 *            {@link SuppliedManagedObjectNode} containing this
 	 *            {@link ManagedObjectSource}. <code>null</code> if not provided
 	 *            from {@link SupplierSource}.
+	 * @param suppliedManagedObjectNode
+	 *            {@link SuppliedManagedObjectNode} should this be a supplied
+	 *            {@link ManagedObjectSource}. Will be <code>null</code> if not
+	 *            supplied.
 	 * @param containingOfficeFloorNode
 	 *            {@link OfficeFloorNode} containing this
 	 *            {@link ManagedObjectSourceNode}.
@@ -220,17 +240,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectSourceNodeImpl(String managedObjectSourceName,
-			SuppliedManagedObjectNode suppliedManagedObjectNode,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource,
 			SectionNode containingSectionNode, OfficeNode containingOfficeNode,
+			SuppliedManagedObjectNode suppliedManagedObjectNode,
 			OfficeFloorNode containingOfficeFloorNode, NodeContext context) {
 		this.managedObjectSourceName = managedObjectSourceName;
-		this.suppliedManagedObjectNode = suppliedManagedObjectNode;
-		this.managedObjectSourceClassName = managedObjectSourceClassName;
-		this.managedObjectSource = managedObjectSource;
 		this.containingSectionNode = containingSectionNode;
 		this.containingOfficeNode = containingOfficeNode;
+		this.suppliedManagedObjectNode = suppliedManagedObjectNode;
 		this.containingOfficeFloorNode = containingOfficeFloorNode;
 		this.context = context;
 
@@ -240,6 +256,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						: this.containingOfficeFloorNode));
 
 		// Create the additional objects
+		this.propertyList = this.context.createPropertyList();
 		this.managingOffice = this.context.createManagingOfficeNode(this);
 	}
 
@@ -290,18 +307,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
+		return (this.state != null);
 
 	}
 
 	@Override
-	public void initialise() {
-		// TODO implement ManagedObjectSourceNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectSourceNode.initialise");
-
+	public void initialise(String managedObjectSourceClassName,
+			ManagedObjectSource<?, ?> managedObjectSource) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(managedObjectSourceClassName,
+						managedObjectSource));
 	}
 
 	/*
@@ -326,8 +341,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@Override
 	public boolean hasManagedObjectSource() {
 		return (this.suppliedManagedObjectNode != null)
-				|| (this.managedObjectSource != null)
-				|| (!CompileUtil.isBlank(this.managedObjectSourceClassName));
+				|| (this.state.managedObjectSource != null)
+				|| (!CompileUtil
+						.isBlank(this.state.managedObjectSourceClassName));
 	}
 
 	@Override
@@ -348,16 +364,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					.getManagedObjectLoader(this);
 
 			// Load the managed object type
-			if (this.managedObjectSource != null) {
+			if (this.state.managedObjectSource != null) {
 				// Load and return the managed object type from instance
-				return loader.loadManagedObjectType(this.managedObjectSource,
-						this.propertyList);
+				return loader.loadManagedObjectType(
+						this.state.managedObjectSource, this.propertyList);
 
 			} else {
 				// Obtain the managed object source class
 				Class managedObjectSourceClass = this.context
 						.getManagedObjectSourceClass(
-								this.managedObjectSourceClassName, this);
+								this.state.managedObjectSourceClassName, this);
 				if (managedObjectSourceClass == null) {
 					return null; // must have managed object source class
 				}
@@ -418,17 +434,17 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		ManagedObjectLoader loader = this.context.getManagedObjectLoader(this);
 
 		// Load the managed object type
-		if (this.managedObjectSource != null) {
+		if (this.state.managedObjectSource != null) {
 			// Load and return the managed object type from instance
 			return loader.loadOfficeFloorManagedObjectSourceType(
-					this.managedObjectSourceName, this.managedObjectSource,
-					this.propertyList);
+					this.managedObjectSourceName,
+					this.state.managedObjectSource, this.propertyList);
 
 		} else {
 			// Obtain the managed object source class
 			Class managedObjectSourceClass = this.context
 					.getManagedObjectSourceClass(
-							this.managedObjectSourceClassName, this);
+							this.state.managedObjectSourceClassName, this);
 			if (managedObjectSourceClass == null) {
 				return null; // must have managed object source class
 			}
@@ -581,16 +597,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						.registerTeam(qualifiedTeamName, qualifiedTeamName);
 			}
 
-		} else if (this.managedObjectSource != null) {
+		} else if (this.state.managedObjectSource != null) {
 			// Build the managed object source from instance
 			moBuilder = builder.addManagedObject(managedObjectSourceName,
-					this.managedObjectSource);
+					this.state.managedObjectSource);
 
 		} else {
 			// No instance, so obtain by managed object source class
 			Class managedObjectSourceClass = this.context
 					.getManagedObjectSourceClass(
-							this.managedObjectSourceClassName, this);
+							this.state.managedObjectSourceClassName, this);
 			if (managedObjectSourceClass == null) {
 				return; // must have managed object source class
 			}

@@ -532,57 +532,36 @@ public interface NodeContext {
 	 * 
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSourceNode}.
-	 * @param managedObjectSourceClassName
-	 *            {@link Class} name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            Optional instantiated {@link ManagedObjectSource}. May be
-	 *            <code>null</code>.
 	 * @param section
 	 *            Parent {@link SectionNode}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	ManagedObjectSourceNode createManagedObjectSourceNode(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource, SectionNode section);
+			String managedObjectSourceName, SectionNode section);
 
 	/**
 	 * Creates a {@link ManagedObjectSourceNode}.
 	 * 
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSourceNode}.
-	 * @param managedObjectSourceClassName
-	 *            {@link Class} name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            Optional instantiated {@link ManagedObjectSource}. May be
-	 *            <code>null</code>.
 	 * @param office
 	 *            Parent {@link OfficeNode}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	ManagedObjectSourceNode createManagedObjectSourceNode(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource, OfficeNode office);
+			String managedObjectSourceName, OfficeNode office);
 
 	/**
 	 * Creates a {@link ManagedObjectSourceNode}.
 	 * 
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSourceNode}.
-	 * @param managedObjectSourceClassName
-	 *            {@link Class} name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            Optional instantiated {@link ManagedObjectSource}. May be
-	 *            <code>null</code>.
 	 * @param suppliedManagedObject
 	 *            Parent {@link SuppliedManagedObjectNode}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	ManagedObjectSourceNode createManagedObjectSourceNode(
 			String managedObjectSourceName,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource,
 			SuppliedManagedObjectNode suppliedManagedObject);
 
 	/**
@@ -590,20 +569,12 @@ public interface NodeContext {
 	 * 
 	 * @param managedObjectSourceName
 	 *            Name of the {@link ManagedObjectSourceNode}.
-	 * @param managedObjectSourceClassName
-	 *            {@link Class} name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            Optional instantiated {@link ManagedObjectSource}. May be
-	 *            <code>null</code>.
 	 * @param officeFloor
 	 *            Parent {@link OfficeFloorNode}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	ManagedObjectSourceNode createManagedObjectSourceNode(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource,
-			OfficeFloorNode officeFloor);
+			String managedObjectSourceName, OfficeFloorNode officeFloor);
 
 	/**
 	 * Obtains the {@link ManagedObjectPoolLoader}.
