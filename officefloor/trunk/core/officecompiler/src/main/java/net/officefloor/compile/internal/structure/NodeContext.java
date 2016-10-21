@@ -43,7 +43,6 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.governance.Governance;
@@ -357,17 +356,11 @@ public interface NodeContext {
 	 * 
 	 * @param workName
 	 *            Name of the {@link WorkNode}.
-	 * @param workSourceClassName
-	 *            {@link Class} name of the {@link WorkSource}.
-	 * @param workSource
-	 *            Optional instantiated {@link WorkSource}. May be
-	 *            <code>null</code>.
 	 * @param section
 	 *            Parent {@link SectionNode}.
 	 * @return {@link WorkNode}.
 	 */
-	WorkNode createWorkNode(String workName, String workSourceClassName,
-			WorkSource<?> workSource, SectionNode section);
+	WorkNode createWorkNode(String workName, SectionNode section);
 
 	/**
 	 * Creates the {@link TaskFlowNode}.
@@ -517,14 +510,11 @@ public interface NodeContext {
 	 * 
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObjectNode}.
-	 * @param managedObjectScope
-	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
 	 * @param managedObjectSourceNode
 	 *            Parent {@link ManagedObjectSourceNode}.
 	 * @return {@link ManagedObjectNode}.
 	 */
 	ManagedObjectNode createManagedObjectNode(String managedObjectName,
-			ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode);
 
 	/**

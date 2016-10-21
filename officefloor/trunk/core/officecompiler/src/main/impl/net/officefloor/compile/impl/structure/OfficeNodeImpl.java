@@ -279,11 +279,13 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	public ManagedObjectNode getOrCreateManagedObjectNode(
 			String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-		return NodeUtil.getInitialisedNode(managedObjectName,
-				this.managedObjects, this.context, () -> this.context
-						.createManagedObjectNode(managedObjectName,
-								managedObjectScope, managedObjectSourceNode), (
-						managedObject) -> managedObject.initialise());
+		return NodeUtil
+				.getInitialisedNode(managedObjectName, this.managedObjects,
+						this.context, () -> this.context
+								.createManagedObjectNode(managedObjectName,
+										managedObjectSourceNode), (
+								managedObject) -> managedObject
+								.initialise(managedObjectScope));
 	}
 
 	/*

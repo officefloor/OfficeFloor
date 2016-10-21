@@ -70,11 +70,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final String managedObjectName;
 
 	/**
-	 * {@link ManagedObjectScope} of this {@link ManagedObject}.
-	 */
-	private final ManagedObjectScope managedObjectScope;
-
-	/**
 	 * {@link ManagedObjectDependencyNode} instances by their
 	 * {@link ManagedObjectDependency} names.
 	 */
@@ -109,6 +104,32 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final NodeContext context;
 
 	/**
+	 * Initialise state.
+	 */
+	private InitialiseState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialiseState {
+
+		/**
+		 * {@link ManagedObjectScope} of this {@link ManagedObject}.
+		 */
+		private final ManagedObjectScope managedObjectScope;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param managedObjectScope
+		 *            {@link ManagedObjectScope} of this {@link ManagedObject}.
+		 */
+		public InitialiseState(ManagedObjectScope managedObjectScope) {
+			this.managedObjectScope = managedObjectScope;
+		}
+	}
+
+	/**
 	 * {@link TypeQualification} instances for this {@link ManagedObjectNode}.
 	 */
 	private final List<TypeQualification> typeQualifications = new LinkedList<TypeQualification>();
@@ -124,8 +145,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * 
 	 * @param managedObjectName
 	 *            Name of this {@link ManagedObject}.
-	 * @param managedObjectScope
-	 *            {@link ManagedObjectScope} of the {@link ManagedObjectNode}.
 	 * @param managedObjectSourceNode
 	 *            {@link ManagedObjectSourceNode} for the
 	 *            {@link ManagedObjectSource} to source this
@@ -134,10 +153,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectNodeImpl(String managedObjectName,
-			ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode, NodeContext context) {
 		this.managedObjectName = managedObjectName;
-		this.managedObjectScope = managedObjectScope;
 		this.managedObjectSourceNode = managedObjectSourceNode;
 		this.containingSectionNode = this.managedObjectSourceNode
 				.getSectionNode();
@@ -175,18 +192,13 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
-	public void initialise() {
-		// TODO implement ManagedObjectNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectNode.initialise");
-
+	public void initialise(ManagedObjectScope managedObjectScope) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialiseState(managedObjectScope));
 	}
 
 	/*
@@ -389,7 +401,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 		// Add the managed object to the office
 		DependencyMappingBuilder mapper;
-		switch (this.managedObjectScope) {
+		switch (this.state.managedObjectScope) {
 		case PROCESS:
 			mapper = officeBuilder.addProcessManagedObject(managedObjectName,
 					managedObjectName);
@@ -403,7 +415,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			return;
 		default:
 			throw new IllegalStateException("Unknown managed object scope "
-					+ this.managedObjectScope);
+					+ this.state.managedObjectScope);
 		}
 
 		// Load the dependencies for the managed object

@@ -303,13 +303,13 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	public ManagedObjectNode getOrCreateManagedObjectNode(
 			String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-		return NodeUtil.getInitialisedNode(managedObjectName,
-				this.managedObjects, this.context, () -> this.context
-						.createManagedObjectNode(managedObjectName,
-								managedObjectScope, managedObjectSourceNode), (
-						managedObject) -> {
-					return;
-				});
+		return NodeUtil
+				.getInitialisedNode(managedObjectName, this.managedObjects,
+						this.context, () -> this.context
+								.createManagedObjectNode(managedObjectName,
+										managedObjectSourceNode), (
+								managedObject) -> managedObject
+								.initialise(managedObjectScope));
 	}
 
 	/*
@@ -817,20 +817,18 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	public SectionWork addSectionWork(String workName,
 			String workSourceClassName) {
 		return NodeUtil.getInitialisedNode(workName, this.workNodes,
-				this.context, () -> this.context.createWorkNode(workName,
-						workSourceClassName, null, this), (work) -> {
-					return;
-				});
+				this.context,
+				() -> this.context.createWorkNode(workName, this),
+				(work) -> work.initialise(workSourceClassName, null));
 	}
 
 	@Override
 	public SectionWork addSectionWork(String workName, WorkSource<?> workSource) {
 		return NodeUtil.getInitialisedNode(workName, this.workNodes,
-				this.context, () -> this.context.createWorkNode(workName,
-						workSource.getClass().getName(), workSource, this), (
-						work) -> {
-					return;
-				});
+				this.context,
+				() -> this.context.createWorkNode(workName, this),
+				(work) -> work.initialise(workSource.getClass().getName(),
+						workSource));
 	}
 
 	@Override
