@@ -767,50 +767,37 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public ManagedObjectSourceNode createManagedObjectSourceNode(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource, SectionNode section) {
+			String managedObjectSourceName, SectionNode section) {
 		OfficeNode office = section.getOfficeNode();
 		OfficeFloorNode officeFloor = (office != null ? office
 				.getOfficeFloorNode() : null);
-		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null,
-				managedObjectSourceClassName, managedObjectSource, section,
-				office, officeFloor, this);
+		return new ManagedObjectSourceNodeImpl(managedObjectSourceName,
+				section, office, null, officeFloor, this);
 	}
 
 	@Override
 	public ManagedObjectSourceNode createManagedObjectSourceNode(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource, OfficeNode office) {
+			String managedObjectSourceName, OfficeNode office) {
 		OfficeFloorNode officeFloor = office.getOfficeFloorNode();
 		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null,
-				managedObjectSourceClassName, managedObjectSource, null,
-				office, officeFloor, this);
+				office, null, officeFloor, this);
 	}
 
 	@Override
 	public ManagedObjectSourceNode createManagedObjectSourceNode(
 			String managedObjectSourceName,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource,
 			SuppliedManagedObjectNode suppliedManagedObject) {
 		OfficeFloorNode officeFloor = suppliedManagedObject.getSupplierNode()
 				.getOfficeFloorNode();
-		return new ManagedObjectSourceNodeImpl(managedObjectSourceName,
-				suppliedManagedObject, managedObjectSourceClassName,
-				managedObjectSource, null, null, officeFloor, this);
+		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null,
+				null, suppliedManagedObject, officeFloor, this);
 	}
 
 	@Override
 	public ManagedObjectSourceNode createManagedObjectSourceNode(
-			String managedObjectSourceName,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource,
-			OfficeFloorNode officeFloor) {
+			String managedObjectSourceName, OfficeFloorNode officeFloor) {
 		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null,
-				managedObjectSourceClassName, managedObjectSource, null, null,
-				officeFloor, this);
+				null, null, officeFloor, this);
 	}
 
 	@Override
