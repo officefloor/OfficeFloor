@@ -290,8 +290,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			OfficeSource officeSource, String officeLocation) {
 		return NodeUtil.getInitialisedNode(officeName, this.offices,
 				this.context, () -> this.context.createOfficeNode(officeName,
-						officeSource.getClass().getName(), officeSource,
-						officeLocation, this), (office) -> office.initialise());
+						this), (office) -> office.initialise(officeSource
+						.getClass().getName(), officeSource, officeLocation));
 	}
 
 	@Override
@@ -299,8 +299,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			String officeSourceClassName, String officeLocation) {
 		return NodeUtil.getInitialisedNode(officeName, this.offices,
 				this.context, () -> this.context.createOfficeNode(officeName,
-						officeSourceClassName, null, officeLocation, this), (
-						office) -> office.initialise());
+						this), (office) -> office.initialise(
+						officeSourceClassName, null, officeLocation));
 	}
 
 	@Override

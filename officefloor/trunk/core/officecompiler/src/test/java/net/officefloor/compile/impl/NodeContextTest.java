@@ -540,11 +540,15 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateOfficeNode() {
 		OfficeNode node = this.doTest(() -> this.context.createOfficeNode(
-				"OFFICE", "ExampleOfficeSource", null, "LOCATION",
-				this.officeFloor));
-		assertNode(node, "OFFICE", "Office", "LOCATION", this.officeFloor);
+				"OFFICE", this.officeFloor));
+		assertNode(node, "OFFICE", "Office", null, this.officeFloor);
 		assertEquals("Incorrect office name", "OFFICE",
 				node.getDeployedOfficeName());
+		assertFalse("Should not be initialised", node.isInitialised());
+		node.initialise("ExampleOfficeSource", null, "LOCATION");
+		assertTrue("Should now be initialised", node.isInitialised());
+		assertEquals("Should be initialised with location", "LOCATION",
+				node.getLocation());
 	}
 
 	/**

@@ -111,8 +111,10 @@ public class OfficeLoaderUtil {
 			String officeSourceClassName) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return new OfficeNodeImpl(OfficeLoaderUtil.class.getSimpleName(),
-				officeSourceClassName, null, OFFICE_LOCATION, null, context);
+		OfficeNode office = new OfficeNodeImpl(
+				OfficeLoaderUtil.class.getSimpleName(), null, context);
+		office.initialise(officeSourceClassName, null, OFFICE_LOCATION);
+		return office;
 	}
 
 	/**
@@ -129,9 +131,11 @@ public class OfficeLoaderUtil {
 			O officeSource) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		return new OfficeNodeImpl(OfficeLoaderUtil.class.getSimpleName(),
-				officeSource.getClass().getName(), officeSource,
-				OFFICE_LOCATION, null, context);
+		OfficeNode office = new OfficeNodeImpl(
+				OfficeLoaderUtil.class.getSimpleName(), null, context);
+		office.initialise(officeSource.getClass().getName(), officeSource,
+				OFFICE_LOCATION);
+		return office;
 	}
 
 	/**
