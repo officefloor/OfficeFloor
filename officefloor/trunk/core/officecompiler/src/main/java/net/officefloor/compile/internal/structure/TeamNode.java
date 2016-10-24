@@ -39,14 +39,19 @@ public interface TeamNode extends LinkTeamNode, OfficeFloorTeam {
 
 	/**
 	 * Initialises the {@link TeamNode}.
+	 * 
+	 * @param teamSourceClassName
+	 *            Class name of the {@link TeamSource}.
 	 */
-	void initialise();
+	void initialise(String teamSourceClassName);
 
 	/**
 	 * Indicates if have the {@link TeamSource} configured.
 	 * 
 	 * @return <code>true</code> if have the {@link TeamSource} configured.
 	 */
+	@Deprecated
+	// should be part of internal checks
 	boolean hasTeamSource();
 
 	/**

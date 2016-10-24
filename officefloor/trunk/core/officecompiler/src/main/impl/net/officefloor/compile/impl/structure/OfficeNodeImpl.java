@@ -806,8 +806,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	public OfficeInput addOfficeInput(String inputName, String parameterType) {
 		return NodeUtil.getInitialisedNode(inputName, this.inputs,
 				this.context, () -> this.context.createOfficeInputNode(
-						inputName, parameterType, this), (input) -> input
-						.initialise());
+						inputName, this), (input) -> input
+						.initialise(parameterType));
 	}
 
 	@Override
@@ -892,9 +892,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			String administratorSourceClassName) {
 		return NodeUtil.getInitialisedNode(administratorName,
 				this.administrators, this.context, () -> this.context
-						.createAdministratorNode(administratorName,
-								administratorSourceClassName, null, this), (
-						administrator) -> administrator.initialise());
+						.createAdministratorNode(administratorName, this), (
+						administrator) -> administrator.initialise(
+						administratorSourceClassName, null));
 	}
 
 	@Override
@@ -902,10 +902,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			AdministratorSource<?, ?> administratorSource) {
 		return NodeUtil.getInitialisedNode(administratorName,
 				this.administrators, this.context, () -> this.context
-						.createAdministratorNode(administratorName,
-								administratorSource.getClass().getName(),
-								administratorSource, this),
-				(administrator) -> administrator.initialise());
+						.createAdministratorNode(administratorName, this), (
+						administrator) -> administrator.initialise(
+						administratorSource.getClass().getName(),
+						administratorSource));
 	}
 
 	@Override

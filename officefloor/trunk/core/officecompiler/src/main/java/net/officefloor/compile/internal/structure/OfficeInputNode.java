@@ -36,8 +36,11 @@ public interface OfficeInputNode extends LinkFlowNode, LinkSynchronousNode,
 
 	/**
 	 * Initialises the {@link OfficeInputNode}.
+	 * 
+	 * @param parameterType
+	 *            Parameter type of {@link OfficeFloorInput}.
 	 */
-	void initialise();
+	void initialise(String parameterType);
 
 	/**
 	 * Obtains the {@link OfficeInputType}.

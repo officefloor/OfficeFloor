@@ -163,14 +163,12 @@ public interface NodeContext {
 	 * 
 	 * @param officeInputName
 	 *            Name of the {@link OfficeInputNode}.
-	 * @param parameterType
-	 *            Parameter type.
 	 * @param office
 	 *            Parent {@link OfficeNode}.
 	 * @return {@link OfficeInputNode}.
 	 */
 	OfficeInputNode createOfficeInputNode(String officeInputName,
-			String parameterType, OfficeNode office);
+			OfficeNode office);
 
 	/**
 	 * Creates the {@link OfficeNode}.
@@ -648,18 +646,12 @@ public interface NodeContext {
 	 * 
 	 * @param administratorName
 	 *            Name of the {@link Administrator}.
-	 * @param administratorSourceClassName
-	 *            {@link Class} name of the {@link AdministratorSource}.
-	 * @param administratorSource
-	 *            Optional instantiated {@link AdministratorSource}. May be
-	 *            <code>null</code>.
 	 * @param office
 	 *            {@link OfficeNode} containing this {@link Administrator}.
 	 * @return {@link AdministratorNode}.
 	 */
 	AdministratorNode createAdministratorNode(String administratorName,
-			String administratorSourceClassName,
-			AdministratorSource<?, ?> administratorSource, OfficeNode office);
+			OfficeNode office);
 
 	/**
 	 * Obtains the {@link GovernanceSource} class.
@@ -736,14 +728,11 @@ public interface NodeContext {
 	 * 
 	 * @param teamName
 	 *            Name of the {@link TeamNode}.
-	 * @param teamSourceClassName
-	 *            {@link Class} name of the {@link TeamSource}.
 	 * @param officeFloor
 	 *            Parent {@link OfficeFloorNode}.
 	 * @return {@link TeamNode}.
 	 */
-	TeamNode createTeamNode(String teamName, String teamSourceClassName,
-			OfficeFloorNode officeFloor);
+	TeamNode createTeamNode(String teamName, OfficeFloorNode officeFloor);
 
 	/**
 	 * Creates an {@link EscalationNode}.

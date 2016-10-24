@@ -22,6 +22,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * {@link OfficeAdministrator} node.
@@ -37,8 +38,15 @@ public interface AdministratorNode extends LinkTeamNode, OfficeAdministrator {
 
 	/**
 	 * Initialises this {@link AdministratorNode}.
+	 * 
+	 * @param administratorSourceClassName
+	 *            Class name of the {@link AdministratorSource}.
+	 * @param administratorSource
+	 *            Optional instantiated {@link AdministratorSource}. May be
+	 *            <code>null</code>.
 	 */
-	void initialise();
+	void initialise(String administratorSourceClassName,
+			AdministratorSource<?, ?> administratorSource);
 
 	/**
 	 * <p>
