@@ -141,11 +141,13 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateAdministratorNode() {
 		AdministratorNode node = this.doTest(() -> this.context
-				.createAdministratorNode("ADMINISTRATOR",
-						"ExampleAdministratorSource", null, this.office));
+				.createAdministratorNode("ADMINISTRATOR", this.office));
 		assertNode(node, "ADMINISTRATOR", "Administrator", null, this.office);
 		assertEquals("Incorrect administrator name", "ADMINISTRATOR",
 				node.getOfficeAdministratorName());
+		assertFalse("Should not be initialised", node.isInitialised());
+		node.initialise("ExampleAdministratorSource", null);
+		assertTrue("Should now be initialised", node.isInitialised());
 	}
 
 	/**
@@ -527,12 +529,14 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link OfficeInputNode}.
 	 */
 	public void testCreateOfficeInputNode() {
-		OfficeInputNode node = this
-				.doTest(() -> this.context.createOfficeInputNode("INPUT",
-						"java.lang.String", this.office));
+		OfficeInputNode node = this.doTest(() -> this.context
+				.createOfficeInputNode("INPUT", this.office));
 		assertNode(node, "INPUT", "Office Input", null, this.office);
 		assertEquals("Incorrect office input name", "INPUT",
 				node.getOfficeInputName());
+		assertFalse("Should not be initialised", node.isInitialised());
+		node.initialise("java.lang.String");
+		assertTrue("Should now be initialised", node.isInitialised());
 	}
 
 	/**
@@ -608,8 +612,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link SectionInputNode}.
 	 */
 	public void testCreateSectionInputNode() {
-		this.recordReturn(this.section, this.section.getOfficeSectionName(),
-				"SECTION");
 		SectionInputNode node = this.doTest(() -> {
 			SectionInputNode input = this.context.createSectionInputNode(
 					"INPUT", this.section);
@@ -745,10 +747,12 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link TeamNode}.
 	 */
 	public void testCreateTeamNode() {
-		TeamNode node = this.context.createTeamNode("TEAM",
-				"ExampleTeamSource", this.officeFloor);
+		TeamNode node = this.context.createTeamNode("TEAM", this.officeFloor);
 		assertNode(node, "TEAM", "Team", null, this.officeFloor);
 		assertEquals("TEAM", node.getOfficeFloorTeamName());
+		assertFalse("Should not be initialised", node.isInitialised());
+		node.initialise("ExampleTeamSource");
+		assertTrue("Should now be initialised", node.isInitialised());
 	}
 
 	/**

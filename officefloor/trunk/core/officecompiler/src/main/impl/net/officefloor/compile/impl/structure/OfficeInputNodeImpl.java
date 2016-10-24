@@ -42,11 +42,6 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	private final String name;
 
 	/**
-	 * Parameter type of this {@link OfficeFloorInput}.
-	 */
-	private final String parameterType;
-
-	/**
 	 * Parent {@link OfficeNode}.
 	 */
 	private final OfficeNode officeNode;
@@ -57,26 +52,44 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	private final NodeContext context;
 
 	/**
-	 * {@link LinkSynchronousNode} being the {@link OfficeOutputNode}.
+	 * Initialised state.
 	 */
-	private OfficeOutputNode linkedSynchronousNode = null;
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+
+		/**
+		 * Parameter type of this {@link OfficeFloorInput}.
+		 */
+		private final String parameterType;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param parameterType
+		 *            Parameter type of this {@link OfficeFloorInput}.
+		 */
+		public InitialisedState(String parameterType) {
+			this.parameterType = parameterType;
+		}
+	}
 
 	/**
 	 * Initialise.
 	 * 
 	 * @param name
 	 *            Name of {@link OfficeFloorInput}.
-	 * @param parameterType
-	 *            Parameter type of {@link OfficeFloorInput}.
 	 * @param officeNode
 	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeInputNodeImpl(String name, String parameterType,
-			OfficeNode officeNode, NodeContext context) {
+	public OfficeInputNodeImpl(String name, OfficeNode officeNode,
+			NodeContext context) {
 		this.name = name;
-		this.parameterType = parameterType;
 		this.officeNode = officeNode;
 		this.context = context;
 	}
@@ -107,18 +120,13 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
-	public void initialise() {
-		// TODO implement OfficeInputNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeInputNode.initialise");
-
+	public void initialise(String parameterType) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(parameterType));
 	}
 
 	/*
@@ -127,7 +135,7 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 
 	@Override
 	public OfficeInputType loadOfficeInputType(TypeContext typeContext) {
-		return new OfficeInputTypeImpl(this.name, this.parameterType,
+		return new OfficeInputTypeImpl(this.name, this.state.parameterType,
 				(this.linkedSynchronousNode == null ? null
 						: this.linkedSynchronousNode
 								.loadOfficeOutputType(typeContext)));
@@ -136,6 +144,8 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	/*
 	 * ===================== LinkSynchronousNode =========================
 	 */
+
+	private OfficeOutputNode linkedSynchronousNode = null;
 
 	@Override
 	public boolean linkSynchronousNode(LinkSynchronousNode node) {

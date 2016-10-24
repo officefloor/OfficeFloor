@@ -278,11 +278,9 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	@Override
 	public OfficeFloorTeam addTeam(String teamName, String teamSourceClassName) {
-		return NodeUtil
-				.getInitialisedNode(teamName, this.teams, this.context,
-						() -> this.context.createTeamNode(teamName,
-								teamSourceClassName, this), (team) -> team
-								.initialise());
+		return NodeUtil.getInitialisedNode(teamName, this.teams, this.context,
+				() -> this.context.createTeamNode(teamName, this),
+				(team) -> team.initialise(teamSourceClassName));
 	}
 
 	@Override

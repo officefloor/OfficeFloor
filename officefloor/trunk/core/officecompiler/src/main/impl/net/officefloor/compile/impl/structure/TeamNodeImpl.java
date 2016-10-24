@@ -47,11 +47,6 @@ public class TeamNodeImpl implements TeamNode {
 	private final String teamName;
 
 	/**
-	 * Class name of the {@link TeamSource}.
-	 */
-	private final String teamSourceClassName;
-
-	/**
 	 * {@link PropertyList} to source the {@link Team}.
 	 */
 	private final PropertyList propertyList;
@@ -67,21 +62,44 @@ public class TeamNodeImpl implements TeamNode {
 	private final NodeContext context;
 
 	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+
+		/**
+		 * Class name of the {@link TeamSource}.
+		 */
+		private final String teamSourceClassName;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param teamSourceClassName
+		 *            Class name of the {@link TeamSource}.
+		 */
+		public InitialisedState(String teamSourceClassName) {
+			this.teamSourceClassName = teamSourceClassName;
+		}
+	}
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param teamName
 	 *            Name of this {@link OfficeFloorTeam}.
-	 * @param teamSourceClassName
-	 *            Class name of the {@link TeamSource}.
 	 * @param officeFloor
 	 *            {@link OfficeFloorNode} containing this {@link TeamNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public TeamNodeImpl(String teamName, String teamSourceClassName,
-			OfficeFloorNode officeFloor, NodeContext context) {
+	public TeamNodeImpl(String teamName, OfficeFloorNode officeFloor,
+			NodeContext context) {
 		this.teamName = teamName;
-		this.teamSourceClassName = teamSourceClassName;
 		this.officeFloorNode = officeFloor;
 		this.context = context;
 
@@ -115,18 +133,13 @@ public class TeamNodeImpl implements TeamNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
-	public void initialise() {
-		// TODO implement TeamNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement TeamNode.initialise");
-
+	public void initialise(String teamSourceClassName) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(teamSourceClassName));
 	}
 
 	/*
@@ -135,7 +148,7 @@ public class TeamNodeImpl implements TeamNode {
 
 	@Override
 	public boolean hasTeamSource() {
-		return !CompileUtil.isBlank(this.teamSourceClassName);
+		return !CompileUtil.isBlank(this.state.teamSourceClassName);
 	}
 
 	@Override
@@ -146,7 +159,7 @@ public class TeamNodeImpl implements TeamNode {
 
 		// Obtain the team source class
 		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(
-				this.teamSourceClassName, this);
+				this.state.teamSourceClassName, this);
 		if (teamSourceClass == null) {
 			return null; // must have source class
 		}
@@ -164,7 +177,7 @@ public class TeamNodeImpl implements TeamNode {
 
 		// Obtain the team source class
 		Class<TeamSource> teamSourceClass = this.context.getTeamSourceClass(
-				this.teamSourceClassName, this);
+				this.state.teamSourceClassName, this);
 		if (teamSourceClass == null) {
 			return null; // must have source class
 		}
@@ -179,7 +192,7 @@ public class TeamNodeImpl implements TeamNode {
 
 		// Obtain the team source class
 		Class<? extends TeamSource> teamSourceClass = this.context
-				.getTeamSourceClass(this.teamSourceClassName, this);
+				.getTeamSourceClass(this.state.teamSourceClassName, this);
 		if (teamSourceClass == null) {
 			return; // must obtain team source class
 		}

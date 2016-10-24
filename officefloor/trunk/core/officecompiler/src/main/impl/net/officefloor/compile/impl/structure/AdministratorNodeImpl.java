@@ -24,7 +24,6 @@ import java.util.Map;
 
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
-import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
@@ -62,21 +61,9 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	private final String administratorName;
 
 	/**
-	 * Class name of the {@link AdministratorSource}.
-	 */
-	private final String administratorSourceClassName;
-
-	/**
-	 * {@link AdministratorSource} instance to use. Should this be specified it
-	 * overrides the {@link Class}.
-	 */
-	@SuppressWarnings("unused")
-	private final AdministratorSource<?, ?> administratorSource;
-
-	/**
 	 * {@link PropertyList} to source the {@link Administrator}.
 	 */
-	private final PropertyList properties = new PropertyListImpl();
+	private final PropertyList properties;
 
 	/**
 	 * Parent {@link Office}.
@@ -87,6 +74,44 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
+
+	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+
+		/**
+		 * Class name of the {@link AdministratorSource}.
+		 */
+		private final String administratorSourceClassName;
+
+		/**
+		 * {@link AdministratorSource} instance to use. Should this be specified
+		 * it overrides the {@link Class}.
+		 */
+		@SuppressWarnings("unused")
+		private final AdministratorSource<?, ?> administratorSource;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param administratorSourceClassName
+		 *            Class name of the {@link AdministratorSource}.
+		 * @param administratorSource
+		 *            {@link AdministratorSource} instance to use. Should this
+		 *            be specified it overrides the {@link Class}.
+		 */
+		public InitialisedState(String administratorSourceClassName,
+				AdministratorSource<?, ?> administratorSource) {
+			this.administratorSourceClassName = administratorSourceClassName;
+			this.administratorSource = administratorSource;
+		}
+	}
 
 	/**
 	 * {@link DutyNode} instances by their {@link OfficeDuty} name.
@@ -103,25 +128,19 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	 * 
 	 * @param administratorName
 	 *            Name of this {@link OfficeAdministrator}.
-	 * @param administratorSourceClassName
-	 *            Class name of the {@link AdministratorSource}.
-	 * @param administratorSource
-	 *            Optional instantiated {@link AdministratorSource}. May be
-	 *            <code>null</code>.
 	 * @param officeNode
 	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public AdministratorNodeImpl(String administratorName,
-			String administratorSourceClassName,
-			AdministratorSource<?, ?> administratorSource,
 			OfficeNode officeNode, NodeContext context) {
 		this.administratorName = administratorName;
-		this.administratorSourceClassName = administratorSourceClassName;
-		this.administratorSource = administratorSource;
 		this.officeNode = officeNode;
 		this.context = context;
+
+		// Create additional objects
+		this.properties = this.context.createPropertyList();
 	}
 
 	/*
@@ -150,18 +169,16 @@ public class AdministratorNodeImpl implements AdministratorNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
+		return (this.state != null);
 
 	}
 
 	@Override
-	public void initialise() {
-		// TODO implement AdministratorNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement AdministratorNode.initialise");
-
+	public void initialise(String administratorSourceClassName,
+			AdministratorSource<?, ?> administratorSource) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(administratorSourceClassName,
+						administratorSource));
 	}
 
 	/*
@@ -213,8 +230,8 @@ public class AdministratorNodeImpl implements AdministratorNode {
 
 		// Obtain the administrator source class
 		Class administratorSourceClass = this.context
-				.getAdministratorSourceClass(this.administratorSourceClassName,
-						this);
+				.getAdministratorSourceClass(
+						this.state.administratorSourceClassName, this);
 		if (administratorSourceClass == null) {
 			return null; // must obtain source class
 		}
@@ -231,8 +248,8 @@ public class AdministratorNodeImpl implements AdministratorNode {
 
 		// Obtain the administrator source class
 		Class administratorSourceClass = this.context
-				.getAdministratorSourceClass(this.administratorSourceClassName,
-						this);
+				.getAdministratorSourceClass(
+						this.state.administratorSourceClassName, this);
 		if (administratorSourceClass == null) {
 			return; // must obtain source class
 		}

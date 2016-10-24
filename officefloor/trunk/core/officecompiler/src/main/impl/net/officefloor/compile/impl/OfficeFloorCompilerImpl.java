@@ -606,9 +606,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public OfficeInputNode createOfficeInputNode(String officeInputName,
-			String parameterType, OfficeNode office) {
-		return new OfficeInputNodeImpl(officeInputName, parameterType, office,
-				this);
+			OfficeNode office) {
+		return new OfficeInputNodeImpl(officeInputName, office, this);
 	}
 
 	@Override
@@ -844,10 +843,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public AdministratorNode createAdministratorNode(String administratorName,
-			String administratorSourceClassName,
-			AdministratorSource<?, ?> administratorSource, OfficeNode office) {
-		return new AdministratorNodeImpl(administratorName,
-				administratorSourceClassName, administratorSource, office, this);
+			OfficeNode office) {
+		return new AdministratorNodeImpl(administratorName, office, this);
 	}
 
 	@Override
@@ -887,10 +884,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public TeamNode createTeamNode(String teamName, String teamSourceClassName,
-			OfficeFloorNode officeFloor) {
-		return new TeamNodeImpl(teamName, teamSourceClassName, officeFloor,
-				this);
+	public TeamNode createTeamNode(String teamName, OfficeFloorNode officeFloor) {
+		return new TeamNodeImpl(teamName, officeFloor, this);
 	}
 
 	@Override
