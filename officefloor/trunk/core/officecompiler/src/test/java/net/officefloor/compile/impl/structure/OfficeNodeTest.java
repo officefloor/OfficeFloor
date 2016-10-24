@@ -91,8 +91,16 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * {@link OfficeNode} to be tested.
 	 */
 	private final OfficeNode node = new OfficeNodeImpl(OFFICE_NAME,
-			MakerOfficeSource.class.getName(), null, OFFICE_LOCATION,
 			this.officeFloor, this.nodeContext);
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+
+		// Initialise the office
+		this.node.initialise(MakerOfficeSource.class.getName(), null,
+				OFFICE_LOCATION);
+	}
 
 	/**
 	 * Ensure allow {@link OfficeSource} to report issues via the

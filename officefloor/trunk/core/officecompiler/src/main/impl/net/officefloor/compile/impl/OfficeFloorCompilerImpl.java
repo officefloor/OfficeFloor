@@ -600,10 +600,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public OfficeNode createOfficeNode(String officeName,
-			String officeSourceClassName, OfficeSource officeSource,
-			String officeLocation, OfficeFloorNode officeFloor) {
-		return new OfficeNodeImpl(officeName, officeSourceClassName,
-				officeSource, officeLocation, officeFloor, this);
+			OfficeFloorNode officeFloor) {
+		return new OfficeNodeImpl(officeName, officeFloor, this);
 	}
 
 	@Override

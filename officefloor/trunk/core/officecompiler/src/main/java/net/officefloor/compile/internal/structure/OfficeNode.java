@@ -21,6 +21,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -42,8 +43,17 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 
 	/**
 	 * Initialises the {@link OfficeNode}.
+	 * 
+	 * @param officeSourceClassName
+	 *            {@link OfficeSource} class name.
+	 * @param officeSource
+	 *            Optional instantiated {@link OfficeSource}. May be
+	 *            <code>null</code>.
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
 	 */
-	void initialise();
+	void initialise(String officeSourceClassName, OfficeSource officeSource,
+			String officeLocation);
 
 	/**
 	 * Sources this {@link Office} along with its top level

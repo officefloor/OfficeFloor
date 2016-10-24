@@ -41,7 +41,6 @@ import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -178,20 +177,11 @@ public interface NodeContext {
 	 * 
 	 * @param officeName
 	 *            Name of the {@link OfficeNode}.
-	 * @param officeSourceClassName
-	 *            {@link Class} name of the {@link OfficeSource}.
-	 * @param officeSource
-	 *            Optional instantiated {@link OfficeSource}. May be
-	 *            <code>null</code>.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
 	 * @param officeFloor
 	 *            Parent {@link OfficeFloorNode}.
 	 * @return {@link OfficeNode}.
 	 */
-	OfficeNode createOfficeNode(String officeName,
-			String officeSourceClassName, OfficeSource officeSource,
-			String officeLocation, OfficeFloorNode officeFloor);
+	OfficeNode createOfficeNode(String officeName, OfficeFloorNode officeFloor);
 
 	/**
 	 * Creates the {@link OfficeObjectNode}.

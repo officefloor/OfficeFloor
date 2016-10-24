@@ -52,7 +52,6 @@ import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskNode;
-import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
@@ -65,7 +64,6 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
-import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeInput;
@@ -112,25 +110,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private final String officeName;
 
 	/**
-	 * Class name of the {@link OfficeSource}.
-	 */
-	private final String officeSourceClassName;
-
-	/**
-	 * {@link OfficeSource} instance to use rather than instantiating the
-	 * {@link OfficeSource} class.
-	 */
-	private final OfficeSource officeSource;
-
-	/**
 	 * {@link PropertyList} to source the {@link Office}.
 	 */
 	private final PropertyList properties;
-
-	/**
-	 * Location of the {@link Office}.
-	 */
-	private final String officeLocation;
 
 	/**
 	 * Parent {@link OfficeFloorNode}.
@@ -141,6 +123,51 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
+
+	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+
+		/**
+		 * Class name of the {@link OfficeSource}.
+		 */
+		private final String officeSourceClassName;
+
+		/**
+		 * {@link OfficeSource} instance to use rather than instantiating the
+		 * {@link OfficeSource} class.
+		 */
+		private final OfficeSource officeSource;
+
+		/**
+		 * Location of the {@link Office}.
+		 */
+		private final String officeLocation;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param officeSourceClassName
+		 *            Class name of the {@link OfficeSource}.
+		 * @param officeSource
+		 *            {@link OfficeSource} instance to use rather than
+		 *            instantiating the {@link OfficeSource} class.
+		 * @param officeLocation
+		 *            Location of the {@link Office}.
+		 */
+		public InitialisedState(String officeSourceClassName,
+				OfficeSource officeSource, String officeLocation) {
+			this.officeSourceClassName = officeSourceClassName;
+			this.officeSource = officeSource;
+			this.officeLocation = officeLocation;
+		}
+	}
 
 	/**
 	 * {@link OfficeObjectNode} instances by their {@link OfficeObject} name.
@@ -205,25 +232,14 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 * 
 	 * @param officeName
 	 *            Name of the {@link DeployedOffice}.
-	 * @param officeSourceClassName
-	 *            {@link OfficeSource} class name.
-	 * @param officeSource
-	 *            Optional instantiated {@link OfficeSource}. May be
-	 *            <code>null</code>.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
 	 * @param officeFloor
 	 *            Parent {@link OfficeFloorNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeNodeImpl(String officeName, String officeSourceClassName,
-			OfficeSource officeSource, String officeLocation,
-			OfficeFloorNode officeFloor, NodeContext context) {
+	public OfficeNodeImpl(String officeName, OfficeFloorNode officeFloor,
+			NodeContext context) {
 		this.officeName = officeName;
-		this.officeSourceClassName = officeSourceClassName;
-		this.officeSource = officeSource;
-		this.officeLocation = officeLocation;
 		this.officeFloor = officeFloor;
 		this.context = context;
 
@@ -247,7 +263,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public String getLocation() {
-		return this.officeLocation;
+		return (this.state != null ? this.state.officeLocation : null);
 	}
 
 	@Override
@@ -257,18 +273,15 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
-	public void initialise() {
-		// TODO implement OfficeNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeNode.initialise");
-
+	public void initialise(String officeSourceClassName,
+			OfficeSource officeSource, String officeLocation) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(officeSourceClassName, officeSource,
+						officeLocation));
 	}
 
 	/*
@@ -306,12 +319,13 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private boolean sourceOffice() {
 
 		// Determine if must instantiate
-		OfficeSource source = this.officeSource;
+		OfficeSource source = this.state.officeSource;
 		if (source == null) {
 
 			// Obtain the office source class
 			Class<? extends OfficeSource> officeSourceClass = this.context
-					.getOfficeSourceClass(this.officeSourceClassName, this);
+					.getOfficeSourceClass(this.state.officeSourceClassName,
+							this);
 			if (officeSourceClass == null) {
 				return false; // must have office source class
 			}
@@ -326,7 +340,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 		// Create the office source context
 		OfficeSourceContext context = new OfficeSourceContextImpl(false,
-				this.officeLocation, properties, this, this.context);
+				this.state.officeLocation, properties, this, this.context);
 
 		try {
 			// Source the office
