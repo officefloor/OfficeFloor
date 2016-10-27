@@ -197,14 +197,11 @@ public interface NodeContext {
 	 * 
 	 * @param name
 	 *            Name of the {@link OfficeOutputNode}.
-	 * @param argumentType
-	 *            Argument type.
 	 * @param office
 	 *            Parent {@link OfficeNode}.
 	 * @return {@link OfficeOutputNode}.
 	 */
-	OfficeOutputNode createOfficeOutputNode(String name, String argumentType,
-			OfficeNode office);
+	OfficeOutputNode createOfficeOutputNode(String name, OfficeNode office);
 
 	/**
 	 * Creates the {@link OfficeStartNode}.
@@ -684,18 +681,11 @@ public interface NodeContext {
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
-	 * @param governanceSourceClassName
-	 *            {@link Class} name of the {@link GovernanceSource}.
-	 * @param governanceSource
-	 *            Optional instantiated {@link GovernanceSource}. May be
-	 *            <code>null</code>.
 	 * @param office
 	 *            {@link OfficeNode} containing this {@link Governance}.
 	 * @return {@link GovernanceNode}.
 	 */
-	GovernanceNode createGovernanceNode(String governanceName,
-			String governanceSourceClassName,
-			GovernanceSource<?, ?> governanceSource, OfficeNode office);
+	GovernanceNode createGovernanceNode(String governanceName, OfficeNode office);
 
 	/**
 	 * Obtains the {@link TeamSource} class.

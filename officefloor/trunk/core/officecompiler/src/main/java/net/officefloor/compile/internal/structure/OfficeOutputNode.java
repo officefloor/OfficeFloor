@@ -36,8 +36,11 @@ public interface OfficeOutputNode extends LinkFlowNode, LinkSynchronousNode,
 
 	/**
 	 * Initialises the {@link OfficeOutputNode}.
+	 * 
+	 * @param argumentType
+	 *            Argument type from this {@link OfficeOutput}.
 	 */
-	void initialise();
+	void initialise(String argumentType);
 
 	/**
 	 * Loads the {@link OfficeOutputType}.

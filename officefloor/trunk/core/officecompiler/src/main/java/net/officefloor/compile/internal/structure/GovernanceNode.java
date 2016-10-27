@@ -18,6 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.governance.GovernanceType;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -37,8 +38,15 @@ public interface GovernanceNode extends LinkTeamNode, OfficeGovernance {
 
 	/**
 	 * Initialises the {@link GovernanceNode}.
+	 * 
+	 * @param governanceSourceClassName
+	 *            Class name of the {@link GovernanceSource}.
+	 * @param governanceSource
+	 *            Optional instantiated {@link GovernanceSource} to use. May be
+	 *            <code>null</code>.
 	 */
-	void initialise();
+	void initialise(String governanceSourceClassName,
+			GovernanceSource<?, ?> governanceSource);
 
 	/**
 	 * Loads the {@link GovernanceType} for this {@link GovernanceNode}.

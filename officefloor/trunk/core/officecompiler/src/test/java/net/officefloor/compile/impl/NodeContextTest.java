@@ -167,11 +167,13 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateGovernanceNode() {
 		GovernanceNode node = this.doTest(() -> this.context
-				.createGovernanceNode("GOVERNANCE", "ExampleGovernanceSource",
-						null, this.office));
+				.createGovernanceNode("GOVERNANCE", this.office));
 		assertNode(node, "GOVERNANCE", "Governance", null, this.office);
 		assertEquals("Incorrect governance name", "GOVERNANCE",
 				node.getOfficeGovernanceName());
+		assertFalse("Should not be initialised", node.isInitialised());
+		node.initialise("ExampleGovernanceSource", null);
+		assertTrue("Should now be initialised", node.isInitialised());
 	}
 
 	/**
@@ -570,8 +572,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getGovernerableManagedObjectName());
 		assertEquals("Incorrect office object name", "OBJECT",
 				node.getOfficeObjectName());
-
-		// Validate initialised
 		assertFalse("Not yet initialsied", node.isInitialised());
 		node.initialise("java.lang.Integer");
 		assertTrue("Now initialised", node.isInitialised());
@@ -582,11 +582,13 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateOfficeOutputNode() {
 		OfficeOutputNode node = this.doTest(() -> this.context
-				.createOfficeOutputNode("OUTPUT", "java.lang.Character",
-						this.office));
+				.createOfficeOutputNode("OUTPUT", this.office));
 		assertNode(node, "OUTPUT", "Office Output", null, this.office);
 		assertEquals("Incorrect output name", "OUTPUT",
 				node.getOfficeOutputName());
+		assertFalse("Should not be initialised", node.isInitialised());
+		node.initialise("java.lang.Character");
+		assertTrue("Should now be initialised", node.isInitialised());
 	}
 
 	/**

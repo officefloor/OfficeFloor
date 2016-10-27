@@ -242,6 +242,27 @@ public class LinkUtil {
 	}
 
 	/**
+	 * Links the {@link LinkObjectNode}.
+	 * 
+	 * @param node
+	 *            {@link LinkTeamNode} to have the link loaded.
+	 * @param linkNode
+	 *            Link {@link LinkTeamNode} to load.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param loader
+	 *            {@link Consumer} to load the link onto the
+	 *            {@link LinkTeamNode}.
+	 * @return <code>true</code> if successful, or <code>false</code> with issue
+	 *         reporte to the {@link CompilerIssues}.
+	 */
+	public static boolean linkTeamNode(LinkTeamNode node,
+			LinkTeamNode linkNode, CompilerIssues issues,
+			Consumer<LinkTeamNode> loader) {
+		return linkNode(node, linkNode, TEAM_TRAVERSER, issues, loader);
+	}
+
+	/**
 	 * Loads the link to the {@link Node}.
 	 * 
 	 * @param node

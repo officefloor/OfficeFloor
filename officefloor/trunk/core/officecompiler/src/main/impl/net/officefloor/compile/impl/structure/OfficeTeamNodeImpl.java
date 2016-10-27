@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.office.OfficeTeamTypeImpl;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -118,10 +119,7 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 
 	@Override
 	public String getOfficeTeamName() {
-		// TODO implement OfficeTeam.getOfficeTeamName
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeTeam.getOfficeTeamName");
-
+		return this.teamName;
 	}
 
 	/*
@@ -144,18 +142,9 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-
-		// Ensure not already linked
-		if (this.linkedTeamNode != null) {
-			// Deployed office team
-			this.context.getCompilerIssues().addIssue(this,
-					this.teamName + " already assigned");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedTeamNode = node;
-		return true;
+		return LinkUtil.linkTeamNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedTeamNode = link);
 	}
 
 	@Override

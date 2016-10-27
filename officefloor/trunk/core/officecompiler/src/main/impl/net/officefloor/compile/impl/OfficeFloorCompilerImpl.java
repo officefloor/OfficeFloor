@@ -618,8 +618,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public OfficeOutputNode createOfficeOutputNode(String name,
-			String argumentType, OfficeNode office) {
-		return new OfficeOutputNodeImpl(name, argumentType, office, this);
+			OfficeNode office) {
+		return new OfficeOutputNodeImpl(name, office, this);
 	}
 
 	@Override
@@ -863,10 +863,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	public GovernanceNode createGovernanceNode(String governanceName,
-			String governanceSourceClassName,
-			GovernanceSource<?, ?> governanceSource, OfficeNode office) {
-		return new GovernanceNodeImpl(governanceName,
-				governanceSourceClassName, governanceSource, office, this);
+			OfficeNode office) {
+		return new GovernanceNodeImpl(governanceName, office, this);
 	}
 
 	@Override
