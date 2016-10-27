@@ -32,14 +32,16 @@ import net.officefloor.compile.impl.governance.MockLoadGovernance;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
+import net.officefloor.compile.impl.structure.OfficeInputNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.impl.structure.OfficeOutputNodeImpl;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeOutputType;
-import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
@@ -347,8 +349,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if duplicate name for {@link OfficeInput} instances.
 	 */
 	public void testInputType_DuplicateName() {
-		this.issues.recordIssue("Type", OfficeNodeImpl.class,
-				"Office input TEST already added");
+		this.issues.recordIssue("TEST", OfficeInputNodeImpl.class,
+				"Office Input TEST already added");
 
 		// Load the type
 		OfficeType type = this.loadOfficeType(true, new Loader() {
@@ -400,8 +402,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if duplicate name for {@link OfficeOutput} instances.
 	 */
 	public void testOutputType_DuplicateName() {
-		this.issues.recordIssue("Type", OfficeNodeImpl.class,
-				"Office output TEST already added");
+		this.issues.recordIssue("TEST", OfficeOutputNodeImpl.class,
+				"Office Output TEST already added");
 
 		// Load the type
 		OfficeType type = this.loadOfficeType(true, new Loader() {

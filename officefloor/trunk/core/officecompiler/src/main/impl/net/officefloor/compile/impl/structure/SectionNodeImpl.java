@@ -1053,7 +1053,10 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	@Override
 	public OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource(
 			String managedObjectSourceName) {
-		throw new UnsupportedOperationException("TODO implement");
+		return NodeUtil.getNode(managedObjectSourceName,
+				this.managedObjectSourceNodes, () -> this.context
+						.createManagedObjectSourceNode(managedObjectSourceName,
+								this));
 	}
 
 	@Override

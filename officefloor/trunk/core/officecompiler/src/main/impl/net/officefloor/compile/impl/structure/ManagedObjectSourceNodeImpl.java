@@ -948,15 +948,16 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public ManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return NodeUtil.getNode(teamName, this.teams,
+				() -> this.context.createManagedObjectTeamNode(teamName, this));
 	}
 
 	@Override
 	public OfficeSectionManagedObject getOfficeSectionManagedObject(
 			String managedObjectName) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return NodeUtil.getNode(managedObjectName, this.managedObjects,
+				() -> this.context.createManagedObjectNode(managedObjectName,
+						this));
 	}
 
 	/*

@@ -814,8 +814,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	public OfficeOutput addOfficeOutput(String outputName, String argumentType) {
 		return NodeUtil.getInitialisedNode(outputName, this.outputs,
 				this.context, () -> this.context.createOfficeOutputNode(
-						outputName, argumentType, this), (output) -> output
-						.initialise());
+						outputName, this), (output) -> output
+						.initialise(argumentType));
 	}
 
 	@Override
@@ -873,8 +873,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			String governanceSourceClassName) {
 		return NodeUtil.getInitialisedNode(governanceName, this.governances,
 				this.context, () -> this.context.createGovernanceNode(
-						governanceName, governanceSourceClassName, null, this),
-				(governance) -> governance.initialise());
+						governanceName, this), (governance) -> governance
+						.initialise(governanceSourceClassName, null));
 	}
 
 	@Override
@@ -882,9 +882,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			GovernanceSource<?, ?> governanceSource) {
 		return NodeUtil.getInitialisedNode(governanceName, this.governances,
 				this.context, () -> this.context.createGovernanceNode(
-						governanceName, governanceSource.getClass().getName(),
-						governanceSource, this), (governance) -> governance
-						.initialise());
+						governanceName, this), (governance) -> governance
+						.initialise(governanceSource.getClass().getName(),
+								governanceSource));
 	}
 
 	@Override

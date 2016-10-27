@@ -19,7 +19,6 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
-import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
@@ -52,20 +51,9 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	private final String governanceName;
 
 	/**
-	 * Class name of the {@link GovernanceSource}.
-	 */
-	private final String governanceSourceClassName;
-
-	/**
-	 * {@link GovernanceSource} instance to use. Should this be specified it
-	 * overrides the {@link Class}.
-	 */
-	private final GovernanceSource<?, ?> governanceSource;
-
-	/**
 	 * {@link PropertyList} to source the {@link Governance}.
 	 */
-	private final PropertyList properties = new PropertyListImpl();
+	private final PropertyList properties;
 
 	/**
 	 * {@link OfficeNode} of the {@link Office} containing this
@@ -79,30 +67,61 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	private final NodeContext context;
 
 	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+
+		/**
+		 * Class name of the {@link GovernanceSource}.
+		 */
+		private final String governanceSourceClassName;
+
+		/**
+		 * {@link GovernanceSource} instance to use. Should this be specified it
+		 * overrides the {@link Class}.
+		 */
+		private final GovernanceSource<?, ?> governanceSource;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param governanceSourceClassName
+		 *            Class name of the {@link GovernanceSource}.
+		 * @param governanceSource
+		 *            {@link GovernanceSource} instance to use. Should this be
+		 *            specified it overrides the {@link Class}.
+		 */
+		public InitialisedState(String governanceSourceClassName,
+				GovernanceSource<?, ?> governanceSource) {
+			this.governanceSourceClassName = governanceSourceClassName;
+			this.governanceSource = governanceSource;
+		}
+	}
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param governanceName
 	 *            Name of this {@link OfficeGovernance}.
-	 * @param governanceSourceClassName
-	 *            Class name of the {@link GovernanceSource}.
-	 * @param governanceSource
-	 *            Optional instantiated {@link GovernanceSource} to use. May be
-	 *            <code>null</code>.
 	 * @param officeNode
 	 *            {@link OfficeNode} of the {@link Office} containing this
 	 *            {@link Governance}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public GovernanceNodeImpl(String governanceName,
-			String governanceSourceClassName,
-			GovernanceSource<?, ?> governanceSource, OfficeNode officeNode,
+	public GovernanceNodeImpl(String governanceName, OfficeNode officeNode,
 			NodeContext context) {
 		this.governanceName = governanceName;
-		this.governanceSourceClassName = governanceSourceClassName;
-		this.governanceSource = governanceSource;
 		this.officeNode = officeNode;
 		this.context = context;
+
+		// Create additional objects
+		this.properties = this.context.createPropertyList();
 	}
 
 	/*
@@ -131,18 +150,15 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
-	public void initialise() {
-		// TODO implement GovernanceNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement GovernanceNode.initialise");
-
+	public void initialise(String governanceSourceClassName,
+			GovernanceSource<?, ?> governanceSource) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(governanceSourceClassName,
+						governanceSource));
 	}
 
 	/*
@@ -155,7 +171,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 		// Obtain the governance source class
 		Class governanceSourceClass = this.context.getGovernanceSourceClass(
-				this.governanceSourceClassName, this);
+				this.state.governanceSourceClassName, this);
 		if (governanceSourceClass == null) {
 			return null; // must obtain source class
 		}
