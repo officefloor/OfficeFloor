@@ -18,20 +18,18 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.officefloor.OfficeFloorSourceContextImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
-import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
@@ -525,93 +523,31 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		OfficeFloorPropertyType[] propertyTypes = PropertyNode
 				.constructPropertyNodes(properties);
 
-		// Load the managed object sources (in deterministic order)
-		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
-				.toSortedArray(this.managedObjectSources.values(),
-						new ManagedObjectSourceNode[0],
-						(mo) -> mo.getOfficeFloorManagedObjectSourceName());
-		int managedObjectSourceIndex = 0;
-		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
-
-			// Ensure have the managed object source name
-			String managedObjectSourceName = managedObjectSource
-					.getOfficeFloorManagedObjectSourceName();
-			if (CompileUtil.isBlank(managedObjectSourceName)) {
-				this.addIssue("Null name for managed object source "
-						+ managedObjectSourceIndex);
-				return null; // must have name
-			}
-
-			// Ensure have the managed object source
-			if (!managedObjectSource.hasManagedObjectSource()) {
-				this.addIssue("Null source for managed object source "
-						+ managedObjectSourceName + " (managed object source "
-						+ managedObjectSourceIndex + ")");
-				return null; // must have source
-			}
-
-			// Load the managed object source type
-			managedObjectSource
-					.loadOfficeFloorManagedObjectSourceType(typeContext);
-
-			// Increment for next managed object source
-			managedObjectSourceIndex++;
+		// Load the managed object source types (in deterministic order)
+		OfficeFloorManagedObjectSourceType[] managedObjectSourceTypes = CompileUtil
+				.loadTypes(
+						this.managedObjectSources,
+						(managedObjectSource) -> managedObjectSource
+								.getOfficeFloorManagedObjectSourceName(),
+						(managedObjectSource) -> managedObjectSource
+								.loadOfficeFloorManagedObjectSourceType(typeContext),
+						OfficeFloorManagedObjectSourceType[]::new);
+		if (managedObjectSourceTypes == null) {
+			return null;
 		}
 
 		// Load the team sources (in deterministic order)
-		TeamNode[] teams = CompileUtil.toSortedArray(this.teams.values(),
-				new TeamNode[0], (team) -> team.getOfficeFloorTeamName());
-		int teamIndex = 0;
-		for (TeamNode team : teams) {
-
-			// Ensure have the team name
-			String teamName = team.getOfficeFloorTeamName();
-			if (CompileUtil.isBlank(teamName)) {
-				this.addIssue("Null name for team " + teamIndex);
-				return null; // must have name
-			}
-
-			// Ensure have the team source
-			if (!team.hasTeamSource()) {
-				this.addIssue("Null source for team " + teamName + " (team "
-						+ teamIndex + ")");
-				return null; // must have source
-			}
-
-			// Load team type
-			team.loadOfficeFloorTeamSourceType();
-
-			// Increment for next team
-			teamIndex++;
-		}
-
-		// Copy the managed object source types into an array
-		List<OfficeFloorManagedObjectSourceType> mosTypes = new LinkedList<OfficeFloorManagedObjectSourceType>();
-		for (ManagedObjectSourceNode mos : managedObjectSources) {
-			OfficeFloorManagedObjectSourceType mosType = mos
-					.loadOfficeFloorManagedObjectSourceType(typeContext);
-			if (mosType != null) {
-				mosTypes.add(mosType);
-			}
-		}
-
-		// Copy team types into an array
-		List<OfficeFloorTeamSourceType> teamTypes = new LinkedList<OfficeFloorTeamSourceType>();
-		for (TeamNode team : teams) {
-			OfficeFloorTeamSourceType teamType = team
-					.loadOfficeFloorTeamSourceType();
-			if (teamType != null) {
-				teamTypes.add(teamType);
-			}
+		OfficeFloorTeamSourceType[] teamTypes = CompileUtil.loadTypes(
+				this.teams, (team) -> team.getOfficeFloorTeamName(),
+				(team) -> team.loadOfficeFloorTeamSourceType(typeContext),
+				OfficeFloorTeamSourceType[]::new);
+		if (teamTypes == null) {
+			return null;
 		}
 
 		// Load and return the type
-		return new OfficeFloorTypeImpl(
-				propertyTypes,
-				mosTypes.toArray(new OfficeFloorManagedObjectSourceType[mosTypes
-						.size()]),
-				teamTypes.toArray(new OfficeFloorTeamSourceType[teamTypes
-						.size()]));
+		return new OfficeFloorTypeImpl(propertyTypes, managedObjectSourceTypes,
+				teamTypes);
 	}
 
 	@Override
@@ -625,152 +561,106 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		// Initiate the OfficeFloor builder with compiler details
 		this.context.initiateOfficeFloorBuilder(builder);
 
-		// Source the offices (in deterministic order)
-		OfficeNode[] offices = CompileUtil.toSortedArray(this.offices.values(),
-				new OfficeNode[0], new StringExtractor<OfficeNode>() {
-					@Override
-					public String toString(OfficeNode object) {
-						return object.getDeployedOfficeName();
-					}
-				});
-		for (OfficeNode office : offices) {
-			if (!office.sourceOfficeTree()) {
-				return null; // Must be able to source the offices
-			}
-		}
-
-		// Load the managed object sources (in deterministic order)
-		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
-				.toSortedArray(this.managedObjectSources.values(),
-						new ManagedObjectSourceNode[0],
-						new StringExtractor<ManagedObjectSourceNode>() {
-							@Override
-							public String toString(
-									ManagedObjectSourceNode object) {
-								return object
-										.getOfficeFloorManagedObjectSourceName();
-							}
-						});
-		int managedObjectSourceIndex = 0;
-		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
-
-			// Ensure have the managed object source name
-			String managedObjectSourceName = managedObjectSource
-					.getOfficeFloorManagedObjectSourceName();
-			if (CompileUtil.isBlank(managedObjectSourceName)) {
-				this.addIssue("Null name for managed object source "
-						+ managedObjectSourceIndex);
-			}
-
-			// Ensure have the managed object source
-			if (!managedObjectSource.hasManagedObjectSource()) {
-				this.addIssue("Null source for managed object source "
-						+ managedObjectSourceName + " (managed object source "
-						+ managedObjectSourceIndex + ")");
-				return null; // must have source
-			}
-
-			// Load the managed object source type
-			typeContext.getOrLoadManagedObjectType(managedObjectSource);
-
-			// Increment for next managed object source
-			managedObjectSourceIndex++;
-		}
-
-		// Load the team sources (in deterministic order)
-		TeamNode[] teams = CompileUtil.toSortedArray(this.teams.values(),
-				new TeamNode[0], new StringExtractor<TeamNode>() {
-					@Override
-					public String toString(TeamNode object) {
-						return object.getOfficeFloorTeamName();
-					}
-				});
-		int teamIndex = 0;
-		for (TeamNode team : teams) {
-
-			// Ensure have the team name
-			String teamName = team.getOfficeFloorTeamName();
-			if (CompileUtil.isBlank(teamName)) {
-				this.addIssue("Null name for team " + teamIndex);
-				return null; // must have name
-			}
-
-			// Ensure have the team source
-			if (!team.hasTeamSource()) {
-				this.addIssue("Null source for team " + teamName + " (team "
-						+ teamIndex + ")");
-				return null; // must have source
-			}
-
-			// Load team type
-			typeContext.getOrLoadTeamType(team);
-
-			// Increment for next team
-			teamIndex++;
-		}
-
 		// Build the teams (in deterministic order)
-		for (TeamNode team : teams) {
-			team.buildTeam(builder);
-		}
+		this.teams
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeFloorTeamName(), b.getOfficeFloorTeamName()))
+				.forEach((team) -> team.buildTeam(builder));
 
 		// Build the offices (in deterministic order)
-		Map<OfficeNode, OfficeBuilder> officeBuilders = new HashMap<OfficeNode, OfficeBuilder>();
-		for (OfficeNode office : offices) {
-			// Build the office
-			OfficeBuilder officeBuilder = office.buildOffice(builder,
-					typeContext);
+		Map<OfficeNode, OfficeBindings> officeBindings = new HashMap<OfficeNode, OfficeBindings>();
+		this.offices
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+				.forEach((office) -> {
 
-			// Provide profiler to office
-			String officeName = office.getDeployedOfficeName();
-			Profiler profiler = this.profilers.get(officeName);
-			if (profiler != null) {
-				officeBuilder.setProfiler(profiler);
-			}
+					// Obtain possible profiler to office
+						String officeName = office.getDeployedOfficeName();
+						Profiler profiler = this.profilers.get(officeName);
 
-			// Keep track of the office builders
-			officeBuilders.put(office, officeBuilder);
-		}
+						// Build the office
+						OfficeBindings bindings = office.buildOffice(builder,
+								typeContext, profiler);
+
+						// Keep track of the offices
+						officeBindings.put(office, bindings);
+					});
 
 		// Build the input managed objects (in deterministic order)
-		InputManagedObjectNode[] inputMos = CompileUtil.toSortedArray(
-				this.inputManagedObjects.values(),
-				new InputManagedObjectNode[0],
-				new StringExtractor<InputManagedObjectNode>() {
-					@Override
-					public String toString(InputManagedObjectNode object) {
-						return object.getOfficeFloorInputManagedObjectName();
-					}
-				});
+		InputManagedObjectNode[] inputMos = this.inputManagedObjects
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeFloorInputManagedObjectName(),
+						b.getOfficeFloorInputManagedObjectName()))
+				.toArray(InputManagedObjectNode[]::new);
 
 		// Build the managed object sources (in deterministic order)
-		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
+		this.managedObjectSources
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeFloorManagedObjectSourceName(),
+						b.getOfficeFloorManagedObjectSourceName()))
+				.forEach((managedObjectSource) -> {
+					// Obtain the managing office for the managed object source
+						OfficeNode managingOffice = managedObjectSource
+								.getManagingOfficeNode();
+						OfficeBindings bindings = officeBindings
+								.get(managingOffice);
+						if (bindings == null) {
+							return; // must have managing office
+						}
 
-			// Obtain the managing office for the managed object source
-			OfficeNode managingOffice = managedObjectSource
-					.getManagingOfficeNode();
-			OfficeBuilder officeBuilder = officeBuilders.get(managingOffice);
-			if (officeBuilder == null) {
-				continue; // must have managing office
-			}
+						// Build the managed object source
+						bindings.buildManagedObjectSourceIntoOffice(managedObjectSource);
 
-			// Build the managed object source
-			managedObjectSource.buildManagedObject(builder, managingOffice,
-					officeBuilder, typeContext);
-
-			// Bind the input managed objects (for this managed object source)
-			for (InputManagedObjectNode inputMo : inputMos) {
-				if (managedObjectSource == inputMo
-						.getBoundManagedObjectSourceNode()) {
-					// Bind managed object source for the input managed object
-					inputMo.buildOfficeManagedObject(managingOffice,
-							officeBuilder, typeContext);
-				}
-			}
-		}
+						// Bind inputs for this managed object source
+						for (InputManagedObjectNode inputMo : inputMos) {
+							if (managedObjectSource == inputMo
+									.getBoundManagedObjectSourceNode()) {
+								// Bind managed object source for the input
+								bindings.buildInputManagedObjectIntoOffice(inputMo);
+							}
+						}
+					});
 
 		// Return the built office floor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
+	}
+
+	/**
+	 * Struct with details of the {@link Office}.
+	 */
+	private class OfficeStruct {
+
+		/**
+		 * {@link OfficeBuilder}.
+		 */
+		public final OfficeBuilder officeBuilder;
+
+		/**
+		 * {@link OfficeBindings}.
+		 */
+		public final OfficeBindings officeBindings;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param officeBuilder
+		 *            {@link OfficeBuilder}.
+		 * @param officeBindings
+		 *            {@link OfficeBindings}.
+		 */
+		public OfficeStruct(OfficeBuilder officeBuilder,
+				OfficeBindings officeBindings) {
+			this.officeBuilder = officeBuilder;
+			this.officeBindings = officeBindings;
+		}
 	}
 
 	/**

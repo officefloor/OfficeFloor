@@ -43,6 +43,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -649,6 +650,17 @@ public interface NodeContext {
 	 */
 	AdministratorNode createAdministratorNode(String administratorName,
 			OfficeNode office);
+
+	/**
+	 * Creates a {@link DutyNode}.
+	 * 
+	 * @param dutyName
+	 *            Name of the {@link Duty}.
+	 * @param administrator
+	 *            {@link AdministratorNode}.
+	 * @return {@link DutyNode}.
+	 */
+	DutyNode createDutyNode(String dutyName, AdministratorNode administrator);
 
 	/**
 	 * Obtains the {@link GovernanceSource} class.

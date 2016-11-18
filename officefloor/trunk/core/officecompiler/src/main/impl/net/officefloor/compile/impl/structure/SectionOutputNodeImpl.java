@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.section.OfficeSectionOutputTypeImpl;
 import net.officefloor.compile.impl.section.SectionOutputTypeImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -148,6 +149,15 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 
 	@Override
 	public SectionOutputType loadSectionOutputType(TypeContext typeContext) {
+
+		// Ensure have output name
+		if (CompileUtil.isBlank(this.outputName)) {
+			this.context.getCompilerIssues().addIssue(this,
+					"Null name for " + TYPE);
+			return null; // must have names for outputs
+		}
+
+		// Create and return type
 		return new SectionOutputTypeImpl(this.outputName,
 				this.state.argumentType, this.state.isEscalationOnly);
 	}

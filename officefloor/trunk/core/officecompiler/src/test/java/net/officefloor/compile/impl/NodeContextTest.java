@@ -17,9 +17,12 @@
  */
 package net.officefloor.compile.impl;
 
+import java.util.function.Consumer;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.internal.structure.AdministratorNode;
+import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
@@ -113,9 +116,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getSectionQualifiedName("QUALIFIED"));
 
 		// Ensure provide location
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise(null, null, "LOCATION");
-		assertTrue("Now initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise(null, null, "LOCATION"));
 		assertEquals("Incorrect location", "LOCATION", node.getLocation());
 	}
 
@@ -134,6 +135,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertSame("Incorrect office", this.office, node.getOfficeNode());
 		assertSame("Incorrect parent section", this.section,
 				node.getParentSectionNode());
+		assertInitialise(node, (n) -> n.initialise(null, null, "LOCATION"));
 	}
 
 	/**
@@ -145,9 +147,19 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "ADMINISTRATOR", "Administrator", null, this.office);
 		assertEquals("Incorrect administrator name", "ADMINISTRATOR",
 				node.getOfficeAdministratorName());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("ExampleAdministratorSource", null);
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node,
+				(n) -> n.initialise("ExampleAdministratorSource", null));
+	}
+
+	/**
+	 * Ensure can create {@link DutyNode}.
+	 */
+	public void testCreateDutyNode() {
+		AdministratorNode admin = this.createMock(AdministratorNode.class);
+		DutyNode node = this.doTest(() -> this.context.createDutyNode("DUTY",
+				admin));
+		assertNode(node, "DUTY", "Duty", null, admin);
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -160,6 +172,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				this.office);
 		assertEquals("Incorrect escalation type", "java.sql.SQLException",
 				node.getOfficeEscalationType());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -171,9 +184,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "GOVERNANCE", "Governance", null, this.office);
 		assertEquals("Incorrect governance name", "GOVERNANCE",
 				node.getOfficeGovernanceName());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("ExampleGovernanceSource", null);
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node,
+				(n) -> n.initialise("ExampleGovernanceSource", null));
 	}
 
 	/**
@@ -186,6 +198,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				this.officeFloor);
 		assertEquals("Incorrect bound managed object name", "INPUT",
 				node.getBoundManagedObjectName());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/*
@@ -205,6 +218,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				managedObject);
 		assertEquals("Incorrect managed object dependency name", "DEPENDENCY",
 				node.getManagedObjectDependencyName());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/*
@@ -219,6 +233,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "DEPENDENCY", "Managed Object Dependency", null, mos);
 		assertEquals("Incorrect managed object dependency name", "DEPENDENCY",
 				node.getManagedObjectDependencyName());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -231,6 +246,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				this.managedObjectSource);
 		assertEquals("Incorrect managed object flow name", "FLOW",
 				node.getManagedObjectFlowName());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -267,9 +283,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getGovernerableManagedObjectName());
 		assertEquals("Incorrect OfficeFloor name", "MO",
 				node.getOfficeFloorManagedObjectName());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise(ManagedObjectScope.THREAD);
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD));
 	}
 
 	/**
@@ -300,9 +314,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getOfficeSectionManagedObjectName());
 		assertEquals("Incorrect managed object source",
 				this.managedObjectSource, node.getManagedObjectSourceNode());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise(ManagedObjectScope.THREAD);
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD));
 	}
 
 	/**
@@ -328,9 +340,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
 		assertEquals("Incorrect managed object source",
 				this.managedObjectSource, node.getManagedObjectSourceNode());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise(ManagedObjectScope.THREAD);
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD));
 	}
 
 	/**
@@ -368,9 +378,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getSectionManagedObjectSourceName());
 		assertSame("Incorrect parent section", this.section,
 				node.getSectionNode());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("ExampleManagedObjectSource", null);
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node,
+				(n) -> n.initialise("ExampleManagedObjectSource", null));
 	}
 
 	/**
@@ -406,9 +415,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNull(
 				"Should not have parent section, as not contained in section",
 				node.getSectionNode());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("ExampleManagedObjectSource", null);
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node,
+				(n) -> n.initialise("ExampleManagedObjectSource", null));
 	}
 
 	/**
@@ -450,9 +458,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNull(
 				"Should not have parent section, as not contained in section",
 				node.getSectionNode());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("ExampleManagedObjectSource", null);
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node,
+				(n) -> n.initialise("ExampleManagedObjectSource", null));
 	}
 
 	/**
@@ -484,9 +491,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNull(
 				"Should not have parent section, as not contained in section",
 				node.getSectionNode());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("ExampleManagedObjectSource", null);
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node,
+				(n) -> n.initialise("ExampleManagedObjectSource", null));
 	}
 
 	/**
@@ -499,6 +505,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				this.managedObjectSource);
 		assertEquals("Incorrect managed object team name", "TEAM",
 				node.getManagedObjectTeamName());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -507,13 +514,14 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	public void testCreateManagingOfficeNode() {
 		this.recordReturn(this.managedObjectSource,
 				this.managedObjectSource.getManagedObjectSourceName(), "MOS");
-		this.doTest(() -> {
-			ManagingOfficeNode node = this.context
+		ManagingOfficeNode node = this.doTest(() -> {
+			ManagingOfficeNode office = this.context
 					.createManagingOfficeNode(this.managedObjectSource);
-			assertNode(node, "Managing Office for Managed Object Source MOS",
+			assertNode(office, "Managing Office for Managed Object Source MOS",
 					"Managing Office", null, this.managedObjectSource);
-			return node;
+			return office;
 		});
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -525,6 +533,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 						"LOCATION"));
 		assertNode(node, OfficeFloorNode.OFFICE_FLOOR_NAME, "OfficeFloor",
 				"LOCATION", null);
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -536,9 +545,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "INPUT", "Office Input", null, this.office);
 		assertEquals("Incorrect office input name", "INPUT",
 				node.getOfficeInputName());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("java.lang.String");
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise("java.lang.String"));
 	}
 
 	/**
@@ -550,9 +557,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "OFFICE", "Office", null, this.officeFloor);
 		assertEquals("Incorrect office name", "OFFICE",
 				node.getDeployedOfficeName());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("ExampleOfficeSource", null, "LOCATION");
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node,
+				(n) -> n.initialise("ExampleOfficeSource", null, "LOCATION"));
 		assertEquals("Should be initialised with location", "LOCATION",
 				node.getLocation());
 	}
@@ -572,9 +578,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getGovernerableManagedObjectName());
 		assertEquals("Incorrect office object name", "OBJECT",
 				node.getOfficeObjectName());
-		assertFalse("Not yet initialsied", node.isInitialised());
-		node.initialise("java.lang.Integer");
-		assertTrue("Now initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise("java.lang.Integer"));
 	}
 
 	/**
@@ -586,9 +590,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "OUTPUT", "Office Output", null, this.office);
 		assertEquals("Incorrect output name", "OUTPUT",
 				node.getOfficeOutputName());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("java.lang.Character");
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise("java.lang.Character"));
 	}
 
 	/**
@@ -599,6 +601,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				.createOfficeStartNode("START", this.office));
 		assertNode(node, "START", "Office Start", null, this.office);
 		assertEquals("Incorrect start name", "START", node.getOfficeStartName());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -608,6 +611,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		OfficeTeamNode node = this.doTest(() -> this.context
 				.createOfficeTeamNode("TEAM", this.office));
 		assertNode(node, "TEAM", "Office Team", null, this.office);
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -624,11 +628,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getDeployedOfficeInputName());
 		assertEquals("Incorrect section input name", "INPUT",
 				node.getOfficeSectionInputName());
-
-		// Validate initialised
-		assertFalse("Not yet initialsied", node.isInitialised());
-		node = node.initialise("java.lang.Short");
-		assertTrue("Now initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise("java.lang.Short"));
 	}
 
 	/**
@@ -644,11 +644,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getSectionObjectName());
 		assertEquals("Incorrect sub section object name", "OBJECT",
 				node.getSubSectionObjectName());
-
-		// Validate initialised
-		assertFalse("Not yet initialsied", node.isInitialised());
-		node.initialise("java.lang.Byte");
-		assertTrue("Now initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise("java.lang.Byte"));
 	}
 
 	/**
@@ -664,11 +660,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getSectionOutputName());
 		assertEquals("Incorrect sub section output name", "OUTPUT",
 				node.getSubSectionOutputName());
-
-		// Validate initialised
-		assertFalse("Not yet initialsied", node.isInitialised());
-		node.initialise("java.lang.Float", true);
-		assertTrue("Now initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise("java.lang.Float", true));
 	}
 
 	/**
@@ -681,6 +673,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				.createSuppliedManagedObjectNode(autoWire, supplier));
 		assertNode(node, autoWire.getQualifiedType(),
 				"Supplied Managed Object", null, supplier);
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -692,6 +685,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "SUPPLIER", "Supplier", null, this.officeFloor);
 		assertEquals("Incorrect supplier name", "SUPPLIER",
 				node.getOfficeFloorSupplierName());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -705,6 +699,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				FlowInstigationStrategyEnum.SEQUENTIAL,
 				node.getFlowInstigationStrategy());
 		assertEquals("Incorrect task flow name", "FLOW", node.getTaskFlowName());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -719,9 +714,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect section task name", "TASK",
 				node.getSectionTaskName());
 		assertNull("Should not have work", node.getWorkNode());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("TYPE", work);
-		assertTrue("Should be initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise("TYPE", work));
 		assertSame("Incorrect work", work, node.getWorkNode());
 	}
 
@@ -734,6 +727,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "OBJECT", "Task Object", null, this.task);
 		assertEquals("Incorrect task object name", "OBJECT",
 				node.getTaskObjectName());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -743,6 +737,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		TaskTeamNode node = this.doTest(() -> this.context.createTaskTeamNode(
 				"TEAM", this.task));
 		assertNode(node, "TEAM", "Task Team", null, this.task);
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**
@@ -752,9 +747,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		TeamNode node = this.context.createTeamNode("TEAM", this.officeFloor);
 		assertNode(node, "TEAM", "Team", null, this.officeFloor);
 		assertEquals("TEAM", node.getOfficeFloorTeamName());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("ExampleTeamSource");
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise("ExampleTeamSource"));
 	}
 
 	/**
@@ -773,9 +766,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertSame("Incorrect section", this.section, node.getSectionNode());
 		assertEquals("Incorrect section work name", "WORK",
 				node.getSectionWorkName());
-		assertFalse("Should not be initialised", node.isInitialised());
-		node.initialise("ExampleWorkSource", null);
-		assertTrue("Should now be initialised", node.isInitialised());
+		assertInitialise(node, (n) -> n.initialise("ExampleWorkSource", null));
 	}
 
 	/**
@@ -798,6 +789,21 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect node type", type, node.getNodeType());
 		assertEquals("Incorrect node location", location, node.getLocation());
 		assertSame("Incorrect node parent", parent, node.getParentNode());
+	}
+
+	/**
+	 * Asserts the {@link Node} is initialised.
+	 * 
+	 * @param node
+	 *            {@link Node} to validate initialising.
+	 * @param initialiser
+	 *            {@link Consumer} to initialise the {@link Node}.
+	 */
+	private static <N extends Node> void assertInitialise(N node,
+			Consumer<N> initialiser) {
+		assertFalse("Should not be initialised", node.isInitialised());
+		initialiser.accept(node);
+		assertTrue("Should now be initialised", node.isInitialised());
 	}
 
 }

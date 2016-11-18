@@ -29,12 +29,12 @@ import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.section.SectionTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
-import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -87,7 +87,6 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -208,7 +207,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
 	/**
-	 * {@link WorkNode} instances by their {@link SectionWork} names.
+	 * {@link Node} instances by their {@link SectionWork} names.
 	 */
 	private final Map<String, WorkNode> workNodes = new HashMap<String, WorkNode>();
 
@@ -395,69 +394,36 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		}
 
 		// Successful only if all sub sections are also sourced
-		return this.subSections
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionName(), b.getOfficeSectionName()))
-				.allMatch(t -> t.sourceSectionTree());
+		return CompileUtil.sourceTree(this.subSections,
+				(subSection) -> subSection.getOfficeSectionName(),
+				(subSection) -> subSection.sourceSectionTree());
 	}
 
 	@Override
 	public SectionType loadSectionType(TypeContext typeContext) {
 
 		// Obtain the listing of input types sorted by name
-		SectionInputType[] inputTypes = this.inputs
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getSectionInputName(), b.getSectionInputName()))
-				.map((input) -> input.loadSectionInputType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(SectionInputType[]::new);
-		for (int i = 0; i < inputTypes.length; i++) {
-			if (CompileUtil.isBlank(inputTypes[i].getSectionInputName())) {
-				this.addIssue("Null name for input " + i);
-				return null; // must have names for inputs
-			}
+		SectionInputType[] inputTypes = CompileUtil.loadTypes(this.inputs, (
+				input) -> input.getSectionInputName(), (input) -> input
+				.loadSectionInputType(typeContext), SectionInputType[]::new);
+		if (inputTypes == null) {
+			return null;
 		}
 
 		// Obtain the listing of output types sorted by name
-		SectionOutputType[] outputTypes = this.outputs
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getSectionOutputName(), b.getSectionOutputName()))
-				.map((output) -> output.loadSectionOutputType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(SectionOutputType[]::new);
-		for (int i = 0; i < outputTypes.length; i++) {
-			if (CompileUtil.isBlank(outputTypes[i].getSectionOutputName())) {
-				this.addIssue("Null name for output " + i);
-				return null; // must have names for outputs
-			}
+		SectionOutputType[] outputTypes = CompileUtil.loadTypes(this.outputs, (
+				output) -> output.getSectionOutputName(), (output) -> output
+				.loadSectionOutputType(typeContext), SectionOutputType[]::new);
+		if (outputTypes == null) {
+			return null;
 		}
 
 		// Obtain the listing of object types sorted by name
-		SectionObjectType[] objectTypes = this.objects
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getSectionObjectName(), b.getSectionObjectName()))
-				.map((object) -> object.loadSectionObjectType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(SectionObjectType[]::new);
-		for (int i = 0; i < objectTypes.length; i++) {
-			SectionObjectType objectType = objectTypes[i];
-			if (CompileUtil.isBlank(objectType.getSectionObjectName())) {
-				this.addIssue("Null name for object " + i);
-				return null; // must have names for objects
-			}
-			if (CompileUtil.isBlank(objectType.getObjectType())) {
-				this.addIssue("Null type for object " + i + " (name="
-						+ objectType.getSectionObjectName() + ")");
-				return null; // must have types for objects
-			}
+		SectionObjectType[] objectTypes = CompileUtil.loadTypes(this.objects, (
+				object) -> object.getSectionObjectName(), (object) -> object
+				.loadSectionObjectType(typeContext), SectionObjectType[]::new);
+		if (objectTypes == null) {
+			return null;
 		}
 
 		// Create and return the section type
@@ -474,44 +440,40 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		}
 
 		// Obtain the section inputs
-		OfficeSectionInputType[] inputTypes = this.inputs
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionInputName(),
-						b.getOfficeSectionInputName()))
-				.map((input) -> input.loadOfficeSectionInputType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(OfficeSectionInputType[]::new);
+		OfficeSectionInputType[] inputTypes = CompileUtil.loadTypes(
+				this.inputs, (input) -> input.getOfficeSectionInputName(),
+				(input) -> input.loadOfficeSectionInputType(typeContext),
+				OfficeSectionInputType[]::new);
+		if (inputTypes == null) {
+			return null; // must load types
+		}
 
 		// Add the office context for the section outputs
-		OfficeSectionOutputType[] outputTypes = this.outputs
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionOutputName(),
-						b.getOfficeSectionOutputName()))
-				.map((output) -> output
-						.loadOfficeSectionOutputType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(OfficeSectionOutputType[]::new);
+		OfficeSectionOutputType[] outputTypes = CompileUtil.loadTypes(
+				this.outputs, (output) -> output.getOfficeSectionOutputName(),
+				(output) -> output.loadOfficeSectionOutputType(typeContext),
+				OfficeSectionOutputType[]::new);
+		if (outputTypes == null) {
+			return null; // must load types
+		}
 
 		// Add the office context for the section objects
-		OfficeSectionObjectType[] objectTypes = this.objects
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionObjectName(),
-						b.getOfficeSectionObjectName()))
-				.map((object) -> object
-						.loadOfficeSectionObjectType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(OfficeSectionObjectType[]::new);
+		OfficeSectionObjectType[] objectTypes = CompileUtil.loadTypes(
+				this.objects, (object) -> object.getOfficeSectionObjectName(),
+				(object) -> object.loadOfficeSectionObjectType(typeContext),
+				OfficeSectionObjectType[]::new);
+		if (objectTypes == null) {
+			return null; // must load types
+		}
 
 		// Create the office section type
 		OfficeSectionTypeImpl officeSectionType = new OfficeSectionTypeImpl(
 				this.sectionName, inputTypes, outputTypes, objectTypes);
-		this.initialiseSubSectionState(officeSectionType, null, typeContext);
+		boolean isInitialised = this.initialiseSubSectionState(
+				officeSectionType, null, typeContext);
+		if (!isInitialised) {
+			return null; // must be initialised
+		}
 
 		// Return the type
 		return officeSectionType;
@@ -526,8 +488,11 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				this.sectionName, new OfficeSectionInputType[] {},
 				new OfficeSectionOutputType[] {},
 				new OfficeSectionObjectType[] {});
-		this.initialiseSubSectionState(officeSectionType, parentSectionType,
-				typeContext);
+		boolean isInitialised = this.initialiseSubSectionState(
+				officeSectionType, parentSectionType, typeContext);
+		if (!isInitialised) {
+			return null; // must be initialised
+		}
 
 		// Return the type
 		return officeSectionType;
@@ -543,30 +508,34 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            Parent {@link OfficeSubSectionType}.
 	 * @param typeContext
 	 *            {@link TypeContext}.
+	 * @return <code>true</code> if initialised {@link OfficeSubSectionType}
+	 *         state.
 	 */
-	private void initialiseSubSectionState(OfficeSectionTypeImpl sectionType,
+	private boolean initialiseSubSectionState(
+			OfficeSectionTypeImpl sectionType,
 			OfficeSubSectionType parentSectionType, TypeContext typeContext) {
 
 		// Load the sub sections
-		OfficeSubSectionType[] subSections = this.subSections
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getSubSectionName(), b.getSubSectionName()))
-				.map(t -> t.loadOfficeSubSectionType(sectionType, typeContext))
-				.filter(t -> (t != null)).toArray(OfficeSubSectionType[]::new);
+		OfficeSubSectionType[] subSections = CompileUtil.loadTypes(
+				this.subSections, (subSection) -> subSection
+						.getSubSectionName(), (subSection) -> subSection
+						.loadOfficeSubSectionType(sectionType, typeContext),
+				OfficeSubSectionType[]::new);
+		if (subSections == null) {
+			return false;
+		}
 
 		// Load managed object sources
-		OfficeSectionManagedObjectSourceType[] managedObjectSourceTypes = this.managedObjectSourceNodes
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionManagedObjectSourceName(),
-						b.getOfficeSectionManagedObjectSourceName()))
-				.map((mos) -> mos
-						.loadOfficeSectionManagedObjectSourceType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(OfficeSectionManagedObjectSourceType[]::new);
+		OfficeSectionManagedObjectSourceType[] managedObjectSourceTypes = CompileUtil
+				.loadTypes(
+						this.managedObjectSourceNodes,
+						(mos) -> mos.getOfficeSectionManagedObjectSourceName(),
+						(mos) -> mos
+								.loadOfficeSectionManagedObjectSourceType(typeContext),
+						OfficeSectionManagedObjectSourceType[]::new);
+		if (managedObjectSourceTypes == null) {
+			return false;
+		}
 
 		// Obtain the mapping of work to types
 		Map<WorkNode, WorkType<?>> workTypes = new HashMap<WorkNode, WorkType<?>>();
@@ -588,43 +557,47 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 					});
 
 		// Add the office context for the tasks
-		OfficeTaskType[] taskTypes = this.taskNodes
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeTaskName(), b.getOfficeTaskName()))
-				.map(task -> {
-					// Obtain the work type of the work for the task
-					WorkType<?> workType = workTypes.get(task.getWorkNode());
-					if (workType == null) {
-						return null;
-					}
+		OfficeTaskType[] taskTypes = CompileUtil.loadTypes(this.taskNodes, (
+				task) -> task.getOfficeTaskName(), task -> {
+			// Obtain the work type of the work for the task
+				WorkType<?> workType = workTypes.get(task.getWorkNode());
+				if (workType == null) {
+					return null;
+				}
 
-					// Load and return the task type
-					return task.loadOfficeTaskType(sectionType, typeContext);
-				}).filter(type -> (type != null))
-				.toArray(OfficeTaskType[]::new);
+				// Load and return the task type
+				return task.loadOfficeTaskType(sectionType, typeContext);
+			}, OfficeTaskType[]::new);
+		if (taskTypes == null) {
+			return false;
+		}
 
 		// Initialise the sub section state
 		sectionType.initialiseAsOfficeSubSectionType(parentSectionType,
 				subSections, taskTypes, managedObjectSourceTypes);
+		return true;
 	}
 
 	@Override
 	public OfficeAvailableSectionInputType[] loadOfficeAvailableSectionInputTypes(
 			TypeContext typeContext) {
-		return this.inputs
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionInputName(),
-						b.getOfficeSectionInputName()))
-				.map((input) -> input.loadOfficeSectionInputType(typeContext))
-				.filter((type) -> (type != null))
-				.map((type) -> new OfficeAvailableSectionInputTypeImpl(
-						this.sectionName, type.getOfficeSectionInputName(),
-						type.getParameterType()))
-				.toArray(OfficeAvailableSectionInputType[]::new);
+		return CompileUtil.loadTypes(this.inputs,
+				(input) -> input.getOfficeSectionInputName(),
+				(input) -> {
+
+					// Load the input type
+				OfficeSectionInputType inputType = input
+						.loadOfficeSectionInputType(typeContext);
+				if (inputType == null) {
+					return null;
+				}
+
+				// Return the section input type
+				return new OfficeAvailableSectionInputTypeImpl(
+						this.sectionName,
+						inputType.getOfficeSectionInputName(), inputType
+								.getParameterType());
+			}, OfficeAvailableSectionInputType[]::new);
 	}
 
 	@Override
@@ -665,51 +638,37 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public void buildSection(OfficeFloorBuilder officeFloorBuilder,
-			OfficeBuilder officeBuilder, TypeContext typeContext) {
+	public void buildSection(OfficeBuilder officeBuilder,
+			OfficeBindings officeBindings, TypeContext typeContext) {
 
 		// Build the work of this section (in deterministic order)
-		WorkNode[] works = CompileUtil.toSortedArray(this.workNodes.values(),
-				new WorkNode[0], new StringExtractor<WorkNode>() {
-					@Override
-					public String toString(WorkNode work) {
-						return work.getSectionWorkName();
-					}
-				});
-		for (WorkNode work : works) {
-			work.buildWork(officeBuilder, typeContext);
-		}
+		this.workNodes
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getSectionWorkName(), b.getSectionWorkName()))
+				.forEach((work) -> work.buildWork(officeBuilder, typeContext));
 
 		// Build the managed object sources for office (in deterministic order)
-		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
-				.toSortedArray(this.managedObjectSourceNodes.values(),
-						new ManagedObjectSourceNode[0],
-						new StringExtractor<ManagedObjectSourceNode>() {
-							@Override
-							public String toString(
-									ManagedObjectSourceNode object) {
-								return object
-										.getOfficeManagedObjectSourceName();
-							}
-						});
-		for (ManagedObjectSourceNode mos : managedObjectSources) {
-			mos.buildManagedObject(officeFloorBuilder, this.office,
-					officeBuilder, typeContext);
-		}
+		this.managedObjectSourceNodes
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeManagedObjectSourceName(),
+						b.getOfficeManagedObjectSourceName()))
+				.forEach(
+						(managedObjectSource) -> officeBindings
+								.buildManagedObjectSourceIntoOffice(managedObjectSource));
 
 		// Build the sub sections (in deterministic order)
-		SectionNode[] subSections = CompileUtil.toSortedArray(
-				this.subSections.values(), new SectionNode[0],
-				new StringExtractor<SectionNode>() {
-					@Override
-					public String toString(SectionNode subSection) {
-						return subSection.getSubSectionName();
-					}
-				});
-		for (SectionNode subSection : subSections) {
-			subSection.buildSection(officeFloorBuilder, officeBuilder,
-					typeContext);
-		}
+		this.subSections
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getSubSectionName(), b.getSubSectionName()))
+				.forEach(
+						(subSection) -> subSection.buildSection(officeBuilder,
+								officeBindings, typeContext));
 	}
 
 	@Override

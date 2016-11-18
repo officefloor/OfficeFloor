@@ -18,8 +18,10 @@
 package net.officefloor.compile.integrate.managedobject;
 
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
-import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -49,7 +51,8 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testSimpleManagedObjectSource() {
 
-		// Record building the office floor
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.DESK.MANAGED_OBJECT_SOURCE",
@@ -69,7 +72,8 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testProcessBoundManagedObject() {
 
-		// Record building the office floor
+		// Record building the OfficeFloor
+		this.record_init();
 		OfficeBuilder office = this
 				.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.DESK.MANAGED_OBJECT",
@@ -95,31 +99,17 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectWithDependencyNotLinked() {
 
-		// Record building the office floor
-
-		// Register the managed object with dependency not linked
-		OfficeBuilder office = this
-				.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.DESK.DEPENDENT",
-				"OFFICE.DESK.DEPENDENT_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject(
-				"OFFICE.DESK.DEPENDENT", "OFFICE.DESK.DEPENDENT");
+		// Record issue creating section type
+		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
 		this.issues
-				.recordIssue("DEPENDENT",
+				.recordIssue("dependency",
 						ManagedObjectDependencyNodeImpl.class,
-						"Dependency dependency is not linked to a BoundManagedObjectNode");
+						"Managed Object Dependency dependency is not linked to a DependentObjectNode");
+		this.issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+				"Failure loading OfficeSectionType from source DESK", issues);
 
-		// Add managed objects to office floor
-		this.record_officeFloorBuilder_addManagedObject(
-				"OFFICE.DESK.DEPENDENT_SOURCE", ClassManagedObjectSource.class,
-				0, "class.name", DependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-
-		// Capture issues for managed object type
-		this.issues.recordCaptureIssues(false);
-
-		// Compile the office floor
-		this.compile(true);
+		// Compile the OfficeFloor
+		this.compile(false);
 	}
 
 	/**
@@ -128,34 +118,35 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectWithDependencyInDesk() {
 
+		// Capture issues for section type
+		this.issues.recordCaptureIssues(false);
+
 		// Record building the office
+		this.record_init();
 
 		// Register the office linked managed objects with the office
 		OfficeBuilder office = this
 				.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.DESK.DEPENDENT",
-				"OFFICE.DESK.DEPENDENT_SOURCE");
-		DependencyMappingBuilder mapper = this
-				.record_officeBuilder_addProcessManagedObject(
-						"OFFICE.DESK.DEPENDENT", "OFFICE.DESK.DEPENDENT");
-		mapper.mapDependency(0, "OFFICE.DESK.SIMPLE");
-		office.registerManagedObjectSource("OFFICE.DESK.SIMPLE",
-				"OFFICE.DESK.SIMPLE_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject("OFFICE.DESK.SIMPLE",
-				"OFFICE.DESK.SIMPLE");
 
 		// Add managed objects to office
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.DESK.DEPENDENT_SOURCE", ClassManagedObjectSource.class,
 				0, "class.name", DependencyManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.DESK.DEPENDENT",
+				"OFFICE.DESK.DEPENDENT_SOURCE");
+		DependencyMappingBuilder mapper = this
+				.record_officeBuilder_addProcessManagedObject(
+						"OFFICE.DESK.DEPENDENT", "OFFICE.DESK.DEPENDENT");
+		office.registerManagedObjectSource("OFFICE.DESK.SIMPLE",
+				"OFFICE.DESK.SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("OFFICE.DESK.SIMPLE",
+				"OFFICE.DESK.SIMPLE");
+		mapper.mapDependency(0, "OFFICE.DESK.SIMPLE");
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.DESK.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-
-		// Capture issues for managed object type
-		this.issues.recordCaptureIssues(false);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -167,34 +158,39 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectWithDependencyOutSideDesk() {
 
+		// Capture issues for section type
+		this.issues.recordCaptureIssues(false);
+
 		// Record building the office
+		this.record_init();
 
 		// Register the section linked managed objects with the office
 		OfficeBuilder office = this
 				.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.SIMPLE",
-				"OFFICE.SIMPLE_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE",
-				"OFFICE.SIMPLE");
-		office.registerManagedObjectSource("OFFICE.DESK.DEPENDENT",
-				"OFFICE.DESK.DEPENDENT_SOURCE");
-		DependencyMappingBuilder mapper = this
-				.record_officeBuilder_addProcessManagedObject(
-						"OFFICE.DESK.DEPENDENT", "OFFICE.DESK.DEPENDENT");
-		mapper.mapDependency(0, "OFFICE.SIMPLE");
 
-		// Add managed objects to office
+		// Add first managed object
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE",
 				ClassManagedObjectSource.class, 0, "class.name",
 				SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.SIMPLE",
+				"OFFICE.SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE",
+				"OFFICE.SIMPLE");
+
+		// Add second managed object
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.DESK.DEPENDENT_SOURCE", ClassManagedObjectSource.class,
 				0, "class.name", DependencyManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.DESK.DEPENDENT",
+				"OFFICE.DESK.DEPENDENT_SOURCE");
 
-		// Capture issues for managed object type
-		this.issues.recordCaptureIssues(false);
+		// Map dependency between managed objects
+		DependencyMappingBuilder mapper = this
+				.record_officeBuilder_addProcessManagedObject(
+						"OFFICE.DESK.DEPENDENT", "OFFICE.DESK.DEPENDENT");
+		mapper.mapDependency(0, "OFFICE.SIMPLE");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -206,7 +202,8 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectSourceFlowNotLinked() {
 
-		// Record building the office floor
+		// Record building the office
+		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.DESK.MANAGED_OBJECT_SOURCE",
@@ -214,12 +211,14 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 				ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.DESK.MANAGED_OBJECT_SOURCE");
-		this.issues.recordIssue("MANAGED_OBJECT_SOURCE",
-				ManagedObjectSourceNodeImpl.class,
-				"Managed object flow doProcess is not linked to a TaskNode");
 
-		// Capture issues for managed object type
+		// Record creating managed object type
 		this.issues.recordCaptureIssues(false);
+
+		// Record issue in flow not linked
+		this.issues
+				.recordIssue("doProcess", ManagedObjectFlowNodeImpl.class,
+						"Managed Object Source Flow doProcess is not linked to a TaskNode");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -231,7 +230,8 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectSourceFlowLinkedToTask() {
 
-		// Record building the office floor
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -262,7 +262,12 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectSourceFlowLinkedToExternalFlow() {
 
-		// Record building the office floor
+		// Capture issues for the two section types
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -279,9 +284,6 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
-
-		// Capture issues for managed object type
-		this.issues.recordCaptureIssues(false);
 
 		// Compile the OfficeFloor
 		this.compile(true);

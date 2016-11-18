@@ -44,9 +44,8 @@ public interface SectionInputNode extends LinkFlowNode, SectionInput,
 	 * 
 	 * @param parameterType
 	 *            Parameter type.
-	 * @return <code>this</code> for builder pattern.
 	 */
-	SectionInputNode initialise(String parameterType);
+	void initialise(String parameterType);
 
 	/**
 	 * Loads the {@link SectionInputType}.

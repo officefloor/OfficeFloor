@@ -39,7 +39,11 @@ public class CompileOfficeEscalationTest extends AbstractCompileTestCase {
 	 */
 	public void testSimpleEscalation() {
 
+		// Record creating section type
+		this.issues.recordCaptureIssues(false);
+
 		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE");
@@ -59,7 +63,11 @@ public class CompileOfficeEscalationTest extends AbstractCompileTestCase {
 	 */
 	public void testMultipleEscalationOrdering() {
 
+		// Record creating section type
+		this.issues.recordCaptureIssues(false);
+
 		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE");

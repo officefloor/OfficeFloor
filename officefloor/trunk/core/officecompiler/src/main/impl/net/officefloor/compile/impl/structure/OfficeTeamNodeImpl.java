@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.office.OfficeTeamTypeImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -128,6 +129,15 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 
 	@Override
 	public OfficeTeamType loadOfficeTeamType(TypeContext typeContext) {
+
+		// Ensure have name
+		if (CompileUtil.isBlank(this.teamName)) {
+			this.context.getCompilerIssues().addIssue(this,
+					"Null name for " + TYPE);
+			return null; // must have name
+		}
+
+		// Create and return type
 		return new OfficeTeamTypeImpl(this.teamName);
 	}
 

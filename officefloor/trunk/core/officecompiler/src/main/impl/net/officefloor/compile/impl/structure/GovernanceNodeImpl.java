@@ -256,18 +256,9 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-
-		// Ensure not already linked
-		if (this.linkedTeamNode != null) {
-			// Team already linked
-			this.context.getCompilerIssues().addIssue(this,
-					"Team already assigned");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedTeamNode = node;
-		return true;
+		return LinkUtil.linkTeamNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedTeamNode = link);
 	}
 
 	@Override

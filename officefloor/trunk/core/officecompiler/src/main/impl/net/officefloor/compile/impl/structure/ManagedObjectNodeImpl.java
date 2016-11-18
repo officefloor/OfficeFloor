@@ -18,13 +18,10 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import net.officefloor.compile.impl.object.DependentObjectTypeImpl;
 import net.officefloor.compile.impl.section.OfficeSectionManagedObjectTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
@@ -36,10 +33,10 @@ import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.DependentObjectType;
@@ -214,53 +211,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	public OfficeSectionManagedObjectType loadOfficeSectionManagedObjectType(
 			TypeContext typeContext) {
 
-		// Load the type structure
-		ManagedObjectDependentObjectStruct struct = this
-				.loadManagedObjectDependentObjectStruct(typeContext);
-		if (struct == null) {
-			return null; // must have structure
-		}
-
-		// Obtain the extension interfaces
-		Class<?>[] extensionInterfaces = struct.managedObjectType
-				.getExtensionInterfaces();
-
-		// Create and return the managed object type
-		return new OfficeSectionManagedObjectTypeImpl(this.managedObjectName,
-				struct.dependentObjectType.getTypeQualifications(),
-				extensionInterfaces,
-				struct.dependentObjectType.getObjectDependencies());
-	}
-
-	/*
-	 * ===================== DependentObjectNode ===========================
-	 */
-
-	@Override
-	public DependentObjectType loadDependentObjectType(TypeContext typeContext) {
-
-		// Load the type structure
-		ManagedObjectDependentObjectStruct struct = this
-				.loadManagedObjectDependentObjectStruct(typeContext);
-		if (struct == null) {
-			return null; // must have structure
-		}
-
-		// Return the dependent object type
-		return struct.dependentObjectType;
-	}
-
-	/**
-	 * Loads the {@link ManagedObjectDependentObjectStruct}.
-	 * 
-	 * @param typeContext
-	 *            {@link TypeContext}.
-	 * @return{@link ManagedObjectDependentObjectStruct} or <code>null</code>
-	 *               with issues reported to the {@link CompilerIssues}.
-	 */
-	public ManagedObjectDependentObjectStruct loadManagedObjectDependentObjectStruct(
-			TypeContext typeContext) {
-
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = typeContext
 				.getOrLoadManagedObjectType(this.managedObjectSourceNode);
@@ -271,60 +221,39 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		// Create the type qualifications
 		TypeQualification[] qualifications = this.typeQualifications.stream()
 				.toArray(TypeQualification[]::new);
-
-		// Obtain the dependencies
-		ObjectDependencyType[] objectDependencyTypes = this.dependencies
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getManagedObjectDependencyName(),
-						b.getManagedObjectDependencyName()))
-				.map((dependency) -> dependency
-						.loadObjectDependencyType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(ObjectDependencyType[]::new);
-
-		// Create the dependent object type
-		DependentObjectType dependentObjectType = new DependentObjectTypeImpl(
-				this.managedObjectName, qualifications, objectDependencyTypes);
-
-		// Create and return the struct
-		return new ManagedObjectDependentObjectStruct(managedObjectType,
-				dependentObjectType);
-	}
-
-	/**
-	 * Structure to return both {@link ManagedObjectType} and
-	 * {@link DependentObjectType}.
-	 */
-	private static class ManagedObjectDependentObjectStruct {
-
-		/**
-		 * {@link ManagedObjectType}.
-		 */
-		public final ManagedObjectType<?> managedObjectType;
-
-		/**
-		 * {@link DependentObjectType}.
-		 */
-		public final DependentObjectType dependentObjectType;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param managedObjectType
-		 *            {@link ManagedObjectType}.
-		 * @param dependentObjectType
-		 *            {@link DependentObjectType}.
-		 */
-		public ManagedObjectDependentObjectStruct(
-				ManagedObjectType<?> managedObjectType,
-				DependentObjectType dependentObjectType) {
-			super();
-			this.managedObjectType = managedObjectType;
-			this.dependentObjectType = dependentObjectType;
+		if (qualifications.length == 0) {
+			// No qualifications, so use managed object type
+			qualifications = new TypeQualification[] { new TypeQualificationImpl(
+					null, managedObjectType.getObjectClass().getName()) };
 		}
 
+		// Obtain the extension interfaces
+		Class<?>[] extensionInterfaces = managedObjectType
+				.getExtensionInterfaces();
+
+		// Obtain the dependencies
+		ObjectDependencyType[] objectDependencyTypes = CompileUtil.loadTypes(
+				this.dependencies, (dependency) -> dependency
+						.getManagedObjectDependencyName(),
+				(dependency) -> dependency
+						.loadObjectDependencyType(typeContext),
+				ObjectDependencyType[]::new);
+		if (objectDependencyTypes == null) {
+			return null;
+		}
+
+		// Create and return the managed object type
+		return new OfficeSectionManagedObjectTypeImpl(this.managedObjectName,
+				qualifications, extensionInterfaces, objectDependencyTypes);
+	}
+
+	/*
+	 * ===================== DependentObjectNode ===========================
+	 */
+
+	@Override
+	public DependentObjectType loadDependentObjectType(TypeContext typeContext) {
+		return this.loadOfficeSectionManagedObjectType(typeContext);
 	}
 
 	/*
@@ -368,22 +297,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		governances.add(governance);
 	}
 
-	/**
-	 * {@link OfficeNode} instances that this {@link ManagedObject} has already
-	 * been built into.
-	 */
-	private final Set<OfficeNode> builtOffices = new HashSet<OfficeNode>();
-
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildOfficeManagedObject(OfficeNode office,
-			OfficeBuilder officeBuilder, TypeContext typeContext) {
-
-		// Ensure not already built into the office
-		if (this.builtOffices.contains(office)) {
-			return; // already built into the office
-		}
-		this.builtOffices.add(office);
+			OfficeBuilder officeBuilder, OfficeBindings officeBindings,
+			TypeContext typeContext) {
 
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = typeContext
@@ -438,8 +356,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			}
 
 			// Ensure the dependent managed object is built into the office
-			dependency.buildOfficeManagedObject(office, officeBuilder,
-					typeContext);
+			officeBindings.buildManagedObjectIntoOffice(dependency);
 
 			// Link the dependency
 			String dependentManagedObjectName = dependency
@@ -475,18 +392,9 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public ManagedObjectDependency getManagedObjectDependency(
 			String managedObjectDependencyName) {
-		// Obtain and return the dependency for the name
-		ManagedObjectDependencyNode dependency = this.dependencies
-				.get(managedObjectDependencyName);
-		if (dependency == null) {
-			// Create the managed object dependency
-			dependency = this.context.createManagedObjectDependencyNode(
-					managedObjectDependencyName, this);
-
-			// Add the managed object dependency
-			this.dependencies.put(managedObjectDependencyName, dependency);
-		}
-		return dependency;
+		return NodeUtil.getNode(managedObjectDependencyName, this.dependencies,
+				() -> this.context.createManagedObjectDependencyNode(
+						managedObjectDependencyName, this));
 	}
 
 	/*

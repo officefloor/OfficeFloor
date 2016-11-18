@@ -21,18 +21,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
 import net.officefloor.compile.impl.office.OfficeTypeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
-import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
@@ -43,6 +40,7 @@ import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -90,6 +88,7 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -392,12 +391,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Source the top level sections
-		isSourced = this.sections
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionName(), b.getOfficeSectionName()))
-				.allMatch((section) -> section.sourceSection());
+		isSourced = CompileUtil.sourceTree(this.sections,
+				(section) -> section.getOfficeSectionName(),
+				(section) -> section.sourceSection());
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -416,12 +412,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Source the all section trees
-		isSourced = this.sections
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionName(), b.getOfficeSectionName()))
-				.allMatch((section) -> section.sourceSectionTree());
+		isSourced = CompileUtil.sourceTree(this.sections,
+				(section) -> section.getOfficeSectionName(),
+				(section) -> section.sourceSectionTree());
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -482,227 +475,180 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Create the listing of input types
-		OfficeInputType[] inputTypes = Arrays.asList(inputs).stream()
-				.filter((input) -> (input != null))
-				.map((input) -> input.loadOfficeInputType(typeContext))
-				.filter((inputType) -> (inputType != null))
-				.toArray(OfficeInputType[]::new);
+		OfficeInputType[] inputTypes = CompileUtil
+				.loadTypes(
+						Arrays.asList(inputs).stream()
+								.filter((input) -> input != null),
+						(input) -> input.getOfficeInputName(),
+						(input) -> input.loadOfficeInputType(typeContext),
+						OfficeInputType[]::new);
+		if (inputTypes == null) {
+			return null;
+		}
 
 		// Create the listing of output types
-		OfficeOutputType[] outputTypes = Arrays.asList(outputs).stream()
-				.filter((output) -> (output != null))
-				.map((output) -> output.loadOfficeOutputType(typeContext))
-				.filter((outputType) -> (outputType != null))
-				.toArray(OfficeOutputType[]::new);
+		OfficeOutputType[] outputTypes = CompileUtil.loadTypes(
+				Arrays.asList(outputs).stream()
+						.filter((output) -> output != null),
+				(output) -> output.getOfficeOutputName(),
+				(output) -> output.loadOfficeOutputType(typeContext),
+				OfficeOutputType[]::new);
+		if (outputTypes == null) {
+			return null;
+		}
 
 		// Create the listing of architect added object types
-		OfficeManagedObjectType[] moTypes = this.objects
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeObjectName(), b.getOfficeObjectName()))
-				.map((object) -> object
-						.loadOfficeManagedObjectType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(OfficeManagedObjectType[]::new);
-
-		// Ensure all objects have names and types
-		for (int i = 0; i < moTypes.length; i++) {
-			OfficeManagedObjectType moType = moTypes[i];
-
-			// Ensure have name
-			String moName = moType.getOfficeManagedObjectName();
-			if (CompileUtil.isBlank(moName)) {
-				this.addIssue("Null name for managed object " + i);
-				return null; // must have name
-			}
-
-			// Ensure have type
-			if (CompileUtil.isBlank(moType.getObjectType())) {
-				this.addIssue("Null type for managed object " + i + " (name="
-						+ moName + ")");
-				return null; // must have type
-			}
+		OfficeManagedObjectType[] moTypes = CompileUtil.loadTypes(this.objects,
+				(object) -> object.getOfficeObjectName(),
+				(object) -> object.loadOfficeManagedObjectType(typeContext),
+				OfficeManagedObjectType[]::new);
+		if (moTypes == null) {
+			return null;
 		}
 
 		// Copy architect added team types into an array
-		OfficeTeamType[] teamTypes = this.teams
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeTeamName(), b.getOfficeTeamName()))
-				.map((team) -> team.loadOfficeTeamType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(OfficeTeamType[]::new);
-
-		// Ensure all teams have names
-		for (int i = 0; i < teamTypes.length; i++) {
-			OfficeTeamType teamType = teamTypes[i];
-			if (CompileUtil.isBlank(teamType.getOfficeTeamName())) {
-				this.addIssue("Null name for team " + i);
-				return null; // must have name
-			}
+		OfficeTeamType[] teamTypes = CompileUtil.loadTypes(this.teams,
+				(team) -> team.getOfficeTeamName(),
+				(team) -> team.loadOfficeTeamType(typeContext),
+				OfficeTeamType[]::new);
+		if (teamTypes == null) {
+			return null;
 		}
 
 		// Create the listing of office section inputs
-		OfficeAvailableSectionInputType[] sectionInputTypes = this.sections
-				.values()
-				.stream()
-				.map((section) -> section
-						.loadOfficeAvailableSectionInputTypes(typeContext))
-				.filter((types) -> (types != null))
+		OfficeAvailableSectionInputType[][] sectionInputTypesArrays = CompileUtil
+				.loadTypes(this.sections, (section) -> section
+						.getOfficeSectionName(), (section) -> section
+						.loadOfficeAvailableSectionInputTypes(typeContext),
+						OfficeAvailableSectionInputType[][]::new);
+		if (sectionInputTypesArrays == null) {
+			return null;
+		}
+		OfficeAvailableSectionInputType[] sectionInputTypes = Arrays
+				.asList(sectionInputTypesArrays).stream()
 				.flatMap((types) -> Arrays.asList(types).stream())
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeSectionName() + "."
-								+ a.getOfficeSectionInputName(),
-						b.getOfficeSectionName() + "."
-								+ b.getOfficeSectionInputName()))
 				.toArray(OfficeAvailableSectionInputType[]::new);
 
-		// Load the type
-		OfficeType officeType = new OfficeTypeImpl(inputTypes, outputTypes,
-				teamTypes, moTypes, sectionInputTypes);
-
-		// Type loaded successfully
-		return officeType;
+		// Create and return the type
+		return new OfficeTypeImpl(inputTypes, outputTypes, teamTypes, moTypes,
+				sectionInputTypes);
 	}
 
 	@Override
-	public OfficeBuilder buildOffice(OfficeFloorBuilder builder,
-			TypeContext typeContext) {
+	public OfficeBindings buildOffice(OfficeFloorBuilder builder,
+			TypeContext typeContext, Profiler profiler) {
 
 		// Build this office
 		OfficeBuilder officeBuilder = builder.addOffice(this.officeName);
 
-		// Register the teams for the office
-		for (OfficeTeamNode team : this.teams.values()) {
-
-			// Obtain the office team name
-			String officeTeamName = team.getOfficeTeamName();
-
-			// Obtain the OfficeFloor team name
-			TeamNode officeFloorTeam = LinkUtil.retrieveTarget(team,
-					TeamNode.class, this.context.getCompilerIssues());
-			if (officeFloorTeam == null) {
-				continue; // OfficeFloor team not linked
-			}
-			String officeFloorTeamName = officeFloorTeam
-					.getOfficeFloorTeamName();
-
-			// Register the team to the office
-			officeBuilder.registerTeam(officeTeamName, officeFloorTeamName);
+		// Load the profiler (if provided)
+		if (profiler != null) {
+			officeBuilder.setProfiler(profiler);
 		}
+
+		// Create the bindings for the office
+		OfficeBindings officeBindings = new OfficeBindingsImpl(this,
+				officeBuilder, builder, typeContext);
+
+		// Register the teams for the office
+		this.teams
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeTeamName(), b.getOfficeTeamName()))
+				.forEachOrdered((team) -> {
+					// Obtain the office team name
+						String officeTeamName = team.getOfficeTeamName();
+
+						// Obtain the OfficeFloor team name
+						TeamNode officeFloorTeam = LinkUtil.retrieveTarget(
+								team, TeamNode.class,
+								this.context.getCompilerIssues());
+						if (officeFloorTeam == null) {
+							return; // OfficeFloor team not linked
+						}
+						String officeFloorTeamName = officeFloorTeam
+								.getOfficeFloorTeamName();
+
+						// Register the team to the office
+						officeBuilder.registerTeam(officeTeamName,
+								officeFloorTeamName);
+					});
 
 		// Build the governance for the office (in deterministic order)
-		GovernanceNode[] governanceNodes = CompileUtil.toSortedArray(
-				this.governances.values(), new GovernanceNode[0],
-				new StringExtractor<GovernanceNode>() {
-					@Override
-					public String toString(GovernanceNode object) {
-						return object.getOfficeGovernanceName();
-					}
-				});
-		for (GovernanceNode governance : governanceNodes) {
-			governance.buildGovernance(officeBuilder, typeContext);
-		}
+		this.governances
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeGovernanceName(),
+						b.getOfficeGovernanceName()))
+				.forEachOrdered(
+						(governance) -> governance.buildGovernance(
+								officeBuilder, typeContext));
 
 		// Load the office objects (in deterministic order)
-		OfficeObjectNode[] officeObjects = CompileUtil.toSortedArray(
-				this.objects.values(), new OfficeObjectNode[0],
-				(object) -> object.getOfficeObjectName());
-
-		// Configure governance for the linked office floor managed objects.
-		// Must be before managed objects as building them builds dependencies.
-		Map<OfficeObjectNode, BoundManagedObjectNode> officeObjectToBoundMo = new HashMap<OfficeObjectNode, BoundManagedObjectNode>();
-		for (OfficeObjectNode objectNode : officeObjects) {
-
-			// Obtain the office object name
-			String officeObjectName = objectNode.getOfficeObjectName();
-
-			// Obtain the office floor managed object node
-			BoundManagedObjectNode managedObjectNode = LinkUtil.retrieveTarget(
-					objectNode, BoundManagedObjectNode.class,
-					this.context.getCompilerIssues());
-			if (managedObjectNode == null) {
-				continue; // office floor managed object not linked
-			}
-
-			// Load governances for linked office floor managed object
-			GovernanceNode[] governances = objectNode.getGovernances();
-			for (GovernanceNode governance : governances) {
-				managedObjectNode.addGovernance(governance, this);
-			}
-		}
-
-		// Build the office floor managed objects for the office.
 		// Ensure the managed objects are only built into the office once.
-		Set<BoundManagedObjectNode> builtManagedObjects = new HashSet<BoundManagedObjectNode>();
-		for (OfficeObjectNode objectNode : officeObjects) {
+		this.objects
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeObjectName(), b.getOfficeObjectName()))
+				.forEachOrdered((objectNode) -> {
 
-			// Obtain the OfficeFloor managed object node
-			BoundManagedObjectNode managedObjectNode = officeObjectToBoundMo
-					.get(objectNode);
-			if (managedObjectNode == null) {
-				continue; // not linked and reported in adding governance
-			}
+					// Obtain the managed object node
+						BoundManagedObjectNode managedObjectNode = LinkUtil
+								.retrieveTarget(objectNode,
+										BoundManagedObjectNode.class,
+										this.context.getCompilerIssues());
+						if (managedObjectNode == null) {
+							return;
+						}
 
-			// Determine if already built the managed object
-			if (builtManagedObjects.contains(managedObjectNode)) {
-				continue; // already built into office (reusing)
-			}
+						// Load governances for linked Managed Object
+						GovernanceNode[] governances = objectNode
+								.getGovernances();
+						for (GovernanceNode governance : governances) {
+							managedObjectNode.addGovernance(governance, this);
+						}
 
-			// Have the managed object build itself into this office
-			managedObjectNode.buildOfficeManagedObject(this, officeBuilder,
-					typeContext);
-			builtManagedObjects.add(managedObjectNode);
-		}
+						// Build the managed object into the office
+						officeBindings
+								.buildManagedObjectIntoOffice(managedObjectNode);
+					});
 
 		// Load the managed object sources for office (in deterministic order)
-		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
-				.toSortedArray(this.managedObjectSources.values(),
-						new ManagedObjectSourceNode[0],
-						new StringExtractor<ManagedObjectSourceNode>() {
-							@Override
-							public String toString(
-									ManagedObjectSourceNode object) {
-								return object
-										.getOfficeManagedObjectSourceName();
-							}
-						});
-		for (ManagedObjectSourceNode mos : managedObjectSources) {
-			typeContext.getOrLoadManagedObjectType(mos);
-		}
-
-		// Build the managed object sources for office (in deterministic order)
-		for (ManagedObjectSourceNode mos : managedObjectSources) {
-			mos.buildManagedObject(builder, this, officeBuilder, typeContext);
-		}
+		this.managedObjectSources
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeManagedObjectSourceName(),
+						b.getOfficeManagedObjectSourceName()))
+				.forEachOrdered(
+						(mos) -> officeBindings
+								.buildManagedObjectSourceIntoOffice(mos));
 
 		// Build the sections of the office (in deterministic order)
-		SectionNode[] sections = CompileUtil.toSortedArray(
-				this.sections.values(), new SectionNode[0],
-				new StringExtractor<SectionNode>() {
-					@Override
-					public String toString(SectionNode section) {
-						return section.getOfficeSectionName();
-					}
-				});
-		for (SectionNode section : sections) {
-			section.buildSection(builder, officeBuilder, typeContext);
-		}
+		this.sections
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeSectionName(), b.getOfficeSectionName()))
+				.forEachOrdered(
+						(section) -> {
+							section.buildSection(officeBuilder, officeBindings,
+									typeContext);
+						});
 
 		// Build the administrators for the office (in deterministic order)
-		AdministratorNode[] admins = CompileUtil.toSortedArray(
-				this.administrators.values(), new AdministratorNode[0],
-				new StringExtractor<AdministratorNode>() {
-					@Override
-					public String toString(AdministratorNode object) {
-						return object.getOfficeAdministratorName();
-					}
+		this.administrators
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeAdministratorName(),
+						b.getOfficeAdministratorName()))
+				.forEachOrdered((admin) -> {
+					admin.buildAdministrator(officeBuilder);
 				});
-		for (AdministratorNode admin : admins) {
-			admin.buildAdministrator(officeBuilder);
-		}
 
 		// Build the list of escalations of the office
 		List<EscalationStruct> escalationStructs = new LinkedList<OfficeNodeImpl.EscalationStruct>();
@@ -762,31 +708,29 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Build the start-up triggers for the office (in deterministic order)
-		OfficeStartNode[] startTriggers = CompileUtil.toSortedArray(
-				this.starts.values(), new OfficeStartNode[0],
-				new StringExtractor<OfficeStartNode>() {
-					@Override
-					public String toString(OfficeStartNode object) {
-						return object.getOfficeStartName();
-					}
-				});
-		for (OfficeStartNode start : startTriggers) {
+		this.starts
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeStartName(), b.getOfficeStartName()))
+				.forEachOrdered((start) -> {
+					// Obtain the target task
+						TaskNode task = LinkUtil.findTarget(start,
+								TaskNode.class,
+								this.context.getCompilerIssues());
+						if (task == null) {
+							return; // task not linked
+						}
 
-			// Obtain the target task
-			TaskNode task = LinkUtil.findTarget(start, TaskNode.class,
-					this.context.getCompilerIssues());
-			if (task == null) {
-				continue; // task not linked
-			}
+						// Build the start-up trigger
+						String workName = task.getWorkNode()
+								.getQualifiedWorkName();
+						String taskName = task.getOfficeTaskName();
+						officeBuilder.addStartupTask(workName, taskName);
+					});
 
-			// Build the start-up trigger
-			String workName = task.getWorkNode().getQualifiedWorkName();
-			String taskName = task.getOfficeTaskName();
-			officeBuilder.addStartupTask(workName, taskName);
-		}
-
-		// Return the office builder
-		return officeBuilder;
+		// Return the office bindings
+		return officeBindings;
 	}
 
 	/*
@@ -1064,10 +1008,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public boolean linkOfficeNode(LinkOfficeNode node) {
-
-		// Link
-		this.linkedOfficeNode = node;
-		return true;
+		return LinkUtil.linkOfficeNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedOfficeNode = link);
 	}
 
 	@Override

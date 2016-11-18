@@ -61,7 +61,7 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 
 	@Override
 	public String getNodeName() {
-		return "Managing Office for " + managedObjectSourceNode.TYPE + " "
+		return "Managing Office for " + ManagedObjectSourceNode.TYPE + " "
 				+ this.managedObjectSourceNode.getManagedObjectSourceName();
 	}
 
@@ -107,21 +107,9 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 
 	@Override
 	public boolean linkOfficeNode(LinkOfficeNode node) {
-
-		// Ensure not already linked
-		if (this.linkedOfficeNode != null) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Managing office for managed object source "
-							+ this.managedObjectSourceNode
-									.getManagedObjectSourceName()
-							+ " linked more than once");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedOfficeNode = node;
-		return true;
+		return LinkUtil.linkOfficeNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedOfficeNode = link);
 	}
 
 	@Override

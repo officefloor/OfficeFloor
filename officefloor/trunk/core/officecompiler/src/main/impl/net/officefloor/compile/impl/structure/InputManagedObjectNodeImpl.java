@@ -18,11 +18,9 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.GovernanceNode;
@@ -31,6 +29,7 @@ import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
@@ -70,12 +69,6 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	 * {@link OfficeNode}.
 	 */
 	private final Map<OfficeNode, List<GovernanceNode>> governancesPerOffice = new HashMap<OfficeNode, List<GovernanceNode>>();
-
-	/**
-	 * {@link OfficeNode} instances that this {@link InputManagedObjectNode} has
-	 * been built into.
-	 */
-	private final Set<OfficeNode> builtOffices = new HashSet<OfficeNode>();
 
 	/**
 	 * Initiate.
@@ -169,22 +162,13 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 	@Override
 	public void buildOfficeManagedObject(OfficeNode office,
-			OfficeBuilder officeBuilder, TypeContext typeContext) {
-
-		// Determine if already built into the office
-		if (this.builtOffices.contains(office)) {
-			return; // already built into the office
-		}
+			OfficeBuilder officeBuilder, OfficeBindings officeBindings,
+			TypeContext typeContext) {
 
 		// Provide binding to managed object source if specified
 		if (this.boundManagedObjectSource != null) {
-			officeBuilder.setBoundInputManagedObject(
-					this.getBoundManagedObjectName(),
-					this.boundManagedObjectSource.getManagedObjectSourceName());
+			officeBindings.buildInputManagedObjectIntoOffice(this);
 		}
-
-		// Flag that built into the office
-		this.builtOffices.add(office);
 	}
 
 	@Override
