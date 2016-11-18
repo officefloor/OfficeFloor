@@ -26,6 +26,7 @@ import java.util.Set;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.office.OfficeManagedObjectTypeImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
@@ -158,15 +159,8 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 
 	@Override
 	public void initialise(String objectType) {
-
-		// Ensure not already initialise
-		if (this.isInitialised()) {
-			throw new IllegalStateException("SectionObjectNode "
-					+ this.objectName + " already initialised");
-		}
-
-		// Initialise
-		this.state = new InitialisedState(objectType);
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(objectType));
 	}
 
 	/*
@@ -192,6 +186,22 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	@Override
 	public OfficeManagedObjectType loadOfficeManagedObjectType(
 			TypeContext typeContext) {
+
+		// Ensure have name
+		if (CompileUtil.isBlank(this.objectName)) {
+			this.context.getCompilerIssues().addIssue(this,
+					"Null name for " + TYPE);
+			return null; // must have name
+		}
+
+		// Ensure have type
+		if (CompileUtil.isBlank(this.state.objectType)) {
+			this.context.getCompilerIssues().addIssue(
+					this,
+					"Null type for managed object (name=" + this.objectName
+							+ ")");
+			return null; // must have type
+		}
 
 		// Obtain the set of extension interfaces to be supported
 		Set<String> extensionInterfaces = new HashSet<String>();

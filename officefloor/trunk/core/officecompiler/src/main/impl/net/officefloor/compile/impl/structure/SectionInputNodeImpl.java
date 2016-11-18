@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.section.OfficeSectionInputTypeImpl;
 import net.officefloor.compile.impl.section.SectionInputTypeImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -126,17 +127,9 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	@Override
-	public SectionInputNode initialise(String parameterType) {
-
-		// Ensure not already initialise
-		if (this.isInitialised()) {
-			throw new IllegalStateException("SectionInputNode "
-					+ this.inputName + " already initialised");
-		}
-
-		// Initialise
-		this.state = new InitialisedState(parameterType);
-		return this;
+	public void initialise(String parameterType) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(parameterType));
 	}
 
 	/*
@@ -145,6 +138,15 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 	@Override
 	public SectionInputType loadSectionInputType(TypeContext typeContext) {
+
+		// Ensure have input name
+		if (CompileUtil.isBlank(this.inputName)) {
+			this.context.getCompilerIssues().addIssue(this,
+					"Null name for " + TYPE);
+			return null; // must have names for inputs
+		}
+
+		// Create and return type
 		return new SectionInputTypeImpl(this.inputName,
 				this.state.parameterType);
 	}

@@ -66,7 +66,8 @@ public interface ManagedObjectSourceNode extends Node,
 	 * @return <code>true</code> if have the {@link ManagedObjectSource}
 	 *         configured.
 	 */
-	@Deprecated // determine another means than exposing the method (such as isInitialised)
+	@Deprecated
+	// determine another means than exposing the method (such as isInitialised)
 	boolean hasManagedObjectSource();
 
 	/**
@@ -181,11 +182,13 @@ public interface ManagedObjectSourceNode extends Node,
 	 *            {@link ManagedObjectSource}.
 	 * @param managingOfficeBuilder
 	 *            {@link OfficeBuilder} for the {@link ManagingOffice}.
+	 * @param officeBindings
+	 *            {@link OfficeBindings}.
 	 * @param typeContext
 	 *            {@link TypeContext}.
 	 */
 	void buildManagedObject(OfficeFloorBuilder builder,
 			OfficeNode managingOffice, OfficeBuilder managingOfficeBuilder,
-			TypeContext typeContext);
+			OfficeBindings officeBindings, TypeContext typeContext);
 
 }

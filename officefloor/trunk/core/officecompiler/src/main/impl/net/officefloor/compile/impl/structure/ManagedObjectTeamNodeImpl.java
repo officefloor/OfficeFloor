@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
@@ -142,18 +143,9 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-
-		// Ensure not already linked
-		if (this.linkedTeamNode != null) {
-			// Deployed office team
-			this.context.getCompilerIssues().addIssue(this,
-					this.teamName + " already assigned");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedTeamNode = node;
-		return true;
+		return LinkUtil.linkTeamNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedTeamNode = link);
 	}
 
 	@Override

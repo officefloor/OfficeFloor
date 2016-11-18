@@ -24,7 +24,9 @@ import java.util.Properties;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
+import net.officefloor.compile.impl.structure.TeamNodeImpl;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -301,9 +303,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * {@link OfficeFloorManagedObjectSourceType} name.
 	 */
 	public void testNullManagedObjectSourceName() {
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class,
-				"Null name for managed object source 0");
+		this.issues.recordIssue(null, ManagedObjectSourceNodeImpl.class,
+				"Null name for Managed Object Source");
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -318,10 +319,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if <code>null</code> {@link ManagedObjectSource} type.
 	 */
 	public void testNullManagedObjectSourceType() {
-		this.issues
-				.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-						OfficeFloorNodeImpl.class,
-						"Null source for managed object source MO (managed object source 0)");
+		this.issues.recordIssue("MO", ManagedObjectSourceNodeImpl.class,
+				"Null source for Managed Object Source MO");
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -399,8 +398,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if <code>null</code> {@link OfficeFloorTeamSourceType} name.
 	 */
 	public void testNullTeamSourceName() {
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class, "Null name for team 0");
+		this.issues.recordIssue(null, TeamNodeImpl.class, "Null name for Team");
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -414,10 +412,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if <code>null</code> {@link OfficeFloorTeamSourceType} type.
 	 */
 	public void testNullTeamSourceType() {
-		this.issues
-				.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-						OfficeFloorNodeImpl.class,
-						"Null source for team TEAM (team 0)");
+		this.issues.recordIssue("TEAM", TeamNodeImpl.class,
+				"Null source for Team TEAM");
 		this.loadType(new Loader() {
 			@Override
 			public void sourceOffice(OfficeFloorDeployer officeFloor,
@@ -525,7 +521,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		if (validator != null) {
 			validator.validate(officeFloorType);
 		} else {
-			assertNull("Should not load the office floor type", officeFloorType);
+			assertNull("Should not load the OfficeFloor type", officeFloorType);
 		}
 
 		// Return the office floor type

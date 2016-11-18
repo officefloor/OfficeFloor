@@ -246,14 +246,13 @@ public class TaskNodeImpl implements TaskNode {
 		}
 
 		// Load the object dependencies
-		ObjectDependencyType[] dependencies = this.taskObjects
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getTaskObjectName(), b.getTaskObjectName()))
-				.map((object) -> object.loadObjectDependencyType(typeContext))
-				.filter((type) -> (type != null))
-				.toArray(ObjectDependencyType[]::new);
+		ObjectDependencyType[] dependencies = CompileUtil.loadTypes(
+				this.taskObjects, (object) -> object.getTaskObjectName(),
+				(object) -> object.loadObjectDependencyType(typeContext),
+				ObjectDependencyType[]::new);
+		if (dependencies == null) {
+			return null;
+		}
 
 		// Create and return the type
 		return new OfficeTaskTypeImpl(this.taskName, parentSubSectionType,

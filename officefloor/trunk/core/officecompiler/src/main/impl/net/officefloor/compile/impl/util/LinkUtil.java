@@ -254,12 +254,33 @@ public class LinkUtil {
 	 *            {@link Consumer} to load the link onto the
 	 *            {@link LinkTeamNode}.
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
-	 *         reporte to the {@link CompilerIssues}.
+	 *         reported to the {@link CompilerIssues}.
 	 */
 	public static boolean linkTeamNode(LinkTeamNode node,
 			LinkTeamNode linkNode, CompilerIssues issues,
 			Consumer<LinkTeamNode> loader) {
 		return linkNode(node, linkNode, TEAM_TRAVERSER, issues, loader);
+	}
+
+	/**
+	 * Links the {@link LinkOfficeNode}.
+	 * 
+	 * @param node
+	 *            {@link LinkOfficeNode} to have the link loaded.
+	 * @param linkNode
+	 *            Link {@link LinkOfficeNode} to load.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @param loader
+	 *            {@link Consumer} to load the link on the
+	 *            {@link LinkOfficeNode}.
+	 * @return <code>true</code> if successful, or <code>false</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	public static boolean linkOfficeNode(LinkOfficeNode node,
+			LinkOfficeNode linkNode, CompilerIssues issues,
+			Consumer<LinkOfficeNode> loader) {
+		return linkNode(node, linkNode, OFFICE_TRAVERSER, issues, loader);
 	}
 
 	/**
@@ -418,7 +439,8 @@ public class LinkUtil {
 
 		// Run out of links, so could not find target
 		if (isIssueOnNoTarget) {
-			issues.addIssue(previousLink, "Breaks linking chain to a "
+			issues.addIssue(previousLink, previousLink.getNodeType() + " "
+					+ previousLink.getNodeName() + " is not linked to a "
 					+ targetType.getSimpleName());
 		}
 		return new Target<T>(null, false); // target not found

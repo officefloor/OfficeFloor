@@ -29,6 +29,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
+import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.spi.team.Team;
@@ -170,7 +171,22 @@ public class TeamNodeImpl implements TeamNode {
 	}
 
 	@Override
-	public OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType() {
+	public OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(
+			TypeContext typeContext) {
+
+		// Ensure have the team name
+		if (CompileUtil.isBlank(this.teamName)) {
+			this.context.getCompilerIssues().addIssue(this,
+					"Null name for " + TYPE);
+			return null; // must have name
+		}
+
+		// Ensure have the team source
+		if (!this.hasTeamSource()) {
+			this.context.getCompilerIssues().addIssue(this,
+					"Null source for " + TYPE + " " + teamName);
+			return null; // must have source
+		}
 
 		// Obtain the loader
 		TeamLoader loader = this.context.getTeamLoader(this);

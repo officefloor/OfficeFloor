@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.issues;
 
 import java.util.function.Supplier;
 
+import junit.framework.AssertionFailedError;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.internal.structure.Node;
@@ -178,6 +179,13 @@ public class MockCompilerIssues implements CompilerIssues {
 
 	@Override
 	public void addIssue(Node node, String issueDescription, Throwable cause) {
+
+		// Determine if assertion failure
+		if (cause instanceof AssertionError) {
+			throw (AssertionFailedError) cause;
+		}
+
+		// Undertake adding the issue
 		String nodeName = node.getNodeName();
 		Class<? extends Node> nodeClass = node.getClass();
 		this.mock.addIssue(nodeName, nodeClass, issueDescription,

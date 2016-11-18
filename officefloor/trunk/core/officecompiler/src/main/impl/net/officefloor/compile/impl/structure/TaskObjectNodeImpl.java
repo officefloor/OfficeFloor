@@ -167,17 +167,15 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 					.retrieveFurtherestTarget(this, DependentObjectNode.class,
 							this.context.getCompilerIssues());
 			if (dependentObjectNode == null) {
-				this.context.getCompilerIssues().addIssue(
-						this,
-						TaskObjectNode.TYPE + " " + this.objectName
-								+ " is not linked to a "
-								+ DependentObjectNode.TYPE);
 				return null;
 			}
 
 			// Obtain the dependent object type
 			dependentObjectType = dependentObjectNode
 					.loadDependentObjectType(typeContext);
+			if (dependentObjectType == null) {
+				return null;
+			}
 		}
 
 		// Create and return the type

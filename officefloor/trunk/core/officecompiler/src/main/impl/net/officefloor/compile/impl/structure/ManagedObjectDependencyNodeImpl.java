@@ -190,11 +190,6 @@ public class ManagedObjectDependencyNodeImpl implements
 				.retrieveFurtherestTarget(this, DependentObjectNode.class,
 						this.context.getCompilerIssues());
 		if (dependentObjectNode == null) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					ManagedObjectDependencyNode.TYPE + " "
-							+ this.dependencyName + " is not linked to a "
-							+ DependentObjectNode.TYPE);
 			return null;
 		}
 

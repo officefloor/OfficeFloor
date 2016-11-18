@@ -73,6 +73,7 @@ import net.officefloor.compile.impl.team.TeamLoaderImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.work.WorkLoaderImpl;
 import net.officefloor.compile.internal.structure.AdministratorNode;
+import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.EscalationNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
@@ -845,6 +846,14 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	public AdministratorNode createAdministratorNode(String administratorName,
 			OfficeNode office) {
 		return new AdministratorNodeImpl(administratorName, office, this);
+	}
+
+	@Override
+	public DutyNode createDutyNode(String dutyName,
+			AdministratorNode administrator) {
+		// TODO implement NodeContext.createDutyNode
+		throw new UnsupportedOperationException(
+				"TODO implement NodeContext.createDutyNode");
 	}
 
 	@Override

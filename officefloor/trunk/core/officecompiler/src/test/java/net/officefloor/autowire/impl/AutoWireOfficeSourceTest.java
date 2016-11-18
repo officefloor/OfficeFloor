@@ -62,7 +62,9 @@ import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
@@ -110,19 +112,20 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		final String SECTION = "Section";
 
+		// Create and configure the source
+		AutoWireOfficeSource source = new AutoWireOfficeSource();
+		this.addSection(source, SECTION, "name", "value");
+
 		// Record creating the section
-		this.recordOfficeSection(SECTION);
+		this.recordOfficeSection(SECTION, "name", "value");
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
 		// Test
 		this.replayMockObjects();
-
-		// Create and configure the source
-		AutoWireOfficeSource source = new AutoWireOfficeSource();
-		this.addSection(source, SECTION, "name", "value");
 
 		// Source the Office
 		source.sourceOffice(this.architect, context);
@@ -162,16 +165,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				SectionSource.class.getName());
 		this.recordReturn(overridden, overridden.getSectionLocation(),
 				SECTION_LOCATION);
-		this.recordReturn(overridden, overridden.getProperties(), properties);
-		this.recordReturn(this.context, this.context.loadOfficeSectionType(
-				SECTION, SectionSource.class.getName(), SECTION_LOCATION,
-				properties), officeSectionType);
 		this.recordReturn(
 				this.architect,
 				this.architect.addOfficeSection(SECTION,
 						SectionSource.class.getName(), SECTION_LOCATION),
 				officeSection);
-		officeSection.addProperty("TODO", "record add property"); // TODO
+		this.recordReturn(overridden, overridden.getProperties(), properties);
+		properties.configureProperties(officeSection);
+		this.recordReturn(this.context, this.context.loadOfficeSectionType(
+				SECTION, SectionSource.class.getName(), SECTION_LOCATION,
+				properties), officeSectionType);
 		this.recordReturn(officeSectionType,
 				officeSectionType.getOfficeSectionObjectTypes(),
 				new OfficeSectionObjectType[0]);
@@ -265,15 +268,15 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				secondTransformed.getSectionLocation(), SECTION_LOCATION);
 		this.recordReturn(secondTransformed, secondTransformed.getProperties(),
 				properties);
-		this.recordReturn(this.context, this.context.loadOfficeSectionType(
-				SECTION, SectionSource.class.getName(), SECTION_LOCATION,
-				properties), officeSectionType);
 		this.recordReturn(
 				this.architect,
 				this.architect.addOfficeSection(SECTION,
 						SectionSource.class.getName(), SECTION_LOCATION),
 				officeSection);
-		officeSection.addProperty("TODO", "record add property"); // TODO
+		properties.configureProperties(officeSection);
+		this.recordReturn(this.context, this.context.loadOfficeSectionType(
+				SECTION, SectionSource.class.getName(), SECTION_LOCATION,
+				properties), officeSectionType);
 		this.recordReturn(officeSectionType,
 				officeSectionType.getOfficeSectionObjectTypes(),
 				new OfficeSectionObjectType[0]);
@@ -313,9 +316,10 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.addSection(source, SECTION, "name", "value");
 
 		// Record creating the section
-		this.recordOfficeSection(SECTION);
+		this.recordOfficeSection(SECTION, "name", "value");
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION, "SubSection");
 		this.recordSubSections("SubSection", "SubSubSectionOne",
 				"SubSubSectionTwo");
@@ -349,10 +353,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
+		this.recordSectionTasks(ONE);
 		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO, TWO_INPUT);
+		this.recordSectionTasks(TWO);
 		this.recordSubSections(TWO);
 		this.recordSectionOutputs(ONE, ONE_OUTPUT);
 		this.recordSectionOutputs(TWO);
@@ -382,14 +388,11 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
-		this.recordSectionOutputs(SECTION, SECTION_OUTPUT);
-		OfficeSectionOutput output = this.outputs.get(SECTION).get(
-				SECTION_OUTPUT);
-
-		// TODO flag output is not escalation
-		// this.recordReturn(output, output.isEscalationOnly(), false);
-
+		OfficeSectionOutputType outputType = this.recordSectionUnlinkedOutput(
+				SECTION, SECTION_OUTPUT);
+		this.recordReturn(outputType, outputType.isEscalationOnly(), false);
 		this.architect
 				.addIssue("Section output 'Section:output' is not linked");
 
@@ -415,13 +418,11 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
-		this.recordSectionOutputs(SECTION, SECTION_OUTPUT);
-		OfficeSectionOutput output = this.outputs.get(SECTION).get(
-				SECTION_OUTPUT);
-
-		// TODO flag output is escalation
-		// this.recordReturn(output, output.isEscalationOnly(), true);
+		OfficeSectionOutputType outputType = this.recordSectionUnlinkedOutput(
+				SECTION, SECTION_OUTPUT);
+		this.recordReturn(outputType, outputType.isEscalationOnly(), true);
 
 		// Test
 		this.replayMockObjects();
@@ -456,14 +457,17 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(PARENT);
 		this.recordSectionObjects(PARENT);
 		this.recordSectionInputs(PARENT);
+		this.recordSectionTasks(PARENT);
 		this.recordSubSections(PARENT);
 		this.recordOfficeSection(CHILD);
 		this.recordSectionObjects(CHILD);
 		this.recordSectionInputs(CHILD);
+		this.recordSectionTasks(CHILD);
 		this.recordSubSections(CHILD);
 		this.recordOfficeSection(TARGET);
 		this.recordSectionObjects(TARGET);
 		this.recordSectionInputs(TARGET, TARGET_INPUT);
+		this.recordSectionTasks(TARGET);
 		this.recordSubSections(TARGET);
 		this.recordSectionOutputs(PARENT, TEMPLATE_OUTPUT);
 		OfficeSectionOutput parentOutput = this.outputs.get(PARENT).get(
@@ -502,19 +506,19 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
+		this.recordSectionTasks(ONE);
 		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO);
+		this.recordSectionTasks(TWO);
 		this.recordSubSections(TWO);
-		this.recordSectionOutputs(ONE, OUTPUT);
+		OfficeSectionOutputType outputType = this.recordSectionUnlinkedOutput(
+				ONE, OUTPUT);
+		this.recordReturn(outputType, outputType.isEscalationOnly(), true);
 		this.recordSectionOutputs(TWO);
 		this.architect
 				.addIssue("Cyclic section inheritance hierarchy ( One : Two : One : ... )");
-		OfficeSectionOutput output = this.outputs.get(ONE).get(OUTPUT);
-
-		// TODO flag output is escalation
-		// this.recordReturn(output, output.isEscalationOnly(), true);
 
 		// Test
 		this.replayMockObjects();
@@ -588,10 +592,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
+		this.recordSectionTasks(ONE);
 		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO, TWO_INPUT);
+		this.recordSectionTasks(TWO);
 		this.recordSubSections(TWO);
 		this.recordSectionOutputs(ONE);
 		this.recordSectionOutputs(TWO);
@@ -624,12 +630,14 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(ONE);
 		this.recordSectionObjects(ONE);
 		this.recordSectionInputs(ONE);
+		this.recordSectionTasks(ONE);
 		this.recordSubSections(ONE);
 		this.recordOfficeSection(TWO);
 		this.recordSectionObjects(TWO);
 		this.recordSectionInputs(TWO);
+		this.recordSectionTasks(TWO);
 		this.recordSubSections(TWO);
-		this.recordSectionOutputs(ONE, ONE_OUTPUT);
+		this.recordSectionUnlinkedOutput(ONE, ONE_OUTPUT);
 		this.recordSectionOutputs(TWO);
 		this.architect
 				.addIssue("Unknown section input 'Two:input' for linking section output 'One:output'");
@@ -660,6 +668,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection("SECTION");
 		this.recordSectionObjects("SECTION");
 		this.recordSectionInputs("SECTION", "INPUT");
+		this.recordSectionTasks("SECTION");
 		this.recordSubSections("SECTION");
 		this.recordSectionOutputs("SECTION");
 		this.recordReturn(this.context, this.context.createPropertyList(),
@@ -707,6 +716,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection("SECTION");
 		this.recordSectionObjects("SECTION");
 		this.recordSectionInputs("SECTION", "INPUT");
+		this.recordSectionTasks("SECTION");
 		this.recordSubSections("SECTION");
 		this.recordSectionOutputs("SECTION");
 		this.recordStartupFlow("SECTION", "INPUT");
@@ -734,6 +744,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire(
 				Connection.class));
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -775,6 +786,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				unqualifiedConnection, qualifiedString);
 
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -807,6 +819,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				null, Connection.class));
 
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -848,11 +861,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(objectType, objectType.getOfficeSectionObjectName(),
 				"OBJECT");
 		this.architect
-				.addIssue("No available auto-wiring for OfficeSectionObject OBJECT (qualifier=null, type="
+				.addIssue("No available auto-wiring for Section Object OBJECT (qualifier=null, type="
 						+ Connection.class.getName()
 						+ ") from OfficeSection SECTION");
 
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -885,6 +899,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 
@@ -915,15 +930,17 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire(
 				Connection.class));
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 		OfficeGovernance governance = this.recordGovernance(GOVERNANCE,
 				XAResource.class);
 		OfficeTeam team = this.recordTeam();
 		this.architect.link(governance, team);
+		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
 		this.recordGovernOfficeObject(GOVERNANCE,
 				new AutoWire(Connection.class));
-		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
+		this.recordGovernSubSections(SECTION);
 
 		// Test
 		this.replayMockObjects();
@@ -959,6 +976,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordSectionObjects(SECTION, new ExpectedAutoWire(
 				Connection.class));
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 		OfficeGovernance governance = this.recordGovernance(GOVERNANCE,
@@ -968,6 +986,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordGovernOfficeObject(GOVERNANCE,
 				new AutoWire(Connection.class));
 		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
+		this.recordGovernSubSections(SECTION);
 
 		// Test
 		this.replayMockObjects();
@@ -995,6 +1014,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION, SUB_SECTION);
 		this.recordSubSections(SUB_SECTION, SUB_SUB_SECTION);
 		this.recordSubSections(SUB_SUB_SECTION);
@@ -1005,10 +1025,13 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.architect.link(governance, team);
 		this.recordGovernManagedObject(GOVERNANCE, SECTION, XAResource.class,
 				true);
+		this.recordGovernSubSections(SECTION, SUB_SECTION);
 		this.recordGovernManagedObject(GOVERNANCE, SUB_SECTION, Map.class,
 				false);
+		this.recordGovernSubSections(SUB_SECTION, SUB_SUB_SECTION);
 		this.recordGovernManagedObject(GOVERNANCE, SUB_SUB_SECTION,
 				XAResource.class, true);
+		this.recordGovernSubSections(SUB_SUB_SECTION);
 
 		// Test
 		this.replayMockObjects();
@@ -1038,6 +1061,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 		OfficeGovernance officeGovernance = this.recordGovernance(GOVERNANCE,
@@ -1047,8 +1071,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(unknownSection, unknownSection.getSectionName(),
 				UNKNOWN_SECTION);
 		this.architect.addIssue("Unknown section '" + UNKNOWN_SECTION
-				+ "' to be governed");
+				+ "' to be governed by governance " + GOVERNANCE);
 		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
+		this.recordGovernSubSections(SECTION);
 
 		// Test
 		this.replayMockObjects();
@@ -1075,6 +1100,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordOfficeSection(SECTION);
 		this.recordSectionObjects(SECTION);
 		this.recordSectionInputs(SECTION);
+		this.recordSectionTasks(SECTION);
 		this.recordSubSections(SECTION);
 		this.recordSectionOutputs(SECTION);
 		OfficeGovernance officeGovernance = this.recordGovernance(GOVERNANCE,
@@ -1083,6 +1109,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.architect.link(officeGovernance, team);
 		this.recordGovernSections(GOVERNANCE, SECTION);
 		this.recordGovernManagedObject(GOVERNANCE, SECTION, null, false);
+		this.recordGovernSubSections(SECTION);
 
 		// Test
 		this.replayMockObjects();
@@ -1461,17 +1488,28 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			private OfficeTeam usedTeam = null;
 
 			private OfficeTeam defaultTeam = null;
+			
+			/**
+			 * Indicates if using the {@link OfficeTeam}.
+			 * @param taskName Name of the {@link OfficeTask}.
+			 * @return <code>true</code> to use the specific {@link OfficeTeam}.  <code>false</code> for default {@link OfficeTeam}.
+			 */
+			private boolean isUseAddedTeam(String taskName) {
+				return (isUseTeam && ("taskAssign".equals(taskName)));
+			}
 
 			@Override
-			public void recordAssignTeam(OfficeTask task,
-					OfficeTaskType taskType) {
+			public void recordAssignTeam(String taskName, OfficeTask task,
+					OfficeTaskType taskType, OfficeTaskType actualTaskType) {
+
+				// Record obtaining the object dependencies (use actual dependencies)
+				AutoWireOfficeSourceTest.this.recordReturn(taskType, taskType.getObjectDependencies(), actualTaskType.getObjectDependencies());
 
 				// Obtain team responsible
 				OfficeTeam assignedTeam = null;
 
 				// Determine if using specific assigned team
-				if (isUseTeam
-						&& ("taskAssign".equals(taskType.getOfficeTaskName()))) {
+				if (this.isUseAddedTeam(taskName)) {
 					// Only obtain the used team once if using
 					if (this.usedTeam == null) {
 						this.usedTeam = AutoWireOfficeSourceTest.this
@@ -1491,8 +1529,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				}
 
 				// Assign the team
-				AutoWireOfficeSourceTest.this.architect.link(
-						task.getTeamResponsible(), assignedTeam);
+				TaskTeam responsibleTeam = AutoWireOfficeSourceTest.this
+						.createMock(TaskTeam.class);
+				AutoWireOfficeSourceTest.this.recordReturn(task,
+						task.getTeamResponsible(), responsibleTeam);
+				AutoWireOfficeSourceTest.this.architect.link(responsibleTeam,
+						assignedTeam);
 			}
 		});
 
@@ -1574,6 +1616,11 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 */
 	private final Map<String, Map<String, OfficeTaskType>> taskTypes = new HashMap<String, Map<String, OfficeTaskType>>();
 
+	/**
+	 * {@link OfficeTask} instances by {@link OfficeSection} name and {@link Task} name.
+	 */
+	private final Map<String, Map<String, OfficeTask>> tasks = new HashMap<String, Map<String,OfficeTask>>();
+	
 	/**
 	 * {@link OfficeGovernance} instances by name.
 	 */
@@ -1668,9 +1715,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		assertNotNull("Section " + SECTION_NAME + " should be added",
 				properties);
 
-		// Obtain the section type for configuring recording
+		// Obtain the actual section type for configuring recording
 		OfficeSectionType actualType = SectionLoaderUtil.loadOfficeSectionType(
 				SECTION_NAME, ClassSectionSource.class, sectionClass.getName());
+
+		// Record adding the office section
+		OfficeSection officeSection = this.createMock(OfficeSection.class);
+		this.recordReturn(this.architect, this.architect.addOfficeSection(
+				SECTION_NAME, ClassSectionSource.class.getName(),
+				sectionClass.getName()), officeSection);
+		this.sections.put(SECTION_NAME, officeSection);
 
 		// Record obtaining the office section type
 		OfficeSectionType officeSectionType = this
@@ -1679,14 +1733,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				SECTION_NAME, ClassSectionSource.class.getName(),
 				sectionClass.getName(), properties), officeSectionType);
 		this.sectionTypes.put(SECTION_NAME, officeSectionType);
-
-		// Record adding the office section
-		OfficeSection officeSection = this.createMock(OfficeSection.class);
-		this.recordReturn(this.architect, this.architect.addOfficeSection(
-				SECTION_NAME, ClassSectionSource.class.getName(),
-				sectionClass.getName()), officeSection);
-		officeSection.addProperty("TODO", "record add property"); // TODO
-		this.sections.put(SECTION_NAME, officeSection);
 
 		// Record obtaining the office objects
 		OfficeSectionObjectType[] actualObjectTypes = actualType
@@ -1699,11 +1745,17 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				objectNames);
 		this.recordReturn(officeSectionType,
 				officeSectionType.getOfficeSectionObjectTypes(), objectTypes);
-
-		// Record the office section objects linked to office objects
 		for (int i = 0; i < objectTypes.length; i++) {
-			String objectName = objectNames[i];
 			OfficeSectionObjectType actualObjectType = actualObjectTypes[i];
+			String objectName = objectNames[i];
+			String objectTypeName = actualObjectType.getObjectType();			
+			String typeQualifier = actualObjectType.getTypeQualifier();
+			OfficeSectionObjectType objectType = objectTypes[i];
+
+			// Record adding the office object information
+			this.recordReturn(objectType, objectType.getObjectType(), objectTypeName);
+			this.recordReturn(objectType, objectType.getTypeQualifier(), typeQualifier);
+			this.recordReturn(objectType, objectType.getOfficeSectionObjectName(), objectName);
 
 			// Record obtaining the office section object
 			OfficeSectionObject sectionObject = this
@@ -1712,9 +1764,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 					officeSection.getOfficeSectionObject(objectName),
 					sectionObject);
 
-			// Record adding the office object
-			String objectTypeName = actualObjectType.getObjectType();
-			String typeQualifier = actualObjectType.getTypeQualifier();
+			// Record obtaining the office object
 			OfficeObject officeObject = this.createMock(OfficeObject.class);
 			this.recordReturn(this.architect, this.architect.addOfficeObject(
 					new AutoWire(typeQualifier, objectTypeName)
@@ -1726,6 +1776,44 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			// Record the link
 			this.architect.link(sectionObject, officeObject);
 		}
+
+		// Record obtaining the office inputs
+		OfficeSectionInputType[] actualInputTypes = actualType.getOfficeSectionInputTypes();
+		String[] inputNames = (Arrays.asList(actualInputTypes)).stream().map(t -> t.getOfficeSectionInputName()).toArray(String[]::new);
+		OfficeSectionInputType[] inputTypes = this.createSectionItems(SECTION_NAME, OfficeSectionInputType.class, this.inputTypes, inputNames);
+		OfficeSectionInput[] inputs = this.createSectionItems(SECTION_NAME, OfficeSectionInput.class, this.inputs, inputNames);
+		this.recordReturn(officeSectionType, officeSectionType.getOfficeSectionInputTypes(), inputTypes);
+		for (int i = 0; i < inputTypes.length; i++) {
+			String inputName = inputNames[i];
+			OfficeSectionInputType inputType = inputTypes[i];
+			OfficeSectionInput input = inputs[i];
+			this.recordReturn(inputType, inputType.getOfficeSectionInputName(), inputName);
+			this.recordReturn(officeSection, officeSection.getOfficeSectionInput(inputName), input);
+		}
+
+		// Record obtaining the task types
+		OfficeTaskType[] actualTaskTypes = actualType.getOfficeTaskTypes();
+		String[] taskNames = (Arrays.asList(actualTaskTypes)).stream()
+				.map(t -> t.getOfficeTaskName()).toArray(String[]::new);
+		OfficeTaskType[] taskTypes = this.createSectionItems(SECTION_NAME,
+				OfficeTaskType.class, this.taskTypes, taskNames);
+		OfficeTask[] tasks = this.createSectionItems(SECTION_NAME, OfficeTask.class, this.tasks, taskNames);
+		this.recordReturn(officeSectionType,
+				officeSectionType.getOfficeTaskTypes(), taskTypes);
+		for (int i = 0; i < taskTypes.length; i++) {
+			String taskName = taskNames[i];
+			OfficeTaskType taskType = taskTypes[i];
+			OfficeTask task = tasks[i];
+			OfficeTaskType actualTaskType = actualTaskTypes[i];
+			this.recordReturn(taskType, taskType.getOfficeTaskName(), taskName);
+			this.recordReturn(officeSection, officeSection.getOfficeTask(taskName), task);
+			
+			// Record assigning the team
+			assigner.recordAssignTeam(taskName, task, taskType, actualTaskType);
+		}
+
+		// No sub sections
+		this.recordReturn(officeSectionType, officeSectionType.getOfficeSubSectionTypes(), new OfficeSubSectionType[0]);
 
 		// Record obtaining the office outputs
 		OfficeSectionOutputType[] actualOutputTypes = actualType
@@ -1765,32 +1853,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			this.architect.link(sectionOutput, officeOutput);
 		}
 
-		// Should not require linking inputs
-
-		// Record obtaining the task types
-		OfficeTaskType[] actualTaskTypes = actualType.getOfficeTaskTypes();
-		String[] taskNames = (Arrays.asList(actualTaskTypes)).stream()
-				.map(t -> t.getOfficeTaskName()).toArray(String[]::new);
-		OfficeTaskType[] taskTypes = this.createSectionItems(SECTION_NAME,
-				OfficeTaskType.class, this.taskTypes, taskNames);
-		this.recordReturn(officeSectionType,
-				officeSectionType.getOfficeTaskTypes(), taskTypes);
-
-		// Record assigning teams
-		for (int i = 0; i < taskTypes.length; i++) {
-			String taskName = taskNames[i];
-			OfficeTaskType taskType = taskTypes[i];
-
-			// Record obtaining the team
-			OfficeTask task = this.createMock(OfficeTask.class);
-			this.recordReturn(officeSection,
-					officeSection.getOfficeTask(taskName), task);
-
-			// Record assigning the team
-			assigner.recordAssignTeam(task, taskType);
-		}
-		// Should not require sub sections for team assignment
-
 		// Return the office section
 		return officeSection;
 	}
@@ -1803,12 +1865,16 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Records assigning the {@link Team} for the {@link OfficeTask}.
 		 * 
+		 * @param taskName
+		 *            Name of the {@link OfficeTask}.
 		 * @param task
 		 *            {@link OfficeTask}.
 		 * @param taskType
 		 *            {@link OfficeTaskType}.
+		 *            @param actualTaskType Actual {@link OfficeTaskType}.
 		 */
-		void recordAssignTeam(OfficeTask task, OfficeTaskType taskType);
+		void recordAssignTeam(String taskName, OfficeTask task,
+				OfficeTaskType taskType, OfficeTaskType actualTaskType);
 	}
 
 	/**
@@ -1875,9 +1941,12 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	 *            Name.
 	 * @param subSectionNames
 	 *            Sub section names.
+	 * @param nameValuePairs
+	 *            Name value pairs for configuring the {@link SectionSource}.
 	 * @return {@link OfficeSection}.
 	 */
-	private void recordOfficeSection(String sectionName) {
+	private void recordOfficeSection(String sectionName,
+			String... nameValuePairs) {
 		assertNull("Already section by name " + sectionName,
 				this.sections.get(sectionName));
 
@@ -1901,7 +1970,9 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(this.architect, this.architect.addOfficeSection(
 				sectionName, SectionSource.class.getName(), sectionLocation),
 				section);
-		section.addProperty("TODO", "record property"); // TODO
+		for (int i = 0; i < nameValuePairs.length; i += 2) {
+			section.addProperty(nameValuePairs[i], nameValuePairs[i + 1]);
+		}
 		this.sections.put(sectionName, section);
 	}
 
@@ -2113,13 +2184,11 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				.getOfficeSubSectionType(sectionName);
 
 		// Record section managed object
-		OfficeSectionManagedObject mo;
 		if (extensionInterface == null) {
 			// No managed object for section
 			this.recordReturn(sectionType,
 					sectionType.getOfficeSectionManagedObjectSourceTypes(),
 					new OfficeSectionManagedObjectSourceType[0]);
-			mo = null; // no section managed object
 
 		} else {
 			// Managed object for section
@@ -2130,35 +2199,38 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			this.recordReturn(sectionType,
 					sectionType.getOfficeSectionManagedObjectSourceTypes(),
 					new OfficeSectionManagedObjectSourceType[] { moSourceType });
-			this.recordReturn(moSourceType,
-					moSourceType.getOfficeSectionManagedObjectSourceName(),
-					MOS_NAME);
 			OfficeSectionManagedObjectType moType = this
 					.createMock(OfficeSectionManagedObjectType.class);
 			this.recordReturn(moSourceType,
 					moSourceType.getOfficeSectionManagedObjectTypes(),
 					new OfficeSectionManagedObjectType[] { moType });
-			this.recordReturn(moType,
-					moType.getOfficeSectionManagedObjectName(), MO_NAME);
 			this.recordReturn(moType, moType.getSupportedExtensionInterfaces(),
 					new Class<?>[] { extensionInterface });
 
-			// Record obtaining the section managed object
-			mo = this.createMock(OfficeSectionManagedObject.class);
-			OfficeSectionManagedObjectSource moSource = this
-					.createMock(OfficeSectionManagedObjectSource.class);
-			this.recordReturn(section,
-					section.getOfficeSectionManagedObjectSource(MOS_NAME),
-					moSource);
-			this.recordReturn(moSource,
-					moSource.getOfficeSectionManagedObject(MO_NAME), mo);
-		}
+			// Provide governance if expected to be under governance
+			OfficeGovernance governance = this.governances.get(governanceName);
+			assertNotNull("Unknown governance " + governanceName);
+			if (isGovern) {
 
-		// Provide governance if expected to be under governance
-		OfficeGovernance governance = this.governances.get(governanceName);
-		assertNotNull("Unknown governance " + governanceName);
-		if (isGovern) {
-			governance.governManagedObject(mo);
+				// Record obtaining the section managed object
+				this.recordReturn(moSourceType,
+						moSourceType.getOfficeSectionManagedObjectSourceName(),
+						MOS_NAME);
+				this.recordReturn(moType,
+						moType.getOfficeSectionManagedObjectName(), MO_NAME);
+				OfficeSectionManagedObjectSource moSource = this
+						.createMock(OfficeSectionManagedObjectSource.class);
+				this.recordReturn(section,
+						section.getOfficeSectionManagedObjectSource(MOS_NAME),
+						moSource);
+				OfficeSectionManagedObject mo = this
+						.createMock(OfficeSectionManagedObject.class);
+				this.recordReturn(moSource,
+						moSource.getOfficeSectionManagedObject(MO_NAME), mo);
+
+				// Govern the managed object
+				governance.governManagedObject(mo);
+			}
 		}
 	}
 
@@ -2180,6 +2252,37 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 			// Record governing the Office Object
 			governance.governManagedObject(officeObject);
+		}
+	}
+
+	/**
+	 * Records {@link Governance} for the {@link SubSection}.
+	 * 
+	 * @param sectionName
+	 *            {@link OfficeSection} name.
+	 * @param subSectionNames
+	 *            {@link SubSection} names.
+	 */
+	private void recordGovernSubSections(String sectionName,
+			String... subSectionNames) {
+		OfficeSubSection section = this.getOfficeSubSection(sectionName);
+		OfficeSubSectionType sectionType = this
+				.getOfficeSubSectionType(sectionName);
+		OfficeSubSectionType[] subSectionTypes = new OfficeSubSectionType[subSectionNames.length];
+		for (int i = 0; i < subSectionTypes.length; i++) {
+			subSectionTypes[i] = this.createMock(OfficeSubSectionType.class);
+			this.subSectionTypes.put(subSectionNames[i], subSectionTypes[i]);
+		}
+		this.recordReturn(sectionType, sectionType.getOfficeSubSectionTypes(),
+				subSectionTypes);
+		for (int i = 0; i < subSectionTypes.length; i++) {
+			String subSectionName = subSectionNames[i];
+			this.recordReturn(sectionType, sectionType.getOfficeSectionName(),
+					subSectionName);
+			OfficeSubSection subSection = this
+					.getOfficeSubSection(subSectionName);
+			this.recordReturn(section,
+					section.getOfficeSubSection(subSectionName), subSection);
 		}
 	}
 
@@ -2214,6 +2317,20 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records the {@link OfficeTask} instances.
+	 * 
+	 * @param sectionName
+	 *            Name of {@link OfficeSection}.
+	 * @param taskNames
+	 *            Names of the tasks.
+	 */
+	private void recordSectionTasks(String sectionName) {
+		OfficeSectionType sectionType = this.getOfficeSectionType(sectionName);
+		this.recordReturn(sectionType, sectionType.getOfficeTaskTypes(),
+				new OfficeTaskType[0]);
+	}
+
+	/**
 	 * Records the {@link OfficeSectionOutput} instances.
 	 * 
 	 * @param sectionName
@@ -2241,6 +2358,28 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			this.recordReturn(section,
 					section.getOfficeSectionOutput(outputNames[i]), outputs[i]);
 		}
+	}
+
+	/**
+	 * Records unlinked {@link OfficeSectionOutput}.
+	 * 
+	 * @param sectionName
+	 *            Name of {@link OfficeSection}.
+	 * @param outputName
+	 *            Name of {@link OfficeSectionOutput}.
+	 * @return {@link OfficeSectionOutputType}.
+	 */
+	private OfficeSectionOutputType recordSectionUnlinkedOutput(
+			String sectionName, String outputName) {
+		OfficeSectionType sectionType = this.getOfficeSectionType(sectionName);
+		OfficeSectionOutputType outputType = this
+				.createMock(OfficeSectionOutputType.class);
+		this.recordReturn(sectionType,
+				sectionType.getOfficeSectionOutputTypes(),
+				new OfficeSectionOutputType[] { outputType });
+		this.recordReturn(outputType, outputType.getOfficeSectionOutputName(),
+				outputName);
+		return outputType;
 	}
 
 	/**
@@ -2281,6 +2420,11 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			String objectName = objectNames[i];
 
 			// Record obtain the object type information
+			String usedType = autoWire.usedAutoWire.getType();
+			this.recordReturn(objectType, objectType.getObjectType(), usedType);
+			String usedQualifier = autoWire.usedAutoWire.getQualifier();
+			this.recordReturn(objectType, objectType.getTypeQualifier(),
+					usedQualifier);
 			this.recordReturn(objectType,
 					objectType.getOfficeSectionObjectName(), objectName);
 
@@ -2293,12 +2437,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			OfficeObject dependency = this.dependencies.get(usedName);
 			if (dependency == null) {
 				// Add the dependency from the office
-				String usedType = autoWire.usedAutoWire.getType();
-				this.recordReturn(objectType, objectType.getObjectType(),
-						usedType);
-				String usedQualifier = autoWire.usedAutoWire.getQualifier();
-				this.recordReturn(objectType, objectType.getTypeQualifier(),
-						usedQualifier);
 				dependency = this.createMock(OfficeObject.class);
 				this.dependencies.put(usedName, dependency);
 				this.recordReturn(this.architect,
@@ -2366,6 +2504,10 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			// Record obtaining the sub section
 			this.recordReturn(section,
 					section.getOfficeSubSection(subSectionName), subSection);
+
+			// Record no tasks for section
+			this.recordReturn(subSectionType,
+					subSectionType.getOfficeTaskTypes(), new OfficeTaskType[0]);
 		}
 	}
 

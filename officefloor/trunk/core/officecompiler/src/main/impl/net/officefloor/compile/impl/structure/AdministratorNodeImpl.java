@@ -26,7 +26,6 @@ import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
-import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.DutyNode;
@@ -197,14 +196,8 @@ public class AdministratorNodeImpl implements AdministratorNode {
 
 	@Override
 	public OfficeDuty getDuty(String dutyName) {
-		// Obtain and return the duty for the name
-		DutyNode duty = this.duties.get(dutyName);
-		if (duty == null) {
-			// Add the duty
-			duty = new DutyNodeImpl(dutyName, this);
-			this.duties.put(dutyName, duty);
-		}
-		return duty;
+		return NodeUtil.getNode(dutyName, this.duties,
+				() -> this.context.createDutyNode(dutyName, this));
 	}
 
 	@Override
@@ -297,16 +290,13 @@ public class AdministratorNodeImpl implements AdministratorNode {
 		}
 
 		// Build the duties (in deterministic order)
-		DutyNode[] duties = CompileUtil.toSortedArray(this.duties.values(),
-				new DutyNode[0], new StringExtractor<DutyNode>() {
-					@Override
-					public String toString(DutyNode object) {
-						return object.getOfficeDutyName();
-					}
-				});
-		for (DutyNode duty : duties) {
-			adminBuilder.addDuty(duty.getOfficeDutyName());
-		}
+		this.duties
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeDutyName(), b.getOfficeDutyName()))
+				.forEach(
+						(duty) -> adminBuilder.addDuty(duty.getOfficeDutyName()));
 	}
 
 	/*
@@ -320,18 +310,9 @@ public class AdministratorNodeImpl implements AdministratorNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-
-		// Ensure not already linked
-		if (this.linkedTeamNode != null) {
-			// Team already linked
-			this.context.getCompilerIssues().addIssue(this,
-					"Team already assigned");
-			return false; // already linked
-		}
-
-		// Link
-		this.linkedTeamNode = node;
-		return true;
+		return LinkUtil.linkTeamNode(this, node,
+				this.context.getCompilerIssues(),
+				(link) -> this.linkedTeamNode = link);
 	}
 
 	@Override

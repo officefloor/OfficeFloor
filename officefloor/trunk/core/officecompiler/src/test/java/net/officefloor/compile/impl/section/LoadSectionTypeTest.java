@@ -26,8 +26,10 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
+import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
+import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
 import net.officefloor.compile.impl.work.MockLoadWork;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -277,8 +279,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullInputName() {
 
 		// Record null input name
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
-				"Null name for input 0");
+		this.issues.recordIssue(null, SectionInputNodeImpl.class,
+				"Null name for Section Input");
 
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
@@ -340,8 +342,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullOutputName() {
 
 		// Record null output name
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
-				"Null name for output 0");
+		this.issues.recordIssue(null, SectionOutputNodeImpl.class,
+				"Null name for Section Output");
 
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
@@ -408,8 +410,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullObjectName() {
 
 		// Record null object name
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
-				"Null name for object 0");
+		this.issues.recordIssue(null, SectionObjectNodeImpl.class,
+				"Null name for Section Object");
 
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
@@ -427,8 +429,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullObjectType() {
 
 		// Record null object type
-		this.issues.recordIssue("Type", SectionNodeImpl.class,
-				"Null type for object 0 (name=OBJECT)");
+		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class,
+				"Null type for Section Object (name=OBJECT)");
 
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {

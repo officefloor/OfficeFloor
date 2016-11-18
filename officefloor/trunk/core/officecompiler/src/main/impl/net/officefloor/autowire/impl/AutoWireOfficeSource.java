@@ -37,6 +37,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
+import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.properties.Property;
@@ -490,24 +491,24 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 						});
 			}
 
-			// Obtain the section name
+			// Obtain the details for the section
 			String sectionName = section.getSectionName();
+			String sectionSourceClassName = section.getSectionSourceClassName();
+			String sectionLocation = section.getSectionLocation();
+			PropertyList sectionProperties = section.getProperties();
 
 			// Add the section
 			OfficeSection officeSection = architect.addOfficeSection(
-					sectionName, section.getSectionSourceClassName(),
-					section.getSectionLocation());
-			section.getProperties().configureProperties(officeSection);
+					sectionName, sectionSourceClassName, sectionLocation);
+			sectionProperties.configureProperties(officeSection);
 
 			// Register the section
 			officeSectionsByName.put(sectionName, officeSection);
 
 			// Obtain the section type
 			OfficeSectionType officeSectionType = context
-					.loadOfficeSectionType(sectionName,
-							section.getSectionSourceClassName(),
-							section.getSectionLocation(),
-							section.getProperties());
+					.loadOfficeSectionType(sectionName, sectionSourceClassName,
+							sectionLocation, sectionProperties);
 
 			// Register the section type
 			officeSectionTypesByName.put(sectionName, officeSectionType);
@@ -519,11 +520,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				// Obtain object details
 				String objectTypeName = objectType.getObjectType();
 				String typeQualifier = objectType.getTypeQualifier();
-
-				// Obtain the section object
 				String objectName = objectType.getOfficeSectionObjectName();
-				OfficeSectionObject sectionObject = officeSection
-						.getOfficeSectionObject(objectName);
 
 				// Obtain appropriate auto-wire
 				AutoWire autoWire = AutoWireOfficeFloorSource
@@ -531,13 +528,17 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 								this.availableObjectAutoWiring);
 				if (autoWire == null) {
 					architect.addIssue("No available auto-wiring for "
-							+ OfficeSectionObject.class.getSimpleName() + " "
-							+ objectName + " (qualifier=" + typeQualifier
-							+ ", type=" + objectType + ") from "
+							+ SectionObjectNode.TYPE + " " + objectName
+							+ " (qualifier=" + typeQualifier + ", type="
+							+ objectTypeName + ") from "
 							+ OfficeSection.class.getSimpleName() + " "
 							+ sectionName);
 					continue; // no available auto-wiring for section object
 				}
+
+				// Obtain the section object
+				OfficeSectionObject sectionObject = officeSection
+						.getOfficeSectionObject(objectName);
 
 				// Link to appropriate Office Object
 				OfficeObject officeObject = objects.get(autoWire);

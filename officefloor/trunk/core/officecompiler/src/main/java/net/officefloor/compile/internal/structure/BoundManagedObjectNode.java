@@ -53,23 +53,20 @@ public interface BoundManagedObjectNode extends LinkObjectNode {
 	void addGovernance(GovernanceNode governance, OfficeNode office);
 
 	/**
-	 * <p>
 	 * Builds the {@link ManagedObject} into the {@link Office}.
-	 * <p>
-	 * This may be called more than once for an {@link Office} due to dependency
-	 * management. Only the first invocation should build this
-	 * {@link ManagedObject} into the {@link Office} and all further invocations
-	 * are to be ignored.
 	 * 
 	 * @param office
 	 *            {@link OfficeNode} of the {@link Office} that this
 	 *            {@link ManagedObject} is to build itself into.
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder} for the {@link Office}.
+	 * @param officeBindings
+	 *            {@link OfficeBindings}.
 	 * @param typeContext
 	 *            {@link TypeContext}.
 	 */
 	void buildOfficeManagedObject(OfficeNode office,
-			OfficeBuilder officeBuilder, TypeContext typeContext);
+			OfficeBuilder officeBuilder, OfficeBindings officeBindings,
+			TypeContext typeContext);
 
 }

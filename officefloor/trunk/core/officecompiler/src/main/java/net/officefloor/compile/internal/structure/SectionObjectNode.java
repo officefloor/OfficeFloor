@@ -31,7 +31,7 @@ import net.officefloor.compile.type.TypeContext;
  * @author Daniel Sagenschneider
  */
 public interface SectionObjectNode extends LinkObjectNode, SubSectionObject,
-		SectionObject, OfficeSectionObject {
+		SectionObject, OfficeSectionObject, DependentObjectNode {
 
 	/**
 	 * {@link Node} type.

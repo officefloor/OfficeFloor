@@ -34,7 +34,9 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.impl.structure.OfficeInputNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeOutputNodeImpl;
+import net.officefloor.compile.impl.structure.OfficeTeamNodeImpl;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
@@ -500,8 +502,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testNullManagedObjectName() {
 
 		// Record null managed object name
-		this.issues.recordIssue("Type", OfficeNodeImpl.class,
-				"Null name for managed object 0");
+		this.issues.recordIssue(null, OfficeObjectNodeImpl.class,
+				"Null name for Office Object");
 
 		// Attempt to load office type
 		this.loadOfficeType(false, new Loader() {
@@ -520,8 +522,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testNullManagedObjectType() {
 
 		// Record null required type
-		this.issues.recordIssue("Type", OfficeNodeImpl.class,
-				"Null type for managed object 0 (name=MO)");
+		this.issues.recordIssue("MO", OfficeObjectNodeImpl.class,
+				"Null type for managed object (name=MO)");
 
 		// Attempt to load office type
 		this.loadOfficeType(false, new Loader() {
@@ -693,8 +695,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testNullTeamName() {
 
 		// Record null required type
-		this.issues.recordIssue("Type", OfficeNodeImpl.class,
-				"Null name for team 0");
+		this.issues.recordIssue(null, OfficeTeamNodeImpl.class,
+				"Null name for Office Team");
 
 		// Attempt to load office type
 		this.loadOfficeType(false, new Loader() {

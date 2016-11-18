@@ -96,19 +96,12 @@ public class OfficeSectionManagedObjectTypeImpl implements
 
 	@Override
 	public String getDependentObjectName() {
-		// TODO implement
-		// DependentManagedObjectType.getDependentManagedObjectName
-		throw new UnsupportedOperationException(
-				"TODO implement DependentManagedObjectType.getDependentManagedObjectName");
-
+		return this.managedObjectName;
 	}
 
 	@Override
 	public TypeQualification[] getTypeQualifications() {
-		// TODO implement DependentManagedObjectType.getTypeQualifications
-		throw new UnsupportedOperationException(
-				"TODO implement DependentManagedObjectType.getTypeQualifications");
-
+		return this.typeQualifications;
 	}
 
 	@Override

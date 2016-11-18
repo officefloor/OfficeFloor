@@ -187,15 +187,16 @@ public interface SectionNode extends Node, ManagedObjectRegistry, TaskRegistry,
 	/**
 	 * Builds this {@link OfficeSection} for this {@link SectionNode}.
 	 * 
-	 * @param officeFloorBuilder
-	 *            {@link OfficeFloorBuilder}.
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder} of the {@link Office} containing this
+	 *            {@link SectionNode}.
+	 * @param officeBindings
+	 *            {@link OfficeBindings} of the {@link Office} containing this
 	 *            {@link SectionNode}.
 	 * @param typeContext
 	 *            {@link TypeContext}.
 	 */
-	void buildSection(OfficeFloorBuilder officeFloorBuilder,
-			OfficeBuilder officeBuilder, TypeContext typeContext);
+	void buildSection(OfficeBuilder officeBuilder,
+			OfficeBindings officeBindings, TypeContext typeContext);
 
 }

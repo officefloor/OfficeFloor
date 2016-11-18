@@ -27,6 +27,7 @@ import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.profile.Profiler;
 
 /**
  * {@link Office} node.
@@ -98,9 +99,11 @@ public interface OfficeNode extends LinkOfficeNode, ManagedObjectRegistry,
 	 *            {@link OfficeFloorBuilder}.
 	 * @param typeContext
 	 *            {@link TypeContext}.
+	 * @param profiler
+	 *            Optional {@link Profiler}. May be <code>null</code>.
 	 * @return {@link OfficeBuilder} for the built {@link Office}.
 	 */
-	OfficeBuilder buildOffice(OfficeFloorBuilder builder,
-			TypeContext typeContext);
+	OfficeBindings buildOffice(OfficeFloorBuilder builder,
+			TypeContext typeContext, Profiler profiler);
 
 }

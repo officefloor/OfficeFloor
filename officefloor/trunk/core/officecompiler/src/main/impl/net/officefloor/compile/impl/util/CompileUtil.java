@@ -22,7 +22,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -289,6 +293,97 @@ public class CompileUtil {
 
 		// Return the loaded type
 		return loadedType;
+	}
+
+	/**
+	 * Convenience method to load a listing of types.
+	 * 
+	 * @param nodesMap
+	 *            {@link Map} of {@link Node} instances by their names to load
+	 *            types from.
+	 * @param sortKeyExtractor
+	 *            {@link Function} to extract the sort key (to enable
+	 *            deterministic order of loading the types).
+	 * @param typeLoader
+	 *            {@link Function} to load the type from the {@link Node}.
+	 * @param arrayGenerator
+	 *            {@link Function} to generate the array of types.
+	 * @return Array of types or <code>null</code> with issues reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	public static <N, T> T[] loadTypes(Map<String, N> nodesMap,
+			Function<N, String> sortKeyExtractor, Function<N, T> typeLoader,
+			IntFunction<T[]> arrayGenerator) {
+		return loadTypes(nodesMap.values().stream(), sortKeyExtractor,
+				typeLoader, arrayGenerator);
+	}
+
+	/**
+	 * Convenience method to load a listing of types.
+	 * 
+	 * @param nodes
+	 *            {@link Stream} of {@link Node} instances to load types from.
+	 * @param sortKeyExtractor
+	 *            {@link Function} to extract the sort key (to enable
+	 *            deterministic order of loading the types).
+	 * @param typeLoader
+	 *            {@link Function} to load the type from the {@link Node}.
+	 * @param arrayGenerator
+	 *            {@link Function} to generate the array of types.
+	 * @return Array of types or <code>null</code> with issues reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	public static <N, T> T[] loadTypes(Stream<N> nodes,
+			Function<N, String> sortKeyExtractor, Function<N, T> typeLoader,
+			IntFunction<T[]> arrayGenerator) {
+		try {
+			// Load the types
+			return nodes
+					.sorted((a, b) -> CompileUtil.sortCompare(
+							sortKeyExtractor.apply(a),
+							sortKeyExtractor.apply(b))).map(typeLoader)
+					.filter((type) -> {
+						if (type == null) {
+							throw new LoadTypesException();
+						}
+						return true;
+					}).toArray(arrayGenerator);
+
+		} catch (LoadTypesException ex) {
+			return null; // failed to load type, so no types
+		}
+	}
+
+	/**
+	 * Indicates failure in loading types.
+	 */
+	private static class LoadTypesException extends RuntimeException {
+	}
+
+	/**
+	 * Convenience method to source a listing of sub {@link Node} instances.
+	 * 
+	 * @param nodesMap
+	 *            {@link Map} of {@link Node} instances by their names to
+	 *            source.
+	 * @param sortKeyExtractor
+	 *            {@link Function} to extract the sort key (to enable
+	 *            deterministic order of sourcing the sub {@link Node}
+	 *            instances).
+	 * @param sourcer
+	 *            {@link Predicate} to source the sub {@link Node}.
+	 * @return <code>true</code> if all sub {@link Node} instances sourced.
+	 *         Otherwise, <code>false</code> with issue reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	public static <N> boolean sourceTree(Map<String, N> nodesMap,
+			Function<N, String> sortKeyExtractor, Predicate<N> sourcer) {
+		return nodesMap
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						sortKeyExtractor.apply(a), sortKeyExtractor.apply(b)))
+				.allMatch(sourcer);
 	}
 
 	/**

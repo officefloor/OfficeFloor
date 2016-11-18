@@ -95,14 +95,6 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	protected final OfficeFloorBuilder officeFloorBuilder = this
 			.createMock(OfficeFloorBuilder.class);
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
-		// Record initialising for deploying
-		this.record_init();
-	}
-
 	/**
 	 * <p>
 	 * Allow enhancing the {@link CompilerIssues}. For example allows wrapping
@@ -708,12 +700,12 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		// Office floor potentially built
 		OfficeFloor officeFloor = null;
 
-		// Record building if expected to build office floor
+		// Record building if expected to build OfficeFloor
 		if (isExpectBuild) {
-			// Create the mock office floor built
+			// Create the mock OfficeFloor built
 			officeFloor = this.createMock(OfficeFloor.class);
 
-			// Record successfully building the office floor
+			// Record successfully building the OfficeFloor
 			this.recordReturn(this.officeFloorBuilder,
 					this.officeFloorBuilder.buildOfficeFloor(null),
 					officeFloor, new TypeMatcher(OfficeFloorIssues.class));
@@ -722,7 +714,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		// Replay the mocks
 		this.replayMockObjects();
 
-		// Create the office frame to return the mock office floor builder
+		// Create the office frame to return the mock OfficeFloor builder
 		OfficeFrame officeFrame = new OfficeFrame() {
 			@Override
 			public OfficeFloorBuilder createOfficeFloorBuilder(
