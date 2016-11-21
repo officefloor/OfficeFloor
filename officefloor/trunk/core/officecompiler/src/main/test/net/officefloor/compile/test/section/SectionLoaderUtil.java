@@ -24,7 +24,6 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.type.TypeContextImpl;
-import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -118,12 +117,11 @@ public class SectionLoaderUtil {
 	 * 
 	 * @param <S>
 	 *            {@link SectionSource} type.
-	 * @param sectionSourceClass
-	 *            {@link SectionSource} class being tested.
+	 * @param location
+	 *            Location of the {@link OfficeSection}.
 	 * @return {@link SectionDesigner}.
 	 */
-	public static <S extends SectionSource> SectionDesigner createSectionDesigner(
-			Class<S> sectionSourceClass) {
+	public static <S extends SectionSource> SectionDesigner createSectionDesigner() {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
 		return context.createSectionNode(
@@ -298,7 +296,14 @@ public class SectionLoaderUtil {
 		if (!(designer instanceof SectionNode)) {
 			TestCase.fail("designer must be created from createSectionDesigner");
 		}
-		OfficeSectionType eSection = ((SectionNode) designer)
+		SectionNode section = (SectionNode) designer;
+		section.initialise(sectionSourceClass.getName(), null, sectionLocation);
+		for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
+			String name = propertyNameValuePairs[i];
+			String value = propertyNameValuePairs[i + 1];
+			section.addProperty(name, value);
+		}
+		OfficeSectionType eSection = section
 				.loadOfficeSectionType(new TypeContextImpl());
 
 		// Load the actual section type
@@ -447,10 +452,6 @@ public class SectionLoaderUtil {
 					aMoSource.getOfficeSectionManagedObjectSourceName());
 			String managedObjectSourceName = eMoSource
 					.getOfficeSectionManagedObjectSourceName();
-
-			// Ensure load the managed object type to have list of teams
-			ManagedObjectSourceNode mosNode = (ManagedObjectSourceNode) eMoSource;
-			mosNode.loadManagedObjectType();
 
 			// Validate the managed object source teams
 			OfficeSectionManagedObjectTeamType[] eTeams = eMoSource

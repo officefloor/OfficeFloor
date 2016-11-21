@@ -537,30 +537,12 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			return false;
 		}
 
-		// Obtain the mapping of work to types
-		Map<WorkNode, WorkType<?>> workTypes = new HashMap<WorkNode, WorkType<?>>();
-		this.workNodes
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getSectionWorkName(), b.getSectionWorkName()))
-				.forEachOrdered((work) -> {
-					// Load the work type
-						WorkType<?> workType = typeContext
-								.getOrLoadWorkType(work);
-						if (workType == null) {
-							return;
-						}
-
-						// Register the work type
-						workTypes.put(work, workType);
-					});
-
 		// Add the office context for the tasks
 		OfficeTaskType[] taskTypes = CompileUtil.loadTypes(this.taskNodes, (
 				task) -> task.getOfficeTaskName(), task -> {
 			// Obtain the work type of the work for the task
-				WorkType<?> workType = workTypes.get(task.getWorkNode());
+				WorkNode work = task.getWorkNode();
+				WorkType<?> workType = typeContext.getOrLoadWorkType(work);
 				if (workType == null) {
 					return null;
 				}
