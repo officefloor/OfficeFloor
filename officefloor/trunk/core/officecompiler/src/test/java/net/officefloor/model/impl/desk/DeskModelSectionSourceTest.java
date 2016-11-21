@@ -47,12 +47,10 @@ public class DeskModelSectionSourceTest extends OfficeFrameTestCase {
 	public void testDesk() {
 
 		// Create the expected section
-		SectionDesigner designer = SectionLoaderUtil
-				.createSectionDesigner(DeskModelSectionSource.class);
+		SectionDesigner designer = SectionLoaderUtil.createSectionDesigner();
 		designer.addSectionInput("INPUT", Integer.class.getName());
 		designer.addSectionOutput("OUTPUT", Float.class.getName(), false);
-		designer
-				.addSectionOutput("ESCALATION", Exception.class.getName(), true);
+		designer.addSectionOutput("ESCALATION", Exception.class.getName(), true);
 		designer.addSectionObject("OBJECT", Connection.class.getName());
 		SectionWork work = designer.addSectionWork("WORK",
 				"net.example.ExampleWorkSource");

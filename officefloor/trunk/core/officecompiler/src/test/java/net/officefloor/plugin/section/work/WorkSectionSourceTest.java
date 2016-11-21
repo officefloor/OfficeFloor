@@ -60,8 +60,7 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create the expected type
-		SectionDesigner expected = SectionLoaderUtil
-				.createSectionDesigner(WorkSectionSource.class);
+		SectionDesigner expected = SectionLoaderUtil.createSectionDesigner();
 
 		// Inputs
 		expected.addSectionInput("taskOne", null);

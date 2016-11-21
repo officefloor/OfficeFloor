@@ -232,6 +232,10 @@ public class TaskNodeImpl implements TaskNode {
 		}
 
 		// As here, did not find corresponding task type
+		this.context.getCompilerIssues().addIssue(
+				this,
+				"Can not find task '" + this.state.taskTypeName + "' on work "
+						+ this.state.workNode.getQualifiedWorkName());
 		return null;
 	}
 

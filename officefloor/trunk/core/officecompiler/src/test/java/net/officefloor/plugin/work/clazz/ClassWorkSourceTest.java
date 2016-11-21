@@ -30,14 +30,13 @@ import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-
-import org.easymock.AbstractMatcher;
 
 /**
  * Test the {@link ClassWorkSource}.
@@ -76,7 +75,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 				.createWorkTypeBuilder(new ClassWorkFactory(
 						MockQualifiedClass.class));
 
-		// task
+		// Task
 		TaskTypeBuilder task = work.addTaskType("task", new ClassTaskFactory(
 				null, false, null), null, null);
 		TaskObjectTypeBuilder<?> objectOne = task.addObject(String.class);
@@ -87,9 +86,22 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		objectTwo.setLabel(String.class.getName());
 
 		// Validate the work type
-		WorkLoaderUtil.validateWorkType(work, ClassWorkSource.class,
+		WorkType<?> workType = WorkLoaderUtil.validateWorkType(work,
+				ClassWorkSource.class,
 				ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
 				MockQualifiedClass.class.getName());
+
+		// Ensure appropriate objects for task
+		TaskType<?, ?, ?> taskType = workType.getTaskTypes()[0];
+		TaskObjectType<?>[] taskObjects = taskType.getObjectTypes();
+		assertEquals("Incorrect number of task objects", 2, taskObjects.length);
+		assertEquals(
+				"Incorrect first object",
+				MockQualification.class.getName() + "-"
+						+ String.class.getName(),
+				taskObjects[0].getObjectName());
+		assertEquals("Incorrect second object", String.class.getName(),
+				taskObjects[1].getObjectName());
 	}
 
 	/**
@@ -127,34 +139,6 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 						+ ClassWorkSource.class.getName(),
 				new IllegalArgumentException(
 						"Method task parameter 0 has more than one Qualifier"));
-		this.control(issues).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-
-				// Match initial parameters
-				for (int i = 0; i < 5; i++) {
-					Object e = expected[i];
-					Object a = actual[i];
-					if ((e == null) && (a == null)) {
-						continue; // match on null
-					} else if ((e != null) && (e.equals(actual[i]))) {
-						continue; // match not null
-					} else {
-						return false; // not match
-					}
-				}
-
-				// Match exception
-				IllegalArgumentException eEx = (IllegalArgumentException) expected[5];
-				IllegalArgumentException aEx = (IllegalArgumentException) actual[5];
-				if (!eEx.getMessage().equals(aEx.getMessage())) {
-					return false; // not match
-				}
-
-				// As here, matches
-				return true;
-			}
-		});
 
 		// Create the work type builder
 		WorkTypeBuilder<ClassWork> work = WorkLoaderUtil
@@ -561,34 +545,6 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 						"Two methods by the same name 'task' in class "
 								+ GrandChildClass.class.getName()
 								+ ".  Either rename one of the methods or annotate one with @NonTaskMethod"));
-		this.control(issues).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-
-				// Match initial parameters
-				for (int i = 0; i < 5; i++) {
-					Object e = expected[i];
-					Object a = actual[i];
-					if ((e == null) && (a == null)) {
-						continue; // match on null
-					} else if ((e != null) && (e.equals(actual[i]))) {
-						continue; // match not null
-					} else {
-						return false; // not match
-					}
-				}
-
-				// Match exception
-				IllegalStateException eEx = (IllegalStateException) expected[5];
-				IllegalStateException aEx = (IllegalStateException) actual[5];
-				if (!eEx.getMessage().equals(aEx.getMessage())) {
-					return false; // not match
-				}
-
-				// As here, matches
-				return true;
-			}
-		});
 
 		// Validate the work type
 		this.replayMockObjects();

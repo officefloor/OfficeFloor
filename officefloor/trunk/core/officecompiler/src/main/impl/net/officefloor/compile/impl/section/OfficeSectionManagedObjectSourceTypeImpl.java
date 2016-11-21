@@ -82,11 +82,7 @@ public class OfficeSectionManagedObjectSourceTypeImpl implements
 
 	@Override
 	public OfficeSectionManagedObjectTeamType[] getOfficeSectionManagedObjectTeamTypes() {
-		// TODO implement
-		// OfficeSectionManagedObjectSourceType.getOfficeSectionManagedObjectTeamTypes
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeSectionManagedObjectSourceType.getOfficeSectionManagedObjectTeamTypes");
-
+		return this.teamTypes;
 	}
 
 	@Override

@@ -258,12 +258,7 @@ public class WorkLoaderImpl implements WorkLoader {
 		// Determine if duplicate task names
 		if (this.isDuplicateNaming(
 				taskTypes,
-				new NameExtractor<TaskType<W, ?, ?>>() {
-					@Override
-					public String extractName(TaskType<W, ?, ?> item) {
-						return item.getTaskName();
-					}
-				},
+				(taskType) -> taskType.getTaskName(),
 				"Two or more "
 						+ TaskType.class.getSimpleName()
 						+ " definitions with the same name (${NAME}) provided by "
@@ -351,13 +346,8 @@ public class WorkLoaderImpl implements WorkLoader {
 		}
 
 		// Validate no duplicate object names
-		if (this.isDuplicateNaming(objectTypes,
-				new NameExtractor<TaskObjectType<M>>() {
-					@Override
-					public String extractName(TaskObjectType<M> item) {
-						return item.getObjectName();
-					}
-				}, this.getTaskIssueDescription("Two or more "
+		if (this.isDuplicateNaming(objectTypes, (item) -> item.getObjectName(),
+				this.getTaskIssueDescription("Two or more "
 						+ TaskObjectType.class.getSimpleName()
 						+ " definitions with the same name (${NAME}) for",
 						taskIndex, taskName, workSourceClass))) {

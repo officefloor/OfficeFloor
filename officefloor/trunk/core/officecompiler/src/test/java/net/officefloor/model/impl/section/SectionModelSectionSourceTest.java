@@ -45,12 +45,10 @@ public class SectionModelSectionSourceTest extends OfficeFrameTestCase {
 	public void testSection() {
 
 		// Create the expected section
-		SectionDesigner designer = SectionLoaderUtil
-				.createSectionDesigner(SectionModelSectionSource.class);
+		SectionDesigner designer = SectionLoaderUtil.createSectionDesigner();
 		designer.addSectionInput("INPUT", Integer.class.getName());
 		designer.addSectionOutput("OUTPUT", Float.class.getName(), false);
-		designer
-				.addSectionOutput("ESCALATION", Exception.class.getName(), true);
+		designer.addSectionOutput("ESCALATION", Exception.class.getName(), true);
 		designer.addSectionObject("OBJECT", Connection.class.getName());
 		designer.addSubSection("SUB_SECTION", "TODO SOURCE", "TODO LOCATION");
 

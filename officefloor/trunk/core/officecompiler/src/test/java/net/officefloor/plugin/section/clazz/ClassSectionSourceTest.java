@@ -24,8 +24,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireOfficeFloor;
@@ -33,7 +31,7 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.MockCompilerIssues;
-import net.officefloor.compile.impl.structure.WorkNodeImpl;
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -45,6 +43,7 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -53,14 +52,13 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 import net.officefloor.plugin.work.clazz.NonTaskMethod;
 import net.officefloor.plugin.work.clazz.Qualifier;
-
-import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link ClassSectionSource}.
@@ -70,18 +68,9 @@ import org.easymock.AbstractMatcher;
 public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 	/**
-	 * <p>
-	 * Expected {@link SectionTask} instances by name.
-	 * <p>
-	 * This is loaded via creation of the {@link SectionDesigner}.
+	 * {@link SectionManagedObject} for the {@link ClassManagedObject}.
 	 */
-	private final Map<String, SectionTask> expectedTasks = new HashMap<String, SectionTask>();
-
-	/**
-	 * {@link ClassSectionSource} used for testing. Allows for overriding with
-	 * child implementation.
-	 */
-	private Class<? extends ClassSectionSource> classSectionSource = ClassSectionSource.class;
+	private SectionManagedObject objectManagedObject;
 
 	/**
 	 * Ensure correct specification.
@@ -97,7 +86,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testInput() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockInputSection.class, "doInput");
+				MockInputSection.class,
+				this.configureClassSectionTask("doInput"));
 		expected.addSectionInput("doInput", null);
 
 		// Validate section
@@ -119,7 +109,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testIgnoreNonTaskMethods() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockIgnoreInputSection.class, "includedInput");
+				MockIgnoreInputSection.class,
+				this.configureClassSectionTask("includedInput"));
 		expected.addSectionInput("includedInput", null);
 
 		// Validate section
@@ -154,9 +145,13 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockChildSection.class, "task");
-		this.expectedTasks.get("task").getTaskObject(Integer.class.getName())
-				.flagAsParameter();
+				MockChildSection.class,
+				(designer, work) -> {
+					SectionTask task = this.addClassSectionTask(designer, work,
+							"task", "task");
+					task.getTaskObject(Integer.class.getName())
+							.flagAsParameter();
+				});
 		expected.addSectionInput("task", Integer.class.getName());
 
 		// Validate section
@@ -187,7 +182,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testOutput() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockOutputSection.class, "doInput");
+				MockOutputSection.class,
+				this.configureClassSectionTask("doInput"));
 		expected.addSectionInput("doInput", null);
 		expected.addSectionOutput("doOutput", null, false);
 
@@ -211,7 +207,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testFlowInterface() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockFlowInterfaceSection.class, "doInput");
+				MockFlowInterfaceSection.class,
+				this.configureClassSectionTask("doInput"));
 		expected.addSectionInput("doInput", null);
 		expected.addSectionOutput("doOutput", null, false);
 
@@ -242,7 +239,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testEscalation() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockEscalationSection.class, "doInput");
+				MockEscalationSection.class,
+				this.configureClassSectionTask("doInput", "doInput"));
 		expected.addSectionInput("doInput", null);
 		expected.addSectionOutput(SQLException.class.getName(),
 				SQLException.class.getName(), true);
@@ -266,8 +264,13 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testParameterArgument() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockParameterArgumentSection.class, "doInput");
-		this.expectedTasks.get("doInput").getTaskObject(String.class.getName());
+				MockParameterArgumentSection.class,
+				(designer, work) -> {
+					SectionTask task = this.addClassSectionTask(designer, work,
+							"doInput", "doInput");
+					task.getTaskObject(String.class.getName())
+							.flagAsParameter();
+				});
 		expected.addSectionInput("doInput", String.class.getName());
 		expected.addSectionOutput("doOutput", Integer.class.getName(), false);
 
@@ -293,12 +296,18 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockObjectSection.class, "doInput");
-		this.expectedTasks.get("doInput").getTaskObject(
-				Connection.class.getName());
+				MockObjectSection.class,
+				(designer, work) -> {
+					SectionTask task = this.addClassSectionTask(designer, work,
+							"doInput", "doInput");
+					TaskObject taskObject = task.getTaskObject(Connection.class
+							.getName());
+					SectionObject sectionObject = designer.addSectionObject(
+							Connection.class.getName(),
+							Connection.class.getName());
+					designer.link(taskObject, sectionObject);
+				});
 		expected.addSectionInput("doInput", null);
-		expected.addSectionObject(Connection.class.getName(),
-				Connection.class.getName());
 
 		// Validate section
 		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
@@ -323,15 +332,35 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		final String UNQUALIFIED_NAME = Connection.class.getName();
 
 		// Create the expected section
-		SectionDesigner expected = this.createSectionDesigner(
-				MockObjectSection.class, "doInput");
-		SectionTask task = this.expectedTasks.get("doInput");
-		task.getTaskObject(QUALIFIED_NAME);
-		task.getTaskObject(UNQUALIFIED_NAME);
+		SectionDesigner expected = this
+				.createSectionDesigner(
+						MockQualifiedObjectSection.class,
+						(designer, work) -> {
+							SectionTask task = this.addClassSectionTask(
+									designer, work, "doInput", "doInput");
+
+							// Qualified dependency
+							TaskObject qualifiedTaskObject = task
+									.getTaskObject(QUALIFIED_NAME);
+							SectionObject qualifiedSectionObject = designer
+									.addSectionObject(QUALIFIED_NAME,
+											Connection.class.getName());
+							qualifiedSectionObject
+									.setTypeQualifier(MockQualification.class
+											.getName());
+							designer.link(qualifiedTaskObject,
+									qualifiedSectionObject);
+
+							// Unqualified dependency
+							TaskObject unqualifiedTaskObject = task
+									.getTaskObject(UNQUALIFIED_NAME);
+							SectionObject unqualifiedSectionObject = designer
+									.addSectionObject(UNQUALIFIED_NAME,
+											Connection.class.getName());
+							designer.link(unqualifiedTaskObject,
+									unqualifiedSectionObject);
+						});
 		expected.addSectionInput("doInput", null);
-		expected.addSectionObject(QUALIFIED_NAME, Connection.class.getName())
-				.setTypeQualifier(MockQualification.class.getName());
-		expected.addSectionObject(UNQUALIFIED_NAME, Connection.class.getName());
 
 		// Validate section
 		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
@@ -363,23 +392,49 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testSameQualifierOnDifferentObjectTypes() {
 
 		// Create the expected section
-		SectionDesigner expected = this.createSectionDesigner(
-				MockObjectSection.class, "doInput");
-		SectionTask task = this.expectedTasks.get("doInput");
-		task.getTaskObject(MockQualification.class.getName() + "-"
-				+ Connection.class.getName());
-		task.getTaskObject(MockQualification.class.getName() + "-"
-				+ String.class.getName());
+		SectionDesigner expected = this
+				.createSectionDesigner(
+						MockSameQualifierObjectSection.class,
+						(designer, work) -> {
+							SectionTask task = this.addClassSectionTask(
+									designer, work, "doInput", "doInput");
+
+							// First qualified object
+							TaskObject firstTaskObject = task
+									.getTaskObject(MockQualification.class
+											.getName()
+											+ "-"
+											+ Connection.class.getName());
+							SectionObject firstSectionObject = designer
+									.addSectionObject(
+											MockQualification.class.getName()
+													+ "-"
+													+ Connection.class
+															.getName(),
+											Connection.class.getName());
+							firstSectionObject
+									.setTypeQualifier(MockQualification.class
+											.getName());
+							designer.link(firstTaskObject, firstSectionObject);
+
+							// Second qualified object
+							TaskObject secondTaskObject = task
+									.getTaskObject(MockQualification.class
+											.getName()
+											+ "-"
+											+ String.class.getName());
+							SectionObject secondSectionObject = designer
+									.addSectionObject(
+											MockQualification.class.getName()
+													+ "-"
+													+ String.class.getName(),
+											String.class.getName());
+							secondSectionObject
+									.setTypeQualifier(MockQualification.class
+											.getName());
+							designer.link(secondTaskObject, secondSectionObject);
+						});
 		expected.addSectionInput("doInput", null);
-		expected.addSectionObject(
-				MockQualification.class.getName() + "-"
-						+ Connection.class.getName(),
-				Connection.class.getName()).setTypeQualifier(
-				MockQualification.class.getName());
-		expected.addSectionObject(
-				MockQualification.class.getName() + "-"
-						+ String.class.getName(), String.class.getName())
-				.setTypeQualifier(MockQualification.class.getName());
 
 		// Validate section
 		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
@@ -411,50 +466,28 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		// Record issue
 		CompilerIssue[] cause = issues.recordCaptureIssues(true);
 		issues.recordIssue(
-				"WORK",
-				WorkNodeImpl.class,
+				"Type",
+				SectionNodeImpl.class,
 				"Failed to source WorkType definition from WorkSource "
 						+ SectionClassWorkSource.class.getName(),
 				new IllegalArgumentException(
 						"Method doInput parameter 0 has more than one Qualifier"));
-		this.control(issues).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-
-				// Match initial parameters
-				for (int i = 0; i < 5; i++) {
-					Object e = expected[i];
-					Object a = actual[i];
-					if ((e == null) && (a == null)) {
-						continue; // match on null
-					} else if ((e != null) && (e.equals(actual[i]))) {
-						continue; // match not null
-					} else {
-						return false; // not match
-					}
-				}
-
-				// Match exception
-				IllegalArgumentException eEx = (IllegalArgumentException) expected[5];
-				IllegalArgumentException aEx = (IllegalArgumentException) actual[5];
-				if (!eEx.getMessage().equals(aEx.getMessage())) {
-					return false; // not match
-				}
-
-				// As here, matches
-				return true;
-			}
-		});
-		issues.recordIssue("Failure loading WorkType from source "
-				+ SectionClassWorkSource.class.getName(), cause);
+		issues.recordIssue("Type", SectionNodeImpl.class,
+				"Failure loading WorkType from source "
+						+ SectionClassWorkSource.class.getName(), cause);
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockObjectSection.class, "doInput");
-		this.expectedTasks.get("doInput").getTaskObject("Connection");
+				MockMultipleQualifiedObjectSection.class,
+				(designer, work) -> {
+					SectionTask task = this.addClassSectionTask(designer, work,
+							"doInput", "doInput");
+					task.getTaskObject("Connection");
+					designer.addSectionObject(
+							MockQualification.class.getName(),
+							Connection.class.getName());
+				});
 		expected.addSectionInput("doInput", null);
-		expected.addSectionObject(MockQualification.class.getName(),
-				Connection.class.getName());
 
 		// Test
 		this.replayMockObjects();
@@ -494,7 +527,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testDependency() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockDependencySection.class, "doInput");
+				MockDependencySection.class,
+				this.configureClassSectionTask("doInput"));
 		expected.addSectionInput("doInput", null);
 		expected.addSectionObject(Connection.class.getName(),
 				Connection.class.getName());
@@ -522,7 +556,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(
-				MockDependencySection.class, "doInput");
+				MockQualifiedDependencySection.class,
+				this.configureClassSectionTask("doInput"));
 		expected.addSectionInput("doInput", null);
 		SectionObject object = expected.addSectionObject(
 				MockQualification.class.getName() + "-"
@@ -561,7 +596,10 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.recordIssue("Dependency connection has more than one Qualifier");
+		issues.recordIssue("Type", SectionNodeImpl.class,
+				"Unable to obtain type qualifier for dependency connection",
+				new IllegalArgumentException(
+						"Dependency connection has more than one Qualifier"));
 
 		// Test
 		this.replayMockObjects();
@@ -593,12 +631,10 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testChangeTaskName() {
 
-		// Override to change class name
-		this.classSectionSource = MockChangeTaskNameClassSectionSource.class;
-
 		// Create the expected type
 		SectionDesigner expected = this.createSectionDesigner(
-				MockInputSection.class, "newName");
+				MockChangeTaskNameSection.class,
+				this.configureClassSectionTask("newName", "oldName"));
 		expected.addSectionInput("newName", null);
 
 		// Validate section
@@ -633,21 +669,41 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testChangeTaskNameAndEnsureCorrectLinkedType() {
 
-		// Override to change class name
-		this.classSectionSource = MockChangeTaskNameClassSectionSource.class;
-
 		// Create the expected type
 		SectionDesigner expected = this.createSectionDesigner(
-				MockInputSection.class, "doInput", "newName", "finished");
-		SectionTask doInput = this.expectedTasks.get("doInput");
-		doInput.getTaskObject(ReturnValue.class.getName());
-		doInput.getTaskObject(Boolean.class.getName());
-		SectionTask newName = this.expectedTasks.get("newName");
-		newName.getTaskObject(ReturnValue.class.getName());
-		newName.getTaskObject(String.class.getName());
-		newName.getTaskObject(Connection.class.getName());
-		SectionTask finished = this.expectedTasks.get("finished");
-		finished.getTaskObject(ReturnValue.class.getName());
+				MockChangeTaskNameWithLinksSection.class,
+				(designer, work) -> {
+					SectionTask doInput = this.addClassSectionTask(designer,
+							work, "doInput", "doInput");
+					TaskObject doInputReturnValue = doInput
+							.getTaskObject(ReturnValue.class.getName());
+					SectionObject returnSectionObject = designer
+							.addSectionObject(ReturnValue.class.getName(),
+									ReturnValue.class.getName());
+					designer.link(doInputReturnValue, returnSectionObject);
+					doInput.getTaskObject(Boolean.class.getName())
+							.flagAsParameter();
+
+					SectionTask newName = this.addClassSectionTask(designer,
+							work, "newName", "oldName");
+					TaskObject newNameReturnValue = newName
+							.getTaskObject(ReturnValue.class.getName());
+					designer.link(newNameReturnValue, returnSectionObject);
+					newName.getTaskObject(String.class.getName())
+							.flagAsParameter();
+					TaskObject newNameConnection = newName
+							.getTaskObject(Connection.class.getName());
+					SectionObject connectionSectionObject = designer
+							.addSectionObject(Connection.class.getName(),
+									Connection.class.getName());
+					designer.link(newNameConnection, connectionSectionObject);
+
+					SectionTask finished = this.addClassSectionTask(designer,
+							work, "finished", "finished");
+					TaskObject finishedReturnValue = finished
+							.getTaskObject(ReturnValue.class.getName());
+					designer.link(finishedReturnValue, returnSectionObject);
+				});
 
 		// Inputs
 		expected.addSectionInput("doInput", Boolean.class.getName());
@@ -658,12 +714,6 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		expected.addSectionOutput("externalFlow", null, false);
 		expected.addSectionOutput("java.sql.SQLException",
 				SQLException.class.getName(), true);
-
-		// Objects
-		expected.addSectionObject(ReturnValue.class.getName(),
-				ReturnValue.class.getName());
-		expected.addSectionObject(Connection.class.getName(),
-				Connection.class.getName());
 
 		// Validate section
 		SectionLoaderUtil.validateSection(expected,
@@ -869,7 +919,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Create the expected section type
 		SectionDesigner type = this.createSectionDesigner(
-				MockQualifiedManagedObjectSection.class, "task");
+				MockQualifiedManagedObjectSection.class,
+				this.configureClassSectionTask("task"));
 		type.addSectionInput("task", null);
 		SectionManagedObjectSource mos = type.addSectionManagedObjectSource(
 				"managedObject", ClassManagedObjectSource.class.getName());
@@ -1119,40 +1170,100 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * {@link SectionWork} configurer.
+	 */
+	private static interface WorkConfigurer {
+
+		/**
+		 * Configures the {@link SectionWork}.
+		 * 
+		 * @param designer
+		 *            {@link SectionDesigner}.
+		 * @param work
+		 *            {@link SectionWork} to configure.
+		 */
+		void configureWork(SectionDesigner designer, SectionWork work);
+	}
+
+	/**
 	 * Creates the expected {@link SectionDesigner} with pre-populated details.
 	 * 
 	 * @param sectionClass
 	 *            Section class.
-	 * @param taskNames
-	 *            Names of the {@link Task} instances.
+	 * @param workConfigurer
+	 *            {@link WorkConfigurer}.
 	 * @return {@link SectionDesigner}.
 	 */
 	private SectionDesigner createSectionDesigner(Class<?> sectionClass,
-			String... taskNames) {
+			WorkConfigurer workConfigurer) {
 
 		// Create the section designer
-		SectionDesigner designer = SectionLoaderUtil
-				.createSectionDesigner(this.classSectionSource);
+		SectionDesigner designer = SectionLoaderUtil.createSectionDesigner();
 		SectionManagedObjectSource managedObjectSource = designer
 				.addSectionManagedObjectSource("OBJECT",
 						ClassManagedObjectSource.class.getName());
 		managedObjectSource.addProperty(
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				sectionClass.getName());
+		this.objectManagedObject = managedObjectSource.addSectionManagedObject(
+				"OBJECT", ManagedObjectScope.THREAD);
 		SectionWork work = designer.addSectionWork("WORK",
-				ClassWorkSource.class.getName());
-		for (String taskName : taskNames) {
-
-			// Create the section task with the section object
-			SectionTask task = work.addSectionTask(taskName, taskName);
-			task.getTaskObject("OBJECT");
-
-			// Register the expected task
-			this.expectedTasks.put(taskName, task);
-		}
+				SectionClassWorkSource.class.getName());
+		work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				sectionClass.getName());
+		workConfigurer.configureWork(designer, work);
 
 		// Return the section designer
 		return designer;
+	}
+
+	/**
+	 * Convenience method to add {@link ClassSectionSource} {@link SectionTask}.
+	 * 
+	 * @param taskName
+	 *            {@link SectionTask} and {@link TaskType} name.
+	 * @return {@link WorkConfigurer}.
+	 */
+	public WorkConfigurer configureClassSectionTask(String taskName) {
+		return this.configureClassSectionTask(taskName, taskName);
+	}
+
+	/**
+	 * Convenience method to add {@link ClassSectionSource} {@link SectionTask}.
+	 * 
+	 * @param taskName
+	 *            {@link SectionTask} name.
+	 * @param taskTypeName
+	 *            {@link TaskType} name.
+	 * @return {@link WorkConfigurer}.
+	 */
+	public WorkConfigurer configureClassSectionTask(String taskName,
+			String taskTypeName) {
+		return (designer, work) -> this.addClassSectionTask(designer, work,
+				taskName, taskTypeName);
+	}
+
+	/**
+	 * Convenience method to add a {@link ClassSectionSource}
+	 * {@link SectionTask}.
+	 * 
+	 * @param designer
+	 *            {@link SectionDesigner}.
+	 * @param work
+	 *            {@link SectionWork}.
+	 * @param taskName
+	 *            {@link SectionTask} name.
+	 * @param taskTypeName
+	 *            {@link TaskType} name.
+	 * @return {@link SectionTask}.
+	 */
+	public SectionTask addClassSectionTask(SectionDesigner designer,
+			SectionWork work, String taskName, String taskTypeName) {
+		SectionTask task = work.addSectionTask(taskName, taskTypeName);
+		TaskObject taskObject = task
+				.getTaskObject(ClassSectionSource.CLASS_OBJECT_NAME);
+		designer.link(taskObject, objectManagedObject);
+		return task;
 	}
 
 }

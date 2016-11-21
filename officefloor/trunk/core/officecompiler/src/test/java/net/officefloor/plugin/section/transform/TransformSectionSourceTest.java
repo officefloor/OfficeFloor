@@ -399,8 +399,7 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 		// Create the expected type
 		Class<? extends SectionSource> sectionSourceClass = isTransform ? TransformSectionSource.class
 				: ClassSectionSource.class;
-		SectionDesigner type = SectionLoaderUtil
-				.createSectionDesigner(sectionSourceClass);
+		SectionDesigner type = SectionLoaderUtil.createSectionDesigner();
 
 		// Inputs
 		type.addSectionInput(prefix + "inputOne", null);
@@ -437,6 +436,8 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			// Tasks
 			SectionWork work = type.addSectionWork("WORK",
 					ClassWorkSource.class.getName());
+			work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+					MockSectionTypeClass.class.getName());
 			SectionTask taskOne = work.addSectionTask("inputOne", "inputOne");
 			taskOne.getTaskObject("OBJECT");
 			taskOne.getTaskObject(Connection.class.getName());
