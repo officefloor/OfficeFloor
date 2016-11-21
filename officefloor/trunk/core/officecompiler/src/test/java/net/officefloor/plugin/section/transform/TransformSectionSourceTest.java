@@ -37,6 +37,7 @@ import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
@@ -46,6 +47,7 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
+import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -53,6 +55,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.section.clazz.SectionClassWorkSource;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
@@ -397,8 +400,6 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 	public SectionDesigner createExpectedType(boolean isTransform, String prefix) {
 
 		// Create the expected type
-		Class<? extends SectionSource> sectionSourceClass = isTransform ? TransformSectionSource.class
-				: ClassSectionSource.class;
 		SectionDesigner type = SectionLoaderUtil.createSectionDesigner();
 
 		// Inputs
@@ -417,8 +418,8 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 				NumberFormatException.class.getName(), true);
 
 		// Objects
-		type.addSectionObject(prefix + Connection.class.getName(),
-				Connection.class.getName());
+		SectionObject connectionSectionObject = type.addSectionObject(prefix
+				+ Connection.class.getName(), Connection.class.getName());
 
 		// Type differences based on transforming
 		if (isTransform) {
@@ -433,18 +434,6 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			}
 
 		} else {
-			// Tasks
-			SectionWork work = type.addSectionWork("WORK",
-					ClassWorkSource.class.getName());
-			work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
-					MockSectionTypeClass.class.getName());
-			SectionTask taskOne = work.addSectionTask("inputOne", "inputOne");
-			taskOne.getTaskObject("OBJECT");
-			taskOne.getTaskObject(Connection.class.getName());
-			SectionTask taskTwo = work.addSectionTask("inputTwo", "inputTwo");
-			taskTwo.getTaskObject("OBJECT");
-			taskTwo.getTaskObject(String.class.getName());
-
 			// Managed Objects
 			SectionManagedObjectSource objectMos = type
 					.addSectionManagedObjectSource("OBJECT",
@@ -452,8 +441,26 @@ public class TransformSectionSourceTest extends OfficeFrameTestCase {
 			objectMos.addProperty(
 					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 					MockSectionTypeClass.class.getName());
-			objectMos.addSectionManagedObject("OBJECT",
-					ManagedObjectScope.PROCESS);
+			SectionManagedObject objectMo = objectMos.addSectionManagedObject(
+					"OBJECT", ManagedObjectScope.PROCESS);
+
+			// Tasks
+			SectionWork work = type.addSectionWork("WORK",
+					SectionClassWorkSource.class.getName());
+			work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+					MockSectionTypeClass.class.getName());
+
+			SectionTask taskOne = work.addSectionTask("inputOne", "inputOne");
+			TaskObject taskOneObject = taskOne.getTaskObject("OBJECT");
+			type.link(taskOneObject, objectMo);
+			TaskObject taskOneConnection = taskOne
+					.getTaskObject(Connection.class.getName());
+			type.link(taskOneConnection, connectionSectionObject);
+
+			SectionTask taskTwo = work.addSectionTask("inputTwo", "inputTwo");
+			TaskObject taskTwoObject = taskTwo.getTaskObject("OBJECT");
+			type.link(taskTwoObject, objectMo);
+			taskTwo.getTaskObject(String.class.getName()).flagAsParameter();
 		}
 
 		// Return the type
