@@ -33,6 +33,7 @@ import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -77,28 +78,42 @@ public class WorkSectionSourceTest extends OfficeFrameTestCase {
 				SQLException.class.getName(), true);
 
 		// Objects
-		expected.addSectionObject(Integer.class.getName(),
-				Integer.class.getName());
-		SectionObject object = expected.addSectionObject(
+		SectionObject integerObject = expected.addSectionObject(
+				Integer.class.getName(), Integer.class.getName());
+		SectionObject qualifiedConnectionObject = expected.addSectionObject(
 				MockQualification.class.getName() + "-"
 						+ Connection.class.getName(),
 				Connection.class.getName());
-		object.setTypeQualifier(MockQualification.class.getName());
-		expected.addSectionObject(Connection.class.getName(),
-				Connection.class.getName());
-		expected.addSectionObject(List.class.getName(), List.class.getName());
+		qualifiedConnectionObject.setTypeQualifier(MockQualification.class
+				.getName());
+		SectionObject connectionObject = expected.addSectionObject(
+				Connection.class.getName(), Connection.class.getName());
+		SectionObject listObject = expected.addSectionObject(
+				List.class.getName(), List.class.getName());
 
 		// Tasks
 		SectionWork work = expected.addSectionWork("WORK",
 				ClassWorkSource.class.getName());
+		work.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
+				MockWork.class.getName());
+
 		SectionTask taskOne = work.addSectionTask("taskOne", "taskOne");
-		taskOne.getTaskObject(Integer.class.getName());
-		taskOne.getTaskObject(MockQualification.class.getName() + "-"
-				+ Connection.class.getName());
+		TaskObject taskOneInteger = taskOne.getTaskObject(Integer.class
+				.getName());
+		expected.link(taskOneInteger, integerObject);
+		TaskObject taskOneConnection = taskOne
+				.getTaskObject(MockQualification.class.getName() + "-"
+						+ Connection.class.getName());
+		expected.link(taskOneConnection, qualifiedConnectionObject);
+
 		SectionTask taskTwo = work.addSectionTask("taskTwo", "taskTwo");
-		taskTwo.getTaskObject(Connection.class.getName());
-		taskTwo.getTaskObject(String.class.getName());
-		taskTwo.getTaskObject(List.class.getName());
+		TaskObject taskTwoConnection = taskTwo.getTaskObject(Connection.class
+				.getName());
+		expected.link(taskTwoConnection, connectionObject);
+		taskTwo.getTaskObject(String.class.getName()).flagAsParameter();
+		TaskObject taskTwoList = taskTwo.getTaskObject(List.class.getName());
+		expected.link(taskTwoList, listObject);
+
 		work.addSectionTask("taskThree", "taskThree");
 
 		// Validate the type

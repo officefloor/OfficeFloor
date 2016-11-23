@@ -41,6 +41,7 @@ import net.officefloor.compile.impl.pool.ManagedObjectPoolLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionLoaderImpl;
 import net.officefloor.compile.impl.structure.AdministratorNodeImpl;
+import net.officefloor.compile.impl.structure.DutyNodeImpl;
 import net.officefloor.compile.impl.structure.EscalationNodeImpl;
 import net.officefloor.compile.impl.structure.GovernanceNodeImpl;
 import net.officefloor.compile.impl.structure.InputManagedObjectNodeImpl;
@@ -851,9 +852,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	@Override
 	public DutyNode createDutyNode(String dutyName,
 			AdministratorNode administrator) {
-		// TODO implement NodeContext.createDutyNode
-		throw new UnsupportedOperationException(
-				"TODO implement NodeContext.createDutyNode");
+		return new DutyNodeImpl(dutyName, administrator);
 	}
 
 	@Override

@@ -20,7 +20,6 @@ package net.officefloor.model.impl.office;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -36,7 +35,6 @@ import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.PropertyModel;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
  * Abstract functionality for refactoring {@link OfficeSectionModel} to an
@@ -208,10 +206,11 @@ public abstract class AbstractRefactorOfficeSectionTest extends
 	}
 
 	/**
-	 * Convenience method to do refactoring with a simple {@link OfficeSection}.
+	 * Convenience method to do refactoring with a simple
+	 * {@link OfficeSectionType}.
 	 */
 	protected void doRefactor() {
-		this.doRefactor((OfficeSection) null);
+		this.doRefactor((OfficeSectionConstructor) null);
 	}
 
 	/**
@@ -222,30 +221,18 @@ public abstract class AbstractRefactorOfficeSectionTest extends
 	 *            {@link OfficeSectionConstructor}.
 	 */
 	protected void doRefactor(OfficeSectionConstructor constructor) {
-		OfficeSection section = this.constructOfficeSection(constructor);
-		this.doRefactor(section);
+		OfficeSectionType sectionType = this
+				.constructOfficeSectionType(constructor);
+		this.doRefactor(sectionType);
 	}
 
 	/**
 	 * Does the refactoring and validates applying and reverting.
 	 *
-	 * @param officeSection
-	 *            {@link OfficeSection}.
+	 * @param officeSectionType
+	 *            {@link OfficeSectionType}.
 	 */
-	protected void doRefactor(OfficeSection officeSection) {
-
-		// Load the office section type
-		OfficeSectionType officeSectionType = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null)
-				.getSectionLoader()
-				.loadOfficeSectionType(
-						this.sectionName,
-						ClassSectionSource.class,
-						Object.class.getName(),
-						this.properties == null ? new PropertyListImpl()
-								: this.properties);
-		assertNotNull("Failed to load the Office Section Type",
-				officeSectionType);
+	protected void doRefactor(OfficeSectionType officeSectionType) {
 
 		// Create the property list
 		PropertyList propertyList = this.properties;
@@ -269,4 +256,5 @@ public abstract class AbstractRefactorOfficeSectionTest extends
 		this.assertChange(change, this.sectionModel, "Refactor office section",
 				true);
 	}
+
 }
