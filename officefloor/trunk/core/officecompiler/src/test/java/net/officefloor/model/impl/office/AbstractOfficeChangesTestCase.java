@@ -20,14 +20,18 @@ package net.officefloor.model.impl.office;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.section.OfficeSectionInputType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
+import net.officefloor.compile.section.OfficeSectionObjectType;
+import net.officefloor.compile.section.OfficeSectionOutputType;
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeSubSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeModel;
@@ -86,12 +90,14 @@ public abstract class AbstractOfficeChangesTestCase extends
 	 *            {@link OfficeSectionConstructor}.
 	 * @return {@link OfficeSection}.
 	 */
-	protected OfficeSection constructOfficeSection(
+	protected OfficeSectionType constructOfficeSectionType(
 			OfficeSectionConstructor constructor) {
 
-		// Construct and return the office section
+		// Construct and return the office section type
 		OfficeSectionContextImpl context = new OfficeSectionContextImpl();
-		constructor.construct(context);
+		if (constructor != null) {
+			constructor.construct(context);
+		}
 		return context;
 	}
 
@@ -155,7 +161,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 	 * {@link OfficeSectionContext} implementation.
 	 */
 	private class OfficeSectionContextImpl implements OfficeSectionContext,
-			OfficeSection {
+			OfficeSectionType {
 
 		/**
 		 * {@link OfficeSection} name.
@@ -163,19 +169,19 @@ public abstract class AbstractOfficeChangesTestCase extends
 		private String sectionName;
 
 		/**
-		 * {@link OfficeSectionInput} instances.
+		 * {@link OfficeSectionInputType} instances.
 		 */
-		private Map<String, OfficeSectionInput> inputs = new HashMap<String, OfficeSectionInput>();
+		private Map<String, OfficeSectionInputType> inputs = new HashMap<String, OfficeSectionInputType>();
 
 		/**
-		 * {@link OfficeSectionOutput} instances.
+		 * {@link OfficeSectionOutputType} instances.
 		 */
-		private Map<String, OfficeSectionOutput> outputs = new HashMap<String, OfficeSectionOutput>();
+		private Map<String, OfficeSectionOutputType> outputs = new HashMap<String, OfficeSectionOutputType>();
 
 		/**
-		 * {@link OfficeSectionObject} instances.
+		 * {@link OfficeSectionObjectType} instances.
 		 */
-		private Map<String, OfficeSectionObject> objects = new HashMap<String, OfficeSectionObject>();
+		private Map<String, OfficeSectionObjectType> objects = new HashMap<String, OfficeSectionObjectType>();
 
 		/*
 		 * ===================== OfficeSectionContext =====================
@@ -183,23 +189,26 @@ public abstract class AbstractOfficeChangesTestCase extends
 
 		@Override
 		public void addOfficeSectionInput(String name, Class<?> parameterType) {
-			this.inputs.put(name, new OfficeSectionItem(name));
+			this.inputs.put(name, new OfficeSectionItem(name, parameterType,
+					false));
 		}
 
 		@Override
 		public void addOfficeSectionOutput(String name, Class<?> argumentType,
 				boolean isEscalationOnly) {
-			this.outputs.put(name, new OfficeSectionItem(name));
+			this.outputs.put(name, new OfficeSectionItem(name, argumentType,
+					isEscalationOnly));
 		}
 
 		@Override
 		public void addOfficeSectionObject(String name, Class<?> objectType,
 				String qualifier) {
-			this.objects.put(name, new OfficeSectionItem(name));
+			this.objects.put(name, new OfficeSectionItem(name, objectType,
+					false));
 		}
 
 		/*
-		 * ===================== OfficeSection ===========================
+		 * ===================== OfficeSectionType ===========================
 		 */
 
 		@Override
@@ -208,55 +217,62 @@ public abstract class AbstractOfficeChangesTestCase extends
 		}
 
 		@Override
-		public void addProperty(String name, String value) {
-			fail("Should not require to set properties in testing");
+		public OfficeSectionInputType[] getOfficeSectionInputTypes() {
+			return this.inputs.values().stream()
+					.toArray(OfficeSectionInputType[]::new);
 		}
 
 		@Override
-		public OfficeSectionInput getOfficeSectionInput(String inputName) {
-			return this.inputs.get(inputName);
+		public OfficeSectionOutputType[] getOfficeSectionOutputTypes() {
+			return this.outputs.values().stream()
+					.toArray(OfficeSectionOutputType[]::new);
 		}
 
 		@Override
-		public OfficeSectionOutput getOfficeSectionOutput(String outputName) {
-			return this.outputs.get(outputName);
+		public OfficeSectionObjectType[] getOfficeSectionObjectTypes() {
+			return this.objects.values().stream()
+					.toArray(OfficeSectionObjectType[]::new);
 		}
 
 		@Override
-		public OfficeSectionObject getOfficeSectionObject(String objectName) {
-			return this.objects.get(objectName);
+		public OfficeSubSectionType getParentOfficeSubSectionType() {
+			// TODO implement OfficeSubSectionType.getParentOfficeSubSectionType
+			throw new UnsupportedOperationException(
+					"TODO implement OfficeSubSectionType.getParentOfficeSubSectionType");
+
 		}
 
 		@Override
-		public OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource(
-				String managedObjectName) {
-			fail("Currently not testing sub sections");
-			return null;
+		public OfficeSubSectionType[] getOfficeSubSectionTypes() {
+			// TODO implement OfficeSubSectionType.getOfficeSubSectionTypes
+			throw new UnsupportedOperationException(
+					"TODO implement OfficeSubSectionType.getOfficeSubSectionTypes");
+
 		}
 
 		@Override
-		public void addGovernance(OfficeGovernance governance) {
-			fail("Currently not testing sub sections");
+		public OfficeTaskType[] getOfficeTaskTypes() {
+			// TODO implement OfficeSubSectionType.getOfficeTaskTypes
+			throw new UnsupportedOperationException(
+					"TODO implement OfficeSubSectionType.getOfficeTaskTypes");
+
 		}
 
 		@Override
-		public OfficeSubSection getOfficeSubSection(String sectionName) {
-			fail("Currently not testing sub sections");
-			return null;
-		}
+		public OfficeSectionManagedObjectSourceType[] getOfficeSectionManagedObjectSourceTypes() {
+			// TODO implement
+			// OfficeSubSectionType.getOfficeSectionManagedObjectSourceTypes
+			throw new UnsupportedOperationException(
+					"TODO implement OfficeSubSectionType.getOfficeSectionManagedObjectSourceTypes");
 
-		@Override
-		public OfficeTask getOfficeTask(String taskName) {
-			fail("Currently not testing sub sections");
-			return null;
 		}
 	}
 
 	/**
-	 * Item from {@link OfficeSection}.
+	 * Item from {@link OfficeSectionType}.
 	 */
-	private class OfficeSectionItem implements OfficeSectionInput,
-			OfficeSectionOutput, OfficeSectionObject {
+	private class OfficeSectionItem implements OfficeSectionInputType,
+			OfficeSectionOutputType, OfficeSectionObjectType {
 
 		/**
 		 * Name.
@@ -264,13 +280,30 @@ public abstract class AbstractOfficeChangesTestCase extends
 		private final String name;
 
 		/**
+		 * Type.
+		 */
+		private final String type;
+
+		/**
+		 * Flag indicating only {@link Escalation}.
+		 */
+		private final boolean isEscalationOnly;
+
+		/**
 		 * Initialise.
 		 * 
 		 * @param name
 		 *            Name.
+		 * @param type
+		 *            Type.
+		 * @param isEscalationOnly
+		 *            Flag indicating only {@link Escalation}.
 		 */
-		public OfficeSectionItem(String name) {
+		public OfficeSectionItem(String name, Class<?> type,
+				boolean isEscalationOnly) {
 			this.name = name;
+			this.type = type.getName();
+			this.isEscalationOnly = isEscalationOnly;
 		}
 
 		/*
@@ -282,6 +315,11 @@ public abstract class AbstractOfficeChangesTestCase extends
 			return this.name;
 		}
 
+		@Override
+		public String getArgumentType() {
+			return this.type;
+		}
+
 		/*
 		 * ================ OfficeSectionOutput ======================
 		 */
@@ -291,6 +329,16 @@ public abstract class AbstractOfficeChangesTestCase extends
 			return this.name;
 		}
 
+		@Override
+		public String getParameterType() {
+			return this.type;
+		}
+
+		@Override
+		public boolean isEscalationOnly() {
+			return this.isEscalationOnly;
+		}
+
 		/*
 		 * ================ OfficeSectionObject ======================
 		 */
@@ -298,6 +346,18 @@ public abstract class AbstractOfficeChangesTestCase extends
 		@Override
 		public String getOfficeSectionObjectName() {
 			return this.name;
+		}
+
+		@Override
+		public String getObjectType() {
+			return this.type;
+		}
+
+		@Override
+		public String getTypeQualifier() {
+			// TODO implement OfficeSectionObjectType.getTypeQualifier
+			throw new UnsupportedOperationException(
+					"TODO implement OfficeSectionObjectType.getTypeQualifier");
 		}
 	}
 

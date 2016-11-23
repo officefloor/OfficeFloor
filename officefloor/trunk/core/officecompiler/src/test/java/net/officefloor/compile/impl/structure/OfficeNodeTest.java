@@ -896,7 +896,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Record already being linked
 		this.issues.recordIssue("GOVERNANCE", GovernanceNodeImpl.class,
-				"Team already assigned");
+				"Governance GOVERNANCE linked more than once");
 
 		this.replayMockObjects();
 
@@ -921,7 +921,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Record already being linked
 		this.issues.recordIssue("ADMIN", AdministratorNodeImpl.class,
-				"Team already assigned");
+				"Administrator ADMIN linked more than once");
 
 		this.replayMockObjects();
 
@@ -1274,7 +1274,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Record already being linked
 		this.issues.recordIssue("TEAM", ManagedObjectTeamNodeImpl.class,
-				"TEAM already assigned");
+				"Managed Object Source Team TEAM linked more than once");
 
 		this.replayMockObjects();
 
@@ -1307,7 +1307,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Record already being linked
 		this.issues.recordIssue("TEAM", ManagedObjectTeamNodeImpl.class,
-				"TEAM already assigned");
+				"Managed Object Source Team TEAM linked more than once");
 
 		this.replayMockObjects();
 
