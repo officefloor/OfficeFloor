@@ -403,6 +403,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 				if (linkedTask != null) {
 					// Link the flow to its task
 					designer.link(taskFlow, linkedTask, instigationStrategy);
+					continue;
 				}
 
 				// Determine if link flow to external flow

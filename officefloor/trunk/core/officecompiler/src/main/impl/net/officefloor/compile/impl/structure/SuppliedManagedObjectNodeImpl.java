@@ -112,10 +112,7 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 
 	@Override
 	public SupplierNode getSupplierNode() {
-		// TODO implement SuppliedManagedObjectNode.getSupplierNode
-		throw new UnsupportedOperationException(
-				"TODO implement SuppliedManagedObjectNode.getSupplierNode");
-
+		return this.supplierNode;
 	}
 
 	@Override

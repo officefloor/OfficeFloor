@@ -41,6 +41,7 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testMissingTag() {
 
 		// Record issue if tag not provided as property
+		this.record_init();
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
 				OfficeFloorNodeImpl.class,
 				"Property 'missing.tag' must be specified");
@@ -56,6 +57,7 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testWarnOnceOnMissingTagRepeated() {
 
 		// Record issue if tag not provided as property
+		this.record_init();
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
 				OfficeFloorNodeImpl.class,
 				"Property 'repeated' must be specified");
@@ -71,6 +73,7 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testMultipleMissingTags() {
 
 		// Record issue for each missing unique tag
+		this.record_init();
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
 				OfficeFloorNodeImpl.class,
 				"Property 'tag.one' must be specified");
@@ -89,6 +92,7 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testPartialSetOfTagsProvided() {
 
 		// Record loading with tags provided
+		this.record_init();
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
 				OfficeFloorNodeImpl.class,
 				"Property 'not.provided' must be specified");
@@ -104,6 +108,7 @@ public class CompileOfficeFloorEnvironmentTest extends AbstractCompileTestCase {
 	public void testTagsProvided() {
 
 		// Record loading with tags provided
+		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Ensure can compile with tag values

@@ -473,7 +473,9 @@ public class AutoWireOfficeFloorSource_ManagedObject_Test extends
 		this.recordReturn(moDependency,
 				moDependency.getManagedObjectDependencyName(), "dependency");
 		this.deployer
-				.addIssue("No dependent managed object for auto-wiring dependency dependency (qualifier=QUALIFIED, type="
+				.addIssue("Managed Object "
+						+ MockRawType.class.getName()
+						+ " has no dependent managed object for auto-wiring dependency dependency (qualifier=QUALIFIED, type="
 						+ Connection.class.getName() + ")");
 		this.recordOfficeObject(mo, rawTypeAutoWire);
 

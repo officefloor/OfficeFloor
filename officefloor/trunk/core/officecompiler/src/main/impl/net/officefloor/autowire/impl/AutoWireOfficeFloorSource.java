@@ -49,6 +49,7 @@ import net.officefloor.autowire.supplier.SuppliedManagedObjectType;
 import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
@@ -1653,7 +1654,8 @@ public class AutoWireOfficeFloorSource extends AbstractOfficeFloorSource
 
 			// As here, no managed object for dependency
 			state.deployer
-					.addIssue("Managed object "
+					.addIssue(ManagedObjectNode.TYPE
+							+ " "
 							+ this.managedObjectName
 							+ " has no dependent managed object for auto-wiring dependency "
 							+ dependency.getManagedObjectDependencyName()

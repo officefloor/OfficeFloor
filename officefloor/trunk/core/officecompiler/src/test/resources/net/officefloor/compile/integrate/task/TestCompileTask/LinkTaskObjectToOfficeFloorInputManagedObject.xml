@@ -53,7 +53,8 @@
 	</office>
 	<desk>
 		<external-managed-objects>
-			<external-managed-object name="OBJECT" />
+			<external-managed-object name="OBJECT"
+				object-type="${testcase}$InputManagedObject" />
 		</external-managed-objects>
 		<works>
 			<work name="WORK" source="CLASS">
@@ -61,7 +62,8 @@
 					<property name="class.name" value="${testcase}$CompileTaskWork" />
 				</properties>
 				<work-task name="inputObjectTask">
-					<task-object name="${testcase}$InputManagedObject" parameter="false">
+					<task-object name="${testcase}$InputManagedObject"
+						parameter="false">
 						<external-managed-object name="OBJECT" />
 					</task-object>
 				</work-task>

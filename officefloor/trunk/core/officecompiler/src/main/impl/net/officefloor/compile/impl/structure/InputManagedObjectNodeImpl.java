@@ -55,6 +55,17 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	private final OfficeFloorNode officeFloor;
 
 	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+	}
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
@@ -113,18 +124,13 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		// TODO implement InputManagedObjectNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement InputManagedObjectNode.initialise");
-
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState());
 	}
 
 	/*

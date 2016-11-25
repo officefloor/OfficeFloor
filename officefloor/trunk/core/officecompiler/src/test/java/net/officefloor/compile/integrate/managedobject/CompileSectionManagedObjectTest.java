@@ -18,8 +18,10 @@
 package net.officefloor.compile.integrate.managedobject;
 
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
-import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
@@ -51,7 +53,11 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testSimpleManagedObjectSource() {
 
-		// Record building the office floor
+		// Record managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.SECTION.MANAGED_OBJECT_SOURCE",
@@ -59,7 +65,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 				SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -68,7 +74,11 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testProcessBoundManagedObject() {
 
-		// Record building the office floor
+		// Record managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		OfficeBuilder office = this
 				.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.SECTION.MANAGED_OBJECT",
@@ -82,7 +92,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 				SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -91,29 +101,18 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectWithDependencyNotLinked() {
 
-		// Record building the office floor
-
-		// Register the managed object with dependency not linked
-		OfficeBuilder office = this
-				.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.SECTION.DEPENDENT",
-				"OFFICE.SECTION.DEPENDENT_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject(
-				"OFFICE.SECTION.DEPENDENT", "OFFICE.SECTION.DEPENDENT");
+		// Record managed object type
+		this.issues.recordCaptureIssues(false);
 		this.issues
-				.recordIssue("DEPENDENT",
+				.recordIssue("dependency",
 						ManagedObjectDependencyNodeImpl.class,
-						"Dependency dependency is not linked to a BoundManagedObjectNode");
+						"Managed Object Dependency dependency is not linked to a DependentObjectNode");
+		this.issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+				"Failure loading " + OfficeSectionType.class.getSimpleName()
+						+ " from source SECTION");
 
-		// Add managed objects to office floor
-		this.record_officeFloorBuilder_addManagedObject(
-				"OFFICE.SECTION.DEPENDENT_SOURCE",
-				ClassManagedObjectSource.class, 0, "class.name",
-				DependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-
-		// Compile the office floor
-		this.compile(true);
+		// Compile the OfficeFloor
+		this.compile(false);
 	}
 
 	/**
@@ -122,7 +121,11 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectWithDependencyInSection() {
 
+		// Record managed object type
+		this.issues.recordCaptureIssues(false);
+
 		// Record building the office
+		this.record_init();
 
 		// Register the office linked managed objects with the office
 		OfficeBuilder office = this
@@ -149,7 +152,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 				0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -159,7 +162,11 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectWithDependencyOutSideSection() {
 
+		// Record managed object type
+		this.issues.recordCaptureIssues(false);
+
 		// Record building the office
+		this.record_init();
 
 		// Register the section linked managed objects with the office
 		OfficeBuilder office = this
@@ -186,7 +193,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 				DependencyManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -196,7 +203,11 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectSourceFlowNotLinked() {
 
-		// Record building the office floor
+		// Record managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.SECTION.MANAGED_OBJECT_SOURCE",
@@ -204,11 +215,11 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 				ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.SECTION.MANAGED_OBJECT_SOURCE");
-		this.issues.recordIssue("MANAGED_OBJECT_SOURCE",
-				ManagedObjectSourceNodeImpl.class,
-				"Managed object flow doProcess is not linked to a TaskNode");
+		this.issues
+				.recordIssue("doProcess", ManagedObjectFlowNodeImpl.class,
+						"Managed Object Source Flow doProcess is not linked to a TaskNode");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -218,7 +229,11 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectSourceFlowLinkedToSubSectionInput() {
 
-		// Record building the office floor
+		// Record managed object type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -236,7 +251,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.SECTION.MANAGED_OBJECT_SOURCE");
 		managingOffice.linkProcess(0, "SECTION.DESK.WORK", "INPUT");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -246,7 +261,12 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectSourceFlowLinkedToExternalFlow() {
 
-		// Record building the office floor
+		// Record section and managed object type
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -264,7 +284,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.SECTION.MANAGED_OBJECT_SOURCE");
 		managingOffice.linkProcess(0, "DESK.WORK", "INPUT");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 

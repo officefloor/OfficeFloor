@@ -308,6 +308,13 @@ public class TaskNodeImpl implements TaskNode {
 
 			// Obtain the linked task for the flow
 			TaskFlowNode flowNode = this.taskFlows.get(flowName);
+			if (flowNode == null) {
+				this.context.getCompilerIssues().addIssue(
+						this,
+						"Flow " + flowName + " is not linked to a "
+								+ TaskNode.class.getSimpleName());
+				continue; // must have linked task
+			}
 			TaskNode linkedTask = LinkUtil.retrieveTarget(flowNode,
 					TaskNode.class, this.context.getCompilerIssues());
 			if (linkedTask == null) {
@@ -388,6 +395,13 @@ public class TaskNodeImpl implements TaskNode {
 
 			// Obtain the object node for the task object
 			TaskObjectNode objectNode = this.taskObjects.get(objectName);
+			if (objectNode == null) {
+				this.context.getCompilerIssues().addIssue(
+						this,
+						"Object " + objectName + " is not linked to a "
+								+ BoundManagedObjectNode.class.getSimpleName());
+				continue;
+			}
 
 			// Determine if the object is a parameter
 			if ((objectNode != null) && (objectNode.isParameter())) {
@@ -433,6 +447,18 @@ public class TaskNodeImpl implements TaskNode {
 			// Obtain the linked task for the escalation
 			TaskFlowNode escalationNode = this.taskEscalations
 					.get(escalationName);
+			if (escalationNode == null) {
+				this.context
+						.getCompilerIssues()
+						.addIssue(
+								this,
+								"Escalation "
+										+ escalationName
+										+ " not handled by a Task nor propagated to the Office");
+				continue;
+			}
+
+			// Link escalation
 			TaskNode linkedTask = LinkUtil.findTarget(escalationNode,
 					TaskNode.class, this.context.getCompilerIssues());
 			if (linkedTask != null) {

@@ -17,9 +17,8 @@
  */
 package net.officefloor.compile.integrate.task;
 
-import net.officefloor.compile.impl.structure.TaskFlowNodeImpl;
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.structure.TaskNodeImpl;
-import net.officefloor.compile.impl.structure.TaskObjectNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -67,7 +66,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testSimpleTask() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -75,7 +78,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -84,7 +87,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testDifferentiatorTask() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -93,7 +100,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 		this.record_taskBuilder_setDifferentiator(DifferentiatorWorkSource.DIFFERENTIATOR);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -102,7 +109,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testInitialTaskForWork() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -112,7 +123,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 		work.setInitialTask("TASK");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -121,7 +132,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testTaskFlowNotLinked() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -131,7 +146,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.issues.recordIssue("TASK", TaskNodeImpl.class,
 				"Flow flow is not linked to a TaskNode");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -140,7 +155,14 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testUnknownFlowInstigationStrategy() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues
+				.recordIssue("SECTION", SectionNodeImpl.class,
+						"Unknown flow instigation strategy 'unknown' for flow flow of task TASK_A");
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -148,12 +170,13 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK_A", "OFFICE_TEAM");
 		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
-		this.issues.recordIssue("flow", TaskFlowNodeImpl.class,
-				"Unknown flow instigation strategy 'unknown' for flow flow");
-		this.issues.recordIssue("flow", TaskFlowNodeImpl.class,
+		this.issues
+				.recordIssue("SECTION", SectionNodeImpl.class,
+						"Unknown flow instigation strategy 'unknown' for flow flow of task TASK_A");
+		this.issues.recordIssue("TASK_A", TaskNodeImpl.class,
 				"No instigation strategy provided for flow flow");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -163,7 +186,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkFlowToTaskOnSameWork() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -175,7 +202,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		taskOne.linkFlow(0, "TASK_B", FlowInstigationStrategyEnum.PARALLEL,
 				String.class);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -185,7 +212,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkFlowToTaskOnDifferentWorkInSameSection() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -198,7 +229,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		task.linkFlow(0, "SECTION.WORK_B", "TASK_B",
 				FlowInstigationStrategyEnum.SEQUENTIAL, String.class);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -208,7 +239,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkFlowToTaskInDifferentSubSection() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -221,7 +256,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		task.linkFlow(0, "SECTION.SUB_SECTION_B.WORK", "INPUT",
 				FlowInstigationStrategyEnum.ASYNCHRONOUS, String.class);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -231,7 +266,12 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkFlowToTaskInDifferentOfficeSection() {
 
-		// Record building the office floor
+		// Record loading section types
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -244,7 +284,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		task.linkFlow(0, "SECTION_B.WORK", "INPUT",
 				FlowInstigationStrategyEnum.ASYNCHRONOUS, String.class);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -254,7 +294,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskNextToTaskOnSameWork() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -265,7 +309,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
 		task.setNextTaskInFlow("TASK_B", Integer.class);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -275,7 +319,12 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskNextToTaskInDifferentOfficeSection() {
 
-		// Record building the office floor
+		// Record loading section types
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -287,7 +336,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
 		task.setNextTaskInFlow("SECTION_B.WORK", "INPUT", Integer.class);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -297,7 +346,12 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskNextToTaskThroughParentSection() {
 
-		// Record building the office floor
+		// Record loading section types
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -309,7 +363,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
 		task.setNextTaskInFlow("SECTION_B.WORK", "INPUT", Integer.class);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -319,7 +373,12 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskNextToTaskThroughChildSection() {
 
-		// Record building the office floor
+		// Record loading section types
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -332,7 +391,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		task.setNextTaskInFlow("SECTION_B.desk-two.WORK", "INPUT",
 				Integer.class);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -341,19 +400,22 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testTaskObjectNotLinked() throws Exception {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this.issues.recordIssue(CompileManagedObject.class.getName(),
-				TaskObjectNodeImpl.class, "Object "
-						+ CompileManagedObject.class.getName()
-						+ " is not linked to a BoundManagedObjectNode");
+		this.issues.recordIssue("TASK", TaskNodeImpl.class, "Object "
+				+ CompileManagedObject.class.getName()
+				+ " is not linked to a BoundManagedObjectNode");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -363,7 +425,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskObjectAsParameter() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -373,7 +439,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"OFFICE_TEAM");
 		task.linkParameter(0, CompileManagedObject.class);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -383,11 +449,19 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskObjectToOfficeFloorManagedObject() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
+		office.registerManagedObjectSource("MANAGED_OBJECT",
+				"MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
+				"MANAGED_OBJECT");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
@@ -396,12 +470,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("MANAGED_OBJECT",
-				"MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
-				"MANAGED_OBJECT");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -411,7 +481,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskObjectToOfficeFloorInputManagedObject() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE");
@@ -429,7 +503,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
 		managingOffice.linkProcess(0, "SECTION.WORK", "TASK");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -439,7 +513,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskObjectToOfficeManagedObject() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
@@ -458,7 +536,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				0, "class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -468,7 +546,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskObjectToSectionManagedObject() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
@@ -489,7 +571,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		task.linkManagedObject(0, "OFFICE.SECTION.MANAGED_OBJECT",
 				CompileManagedObject.class);
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -499,7 +581,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskObjectToDeskManagedObject() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
@@ -521,7 +607,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -531,11 +617,19 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkTaskObjectThroughParentSection() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
+		office.registerManagedObjectSource("MANAGED_OBJECT",
+				"MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
+				"MANAGED_OBJECT");
 		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
@@ -544,12 +638,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("MANAGED_OBJECT",
-				"MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
-				"MANAGED_OBJECT");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -559,7 +649,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkEscalationToTaskOnSameWork() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -570,7 +664,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
 		task.addEscalation(Exception.class, "TASK_B");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -580,7 +674,12 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkEscalationToTaskInDifferentOfficeSection() {
 
-		// Record building the office floor
+		// Record loading section types
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -592,7 +691,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
 		task.addEscalation(Exception.class, "SECTION_B.WORK", "INPUT");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -601,22 +700,22 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testEscalationNotPropagatedToOffice() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this.issues
-				.recordIssue(
-						Exception.class.getName(),
-						TaskFlowNodeImpl.class,
-						"Escalation "
-								+ Exception.class.getName()
-								+ " not handled by a Task nor propagated to the Office");
+		this.issues.recordIssue("TASK", TaskNodeImpl.class, "Escalation "
+				+ Exception.class.getName()
+				+ " not handled by a Task nor propagated to the Office");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -626,7 +725,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testEscalationPropagatedToOffice() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -634,7 +737,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -644,7 +747,11 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public void testLinkStartToOfficeSectionInput() {
 
-		// Record building the office floor
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -653,12 +760,12 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
 		this.record_officeBuilder_addStartupTask("SECTION.WORK", "INPUT");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
 	/**
-	 * {@link FlowInterface} for {@link CompileTaskWork}.
+	 * s {@link FlowInterface} for {@link CompileTaskWork}.
 	 */
 	@FlowInterface
 	public static interface Flows {
