@@ -71,6 +71,17 @@ public class SupplierNodeImpl implements SupplierNode {
 	private final NodeContext context;
 
 	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+	}
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param supplierName
@@ -120,18 +131,13 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		// TODO implement SupplierNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement SupplierNode.initialise");
-
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState());
 	}
 
 	/*
@@ -170,10 +176,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public OfficeFloorNode getOfficeFloorNode() {
-		// TODO implement SupplierNode.getOfficeFloorNode
-		throw new UnsupportedOperationException(
-				"TODO implement SupplierNode.getOfficeFloorNode");
-
+		return this.officeFloorNode;
 	}
 
 	@Override

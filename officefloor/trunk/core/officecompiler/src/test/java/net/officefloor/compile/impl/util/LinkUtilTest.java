@@ -192,7 +192,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		this.issues.recordIssue(
 				"LINK",
 				LinkNode.class,
-				"Breaks linking chain to a "
+				"Link LINK is not linked to a "
 						+ TargetLinkNode.class.getSimpleName());
 
 		// Find the target
@@ -262,7 +262,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		this.issues.recordIssue(
 				"LINK",
 				LinkNode.class,
-				"Breaks linking chain to a "
+				"Link LINK is not linked to a "
 						+ TargetLinkNode.class.getSimpleName());
 
 		// Attempt to obtain the target

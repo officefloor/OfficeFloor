@@ -44,8 +44,11 @@ import net.officefloor.autowire.supplier.SupplierType;
 import net.officefloor.autowire.supplier.SupplyOrder;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LoadTypeError;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.SuppliedManagedObjectNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -215,17 +218,23 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements
 			}
 
 			// Obtain the managed object loader
+			ManagedObjectSourceNode managedObjectSourceNode = this.context
+					.createManagedObjectSourceNode(managedObjectName,
+							(SuppliedManagedObjectNode) null);
 			ManagedObjectLoader managedObjectLoader = this.context
-					.getManagedObjectLoader(this.node);
+					.getManagedObjectLoader(managedObjectSourceNode);
 
 			// Load the managed object type
-			ManagedObjectType moType = managedObjectLoader
-					.loadManagedObjectType(object.managedObjectSource,
-							object.properties);
-			if (moType == null) {
-				this.addIssue("Could not load "
-						+ ManagedObjectType.class.getSimpleName() + issueSuffix);
-				continue; // can not load supplied managed object
+			ManagedObjectType moType;
+			try {
+				moType = CompileUtil.loadType(ManagedObjectType.class,
+						object.managedObjectSource.getClass().getName(),
+						this.context.getCompilerIssues(),
+						() -> managedObjectLoader.loadManagedObjectType(
+								object.managedObjectSource, object.properties));
+			} catch (LoadTypeError ex) {
+				ex.addLoadTypeIssue(this.node, this.context.getCompilerIssues());
+				continue;
 			}
 
 			// Determine if an input managed object

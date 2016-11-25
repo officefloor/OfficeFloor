@@ -422,7 +422,13 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Record
 		this.record_initiateOfficeFloorBuilder();
-		this.issues.recordCaptureIssues(false); // for supplier type
+
+		// Load supplier type
+		this.issues.recordCaptureIssues(false);
+
+		// Load the managed object types
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 
 		// Test
 		this.loadOfficeFloor(true, new OfficeFloorMaker() {

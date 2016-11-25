@@ -107,7 +107,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * @return By default returns input {@link CompilerIssues}.
 	 */
 	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
-		return this.issues;
+		return issues;
 	}
 
 	/**
@@ -697,7 +697,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 */
 	protected void compile(boolean isExpectBuild, String... propertyNameValues) {
 
-		// Office floor potentially built
+		// OfficeFloor potentially built
 		OfficeFloor officeFloor = null;
 
 		// Record building if expected to build OfficeFloor
@@ -740,7 +740,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			compiler.addProperty(name, value);
 		}
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		OfficeFloor loadedOfficeFloor = compiler.compile("office-floor");
 
 		// Verify the mocks

@@ -784,8 +784,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	public ManagedObjectSourceNode createManagedObjectSourceNode(
 			String managedObjectSourceName,
 			SuppliedManagedObjectNode suppliedManagedObject) {
-		OfficeFloorNode officeFloor = suppliedManagedObject.getSupplierNode()
-				.getOfficeFloorNode();
+		OfficeFloorNode officeFloor = (suppliedManagedObject == null ? null
+				: suppliedManagedObject.getSupplierNode().getOfficeFloorNode());
 		return new ManagedObjectSourceNodeImpl(managedObjectSourceName, null,
 				null, suppliedManagedObject, officeFloor, this);
 	}
