@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.structure;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
@@ -42,16 +43,36 @@ public class DutyNodeImpl implements DutyNode {
 	private final AdministratorNode administrator;
 
 	/**
+	 * {@link NodeContext}.
+	 */
+	private final NodeContext context;
+
+	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+	}
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param dutyName
 	 *            Name of this {@link OfficeDuty}.
 	 * @param administrator
 	 *            {@link AdministratorNode} containing this {@link DutyNode}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
-	public DutyNodeImpl(String dutyName, AdministratorNode administrator) {
+	public DutyNodeImpl(String dutyName, AdministratorNode administrator,
+			NodeContext context) {
 		this.dutyName = dutyName;
 		this.administrator = administrator;
+		this.context = context;
 	}
 
 	/*
@@ -60,50 +81,33 @@ public class DutyNodeImpl implements DutyNode {
 
 	@Override
 	public String getNodeName() {
-		// TODO implement Node.getNodeName
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeName");
-
+		return this.dutyName;
 	}
 
 	@Override
 	public String getNodeType() {
-		// TODO implement Node.getNodeType
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getNodeType");
-
+		return TYPE;
 	}
 
 	@Override
 	public String getLocation() {
-		// TODO implement Node.getLocation
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getLocation");
-
+		return null;
 	}
 
 	@Override
 	public Node getParentNode() {
-		// TODO implement Node.getParentNode
-		throw new UnsupportedOperationException(
-				"TODO implement Node.getParentNode");
-
+		return this.administrator;
 	}
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		// TODO implement DutyNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement DutyNode.initialise");
-
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState());
 	}
 
 	/*

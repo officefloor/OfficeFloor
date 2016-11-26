@@ -106,6 +106,17 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	private final NodeContext context;
 
 	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+	}
+
+	/**
 	 * Mapping of {@link Profiler} by their {@link Office} name.
 	 */
 	private final Map<String, Profiler> profilers;
@@ -197,18 +208,13 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		// TODO implement OfficeFloorNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorNode.initialise");
-
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState());
 	}
 
 	/*

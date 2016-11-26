@@ -49,6 +49,17 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 	private final NodeContext context;
 
 	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+	}
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param autoWire
@@ -92,18 +103,13 @@ public class SuppliedManagedObjectNodeImpl implements SuppliedManagedObjectNode 
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		// TODO implement SuppliedManagedObjectNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement SuppliedManagedObjectNode.initialise");
-
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState());
 	}
 
 	/*

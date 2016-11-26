@@ -56,6 +56,17 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	private final NodeContext context;
 
 	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+	}
+
+	/**
 	 * Flag indicating if this {@link TaskObject} is a parameter to the
 	 * {@link Task}.
 	 */
@@ -103,18 +114,13 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		// TODO implement TaskObjectNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement TaskObjectNode.initialise");
-
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState());
 	}
 
 	/*

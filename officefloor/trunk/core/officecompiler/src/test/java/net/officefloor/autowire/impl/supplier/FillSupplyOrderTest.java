@@ -72,6 +72,9 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 		// Ensure issue if no auto-wire
 		this.issues.recordIssue("SupplyOrder 0 must have an AutoWire");
 
+		// Record obtaining the managed object types
+		this.recordLoadingManagedObjects();
+
 		// Test
 		MockSupplyOrder order = new MockSupplyOrder(null);
 		this.fillSupplyOrders(order);
@@ -84,6 +87,10 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	 * Indicate not fill {@link SupplyOrder}.
 	 */
 	public void testNotFillSupplyOrder() {
+
+		// Record obtaining the managed object types
+		this.recordLoadingManagedObjects();
+
 		MockSupplyOrder order = new MockSupplyOrder(new AutoWire(
 				UnknownType.class));
 		this.fillSupplyOrders(order);
@@ -94,6 +101,10 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	 * Ensure can fill a {@link SupplyOrder}.
 	 */
 	public void testFillSupplyOrder() {
+
+		// Record obtaining the managed object types
+		this.recordLoadingManagedObjects();
+
 		MockSupplyOrder order = new MockSupplyOrder(new AutoWire(String.class));
 		this.fillSupplyOrders(order);
 		validateSuppliedManagedObject(order, String.class, 0, 0);
@@ -103,6 +114,10 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	 * Ensure can fill multiple {@link SupplyOrder} instances.
 	 */
 	public void testFillMultipleSupplyOrders() {
+
+		// Record obtaining the managed object types
+		this.recordLoadingManagedObjects();
+
 		MockSupplyOrder one = new MockSupplyOrder(new AutoWire(String.class));
 		MockSupplyOrder two = new MockSupplyOrder(new AutoWire(Property.class));
 		MockSupplyOrder three = new MockSupplyOrder(new AutoWire(Long.class));
@@ -117,6 +132,10 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	 * Ensure can fill a qualified {@link SupplyOrder}.
 	 */
 	public void testFillQualifiedSupplyOrder() {
+		
+		// Record obtaining the managed object types
+		this.recordLoadingManagedObjects();
+
 		MockSupplyOrder defaultOrder = new MockSupplyOrder(new AutoWire(
 				String.class));
 		MockSupplyOrder qualifiedOrder = new MockSupplyOrder(new AutoWire(
@@ -133,6 +152,10 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	 * Ensure can provide {@link SuppliedManagedObjectTeam} instances.
 	 */
 	public void testFillSupplyOrderHavingSuppliedTeams() {
+		
+		// Record obtaining the managed object types
+		this.recordLoadingManagedObjects();
+
 		MockSupplyOrder complex = new MockSupplyOrder(new AutoWire(
 				Connection.class));
 		this.fillSupplyOrders(complex);
@@ -253,6 +276,17 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 
 		// Verify the mock objects
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Records loading the {@link ManagedObjectType} instances.
+	 */
+	private void recordLoadingManagedObjects() {
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 	}
 
 	/**
