@@ -88,7 +88,8 @@ public class LoadOfficeFloorTeamSourceTypeTest extends OfficeFrameTestCase {
 		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Record failure to instantiate
-		issues.recordIssue("team", TeamNodeImpl.class,
+		this.recordReturn(node, node.getNodeName(), "team");
+		issues.recordIssue("team", node.getClass(),
 				"Failed to obtain TeamSourceSpecification from "
 						+ MockTeamSource.class.getName(), failure);
 
@@ -105,7 +106,7 @@ public class LoadOfficeFloorTeamSourceTypeTest extends OfficeFrameTestCase {
 		// Obtain node context
 		NodeContext nodeContext = (NodeContext) compiler;
 
-		// Load the officeflooor managed object source type
+		// Load the OfficeFlooor managed object source type
 		TeamLoader teamLoader = nodeContext.getTeamLoader(node);
 		OfficeFloorTeamSourceType teamType = teamLoader
 				.loadOfficeFloorTeamSourceType("team", MockTeamSource.class,

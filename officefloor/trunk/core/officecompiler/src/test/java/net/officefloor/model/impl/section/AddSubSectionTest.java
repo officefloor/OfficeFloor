@@ -21,18 +21,20 @@ import java.sql.Connection;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.type.TypeContextImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
-import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.spi.TestSource;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionObjectModel;
 import net.officefloor.model.section.SubSectionOutputModel;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
  * Tests adding a {@link SubSectionModel}.
@@ -59,14 +61,9 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 			.createMock(SectionNode.class);
 
 	/**
-	 * Mock {@link OfficeNode}.
-	 */
-	private final OfficeNode officeNode = this.createMock(OfficeNode.class);
-
-	/**
 	 * Mock {@link NodeContext}.
 	 */
-	private final NodeContext context = this.createMock(NodeContext.class);
+	private final NodeContext context = (NodeContext) this.compiler;
 
 	/**
 	 * Ensure can add a {@link SubSectionModel} that only has properties.
@@ -74,12 +71,9 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	public void testAddSubSectionWithPropertiesOnly() {
 
 		// Create the sub section
-		SectionType sectionType = compiler.getSectionLoader().loadSectionType(
-				ClassSectionSource.class, Object.class.getName(),
-				compiler.createPropertyList());
-
-		new SectionNodeImpl(SECTION_NAME, this.parentSection, this.officeNode,
-				this.context).loadSectionType(new TypeContextImpl());
+		SectionType sectionType = this.compiler.getSectionLoader()
+				.loadSectionType(EmptySectionSource.class, "location",
+						this.compiler.createPropertyList());
 
 		// Ensure can add
 		Change<SubSectionModel> change = this.operations.addSubSection(
@@ -102,8 +96,8 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	public void testAddSubSectionWithInputsOutputsObjects() {
 
 		// Create the sub section with inputs, outputs, objects
-		SectionNodeImpl sectionNode = new SectionNodeImpl(SECTION_NAME,
-				this.parentSection, this.officeNode, this.context);
+		SectionNode sectionNode = this.context.createSectionNode(SECTION_NAME,
+				this.parentSection);
 		sectionNode.addSectionInput("INPUT_B", Integer.class.getName());
 		sectionNode.addSectionInput("INPUT_A", Double.class.getName());
 		sectionNode.addSectionOutput("OUTPUT_B", String.class.getName(), false);
@@ -111,12 +105,13 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 				true);
 		sectionNode.addSectionObject("OBJECT_B", Object.class.getName());
 		sectionNode.addSectionObject("OBJECT_A", Connection.class.getName());
+		SectionType sectionType = sectionNode
+				.loadSectionType(new TypeContextImpl());
 
 		// Ensure can add (ordering the inputs, outputs, objects for easier SCM)
 		Change<SubSectionModel> change = this.operations.addSubSection(
 				"SUB_SECTION", "net.example.ExampleSectionSource",
-				"SECTION_LOCATION", new PropertyListImpl(),
-				sectionNode.loadSectionType(new TypeContextImpl()));
+				"SECTION_LOCATION", new PropertyListImpl(), sectionType);
 		this.assertChange(change, null, "Add sub section SUB_SECTION", true);
 	}
 
@@ -126,9 +121,9 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	public void testAddMultipleSubSections() {
 
 		// Create the section type
-		SectionType sectionType = compiler.getSectionLoader().loadSectionType(
-				ClassSectionSource.class, Object.class.getName(),
-				compiler.createPropertyList());
+		SectionType sectionType = this.compiler.getSectionLoader()
+				.loadSectionType(EmptySectionSource.class, "location",
+						this.compiler.createPropertyList());
 
 		// Add multiple section types
 		Change<SubSectionModel> changeB = this.operations.addSubSection(
@@ -143,6 +138,26 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 
 		// Apply the changes, ensuring ordering of the sub sections
 		this.assertChanges(changeB, changeA, changeC);
+	}
+
+	/**
+	 * Empty {@link SectionSource} for testing.
+	 */
+	@TestSource
+	public static class EmptySectionSource extends AbstractSectionSource {
+
+		/*
+		 * ==================== SectionSource =================================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceSection(SectionDesigner designer,
+				SectionSourceContext context) throws Exception {
+		}
 	}
 
 }

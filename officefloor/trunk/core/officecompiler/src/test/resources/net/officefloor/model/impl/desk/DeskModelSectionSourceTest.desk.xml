@@ -8,7 +8,7 @@
 			object-type="java.sql.Connection" />
 	</external-managed-objects>
 	<works>
-		<work name="WORK" source="net.example.ExampleWorkSource">
+		<work name="WORK" source="net.officefloor.model.impl.desk.MockWorkSource">
 			<work-task name="WORK_TASK">
 				<task-object name="PARAMETER" object-type="java.lang.Integer"
 					parameter="true" />

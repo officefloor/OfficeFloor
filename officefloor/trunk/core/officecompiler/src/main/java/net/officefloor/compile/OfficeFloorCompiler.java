@@ -63,7 +63,7 @@ import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * <p>
- * Office Floor compiler to compile the {@link OfficeFloor} into the
+ * OfficeFloor compiler to compile the {@link OfficeFloor} into the
  * {@link OfficeFrame} to be built.
  * <p>
  * This is the starting point to use the compiler.
@@ -135,7 +135,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 							+ " has already been specified");
 		}
 
-		// Specify office floor compiler factory
+		// Specify OfficeFloor compiler factory
 		FACTORY = factory;
 	}
 
@@ -163,7 +163,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 		// Determine if use factory
 		Object implementation = null;
 		if (FACTORY != null) {
-			// Factory to create the office floor compiler
+			// Factory to create the OfficeFloor compiler
 			implementation = FACTORY.createOfficeFloorCompiler(implClassLoader);
 
 		} else {
@@ -187,7 +187,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 			}
 		}
 
-		// Obtain the office floor compiler
+		// Obtain the OfficeFloor compiler
 		OfficeFloorCompiler compiler = null;
 		if (implementation instanceof OfficeFloorCompiler) {
 			// Compatible by type (as likely same class loader)
@@ -233,7 +233,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 		// Specify the class loader on the compiler
 		compiler.classLoader = clientClassLoader;
 
-		// Return the office floor compiler implementation
+		// Return the OfficeFloor compiler implementation
 		return compiler;
 	}
 
@@ -244,7 +244,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 */
 	public static final PropertyList newPropertyList() {
 
-		// Create the office floor compiler
+		// Create the OfficeFloor compiler
 		OfficeFloorCompiler compiler = newOfficeFloorCompiler(Thread
 				.currentThread().getContextClassLoader());
 
