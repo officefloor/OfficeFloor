@@ -63,6 +63,17 @@ public class ManagedObjectDependencyNodeImpl implements
 	private final ManagedObjectSourceNode managedObjectSource;
 
 	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+	}
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param dependencyName
@@ -128,18 +139,13 @@ public class ManagedObjectDependencyNodeImpl implements
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		// TODO implement ManagedObjectDependencyNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectDependencyNode.initialise");
-
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState());
 	}
 
 	/*

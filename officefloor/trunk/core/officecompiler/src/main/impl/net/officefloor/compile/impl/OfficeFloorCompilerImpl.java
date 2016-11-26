@@ -852,7 +852,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	@Override
 	public DutyNode createDutyNode(String dutyName,
 			AdministratorNode administrator) {
-		return new DutyNodeImpl(dutyName, administrator);
+		return new DutyNodeImpl(dutyName, administrator, this);
 	}
 
 	@Override

@@ -55,6 +55,17 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 	private final NodeContext context;
 
 	/**
+	 * Initialised state.
+	 */
+	private InitialisedState state;
+
+	/**
+	 * Initialised state.
+	 */
+	private static class InitialisedState {
+	}
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param flowName
@@ -104,18 +115,13 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 
 	@Override
 	public boolean isInitialised() {
-		// TODO implement Node.isInitialised
-		throw new UnsupportedOperationException(
-				"TODO implement Node.isInitialised");
-
+		return (this.state != null);
 	}
 
 	@Override
 	public void initialise() {
-		// TODO implement TaskFlowNode.initialise
-		throw new UnsupportedOperationException(
-				"TODO implement TaskFlowNode.initialise");
-
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState());
 	}
 
 	/*

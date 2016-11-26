@@ -43,7 +43,8 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	 */
 	public void testSimpleAdministrator() {
 
-		// Record building the office floor
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -63,7 +64,11 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	@SuppressWarnings("rawtypes")
 	public void testPreAdministerTask() {
 
-		// Record building the office floor
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -89,7 +94,11 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	@SuppressWarnings("rawtypes")
 	public void testPostAdministerTask() {
 
-		// Record building the office floor
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -115,25 +124,26 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	@SuppressWarnings("rawtypes")
 	public void testAdministerOfficeFloorManagedObject() {
 
-		// Record building the office floor
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
-		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", SimpleManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT",
+				"MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
+				"MANAGED_OBJECT");
 		AdministratorBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
 						"OFFICE_TEAM", ClassAdministratorSource.class,
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
 						SimpleAdmin.class.getName());
 		admin.administerManagedObject("MANAGED_OBJECT");
-		office.registerManagedObjectSource("MANAGED_OBJECT",
-				"MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
-				"MANAGED_OBJECT");
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
 		// Compile
 		this.compile(true);
@@ -145,7 +155,8 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	@SuppressWarnings("rawtypes")
 	public void testAdministerOfficeManagedObject() {
 
-		// Record building the office floor
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(

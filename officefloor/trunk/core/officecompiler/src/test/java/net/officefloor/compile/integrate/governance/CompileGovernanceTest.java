@@ -59,7 +59,8 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 */
 	public void testGovernOfficeFloorManagedObject() {
 
-		// Record building the office floor
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
@@ -77,7 +78,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		dependencies.mapGovernance("GOVERNANCE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -89,13 +90,18 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 */
 	public void testGovernInputManagedObject() {
 
-		// Record building the office floor
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
 				ClassGovernanceSource.class, SimpleManagedObject.class);
+		office.setBoundInputManagedObject("INPUT_MO", "MANAGED_OBJECT_SOURCE_A");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
@@ -107,9 +113,8 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		DependencyMappingBuilder mapperA = this
 				.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
-		mosA.linkProcess(0, "SECTION.WORK", "INPUT");
-		office.setBoundInputManagedObject("INPUT_MO", "MANAGED_OBJECT_SOURCE_A");
 		mapperA.mapGovernance("GOVERNANCE");
+		mosA.linkProcess(0, "SECTION.WORK", "INPUT");
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE_B", ClassManagedObjectSource.class, 0,
 				"class.name", ProcessManagedObject.class.getName());
@@ -117,10 +122,10 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		DependencyMappingBuilder mapperB = this
 				.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
-		mosB.linkProcess(0, "SECTION.WORK", "INPUT");
 		mapperB.mapGovernance("GOVERNANCE");
+		mosB.linkProcess(0, "SECTION.WORK", "INPUT");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -129,7 +134,8 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 */
 	public void testGovernOfficeManagedObject() {
 
-		// Record building the office floor
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
@@ -147,7 +153,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 						"OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 		dependencies.mapGovernance("GOVERNANCE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -157,7 +163,15 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 */
 	public void testGovernSectionManagedObject() {
 
-		// Record building the office floor
+		// Record obtaining the section, managed object and work types
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
@@ -173,17 +187,6 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 				SectionWithManagedObject.class);
 
 		this.record_officeFloorBuilder_addManagedObject(
-				"OFFICE.SECTION.OBJECT", SectionClassManagedObjectSource.class,
-				0, "class.name", SectionWithManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.SECTION.OBJECT",
-				"OFFICE.SECTION.OBJECT");
-		DependencyMappingBuilder sectionDependencies = this
-				.record_officeBuilder_addThreadManagedObject(
-						"OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
-		sectionDependencies.mapDependency(0, "OFFICE.SECTION.managedObject");
-
-		this.record_officeFloorBuilder_addManagedObject(
 				"OFFICE.SECTION.managedObject", ClassManagedObjectSource.class,
 				0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -195,7 +198,18 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 						"OFFICE.SECTION.managedObject");
 		managedObjectDependencies.mapGovernance("GOVERNANCE");
 
-		// Compile the office floor
+		this.record_officeFloorBuilder_addManagedObject(
+				"OFFICE.SECTION.OBJECT", SectionClassManagedObjectSource.class,
+				0, "class.name", SectionWithManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.SECTION.OBJECT",
+				"OFFICE.SECTION.OBJECT");
+		DependencyMappingBuilder sectionDependencies = this
+				.record_officeBuilder_addThreadManagedObject(
+						"OFFICE.SECTION.OBJECT", "OFFICE.SECTION.OBJECT");
+		sectionDependencies.mapDependency(0, "OFFICE.SECTION.managedObject");
+
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -205,7 +219,11 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 */
 	public void testGovernSection() {
 
-		// Record building the office floor
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -217,7 +235,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 				"TASK", "OFFICE_TEAM");
 		governedTask.addGovernance("GOVERNANCE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -227,7 +245,11 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 */
 	public void testGovernSubSection() {
 
-		// Record building the office floor
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -239,7 +261,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 				"TASK", "OFFICE_TEAM");
 		governedTask.addGovernance("GOVERNANCE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -248,7 +270,11 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 */
 	public void testGovernOfficeTask() {
 
-		// Record building the office floor
+		// Record obtaining the section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -260,7 +286,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 				"TASK", "OFFICE_TEAM");
 		governedTask.addGovernance("GOVERNANCE");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
@@ -270,7 +296,12 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 */
 	public void testSubSectionTaskInheritGovernance() {
 
-		// Record building the office floor
+		// Record obtaining the section types
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
@@ -284,7 +315,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addWork("NON_GOVERNED_DESK.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 
-		// Compile the office floor
+		// Compile the OfficeFloor
 		this.compile(true);
 	}
 
