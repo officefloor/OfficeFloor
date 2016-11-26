@@ -53,9 +53,9 @@ public class DeskModelSectionSourceTest extends OfficeFrameTestCase {
 		designer.addSectionOutput("ESCALATION", Exception.class.getName(), true);
 		designer.addSectionObject("OBJECT", Connection.class.getName());
 		SectionWork work = designer.addSectionWork("WORK",
-				"net.example.ExampleWorkSource");
+				MockWorkSource.class.getName());
 		SectionTask task = work.addSectionTask("INPUT", "WORK_TASK");
-		task.getTaskObject("PARAMETER"); // TODO handle parameters
+		task.getTaskObject("PARAMETER").flagAsParameter();
 
 		// Validates the section is as expected
 		SectionLoaderUtil.validateSection(designer,

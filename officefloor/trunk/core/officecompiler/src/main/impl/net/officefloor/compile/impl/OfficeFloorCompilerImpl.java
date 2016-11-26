@@ -33,7 +33,6 @@ import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.administrator.AdministratorLoaderImpl;
 import net.officefloor.compile.impl.governance.GovernanceLoaderImpl;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
-import net.officefloor.compile.impl.issues.StderrCompilerIssues;
 import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.office.OfficeLoaderImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorLoaderImpl;
@@ -166,7 +165,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private CompilerIssues issues = new StderrCompilerIssues();
+	private CompilerIssues issues;
 
 	/**
 	 * {@link OfficeFrame}.
