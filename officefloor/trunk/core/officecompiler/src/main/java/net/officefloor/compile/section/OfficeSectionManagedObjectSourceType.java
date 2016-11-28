@@ -18,10 +18,8 @@
 package net.officefloor.compile.section;
 
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -53,14 +51,5 @@ public interface OfficeSectionManagedObjectSourceType {
 	 *         {@link Office} {@link SectionManagedObjectSource}.
 	 */
 	OfficeSectionManagedObjectTeamType[] getOfficeSectionManagedObjectTeamTypes();
-
-	/**
-	 * Obtains the {@link Office} {@link SectionManagedObject} instance uses of
-	 * {@link ManagedObject} from the {@link ManagedObjectSource}.
-	 * 
-	 * @return {@link Office} {@link SectionManagedObject} instance uses of
-	 *         {@link ManagedObject} from the {@link ManagedObjectSource}.
-	 */
-	OfficeSectionManagedObjectType[] getOfficeSectionManagedObjectTypes();
 
 }

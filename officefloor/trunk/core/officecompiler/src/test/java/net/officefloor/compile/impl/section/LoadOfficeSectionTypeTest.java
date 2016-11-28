@@ -181,8 +181,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		// Validate results
 		assertEquals("Should be no sub sections", 0,
 				section.getOfficeSubSectionTypes().length);
-		assertEquals("Should be no managed object sources", 0,
-				section.getOfficeSectionManagedObjectSourceTypes().length);
+		assertEquals("Should be no managed object s", 0,
+				section.getOfficeSectionManagedObjectTypes().length);
 		assertEquals("Should have a single task", 1,
 				section.getOfficeTaskTypes().length);
 		OfficeTaskType task = section.getOfficeTaskTypes()[0];
@@ -381,20 +381,19 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				section.getOfficeSubSectionTypes().length);
 		assertEquals("Should have no tasks", 0,
 				section.getOfficeTaskTypes().length);
-		assertEquals("Should have a section managed object source", 1,
-				section.getOfficeSectionManagedObjectSourceTypes().length);
-		OfficeSectionManagedObjectSourceType moSource = section
-				.getOfficeSectionManagedObjectSourceTypes()[0];
-		assertEquals("Incorrect managed object source name", "MO_SOURCE",
-				moSource.getOfficeSectionManagedObjectSourceName());
 		assertEquals("Should have a section managed object", 1,
-				moSource.getOfficeSectionManagedObjectTypes().length);
-		OfficeSectionManagedObjectType mo = moSource
+				section.getOfficeSectionManagedObjectTypes().length);
+		OfficeSectionManagedObjectType mo = section
 				.getOfficeSectionManagedObjectTypes()[0];
 		assertEquals("Incorrect managed object name", "MO",
 				mo.getOfficeSectionManagedObjectName());
 		assertEquals("Should not have dependencies", 0,
 				mo.getObjectDependencies().length);
+		OfficeSectionManagedObjectSourceType moSource = mo
+				.getOfficeSectionManagedObjectSourceType();
+		assertNotNull("Should have a section managed object source", moSource);
+		assertEquals("Incorrect managed object source name", "MO_SOURCE",
+				moSource.getOfficeSectionManagedObjectSourceName());
 	}
 
 	/**
@@ -481,21 +480,20 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				});
 
 		// Validate the results
-		assertEquals("Should have a section managed object source", 1,
-				section.getOfficeSectionManagedObjectSourceTypes().length);
-		OfficeSectionManagedObjectSourceType moSource = section
-				.getOfficeSectionManagedObjectSourceTypes()[0];
-		assertEquals("Incorrect managed object source name", "MO_SOURCE",
-				moSource.getOfficeSectionManagedObjectSourceName());
 		assertEquals("Should have a section managed object", 1,
-				moSource.getOfficeSectionManagedObjectTypes().length);
-		OfficeSectionManagedObjectType mo = moSource
+				section.getOfficeSectionManagedObjectTypes().length);
+		OfficeSectionManagedObjectType mo = section
 				.getOfficeSectionManagedObjectTypes()[0];
 		assertEquals("Should have a supported extension interface", 1,
 				mo.getSupportedExtensionInterfaces().length);
 		Class<?> supportedEi = mo.getSupportedExtensionInterfaces()[0];
 		assertEquals("Incorrect supported extension interface",
 				XAResource.class, supportedEi);
+		OfficeSectionManagedObjectSourceType moSource = mo
+				.getOfficeSectionManagedObjectSourceType();
+		assertNotNull("Should have a section managed object source", moSource);
+		assertEquals("Incorrect managed object source name", "MO_SOURCE",
+				moSource.getOfficeSectionManagedObjectSourceName());
 	}
 
 	/**
@@ -724,29 +722,22 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				});
 
 		// Ensure correct number of managed object sources
-		assertEquals("Should have a two managed object sources", 2,
-				section.getOfficeSectionManagedObjectSourceTypes().length);
+		assertEquals("Should have a two managed objects", 2,
+				section.getOfficeSectionManagedObjectTypes().length);
 
 		// Obtain appropriate sources
-		OfficeSectionManagedObjectSourceType moSourceOne = section
-				.getOfficeSectionManagedObjectSourceTypes()[0];
-		OfficeSectionManagedObjectSourceType moSourceTwo = section
-				.getOfficeSectionManagedObjectSourceTypes()[1];
-		if (!("MO_SOURCE_ONE".equals(moSourceOne
-				.getOfficeSectionManagedObjectSourceName()))) {
+		OfficeSectionManagedObjectType moOne = section
+				.getOfficeSectionManagedObjectTypes()[0];
+		OfficeSectionManagedObjectType moTwo = section
+				.getOfficeSectionManagedObjectTypes()[1];
+		if (!("MO_ONE".equals(moOne.getOfficeSectionManagedObjectName()))) {
 			// Wrong way round, so swap
-			OfficeSectionManagedObjectSourceType tmp = moSourceOne;
-			moSourceOne = moSourceTwo;
-			moSourceTwo = tmp;
+			OfficeSectionManagedObjectType tmp = moOne;
+			moOne = moTwo;
+			moTwo = tmp;
 		}
 
 		// Validate managed object one
-		assertEquals("Incorrect managed object source name", "MO_SOURCE_ONE",
-				moSourceOne.getOfficeSectionManagedObjectSourceName());
-		assertEquals("MO_SOURCE_ONE should have a section managed object", 1,
-				moSourceOne.getOfficeSectionManagedObjectTypes().length);
-		OfficeSectionManagedObjectType moOne = moSourceOne
-				.getOfficeSectionManagedObjectTypes()[0];
 		assertEquals("Incorrect managed object name", "MO_ONE",
 				moOne.getOfficeSectionManagedObjectName());
 		assertEquals("MO_ONE should have a dependency", 1,
@@ -758,18 +749,24 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				dependency.getObjectDependencyType());
 		assertNotNull("Dependency should be linked",
 				dependency.getDependentObjectType());
+		OfficeSectionManagedObjectSourceType moSourceOne = moOne
+				.getOfficeSectionManagedObjectSourceType();
+		assertEquals("MO_ONE should have a section managed object source",
+				moSourceOne);
+		assertEquals("Incorrect managed object source name", "MO_SOURCE_ONE",
+				moSourceOne.getOfficeSectionManagedObjectSourceName());
 
 		// Validate managed object two
-		assertEquals("Incorrect managed object source name", "MO_SOURCE_TWO",
-				moSourceTwo.getOfficeSectionManagedObjectSourceName());
-		assertEquals("MO_SOURCE_TWO should have a section managed object", 1,
-				moSourceTwo.getOfficeSectionManagedObjectTypes().length);
-		OfficeSectionManagedObjectType moTwo = moSourceTwo
-				.getOfficeSectionManagedObjectTypes()[0];
 		assertEquals("Incorrect managed object name", "MO_TWO",
 				moTwo.getOfficeSectionManagedObjectName());
 		assertEquals("MO_TWO should not have a dependency", 0,
 				moTwo.getObjectDependencies().length);
+		OfficeSectionManagedObjectSourceType moSourceTwo = moTwo
+				.getOfficeSectionManagedObjectSourceType();
+		assertEquals("MO_TWO should have a section managed object source",
+				moSourceTwo);
+		assertEquals("Incorrect managed object source name", "MO_SOURCE_TWO",
+				moSourceTwo.getOfficeSectionManagedObjectSourceName());
 
 		// Ensure dependency is linked to correct managed object
 		assertEquals("Incorrect dependent object", dependency

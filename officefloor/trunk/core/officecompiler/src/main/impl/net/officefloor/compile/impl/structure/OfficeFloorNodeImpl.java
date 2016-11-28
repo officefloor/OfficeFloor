@@ -60,7 +60,6 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.Office;
@@ -222,16 +221,20 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	 */
 
 	@Override
-	public ManagedObjectNode getOrCreateManagedObjectNode(
-			String managedObjectName, ManagedObjectScope managedObjectScope,
+	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
+		return NodeUtil.getNode(managedObjectName, this.managedObjects,
+				() -> this.context.createManagedObjectNode(managedObjectName));
+	}
+
+	@Override
+	public ManagedObjectNode addManagedObjectNode(String managedObjectName,
+			ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-		return NodeUtil
-				.getInitialisedNode(managedObjectName, this.managedObjects,
-						this.context, () -> this.context
-								.createManagedObjectNode(managedObjectName,
-										managedObjectSourceNode), (
-								managedObject) -> managedObject
-								.initialise(managedObjectScope));
+		return NodeUtil.getInitialisedNode(managedObjectName,
+				this.managedObjects, this.context, () -> this.context
+						.createManagedObjectNode(managedObjectName), (
+						managedObject) -> managedObject.initialise(
+						managedObjectScope, managedObjectSourceNode));
 	}
 
 	/*
@@ -573,7 +576,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getOfficeFloorTeamName(), b.getOfficeFloorTeamName()))
-				.forEach((team) -> team.buildTeam(builder));
+				.forEachOrdered((team) -> team.buildTeam(builder));
 
 		// Build the offices (in deterministic order)
 		Map<OfficeNode, OfficeBindings> officeBindings = new HashMap<OfficeNode, OfficeBindings>();
@@ -582,7 +585,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
 						a.getDeployedOfficeName(), b.getDeployedOfficeName()))
-				.forEach((office) -> {
+				.forEachOrdered((office) -> {
 
 					// Obtain possible profiler to office
 						String officeName = office.getDeployedOfficeName();
@@ -596,24 +599,19 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 						officeBindings.put(office, bindings);
 					});
 
-		// Build the input managed objects (in deterministic order)
-		InputManagedObjectNode[] inputMos = this.inputManagedObjects
+		// Build the managed objects (in deterministic order)
+		this.managedObjects
 				.values()
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeFloorInputManagedObjectName(),
-						b.getOfficeFloorInputManagedObjectName()))
-				.toArray(InputManagedObjectNode[]::new);
+						a.getOfficeFloorManagedObjectName(),
+						b.getOfficeFloorManagedObjectName()))
+				.forEachOrdered((managedObject) -> {
+					// Obtain the managed object source
+						ManagedObjectSourceNode managedObjectSource = managedObject
+								.getManagedObjectSourceNode();
 
-		// Build the managed object sources (in deterministic order)
-		this.managedObjectSources
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeFloorManagedObjectSourceName(),
-						b.getOfficeFloorManagedObjectSourceName()))
-				.forEach((managedObjectSource) -> {
-					// Obtain the managing office for the managed object source
+						// Obtain the managing office for managed object
 						OfficeNode managingOffice = managedObjectSource
 								.getManagingOfficeNode();
 						OfficeBindings bindings = officeBindings
@@ -622,51 +620,37 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 							return; // must have managing office
 						}
 
-						// Build the managed object source
-						bindings.buildManagedObjectSourceIntoOffice(managedObjectSource);
+						// Build the managed object into the office
+						bindings.buildManagedObjectIntoOffice(managedObject);
+					});
 
-						// Bind inputs for this managed object source
-						for (InputManagedObjectNode inputMo : inputMos) {
-							if (managedObjectSource == inputMo
-									.getBoundManagedObjectSourceNode()) {
-								// Bind managed object source for the input
-								bindings.buildInputManagedObjectIntoOffice(inputMo);
-							}
+		// Build the input managed objects (in deterministic order)
+		this.inputManagedObjects
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeFloorInputManagedObjectName(),
+						b.getOfficeFloorInputManagedObjectName()))
+				.forEachOrdered((inputManagedObject) -> {
+					// Obtain the managed object source
+						ManagedObjectSourceNode managedObjectSource = inputManagedObject
+								.getBoundManagedObjectSourceNode();
+
+						// Obtain the managing office for managed object
+						OfficeNode managingOffice = managedObjectSource
+								.getManagingOfficeNode();
+						OfficeBindings bindings = officeBindings
+								.get(managingOffice);
+						if (bindings == null) {
+							return; // must have managing office
 						}
+
+						// Build the input managed object into the office
+						bindings.buildInputManagedObjectIntoOffice(inputManagedObject);
 					});
 
 		// Return the built office floor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
-	}
-
-	/**
-	 * Struct with details of the {@link Office}.
-	 */
-	private class OfficeStruct {
-
-		/**
-		 * {@link OfficeBuilder}.
-		 */
-		public final OfficeBuilder officeBuilder;
-
-		/**
-		 * {@link OfficeBindings}.
-		 */
-		public final OfficeBindings officeBindings;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param officeBuilder
-		 *            {@link OfficeBuilder}.
-		 * @param officeBindings
-		 *            {@link OfficeBindings}.
-		 */
-		public OfficeStruct(OfficeBuilder officeBuilder,
-				OfficeBindings officeBindings) {
-			this.officeBuilder = officeBuilder;
-			this.officeBindings = officeBindings;
-		}
 	}
 
 	/**

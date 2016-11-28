@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.object.ObjectDependencyType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
@@ -52,6 +53,11 @@ public class OfficeSectionManagedObjectTypeImpl implements
 	private final ObjectDependencyType[] objectDependencies;
 
 	/**
+	 * {@link OfficeSectionManagedObjectSourceType}.
+	 */
+	private final OfficeSectionManagedObjectSourceType managedObjectSourceType;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param managedObjectName
@@ -65,15 +71,19 @@ public class OfficeSectionManagedObjectTypeImpl implements
 	 * @param objectDependencies
 	 *            {@link ObjectDependencyType} instances of the dependent
 	 *            objects.
+	 * @param managedObjectSourceType
+	 *            {@link OfficeSectionManagedObjectSourceType}.
 	 */
 	public OfficeSectionManagedObjectTypeImpl(String managedObjectName,
 			TypeQualification[] typeQualifications,
 			Class<?>[] extensionInterfaces,
-			ObjectDependencyType[] objectDependencies) {
+			ObjectDependencyType[] objectDependencies,
+			OfficeSectionManagedObjectSourceType managedObjectSourceType) {
 		this.managedObjectName = managedObjectName;
 		this.typeQualifications = typeQualifications;
 		this.extensionInterfaces = extensionInterfaces;
 		this.objectDependencies = objectDependencies;
+		this.managedObjectSourceType = managedObjectSourceType;
 	}
 
 	/*
@@ -107,6 +117,14 @@ public class OfficeSectionManagedObjectTypeImpl implements
 	@Override
 	public ObjectDependencyType[] getObjectDependencies() {
 		return this.objectDependencies;
+	}
+
+	@Override
+	public OfficeSectionManagedObjectSourceType getOfficeSectionManagedObjectSourceType() {
+		// TODO implement
+		// OfficeSectionManagedObjectType.getOfficeSectionManagedObjectSourceType
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeSectionManagedObjectType.getOfficeSectionManagedObjectSourceType");
 	}
 
 }

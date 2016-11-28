@@ -20,20 +20,11 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.frame.api.manage.Office;
 
 /**
- * Bindings of the {@link BoundManagedObjectNode} to the {@link Office}.
+ * Bindings to the {@link Office}.
  *
  * @author Daniel Sagenschneider
  */
 public interface OfficeBindings {
-
-	/**
-	 * Builds the {@link ManagedObjectSourceNode} into the {@link Office}.
-	 * 
-	 * @param managedObjectSourceNode
-	 *            {@link ManagedObjectSourceNode}.
-	 */
-	void buildManagedObjectSourceIntoOffice(
-			ManagedObjectSourceNode managedObjectSourceNode);
 
 	/**
 	 * Builds the {@link BoundManagedObjectNode} into the {@link Office}.
@@ -51,5 +42,13 @@ public interface OfficeBindings {
 	 */
 	void buildInputManagedObjectIntoOffice(
 			InputManagedObjectNode inputManagedObjectNode);
+
+	/**
+	 * Builds the {@link TaskNode} into the {@link Office}.
+	 * 
+	 * @param taskNode
+	 *            {@link TaskNode}.
+	 */
+	void buildTaskIntoOffice(TaskNode taskNode);
 
 }

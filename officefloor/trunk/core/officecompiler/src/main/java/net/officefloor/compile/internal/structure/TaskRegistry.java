@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 
@@ -28,17 +29,32 @@ import net.officefloor.frame.api.execute.Work;
 public interface TaskRegistry {
 
 	/**
+	 * <p>
 	 * Obtains the {@link TaskNode} from the registry.
+	 * <p>
+	 * The returned {@link TaskNode} may or may not be initialised.
 	 * 
 	 * @param taskName
 	 *            Name of the {@link TaskNode} to obtain.
+	 * @return {@link TaskNode} from the registry.
+	 */
+	TaskNode getTaskNode(String taskName);
+
+	/**
+	 * <p>
+	 * Adds an initialised {@link TaskNode} to the registry.
+	 * <p>
+	 * Should an {@link TaskNode} already be added by the name, then an issue is
+	 * reported to the {@link CompilerIssue}.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link TaskNode}.
 	 * @param taskTypeName
 	 *            Type name of the {@link Task} within the {@link Work}.
 	 * @param work
 	 *            Parent {@link WorkNode}.
-	 * @return {@link TaskNode} by the name.
+	 * @return Initialised {@link TaskNode} by the name.
 	 */
-	TaskNode getOrCreateTaskNode(String taskName, String taskTypeName,
-			WorkNode workNode);
+	TaskNode addTaskNode(String taskName, String taskTypeName, WorkNode workNode);
 
 }

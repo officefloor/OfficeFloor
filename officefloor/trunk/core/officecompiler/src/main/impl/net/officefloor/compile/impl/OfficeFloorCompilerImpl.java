@@ -755,10 +755,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public ManagedObjectNode createManagedObjectNode(String managedObjectName,
-			ManagedObjectSourceNode managedObjectSourceNode) {
-		return new ManagedObjectNodeImpl(managedObjectName,
-				managedObjectSourceNode, this);
+	public ManagedObjectNode createManagedObjectNode(String managedObjectName) {
+		return new ManagedObjectNodeImpl(managedObjectName, this);
 	}
 
 	@Override

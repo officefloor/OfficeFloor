@@ -17,13 +17,10 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.internal.structure.TaskNode;
+import net.officefloor.compile.internal.structure.TaskRegistry;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -57,6 +54,11 @@ public class WorkNodeImpl implements WorkNode {
 	 * {@link OfficeSection} containing this {@link WorkNode}.
 	 */
 	private final SectionNode section;
+
+	/**
+	 * {@link TaskRegistry}.
+	 */
+	private final TaskRegistry taskRegistry;
 
 	/**
 	 * {@link NodeContext}.
@@ -102,11 +104,6 @@ public class WorkNodeImpl implements WorkNode {
 	}
 
 	/**
-	 * Listing of {@link TaskNode} instances for this {@link SectionWork}.
-	 */
-	private final List<TaskNode> taskNodes = new LinkedList<TaskNode>();
-
-	/**
 	 * Initial {@link SectionTask} for this {@link SectionWork}.
 	 */
 	private SectionTask initialTask = null;
@@ -125,6 +122,7 @@ public class WorkNodeImpl implements WorkNode {
 			NodeContext context) {
 		this.workName = workName;
 		this.section = section;
+		this.taskRegistry = section;
 		this.context = context;
 
 		// Create additional objects
@@ -182,10 +180,7 @@ public class WorkNodeImpl implements WorkNode {
 
 	@Override
 	public SectionTask addSectionTask(String taskName, String taskTypeName) {
-		TaskNode task = this.section.getOrCreateTaskNode(taskName,
-				taskTypeName, this);
-		this.taskNodes.add(task);
-		return task;
+		return this.taskRegistry.addTaskNode(taskName, taskTypeName, this);
 	}
 
 	@Override
@@ -224,13 +219,13 @@ public class WorkNodeImpl implements WorkNode {
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void buildWork(OfficeBuilder builder, TypeContext typeContext) {
+	public WorkBuilder<?> buildWork(OfficeBuilder builder,
+			TypeContext typeContext) {
 
 		// Obtain the work type
 		WorkType<?> workType = typeContext.getOrLoadWorkType(this);
 		if (workType == null) {
-			return; // must have WorkType to build work
+			return null; // must have WorkType to build work
 		}
 
 		// Obtain the fully qualified work name
@@ -238,13 +233,8 @@ public class WorkNodeImpl implements WorkNode {
 				.getSectionQualifiedName(this.workName);
 
 		// Build the work
-		WorkBuilder workBuilder = builder.addWork(fullyQualifiedWorkName,
+		WorkBuilder<?> workBuilder = builder.addWork(fullyQualifiedWorkName,
 				workType.getWorkFactory());
-
-		// Build the tasks
-		for (TaskNode task : this.taskNodes) {
-			task.buildTask(workBuilder, typeContext);
-		}
 
 		// Determine if initial task for work
 		if (this.initialTask != null) {
@@ -252,6 +242,9 @@ public class WorkNodeImpl implements WorkNode {
 			String initialTaskName = this.initialTask.getSectionTaskName();
 			workBuilder.setInitialTask(initialTaskName);
 		}
+
+		// Return the work builder
+		return workBuilder;
 	}
 
 }

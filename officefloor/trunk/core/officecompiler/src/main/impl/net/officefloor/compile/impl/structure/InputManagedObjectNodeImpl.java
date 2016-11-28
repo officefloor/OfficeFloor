@@ -167,6 +167,11 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	}
 
 	@Override
+	public ManagedObjectSourceNode getManagedObjectSourceNode() {
+		return this.boundManagedObjectSource;
+	}
+
+	@Override
 	public void buildOfficeManagedObject(OfficeNode office,
 			OfficeBuilder officeBuilder, OfficeBindings officeBindings,
 			TypeContext typeContext) {

@@ -54,16 +54,15 @@ public interface OfficeSubSection {
 	OfficeTask getOfficeTask(String taskName);
 
 	/**
-	 * Obtains the {@link OfficeSectionManagedObjectSource} particular to his
+	 * Obtains the {@link OfficeSectionManagedObject} particular to this
 	 * {@link OfficeSubSection}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeSectionManagedObjectSource} to
-	 *            obtain.
-	 * @return {@link OfficeSectionManagedObjectSource}.
+	 * @param managedObjectName
+	 *            Name of the {@link OfficeSectionManagedSource} to obtain.
+	 * @return {@link OfficeSectionManagedObject}.
 	 */
-	OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource(
-			String managedObjectSourceName);
+	OfficeSectionManagedObject getOfficeSectionManagedObject(
+			String managedObjectSource);
 
 	/**
 	 * <p>

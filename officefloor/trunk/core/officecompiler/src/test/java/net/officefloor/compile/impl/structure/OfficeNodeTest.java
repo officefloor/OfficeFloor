@@ -1076,7 +1076,6 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Add section with governance
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
 		OfficeSectionManagedObject mo = section
-				.getOfficeSectionManagedObjectSource("MO_SOURCE")
 				.getOfficeSectionManagedObject("MO");
 
 		// Link
@@ -1142,7 +1141,6 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Add section with managed object
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
 		OfficeSectionManagedObject mo = section
-				.getOfficeSectionManagedObjectSource("MO_SOURCE")
 				.getOfficeSectionManagedObject("MO");
 
 		// Link
@@ -1332,8 +1330,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 								});
 					}
 				});
-		OfficeSectionManagedObjectSource moSource = section
-				.getOfficeSectionManagedObjectSource("MO_SOURCE");
+		OfficeSectionManagedObject mo = section
+				.getOfficeSectionManagedObject("MO");
+		OfficeSectionManagedObjectSource moSource = mo
+				.getOfficeSectionManagedObjectSource();
 		assertEquals("Incorrect section managed object source", "MO_SOURCE",
 				moSource.getOfficeSectionManagedObjectSourceName());
 		ManagedObjectTeam team = moSource

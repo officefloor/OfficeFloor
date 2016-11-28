@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.section.OfficeSectionInputType;
-import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
@@ -259,7 +259,7 @@ public abstract class AbstractOfficeChangesTestCase extends
 		}
 
 		@Override
-		public OfficeSectionManagedObjectSourceType[] getOfficeSectionManagedObjectSourceTypes() {
+		public OfficeSectionManagedObjectType[] getOfficeSectionManagedObjectTypes() {
 			// TODO implement
 			// OfficeSubSectionType.getOfficeSectionManagedObjectSourceTypes
 			throw new UnsupportedOperationException(

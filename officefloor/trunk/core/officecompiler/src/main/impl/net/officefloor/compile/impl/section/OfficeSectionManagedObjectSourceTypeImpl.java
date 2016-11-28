@@ -17,9 +17,8 @@
  */
 package net.officefloor.compile.impl.section;
 
-import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
-import net.officefloor.compile.section.OfficeSectionManagedObjectType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 
@@ -44,12 +43,6 @@ public class OfficeSectionManagedObjectSourceTypeImpl implements
 	private final OfficeSectionManagedObjectTeamType[] teamTypes;
 
 	/**
-	 * {@link OfficeSectionManagedObjectType} instances for the
-	 * {@link OfficeSectionManagedObjectSource}.
-	 */
-	private final OfficeSectionManagedObjectType[] managedObjectTypes;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param managedObjectSourceName
@@ -58,17 +51,12 @@ public class OfficeSectionManagedObjectSourceTypeImpl implements
 	 *            {@link OfficeSectionManagedObjectTeamType} instances for the
 	 *            {@link ManagedObjectTeam} instances of the
 	 *            {@link OfficeSectionManagedObjectSource}.
-	 * @param managedObjectTypes
-	 *            {@link OfficeSectionManagedObjectType} instances for the
-	 *            {@link OfficeSectionManagedObjectSource}.
 	 */
 	public OfficeSectionManagedObjectSourceTypeImpl(
 			String managedObjectSourceName,
-			OfficeSectionManagedObjectTeamType[] teamTypes,
-			OfficeSectionManagedObjectType[] managedObjectTypes) {
+			OfficeSectionManagedObjectTeamType[] teamTypes) {
 		this.managedObjectSourceName = managedObjectSourceName;
 		this.teamTypes = teamTypes;
-		this.managedObjectTypes = managedObjectTypes;
 	}
 
 	/*
@@ -83,11 +71,6 @@ public class OfficeSectionManagedObjectSourceTypeImpl implements
 	@Override
 	public OfficeSectionManagedObjectTeamType[] getOfficeSectionManagedObjectTeamTypes() {
 		return this.teamTypes;
-	}
-
-	@Override
-	public OfficeSectionManagedObjectType[] getOfficeSectionManagedObjectTypes() {
-		return this.managedObjectTypes;
 	}
 
 }
