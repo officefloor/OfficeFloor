@@ -47,8 +47,12 @@ public interface ManagedObjectNode extends DependentObjectNode,
 	 * 
 	 * @param managedObjectScope
 	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
+	 * @param managedObjectSourceNode
+	 *            {@link ManagedObjectSourceNode} for the
+	 *            {@link ManagedObjectNode}.
 	 */
-	void initialise(ManagedObjectScope managedObjectScope);
+	void initialise(ManagedObjectScope managedObjectScope,
+			ManagedObjectSourceNode managedObjectSourceNode);
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceNode} for this

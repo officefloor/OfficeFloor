@@ -288,16 +288,20 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 */
 
 	@Override
-	public ManagedObjectNode getOrCreateManagedObjectNode(
-			String managedObjectName, ManagedObjectScope managedObjectScope,
+	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
+		return NodeUtil.getNode(managedObjectName, this.managedObjects,
+				() -> this.context.createManagedObjectNode(managedObjectName));
+	}
+
+	@Override
+	public ManagedObjectNode addManagedObjectNode(String managedObjectName,
+			ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-		return NodeUtil
-				.getInitialisedNode(managedObjectName, this.managedObjects,
-						this.context, () -> this.context
-								.createManagedObjectNode(managedObjectName,
-										managedObjectSourceNode), (
-								managedObject) -> managedObject
-								.initialise(managedObjectScope));
+		return NodeUtil.getInitialisedNode(managedObjectName,
+				this.managedObjects, this.context, () -> this.context
+						.createManagedObjectNode(managedObjectName), (
+						managedObject) -> managedObject.initialise(
+						managedObjectScope, managedObjectSourceNode));
 	}
 
 	/*
@@ -587,7 +591,6 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 								officeBuilder, typeContext));
 
 		// Load the office objects (in deterministic order)
-		// Ensure the managed objects are only built into the office once.
 		this.objects
 				.values()
 				.stream()
@@ -616,16 +619,16 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 								.buildManagedObjectIntoOffice(managedObjectNode);
 					});
 
-		// Load the managed object sources for office (in deterministic order)
-		this.managedObjectSources
+		// Load the managed objects for office (in deterministic order)
+		this.managedObjects
 				.values()
 				.stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeManagedObjectSourceName(),
-						b.getOfficeManagedObjectSourceName()))
+						a.getOfficeManagedObjectName(),
+						b.getOfficeManagedObjectName()))
 				.forEachOrdered(
 						(mos) -> officeBindings
-								.buildManagedObjectSourceIntoOffice(mos));
+								.buildManagedObjectIntoOffice(mos));
 
 		// Build the sections of the office (in deterministic order)
 		this.sections

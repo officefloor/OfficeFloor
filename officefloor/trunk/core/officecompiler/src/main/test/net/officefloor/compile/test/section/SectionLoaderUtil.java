@@ -434,20 +434,70 @@ public class SectionLoaderUtil {
 			}
 		}
 
-		// Validate the managed object sources
-		OfficeSectionManagedObjectSourceType[] eMoSources = eSection
-				.getOfficeSectionManagedObjectSourceTypes();
-		OfficeSectionManagedObjectSourceType[] aMoSources = aSection
-				.getOfficeSectionManagedObjectSourceTypes();
+		// Validate the managed objects
+		OfficeSectionManagedObjectType[] eMos = eSection
+				.getOfficeSectionManagedObjectTypes();
+		OfficeSectionManagedObjectType[] aMos = aSection
+				.getOfficeSectionManagedObjectTypes();
 		TestCase.assertEquals(
-				"Incorrect number of managed object sources (sub section="
-						+ subSectionName + ")", eMoSources.length,
-				aMoSources.length);
-		for (int i = 0; i < eMoSources.length; i++) {
-			OfficeSectionManagedObjectSourceType eMoSource = eMoSources[i];
-			OfficeSectionManagedObjectSourceType aMoSource = aMoSources[i];
+				"Incorrect number of managed objects (sub section="
+						+ subSectionName + ")", eMos.length, aMos.length);
+		for (int j = 0; j < eMos.length; j++) {
+			OfficeSectionManagedObjectType eMo = eMos[j];
+			OfficeSectionManagedObjectType aMo = aMos[j];
+			TestCase.assertEquals("Incorrect name for managed object " + j
+					+ " (sub section=" + subSectionName + ")",
+					eMo.getOfficeSectionManagedObjectName(),
+					aMo.getOfficeSectionManagedObjectName());
+			TestCase.assertEquals(
+					"Incorrect dependent name for managed object " + j
+							+ " (sub section=" + subSectionName + ")",
+					eMo.getDependentObjectName(), aMo.getDependentObjectName());
+			String managedObjectName = eMo.getOfficeSectionManagedObjectName();
+
+			// Validate the managed object type qualifiers
+			TypeQualification[] eTqs = eMo.getTypeQualifications();
+			TypeQualification[] aTqs = aMo.getTypeQualifications();
+			TestCase.assertEquals(
+					"Incorrect number of type qualifiers for managed object "
+							+ j + " (sub section=" + subSectionName + ")",
+					eTqs.length, aTqs.length);
+			for (int q = 0; q < eTqs.length; q++) {
+				TypeQualification eTq = eTqs[q];
+				TypeQualification aTq = aTqs[q];
+				TestCase.assertEquals("Incorrect qualifying qualifier " + q
+						+ " (managed object=" + managedObjectName
+						+ ", sub section=" + subSectionName + ")",
+						eTq.getQualifier(), aTq.getQualifier());
+				TestCase.assertEquals("Incorrect qualifying type " + q
+						+ " (managed object=" + managedObjectName
+						+ ", sub section=" + subSectionName + ")",
+						eTq.getType(), aTq.getType());
+			}
+
+			// Validate the managed object supported extension interfaces
+			Class<?>[] eEis = eMo.getSupportedExtensionInterfaces();
+			Class<?>[] aEis = aMo.getSupportedExtensionInterfaces();
+			TestCase.assertEquals(
+					"Incorrect number of supported extension interfaces for managed object "
+							+ j + " (sub section=" + subSectionName + ")",
+					eEis.length, aEis.length);
+			for (int k = 0; k < eEis.length; k++) {
+				TestCase.assertEquals(
+						"Incorrect class for extension interface " + k
+								+ " (managed object=" + managedObjectName
+								+ ", sub section=" + subSectionName + ")",
+						eEis[k], aEis[k]);
+			}
+
+			// Validate the managed object source
+			OfficeSectionManagedObjectSourceType eMoSource = eMo
+					.getOfficeSectionManagedObjectSourceType();
+			OfficeSectionManagedObjectSourceType aMoSource = aMo
+					.getOfficeSectionManagedObjectSourceType();
 			TestCase.assertEquals("Incorrect name for managed obect source "
-					+ i + " (sub section=" + subSectionName + ")",
+					+ " (managed object=" + managedObjectName
+					+ ", sub section=" + subSectionName + ")",
 					eMoSource.getOfficeSectionManagedObjectSourceName(),
 					aMoSource.getOfficeSectionManagedObjectSourceName());
 			String managedObjectSourceName = eMoSource
@@ -459,93 +509,21 @@ public class SectionLoaderUtil {
 			OfficeSectionManagedObjectTeamType[] aTeams = aMoSource
 					.getOfficeSectionManagedObjectTeamTypes();
 			TestCase.assertEquals(
-					"Incorrect number of teams for managed object source " + i
-							+ " (managed object source="
+					"Incorrect number of teams for managed object source "
+							+ " (managed object=" + managedObjectName
+							+ ", managed object source="
 							+ managedObjectSourceName + ", sub section="
 							+ subSectionName + ")", eTeams.length,
 					aTeams.length);
-			for (int j = 0; j < eTeams.length; j++) {
-				OfficeSectionManagedObjectTeamType eTeam = eTeams[j];
-				OfficeSectionManagedObjectTeamType aTeam = aTeams[j];
-				TestCase.assertEquals("Incorrect name for team " + j
-						+ " (managed object source=" + managedObjectSourceName
+			for (int t = 0; t < eTeams.length; t++) {
+				OfficeSectionManagedObjectTeamType eTeam = eTeams[t];
+				OfficeSectionManagedObjectTeamType aTeam = aTeams[t];
+				TestCase.assertEquals("Incorrect name for team " + t
+						+ " (managed object=" + managedObjectName
+						+ ", managed object source=" + managedObjectSourceName
 						+ ", sub section=" + subSectionName + ")",
 						eTeam.getOfficeSectionManagedObjectTeamName(),
 						aTeam.getOfficeSectionManagedObjectTeamName());
-			}
-
-			// Validate the managed objects
-			OfficeSectionManagedObjectType[] eMos = eMoSource
-					.getOfficeSectionManagedObjectTypes();
-			OfficeSectionManagedObjectType[] aMos = aMoSource
-					.getOfficeSectionManagedObjectTypes();
-			TestCase.assertEquals(
-					"Incorrect number of managed objects (managed object source="
-							+ managedObjectSourceName + ", sub section="
-							+ subSectionName + ")", eMoSources.length,
-					aMoSources.length);
-			for (int j = 0; j < eMos.length; j++) {
-				OfficeSectionManagedObjectType eMo = eMos[j];
-				OfficeSectionManagedObjectType aMo = aMos[j];
-				TestCase.assertEquals("Incorrect name for managed object " + j
-						+ " (managed object source=" + managedObjectSourceName
-						+ ", sub section=" + subSectionName + ")",
-						eMo.getOfficeSectionManagedObjectName(),
-						aMo.getOfficeSectionManagedObjectName());
-				TestCase.assertEquals(
-						"Incorrect dependent name for managed object " + j
-								+ " (managed object source="
-								+ managedObjectSourceName + ", sub section="
-								+ subSectionName + ")",
-						eMo.getDependentObjectName(),
-						aMo.getDependentObjectName());
-				String managedObjectName = eMo
-						.getOfficeSectionManagedObjectName();
-
-				// Validate the managed object type qualifiers
-				TypeQualification[] eTqs = eMo.getTypeQualifications();
-				TypeQualification[] aTqs = aMo.getTypeQualifications();
-				TestCase.assertEquals(
-						"Incorrect number of type qualifiers for managed object "
-								+ j + " (managed object source="
-								+ managedObjectSourceName + ", sub section="
-								+ subSectionName + ")", eTqs.length,
-						aTqs.length);
-				for (int q = 0; q < eTqs.length; q++) {
-					TypeQualification eTq = eTqs[q];
-					TypeQualification aTq = aTqs[q];
-					TestCase.assertEquals("Incorrect qualifying qualifier " + q
-							+ " (managed object=" + managedObjectName
-							+ ", managed object source="
-							+ managedObjectSourceName + ", sub section="
-							+ subSectionName + ")", eTq.getQualifier(),
-							aTq.getQualifier());
-					TestCase.assertEquals("Incorrect qualifying type " + q
-							+ " (managed object=" + managedObjectName
-							+ ", managed object source="
-							+ managedObjectSourceName + ", sub section="
-							+ subSectionName + ")", eTq.getType(),
-							aTq.getType());
-				}
-
-				// Validate the managed object supported extension interfaces
-				Class<?>[] eEis = eMo.getSupportedExtensionInterfaces();
-				Class<?>[] aEis = aMo.getSupportedExtensionInterfaces();
-				TestCase.assertEquals(
-						"Incorrect number of supported extension interfaces for managed object "
-								+ j + " (managed object source="
-								+ managedObjectSourceName + ", sub section="
-								+ subSectionName + ")", eEis.length,
-						aEis.length);
-				for (int k = 0; k < eEis.length; k++) {
-					TestCase.assertEquals(
-							"Incorrect class for extension interface " + k
-									+ " (managed object=" + managedObjectName
-									+ ", managed object source="
-									+ managedObjectSourceName
-									+ ", sub section=" + subSectionName + ")",
-							eEis[k], aEis[k]);
-				}
 			}
 		}
 

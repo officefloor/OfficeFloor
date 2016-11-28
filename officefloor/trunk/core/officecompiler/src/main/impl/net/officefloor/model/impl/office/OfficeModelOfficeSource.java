@@ -30,7 +30,6 @@ import net.officefloor.compile.OfficeSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
@@ -871,15 +870,15 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		// Process the sub sections
 		for (OfficeSectionModel sectionModel : office.getOfficeSections()) {
 
-			// Obtain the top level office sub sections
-			String subSectionName = sectionModel.getOfficeSectionName();
-			OfficeSection subSection = sections.get(subSectionName);
-			OfficeSectionType subSectionType = sectionTypes.get(subSectionName);
+			// Obtain the top level office sections
+			String sectionName = sectionModel.getOfficeSectionName();
+			OfficeSection section = sections.get(sectionName);
+			OfficeSectionType sectionType = sectionTypes.get(sectionName);
 			OfficeSubSectionModel subSectionModel = sectionModel
 					.getOfficeSubSection();
 
 			// Process the section and its sub sections
-			this.processSubSections(null, subSection, subSectionType,
+			this.processSubSections(sectionName, section, sectionType,
 					subSectionModel, sectionModel, processors, architect);
 		}
 	}
@@ -1071,14 +1070,6 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			return;
 		}
 
-		// Determine the path for current sub section
-		String subSectionName = subSectionModel.getOfficeSubSectionName();
-		if (subSectionPath == null) {
-			subSectionPath = sectionModel.getOfficeSectionName();
-		} else {
-			subSectionPath = subSectionPath + "/" + subSectionName;
-		}
-
 		// Process the sub section
 		processor.processSubSection(subSectionModel, subSection, architect,
 				subSectionPath);
@@ -1091,21 +1082,14 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			String managedObjectName = managedObjectModel
 					.getOfficeSectionManagedObjectName();
 			OfficeSectionManagedObject managedObject = null;
-			for (OfficeSectionManagedObjectSourceType checkManagedObjectSourceType : subSectionType
-					.getOfficeSectionManagedObjectSourceTypes()) {
-				for (OfficeSectionManagedObjectType checkManagedObjectType : checkManagedObjectSourceType
-						.getOfficeSectionManagedObjectTypes()) {
-					if (managedObjectName.equals(checkManagedObjectType
-							.getOfficeSectionManagedObjectName())) {
+			for (OfficeSectionManagedObjectType checkManagedObjectType : subSectionType
+					.getOfficeSectionManagedObjectTypes()) {
+				if (managedObjectName.equals(checkManagedObjectType
+						.getOfficeSectionManagedObjectName())) {
 
-						// Obtain the managed object
-						managedObject = subSection
-								.getOfficeSectionManagedObjectSource(
-										checkManagedObjectSourceType
-												.getOfficeSectionManagedObjectSourceName())
-								.getOfficeSectionManagedObject(
-										managedObjectName);
-					}
+					// Obtain the managed object
+					managedObject = subSection
+							.getOfficeSectionManagedObject(managedObjectName);
 				}
 			}
 			if (managedObject == null) {
@@ -1164,8 +1148,12 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				continue; // must have sub section
 			}
 
+			// Determine the path for the sub section
+			String subSubSectionPath = (subSectionPath == null) ? subSubSectionName
+					: subSectionPath + "/" + subSubSectionName;
+
 			// Recursively process the sub sections
-			this.processSubSections(subSectionPath, subSubSection,
+			this.processSubSections(subSubSectionPath, subSubSection,
 					subSubSectionType, subSubSectionModel, sectionModel,
 					processor, architect);
 		}

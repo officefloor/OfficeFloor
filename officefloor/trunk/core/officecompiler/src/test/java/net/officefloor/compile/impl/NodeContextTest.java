@@ -264,10 +264,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		this.recordReturn(this.section,
 				this.section.getSectionQualifiedName("MO"), "SECTION.MO");
 		ManagedObjectNode node = this.doTest(() -> {
-			ManagedObjectNode mo = this.context.createManagedObjectNode("MO",
-					this.managedObjectSource);
-			assertEquals("Incorrect bound name", "OFFICE.SECTION.MO",
-					mo.getBoundManagedObjectName());
+			ManagedObjectNode mo = this.context.createManagedObjectNode("MO");
 			return mo;
 		});
 		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
@@ -283,7 +280,12 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getGovernerableManagedObjectName());
 		assertEquals("Incorrect OfficeFloor name", "MO",
 				node.getOfficeFloorManagedObjectName());
-		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD));
+		assertNull("Should not have bound name until initialised",
+				node.getBoundManagedObjectName());
+		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD,
+				this.managedObjectSource));
+		assertEquals("Incorrect bound name", "OFFICE.SECTION.MO",
+				node.getBoundManagedObjectName());
 	}
 
 	/**
@@ -299,10 +301,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		this.recordReturn(this.office, this.office.getDeployedOfficeName(),
 				"OFFICE");
 		ManagedObjectNode node = this.doTest(() -> {
-			ManagedObjectNode mo = this.context.createManagedObjectNode("MO",
-					this.managedObjectSource);
-			assertEquals("Incorrect bound name", "OFFICE.MO",
-					mo.getBoundManagedObjectName());
+			ManagedObjectNode mo = this.context.createManagedObjectNode("MO");
 			return mo;
 		});
 		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
@@ -314,7 +313,12 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				node.getOfficeSectionManagedObjectName());
 		assertEquals("Incorrect managed object source",
 				this.managedObjectSource, node.getManagedObjectSourceNode());
-		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD));
+		assertNull("Should not have bound name until initialised",
+				node.getBoundManagedObjectName());
+		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD,
+				this.managedObjectSource));
+		assertEquals("Incorrect bound name", "OFFICE.MO",
+				node.getBoundManagedObjectName());
 	}
 
 	/**
@@ -329,8 +333,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		this.recordReturn(this.managedObjectSource,
 				this.managedObjectSource.getOfficeFloorNode(), this.officeFloor);
 		ManagedObjectNode node = this.doTest(() -> {
-			ManagedObjectNode mo = this.context.createManagedObjectNode("MO",
-					this.managedObjectSource);
+			ManagedObjectNode mo = this.context.createManagedObjectNode("MO");
 			assertNull("Not in office, so should not have office name",
 					mo.getOfficeManagedObjectName());
 			assertNull("Not in section, so should not have section name",
@@ -340,7 +343,12 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
 		assertEquals("Incorrect managed object source",
 				this.managedObjectSource, node.getManagedObjectSourceNode());
-		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD));
+		assertNull("Should not have bound name until initialised",
+				node.getBoundManagedObjectName());
+		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD,
+				this.managedObjectSource));
+		assertEquals("Incorrect bound name", "MO",
+				node.getBoundManagedObjectName());
 	}
 
 	/**

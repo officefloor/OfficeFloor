@@ -496,12 +496,9 @@ public interface NodeContext {
 	 * 
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObjectNode}.
-	 * @param managedObjectSourceNode
-	 *            Parent {@link ManagedObjectSourceNode}.
 	 * @return {@link ManagedObjectNode}.
 	 */
-	ManagedObjectNode createManagedObjectNode(String managedObjectName,
-			ManagedObjectSourceNode managedObjectSourceNode);
+	ManagedObjectNode createManagedObjectNode(String managedObjectName);
 
 	/**
 	 * Creates a {@link ManagedObjectSourceNode}.

@@ -40,6 +40,15 @@ public interface BoundManagedObjectNode extends LinkObjectNode {
 	String getBoundManagedObjectName();
 
 	/**
+	 * Obtains the {@link ManagedObjectSourceNode} for this
+	 * {@link BoundManagedObjectNode}.
+	 * 
+	 * @return {@link ManagedObjectSourceNode} for this
+	 *         {@link BoundManagedObjectNode}.
+	 */
+	ManagedObjectSourceNode getManagedObjectSourceNode();
+
+	/**
 	 * Adds the {@link GovernanceNode} to provide {@link Governance} over this
 	 * {@link ManagedObjectNode} when used within the {@link Office} of the
 	 * {@link OfficeNode}.

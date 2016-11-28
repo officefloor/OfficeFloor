@@ -43,7 +43,6 @@ import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionInputType;
-import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
@@ -60,7 +59,6 @@ import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
@@ -989,27 +987,19 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			OfficeGovernance governance) {
 
 		// Check all section managed objects
-		for (OfficeSectionManagedObjectSourceType moSourceType : sectionType
-				.getOfficeSectionManagedObjectSourceTypes()) {
-			for (OfficeSectionManagedObjectType moType : moSourceType
-					.getOfficeSectionManagedObjectTypes()) {
-				for (Class<?> supportedExtensionInterface : moType
-						.getSupportedExtensionInterfaces()) {
-					if (extensionInterface.equals(supportedExtensionInterface)) {
+		for (OfficeSectionManagedObjectType moType : sectionType
+				.getOfficeSectionManagedObjectTypes()) {
+			for (Class<?> supportedExtensionInterface : moType
+					.getSupportedExtensionInterfaces()) {
+				if (extensionInterface.equals(supportedExtensionInterface)) {
 
-						// Obtain the managed object
-						String moSourceName = moSourceType
-								.getOfficeSectionManagedObjectSourceName();
-						OfficeSectionManagedObjectSource moSource = section
-								.getOfficeSectionManagedObjectSource(moSourceName);
-						String moName = moType
-								.getOfficeSectionManagedObjectName();
-						OfficeSectionManagedObject mo = moSource
-								.getOfficeSectionManagedObject(moName);
+					// Obtain the managed object
+					String moName = moType.getOfficeSectionManagedObjectName();
+					OfficeSectionManagedObject mo = section
+							.getOfficeSectionManagedObject(moName);
 
-						// Supports extension so govern
-						governance.governManagedObject(mo);
-					}
+					// Supports extension so govern
+					governance.governManagedObject(mo);
 				}
 			}
 		}

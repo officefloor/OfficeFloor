@@ -53,4 +53,13 @@ public interface OfficeSectionManagedObjectType extends DependentObjectType {
 	 */
 	Class<?>[] getSupportedExtensionInterfaces();
 
+	/**
+	 * Obtains the {@link OfficeSectionManagedObjectSourceType} for this
+	 * {@link OfficeSectionManagedObject}.
+	 * 
+	 * @return {@link OfficeSectionManagedObjectSourceType} for this
+	 *         {@link OfficeSectionManagedObject}.
+	 */
+	OfficeSectionManagedObjectSourceType getOfficeSectionManagedObjectSourceType();
+
 }

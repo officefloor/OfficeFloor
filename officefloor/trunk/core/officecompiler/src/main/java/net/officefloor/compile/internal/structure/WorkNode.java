@@ -23,6 +23,7 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -78,7 +79,9 @@ public interface WorkNode extends Node, SectionWork {
 	 *            {@link OfficeBuilder}.
 	 * @param typeContext
 	 *            {@link TypeContext}.
+	 * @return {@link WorkBuilder} to enable building the {@link TaskNode}
+	 *         instances.
 	 */
-	void buildWork(OfficeBuilder builder, TypeContext typeContext);
+	WorkBuilder<?> buildWork(OfficeBuilder builder, TypeContext typeContext);
 
 }

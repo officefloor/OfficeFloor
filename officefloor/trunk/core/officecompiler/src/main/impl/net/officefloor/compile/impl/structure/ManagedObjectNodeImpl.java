@@ -41,8 +41,10 @@ import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
+import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
@@ -73,29 +75,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final Map<String, ManagedObjectDependencyNode> dependencies = new HashMap<String, ManagedObjectDependencyNode>();
 
 	/**
-	 * {@link ManagedObjectSourceNode} for the {@link ManagedObjectSource} to
-	 * source this {@link ManagedObject}.
-	 */
-	private final ManagedObjectSourceNode managedObjectSourceNode;
-
-	/**
-	 * Containing {@link SectionNode}. <code>null</code> if contained in the
-	 * {@link Office} or {@link OfficeFloor}.
-	 */
-	private final SectionNode containingSectionNode;
-
-	/**
-	 * Containing {@link OfficeNode}. <code>null</code> if contained in the
-	 * {@link OfficeFloor}.
-	 */
-	private final OfficeNode containingOfficeNode;
-
-	/**
-	 * Containing {@link OfficeFloorNode}.
-	 */
-	private final OfficeFloorNode containingOfficeFloorNode;
-
-	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
@@ -116,13 +95,50 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		private final ManagedObjectScope managedObjectScope;
 
 		/**
+		 * {@link ManagedObjectSourceNode} for the {@link ManagedObjectSource}
+		 * to source this {@link ManagedObject}.
+		 */
+		private final ManagedObjectSourceNode managedObjectSourceNode;
+
+		/**
+		 * Containing {@link SectionNode}. <code>null</code> if contained in the
+		 * {@link Office} or {@link OfficeFloor}.
+		 */
+		private final SectionNode containingSectionNode;
+
+		/**
+		 * Containing {@link OfficeNode}. <code>null</code> if contained in the
+		 * {@link OfficeFloor}.
+		 */
+		private final OfficeNode containingOfficeNode;
+
+		/**
+		 * Containing {@link OfficeFloorNode}.
+		 */
+		private final OfficeFloorNode containingOfficeFloorNode;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param managedObjectScope
 		 *            {@link ManagedObjectScope} of this {@link ManagedObject}.
+		 * @param managedObjectSourceNode
+		 *            {@link ManagedObjectSourceNode} for the
+		 *            {@link ManagedObjectSource} to source this
+		 *            {@link ManagedObject}.
 		 */
-		public InitialiseState(ManagedObjectScope managedObjectScope) {
+		public InitialiseState(ManagedObjectScope managedObjectScope,
+				ManagedObjectSourceNode managedObjectSourceNode) {
 			this.managedObjectScope = managedObjectScope;
+			this.managedObjectSourceNode = managedObjectSourceNode;
+			this.containingSectionNode = this.managedObjectSourceNode
+					.getSectionNode();
+			this.containingOfficeNode = (this.containingSectionNode != null ? this.containingSectionNode
+					.getOfficeNode() : this.managedObjectSourceNode
+					.getOfficeNode());
+			this.containingOfficeFloorNode = (this.containingOfficeNode != null ? this.containingOfficeNode
+					.getOfficeFloorNode() : this.managedObjectSourceNode
+					.getOfficeFloorNode());
 		}
 	}
 
@@ -142,24 +158,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * 
 	 * @param managedObjectName
 	 *            Name of this {@link ManagedObject}.
-	 * @param managedObjectSourceNode
-	 *            {@link ManagedObjectSourceNode} for the
-	 *            {@link ManagedObjectSource} to source this
-	 *            {@link ManagedObject}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectNodeImpl(String managedObjectName,
-			ManagedObjectSourceNode managedObjectSourceNode, NodeContext context) {
+	public ManagedObjectNodeImpl(String managedObjectName, NodeContext context) {
 		this.managedObjectName = managedObjectName;
-		this.managedObjectSourceNode = managedObjectSourceNode;
-		this.containingSectionNode = this.managedObjectSourceNode
-				.getSectionNode();
-		this.containingOfficeNode = (this.containingSectionNode != null ? this.containingSectionNode
-				.getOfficeNode() : this.managedObjectSourceNode.getOfficeNode());
-		this.containingOfficeFloorNode = (this.containingOfficeNode != null ? this.containingOfficeNode
-				.getOfficeFloorNode() : this.managedObjectSourceNode
-				.getOfficeFloorNode());
 		this.context = context;
 	}
 
@@ -184,7 +187,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public Node getParentNode() {
-		return this.managedObjectSourceNode;
+		return this.state.managedObjectSourceNode;
 	}
 
 	@Override
@@ -193,9 +196,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
-	public void initialise(ManagedObjectScope managedObjectScope) {
+	public void initialise(ManagedObjectScope managedObjectScope,
+			ManagedObjectSourceNode managedObjectSourceNode) {
 		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialiseState(managedObjectScope));
+				() -> new InitialiseState(managedObjectScope,
+						managedObjectSourceNode));
 	}
 
 	/*
@@ -204,7 +209,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public ManagedObjectSourceNode getManagedObjectSourceNode() {
-		return this.managedObjectSourceNode;
+		return this.state.managedObjectSourceNode;
 	}
 
 	@Override
@@ -213,7 +218,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = typeContext
-				.getOrLoadManagedObjectType(this.managedObjectSourceNode);
+				.getOrLoadManagedObjectType(this.state.managedObjectSourceNode);
 		if (managedObjectType == null) {
 			return null; // must have type
 		}
@@ -242,9 +247,17 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			return null;
 		}
 
+		// Load the managed object source type
+		OfficeSectionManagedObjectSourceType managedObjectSourceType = this.state.managedObjectSourceNode
+				.loadOfficeSectionManagedObjectSourceType(typeContext);
+		if (managedObjectSourceType == null) {
+			return null;
+		}
+
 		// Create and return the managed object type
 		return new OfficeSectionManagedObjectTypeImpl(this.managedObjectName,
-				qualifications, extensionInterfaces, objectDependencyTypes);
+				qualifications, extensionInterfaces, objectDependencyTypes,
+				managedObjectSourceType);
 	}
 
 	/*
@@ -263,17 +276,17 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public String getBoundManagedObjectName() {
 		// Obtain the name based on location
-		if (this.containingSectionNode != null) {
+		if (this.state.containingSectionNode != null) {
 			// Use name qualified with both office and section
-			return this.containingOfficeNode.getDeployedOfficeName()
+			return this.state.containingOfficeNode.getDeployedOfficeName()
 					+ "."
-					+ this.containingSectionNode
+					+ this.state.containingSectionNode
 							.getSectionQualifiedName(this.managedObjectName);
 
-		} else if (this.containingOfficeNode != null) {
+		} else if (this.state.containingOfficeNode != null) {
 			// Use name qualified with office name
-			return this.containingOfficeNode.getDeployedOfficeName() + "."
-					+ this.managedObjectName;
+			return this.state.containingOfficeNode.getDeployedOfficeName()
+					+ "." + this.managedObjectName;
 
 		} else {
 			// Use name unqualified
@@ -305,7 +318,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = typeContext
-				.getOrLoadManagedObjectType(this.managedObjectSourceNode);
+				.getOrLoadManagedObjectType(this.state.managedObjectSourceNode);
 		if (managedObjectType == null) {
 			return; // must have managed object type
 		}
@@ -314,8 +327,10 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		String managedObjectName = this.getBoundManagedObjectName();
 
 		// Register to the office
-		officeBuilder.registerManagedObjectSource(managedObjectName,
-				this.managedObjectSourceNode.getManagedObjectSourceName());
+		officeBuilder
+				.registerManagedObjectSource(managedObjectName,
+						this.state.managedObjectSourceNode
+								.getManagedObjectSourceName());
 
 		// Add the managed object to the office
 		DependencyMappingBuilder mapper;
@@ -369,7 +384,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			}
 		}
 
-		// Obtain the governances for the office
+		// Load governances for the managed object from the office
 		List<GovernanceNode> governances = this.governancesPerOffice
 				.get(office);
 		if (governances != null) {
@@ -403,7 +418,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getSectionManagedObjectName() {
-		return (this.containingSectionNode != null ? this.managedObjectName
+		return (this.state.containingSectionNode != null ? this.managedObjectName
 				: null);
 	}
 
@@ -413,8 +428,17 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getOfficeSectionManagedObjectName() {
-		return (this.containingSectionNode != null ? this.managedObjectName
+		return (this.state.containingSectionNode != null ? this.managedObjectName
 				: null);
+	}
+
+	@Override
+	public OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource() {
+		// TODO implement
+		// OfficeSectionManagedObject.getOfficeSectionManagedObjectSource
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeSectionManagedObject.getOfficeSectionManagedObjectSource");
+
 	}
 
 	/*
@@ -423,7 +447,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getOfficeManagedObjectName() {
-		return (this.containingOfficeNode != null ? this.managedObjectName
+		return (this.state.containingOfficeNode != null ? this.managedObjectName
 				: null);
 	}
 
