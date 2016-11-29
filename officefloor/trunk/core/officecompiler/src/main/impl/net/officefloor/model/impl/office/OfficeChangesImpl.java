@@ -44,7 +44,7 @@ import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.ConnectionModel;
@@ -284,9 +284,9 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * Links the {@link OfficeTaskModel} to the {@link DutyModel}.
 	 * 
 	 * @param officeSectionModel
-	 *            {@link OfficeSectionModel} containing the {@link OfficeTask}.
+	 *            {@link OfficeSectionModel} containing the {@link OfficeSectionTask}.
 	 * @param officeTaskType
-	 *            {@link OfficeTaskType} of {@link OfficeTask} to link to
+	 *            {@link OfficeTaskType} of {@link OfficeSectionTask} to link to
 	 *            {@link DutyModel}.
 	 * @param duty
 	 *            {@link DutyModel}.

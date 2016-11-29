@@ -40,7 +40,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
@@ -873,7 +873,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add section with task
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
-		OfficeTask task = section.getOfficeTask("TASK");
+		OfficeSectionTask task = section.getOfficeSectionTask("TASK");
 		assertEquals("Incorrect office task", "TASK", task.getOfficeTaskName());
 
 		// Link
@@ -992,7 +992,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 	/**
 	 * Ensure can specify {@link OfficeGovernance} for a specific
-	 * {@link OfficeTask}.
+	 * {@link OfficeSectionTask}.
 	 */
 	public void testLinkOfficeGovernanceForOfficeTask() {
 
@@ -1000,7 +1000,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add section with task
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
-		OfficeTask task = section.getOfficeTask("TASK");
+		OfficeSectionTask task = section.getOfficeSectionTask("TASK");
 
 		// Link
 		OfficeGovernance governance = this.addGovernance(this.node,
@@ -1017,7 +1017,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can specify pre {@link OfficeDuty} for the {@link OfficeTask}.
+	 * Ensure can specify pre {@link OfficeDuty} for the {@link OfficeSectionTask}.
 	 */
 	public void testLinkPreOfficeDutyForOfficeTask() {
 
@@ -1025,7 +1025,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add section with task
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
-		OfficeTask task = section.getOfficeTask("TASK");
+		OfficeSectionTask task = section.getOfficeSectionTask("TASK");
 
 		// Link
 		OfficeAdministrator administrator = this.addAdministrator(this.node,
@@ -1044,7 +1044,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can specify post {@link OfficeDuty} for the {@link OfficeTask}.
+	 * Ensure can specify post {@link OfficeDuty} for the {@link OfficeSectionTask}.
 	 */
 	public void testLinkPostOfficeDutyForOfficeTask() {
 
@@ -1052,7 +1052,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add section with task
 		OfficeSection section = this.addSection(this.node, "SECTION", null);
-		OfficeTask task = section.getOfficeTask("TASK");
+		OfficeSectionTask task = section.getOfficeSectionTask("TASK");
 
 		// Link
 		OfficeAdministrator administrator = this.addAdministrator(this.node,
@@ -1330,10 +1330,9 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 								});
 					}
 				});
-		OfficeSectionManagedObject mo = section
-				.getOfficeSectionManagedObject("MO");
-		OfficeSectionManagedObjectSource moSource = mo
-				.getOfficeSectionManagedObjectSource();
+		OfficeSectionManagedObjectSource moSource = section
+				.getOfficeSectionManagedObjectSource("MO_SOURCE");
+		assertNotNull("Should have managed object source", moSource);
 		assertEquals("Incorrect section managed object source", "MO_SOURCE",
 				moSource.getOfficeSectionManagedObjectSourceName());
 		ManagedObjectTeam team = moSource

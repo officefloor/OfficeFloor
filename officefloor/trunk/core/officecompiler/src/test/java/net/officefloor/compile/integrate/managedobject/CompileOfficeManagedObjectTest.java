@@ -174,6 +174,10 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		// Register the office linked managed objects with the office
 		OfficeBuilder office = this
 				.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name",
+				SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
 		this.record_officeFloorBuilder_addManagedObject(
@@ -186,10 +190,6 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 				.record_officeBuilder_addProcessManagedObject(
 						"OFFICE.DEPENDENT", "OFFICE.DEPENDENT");
 		mapper.mapDependency(0, "SIMPLE");
-		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE",
-				ClassManagedObjectSource.class, 0, "class.name",
-				SimpleManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -256,6 +256,10 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE",
+				ClassManagedObjectSource.class, 0, "class.name",
+				SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.INPUT_SOURCE",
@@ -271,10 +275,6 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
-		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE",
-				ClassManagedObjectSource.class, 0, "class.name",
-				SimpleManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
 		// Compile the OfficeFloor
 		this.compile(true);

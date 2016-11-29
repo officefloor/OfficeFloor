@@ -18,11 +18,11 @@
 package net.officefloor.compile.object;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.work.TaskObjectType;
 
 /**
- * <code>Type definition</code> of a dependent object of an {@link OfficeTask}.
+ * <code>Type definition</code> of a dependent object of an {@link OfficeSectionTask}.
  *
  * @author Daniel Sagenschneider
  */

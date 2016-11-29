@@ -265,27 +265,32 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				this.section.getSectionQualifiedName("MO"), "SECTION.MO");
 		ManagedObjectNode node = this.doTest(() -> {
 			ManagedObjectNode mo = this.context.createManagedObjectNode("MO");
-			return mo;
-		});
+
+			// Ensure uninitialised that provides values
+				assertNode(mo, "MO", "Managed Object", null, null);
+				assertEquals("Incorrect office name", "MO",
+						mo.getOfficeManagedObjectName());
+				assertEquals("Incorrect section name", "MO",
+						mo.getSectionManagedObjectName());
+				assertEquals("Incorrect administerable name", "MO",
+						mo.getAdministerableManagedObjectName());
+				assertEquals("Incorrect dependency name", "MO",
+						mo.getDependentManagedObjectName());
+				assertEquals("Incorrect governerable name", "MO",
+						mo.getGovernerableManagedObjectName());
+				assertEquals("Incorrect OfficeFloor name", "MO",
+						mo.getOfficeFloorManagedObjectName());
+				assertNull("Should not have bound name until initialised",
+						mo.getBoundManagedObjectName());
+
+				// Initialise, as must obtain details from managed object source
+				assertInitialise(mo, (n) -> n.initialise(
+						ManagedObjectScope.THREAD, this.managedObjectSource));
+				assertEquals("Incorrect bound name", "OFFICE.SECTION.MO",
+						mo.getBoundManagedObjectName());
+				return mo;
+			});
 		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
-		assertEquals("Incorrect office name", "MO",
-				node.getOfficeManagedObjectName());
-		assertEquals("Incorrect section name", "MO",
-				node.getSectionManagedObjectName());
-		assertEquals("Incorrect administerable name", "MO",
-				node.getAdministerableManagedObjectName());
-		assertEquals("Incorrect dependency name", "MO",
-				node.getDependentManagedObjectName());
-		assertEquals("Incorrect governerable name", "MO",
-				node.getGovernerableManagedObjectName());
-		assertEquals("Incorrect OfficeFloor name", "MO",
-				node.getOfficeFloorManagedObjectName());
-		assertNull("Should not have bound name until initialised",
-				node.getBoundManagedObjectName());
-		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD,
-				this.managedObjectSource));
-		assertEquals("Incorrect bound name", "OFFICE.SECTION.MO",
-				node.getBoundManagedObjectName());
 	}
 
 	/**
@@ -300,25 +305,38 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				this.officeFloor);
 		this.recordReturn(this.office, this.office.getDeployedOfficeName(),
 				"OFFICE");
-		ManagedObjectNode node = this.doTest(() -> {
-			ManagedObjectNode mo = this.context.createManagedObjectNode("MO");
-			return mo;
-		});
+		ManagedObjectNode node = this
+				.doTest(() -> {
+					ManagedObjectNode mo = this.context
+							.createManagedObjectNode("MO");
+
+					// Validate correct details
+					assertNode(mo, "MO", "Managed Object", null, null);
+					assertEquals("Incorrect section name", "MO",
+							mo.getSectionManagedObjectName());
+					assertEquals("Incorrect office name", "MO",
+							mo.getOfficeManagedObjectName());
+					assertEquals("Incorrect office section name", "MO",
+							mo.getOfficeSectionManagedObjectName());
+					assertNull("Should not have bound name until initialised",
+							mo.getBoundManagedObjectName());
+					assertNull(
+							"Should not have managed object source until initialised",
+							mo.getManagedObjectSourceNode());
+
+					// Initialise, as gets details from managed object source
+					assertInitialise(mo, (n) -> n
+							.initialise(ManagedObjectScope.THREAD,
+									this.managedObjectSource));
+					assertEquals("Incorrect bound name", "OFFICE.MO",
+							mo.getBoundManagedObjectName());
+					assertEquals("Incorrect managed object source",
+							this.managedObjectSource,
+							mo.getManagedObjectSourceNode());
+
+					return mo;
+				});
 		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
-		assertEquals("Incorrect office name", "MO",
-				node.getOfficeManagedObjectName());
-		assertNull("Not in section, so should not have section name",
-				node.getSectionManagedObjectName());
-		assertNull("Not in section, so should not have office section name",
-				node.getOfficeSectionManagedObjectName());
-		assertEquals("Incorrect managed object source",
-				this.managedObjectSource, node.getManagedObjectSourceNode());
-		assertNull("Should not have bound name until initialised",
-				node.getBoundManagedObjectName());
-		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD,
-				this.managedObjectSource));
-		assertEquals("Incorrect bound name", "OFFICE.MO",
-				node.getBoundManagedObjectName());
 	}
 
 	/**
@@ -334,21 +352,30 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				this.managedObjectSource.getOfficeFloorNode(), this.officeFloor);
 		ManagedObjectNode node = this.doTest(() -> {
 			ManagedObjectNode mo = this.context.createManagedObjectNode("MO");
-			assertNull("Not in office, so should not have office name",
-					mo.getOfficeManagedObjectName());
-			assertNull("Not in section, so should not have section name",
-					mo.getSectionManagedObjectName());
-			return mo;
-		});
+
+			// Ensure uninitialised that provides values
+				assertNode(mo, "MO", "Managed Object", null, null);
+				assertEquals("Incorrect section name", "MO",
+						mo.getSectionManagedObjectName());
+				assertEquals("Incorrect office name", "MO",
+						mo.getOfficeManagedObjectName());
+				assertEquals("Incorrect office section name", "MO",
+						mo.getOfficeSectionManagedObjectName());
+				assertNull("Should not have bound name until initialised",
+						mo.getBoundManagedObjectName());
+
+				// Initialise, as gets details from managed object source
+				assertInitialise(mo, (n) -> n.initialise(
+						ManagedObjectScope.THREAD, this.managedObjectSource));
+				assertEquals("Incorrect bound name", "MO",
+						mo.getBoundManagedObjectName());
+				assertEquals("Incorrect managed object source",
+						this.managedObjectSource,
+						mo.getManagedObjectSourceNode());
+
+				return mo;
+			});
 		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
-		assertEquals("Incorrect managed object source",
-				this.managedObjectSource, node.getManagedObjectSourceNode());
-		assertNull("Should not have bound name until initialised",
-				node.getBoundManagedObjectName());
-		assertInitialise(node, (n) -> n.initialise(ManagedObjectScope.THREAD,
-				this.managedObjectSource));
-		assertEquals("Incorrect bound name", "MO",
-				node.getBoundManagedObjectName());
 	}
 
 	/**

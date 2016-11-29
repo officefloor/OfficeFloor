@@ -619,6 +619,17 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 								.buildManagedObjectIntoOffice(managedObjectNode);
 					});
 
+		// Build the managed object sources (in deterministic order)
+		this.managedObjectSources
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeManagedObjectSourceName(),
+						b.getOfficeManagedObjectSourceName()))
+				.forEachOrdered(
+						(managedObjectSource) -> officeBindings
+								.buildManagedObjectSourceIntoOffice(managedObjectSource));
+
 		// Load the managed objects for office (in deterministic order)
 		this.managedObjects
 				.values()

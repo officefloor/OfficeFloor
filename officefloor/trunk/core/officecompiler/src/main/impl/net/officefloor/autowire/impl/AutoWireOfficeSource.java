@@ -63,7 +63,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
@@ -578,7 +578,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 				// Obtain the task
 				String taskName = taskType.getOfficeTaskName();
-				OfficeTask task = officeSection.getOfficeTask(taskName);
+				OfficeSectionTask task = officeSection.getOfficeSectionTask(taskName);
 
 				// Assign the team
 				this.assignTeam(task, taskType, responsibleTeams, defaultTeam,
@@ -1020,7 +1020,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
-	 * Links the {@link OfficeTask} instances of the {@link OfficeSubSection} to
+	 * Links the {@link OfficeSectionTask} instances of the {@link OfficeSubSection} to
 	 * the {@link OfficeTeam}.
 	 * 
 	 * @param subSection
@@ -1044,7 +1044,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Obtain the task
 			String taskName = taskType.getOfficeTaskName();
-			OfficeTask task = subSection.getOfficeTask(taskName);
+			OfficeSectionTask task = subSection.getOfficeSectionTask(taskName);
 
 			// Assign the team
 			this.assignTeam(task, taskType, responsibleTeams, defaultTeam,
@@ -1067,10 +1067,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
-	 * Assigns the {@link OfficeTeam} for the {@link OfficeTask}.
+	 * Assigns the {@link OfficeTeam} for the {@link OfficeSectionTask}.
 	 * 
 	 * @param task
-	 *            {@link OfficeTask}.
+	 *            {@link OfficeSectionTask}.
 	 * @param taskType
 	 *            {@link OfficeTaskType}.
 	 * @param responsibleTeams
@@ -1080,7 +1080,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 */
-	private void assignTeam(OfficeTask task, OfficeTaskType taskType,
+	private void assignTeam(OfficeSectionTask task, OfficeTaskType taskType,
 			List<ResponsibleTeam> responsibleTeams,
 			ResponsibleTeam defaultTeam, OfficeArchitect architect) {
 
@@ -1303,12 +1303,12 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 		/**
 		 * Determines if the {@link OfficeTeam} is responsible for the
-		 * {@link OfficeTask}.
+		 * {@link OfficeSectionTask}.
 		 * 
 		 * @param taskType
 		 *            {@link OfficeTaskType} to check if responsible.
 		 * @return <code>true</code> if the {@link OfficeTeam} is potentially
-		 *         responsible for the {@link OfficeTask}.
+		 *         responsible for the {@link OfficeSectionTask}.
 		 */
 		public boolean isResponsible(OfficeTaskType taskType) {
 			return this.isResponsible(taskType.getObjectDependencies(),

@@ -21,59 +21,59 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
- * {@link OfficeTask} within the {@link Office}.
+ * {@link OfficeSectionTask} within the {@link Office}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeTask {
+public interface OfficeSectionTask {
 
 	/**
-	 * Obtains the name of the {@link OfficeTask}.
+	 * Obtains the name of the {@link OfficeSectionTask}.
 	 * 
-	 * @return Name of the {@link OfficeTask}.
+	 * @return Name of the {@link OfficeSectionTask}.
 	 */
 	String getOfficeTaskName();
 
 	/**
-	 * Obtains the {@link TaskTeam} responsible for this {@link OfficeTask}.
+	 * Obtains the {@link TaskTeam} responsible for this {@link OfficeSectionTask}.
 	 * 
-	 * @return {@link TaskTeam} responsible for this {@link OfficeTask}.
+	 * @return {@link TaskTeam} responsible for this {@link OfficeSectionTask}.
 	 */
 	TaskTeam getTeamResponsible();
 
 	/**
 	 * <p>
 	 * Adds an {@link OfficeDuty} to be done before attempting this
-	 * {@link OfficeTask}.
+	 * {@link OfficeSectionTask}.
 	 * <p>
 	 * The order that the {@link OfficeDuty} instances are added is the order
-	 * they will be done before this {@link OfficeTask}.
+	 * they will be done before this {@link OfficeSectionTask}.
 	 * 
 	 * @param duty
 	 *            {@link OfficeDuty} to be done before attempting this
-	 *            {@link OfficeTask}.
+	 *            {@link OfficeSectionTask}.
 	 */
 	void addPreTaskDuty(OfficeDuty duty);
 
 	/**
 	 * <p>
 	 * Adds an {@link OfficeDuty} to be done after completing this
-	 * {@link OfficeTask}.
+	 * {@link OfficeSectionTask}.
 	 * <p>
 	 * The order that the {@link OfficeDuty} instances are added is the order
-	 * they will be done after this {@link OfficeTask} is complete.
+	 * they will be done after this {@link OfficeSectionTask} is complete.
 	 * 
 	 * @param duty
 	 *            {@link OfficeDuty} to be done after completing this
-	 *            {@link OfficeTask}.
+	 *            {@link OfficeSectionTask}.
 	 */
 	void addPostTaskDuty(OfficeDuty duty);
 
 	/**
 	 * <p>
-	 * Adds {@link Governance} for this {@link OfficeTask}.
+	 * Adds {@link Governance} for this {@link OfficeSectionTask}.
 	 * <p>
-	 * This enables specifying specifically which {@link OfficeTask} instances
+	 * This enables specifying specifically which {@link OfficeSectionTask} instances
 	 * require {@link Governance}.
 	 * 
 	 * @param governance

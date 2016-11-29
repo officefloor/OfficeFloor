@@ -108,22 +108,6 @@ public class OfficeBindingsImpl implements OfficeBindings {
 	}
 
 	/**
-	 * Builds the {@link ManagedObjectSourceNode} into the {@link Office}.
-	 * 
-	 * @param managedObjectSourceNode
-	 *            {@link ManagedObjectSourceNode}.
-	 */
-	private void buildManagedObjectSourceIntoOffice(
-			ManagedObjectSourceNode managedObjectSourceNode) {
-		if (this.builtManagedObjectSources.contains(managedObjectSourceNode)) {
-			return; // already built into office
-		}
-		managedObjectSourceNode.buildManagedObject(this.officeFloorBuilder,
-				this.office, this.officeBuilder, this, this.typeContext);
-		this.builtManagedObjectSources.add(managedObjectSourceNode);
-	}
-
-	/**
 	 * Builds the {@link WorkNode} into the {@link Office}.
 	 * 
 	 * @param workNode
@@ -145,12 +129,26 @@ public class OfficeBindingsImpl implements OfficeBindings {
 	 */
 
 	@Override
+	public void buildManagedObjectSourceIntoOffice(
+			ManagedObjectSourceNode managedObjectSourceNode) {
+		if (this.builtManagedObjectSources.contains(managedObjectSourceNode)) {
+			return; // already built into office
+		}
+		managedObjectSourceNode.buildManagedObject(this.officeFloorBuilder,
+				this.office, this.officeBuilder, this, this.typeContext);
+		this.builtManagedObjectSources.add(managedObjectSourceNode);
+	}
+
+	@Override
 	public void buildManagedObjectIntoOffice(
 			BoundManagedObjectNode managedObjectNode) {
 
 		// Ensure the managed object source is built into the office
-		this.buildManagedObjectSourceIntoOffice(managedObjectNode
-				.getManagedObjectSourceNode());
+		ManagedObjectSourceNode managedObjectSourceNode = managedObjectNode
+				.getManagedObjectSourceNode();
+		if (managedObjectSourceNode != null) {
+			this.buildManagedObjectSourceIntoOffice(managedObjectSourceNode);
+		}
 
 		// Build the managed object into the office
 		if (this.builtManagedObjects.contains(managedObjectNode)) {

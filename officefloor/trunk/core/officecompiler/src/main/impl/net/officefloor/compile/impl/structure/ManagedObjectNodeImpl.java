@@ -44,7 +44,6 @@ import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
@@ -187,7 +186,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public Node getParentNode() {
-		return this.state.managedObjectSourceNode;
+		return (this.state != null ? this.state.managedObjectSourceNode : null);
 	}
 
 	@Override
@@ -209,7 +208,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public ManagedObjectSourceNode getManagedObjectSourceNode() {
-		return this.state.managedObjectSourceNode;
+		return (this.state != null ? this.state.managedObjectSourceNode : null);
 	}
 
 	@Override
@@ -275,6 +274,12 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getBoundManagedObjectName() {
+
+		// No bound name until initialised
+		if (this.state == null) {
+			return null;
+		}
+
 		// Obtain the name based on location
 		if (this.state.containingSectionNode != null) {
 			// Use name qualified with both office and section
@@ -418,8 +423,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getSectionManagedObjectName() {
-		return (this.state.containingSectionNode != null ? this.managedObjectName
-				: null);
+		return this.managedObjectName;
 	}
 
 	/*
@@ -428,17 +432,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getOfficeSectionManagedObjectName() {
-		return (this.state.containingSectionNode != null ? this.managedObjectName
-				: null);
-	}
-
-	@Override
-	public OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource() {
-		// TODO implement
-		// OfficeSectionManagedObject.getOfficeSectionManagedObjectSource
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeSectionManagedObject.getOfficeSectionManagedObjectSource");
-
+		return this.managedObjectName;
 	}
 
 	/*
@@ -447,8 +441,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getOfficeManagedObjectName() {
-		return (this.state.containingOfficeNode != null ? this.managedObjectName
-				: null);
+		return this.managedObjectName;
 	}
 
 	/*

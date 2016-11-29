@@ -27,6 +27,15 @@ import net.officefloor.frame.api.manage.Office;
 public interface OfficeBindings {
 
 	/**
+	 * Builds the {@link ManagedObjectSourceNode} into the {@link Office}.
+	 * 
+	 * @param managedObjectSourceNode
+	 *            {@link ManagedObjectSourceNode}.
+	 */
+	void buildManagedObjectSourceIntoOffice(
+			ManagedObjectSourceNode managedObjectSourceNode);
+
+	/**
 	 * Builds the {@link BoundManagedObjectNode} into the {@link Office}.
 	 * 
 	 * @param managedObjectNode

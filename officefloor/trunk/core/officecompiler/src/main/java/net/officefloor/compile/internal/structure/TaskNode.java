@@ -20,7 +20,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.compile.work.TaskType;
@@ -33,7 +33,7 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskNode extends LinkFlowNode, SectionTask, OfficeTask {
+public interface TaskNode extends LinkFlowNode, SectionTask, OfficeSectionTask {
 
 	/**
 	 * {@link Node} type.
@@ -55,7 +55,7 @@ public interface TaskNode extends LinkFlowNode, SectionTask, OfficeTask {
 	 * 
 	 * @param parentSubSectionType
 	 *            Containing {@link OfficeSubSectionType} to this
-	 *            {@link OfficeTask}.
+	 *            {@link OfficeSectionTask}.
 	 * @param typeContext
 	 *            {@link TypeContext}.
 	 * @return {@link OfficeTaskType} or <code>null</code> with issues reported

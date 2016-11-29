@@ -725,17 +725,11 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		assertEquals("Should have a two managed objects", 2,
 				section.getOfficeSectionManagedObjectTypes().length);
 
-		// Obtain appropriate sources
+		// Obtain the managed objects
 		OfficeSectionManagedObjectType moOne = section
 				.getOfficeSectionManagedObjectTypes()[0];
 		OfficeSectionManagedObjectType moTwo = section
 				.getOfficeSectionManagedObjectTypes()[1];
-		if (!("MO_ONE".equals(moOne.getOfficeSectionManagedObjectName()))) {
-			// Wrong way round, so swap
-			OfficeSectionManagedObjectType tmp = moOne;
-			moOne = moTwo;
-			moTwo = tmp;
-		}
 
 		// Validate managed object one
 		assertEquals("Incorrect managed object name", "MO_ONE",
@@ -751,7 +745,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				dependency.getDependentObjectType());
 		OfficeSectionManagedObjectSourceType moSourceOne = moOne
 				.getOfficeSectionManagedObjectSourceType();
-		assertEquals("MO_ONE should have a section managed object source",
+		assertNotNull("MO_ONE should have a section managed object source",
 				moSourceOne);
 		assertEquals("Incorrect managed object source name", "MO_SOURCE_ONE",
 				moSourceOne.getOfficeSectionManagedObjectSourceName());
@@ -763,7 +757,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 				moTwo.getObjectDependencies().length);
 		OfficeSectionManagedObjectSourceType moSourceTwo = moTwo
 				.getOfficeSectionManagedObjectSourceType();
-		assertEquals("MO_TWO should have a section managed object source",
+		assertNotNull("MO_TWO should have a section managed object source",
 				moSourceTwo);
 		assertEquals("Incorrect managed object source name", "MO_SOURCE_TWO",
 				moSourceTwo.getOfficeSectionManagedObjectSourceName());

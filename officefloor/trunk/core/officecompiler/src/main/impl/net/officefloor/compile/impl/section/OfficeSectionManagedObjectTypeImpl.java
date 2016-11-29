@@ -121,10 +121,7 @@ public class OfficeSectionManagedObjectTypeImpl implements
 
 	@Override
 	public OfficeSectionManagedObjectSourceType getOfficeSectionManagedObjectSourceType() {
-		// TODO implement
-		// OfficeSectionManagedObjectType.getOfficeSectionManagedObjectSourceType
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeSectionManagedObjectType.getOfficeSectionManagedObjectSourceType");
+		return this.managedObjectSourceType;
 	}
 
 }

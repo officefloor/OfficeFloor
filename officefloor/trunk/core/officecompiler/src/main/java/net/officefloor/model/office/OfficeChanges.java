@@ -28,7 +28,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.internal.structure.AdministratorScope;
@@ -744,7 +744,7 @@ public interface OfficeChanges {
 	 *            {@link OfficeSectionModel} containing the
 	 *            {@link OfficeTaskModel}.
 	 * @param officeTaskType
-	 *            {@link OfficeTask} of the {@link OfficeSection} to ensure an
+	 *            {@link OfficeSectionTask} of the {@link OfficeSection} to ensure an
 	 *            {@link OfficeTaskModel} exists for it.
 	 * @param duty
 	 *            {@link DutyModel}.
@@ -772,7 +772,7 @@ public interface OfficeChanges {
 	 *            {@link OfficeSectionModel} containing the
 	 *            {@link OfficeTaskModel}.
 	 * @param officeTaskType
-	 *            {@link OfficeTask} of the {@link OfficeSection} to ensure an
+	 *            {@link OfficeSectionTask} of the {@link OfficeSection} to ensure an
 	 *            {@link OfficeTaskModel} exists for it.
 	 * @param duty
 	 *            {@link DutyModel}.

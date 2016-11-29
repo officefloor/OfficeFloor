@@ -20,7 +20,7 @@ package net.officefloor.compile.spi.office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link ManagedObject} that a {@link OfficeTask} or {@link ManagedObject}
+ * {@link ManagedObject} that a {@link OfficeSectionTask} or {@link ManagedObject}
  * depends upon.
  * 
  * @author Daniel Sagenschneider

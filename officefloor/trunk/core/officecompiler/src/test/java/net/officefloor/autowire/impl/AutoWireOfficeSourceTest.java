@@ -58,7 +58,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
@@ -1491,7 +1491,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			 * Indicates if using the {@link OfficeTeam}.
 			 * 
 			 * @param taskName
-			 *            Name of the {@link OfficeTask}.
+			 *            Name of the {@link OfficeSectionTask}.
 			 * @return <code>true</code> to use the specific {@link OfficeTeam}.
 			 *         <code>false</code> for default {@link OfficeTeam}.
 			 */
@@ -1500,7 +1500,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 			}
 
 			@Override
-			public void recordAssignTeam(String taskName, OfficeTask task,
+			public void recordAssignTeam(String taskName, OfficeSectionTask task,
 					OfficeTaskType taskType, OfficeTaskType actualTaskType) {
 
 				// Record obtaining the object dependencies (use actual
@@ -1621,10 +1621,10 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	private final Map<String, Map<String, OfficeTaskType>> taskTypes = new HashMap<String, Map<String, OfficeTaskType>>();
 
 	/**
-	 * {@link OfficeTask} instances by {@link OfficeSection} name and
+	 * {@link OfficeSectionTask} instances by {@link OfficeSection} name and
 	 * {@link Task} name.
 	 */
-	private final Map<String, Map<String, OfficeTask>> tasks = new HashMap<String, Map<String, OfficeTask>>();
+	private final Map<String, Map<String, OfficeSectionTask>> tasks = new HashMap<String, Map<String, OfficeSectionTask>>();
 
 	/**
 	 * {@link OfficeGovernance} instances by name.
@@ -1813,18 +1813,18 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 				.map(t -> t.getOfficeTaskName()).toArray(String[]::new);
 		OfficeTaskType[] taskTypes = this.createSectionItems(SECTION_NAME,
 				OfficeTaskType.class, this.taskTypes, taskNames);
-		OfficeTask[] tasks = this.createSectionItems(SECTION_NAME,
-				OfficeTask.class, this.tasks, taskNames);
+		OfficeSectionTask[] tasks = this.createSectionItems(SECTION_NAME,
+				OfficeSectionTask.class, this.tasks, taskNames);
 		this.recordReturn(officeSectionType,
 				officeSectionType.getOfficeTaskTypes(), taskTypes);
 		for (int i = 0; i < taskTypes.length; i++) {
 			String taskName = taskNames[i];
 			OfficeTaskType taskType = taskTypes[i];
-			OfficeTask task = tasks[i];
+			OfficeSectionTask task = tasks[i];
 			OfficeTaskType actualTaskType = actualTaskTypes[i];
 			this.recordReturn(taskType, taskType.getOfficeTaskName(), taskName);
 			this.recordReturn(officeSection,
-					officeSection.getOfficeTask(taskName), task);
+					officeSection.getOfficeSectionTask(taskName), task);
 
 			// Record assigning the team
 			assigner.recordAssignTeam(taskName, task, taskType, actualTaskType);
@@ -1878,23 +1878,23 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records assigning the {@link Team} for the {@link OfficeTask}.
+	 * Records assigning the {@link Team} for the {@link OfficeSectionTask}.
 	 */
 	private static interface TeamAssigner {
 
 		/**
-		 * Records assigning the {@link Team} for the {@link OfficeTask}.
+		 * Records assigning the {@link Team} for the {@link OfficeSectionTask}.
 		 * 
 		 * @param taskName
-		 *            Name of the {@link OfficeTask}.
+		 *            Name of the {@link OfficeSectionTask}.
 		 * @param task
-		 *            {@link OfficeTask}.
+		 *            {@link OfficeSectionTask}.
 		 * @param taskType
 		 *            {@link OfficeTaskType}.
 		 * @param actualTaskType
 		 *            Actual {@link OfficeTaskType}.
 		 */
-		void recordAssignTeam(String taskName, OfficeTask task,
+		void recordAssignTeam(String taskName, OfficeSectionTask task,
 				OfficeTaskType taskType, OfficeTaskType actualTaskType);
 	}
 
@@ -2213,7 +2213,6 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 		} else {
 			// Managed object for section
-			final String MOS_NAME = "MOS_NAME";
 			final String MO_NAME = "MO_NAME";
 			OfficeSectionManagedObjectType moType = this
 					.createMock(OfficeSectionManagedObjectType.class);
@@ -2230,7 +2229,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 				// Record obtaining the section managed object
 				this.recordReturn(moType,
-						moType.getOfficeSectionManagedObjectName(), MOS_NAME);
+						moType.getOfficeSectionManagedObjectName(), MO_NAME);
 				OfficeSectionManagedObject mo = this
 						.createMock(OfficeSectionManagedObject.class);
 				this.recordReturn(section,
@@ -2325,7 +2324,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records the {@link OfficeTask} instances.
+	 * Records the {@link OfficeSectionTask} instances.
 	 * 
 	 * @param sectionName
 	 *            Name of {@link OfficeSection}.
