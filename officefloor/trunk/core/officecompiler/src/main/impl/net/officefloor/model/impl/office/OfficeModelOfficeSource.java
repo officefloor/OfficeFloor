@@ -51,7 +51,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
@@ -473,12 +473,12 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			}
 
 			// Create the listing of all tasks
-			List<OfficeTask> tasks = new LinkedList<OfficeTask>();
+			List<OfficeSectionTask> tasks = new LinkedList<OfficeSectionTask>();
 			this.loadOfficeTasks(section, sectionType, tasks);
 
 			// Assign teams their responsibilities
 			for (Responsibility responsibility : responsibilities) {
-				for (OfficeTask task : new ArrayList<OfficeTask>(tasks)) {
+				for (OfficeSectionTask task : new ArrayList<OfficeSectionTask>(tasks)) {
 					if (responsibility.isResponsible(task)) {
 						// Assign the team responsible for task
 						architect.link(task.getTeamResponsible(),
@@ -1003,7 +1003,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	}
 
 	/**
-	 * Loads the {@link OfficeTask} instances for the {@link OfficeSubSection}
+	 * Loads the {@link OfficeSectionTask} instances for the {@link OfficeSubSection}
 	 * and its {@link OfficeSubSection} instances.
 	 * 
 	 * @param section
@@ -1012,10 +1012,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	 *            {@link OfficeSubSectionType}.
 	 * @param tasks
 	 *            Listing to be populated with the {@link OfficeSubSectionType}
-	 *            {@link OfficeTask} instances.
+	 *            {@link OfficeSectionTask} instances.
 	 */
 	private void loadOfficeTasks(OfficeSubSection section,
-			OfficeSubSectionType sectionType, List<OfficeTask> tasks) {
+			OfficeSubSectionType sectionType, List<OfficeSectionTask> tasks) {
 
 		// Ensure have section
 		if (sectionType == null) {
@@ -1025,7 +1025,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		// Add the section office tasks
 		for (OfficeTaskType taskType : sectionType.getOfficeTaskTypes()) {
 			String taskName = taskType.getOfficeTaskName();
-			OfficeTask task = section.getOfficeTask(taskName);
+			OfficeSectionTask task = section.getOfficeSectionTask(taskName);
 			tasks.add(task);
 		}
 
@@ -1112,7 +1112,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 			// Obtain the corresponding office task
 			String taskName = taskModel.getOfficeTaskName();
-			OfficeTask task = subSection.getOfficeTask(taskName);
+			OfficeSectionTask task = subSection.getOfficeSectionTask(taskName);
 
 			// Process the office task
 			processor.processOfficeTask(taskModel, task, architect,
@@ -1198,18 +1198,18 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				OfficeArchitect architect, String subSectionPath);
 
 		/**
-		 * Processes the {@link OfficeTask}.
+		 * Processes the {@link OfficeSectionTask}.
 		 * 
 		 * @param taskModel
 		 *            {@link OfficeTaskModel}.
 		 * @param task
-		 *            {@link OfficeTask}.
+		 *            {@link OfficeSectionTask}.
 		 * @param architect
 		 *            {@link OfficeArchitect}.
 		 * @param subSectionPath
 		 *            Path to the {@link OfficeSubSection}.
 		 */
-		void processOfficeTask(OfficeTaskModel taskModel, OfficeTask task,
+		void processOfficeTask(OfficeTaskModel taskModel, OfficeSectionTask task,
 				OfficeArchitect architect, String subSectionPath);
 	}
 
@@ -1240,7 +1240,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		@Override
 		public void processOfficeTask(OfficeTaskModel taskModel,
-				OfficeTask task, OfficeArchitect architect,
+				OfficeSectionTask task, OfficeArchitect architect,
 				String subSectionPath) {
 			// Override to provide processing
 		}
@@ -1295,7 +1295,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		@Override
 		public void processOfficeTask(OfficeTaskModel taskModel,
-				OfficeTask task, OfficeArchitect architect,
+				OfficeSectionTask task, OfficeArchitect architect,
 				String subSectionPath) {
 			for (SubSectionProcessor processor : this.processors) {
 				processor.processOfficeTask(taskModel, task, architect,
@@ -1344,7 +1344,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		@Override
 		public void processOfficeTask(OfficeTaskModel taskModel,
-				OfficeTask task, OfficeArchitect architect,
+				OfficeSectionTask task, OfficeArchitect architect,
 				String subSectionPath) {
 
 			// Determine if task is linked to duties
@@ -1490,7 +1490,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 		@Override
 		public void processOfficeTask(OfficeTaskModel taskModel,
-				OfficeTask task, OfficeArchitect architect,
+				OfficeSectionTask task, OfficeArchitect architect,
 				String subSectionPath) {
 
 			// Link the governances
@@ -1533,14 +1533,14 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		}
 
 		/**
-		 * Indicates if {@link OfficeTask} is within this responsibility.
+		 * Indicates if {@link OfficeSectionTask} is within this responsibility.
 		 * 
 		 * @param task
-		 *            {@link OfficeTask}.
-		 * @return <code>true</code> if {@link OfficeTask} is within this
+		 *            {@link OfficeSectionTask}.
+		 * @return <code>true</code> if {@link OfficeSectionTask} is within this
 		 *         responsibility.
 		 */
-		public boolean isResponsible(OfficeTask task) {
+		public boolean isResponsible(OfficeSectionTask task) {
 			// TODO handle managed object matching for responsibility
 			return true; // TODO for now always responsible
 		}

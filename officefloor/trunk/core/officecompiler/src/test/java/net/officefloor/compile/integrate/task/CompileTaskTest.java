@@ -120,8 +120,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		WorkBuilder<Work> work = this
 				.record_officeBuilder_addWork("SECTION.WORK");
-		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 		work.setInitialTask("TASK");
+		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 
 		// Compile the OfficeFloor
 		this.compile(true);

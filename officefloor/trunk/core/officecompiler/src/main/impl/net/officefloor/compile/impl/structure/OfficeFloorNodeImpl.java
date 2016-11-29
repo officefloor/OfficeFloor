@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import net.officefloor.compile.impl.officefloor.OfficeFloorSourceContextImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorTypeImpl;
@@ -599,6 +600,34 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 						officeBindings.put(office, bindings);
 					});
 
+		// Obtains the Office bindings for the managed object source
+		Function<ManagedObjectSourceNode, OfficeBindings> getOfficeBindings = (
+				managedObjectSource) -> {
+			OfficeNode managingOffice = managedObjectSource
+					.getManagingOfficeNode();
+			return officeBindings.get(managingOffice);
+		};
+
+		// Build the managed object sources (in deterministic order)
+		this.managedObjectSources
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeManagedObjectSourceName(),
+						b.getOfficeManagedObjectSourceName()))
+				.forEachOrdered((managedObjectSource) -> {
+
+					// Obtain the managing office for managed object
+						OfficeBindings bindings = getOfficeBindings
+								.apply(managedObjectSource);
+						if (bindings == null) {
+							return; // must have office
+						}
+
+						// Build the managed object source into the office
+						bindings.buildManagedObjectSourceIntoOffice(managedObjectSource);
+					});
+
 		// Build the managed objects (in deterministic order)
 		this.managedObjects
 				.values()
@@ -612,12 +641,10 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 								.getManagedObjectSourceNode();
 
 						// Obtain the managing office for managed object
-						OfficeNode managingOffice = managedObjectSource
-								.getManagingOfficeNode();
-						OfficeBindings bindings = officeBindings
-								.get(managingOffice);
+						OfficeBindings bindings = getOfficeBindings
+								.apply(managedObjectSource);
 						if (bindings == null) {
-							return; // must have managing office
+							return; // must have office
 						}
 
 						// Build the managed object into the office
@@ -635,14 +662,15 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 					// Obtain the managed object source
 						ManagedObjectSourceNode managedObjectSource = inputManagedObject
 								.getBoundManagedObjectSourceNode();
+						if (managedObjectSource == null) {
+							return; // must have managed object source
+						}
 
 						// Obtain the managing office for managed object
-						OfficeNode managingOffice = managedObjectSource
-								.getManagingOfficeNode();
-						OfficeBindings bindings = officeBindings
-								.get(managingOffice);
+						OfficeBindings bindings = getOfficeBindings
+								.apply(managedObjectSource);
 						if (bindings == null) {
-							return; // must have managing office
+							return; // must have office
 						}
 
 						// Build the input managed object into the office

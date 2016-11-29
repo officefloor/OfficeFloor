@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.office;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 
 /**
  * {@link OfficeTaskType} implementation.
@@ -30,7 +30,7 @@ import net.officefloor.compile.spi.office.OfficeTask;
 public class OfficeTaskTypeImpl implements OfficeTaskType {
 
 	/**
-	 * Name of the {@link OfficeTask}.
+	 * Name of the {@link OfficeSectionTask}.
 	 */
 	private final String taskName;
 
@@ -40,7 +40,7 @@ public class OfficeTaskTypeImpl implements OfficeTaskType {
 	private final OfficeSubSectionType subSectionType;
 
 	/**
-	 * {@link ObjectDependencyType} instances of the {@link OfficeTask}.
+	 * {@link ObjectDependencyType} instances of the {@link OfficeSectionTask}.
 	 */
 	private final ObjectDependencyType[] dependencies;
 
@@ -48,12 +48,12 @@ public class OfficeTaskTypeImpl implements OfficeTaskType {
 	 * Instantiate.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link OfficeTask}.
+	 *            Name of the {@link OfficeSectionTask}.
 	 * @param subSectionType
 	 *            Containing {@link OfficeSubSectionType}.
 	 * @param dependencies
 	 *            {@link ObjectDependencyType} instances of the
-	 *            {@link OfficeTask}.
+	 *            {@link OfficeSectionTask}.
 	 */
 	public OfficeTaskTypeImpl(String taskName,
 			OfficeSubSectionType subSectionType,

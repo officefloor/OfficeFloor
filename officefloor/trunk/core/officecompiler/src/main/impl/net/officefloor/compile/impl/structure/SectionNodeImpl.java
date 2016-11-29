@@ -60,10 +60,11 @@ import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -631,7 +632,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	public void buildSection(OfficeBuilder officeBuilder,
 			OfficeBindings officeBindings, TypeContext typeContext) {
 
-		// Build the tasks of this section (in deterministic order)
+		// Build the tasks (in deterministic order)
 		this.taskNodes
 				.values()
 				.stream()
@@ -640,7 +641,18 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 				.forEachOrdered(
 						(task) -> officeBindings.buildTaskIntoOffice(task));
 
-		// Build the managed object for office (in deterministic order)
+		// Build the managed object sources (in deterministic order)
+		this.managedObjectSourceNodes
+				.values()
+				.stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(
+						a.getOfficeManagedObjectSourceName(),
+						b.getOfficeManagedObjectSourceName()))
+				.forEachOrdered(
+						(managedObjectSource) -> officeBindings
+								.buildManagedObjectSourceIntoOffice(managedObjectSource));
+
+		// Build the managed objects (in deterministic order)
 		this.managedObjects
 				.values()
 				.stream()
@@ -995,7 +1007,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public OfficeTask getOfficeTask(String taskName) {
+	public OfficeSectionTask getOfficeSectionTask(String taskName) {
 		return NodeUtil.getNode(taskName, this.taskNodes,
 				() -> this.context.createTaskNode(taskName));
 	}
@@ -1005,6 +1017,15 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			String managedObjectName) {
 		return NodeUtil.getNode(managedObjectName, this.managedObjects,
 				() -> this.context.createManagedObjectNode(managedObjectName));
+	}
+
+	@Override
+	public OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource(
+			String managedObjectSourceName) {
+		return NodeUtil.getNode(managedObjectSourceName,
+				this.managedObjectSourceNodes, () -> this.context
+						.createManagedObjectSourceNode(managedObjectSourceName,
+								this));
 	}
 
 	@Override

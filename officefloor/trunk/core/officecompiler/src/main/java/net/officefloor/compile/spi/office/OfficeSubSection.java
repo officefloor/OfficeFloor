@@ -44,31 +44,43 @@ public interface OfficeSubSection {
 	OfficeSubSection getOfficeSubSection(String sectionName);
 
 	/**
-	 * Obtains the {@link OfficeTask} instance particular to this
+	 * Obtains the {@link OfficeSectionTask} instance particular to this
 	 * {@link OfficeSubSection}.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link OfficeTask} to obtain.
-	 * @return {@link OfficeTask}.
+	 *            Name of the {@link OfficeSectionTask} to obtain.
+	 * @return {@link OfficeSectionTask}.
 	 */
-	OfficeTask getOfficeTask(String taskName);
+	OfficeSectionTask getOfficeSectionTask(String taskName);
 
 	/**
 	 * Obtains the {@link OfficeSectionManagedObject} particular to this
 	 * {@link OfficeSubSection}.
 	 * 
 	 * @param managedObjectName
-	 *            Name of the {@link OfficeSectionManagedSource} to obtain.
+	 *            Name of the {@link OfficeSectionManagedObject} to obtain.
 	 * @return {@link OfficeSectionManagedObject}.
 	 */
 	OfficeSectionManagedObject getOfficeSectionManagedObject(
-			String managedObjectSource);
+			String managedObjectName);
+
+	/**
+	 * Obtains the {@link OfficeSectionManagedObjectSource} particular to this
+	 * {@link OfficeSubSection}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeSectionManagedObjectSource} to
+	 *            obtain.
+	 * @return {@link OfficeSectionManagedObjectSource}.
+	 */
+	OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource(
+			String managedObjectSourceName);
 
 	/**
 	 * <p>
 	 * Adds {@link Governance} for this {@link OfficeSubSection}.
 	 * <p>
-	 * This enables providing {@link Governance} over all {@link OfficeTask}
+	 * This enables providing {@link Governance} over all {@link OfficeSectionTask}
 	 * instances within the {@link OfficeSubSection} and all its subsequent
 	 * {@link OfficeSubSection} instances.
 	 * 

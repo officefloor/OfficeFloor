@@ -34,13 +34,4 @@ public interface OfficeSectionManagedObject extends DependentManagedObject,
 	 */
 	String getOfficeSectionManagedObjectName();
 
-	/**
-	 * Obtains the {@link OfficeSectionManagedObjectSource} for this
-	 * {@link OfficeSectionManagedObject}.
-	 * 
-	 * @return {@link OfficeSectionManagedObjectSource} for this
-	 *         {@link OfficeSectionManagedObject}.
-	 */
-	OfficeSectionManagedObjectSource getOfficeSectionManagedObjectSource();
-
 }

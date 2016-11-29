@@ -44,7 +44,7 @@ import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeGovernance;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
@@ -131,7 +131,7 @@ public class TaskNodeImpl implements TaskNode {
 
 	/**
 	 * Listing of {@link OfficeDuty} instances to do before this
-	 * {@link OfficeTask}.
+	 * {@link OfficeSectionTask}.
 	 */
 	private final List<DutyNode> preTaskDuties = new LinkedList<DutyNode>();
 
@@ -148,7 +148,7 @@ public class TaskNodeImpl implements TaskNode {
 	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
 	/**
-	 * {@link TaskTeam} responsible for this {@link OfficeTask}.
+	 * {@link TaskTeam} responsible for this {@link OfficeSectionTask}.
 	 */
 	private final TaskTeamNode teamResponsible;
 

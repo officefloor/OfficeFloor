@@ -18,12 +18,12 @@
 package net.officefloor.compile.section;
 
 import net.officefloor.compile.object.ObjectDependencyType;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * <code>Type definition</code> of the {@link OfficeTask}.
+ * <code>Type definition</code> of the {@link OfficeSectionTask}.
  *
  * @author Daniel Sagenschneider
  */
@@ -31,12 +31,12 @@ public interface OfficeTaskType {
 
 	/**
 	 * <p>
-	 * Obtains the name of the {@link OfficeTask}.
+	 * Obtains the name of the {@link OfficeSectionTask}.
 	 * <p>
 	 * This aids the {@link OfficeSource} in deciding the {@link Team}
-	 * responsible for this {@link OfficeTask}.
+	 * responsible for this {@link OfficeSectionTask}.
 	 * 
-	 * @return Name of the {@link OfficeTask}.
+	 * @return Name of the {@link OfficeSectionTask}.
 	 */
 	String getOfficeTaskName();
 
@@ -52,13 +52,13 @@ public interface OfficeTaskType {
 	/**
 	 * <p>
 	 * Obtains the {@link ObjectDependencyType} instances that this
-	 * {@link OfficeTask} is dependent upon.
+	 * {@link OfficeSectionTask} is dependent upon.
 	 * <p>
 	 * This aids the {@link OfficeSource} in deciding the {@link Team}
-	 * responsible for this {@link OfficeTask}.
+	 * responsible for this {@link OfficeSectionTask}.
 	 * 
 	 * @return {@link ObjectDependencyType} instances that this
-	 *         {@link OfficeTask} is dependent upon.
+	 *         {@link OfficeSectionTask} is dependent upon.
 	 */
 	ObjectDependencyType[] getObjectDependencies();
 

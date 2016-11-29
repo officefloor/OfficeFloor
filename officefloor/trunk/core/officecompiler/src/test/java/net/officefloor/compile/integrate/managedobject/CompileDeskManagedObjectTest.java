@@ -212,7 +212,7 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.DESK.MANAGED_OBJECT_SOURCE");
 
-		// Record creating managed object type
+		// Record creating section type
 		this.issues.recordCaptureIssues(false);
 
 		// Record issue in flow not linked
