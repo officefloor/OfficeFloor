@@ -41,30 +41,24 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofTemplateExtensionLoaderImpl implements
-		WoofTemplateExtensionLoader {
+public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoader {
 
 	/*
 	 * =============== WoofTemplateExtensionLoader =================
 	 */
 
-	public static class LoadSpecification implements
-			OfficeFloorCompilerRunnable<PropertyList> {
+	public static class LoadSpecification implements OfficeFloorCompilerRunnable<PropertyList> {
 		@Override
-		public PropertyList run(OfficeFloorCompiler compiler,
-				Object[] parameters) throws Exception {
+		public PropertyList run(OfficeFloorCompiler compiler, Object[] parameters) throws Exception {
 
 			// Obtain the parameters
 			String woofTemplateExtensionSourceClassName = (String) parameters[0];
 			CompilerIssues issues = (CompilerIssues) parameters[1];
 
 			// Instantiate the woof template extension source
-			SourceContext sourceContext = new SourceContextImpl(true,
-					compiler.getClassLoader());
-			WoofTemplateExtensionSource extensionSource = CompileUtil
-					.newInstance(woofTemplateExtensionSourceClassName,
-							WoofTemplateExtensionSource.class, null,
-							sourceContext, null, null, null, null, issues);
+			SourceContext sourceContext = new SourceContextImpl(true, compiler.getClassLoader());
+			WoofTemplateExtensionSource extensionSource = CompileUtil.newInstance(woofTemplateExtensionSourceClassName,
+					WoofTemplateExtensionSource.class, null, sourceContext, compiler, issues);
 			if (extensionSource == null) {
 				return null; // failed to instantiate
 			}
@@ -74,29 +68,17 @@ public class WoofTemplateExtensionLoaderImpl implements
 			try {
 				specification = extensionSource.getSpecification();
 			} catch (Throwable ex) {
-				issues.addIssue(
-						null,
-						null,
-						null,
-						null,
-						"Failed to obtain "
-								+ WoofTemplateExtensionSourceSpecification.class
-										.getSimpleName() + " from "
-								+ woofTemplateExtensionSourceClassName, ex);
+				issues.addIssue(compiler,
+						"Failed to obtain " + WoofTemplateExtensionSourceSpecification.class.getSimpleName() + " from "
+								+ woofTemplateExtensionSourceClassName,
+						ex);
 				return null; // failed to obtain
 			}
 
 			// Ensure have specification
 			if (specification == null) {
-				issues.addIssue(
-						null,
-						null,
-						null,
-						null,
-						"No "
-								+ WoofTemplateExtensionSourceSpecification.class
-										.getSimpleName() + " returned from "
-								+ woofTemplateExtensionSourceClassName);
+				issues.addIssue(compiler, "No " + WoofTemplateExtensionSourceSpecification.class.getSimpleName()
+						+ " returned from " + woofTemplateExtensionSourceClassName);
 				return null; // no specification obtained
 			}
 
@@ -105,18 +87,11 @@ public class WoofTemplateExtensionLoaderImpl implements
 			try {
 				extensionSourceProperties = specification.getProperties();
 			} catch (Throwable ex) {
-				issues.addIssue(
-						null,
-						null,
-						null,
-						null,
-						"Failed to obtain "
-								+ WoofTemplateExtensionSourceProperty.class
-										.getSimpleName()
-								+ " instances from "
-								+ WoofTemplateExtensionSourceSpecification.class
-										.getSimpleName() + " for "
-								+ woofTemplateExtensionSourceClassName, ex);
+				issues.addIssue(compiler,
+						"Failed to obtain " + WoofTemplateExtensionSourceProperty.class.getSimpleName()
+								+ " instances from " + WoofTemplateExtensionSourceSpecification.class.getSimpleName()
+								+ " for " + woofTemplateExtensionSourceClassName,
+						ex);
 				return null; // failed to obtain properties
 			}
 
@@ -128,19 +103,9 @@ public class WoofTemplateExtensionLoaderImpl implements
 
 					// Ensure have the extension source property
 					if (extensionProperty == null) {
-						issues.addIssue(
-								null,
-								null,
-								null,
-								null,
-								WoofTemplateExtensionSourceProperty.class
-										.getSimpleName()
-										+ " "
-										+ i
-										+ " is null from "
-										+ WoofTemplateExtensionSourceSpecification.class
-												.getSimpleName()
-										+ " for "
+						issues.addIssue(compiler,
+								WoofTemplateExtensionSourceProperty.class.getSimpleName() + " " + i + " is null from "
+										+ WoofTemplateExtensionSourceSpecification.class.getSimpleName() + " for "
 										+ woofTemplateExtensionSourceClassName);
 						return null; // must have complete property details
 					}
@@ -150,37 +115,19 @@ public class WoofTemplateExtensionLoaderImpl implements
 					try {
 						name = extensionProperty.getName();
 					} catch (Throwable ex) {
-						issues.addIssue(
-								null,
-								null,
-								null,
-								null,
-								"Failed to get name for "
-										+ WoofTemplateExtensionSourceProperty.class
-												.getSimpleName()
-										+ " "
-										+ i
-										+ " from "
-										+ WoofTemplateExtensionSourceSpecification.class
-												.getSimpleName() + " for "
+						issues.addIssue(compiler,
+								"Failed to get name for " + WoofTemplateExtensionSourceProperty.class.getSimpleName()
+										+ " " + i + " from "
+										+ WoofTemplateExtensionSourceSpecification.class.getSimpleName() + " for "
 										+ woofTemplateExtensionSourceClassName,
 								ex);
 						return null; // must have complete property details
 					}
 					if (CompileUtil.isBlank(name)) {
-						issues.addIssue(
-								null,
-								null,
-								null,
-								null,
-								WoofTemplateExtensionSourceProperty.class
-										.getSimpleName()
-										+ " "
-										+ i
+						issues.addIssue(compiler,
+								WoofTemplateExtensionSourceProperty.class.getSimpleName() + " " + i
 										+ " provided blank name from "
-										+ WoofTemplateExtensionSourceSpecification.class
-												.getSimpleName()
-										+ " for "
+										+ WoofTemplateExtensionSourceSpecification.class.getSimpleName() + " for "
 										+ woofTemplateExtensionSourceClassName);
 						return null; // must have complete property details
 					}
@@ -190,21 +137,10 @@ public class WoofTemplateExtensionLoaderImpl implements
 					try {
 						label = extensionProperty.getLabel();
 					} catch (Throwable ex) {
-						issues.addIssue(
-								null,
-								null,
-								null,
-								null,
-								"Failed to get label for "
-										+ WoofTemplateExtensionSourceProperty.class
-												.getSimpleName()
-										+ " "
-										+ i
-										+ " ("
-										+ name
-										+ ") from "
-										+ WoofTemplateExtensionSourceSpecification.class
-												.getSimpleName() + " for "
+						issues.addIssue(compiler,
+								"Failed to get label for " + WoofTemplateExtensionSourceProperty.class.getSimpleName()
+										+ " " + i + " (" + name + ") from "
+										+ WoofTemplateExtensionSourceSpecification.class.getSimpleName() + " for "
 										+ woofTemplateExtensionSourceClassName,
 								ex);
 						return null; // must have complete property details
@@ -221,24 +157,20 @@ public class WoofTemplateExtensionLoaderImpl implements
 	}
 
 	@Override
-	public PropertyList loadSpecification(
-			String woofTemplateExtensionSourceClassName,
-			ClassLoader classLoader, CompilerIssues issues) {
+	public PropertyList loadSpecification(String woofTemplateExtensionSourceClassName, ClassLoader classLoader,
+			CompilerIssues issues) {
 
 		// Create and configure the compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(classLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
 		compiler.setCompilerIssues(issues);
 
 		// Load the specification
 		PropertyList properties = null;
 		try {
-			properties = compiler.run(LoadSpecification.class,
-					woofTemplateExtensionSourceClassName, issues);
+			properties = compiler.run(LoadSpecification.class, woofTemplateExtensionSourceClassName, issues);
 
 		} catch (Exception ex) {
-			issues.addIssue(null, null, null, null,
-					"Failed to load specification", ex);
+			issues.addIssue(compiler, "Failed to load specification", ex);
 		}
 
 		// Return the properties
@@ -249,16 +181,14 @@ public class WoofTemplateExtensionLoaderImpl implements
 	 * {@link OfficeFloorCompilerRunnable} to refactor the
 	 * {@link WoofTemplateExtensionSource}.
 	 */
-	public static class RefactorTemplateExtension implements
-			OfficeFloorCompilerRunnable<Change<?>> {
+	public static class RefactorTemplateExtension implements OfficeFloorCompilerRunnable<Change<?>> {
 
 		/*
 		 * ================ OfficeFloorCompilerRunnable ==============
 		 */
 
 		@Override
-		public Change<?> run(OfficeFloorCompiler compiler, Object[] parameters)
-				throws Exception {
+		public Change<?> run(OfficeFloorCompiler compiler, Object[] parameters) throws Exception {
 
 			// Obtain the parameters
 			String woofTemplateExtensionSourceClassName = (String) parameters[0];
@@ -271,33 +201,27 @@ public class WoofTemplateExtensionLoaderImpl implements
 			WoofChangeIssues issues = (WoofChangeIssues) parameters[7];
 
 			// Wrap issues to report this particular extension failing
-			WoofChangeIssues extensionIssues = new ExtensionWoofChangeIssues(
-					(oldUri == null ? newUri : oldUri),
+			WoofChangeIssues extensionIssues = new ExtensionWoofChangeIssues((oldUri == null ? newUri : oldUri),
 					woofTemplateExtensionSourceClassName, issues);
 
 			// Construct the context
-			WoofTemplateExtensionChangeContext context = new WoofTemplateExtensionChangeContextImpl(
-					true, sourceContext, oldUri, oldProperties, newUri,
-					newProperties, configurationContext, extensionIssues);
+			WoofTemplateExtensionChangeContext context = new WoofTemplateExtensionChangeContextImpl(true, sourceContext,
+					oldUri, oldProperties, newUri, newProperties, configurationContext, extensionIssues);
 
 			// Attempt to create the extension change
 			Change<?> extensionChange = null;
 			try {
 
 				// Construct the source
-				Class<?> extensionSourceClass = sourceContext
-						.loadClass(woofTemplateExtensionSourceClassName);
-				WoofTemplateExtensionSource source = (WoofTemplateExtensionSource) extensionSourceClass
-						.newInstance();
+				Class<?> extensionSourceClass = sourceContext.loadClass(woofTemplateExtensionSourceClassName);
+				WoofTemplateExtensionSource source = (WoofTemplateExtensionSource) extensionSourceClass.newInstance();
 
 				// Create potential change to to refactor extension
 				extensionChange = source.createConfigurationChange(context);
 
 			} catch (Throwable ex) {
 				// Provide conflict indicating failure of extension
-				extensionChange = createFailureChange(
-						woofTemplateExtensionSourceClassName, oldUri, newUri,
-						ex);
+				extensionChange = createFailureChange(woofTemplateExtensionSourceClassName, oldUri, newUri, ex);
 			}
 
 			// Return the extension change
@@ -331,11 +255,10 @@ public class WoofTemplateExtensionLoaderImpl implements
 		 * @param delegate
 		 *            {@link WoofChangeIssues} delegate.
 		 */
-		public ExtensionWoofChangeIssues(String templateUri,
-				String woofTemplateExtensionSourceClassName,
+		public ExtensionWoofChangeIssues(String templateUri, String woofTemplateExtensionSourceClassName,
 				WoofChangeIssues delegate) {
-			this.messagePrefix = "Template " + templateUri + " Extension "
-					+ woofTemplateExtensionSourceClassName + ": ";
+			this.messagePrefix = "Template " + templateUri + " Extension " + woofTemplateExtensionSourceClassName
+					+ ": ";
 			this.delegate = delegate;
 		}
 
@@ -355,29 +278,22 @@ public class WoofTemplateExtensionLoaderImpl implements
 	}
 
 	@Override
-	public Change<?> refactorTemplateExtension(
-			String woofTemplateExtensionSourceClassName, String oldUri,
-			SourceProperties oldProperties, String newUri,
-			SourceProperties newProperties,
-			ConfigurationContext configurationContext,
-			SourceContext sourceContext, WoofChangeIssues issues) {
+	public Change<?> refactorTemplateExtension(String woofTemplateExtensionSourceClassName, String oldUri,
+			SourceProperties oldProperties, String newUri, SourceProperties newProperties,
+			ConfigurationContext configurationContext, SourceContext sourceContext, WoofChangeIssues issues) {
 
 		// Create and configure the compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(sourceContext.getClassLoader());
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(sourceContext.getClassLoader());
 
 		// Load the change
 		Change<?> change = null;
 		try {
-			change = compiler.run(RefactorTemplateExtension.class,
-					woofTemplateExtensionSourceClassName, oldUri,
-					oldProperties, newUri, newProperties, configurationContext,
-					sourceContext, issues);
+			change = compiler.run(RefactorTemplateExtension.class, woofTemplateExtensionSourceClassName, oldUri,
+					oldProperties, newUri, newProperties, configurationContext, sourceContext, issues);
 
 		} catch (Exception ex) {
 			// Provide conflict indicating failure of extension
-			change = createFailureChange(woofTemplateExtensionSourceClassName,
-					oldUri, newUri, ex);
+			change = createFailureChange(woofTemplateExtensionSourceClassName, oldUri, newUri, ex);
 		}
 
 		// Return the change
@@ -397,23 +313,19 @@ public class WoofTemplateExtensionLoaderImpl implements
 	 *            Cause.
 	 * @return {@link NoChange}.
 	 */
-	private static NoChange<?> createFailureChange(
-			String woofTemplateExtensionSourceClassName, String oldUri,
+	private static NoChange<?> createFailureChange(String woofTemplateExtensionSourceClassName, String oldUri,
 			String newUri, Throwable ex) {
 		return new NoChange<WoofTemplateExtensionModel>(
-				new WoofTemplateExtensionModel(
-						woofTemplateExtensionSourceClassName),
+				new WoofTemplateExtensionModel(woofTemplateExtensionSourceClassName),
 				"Refactor extension " + woofTemplateExtensionSourceClassName,
-				"Extension " + woofTemplateExtensionSourceClassName
-						+ " on template " + (oldUri != null ? oldUri : newUri)
-						+ " prevented change as " + ex.getMessage() + " ["
+				"Extension " + woofTemplateExtensionSourceClassName + " on template "
+						+ (oldUri != null ? oldUri : newUri) + " prevented change as " + ex.getMessage() + " ["
 						+ ex.getClass().getName() + "]");
 	}
 
 	@Override
-	public void extendTemplate(String extensionSourceClassName,
-			PropertyList properties, HttpTemplateAutoWireSection template,
-			WebAutoWireApplication application, SourceContext sourceContext)
+	public void extendTemplate(String extensionSourceClassName, PropertyList properties,
+			HttpTemplateAutoWireSection template, WebAutoWireApplication application, SourceContext sourceContext)
 			throws WoofTemplateExtensionException {
 
 		// Create the context for the extension source
@@ -433,17 +345,15 @@ public class WoofTemplateExtensionLoaderImpl implements
 		} catch (Throwable ex) {
 			// Indicate failure to extend template
 			throw new WoofTemplateExtensionException(
-					"Failed loading Template Extension "
-							+ extensionSourceClassName + ". " + ex.getMessage(),
-					ex);
+					"Failed loading Template Extension " + extensionSourceClassName + ". " + ex.getMessage(), ex);
 		}
 	}
 
 	/**
 	 * {@link WoofTemplateExtensionSourceContext} implementation.
 	 */
-	private static class WoofTemplateExtensionServiceContextImpl extends
-			SourceContextImpl implements WoofTemplateExtensionSourceContext {
+	private static class WoofTemplateExtensionServiceContextImpl extends SourceContextImpl
+			implements WoofTemplateExtensionSourceContext {
 
 		/**
 		 * {@link HttpTemplateAutoWireSection}.
@@ -467,12 +377,9 @@ public class WoofTemplateExtensionLoaderImpl implements
 		 * @param classLoader
 		 *            {@link ClassLoader}.
 		 */
-		public WoofTemplateExtensionServiceContextImpl(
-				HttpTemplateAutoWireSection template,
-				WebAutoWireApplication application, PropertyList properties,
-				SourceContext sourceContext) {
-			super(sourceContext.isLoadingType(), sourceContext,
-					new PropertyListSourceProperties(properties));
+		public WoofTemplateExtensionServiceContextImpl(HttpTemplateAutoWireSection template,
+				WebAutoWireApplication application, PropertyList properties, SourceContext sourceContext) {
+			super(sourceContext.isLoadingType(), sourceContext, new PropertyListSourceProperties(properties));
 			this.template = template;
 			this.application = application;
 		}

@@ -18,9 +18,9 @@
 package net.officefloor.plugin.woof.template;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -32,19 +32,17 @@ import net.officefloor.plugin.woof.template.impl.AbstractWoofTemplateExtensionSo
  * 
  * @author Daniel Sagenschneider
  */
-public class LoadWoofTemplateExtensionSpecificationTest extends
-		OfficeFrameTestCase {
+public class LoadWoofTemplateExtensionSpecificationTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link ClassLoader}.
 	 */
-	private ClassLoader classLoader = Thread.currentThread()
-			.getContextClassLoader();
+	private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link MockCompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	/**
 	 * {@link WoofTemplateExtensionSourceSpecification}.
@@ -63,13 +61,12 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 */
 	public void testFailInstantiateForSpecification() {
 
-		final RuntimeException failure = new RuntimeException(
-				"instantiate failure");
+		final RuntimeException failure = new RuntimeException("instantiate failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to instantiate "
-				+ MockWoofTemplateExtensionSource.class.getName()
-				+ " by default constructor", failure);
+		this.issues.recordIssue(
+				"Failed to instantiate " + MockWoofTemplateExtensionSource.class.getName() + " by default constructor",
+				failure);
 
 		// Attempt to obtain specification
 		MockWoofTemplateExtensionSource.instantiateFailure = failure;
@@ -87,10 +84,8 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue(
-				"Failed to obtain WoofTemplateExtensionSourceSpecification from "
-						+ MockWoofTemplateExtensionSource.class.getName(),
-				failure);
+		this.issues.recordIssue("Failed to obtain WoofTemplateExtensionSourceSpecification from "
+				+ MockWoofTemplateExtensionSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		MockWoofTemplateExtensionSource.specificationFailure = failure;
@@ -106,7 +101,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	public void testNoSpecification() {
 
 		// Record no specification returned
-		this.record_issue("No WoofTemplateExtensionSourceSpecification returned from "
+		this.issues.recordIssue("No WoofTemplateExtensionSourceSpecification returned from "
 				+ MockWoofTemplateExtensionSource.class.getName());
 
 		// Attempt to obtain specification
@@ -122,13 +117,11 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 */
 	public void testFailGetProperties() {
 
-		final NullPointerException failure = new NullPointerException(
-				"Fail to get template extension properties");
+		final NullPointerException failure = new NullPointerException("Fail to get template extension properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(
-				this.specification.getProperties(), failure);
-		this.record_issue(
+		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
+		this.issues.recordIssue(
 				"Failed to obtain WoofTemplateExtensionSourceProperty instances from WoofTemplateExtensionSourceSpecification for "
 						+ MockWoofTemplateExtensionSource.class.getName(),
 				failure);
@@ -146,8 +139,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	public void testNullPropertiesArray() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -162,11 +154,11 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	public void testNullPropertyElement() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new WoofTemplateExtensionSourceProperty[] { null });
-		this.record_issue("WoofTemplateExtensionSourceProperty 0 is null from WoofTemplateExtensionSourceSpecification for "
-				+ MockWoofTemplateExtensionSource.class.getName());
+		this.issues.recordIssue(
+				"WoofTemplateExtensionSourceProperty 0 is null from WoofTemplateExtensionSourceSpecification for "
+						+ MockWoofTemplateExtensionSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -180,16 +172,15 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 */
 	public void testNullPropertyName() {
 
-		final WoofTemplateExtensionSourceProperty property = this
-				.createMock(WoofTemplateExtensionSourceProperty.class);
+		final WoofTemplateExtensionSourceProperty property = this.createMock(WoofTemplateExtensionSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new WoofTemplateExtensionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.record_issue("WoofTemplateExtensionSourceProperty 0 provided blank name from WoofTemplateExtensionSourceSpecification for "
-				+ MockWoofTemplateExtensionSource.class.getName());
+		this.issues.recordIssue(
+				"WoofTemplateExtensionSourceProperty 0 provided blank name from WoofTemplateExtensionSourceSpecification for "
+						+ MockWoofTemplateExtensionSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -203,17 +194,14 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 */
 	public void testFailPropertyName() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property name");
-		final WoofTemplateExtensionSourceProperty property = this
-				.createMock(WoofTemplateExtensionSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property name");
+		final WoofTemplateExtensionSourceProperty property = this.createMock(WoofTemplateExtensionSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new WoofTemplateExtensionSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.record_issue(
+		this.issues.recordIssue(
 				"Failed to get name for WoofTemplateExtensionSourceProperty 0 from WoofTemplateExtensionSourceSpecification for "
 						+ MockWoofTemplateExtensionSource.class.getName(),
 				failure);
@@ -230,18 +218,15 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 */
 	public void testFailGetWorkPropertyLabel() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property label");
-		final WoofTemplateExtensionSourceProperty property = this
-				.createMock(WoofTemplateExtensionSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property label");
+		final WoofTemplateExtensionSourceProperty property = this.createMock(WoofTemplateExtensionSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new WoofTemplateExtensionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.record_issue(
+		this.issues.recordIssue(
 				"Failed to get label for WoofTemplateExtensionSourceProperty 0 (NAME) from WoofTemplateExtensionSourceSpecification for "
 						+ MockWoofTemplateExtensionSource.class.getName(),
 				failure);
@@ -264,18 +249,12 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 				.createMock(WoofTemplateExtensionSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
-				new WoofTemplateExtensionSourceProperty[] { propertyWithLabel,
-						propertyWithoutLabel });
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
-				"NAME");
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
-				"LABEL");
-		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(),
-				"NO LABEL");
-		this.recordReturn(propertyWithoutLabel,
-				propertyWithoutLabel.getLabel(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(),
+				new WoofTemplateExtensionSourceProperty[] { propertyWithLabel, propertyWithoutLabel });
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(), "NAME");
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(), "LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(), "NO LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getLabel(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -287,16 +266,13 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 * Ensure can load the adapted specification.
 	 */
 	public void testAdaptedLoadSpecification() {
-		this.loadSpecification(
-				AdaptedWoofTemplateExtensionSource.class.getName(), true,
-				"NAME", "LABEL");
+		this.loadSpecification(AdaptedWoofTemplateExtensionSource.class.getName(), true, "NAME", "LABEL");
 	}
 
 	/**
 	 * Adapted {@link WoofTemplateExtensionSource}.
 	 */
-	public static class AdaptedWoofTemplateExtensionSource extends
-			AbstractWoofTemplateExtensionSource {
+	public static class AdaptedWoofTemplateExtensionSource extends AbstractWoofTemplateExtensionSource {
 
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
@@ -304,32 +280,9 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 		}
 
 		@Override
-		public void extendTemplate(WoofTemplateExtensionSourceContext context)
-				throws Exception {
+		public void extendTemplate(WoofTemplateExtensionSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 		}
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void record_issue(String issueDescription) {
-		this.issues.addIssue(null, null, null, null, issueDescription);
-	}
-
-	/**
-	 * Records an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 */
-	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(null, null, null, null, issueDescription, cause);
 	}
 
 	/**
@@ -341,10 +294,8 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 * @param propertyNames
 	 *            Expected {@link Property} names for being returned.
 	 */
-	private void loadSpecification(boolean isExpectToLoad,
-			String... propertyNameLabelPairs) {
-		this.loadSpecification(MockWoofTemplateExtensionSource.class.getName(),
-				isExpectToLoad, propertyNameLabelPairs);
+	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
+		this.loadSpecification(MockWoofTemplateExtensionSource.class.getName(), isExpectToLoad, propertyNameLabelPairs);
 	}
 
 	/**
@@ -358,16 +309,14 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 * @param propertyNames
 	 *            Expected {@link Property} names for being returned.
 	 */
-	private void loadSpecification(String woofTemplateExtensionSourceClassName,
-			boolean isExpectToLoad, String... propertyNameLabelPairs) {
+	private void loadSpecification(String woofTemplateExtensionSourceClassName, boolean isExpectToLoad,
+			String... propertyNameLabelPairs) {
 
 		// Load the specification
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
-		PropertyList propertyList = loader.loadSpecification(
-				woofTemplateExtensionSourceClassName, this.classLoader,
+		PropertyList propertyList = loader.loadSpecification(woofTemplateExtensionSourceClassName, this.classLoader,
 				this.issues);
 
 		// Determine if expected to load
@@ -375,8 +324,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 			assertNotNull("Expected to load specification", propertyList);
 
 			// Ensure the properties are as expected
-			PropertyListUtil.validatePropertyNameLabels(propertyList,
-					propertyNameLabelPairs);
+			PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabelPairs);
 
 		} else {
 			assertNull("Should not load specification", propertyList);
@@ -387,8 +335,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 	 * Mock {@link WoofTemplateExtensionSourceSpecification} for testing.
 	 */
 	@TestSource
-	public static class MockWoofTemplateExtensionSource implements
-			WoofTemplateExtensionSource {
+	public static class MockWoofTemplateExtensionSource implements WoofTemplateExtensionSource {
 
 		/**
 		 * Failure to instantiate an instance.
@@ -412,8 +359,7 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 		 * @param specification
 		 *            {@link WoofTemplateExtensionSourceSpecification}.
 		 */
-		public static void reset(
-				WoofTemplateExtensionSourceSpecification specification) {
+		public static void reset(WoofTemplateExtensionSourceSpecification specification) {
 			instantiateFailure = null;
 			specificationFailure = null;
 			MockWoofTemplateExtensionSource.specification = specification;
@@ -446,15 +392,13 @@ public class LoadWoofTemplateExtensionSpecificationTest extends
 		}
 
 		@Override
-		public Change<?> createConfigurationChange(
-				WoofTemplateExtensionChangeContext context) {
+		public Change<?> createConfigurationChange(WoofTemplateExtensionChangeContext context) {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}
 
 		@Override
-		public void extendTemplate(WoofTemplateExtensionSourceContext context)
-				throws Exception {
+		public void extendTemplate(WoofTemplateExtensionSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 		}
 	}

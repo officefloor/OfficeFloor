@@ -22,9 +22,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.LogRecord;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.impl.client.CloseableHttpClient;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.compile.impl.issues.FailCompilerIssues;
+import net.officefloor.autowire.impl.AutoWireOfficeSource;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.frame.test.LoggerAssertion;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -35,11 +42,6 @@ import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Tests the {@link WoofOfficeFloorSource}.
@@ -70,10 +72,8 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		System.setProperty("CHAIN.TEST", "VALUE");
 
 		// Create the logger assertions
-		this.loaderLoggerAssertion = LoggerAssertion
-				.setupLoggerAssertion(WoofLoaderImpl.class.getName());
-		this.sourceLoggerAssertion = LoggerAssertion
-				.setupLoggerAssertion(WoofOfficeFloorSource.class.getName());
+		this.loaderLoggerAssertion = LoggerAssertion.setupLoggerAssertion(WoofLoaderImpl.class.getName());
+		this.sourceLoggerAssertion = LoggerAssertion.setupLoggerAssertion(WoofOfficeFloorSource.class.getName());
 
 		// Clear implicit template extension
 		MockImplicitWoofTemplateExtensionSourceService.reset();
@@ -134,19 +134,14 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		for (LogRecord record : records) {
 			messages.append("\t" + record.getMessage() + "\n");
 		}
-		assertEquals("Incorrect number of records:\n" + messages.toString(), 1,
-				records.length);
+		assertEquals("Incorrect number of records:\n" + messages.toString(), 1, records.length);
 		LogRecord record = records[0];
-		assertEquals(
-				"Incorrect unknown extension log record",
-				WoofApplicationExtensionService.class.getName()
-						+ ": Provider woof.application.extension.not.available.Service not found",
-				record.getMessage());
+		assertEquals("Incorrect unknown extension log record", WoofApplicationExtensionService.class.getName()
+				+ ": Provider woof.application.extension.not.available.Service not found", record.getMessage());
 
 		// Test that loaded servicer
 		String response = this.doRequest("/chain");
-		assertEquals("Should be serviced by chained servicer", "CHAINED",
-				response);
+		assertEquals("Should be serviced by chained servicer", "CHAINED", response);
 	}
 
 	/**
@@ -161,8 +156,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 			this.doRequest("/test");
 			fail("Should not be successful");
 		} catch (HttpHostConnectException ex) {
-			assertTrue("Incorrect cause: " + ex.getMessage(), ex.getMessage()
-					.endsWith(connectionMessageSuffix));
+			assertTrue("Incorrect cause: " + ex.getMessage(), ex.getMessage().endsWith(connectionMessageSuffix));
 		}
 
 		// Run the application
@@ -180,8 +174,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 			refreshedClient.execute(new HttpGet("http://localhost:7878/test"));
 			fail("Should not be successful");
 		} catch (HttpHostConnectException ex) {
-			assertTrue("Incorrect cause: " + ex.getMessage(), ex.getMessage()
-					.endsWith(connectionMessageSuffix));
+			assertTrue("Incorrect cause: " + ex.getMessage(), ex.getMessage().endsWith(connectionMessageSuffix));
 		} finally {
 			refreshedClient.close();
 		}
@@ -208,13 +201,11 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		MockImplicitWoofTemplateExtensionSourceService.reset("/template");
 
 		// Obtain no logic template WoOF configuration
-		String noLogicTemplateConfigurationLocation = this
-				.getPackageRelativePath(this.getClass())
+		String noLogicTemplateConfigurationLocation = this.getPackageRelativePath(this.getClass())
 				+ "/NoLogicTemplate.woof";
 
 		// Run the application with no logic template
-		WoofOfficeFloorSource.start(
-				WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeFloorSource.start(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				noLogicTemplateConfigurationLocation);
 
 		// Test
@@ -228,12 +219,10 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	public void testCommandLineConfiguration() throws Exception {
 
 		// Obtain alternate configuration location
-		String alternateConfigurationLocation = this
-				.getPackageRelativePath(this.getClass()) + "/commandline.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/commandline.woof";
 
 		// Run the application with properties for alternate configuration
-		WoofOfficeFloorSource.main(
-				WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeFloorSource.main(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
@@ -244,18 +233,14 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 * Ensure can provide command line configuration with property name of the
 	 * form <code>-name</code>.
 	 */
-	public void testCommandLineConfigurationWithPropertyNameHyphenPrefix()
-			throws Exception {
+	public void testCommandLineConfigurationWithPropertyNameHyphenPrefix() throws Exception {
 
 		// Obtain alternate configuration location
-		String alternateConfigurationLocation = this
-				.getPackageRelativePath(this.getClass()) + "/commandline.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/commandline.woof";
 
 		// Run the application with properties for alternate configuration
-		WoofOfficeFloorSource.main("-"
-				+ WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
-				alternateConfigurationLocation,
-				"only.property.name.to.have.blank.value");
+		WoofOfficeFloorSource.main("-" + WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+				alternateConfigurationLocation, "only.property.name.to.have.blank.value");
 
 		// Test
 		this.doTestRequest("/commandline");
@@ -272,20 +257,16 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		MockImplicitWoofTemplateExtensionSourceService.reset("/woofResource");
 
 		// Obtain webapp configuration location
-		String alternateConfigurationLocation = this
-				.getPackageRelativePath(this.getClass()) + "/webapp.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof";
 
 		// Run the application for woof resource
-		WoofOfficeFloorSource.main("-"
-				+ WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeFloorSource.main("-" + WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
 		String response = this.doRequest("/woofResource.woof");
-		assertEquals(
-				"Incorrect response",
-				"This is only for testing and should not be included in built jar for project",
-				response);
+		assertEquals("Incorrect response",
+				"This is only for testing and should not be included in built jar for project", response);
 	}
 
 	/**
@@ -299,20 +280,16 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		MockImplicitWoofTemplateExtensionSourceService.reset("/woofResource");
 
 		// Obtain webapp configuration location
-		String alternateConfigurationLocation = this
-				.getPackageRelativePath(this.getClass()) + "/webapp.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof";
 
 		// Run the application for woof resource
-		WoofOfficeFloorSource.main("-"
-				+ WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeFloorSource.main("-" + WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
 		String response = this.doRequest("/resource");
-		assertEquals(
-				"Incorrect response",
-				"Configured resource for testing that should not be included in built jar for project",
-				response);
+		assertEquals("Incorrect response",
+				"Configured resource for testing that should not be included in built jar for project", response);
 	}
 
 	/**
@@ -325,19 +302,15 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		MockImplicitWoofTemplateExtensionSourceService.reset("/woofResource");
 
 		// Obtain webapp configuration location
-		String alternateConfigurationLocation = this
-				.getPackageRelativePath(this.getClass()) + "/webapp.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webapp.woof";
 
 		// Run the application for woof resource
-		WoofOfficeFloorSource.main("-"
-				+ WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		WoofOfficeFloorSource.main("-" + WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				alternateConfigurationLocation);
 
 		// Test
 		String response = this.doRequest("/NonWoof.html");
-		assertEquals(
-				"Incorrect response",
-				"Not a WoOF resource.  Also should not be included in resulting built jar.",
+		assertEquals("Incorrect response", "Not a WoOF resource.  Also should not be included in resulting built jar.",
 				response);
 	}
 
@@ -348,8 +321,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	public void testSrcMainWebappIgnoreOtherResources() throws Exception {
 
 		// Configure implicit template extension
-		MockImplicitWoofTemplateExtensionSourceService
-				.reset("/not/found/resource");
+		MockImplicitWoofTemplateExtensionSourceService.reset("/not/found/resource");
 
 		// Ensure the resource is available
 		File nonWoofResource = new File(".", "src/main/webapp/NonWoof.html");
@@ -357,24 +329,24 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 				(nonWoofResource.exists() && nonWoofResource.isFile()));
 
 		// Obtain webapp configuration location
-		String alternateConfigurationLocation = this
-				.getPackageRelativePath(this.getClass()) + "/webappOther.woof";
+		String alternateConfigurationLocation = this.getPackageRelativePath(this.getClass()) + "/webappOther.woof";
 
 		try {
 			// Run the application for woof resource
-			WoofOfficeFloorSource
-					.main("-"
-							+ WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
-							alternateConfigurationLocation);
+			WoofOfficeFloorSource.main("-" + WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
+					alternateConfigurationLocation);
 			fail("Should not successfully find resource and therefore should not start");
 
-		} catch (FailCompilerIssues ex) {
+		} catch (CompileException ex) {
 			// Should not start due to unknown resource
-			assertEquals(
-					"Incorrect cause",
-					"null null: Can not obtain resource at location 'NonWoof.html' for SectionSource "
-							+ HttpTemplateSectionSource.class.getName(),
-					ex.getMessage());
+			assertEquals("Should not load office",
+					"Failure loading OfficeType from source " + AutoWireOfficeSource.class.getName(), ex.getMessage());
+			DefaultCompilerIssue issue = ex.getCompilerIssue();
+			DefaultCompilerIssue officeSectionLoadIssue = (DefaultCompilerIssue) issue.getCauses()[0];
+			DefaultCompilerIssue sectionLoadIssue = (DefaultCompilerIssue) officeSectionLoadIssue.getCauses()[0];
+			DefaultCompilerIssue missingResourceIssue = (DefaultCompilerIssue) sectionLoadIssue.getCauses()[0];
+			assertEquals("Incorrect cause", "Can not obtain resource at location 'NonWoof.html' for SectionSource "
+					+ HttpTemplateSectionSource.class.getName(), missingResourceIssue.getIssueDescription());
 		}
 	}
 
@@ -402,9 +374,8 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 		@Override
 		protected void configure(HttpServerAutoWireOfficeFloorSource application) {
-			AutoWireSection section = application
-					.addSection("ANOTHER", ClassSectionSource.class.getName(),
-							Section.class.getName());
+			AutoWireSection section = application.addSection("ANOTHER", ClassSectionSource.class.getName(),
+					Section.class.getName());
 			application.linkUri("another", section, "service");
 		}
 	}
@@ -421,9 +392,8 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 		String response = this.doRequest(uri);
 
 		// Ensure is configured correctly by correct response
-		assertEquals("Incorrect response body", "WOOF TEST OnePersonTeam_"
-				+ new AutoWire(MockDependency.class).getQualifiedType(),
-				response);
+		assertEquals("Incorrect response body",
+				"WOOF TEST OnePersonTeam_" + new AutoWire(MockDependency.class).getQualifiedType(), response);
 	}
 
 	/**
@@ -436,8 +406,7 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	private String doRequest(String uri) throws Exception {
 		HttpGet request = new HttpGet("http://localhost:7878" + uri);
 		HttpResponse response = this.client.execute(request);
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
 		return new String(buffer.toByteArray());
@@ -456,17 +425,14 @@ public class WoofOfficeFloorSourceTest extends OfficeFrameTestCase {
 	 * Class for {@link ClassSectionSource} in testing.
 	 */
 	public static class Section {
-		public void service(ServerHttpConnection connection,
-				MockDependency dependency) throws IOException {
+		public void service(ServerHttpConnection connection, MockDependency dependency) throws IOException {
 
 			// Obtain content to validate objects and teams
 			Thread thread = Thread.currentThread();
-			String content = "WOOF " + dependency.getMessage() + " "
-					+ thread.getName();
+			String content = "WOOF " + dependency.getMessage() + " " + thread.getName();
 
 			// Write response
-			net.officefloor.plugin.socket.server.http.HttpResponse response = connection
-					.getHttpResponse();
+			net.officefloor.plugin.socket.server.http.HttpResponse response = connection.getHttpResponse();
 			response.getEntity().write(content.getBytes());
 		}
 	}

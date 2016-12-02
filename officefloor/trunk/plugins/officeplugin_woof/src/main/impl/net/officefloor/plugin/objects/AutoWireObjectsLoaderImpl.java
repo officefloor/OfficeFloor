@@ -29,7 +29,6 @@ import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.objects.AutoWireDependencyModel;
 import net.officefloor.model.objects.AutoWireFlowModel;
@@ -74,38 +73,31 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 	 */
 
 	@Override
-	public void loadAutoWireObjectsConfiguration(
-			AutoWireObjectsLoaderContext context) throws Exception {
+	public void loadAutoWireObjectsConfiguration(AutoWireObjectsLoaderContext context) throws Exception {
 
 		// Obtain the details
 		ConfigurationItem objectsConfiguration = context.getConfiguration();
 		AutoWireApplication application = context.getAutoWireApplication();
 
 		// Load the objects model
-		AutoWireObjectsModel objects = this.repository
-				.retrieveAutoWireObjects(objectsConfiguration);
+		AutoWireObjectsModel objects = this.repository.retrieveAutoWireObjects(objectsConfiguration);
 
 		// Configure the objects
-		for (AutoWireObjectSourceModel objectSource : objects
-				.getAutoWireObjectSources()) {
+		for (AutoWireObjectSourceModel objectSource : objects.getAutoWireObjectSources()) {
 
 			// Load based on object source type
 			if (objectSource instanceof AutoWireManagedObjectModel) {
 				// Load the managed object
-				this.loadAutoWireManagedObject(
-						(AutoWireManagedObjectModel) objectSource, application,
-						context);
+				this.loadAutoWireManagedObject((AutoWireManagedObjectModel) objectSource, application, context);
 
 			} else if (objectSource instanceof AutoWireSupplierModel) {
 				// Load the supplier
-				this.loadAutoWireSupplier((AutoWireSupplierModel) objectSource,
-						application);
+				this.loadAutoWireSupplier((AutoWireSupplierModel) objectSource, application);
 
 			} else {
 				// Unknown object source
 				throw new IllegalStateException(
-						"Unknown object source configuration type "
-								+ objectSource.getClass().getName());
+						"Unknown object source configuration type " + objectSource.getClass().getName());
 			}
 		}
 	}
@@ -122,23 +114,18 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 	 * @throws Exception
 	 *             If fails to load {@link ManagedObject}.
 	 */
-	private void loadAutoWireManagedObject(
-			final AutoWireManagedObjectModel managedObject,
-			AutoWireApplication application,
-			AutoWireObjectsLoaderContext context) throws Exception {
+	private void loadAutoWireManagedObject(final AutoWireManagedObjectModel managedObject,
+			AutoWireApplication application, AutoWireObjectsLoaderContext context) throws Exception {
 
 		// Obtain the managed object source
-		String managedObjectSourceClassName = managedObject
-				.getManagedObjectSourceClassName();
+		String managedObjectSourceClassName = managedObject.getManagedObjectSourceClassName();
 		String classManagedObjectSourceClass = null;
 		if (managedObjectSourceClassName == null) {
 			// No managed object source, so try for class
-			classManagedObjectSourceClass = managedObject
-					.getClassManagedObjectSourceClass();
+			classManagedObjectSourceClass = managedObject.getClassManagedObjectSourceClass();
 			if (classManagedObjectSourceClass != null) {
 				// Have class, so use class managed object
-				managedObjectSourceClassName = ClassManagedObjectSource.class
-						.getName();
+				managedObjectSourceClassName = ClassManagedObjectSource.class.getName();
 			}
 		}
 
@@ -154,13 +141,11 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 			autoWiring.add(new AutoWire(qualifier, type));
 		}
 		for (AutoWireModel autoWire : managedObject.getAutoWiring()) {
-			autoWiring.add(new AutoWire(autoWire.getQualifier(), autoWire
-					.getType()));
+			autoWiring.add(new AutoWire(autoWire.getQualifier(), autoWire.getType()));
 		}
 		if ((classManagedObjectSourceClass != null) && (autoWiring.size() == 0)) {
 			// No auto-wiring for class, so default from class
-			autoWiring.add(new AutoWire(qualifier,
-					classManagedObjectSourceClass));
+			autoWiring.add(new AutoWire(qualifier, classManagedObjectSourceClass));
 		}
 
 		// Obtain the managed object scope
@@ -168,14 +153,11 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 		final ManagedObjectScope managedObjectScope;
 		try {
 			managedObjectScope = CompileUtil.isBlank(managedObjectScopeName) ? null
-					: ManagedObjectScope.valueOf(managedObjectScopeName
-							.toUpperCase());
+					: ManagedObjectScope.valueOf(managedObjectScopeName.toUpperCase());
 		} catch (IllegalArgumentException ex) {
 			// Invalid scope
-			context.addIssue("Invalid managed object scope '"
-					+ managedObjectScopeName + "'", AssetType.MANAGED_OBJECT,
-					autoWiring.size() > 0 ? autoWiring.get(0).toString()
-							: managedObjectScopeName);
+			context.addIssue("Invalid managed object scope '" + managedObjectScopeName + "' for managed object "
+					+ (autoWiring.size() > 0 ? autoWiring.get(0).toString() : managedObjectSourceClassName));
 			return; // invalid managed object so do not load
 		}
 
@@ -191,28 +173,24 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 
 				// Configure the flows
 				for (AutoWireFlowModel flow : managedObject.getFlows()) {
-					context.mapFlow(flow.getName(), flow.getSection(),
-							flow.getInput());
+					context.mapFlow(flow.getName(), flow.getSection(), flow.getInput());
 				}
 
 				// Configure the teams
 				for (AutoWireTeamModel team : managedObject.getTeams()) {
-					context.mapTeam(team.getName(),
-							new AutoWire(team.getQualifier(), team.getType()));
+					context.mapTeam(team.getName(), new AutoWire(team.getQualifier(), team.getType()));
 				}
 
 				// Configure the dependencies
-				for (AutoWireDependencyModel dependency : managedObject
-						.getDependencies()) {
-					context.mapDependency(dependency.getName(), new AutoWire(
-							dependency.getQualifier(), dependency.getType()));
+				for (AutoWireDependencyModel dependency : managedObject.getDependencies()) {
+					context.mapDependency(dependency.getName(),
+							new AutoWire(dependency.getQualifier(), dependency.getType()));
 				}
 			}
 		};
 
 		// Add the managed object
-		AutoWireObject object = application.addManagedObject(
-				managedObjectSourceClassName, wirer,
+		AutoWireObject object = application.addManagedObject(managedObjectSourceClassName, wirer,
 				autoWiring.toArray(new AutoWire[autoWiring.size()]));
 
 		// Provide timeout (if provided)
@@ -223,12 +201,9 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 		// Load the properties
 		if (classManagedObjectSourceClass != null) {
 			// Class managed object source class name property always first
-			object.addProperty(
-					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
-					classManagedObjectSourceClass);
+			object.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, classManagedObjectSourceClass);
 		}
-		for (PropertySourceModel propertySource : managedObject
-				.getPropertySources()) {
+		for (PropertySourceModel propertySource : managedObject.getPropertySources()) {
 
 			// Load based on property source type
 			if (propertySource instanceof PropertyModel) {
@@ -243,8 +218,7 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 
 			} else {
 				// Unknown property source
-				throw new IllegalStateException("Unknown property source type "
-						+ propertySource.getClass().getName());
+				throw new IllegalStateException("Unknown property source type " + propertySource.getClass().getName());
 			}
 		}
 	}
@@ -259,15 +233,14 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 	 * @throws IOException
 	 *             If failure loading {@link Property}.
 	 */
-	private void loadAutoWireSupplier(AutoWireSupplierModel supplier,
-			AutoWireApplication application) throws IOException {
+	private void loadAutoWireSupplier(AutoWireSupplierModel supplier, AutoWireApplication application)
+			throws IOException {
 
 		// Obtain the supplier details
 		String supplierSourceClassName = supplier.getSupplierSourceClassName();
 
 		// Add the supplier
-		AutoWireSupplier autoWireSupplier = application
-				.addSupplier(supplierSourceClassName);
+		AutoWireSupplier autoWireSupplier = application.addSupplier(supplierSourceClassName);
 
 		// Load the properties
 		for (PropertySourceModel propertySource : supplier.getPropertySources()) {
@@ -276,8 +249,7 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 			if (propertySource instanceof PropertyModel) {
 				// Load the property
 				PropertyModel property = (PropertyModel) propertySource;
-				autoWireSupplier.addProperty(property.getName(),
-						property.getValue());
+				autoWireSupplier.addProperty(property.getName(), property.getValue());
 
 			} else if (propertySource instanceof PropertyFileModel) {
 				// Load properties from file
@@ -286,8 +258,7 @@ public class AutoWireObjectsLoaderImpl implements AutoWireObjectsLoader {
 
 			} else {
 				// Unknown property source
-				throw new IllegalStateException("Unknown property source type "
-						+ propertySource.getClass().getName());
+				throw new IllegalStateException("Unknown property source type " + propertySource.getClass().getName());
 			}
 		}
 	}

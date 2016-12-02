@@ -73,6 +73,15 @@ public class CompileException extends Exception {
 		this.issue = issue;
 	}
 
+	/**
+	 * Obtains the {@link CompilerIssue}.
+	 * 
+	 * @return {@link CompilerIssue}.
+	 */
+	public DefaultCompilerIssue getCompilerIssue() {
+		return this.issue;
+	}
+
 	/*
 	 * ======================= Throwable ============================
 	 */
@@ -220,8 +229,7 @@ public class CompileException extends Exception {
 	 * @param depth
 	 *            Depth into the causes.
 	 */
-	private static void printIssue(DefaultCompilerIssue issue, Output out,
-			int depth) {
+	private static void printIssue(DefaultCompilerIssue issue, Output out, int depth) {
 
 		// Output details of issue
 		out.print(issue.getIssueDescription());
@@ -246,8 +254,7 @@ public class CompileException extends Exception {
 	 * @param depth
 	 *            Depth into the causes.
 	 */
-	private static void printCauses(DefaultCompilerIssue issue, Output out,
-			int depth) {
+	private static void printCauses(DefaultCompilerIssue issue, Output out, int depth) {
 
 		// Obtain the causes
 		CompilerIssue[] causes = issue.getCauses();
@@ -339,8 +346,8 @@ public class CompileException extends Exception {
 		}
 
 		// Create the stack trace element
-		StackTraceElement element = new StackTraceElement(node.getNodeType(),
-				node.getNodeName(), node.getLocation(), 0);
+		StackTraceElement element = new StackTraceElement(node.getNodeType(), node.getNodeName(), node.getLocation(),
+				0);
 
 		// Add the to trace
 		trace.add(element);

@@ -18,8 +18,6 @@
 package net.officefloor.plugin.objects;
 
 import net.officefloor.autowire.AutoWireApplication;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -53,14 +51,9 @@ public interface AutoWireObjectsLoaderContext {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
-	 * @param assetType
-	 *            {@link AssetType}. May be <code>null</code>.
-	 * @param assetName
-	 *            Name of the {@link Asset}. May be <code>null</code>.
 	 * @throws Exception
 	 *             If needs to propagate the issue.
 	 */
-	void addIssue(String issueDescription, AssetType assetType, String assetName)
-			throws Exception;
+	void addIssue(String issueDescription) throws Exception;
 
 }
