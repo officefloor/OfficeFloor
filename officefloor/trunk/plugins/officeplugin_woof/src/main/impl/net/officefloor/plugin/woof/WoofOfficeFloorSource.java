@@ -35,7 +35,6 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.source.ResourceSource;
@@ -67,14 +66,12 @@ import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
-		implements WoofContextConfigurable {
+public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource implements WoofContextConfigurable {
 
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger
-			.getLogger(WoofOfficeFloorSource.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(WoofOfficeFloorSource.class.getName());
 
 	/**
 	 * Property for the location of the WoOF configuration for the application.
@@ -234,14 +231,13 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	 * @param projectDirectory
 	 *            Maven project directory.
 	 */
-	public static void loadWebResourcesFromMavenProject(
-			WoofContextConfigurable contextConfigurable, File projectDirectory) {
+	public static void loadWebResourcesFromMavenProject(WoofContextConfigurable contextConfigurable,
+			File projectDirectory) {
 
 		// Determine if running within maven project
 		if (!(new File(projectDirectory, "pom.xml").exists())) {
 			if (LOGGER.isLoggable(Level.WARNING)) {
-				LOGGER.warning("Not a Maven project as can not find pom.xml in "
-						+ projectDirectory.getAbsolutePath());
+				LOGGER.warning("Not a Maven project as can not find pom.xml in " + projectDirectory.getAbsolutePath());
 			}
 			return; // must be a maven project
 		}
@@ -268,8 +264,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 		}
 
 		// Load the web resources
-		loadWebResources(contextConfigurable, webAppDir,
-				new File[] { webAppDir });
+		loadWebResources(contextConfigurable, webAppDir, new File[] { webAppDir });
 	}
 
 	/**
@@ -282,9 +277,8 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	 * @param resourceDirectories
 	 *            Directories to source public resources.
 	 */
-	public static void loadWebResources(
-			final WoofContextConfigurable contextConfigurable,
-			final File webAppDir, File... resourceDirectories) {
+	public static void loadWebResources(final WoofContextConfigurable contextConfigurable, final File webAppDir,
+			File... resourceDirectories) {
 
 		// Ensure have web app directory
 		if (webAppDir == null) {
@@ -294,8 +288,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 
 		// Ensure the WEB-INF/web.xml file exists
 		if (!(new File(webAppDir, WEBXML_FILE_PATH).exists())) {
-			LOGGER.warning("Not including webapp content as "
-					+ WEBXML_FILE_PATH + " not found within "
+			LOGGER.warning("Not including webapp content as " + WEBXML_FILE_PATH + " not found within "
 					+ webAppDir.getAbsolutePath());
 			return; // not include
 		}
@@ -304,8 +297,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 		contextConfigurable.setWebAppDirectory(webAppDir);
 
 		// Configure resource directories
-		SourceHttpResourceFactory.loadProperties(null, resourceDirectories,
-				null, Boolean.FALSE, contextConfigurable);
+		SourceHttpResourceFactory.loadProperties(null, resourceDirectories, null, Boolean.FALSE, contextConfigurable);
 
 		// Make WoOF resources available
 		contextConfigurable.addResources(new ResourceSource() {
@@ -349,22 +341,18 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	 * @throws Exception
 	 *             If fails to load the extension functionality.
 	 */
-	public static void loadWebApplicationExtensions(
-			WebAutoWireApplication application, SourceProperties properties,
-			ClassLoader classLoader, ResourceSource... resourceSources)
-			throws Exception {
+	public static void loadWebApplicationExtensions(WebAutoWireApplication application, SourceProperties properties,
+			ClassLoader classLoader, ResourceSource... resourceSources) throws Exception {
 
 		// Create the WoOF application extension context
-		SourceContext sourceContext = new SourceContextImpl(false, classLoader,
-				resourceSources);
+		SourceContext sourceContext = new SourceContextImpl(false, classLoader, resourceSources);
 		WoofApplicationExtensionServiceContext extensionContext = new WoofApplicationExtensionServiceContextImpl(
 				application, sourceContext, properties);
 
 		// Load the application extensions
 		ServiceLoader<WoofApplicationExtensionService> extensionServiceLoader = ServiceLoader
 				.load(WoofApplicationExtensionService.class, classLoader);
-		Iterator<WoofApplicationExtensionService> extensionIterator = extensionServiceLoader
-				.iterator();
+		Iterator<WoofApplicationExtensionService> extensionIterator = extensionServiceLoader.iterator();
 		while (extensionIterator.hasNext()) {
 
 			// Obtain the next extension service
@@ -388,14 +376,8 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 			} catch (Throwable ex) {
 				// Warn that issue with service
 				if (LOGGER.isLoggable(Level.WARNING)) {
-					LOGGER.log(
-							Level.WARNING,
-							WoofApplicationExtensionService.class
-									.getSimpleName()
-									+ " "
-									+ extensionService.getClass().getName()
-									+ " configuration failure: "
-									+ ex.getMessage(), ex);
+					LOGGER.log(Level.WARNING, WoofApplicationExtensionService.class.getSimpleName() + " "
+							+ extensionService.getClass().getName() + " configuration failure: " + ex.getMessage(), ex);
 				}
 			}
 
@@ -418,15 +400,13 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	 * @throws Exception
 	 *             If fails to load the optional configuration.
 	 */
-	public static void loadOptionalConfiguration(
-			final AutoWireApplication application, String objectsLocation,
-			String teamsLocation, ConfigurationContext configurationContext,
-			final OfficeFloorDeployer deployer) throws Exception {
+	public static void loadOptionalConfiguration(final AutoWireApplication application, String objectsLocation,
+			String teamsLocation, ConfigurationContext configurationContext, final OfficeFloorDeployer deployer)
+			throws Exception {
 
 		// Load the optional objects configuration to the application
-		final ConfigurationItem objectsConfiguration = retrieveOptionalConfiguration(
-				objectsLocation, configurationContext,
-				DEFAULT_OBJECTS_CONFIGURATION_LOCATION);
+		final ConfigurationItem objectsConfiguration = retrieveOptionalConfiguration(objectsLocation,
+				configurationContext, DEFAULT_OBJECTS_CONFIGURATION_LOCATION);
 		if (objectsConfiguration != null) {
 
 			// Create the configuration context
@@ -443,17 +423,14 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 				}
 
 				@Override
-				public void addIssue(String issueDescription,
-						AssetType assetType, String assetName) throws Exception {
+				public void addIssue(String issueDescription) throws Exception {
 					if (deployer == null) {
 						// No deployer, so throw exception
-						throw new Exception(assetType.name() + "-" + assetName
-								+ ": " + issueDescription);
+						throw new Exception(issueDescription);
 
 					} else {
 						// Have deployer, so report the issue
-						deployer.addIssue(issueDescription, assetType,
-								assetName);
+						deployer.addIssue(issueDescription);
 					}
 				}
 			};
@@ -465,15 +442,13 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 		}
 
 		// Load the optional teams configuration to the application
-		ConfigurationItem teamsConfiguration = retrieveOptionalConfiguration(
-				teamsLocation, configurationContext,
+		ConfigurationItem teamsConfiguration = retrieveOptionalConfiguration(teamsLocation, configurationContext,
 				DEFAULT_TEAMS_CONFIGURATION_LOCATION);
 		if (teamsConfiguration != null) {
 			// Load the teams configuration
 			AutoWireTeamsLoader teamsLoader = new AutoWireTeamsLoaderImpl(
 					new AutoWireTeamsRepositoryImpl(new ModelRepositoryImpl()));
-			teamsLoader.loadAutoWireTeamsConfiguration(teamsConfiguration,
-					application);
+			teamsLoader.loadAutoWireTeamsConfiguration(teamsConfiguration, application);
 		}
 	}
 
@@ -491,19 +466,15 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	 * @throws Exception
 	 *             If fails to retrieve the {@link ConfigurationItem}.
 	 */
-	private static ConfigurationItem retrieveOptionalConfiguration(
-			String configurationLocation,
-			ConfigurationContext configurationContext, String defaultLocation)
-			throws Exception {
+	private static ConfigurationItem retrieveOptionalConfiguration(String configurationLocation,
+			ConfigurationContext configurationContext, String defaultLocation) throws Exception {
 
 		// Retrieve the configuration
-		ConfigurationItem configuration = configurationContext
-				.getConfigurationItem(configurationLocation);
+		ConfigurationItem configuration = configurationContext.getConfigurationItem(configurationLocation);
 		if (configuration == null) {
 			// Attempt to load via '.xml' suffix if default location
 			if (defaultLocation.equals(configurationLocation)) {
-				configuration = configurationContext
-						.getConfigurationItem(defaultLocation + ".xml");
+				configuration = configurationContext.getConfigurationItem(defaultLocation + ".xml");
 			}
 		}
 
@@ -565,8 +536,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 
 					// Log failure to source resource
 					if (LOGGER.isLoggable(Level.WARNING)) {
-						LOGGER.log(Level.WARNING, "Failed to source resource "
-								+ location + " from webapp directory "
+						LOGGER.log(Level.WARNING, "Failed to source resource " + location + " from webapp directory "
 								+ webappDirectory.getAbsolutePath(), ex);
 					}
 
@@ -592,51 +562,39 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	 */
 
 	@Override
-	protected void initOfficeFloor(OfficeFloorDeployer deployer,
-			OfficeFloorSourceContext context) throws Exception {
+	protected void initOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception {
 
 		// Obtain the configuration context
-		ClassLoader classLoader = this.getOfficeFloorCompiler()
-				.getClassLoader();
-		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
-				classLoader);
+		ClassLoader classLoader = this.getOfficeFloorCompiler().getClassLoader();
+		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader);
 
 		// Obtain the woof configuration (ensuring exists)
-		String woofLocation = context.getProperty(
-				PROPERTY_WOOF_CONFIGURATION_LOCATION,
+		String woofLocation = context.getProperty(PROPERTY_WOOF_CONFIGURATION_LOCATION,
 				DEFAULT_WOOF_CONFIGUARTION_LOCATION);
-		ConfigurationItem woofConfiguration = configurationContext
-				.getConfigurationItem(woofLocation);
+		ConfigurationItem woofConfiguration = configurationContext.getConfigurationItem(woofLocation);
 		if (woofConfiguration == null) {
-			deployer.addIssue("Can not find WoOF configuration file '"
-					+ woofLocation + "'", AssetType.OFFICE_FLOOR, "WoOF");
+			deployer.addIssue("Can not find WoOF configuration file '" + woofLocation + "'");
 			return; // must have WoOF configuration
 		}
 
 		// Load the WoOF configuration to the application
-		WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(
-				new ModelRepositoryImpl()));
+		WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(new ModelRepositoryImpl()));
 		woofLoader.loadWoofConfiguration(woofConfiguration, this, context);
 
 		// Load the optional configuration to the application
-		String objectsLocation = context.getProperty(
-				PROPERTY_OBJECTS_CONFIGURATION_LOCATION,
+		String objectsLocation = context.getProperty(PROPERTY_OBJECTS_CONFIGURATION_LOCATION,
 				DEFAULT_OBJECTS_CONFIGURATION_LOCATION);
-		String teamsLocation = context.getProperty(
-				PROPERTY_TEAMS_CONFIGURATION_LOCATION,
+		String teamsLocation = context.getProperty(PROPERTY_TEAMS_CONFIGURATION_LOCATION,
 				DEFAULT_TEAMS_CONFIGURATION_LOCATION);
-		loadOptionalConfiguration(this, objectsLocation, teamsLocation,
-				configurationContext, deployer);
+		loadOptionalConfiguration(this, objectsLocation, teamsLocation, configurationContext, deployer);
 
 		// Providing additional configuration
 		this.configure(this);
 
 		// Load extensions after configured WoOF
 		ResourceSource[] resourceSources = this.applicationResourceSources
-				.toArray(new ResourceSource[this.applicationResourceSources
-						.size()]);
-		loadWebApplicationExtensions(this, context, classLoader,
-				resourceSources);
+				.toArray(new ResourceSource[this.applicationResourceSources.size()]);
+		loadWebApplicationExtensions(this, context, classLoader, resourceSources);
 
 		// Initialise parent
 		super.initOfficeFloor(deployer, context);
@@ -645,8 +603,8 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 	/**
 	 * {@link WoofApplicationExtensionServiceContext} implementation.
 	 */
-	private static class WoofApplicationExtensionServiceContextImpl extends
-			SourceContextImpl implements WoofApplicationExtensionServiceContext {
+	private static class WoofApplicationExtensionServiceContextImpl extends SourceContextImpl
+			implements WoofApplicationExtensionServiceContext {
 
 		/**
 		 * {@link WebAutoWireApplication}.
@@ -663,8 +621,7 @@ public class WoofOfficeFloorSource extends HttpServerAutoWireOfficeFloorSource
 		 * @param properties
 		 *            {@link SourceProperties}.
 		 */
-		public WoofApplicationExtensionServiceContextImpl(
-				WebAutoWireApplication application,
+		public WoofApplicationExtensionServiceContextImpl(WebAutoWireApplication application,
 				SourceContext sourceContext, SourceProperties properties) {
 			super(false, sourceContext, properties);
 			this.application = application;

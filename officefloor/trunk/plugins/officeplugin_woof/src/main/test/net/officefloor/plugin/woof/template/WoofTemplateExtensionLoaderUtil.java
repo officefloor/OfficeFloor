@@ -23,6 +23,7 @@ import java.io.StringWriter;
 
 import org.junit.Assert;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
@@ -65,10 +66,8 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> PropertyList validateSpecification(
-			Class<S> woofTemplateExtensionSourceClass,
-			String... propertyNameLabels) {
-		return validateSpecification(woofTemplateExtensionSourceClass, null,
-				propertyNameLabels);
+			Class<S> woofTemplateExtensionSourceClass, String... propertyNameLabels) {
+		return validateSpecification(woofTemplateExtensionSourceClass, null, propertyNameLabels);
 	}
 
 	/**
@@ -87,17 +86,14 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <S extends WoofTemplateExtensionSource> PropertyList validateSpecification(
-			Class<S> woofTemplateExtensionSourceClass, ClassLoader classLoader,
-			String... propertyNameLabels) {
+			Class<S> woofTemplateExtensionSourceClass, ClassLoader classLoader, String... propertyNameLabels) {
 
 		// Load the specification
 		PropertyList propertyList = getWoofTemplateExtensionLoader()
-				.loadSpecification(woofTemplateExtensionSourceClass.getName(),
-						classLoader, getCompilerIssues());
+				.loadSpecification(woofTemplateExtensionSourceClass.getName(), classLoader, getCompilerIssues());
 
 		// Verify the properties
-		PropertyListUtil.validatePropertyNameLabels(propertyList,
-				propertyNameLabels);
+		PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabels);
 
 		// Return the property list
 		return propertyList;
@@ -110,8 +106,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	 *            Property name/value pairs.
 	 * @return {@link SourceProperties}.
 	 */
-	public static SourceProperties createSourceProperties(
-			String... propertyNameValues) {
+	public static SourceProperties createSourceProperties(String... propertyNameValues) {
 		return new SourcePropertiesImpl(propertyNameValues);
 	}
 
@@ -121,17 +116,18 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @return {@link WoofChangeIssues}.
 	 */
 	public static WoofChangeIssues getWoofChangeIssues() {
+		final OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		final CompilerIssues issues = getCompilerIssues();
 		return new WoofChangeIssues() {
 
 			@Override
 			public void addIssue(String message, Throwable cause) {
-				issues.addIssue(null, null, null, null, message, cause);
+				issues.addIssue(compiler, message, cause);
 			}
 
 			@Override
 			public void addIssue(String message) {
-				issues.addIssue(null, null, null, null, message);
+				issues.addIssue(compiler, message);
 			}
 		};
 	}
@@ -154,11 +150,10 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @return {@link Change} for refactoring. May be <code>null</code>.
 	 */
 	public static <S extends WoofTemplateExtensionSource> Change<?> refactorTemplateExtension(
-			Class<S> woofTemplateExtensionSourceClass, String oldUri,
-			SourceProperties oldProperties, String newUri,
+			Class<S> woofTemplateExtensionSourceClass, String oldUri, SourceProperties oldProperties, String newUri,
 			SourceProperties newProperties) {
-		return refactorTemplateExtension(woofTemplateExtensionSourceClass,
-				oldUri, oldProperties, newUri, newProperties, null, null);
+		return refactorTemplateExtension(woofTemplateExtensionSourceClass, oldUri, oldProperties, newUri, newProperties,
+				null, null);
 	}
 
 	/**
@@ -185,10 +180,8 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @return {@link Change} for refactoring. May be <code>null</code>.
 	 */
 	public static <S extends WoofTemplateExtensionSource> Change<?> refactorTemplateExtension(
-			Class<S> woofTemplateExtensionSourceClass, String oldUri,
-			SourceProperties oldProperties, String newUri,
-			SourceProperties newProperties,
-			ConfigurationContext configurationContext, ClassLoader classLoader,
+			Class<S> woofTemplateExtensionSourceClass, String oldUri, SourceProperties oldProperties, String newUri,
+			SourceProperties newProperties, ConfigurationContext configurationContext, ClassLoader classLoader,
 			ResourceSource... resourceSources) {
 
 		// Ensure have configuration context
@@ -197,21 +190,17 @@ public class WoofTemplateExtensionLoaderUtil {
 		}
 
 		// Create the source context
-		SourceContext sourceContext = getSourceContext(classLoader,
-				resourceSources);
+		SourceContext sourceContext = getSourceContext(classLoader, resourceSources);
 
 		// Obtain the extension source class name
-		String extensionSourceClassName = woofTemplateExtensionSourceClass
-				.getName();
+		String extensionSourceClassName = woofTemplateExtensionSourceClass.getName();
 
 		// Obtain the WoOF change issues
 		WoofChangeIssues issues = getWoofChangeIssues();
 
 		// Load the change
-		Change<?> change = getWoofTemplateExtensionLoader()
-				.refactorTemplateExtension(extensionSourceClassName, oldUri,
-						oldProperties, newUri, newProperties,
-						configurationContext, sourceContext, issues);
+		Change<?> change = getWoofTemplateExtensionLoader().refactorTemplateExtension(extensionSourceClassName, oldUri,
+				oldProperties, newUri, newProperties, configurationContext, sourceContext, issues);
 
 		// Return the change
 		return change;
@@ -231,35 +220,31 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @throws Exception
 	 *             If failure in accessing {@link ConfigurationItem}.
 	 */
-	public static void validateConfigurationItem(ConfigurationContext context,
-			String location, String content) throws Exception {
+	public static void validateConfigurationItem(ConfigurationContext context, String location, String content)
+			throws Exception {
 
 		// Obtain the configuration item
 		ConfigurationItem item = context.getConfigurationItem(location);
 
 		// Determine if expecting the configuration item
 		if (content == null) {
-			Assert.assertNull("Should be no configuration item at location "
-					+ location, item);
+			Assert.assertNull("Should be no configuration item at location " + location, item);
 			return;
 		}
 
 		// Ensure have the configuration item
-		Assert.assertNotNull("Should have configuration item for location "
-				+ location, item);
+		Assert.assertNotNull("Should have configuration item for location " + location, item);
 
 		// Load the content of the configuration item
 		Reader reader = new InputStreamReader(item.getConfiguration());
 		StringWriter buffer = new StringWriter();
-		for (int character = reader.read(); character != -1; character = reader
-				.read()) {
+		for (int character = reader.read(); character != -1; character = reader.read()) {
 			buffer.write(character);
 		}
 
 		// Ensure correct content
-		OfficeFrameTestCase.assertXmlEquals(
-				"Incorrect content for configuration item at location "
-						+ location, content, buffer.toString());
+		OfficeFrameTestCase.assertXmlEquals("Incorrect content for configuration item at location " + location, content,
+				buffer.toString());
 	}
 
 	/**
@@ -276,16 +261,15 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @throws Exception
 	 *             If fails accessing the {@link ConfigurationItem}.
 	 */
-	public static void validateConfigurationItem(ConfigurationContext context,
-			String location, Reader content) throws Exception {
+	public static void validateConfigurationItem(ConfigurationContext context, String location, Reader content)
+			throws Exception {
 
 		// Obtain the content as string
 		StringWriter buffer = null;
 		if (content != null) {
 			// Load the content into a buffer
 			buffer = new StringWriter();
-			for (int character = content.read(); character != -1; character = content
-					.read()) {
+			for (int character = content.read(); character != -1; character = content.read()) {
 				buffer.write(character);
 			}
 		}
@@ -312,13 +296,10 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @throws Exception
 	 *             If fails to extend {@link HttpTemplateAutoWireSection}.
 	 */
-	public static <S extends WoofTemplateExtensionSource> void extendTemplate(
-			Class<S> extensionSourceClass,
-			HttpTemplateAutoWireSection template,
-			WebAutoWireApplication application, String... propertyNameValues)
+	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
+			HttpTemplateAutoWireSection template, WebAutoWireApplication application, String... propertyNameValues)
 			throws Exception {
-		extendTemplate(extensionSourceClass, template, application, null, null,
-				propertyNameValues);
+		extendTemplate(extensionSourceClass, template, application, null, null, propertyNameValues);
 	}
 
 	/**
@@ -342,23 +323,18 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * @throws Exception
 	 *             If fails to extend {@link HttpTemplateAutoWireSection}.
 	 */
-	public static <S extends WoofTemplateExtensionSource> void extendTemplate(
-			Class<S> extensionSourceClass,
-			HttpTemplateAutoWireSection template,
-			WebAutoWireApplication application, ClassLoader classLoader,
-			ResourceSource[] resourceSources, String... propertyNameValues)
-			throws Exception {
+	public static <S extends WoofTemplateExtensionSource> void extendTemplate(Class<S> extensionSourceClass,
+			HttpTemplateAutoWireSection template, WebAutoWireApplication application, ClassLoader classLoader,
+			ResourceSource[] resourceSources, String... propertyNameValues) throws Exception {
 
 		// Obtains the source context
-		SourceContext sourceContext = getSourceContext(classLoader,
-				resourceSources);
+		SourceContext sourceContext = getSourceContext(classLoader, resourceSources);
 
 		// Create the properties
 		PropertyList properties = new PropertyListImpl(propertyNameValues);
 
 		// Undertake the extension of the template
-		getWoofTemplateExtensionLoader().extendTemplate(
-				extensionSourceClass.getName(), properties, template,
+		getWoofTemplateExtensionLoader().extendTemplate(extensionSourceClass.getName(), properties, template,
 				application, sourceContext);
 	}
 
@@ -380,8 +356,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	 *            {@link ResourceSource} instances. May be <code>null</code>.
 	 * @return {@link SourceContext}.
 	 */
-	private static SourceContext getSourceContext(ClassLoader classLoader,
-			ResourceSource[] resourceSources) {
+	private static SourceContext getSourceContext(ClassLoader classLoader, ResourceSource[] resourceSources) {
 
 		// Ensure have class loader
 		if (classLoader == null) {
