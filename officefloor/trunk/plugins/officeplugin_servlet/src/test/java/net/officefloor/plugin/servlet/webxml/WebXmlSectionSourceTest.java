@@ -28,7 +28,6 @@ import javax.servlet.ServletException;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.plugin.servlet.filter.configuration.FilterInstance;
@@ -64,12 +63,9 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 		SectionDesigner type = this.createExpectedType();
 
 		// Validate type
-		String webXmlLocation = this.getPackageRelativePath(this.getClass())
-				+ "/Type.xml";
-		SectionLoaderUtil.validateSectionType(type, WebXmlSectionSource.class,
-				webXmlLocation,
-				WebXmlSectionSource.PROPERTY_WEB_XML_CONFIGURATION,
-				"This should be ignored");
+		String webXmlLocation = this.getPackageRelativePath(this.getClass()) + "/Type.xml";
+		SectionLoaderUtil.validateSectionType(type, WebXmlSectionSource.class, webXmlLocation,
+				WebXmlSectionSource.PROPERTY_WEB_XML_CONFIGURATION, "This should be ignored");
 	}
 
 	/**
@@ -81,13 +77,11 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 		SectionDesigner type = this.createExpectedType();
 
 		// Load the configuration
-		String configuration = this.getFileContents(this.findFile(
-				this.getClass(), "Type.xml"));
+		String configuration = this.getFileContents(this.findFile(this.getClass(), "Type.xml"));
 
 		// Validate type
-		SectionLoaderUtil.validateSectionType(type, WebXmlSectionSource.class,
-				null, WebXmlSectionSource.PROPERTY_WEB_XML_CONFIGURATION,
-				configuration);
+		SectionLoaderUtil.validateSectionType(type, WebXmlSectionSource.class, null,
+				WebXmlSectionSource.PROPERTY_WEB_XML_CONFIGURATION, configuration);
 	}
 
 	/**
@@ -98,22 +92,16 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 	private SectionDesigner createExpectedType() throws Exception {
 
 		// Create the expected type
-		SectionDesigner type = SectionLoaderUtil
-				.createSectionDesigner(WebXmlSectionSource.class);
+		SectionDesigner type = SectionLoaderUtil.createSectionDesigner();
 		type.addSectionInput("service", null);
 		type.addSectionOutput("unhandled", null, false);
-		type.addSectionOutput(ServletException.class.getSimpleName(),
-				ServletException.class.getName(), true);
-		type.addSectionOutput(IOException.class.getSimpleName(),
-				IOException.class.getName(), true);
+		type.addSectionOutput(ServletException.class.getSimpleName(), ServletException.class.getName(), true);
+		type.addSectionOutput(IOException.class.getSimpleName(), IOException.class.getName(), true);
 		type.addSectionObject("SERVLET_SERVER", ServletServer.class.getName());
-		type.addSectionObject("HTTP_CONNECTION",
-				ServerHttpConnection.class.getName());
-		type.addSectionObject("REQUEST_ATTRIBUTES",
-				HttpRequestState.class.getName());
+		type.addSectionObject("HTTP_CONNECTION", ServerHttpConnection.class.getName());
+		type.addSectionObject("REQUEST_ATTRIBUTES", HttpRequestState.class.getName());
 		type.addSectionObject("HTTP_SESSION", HttpSession.class.getName());
-		type.addSectionObject("HTTP_SECURITY",
-				HttpServletSecurity.class.getName());
+		type.addSectionObject("HTTP_SECURITY", HttpServletSecurity.class.getName());
 
 		// Return the expected type
 		return type;
@@ -125,19 +113,14 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 	public void testValidWebXmlConfiguration() throws Exception {
 
 		// Create the source context
-		SourceContext context = new SourceContextImpl(false, Thread
-				.currentThread().getContextClassLoader());
+		SourceContext context = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
 
 		// Validate marker file
-		this.undertakeInvalidWebXmlCheck(
-				"Marker file",
-				"Invalid web.xml configuration ["
-						+ XmlMarshallException.class.getSimpleName()
-						+ "]: Content is not allowed in prolog.", context);
+		this.undertakeInvalidWebXmlCheck("Marker file", "Invalid web.xml configuration ["
+				+ XmlMarshallException.class.getSimpleName() + "]: Content is not allowed in prolog.", context);
 
 		// Validate must have servlet
-		this.undertakeInvalidWebXmlCheck("<web-app />",
-				"Must have at least one servlet configured", context);
+		this.undertakeInvalidWebXmlCheck("<web-app />", "Must have at least one servlet configured", context);
 
 		// Validate must have servlet mapping
 		this.undertakeInvalidWebXmlCheck("<web-app><servlet /></web-app>",
@@ -145,9 +128,7 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 
 		// Validate that reports valid with minimal configuration
 		WebXmlSectionSource.validateWebXmlConfiguration(
-				new ByteArrayInputStream(
-						"<web-app><servlet /><servlet-mapping /></web-app>"
-								.getBytes()), context);
+				new ByteArrayInputStream("<web-app><servlet /><servlet-mapping /></web-app>".getBytes()), context);
 	}
 
 	/**
@@ -160,11 +141,9 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 	 * @param context
 	 *            {@link SourceContext}.
 	 */
-	private void undertakeInvalidWebXmlCheck(String webXmlContents,
-			String expectedReason, SourceContext context) {
+	private void undertakeInvalidWebXmlCheck(String webXmlContents, String expectedReason, SourceContext context) {
 		try {
-			WebXmlSectionSource.validateWebXmlConfiguration(
-					new ByteArrayInputStream(webXmlContents.getBytes()),
+			WebXmlSectionSource.validateWebXmlConfiguration(new ByteArrayInputStream(webXmlContents.getBytes()),
 					context);
 			fail("Should not be successful");
 		} catch (InvalidServletConfigurationException ex) {
@@ -183,9 +162,7 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 				this.recordInit();
 				this.recordOfficeServletContext();
 				this.recordRouteService();
-				designer.addIssue(
-						"At least one <servlet/> element must be configured",
-						AssetType.WORK, "servlet");
+				designer.addIssue("At least one <servlet/> element must be configured");
 			}
 		});
 	}
@@ -201,9 +178,7 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 				this.recordInit();
 				this.recordOfficeServletContext();
 				this.recordRouteService();
-				designer.addIssue(
-						"At least one <servlet-mapping/> element must be configured",
-						AssetType.WORK, "servlet-mapping");
+				designer.addIssue("At least one <servlet-mapping/> element must be configured");
 				this.recordHttpServlet("Test", null);
 			}
 		});
@@ -234,8 +209,7 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 			void record(SectionDesigner designer) {
 				// Record filter
 				this.recordInit();
-				this.recordFilter(new FilterInstance("Filter", MockFilter.class
-						.getName(), "ONE", "a", "TWO", "b"));
+				this.recordFilter(new FilterInstance("Filter", MockFilter.class.getName(), "ONE", "a", "TWO", "b"));
 				this.getFilterMappings().addFilterMapping("Filter", "/", null);
 				this.recordOfficeServletContext();
 				this.recordRouteService();
@@ -253,13 +227,11 @@ public class WebXmlSectionSourceTest extends AbstractWebXmlTestCase {
 			void record(SectionDesigner designer) {
 				// Record filter
 				this.recordInit();
-				this.recordFilter(new FilterInstance("Filter", MockFilter.class
-						.getName()));
+				this.recordFilter(new FilterInstance("Filter", MockFilter.class.getName()));
 				FilterMappings mappings = this.getFilterMappings();
 				mappings.addFilterMapping("Filter", "/path/*", null);
 				mappings.addFilterMapping("Filter", "*.extension", null);
-				mappings.addFilterMapping("Filter", null, "Servlet",
-						MappingType.REQUEST, MappingType.FORWARD,
+				mappings.addFilterMapping("Filter", null, "Servlet", MappingType.REQUEST, MappingType.FORWARD,
 						MappingType.INCLUDE);
 				this.recordOfficeServletContext();
 				this.recordRouteService();

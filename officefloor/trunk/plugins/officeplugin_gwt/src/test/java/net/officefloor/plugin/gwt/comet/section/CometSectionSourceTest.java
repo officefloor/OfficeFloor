@@ -46,20 +46,15 @@ public class CometSectionSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create the expected type
-		SectionDesigner type = SectionLoaderUtil
-				.createSectionDesigner(CometSectionSource.class);
+		SectionDesigner type = SectionLoaderUtil.createSectionDesigner();
 		type.addSectionInput(CometSectionSource.SUBSCRIBE_INPUT_NAME, null);
 		type.addSectionInput(CometSectionSource.PUBLISH_INPUT_NAME, null);
-		type.addSectionObject(CometRequestServicer.class.getName(),
-				CometRequestServicer.class.getName());
-		type.addSectionObject(CometService.class.getName(),
-				CometService.class.getName());
-		type.addSectionObject(ServerGwtRpcConnection.class.getName(),
-				ServerGwtRpcConnection.class.getName());
+		type.addSectionObject(CometRequestServicer.class.getName(), CometRequestServicer.class.getName());
+		type.addSectionObject(CometService.class.getName(), CometService.class.getName());
+		type.addSectionObject(ServerGwtRpcConnection.class.getName(), ServerGwtRpcConnection.class.getName());
 
 		// Validate type
-		SectionLoaderUtil.validateSectionType(type, CometSectionSource.class,
-				"COMET");
+		SectionLoaderUtil.validateSectionType(type, CometSectionSource.class, "COMET");
 	}
 
 	/**
@@ -68,23 +63,17 @@ public class CometSectionSourceTest extends OfficeFrameTestCase {
 	public void testTypeWithManualPublish() {
 
 		// Create the expected type
-		SectionDesigner type = SectionLoaderUtil
-				.createSectionDesigner(CometSectionSource.class);
+		SectionDesigner type = SectionLoaderUtil.createSectionDesigner();
 		type.addSectionInput(CometSectionSource.SUBSCRIBE_INPUT_NAME, null);
 		type.addSectionInput(CometSectionSource.PUBLISH_INPUT_NAME, null);
-		type.addSectionOutput(CometSectionSource.PUBLISH_OUTPUT_PREFIX
-				+ "template", CometEvent.class.getName(), false);
-		type.addSectionObject(CometRequestServicer.class.getName(),
-				CometRequestServicer.class.getName());
-		type.addSectionObject(CometService.class.getName(),
-				CometService.class.getName());
-		type.addSectionObject(ServerGwtRpcConnection.class.getName(),
-				ServerGwtRpcConnection.class.getName());
+		type.addSectionOutput(CometSectionSource.PUBLISH_OUTPUT_PREFIX + "template", CometEvent.class.getName(), false);
+		type.addSectionObject(CometRequestServicer.class.getName(), CometRequestServicer.class.getName());
+		type.addSectionObject(CometService.class.getName(), CometService.class.getName());
+		type.addSectionObject(ServerGwtRpcConnection.class.getName(), ServerGwtRpcConnection.class.getName());
 
 		// Validate type
-		SectionLoaderUtil.validateSectionType(type, CometSectionSource.class,
-				"COMET", CometSectionSource.PROPERTY_MANUAL_PUBLISH_URI_PREFIX
-						+ "template", "template");
+		SectionLoaderUtil.validateSectionType(type, CometSectionSource.class, "COMET",
+				CometSectionSource.PROPERTY_MANUAL_PUBLISH_URI_PREFIX + "template", "template");
 	}
 
 }

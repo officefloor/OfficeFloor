@@ -20,16 +20,22 @@ package net.officefloor.plugin.json.read;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
@@ -46,30 +52,19 @@ import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.application.WebAutoWireApplication;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.easymock.AbstractMatcher;
-
 /**
  * Tests the {@link JsonRequestReaderManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JsonRequestReaderManagedObjectSourceTest extends
-		OfficeFrameTestCase {
+public class JsonRequestReaderManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil
-				.validateSpecification(
-						JsonRequestReaderManagedObjectSource.class,
-						JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
-						"Class");
+		ManagedObjectLoaderUtil.validateSpecification(JsonRequestReaderManagedObjectSource.class,
+				JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS, "Class");
 	}
 
 	/**
@@ -78,21 +73,14 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 	public void testType() {
 
 		// Create the expected type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockJsonObject.class);
-		type.addDependency(Dependencies.SERVER_HTTP_CONNECTION,
-				ServerHttpConnection.class, null);
-		type.addDependency(Dependencies.HTTP_REQUEST_STATE,
-				HttpRequestState.class, null);
+		type.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
+		type.addDependency(Dependencies.HTTP_REQUEST_STATE, HttpRequestState.class, null);
 
 		// Validate type
-		ManagedObjectLoaderUtil
-				.validateManagedObjectType(
-						type,
-						JsonRequestReaderManagedObjectSource.class,
-						JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
-						MockJsonObject.class.getName());
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, JsonRequestReaderManagedObjectSource.class,
+				JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS, MockJsonObject.class.getName());
 	}
 
 	/**
@@ -100,41 +88,20 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 	 */
 	public void testInvalidObjectAsNotSerializable() {
 
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Record issue as not serializable object
-		issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
-				"Failed to init", null);
-		this.control(issues).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				for (int i = 0; i < (expected.length - 1); i++) {
-					assertEquals("Invalid parameter " + i, expected[i],
-							actual[i]);
-				}
-				Exception cause = (Exception) actual[expected.length - 1];
-				assertEquals(
-						"Incorrect cause",
-						"JSON object "
-								+ MockInvalidObject.class.getName()
-								+ " must be Serializable as stored in HttpRequestState",
-						cause.getMessage());
-				return true;
-			}
-		});
+		issues.recordIssue("Failed to init", new Exception("JSON object " + MockInvalidObject.class.getName()
+				+ " must be Serializable as stored in HttpRequestState"));
 
 		// Test
 		this.replayMockObjects();
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(issues);
 		PropertyList properties = compiler.createPropertyList();
-		properties
-				.addProperty(
-						JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS)
+		properties.addProperty(JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS)
 				.setValue(MockInvalidObject.class.getName());
-		compiler.getManagedObjectLoader().loadManagedObjectType(
-				JsonRequestReaderManagedObjectSource.class, properties);
+		compiler.getManagedObjectLoader().loadManagedObjectType(JsonRequestReaderManagedObjectSource.class, properties);
 		this.verifyMockObjects();
 	}
 
@@ -170,8 +137,7 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 	 * Ensure able to read object from {@link HttpRequest} pay load specifying
 	 * the bound name.
 	 */
-	public void testReadObjectFromPayloadRegisteringWithBoundName()
-			throws Throwable {
+	public void testReadObjectFromPayloadRegisteringWithBoundName() throws Throwable {
 		this.doReadObjectTest("BIND", "BIND", false);
 	}
 
@@ -186,18 +152,15 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 	 *            <code>true</code> should the object be available from the
 	 *            {@link HttpRequestState}.
 	 */
-	private void doReadObjectTest(String bindName, String boundName,
-			boolean isAvailableInHttpRequestState) throws Throwable {
+	private void doReadObjectTest(String bindName, String boundName, boolean isAvailableInHttpRequestState)
+			throws Throwable {
 
-		final ServerHttpConnection connection = this
-				.createMock(ServerHttpConnection.class);
-		final HttpRequestState requestState = this
-				.createMock(HttpRequestState.class);
+		final ServerHttpConnection connection = this.createMock(ServerHttpConnection.class);
+		final HttpRequestState requestState = this.createMock(HttpRequestState.class);
 		final HttpRequest request = this.createMock(HttpRequest.class);
 
 		ServerInputStreamImpl entity = new ServerInputStreamImpl(new Object());
-		byte[] data = "{\"name\":\"Daniel\"}"
-				.getBytes(HttpRequestParserImpl.US_ASCII);
+		byte[] data = "{\"name\":\"Daniel\"}".getBytes(HttpRequestParserImpl.US_ASCII);
 		entity.inputData(data, 0, (data.length - 1), false);
 
 		// Provide object
@@ -207,13 +170,11 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 		// Record reading the object
 		if (isAvailableInHttpRequestState) {
 			// Obtain available from HTTP request state
-			this.recordReturn(requestState,
-					requestState.getAttribute(boundName), jsonObject[0]);
+			this.recordReturn(requestState, requestState.getAttribute(boundName), jsonObject[0]);
 
 		} else {
 			// Obtain from HTTP request pay load
-			this.recordReturn(requestState,
-					requestState.getAttribute(boundName), null);
+			this.recordReturn(requestState, requestState.getAttribute(boundName), null);
 			this.recordReturn(connection, connection.getHttpRequest(), request);
 			this.recordReturn(request, request.getEntity(), entity);
 			requestState.setAttribute(boundName, null);
@@ -238,13 +199,10 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 
 		// Load the source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(
-				JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
+		loader.addProperty(JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
 				MockJsonObject.class.getName());
 		if (bindName != null) {
-			loader.addProperty(
-					JsonRequestReaderManagedObjectSource.PROPERTY_BIND_NAME,
-					bindName);
+			loader.addProperty(JsonRequestReaderManagedObjectSource.PROPERTY_BIND_NAME, bindName);
 		}
 		JsonRequestReaderManagedObjectSource source = loader
 				.loadManagedObjectSource(JsonRequestReaderManagedObjectSource.class);
@@ -274,9 +232,8 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 	 * Ensure able to handle null JSON values.
 	 */
 	public void testLoadNullValues() throws Exception {
-		this.doReadObjectTest(
-				"{ \"name\" : null, \"array\" : null, \"subObject\" : null, \"empty\" : null }",
-				null, null, false, (String[]) null);
+		this.doReadObjectTest("{ \"name\" : null, \"array\" : null, \"subObject\" : null, \"empty\" : null }", null,
+				null, false, (String[]) null);
 	}
 
 	/**
@@ -291,21 +248,17 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 	/**
 	 * Ensure can read and load JSON contents from pay load.
 	 */
-	private void doReadObjectTest(String jsonPayLoad, String expectedName,
-			String expectedSubObjectText, boolean isExpectedEmpty,
-			String... expectedArrayValues) throws Exception {
+	private void doReadObjectTest(String jsonPayLoad, String expectedName, String expectedSubObjectText,
+			boolean isExpectedEmpty, String... expectedArrayValues) throws Exception {
 
 		// Start the application
 		WebAutoWireApplication app = new HttpServerAutoWireOfficeFloorSource();
-		AutoWireSection servicer = app
-				.addSection("SECTION", ClassSectionSource.class.getName(),
-						MockService.class.getName());
+		AutoWireSection servicer = app.addSection("SECTION", ClassSectionSource.class.getName(),
+				MockService.class.getName());
 		app.linkUri("service", servicer, "service");
-		AutoWireObject json = app.addManagedObject(
-				JsonRequestReaderManagedObjectSource.class.getName(), null,
+		AutoWireObject json = app.addManagedObject(JsonRequestReaderManagedObjectSource.class.getName(), null,
 				new AutoWire(MockJsonObject.class));
-		json.addProperty(
-				JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
+		json.addProperty(JsonRequestReaderManagedObjectSource.PROPERTY_JSON_OBJECT_CLASS,
 				MockJsonObject.class.getName());
 		AutoWireOfficeFloor officeFloor = app.openOfficeFloor();
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
@@ -319,10 +272,8 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 				post.setEntity(new StringEntity(jsonPayLoad));
 			}
 			HttpResponse response = client.execute(post);
-			assertEquals("Incorrect response entity", "SERVICED",
-					EntityUtils.toString(response.getEntity()));
-			assertEquals("Request should be successful", 200, response
-					.getStatusLine().getStatusCode());
+			assertEquals("Incorrect response entity", "SERVICED", EntityUtils.toString(response.getEntity()));
+			assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
 
 		} finally {
 			// Ensure stop server (client also is closed)
@@ -338,12 +289,10 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 		if (expectedArrayValues == null) {
 			assertNull("Should not have array", jsonObject.array);
 		} else {
-			assertEquals("Incorrect number of array items",
-					expectedArrayValues.length, jsonObject.array.length);
+			assertEquals("Incorrect number of array items", expectedArrayValues.length, jsonObject.array.length);
 			int index = 0;
 			for (String value : expectedArrayValues) {
-				assertEquals("Incorrect value", value,
-						jsonObject.array[index++]);
+				assertEquals("Incorrect value", value, jsonObject.array[index++]);
 			}
 		}
 		MockJsonSubObject subObject = jsonObject.subObject;
@@ -351,8 +300,7 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 			assertNull("Should not have sub object", subObject);
 		} else {
 			assertNotNull("Should have sub object", subObject);
-			assertEquals("Incorrect text for sub object",
-					expectedSubObjectText, subObject.text);
+			assertEquals("Incorrect text for sub object", expectedSubObjectText, subObject.text);
 		}
 		if (isExpectedEmpty) {
 			assertNotNull("Should have empty object", jsonObject.empty);
@@ -371,8 +319,7 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 		private static volatile MockJsonObject object = null;
 
 		@NextTask("same")
-		public void service(MockJsonObject object,
-				ServerHttpConnection connection) throws IOException {
+		public void service(MockJsonObject object, ServerHttpConnection connection) throws IOException {
 
 			// Specify the object to check same on another request task
 			this.check = object;
@@ -384,8 +331,7 @@ public class JsonRequestReaderManagedObjectSourceTest extends
 		public void same(MockJsonObject object) {
 
 			// Ensure same object (cached in HttpRequestState)
-			assertSame("Object to be cached in HttpRequestState", this.check,
-					object);
+			assertSame("Object to be cached in HttpRequestState", this.check, object);
 
 			// Specify the object for testing JSON
 			MockService.object = object;

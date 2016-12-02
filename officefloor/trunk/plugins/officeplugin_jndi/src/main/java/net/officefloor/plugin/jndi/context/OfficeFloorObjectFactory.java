@@ -18,9 +18,13 @@
 package net.officefloor.plugin.jndi.context;
 
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -30,8 +34,9 @@ import javax.naming.NamingException;
 import javax.naming.spi.ObjectFactory;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -68,8 +73,8 @@ public class OfficeFloorObjectFactory implements ObjectFactory {
 	 */
 
 	@Override
-	public Object getObjectInstance(Object obj, Name name, Context nameCtx,
-			Hashtable<?, ?> environment) throws Exception {
+	public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable<?, ?> environment)
+			throws Exception {
 
 		// Transform name to resource name
 		StringBuilder resourceNameBuffer = new StringBuilder();
@@ -85,17 +90,14 @@ public class OfficeFloorObjectFactory implements ObjectFactory {
 		resourceName = resourceName.replace('.', '/');
 
 		// Obtain the class loader
-		ClassLoader classLoader = Thread.currentThread()
-				.getContextClassLoader();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		// First attempt for direct OfficeFloor configuration
-		String officeFloorConfigurationPath = resourceName
-				+ OFFICE_FLOOR_CONFIGURATION_FILE_EXTENSION;
+		String officeFloorConfigurationPath = resourceName + OFFICE_FLOOR_CONFIGURATION_FILE_EXTENSION;
 		URL resourceUrl = classLoader.getResource(officeFloorConfigurationPath);
 		if (resourceUrl == null) {
 			// Next attempt for properties to run OfficeFloor
-			String officeFloorPropertiesPath = resourceName
-					+ OFFICE_FLOOR_PROPERTIES_FILE_EXTENSION;
+			String officeFloorPropertiesPath = resourceName + OFFICE_FLOOR_PROPERTIES_FILE_EXTENSION;
 			resourceUrl = classLoader.getResource(officeFloorPropertiesPath);
 			if (resourceUrl != null) {
 				// Load properties for OfficeFloor
@@ -105,14 +107,11 @@ public class OfficeFloorObjectFactory implements ObjectFactory {
 				propertyContent.close();
 
 				// Obtain the OfficeFloor configuration path
-				officeFloorConfigurationPath = properties
-						.getProperty(PROPERTY_OFFICE_FLOOR_CONFIGURATION_PATH);
+				officeFloorConfigurationPath = properties.getProperty(PROPERTY_OFFICE_FLOOR_CONFIGURATION_PATH);
 
 			} else {
 				// Unknown resource
-				throw new NamingException("Unknown "
-						+ OfficeFloor.class.getSimpleName() + " resource '"
-						+ name + "'");
+				throw new NamingException("Unknown " + OfficeFloor.class.getSimpleName() + " resource '" + name + "'");
 			}
 		}
 
@@ -124,8 +123,7 @@ public class OfficeFloorObjectFactory implements ObjectFactory {
 			if (entry == null) {
 				// No entry as yet, so create one to open OfficeFloor against
 				entry = new OpenOfficeFloorEntry();
-				openOfficeFloorRegistry
-						.put(officeFloorConfigurationPath, entry);
+				openOfficeFloorRegistry.put(officeFloorConfigurationPath, entry);
 			}
 		}
 
@@ -140,56 +138,26 @@ public class OfficeFloorObjectFactory implements ObjectFactory {
 			}
 
 			// Create the OfficeFloor compiler
-			OfficeFloorCompiler compiler = OfficeFloorCompiler
-					.newOfficeFloorCompiler(classLoader);
-			final StringBuilder issues = new StringBuilder();
-			compiler.setCompilerIssues(new CompilerIssues() {
+			OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
+			final List<DefaultCompilerIssue> issues = new LinkedList<>();
+			compiler.setCompilerIssues(new AbstractCompilerIssues() {
 				@Override
-				public void addIssue(LocationType locationType,
-						String location, AssetType assetType, String assetName,
-						String issueDescription) {
-					this.addIssue(locationType, location, assetType, assetName,
-							issueDescription, null);
-				}
-
-				@Override
-				public void addIssue(LocationType locationType,
-						String location, AssetType assetType, String assetName,
-						String issueDescription, Throwable cause) {
-					issues.append("\n\t");
-					issues.append(issueDescription);
-					issues.append(" [");
-					if (locationType != null) {
-						issues.append(locationType + ":" + location);
-					}
-					if (assetType != null) {
-						issues.append(", " + assetType + ":" + assetName);
-					}
-					issues.append("]");
-					if (cause != null) {
-						issues.append(" - " + cause.getMessage() + " ["
-								+ cause.getClass().getSimpleName() + "]");
-					}
+				protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+					issues.add(issue);
 				}
 			});
 
-			// Obtain issue text
-			String issuesText = issues.toString();
-
 			// Compile the OfficeFloor
 			officeFloor = compiler.compile(officeFloorConfigurationPath);
-			if (officeFloor == null) {
+			if ((officeFloor == null) || (issues.size() > 0)) {
 				// Failed to compile OfficeFloor
-				throw new NamingException("Failed to load "
-						+ OfficeFloor.class.getSimpleName() + ": '"
-						+ officeFloorConfigurationPath + "' for name '" + name
-						+ "'" + issuesText);
-			} else if ((issuesText != null) && (issuesText.trim().length() > 0)) {
-				// Issues in compiling OfficeFloor
-				throw new NamingException("Issue in loading "
-						+ OfficeFloor.class.getSimpleName() + ": '"
-						+ officeFloorConfigurationPath + "' for name '" + name
-						+ "'" + issuesText);
+				StringWriter reason = new StringWriter();
+				reason.write("Failed to load " + OfficeFloor.class.getSimpleName() + ": '"
+						+ officeFloorConfigurationPath + "' for name '" + name + "'\n\n");
+				for (DefaultCompilerIssue issue : issues) {
+					CompileException.printIssue(issue, new PrintWriter(reason));
+				}
+				throw new NamingException(reason.toString());
 			}
 
 			// Open the OfficeFloor
