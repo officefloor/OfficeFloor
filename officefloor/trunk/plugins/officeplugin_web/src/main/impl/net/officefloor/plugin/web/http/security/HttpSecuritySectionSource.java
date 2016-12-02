@@ -82,73 +82,56 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner designer,
-			SectionSourceContext context) throws Exception {
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// Retrieve the HTTP Security configuration
 		String key = context.getSectionLocation();
 		if (CompileUtil.isBlank(key)) {
 			key = context.getProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY);
 		}
-		HttpSecurityConfiguration<?, ?, ?, ?> configuration = HttpSecurityConfigurator
-				.getHttpSecuritySource(key);
+		HttpSecurityConfiguration<?, ?, ?, ?> configuration = HttpSecurityConfigurator.getHttpSecuritySource(key);
 
 		// Obtain the HTTP Security Type
-		HttpSecurityType<?, ?, ?, ?> securityType = configuration
-				.getHttpSecurityType();
+		HttpSecurityType<?, ?, ?, ?> securityType = configuration.getHttpSecurityType();
 
 		// Obtain the credentials type
-		Class<?> credentialsType = HttpSecurityWorkSource
-				.getCredentialsClass(securityType);
+		Class<?> credentialsType = HttpSecurityWorkSource.getCredentialsClass(securityType);
 
 		// Create the dependent objects
-		SectionObject serverHttpConnection = designer.addSectionObject(
-				"SERVER_HTTP_CONNECTION", ServerHttpConnection.class.getName());
-		SectionObject httpSession = designer.addSectionObject("HTTP_SESSION",
-				HttpSession.class.getName());
-		SectionObject httpRequestState = designer.addSectionObject(
-				"HTTP_REQUEST_STATE", HttpRequestState.class.getName());
-		SectionObject httpAuthentication = designer.addSectionObject(
-				"HTTP_AUTHENTICATION", HttpAuthentication.class.getName());
-		HttpSecurityDependencyType<?>[] dependencyTypes = securityType
-				.getDependencyTypes();
+		SectionObject serverHttpConnection = designer.addSectionObject("SERVER_HTTP_CONNECTION",
+				ServerHttpConnection.class.getName());
+		SectionObject httpSession = designer.addSectionObject("HTTP_SESSION", HttpSession.class.getName());
+		SectionObject httpRequestState = designer.addSectionObject("HTTP_REQUEST_STATE",
+				HttpRequestState.class.getName());
+		SectionObject httpAuthentication = designer.addSectionObject("HTTP_AUTHENTICATION",
+				HttpAuthentication.class.getName());
+		HttpSecurityDependencyType<?>[] dependencyTypes = securityType.getDependencyTypes();
 		SectionObject[] dependencyObjects = new SectionObject[dependencyTypes.length];
 		for (int i = 0; i < dependencyObjects.length; i++) {
 			HttpSecurityDependencyType<?> dependencyType = dependencyTypes[i];
-			dependencyObjects[i] = designer.addSectionObject("DEPENDENCY_"
-					+ dependencyType.getDependencyName(), dependencyType
-					.getDependencyType().getName());
-			dependencyObjects[i].setTypeQualifier(dependencyType
-					.getTypeQualifier());
+			dependencyObjects[i] = designer.addSectionObject("DEPENDENCY_" + dependencyType.getDependencyName(),
+					dependencyType.getDependencyType().getName());
+			dependencyObjects[i].setTypeQualifier(dependencyType.getTypeQualifier());
 		}
 
 		// Create the failure flow
-		SectionOutput failureOutput = designer.addSectionOutput(OUTPUT_FAILURE,
-				Throwable.class.getName(), true);
+		SectionOutput failureOutput = designer.addSectionOutput(OUTPUT_FAILURE, Throwable.class.getName(), true);
 
 		// Configure the HTTP Security Work Source
-		SectionWork work = designer.addSectionWork("HttpSecuritySource",
-				HttpSecurityWorkSource.class.getName());
-		work.addProperty(
-				HttpSecurityWorkSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
+		SectionWork work = designer.addSectionWork("HttpSecuritySource", HttpSecurityWorkSource.class.getName());
+		work.addProperty(HttpSecurityWorkSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
 
 		// Configure the challenge handling
-		SectionTask challengeTask = work.addSectionTask(
-				HttpSecurityWorkSource.TASK_CHALLENGE,
+		SectionTask challengeTask = work.addSectionTask(HttpSecurityWorkSource.TASK_CHALLENGE,
 				HttpSecurityWorkSource.TASK_CHALLENGE);
-		challengeTask.getTaskObject("HTTP_AUTHENTICATION_REQUIRED_EXCEPTION")
-				.flagAsParameter();
-		designer.link(challengeTask.getTaskObject("SERVER_HTTP_CONNECTION"),
-				serverHttpConnection);
+		challengeTask.getTaskObject("HTTP_AUTHENTICATION_REQUIRED_EXCEPTION").flagAsParameter();
+		designer.link(challengeTask.getTaskObject("SERVER_HTTP_CONNECTION"), serverHttpConnection);
 		designer.link(challengeTask.getTaskObject("HTTP_SESSION"), httpSession);
-		designer.link(challengeTask.getTaskObject("HTTP_REQUEST_STATE"),
-				httpRequestState);
+		designer.link(challengeTask.getTaskObject("HTTP_REQUEST_STATE"), httpRequestState);
 		for (SectionObject dependency : dependencyObjects) {
-			designer.link(challengeTask.getTaskObject(dependency
-					.getSectionObjectName()), dependency);
+			designer.link(challengeTask.getTaskObject(dependency.getSectionObjectName()), dependency);
 		}
-		designer.link(challengeTask.getTaskFlow("FAILURE"), failureOutput,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		designer.link(challengeTask.getTaskFlow("FAILURE"), failureOutput, FlowInstigationStrategyEnum.SEQUENTIAL);
 		for (HttpSecurityFlowType<?> flowType : securityType.getFlowTypes()) {
 			String flowName = flowType.getFlowName();
 			TaskFlow taskFlow = challengeTask.getTaskFlow("FLOW_" + flowName);
@@ -158,52 +141,38 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 				sectionOutput = failureOutput;
 			} else {
 				// Create output for the flow
-				sectionOutput = designer.addSectionOutput(flowName, flowType
-						.getArgumentType().getName(), false);
+				sectionOutput = designer.addSectionOutput(flowName, flowType.getArgumentType().getName(), false);
 			}
-			designer.link(taskFlow, sectionOutput,
-					FlowInstigationStrategyEnum.SEQUENTIAL);
+			designer.link(taskFlow, sectionOutput, FlowInstigationStrategyEnum.SEQUENTIAL);
 		}
 
 		// Configure the managed object authentication
-		SectionTask moAuthTask = work.addSectionTask(
-				HttpSecurityWorkSource.TASK_MANAGED_OBJECT_AUTHENTICATE,
+		SectionTask moAuthTask = work.addSectionTask(HttpSecurityWorkSource.TASK_MANAGED_OBJECT_AUTHENTICATE,
 				HttpSecurityWorkSource.TASK_MANAGED_OBJECT_AUTHENTICATE);
 		moAuthTask.getTaskObject("TASK_AUTHENTICATE_CONTEXT").flagAsParameter();
 		for (SectionObject dependency : dependencyObjects) {
-			designer.link(
-					moAuthTask.getTaskObject(dependency.getSectionObjectName()),
-					dependency);
+			designer.link(moAuthTask.getTaskObject(dependency.getSectionObjectName()), dependency);
 		}
 
 		// Configure the managed object logout
-		SectionTask moLogoutTask = work.addSectionTask(
-				HttpSecurityWorkSource.TASK_MANAGED_OBJECT_LOGOUT,
+		SectionTask moLogoutTask = work.addSectionTask(HttpSecurityWorkSource.TASK_MANAGED_OBJECT_LOGOUT,
 				HttpSecurityWorkSource.TASK_MANAGED_OBJECT_LOGOUT);
 		moLogoutTask.getTaskObject("TASK_LOGOUT_CONTEXT").flagAsParameter();
-		designer.link(moLogoutTask.getTaskObject("SERVER_HTTP_CONNECTION"),
-				serverHttpConnection);
-		designer.link(moLogoutTask.getTaskObject("HTTP_SESSION"), httpSession);
 		for (SectionObject dependency : dependencyObjects) {
-			designer.link(moLogoutTask.getTaskObject(dependency
-					.getSectionObjectName()), dependency);
+			designer.link(moLogoutTask.getTaskObject(dependency.getSectionObjectName()), dependency);
 		}
 
 		// Configure the application authentication start
-		SectionTask startAuthTask = work.addSectionTask(
-				HttpSecurityWorkSource.TASK_START_APPLICATION_AUTHENTICATE,
+		SectionTask startAuthTask = work.addSectionTask(HttpSecurityWorkSource.TASK_START_APPLICATION_AUTHENTICATE,
 				HttpSecurityWorkSource.TASK_START_APPLICATION_AUTHENTICATE);
-		startAuthTask.getTaskObject(
-				StartApplicationHttpAuthenticateTask.Dependencies.CREDENTIALS
-						.name()).flagAsParameter();
+		startAuthTask.getTaskObject(StartApplicationHttpAuthenticateTask.Dependencies.CREDENTIALS.name())
+				.flagAsParameter();
 		designer.link(
 				startAuthTask
-						.getTaskObject(StartApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION
-								.name()), httpAuthentication);
-		designer.link(startAuthTask
-				.getTaskFlow(StartApplicationHttpAuthenticateTask.Flows.FAILURE
-						.name()), failureOutput,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+						.getTaskObject(StartApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION.name()),
+				httpAuthentication);
+		designer.link(startAuthTask.getTaskFlow(StartApplicationHttpAuthenticateTask.Flows.FAILURE.name()),
+				failureOutput, FlowInstigationStrategyEnum.SEQUENTIAL);
 
 		// Configure the application authentication completion
 		SectionTask completeAuthTask = work.addSectionTask(
@@ -211,44 +180,32 @@ public class HttpSecuritySectionSource extends AbstractSectionSource {
 				HttpSecurityWorkSource.TASK_COMPLETE_APPLICATION_AUTHENTICATE);
 		designer.link(
 				completeAuthTask
-						.getTaskObject(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION
-								.name()), httpAuthentication);
+						.getTaskObject(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION.name()),
+				httpAuthentication);
 		designer.link(
-				completeAuthTask
-						.getTaskObject(CompleteApplicationHttpAuthenticateTask.Dependencies.SERVER_HTTP_CONNECTION
-								.name()), serverHttpConnection);
-		designer.link(
-				completeAuthTask
-						.getTaskObject(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_SESSION
-								.name()), httpSession);
-		designer.link(
-				completeAuthTask
-						.getTaskObject(CompleteApplicationHttpAuthenticateTask.Dependencies.REQUEST_STATE
-								.name()), httpRequestState);
-		designer.link(
-				completeAuthTask
-						.getTaskFlow(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE
-								.name()), failureOutput,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+				completeAuthTask.getTaskObject(
+						CompleteApplicationHttpAuthenticateTask.Dependencies.SERVER_HTTP_CONNECTION.name()),
+				serverHttpConnection);
+		designer.link(completeAuthTask
+				.getTaskObject(CompleteApplicationHttpAuthenticateTask.Dependencies.HTTP_SESSION.name()), httpSession);
+		designer.link(completeAuthTask.getTaskObject(
+				CompleteApplicationHttpAuthenticateTask.Dependencies.REQUEST_STATE.name()), httpRequestState);
+		designer.link(completeAuthTask.getTaskFlow(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE.name()),
+				failureOutput, FlowInstigationStrategyEnum.SEQUENTIAL);
 
 		// Link completion for started authentication
 		designer.link(startAuthTask, completeAuthTask);
 
 		// Link re-continue for completed authentication
-		designer.link(completeAuthTask,
-				designer.addSectionOutput(OUTPUT_RECONTINUE, null, false));
+		designer.link(completeAuthTask, designer.addSectionOutput(OUTPUT_RECONTINUE, null, false));
 
 		// Link inputs
-		designer.link(designer.addSectionInput(INPUT_CHALLENGE,
-				HttpAuthenticationRequiredException.class.getName()),
+		designer.link(designer.addSectionInput(INPUT_CHALLENGE, HttpAuthenticationRequiredException.class.getName()),
 				challengeTask);
-		designer.link(
-				designer.addSectionInput(INPUT_AUTHENTICATE,
-						credentialsType.getName()), startAuthTask);
-		designer.link(designer.addSectionInput("ManagedObjectAuthenticate",
-				TaskAuthenticateContext.class.getName()), moAuthTask);
-		designer.link(designer.addSectionInput("ManagedObjectLogout",
-				HttpLogoutRequest.class.getName()), moLogoutTask);
+		designer.link(designer.addSectionInput(INPUT_AUTHENTICATE, credentialsType.getName()), startAuthTask);
+		designer.link(designer.addSectionInput("ManagedObjectAuthenticate", TaskAuthenticateContext.class.getName()),
+				moAuthTask);
+		designer.link(designer.addSectionInput("ManagedObjectLogout", HttpLogoutRequest.class.getName()), moLogoutTask);
 	}
 
 }

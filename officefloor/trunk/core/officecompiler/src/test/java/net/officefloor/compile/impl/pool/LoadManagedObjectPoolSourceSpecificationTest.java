@@ -18,7 +18,6 @@
 package net.officefloor.compile.impl.pool;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.Property;
@@ -27,6 +26,7 @@ import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceContext;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceProperty;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceSpecification;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.test.OfficeFrameTestCase;

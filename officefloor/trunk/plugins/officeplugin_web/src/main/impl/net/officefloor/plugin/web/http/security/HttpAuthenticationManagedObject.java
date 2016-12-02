@@ -35,9 +35,8 @@ import net.officefloor.plugin.web.http.session.HttpSession;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpAuthenticationManagedObject<S, C> implements
-		AsynchronousManagedObject, CoordinatingManagedObject<Dependencies>,
-		HttpAuthentication<S, C> {
+public class HttpAuthenticationManagedObject<S, C>
+		implements AsynchronousManagedObject, CoordinatingManagedObject<Dependencies>, HttpAuthentication<S, C> {
 
 	/**
 	 * {@link HttpSecuritySource}.
@@ -82,8 +81,7 @@ public class HttpAuthenticationManagedObject<S, C> implements
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 */
-	public HttpAuthenticationManagedObject(
-			HttpSecuritySource<S, C, ?, ?> httpSecuritySource,
+	public HttpAuthenticationManagedObject(HttpSecuritySource<S, C, ?, ?> httpSecuritySource,
 			ManagedObjectExecuteContext<Flows> executeContext) {
 		this.httpSecuritySource = httpSecuritySource;
 		this.executeContext = executeContext;
@@ -94,20 +92,16 @@ public class HttpAuthenticationManagedObject<S, C> implements
 	 */
 
 	@Override
-	public void registerAsynchronousCompletionListener(
-			AsynchronousListener listener) {
+	public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
 		this.listener = listener;
 	}
 
 	@Override
-	public synchronized void loadObjects(ObjectRegistry<Dependencies> registry)
-			throws Throwable {
+	public synchronized void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 
 		// Obtain the dependencies
-		this.connection = (ServerHttpConnection) registry
-				.getObject(Dependencies.SERVER_HTTP_CONNECTION);
-		this.session = (HttpSession) registry
-				.getObject(Dependencies.HTTP_SESSION);
+		this.connection = (ServerHttpConnection) registry.getObject(Dependencies.SERVER_HTTP_CONNECTION);
+		this.session = (HttpSession) registry.getObject(Dependencies.HTTP_SESSION);
 
 		// Undertake authentication
 		this.authenticate(null);
@@ -123,8 +117,7 @@ public class HttpAuthenticationManagedObject<S, C> implements
 	 */
 
 	@Override
-	public synchronized void authenticate(
-			HttpAuthenticateRequest<C> authenticationRequest) {
+	public synchronized void authenticate(HttpAuthenticateRequest<C> authenticationRequest) {
 
 		// Unless undertaking request, ensure complete request
 		boolean isCompleteRequest = true;
@@ -137,10 +130,8 @@ public class HttpAuthenticationManagedObject<S, C> implements
 			}
 
 			// Determine if possible to authenticate
-			HttpRatifyContextImpl context = new HttpRatifyContextImpl(
-					credentials);
-			boolean isPossibleToAuthenticate = this.httpSecuritySource
-					.ratify(context);
+			HttpRatifyContextImpl context = new HttpRatifyContextImpl(credentials);
+			boolean isPossibleToAuthenticate = this.httpSecuritySource.ratify(context);
 
 			// Determine if already authenticated
 			if (this.security != null) {
@@ -157,11 +148,8 @@ public class HttpAuthenticationManagedObject<S, C> implements
 
 				// Attempt authentication
 				this.listener.notifyStarted();
-				this.executeContext
-						.invokeProcess(Flows.AUTHENTICATE,
-								new TaskAuthenticateContextImpl(credentials,
-										authenticationRequest),
-								executeManagedObject, 0);
+				this.executeContext.invokeProcess(Flows.AUTHENTICATE,
+						new TaskAuthenticateContextImpl(credentials, authenticationRequest), executeManagedObject, 0);
 				isCompleteRequest = false; // context will complete
 			}
 
@@ -187,8 +175,7 @@ public class HttpAuthenticationManagedObject<S, C> implements
 				throw (Error) this.failure;
 			} else {
 				// Propagate failure
-				throw new IllegalStateException("Authentication error: "
-						+ this.failure.getMessage() + " ("
+				throw new IllegalStateException("Authentication error: " + this.failure.getMessage() + " ("
 						+ this.failure.getClass().getName() + ")", this.failure);
 			}
 		}
@@ -214,13 +201,12 @@ public class HttpAuthenticationManagedObject<S, C> implements
 
 		// New managed object (stop overwrite of asynchronous listener)
 		// (Not used for execution but need to provide an instance)
-		HttpAuthenticationManagedObject<S, C> executeManagedObject = new HttpAuthenticationManagedObject<S, C>(
-				null, null);
+		HttpAuthenticationManagedObject<S, C> executeManagedObject = new HttpAuthenticationManagedObject<S, C>(null,
+				null);
 
 		// Trigger logout
 		this.executeContext.invokeProcess(Flows.LOGOUT,
-				new TaskLogoutContextImpl(logoutRequest), executeManagedObject,
-				0);
+				new TaskLogoutContextImpl(logoutRequest, this.connection, this.session), executeManagedObject, 0);
 	}
 
 	/**
@@ -271,8 +257,7 @@ public class HttpAuthenticationManagedObject<S, C> implements
 	/**
 	 * {@link TaskAuthenticateContext} implementation.
 	 */
-	private class TaskAuthenticateContextImpl implements
-			TaskAuthenticateContext<S, C> {
+	private class TaskAuthenticateContextImpl implements TaskAuthenticateContext<S, C> {
 
 		/**
 		 * Credentials.
@@ -292,8 +277,7 @@ public class HttpAuthenticationManagedObject<S, C> implements
 		 * @param request
 		 *            {@link HttpAuthenticateRequest}.
 		 */
-		public TaskAuthenticateContextImpl(C credentials,
-				HttpAuthenticateRequest<C> request) {
+		public TaskAuthenticateContextImpl(C credentials, HttpAuthenticateRequest<C> request) {
 			this.credentials = credentials;
 			this.request = request;
 		}
@@ -359,7 +343,7 @@ public class HttpAuthenticationManagedObject<S, C> implements
 	/**
 	 * {@link TaskLogoutContext} implementation.
 	 */
-	private class TaskLogoutContextImpl implements TaskLogoutContext {
+	private static class TaskLogoutContextImpl implements TaskLogoutContext {
 
 		/**
 		 * {@link HttpLogoutRequest}.
@@ -367,13 +351,29 @@ public class HttpAuthenticationManagedObject<S, C> implements
 		private final HttpLogoutRequest request;
 
 		/**
+		 * {@link ServerHttpConnection}.
+		 */
+		private final ServerHttpConnection connection;
+
+		/**
+		 * {@link HttpSession}.
+		 */
+		private final HttpSession session;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param request
 		 *            {@link HttpLogoutRequest}.
+		 * @param connection
+		 *            {@link ServerHttpConnection}.
+		 * @param session
+		 *            {@link HttpSession}.
 		 */
-		public TaskLogoutContextImpl(HttpLogoutRequest request) {
+		public TaskLogoutContextImpl(HttpLogoutRequest request, ServerHttpConnection connection, HttpSession session) {
 			this.request = request;
+			this.connection = connection;
+			this.session = session;
 		}
 
 		/*
@@ -382,16 +382,13 @@ public class HttpAuthenticationManagedObject<S, C> implements
 
 		@Override
 		public ServerHttpConnection getConnection() {
-			synchronized (HttpAuthenticationManagedObject.this) {
-				return HttpAuthenticationManagedObject.this.connection;
-			}
+			return this.connection;
+
 		}
 
 		@Override
 		public HttpSession getSession() {
-			synchronized (HttpAuthenticationManagedObject.this) {
-				return HttpAuthenticationManagedObject.this.session;
-			}
+			return this.session;
 		}
 
 		@Override

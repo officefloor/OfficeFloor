@@ -18,7 +18,6 @@
 package net.officefloor.compile.impl.work;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -27,6 +26,7 @@ import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.execute.Work;

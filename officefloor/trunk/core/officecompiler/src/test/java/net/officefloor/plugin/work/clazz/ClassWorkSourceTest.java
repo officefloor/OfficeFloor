@@ -24,11 +24,11 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;

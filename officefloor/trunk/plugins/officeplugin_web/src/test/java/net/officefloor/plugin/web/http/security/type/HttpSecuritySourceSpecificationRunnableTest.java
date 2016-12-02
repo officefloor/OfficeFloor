@@ -20,10 +20,9 @@ package net.officefloor.plugin.web.http.security.type;
 import java.io.IOException;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.web.http.security.HttpAuthenticateContext;
@@ -95,17 +94,11 @@ public class HttpSecuritySourceSpecificationRunnableTest extends
 	 */
 	public void testFailSpecification() throws Exception {
 
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Record issue in obtaining specification
-		issues.addIssue(
-				null,
-				null,
-				AssetType.MANAGED_OBJECT,
-				null,
-				"No ManagedObjectSourceSpecification returned from "
-						+ HttpSecurityManagedObjectAdapterSource.class
-								.getName());
+		issues.recordIssue("No ManagedObjectSourceSpecification returned from "
+				+ HttpSecurityManagedObjectAdapterSource.class.getName());
 
 		// Test
 		this.replayMockObjects();

@@ -70,7 +70,7 @@ public class HttpApplicationObjectManagedObjectSourceTest extends
 	 * Ensure can use the {@link ManagedObject} name.
 	 */
 	public void testUseManagedObjectName() throws Throwable {
-		this.doTest(null);
+		this.doTest((String) null);
 	}
 
 	/**

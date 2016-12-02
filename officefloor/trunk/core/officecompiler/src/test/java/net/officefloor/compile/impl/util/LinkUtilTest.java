@@ -19,13 +19,13 @@ package net.officefloor.compile.impl.util;
 
 import java.util.function.Function;
 
-import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

@@ -53,8 +53,7 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 	public void testTypeForBasicAuthentication() {
 
 		// Create the expected type
-		SectionDesigner type = SectionLoaderUtil
-				.createSectionDesigner(HttpSecuritySectionSource.class);
+		SectionDesigner type = SectionLoaderUtil.createSectionDesigner();
 
 		// Inputs
 		type.addSectionInput("Challenge",
@@ -92,8 +91,7 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 	public void testTypeForDigestAuthentication() {
 
 		// Create the expected type
-		SectionDesigner type = SectionLoaderUtil
-				.createSectionDesigner(HttpSecuritySectionSource.class);
+		SectionDesigner type = SectionLoaderUtil.createSectionDesigner();
 
 		// Inputs
 		type.addSectionInput("Challenge",
@@ -132,8 +130,7 @@ public class HttpSecuritySectionSourceTest extends OfficeFrameTestCase {
 	public void testTypeForFormAuthentication() {
 
 		// Create the expected type
-		SectionDesigner type = SectionLoaderUtil
-				.createSectionDesigner(HttpSecuritySectionSource.class);
+		SectionDesigner type = SectionLoaderUtil.createSectionDesigner();
 
 		// Inputs
 		type.addSectionInput("Challenge",

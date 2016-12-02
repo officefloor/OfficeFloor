@@ -26,16 +26,23 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -60,20 +67,12 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionExten
 import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-
 /**
  * Tests the {@link WebApplicationAutoWireOfficeFloorSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebApplicationAutoWireOfficeFloorSourceTest extends
-		OfficeFrameTestCase {
+public class WebApplicationAutoWireOfficeFloorSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Binds the {@link ManagedObject} to the {@link ProcessState}.
@@ -88,8 +87,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	/**
 	 * Host name for testing.
 	 */
-	private static final String HOST_NAME = HttpApplicationLocationManagedObjectSource
-			.getDefaultHostName();
+	private static final String HOST_NAME = HttpApplicationLocationManagedObjectSource.getDefaultHostName();
 
 	/**
 	 * {@link WebApplicationAutoWireOfficeFloorSource} to be tested.
@@ -116,8 +114,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Configure the port
 		this.port = HttpTestUtil.getAvailablePort();
-		this.source.getOfficeFloorCompiler().addProperty(
-				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
+		this.source.getOfficeFloorCompiler().addProperty(HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
 				String.valueOf(this.port));
 		HttpServerSocketManagedObjectSource.autoWire(this.source, this.port,
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
@@ -125,22 +122,17 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Configure the secure port
 		this.securePort = HttpTestUtil.getAvailablePort();
-		this.source.getOfficeFloorCompiler().addProperty(
-				HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
+		this.source.getOfficeFloorCompiler().addProperty(HttpApplicationLocationManagedObjectSource.PROPERTY_HTTPS_PORT,
 				String.valueOf(this.securePort));
-		HttpsServerSocketManagedObjectSource.autoWire(this.source,
-				this.securePort, HttpTestUtil.getSslEngineSourceClass(),
-				WebApplicationAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
+		HttpsServerSocketManagedObjectSource.autoWire(this.source, this.securePort,
+				HttpTestUtil.getSslEngineSourceClass(), WebApplicationAutoWireOfficeFloorSource.HANDLER_SECTION_NAME,
 				WebApplicationAutoWireOfficeFloorSource.HANDLER_INPUT_NAME);
 
 		// Configure the HTTP Request State and HTTP Session
-		this.source.addManagedObject(
-				HttpRequestStateManagedObjectSource.class.getName(),
-				processScopeWirer, new AutoWire(HttpRequestState.class));
-		this.source.addManagedObject(
-				HttpSessionManagedObjectSource.class.getName(),
-				processScopeWirer, new AutoWire(HttpSession.class)).setTimeout(
-				60 * 1000);
+		this.source.addManagedObject(HttpRequestStateManagedObjectSource.class.getName(), processScopeWirer,
+				new AutoWire(HttpRequestState.class));
+		this.source.addManagedObject(HttpSessionManagedObjectSource.class.getName(), processScopeWirer,
+				new AutoWire(HttpSession.class)).setTimeout(60 * 1000);
 
 		// Configure the client (to not redirect)
 		HttpClientBuilder builder = HttpClientBuilder.create();
@@ -177,14 +169,12 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	/**
 	 * Undertakes test to enable to auto-wire template with no logic class.
 	 */
-	public void doTemplateWithNoLogicClassTest(boolean isSecure)
-			throws Exception {
+	public void doTemplateWithNoLogicClassTest(boolean isSecure) throws Exception {
 
 		final String templatePath = this.getClassPath("NoLogicTemplate.ofp");
 
 		// Add HTTP template with no logic class
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"template", templatePath, null);
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("template", templatePath, null);
 		template.setTemplateSecure(isSecure);
 		this.source.linkToResource(template, "link", "resource.html");
 		this.source.openOfficeFloor();
@@ -220,20 +210,16 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String templatePath = this.getClassPath("template.ofp");
 
 		// Add HTTP template (with URL)
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				"uri", templatePath, MockTemplateLogic.class);
+		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("uri", templatePath, MockTemplateLogic.class);
 		section.setTemplateSecure(isSecure);
 		this.source.openOfficeFloor();
 
 		// Ensure correct section details
 		assertEquals("Incorrect section name", "uri", section.getSectionName());
-		assertEquals("Incorrect section source",
-				HttpTemplateSectionSource.class.getName(),
+		assertEquals("Incorrect section source", HttpTemplateSectionSource.class.getName(),
 				section.getSectionSourceClassName());
-		assertEquals("Incorrect section location",
-				this.getClassPath("template.ofp"), templatePath);
-		assertEquals("Incorrect template path", templatePath,
-				section.getTemplatePath());
+		assertEquals("Incorrect section location", this.getClassPath("template.ofp"), templatePath);
+		assertEquals("Incorrect template path", templatePath, section.getTemplatePath());
 		assertEquals("Incorrect template URI", "/uri", section.getTemplateUri());
 
 		// Ensure template available
@@ -247,29 +233,24 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Obtain non-default charset
 		Charset charset = Charset.defaultCharset();
-		if (AbstractServerSocketManagedObjectSource.DEFAULT_CHARSET
-				.equalsIgnoreCase(charset.name())) {
+		if (AbstractServerSocketManagedObjectSource.DEFAULT_CHARSET.equalsIgnoreCase(charset.name())) {
 			charset = Charset.forName("UTF-16");
 		}
 
 		// Create the content type
-		String contentType = "text/plain; one=1; charset=" + charset.name()
-				+ "; another";
+		String contentType = "text/plain; one=1; charset=" + charset.name() + "; another";
 
 		// Add HTTP template with Content-Type
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				"uri", "PUBLIC/resource.html", null);
+		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
 		section.setTemplateContentType(contentType);
 		this.source.openOfficeFloor();
 
 		// Ensure correct Content-Type
-		assertEquals("Incorrect Content-Type", contentType,
-				section.getTemplateContentType());
+		assertEquals("Incorrect Content-Type", contentType, section.getTemplateContentType());
 
 		// Ensure template correct (charset appended as handled specifically)
 		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
-		assertEquals("Incorrect Content-Type on response",
-				"text/plain; one=1; another; charset=" + charset.name(),
+		assertEquals("Incorrect Content-Type on response", "text/plain; one=1; another; charset=" + charset.name(),
 				response.getFirstHeader("Content-Type").getValue());
 	}
 
@@ -279,22 +260,17 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testTemplateContentTypeWithDefaultCharset() throws Exception {
 
 		// Add HTTP template with Content-Type
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				"uri", "PUBLIC/resource.html", null);
+		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
 		section.setTemplateContentType("text/plain");
 		this.source.openOfficeFloor();
 
 		// Ensure correct Content-Type
-		assertEquals("Incorrect Content-Type", "text/plain",
-				section.getTemplateContentType());
+		assertEquals("Incorrect Content-Type", "text/plain", section.getTemplateContentType());
 
 		// Ensure template correct
 		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
-		assertEquals(
-				"Incorrect Content-Type on response",
-				"text/plain; charset="
-						+ AbstractServerSocketManagedObjectSource.getCharset(
-								null).name(),
+		assertEquals("Incorrect Content-Type on response",
+				"text/plain; charset=" + AbstractServerSocketManagedObjectSource.getCharset(null).name(),
 				response.getFirstHeader("Content-Type").getValue());
 	}
 
@@ -304,22 +280,17 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testTemplateNonTextContentType() throws Exception {
 
 		// Add HTTP template with Content-Type
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate(
-				"uri", "PUBLIC/resource.html", null);
+		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("uri", "PUBLIC/resource.html", null);
 		section.setTemplateContentType("x-test/non-text");
 		this.source.openOfficeFloor();
 
 		// Ensure correct Content-Type
-		assertEquals("Incorrect Content-Type", "x-test/non-text",
-				section.getTemplateContentType());
+		assertEquals("Incorrect Content-Type", "x-test/non-text", section.getTemplateContentType());
 
 		// Ensure template correct
 		HttpResponse response = this.assertHttpRequest("/uri", 200, "RESOURCE");
-		assertEquals(
-				"Incorrect Content-Type on response",
-				"x-test/non-text; charset="
-						+ AbstractServerSocketManagedObjectSource.getCharset(
-								null).name(),
+		assertEquals("Incorrect Content-Type on response",
+				"x-test/non-text; charset=" + AbstractServerSocketManagedObjectSource.getCharset(null).name(),
 				response.getFirstHeader("Content-Type").getValue());
 
 	}
@@ -346,13 +317,12 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * @param renderRedirectHttpMethods
 	 *            Render redirect HTTP methods.
 	 */
-	public void doRenderRedirectTest(String method,
-			String... renderRedirectHttpMethods) throws Exception {
+	public void doRenderRedirectTest(String method, String... renderRedirectHttpMethods) throws Exception {
 
 		// Add the template
 		final String templatePath = this.getClassPath("template.ofp");
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"uri", templatePath, MockTemplateLogic.class);
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("uri", templatePath,
+				MockTemplateLogic.class);
 
 		// Ensure able to provide appropriate render redirect HTTP methods
 		for (String renderRedirectHttpMethod : renderRedirectHttpMethods) {
@@ -361,11 +331,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure correctly provided
 		String[] configuredMethods = template.getRenderRedirectHttpMethods();
-		assertEquals("Incorrect number of render redirect HTTP methods",
-				renderRedirectHttpMethods.length, configuredMethods.length);
+		assertEquals("Incorrect number of render redirect HTTP methods", renderRedirectHttpMethods.length,
+				configuredMethods.length);
 		for (int i = 0; i < renderRedirectHttpMethods.length; i++) {
-			assertEquals("Incorrect render redirect HTTP method " + i,
-					renderRedirectHttpMethods[i], configuredMethods[i]);
+			assertEquals("Incorrect render redirect HTTP method " + i, renderRedirectHttpMethods[i],
+					configuredMethods[i]);
 		}
 
 		// Open
@@ -381,8 +351,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	/**
 	 * {@link HttpUriRequest} for HTTP method <code>OTHER</code>.
 	 */
-	private static class HttpConfiguredRequest extends
-			HttpEntityEnclosingRequestBase {
+	private static class HttpConfiguredRequest extends HttpEntityEnclosingRequestBase {
 
 		/**
 		 * HTTP method.
@@ -434,29 +403,23 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String templatePath = this.getClassPath("template.ofp");
 
 		// Add HTTP template (with URL)
-		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("/",
-				templatePath, MockTemplateLogic.class);
+		HttpTemplateAutoWireSection section = this.source.addHttpTemplate("/", templatePath, MockTemplateLogic.class);
 		section.setTemplateSecure(isSecure);
 		this.source.openOfficeFloor();
 
 		// Ensure correct section details
-		assertEquals("Incorrect section name", "_root_",
-				section.getSectionName());
-		assertEquals("Incorrect section source",
-				HttpTemplateSectionSource.class.getName(),
+		assertEquals("Incorrect section name", "_root_", section.getSectionName());
+		assertEquals("Incorrect section source", HttpTemplateSectionSource.class.getName(),
 				section.getSectionSourceClassName());
-		assertEquals("Incorrect section location",
-				this.getClassPath("template.ofp"), templatePath);
-		assertEquals("Incorrect template path", templatePath,
-				section.getTemplatePath());
+		assertEquals("Incorrect section location", this.getClassPath("template.ofp"), templatePath);
+		assertEquals("Incorrect template path", templatePath, section.getTemplatePath());
 		assertEquals("Incorrect template URI", "/", section.getTemplateUri());
 
 		// Ensure template available at default root
 		this.assertHttpRequest("/", isSecure, 200, SUBMIT_URI);
 
 		// Ensure root link works
-		this.assertHttpRequest(SUBMIT_URI, isSecure, 200, "submitted"
-				+ SUBMIT_URI);
+		this.assertHttpRequest(SUBMIT_URI, isSecure, 200, "submitted" + SUBMIT_URI);
 	}
 
 	/**
@@ -472,8 +435,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		 */
 		@NextTask("doNothing")
 		public void submit(ServerHttpConnection connection) throws IOException {
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"submitted", connection);
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse("submitted", connection);
 		}
 
 		/**
@@ -491,29 +453,24 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String TEMPLATE_URI = "template";
 
 		// Add HTTP template
-		this.source.addHttpTemplate(TEMPLATE_URI,
-				this.getClassPath("template.ofp"), MockTemplateLogic.class);
+		this.source.addHttpTemplate(TEMPLATE_URI, this.getClassPath("template.ofp"), MockTemplateLogic.class);
 
 		// Ensure indicates template already registered for URI
 		try {
-			this.source.addHttpTemplate(TEMPLATE_URI,
-					this.getClassPath("template.ofp"), MockTemplateLogic.class);
+			this.source.addHttpTemplate(TEMPLATE_URI, this.getClassPath("template.ofp"), MockTemplateLogic.class);
 			fail("Should not successfully add template for duplicate URI");
 		} catch (IllegalStateException ex) {
-			assertEquals("Incorrect cause",
-					"HTTP Template already added for URI '/" + TEMPLATE_URI
-							+ "'", ex.getMessage());
+			assertEquals("Incorrect cause", "HTTP Template already added for URI '/" + TEMPLATE_URI + "'",
+					ex.getMessage());
 		}
 
 		// Ensure indicates template already registered for canonical URI
 		try {
-			this.source.addHttpTemplate("/" + TEMPLATE_URI,
-					this.getClassPath("template.ofp"), MockTemplateLogic.class);
+			this.source.addHttpTemplate("/" + TEMPLATE_URI, this.getClassPath("template.ofp"), MockTemplateLogic.class);
 			fail("Should not successfully add template for duplicate URI");
 		} catch (IllegalStateException ex) {
-			assertEquals("Incorrect cause",
-					"HTTP Template already added for URI '/" + TEMPLATE_URI
-							+ "'", ex.getMessage());
+			assertEquals("Incorrect cause", "HTTP Template already added for URI '/" + TEMPLATE_URI + "'",
+					ex.getMessage());
 		}
 	}
 
@@ -539,13 +496,12 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String SUBMIT_URI = "/uri-submit";
 
 		// Add HTTP template
-		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class).setTemplateSecure(isSecure);
+		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class)
+				.setTemplateSecure(isSecure);
 		this.source.openOfficeFloor();
 
 		// Ensure submit on task for template is correct
-		this.assertHttpRequest(SUBMIT_URI, isSecure, 200, "submitted"
-				+ SUBMIT_URI);
+		this.assertHttpRequest(SUBMIT_URI, isSecure, 200, "submitted" + SUBMIT_URI);
 	}
 
 	/**
@@ -556,8 +512,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String SUBMIT_URI = "/uri-submit";
 
 		// Add HTTP template
-		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class).setLinkSecure("submit", true);
+		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class)
+				.setLinkSecure("submit", true);
 		this.source.openOfficeFloor();
 
 		// Ensure submit on task for template is correct
@@ -572,21 +528,18 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String SUBMIT_URI = "/uri-submit";
 
 		// Add HTTP template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"uri", this.getClassPath("template.ofp"),
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
 				MockTemplateLogic.class);
 		template.setTemplateSecure(true);
 		template.setLinkSecure("submit", false);
 		this.source.openOfficeFloor();
 
 		// Ensure submit on task for template is correct
-		String requestUrl = "http://" + HOST_NAME + ":" + this.port
-				+ SUBMIT_URI;
-		String redirectUrl = "https://" + HOST_NAME + ":" + this.securePort
-				+ "/uri" + HttpRouteTask.REDIRECT_URI_SUFFIX;
+		String requestUrl = "http://" + HOST_NAME + ":" + this.port + SUBMIT_URI;
+		String redirectUrl = "https://" + HOST_NAME + ":" + this.securePort + "/uri"
+				+ HttpRouteTask.REDIRECT_URI_SUFFIX;
 		String linkUrl = "http://" + HOST_NAME + ":" + this.port + SUBMIT_URI;
-		this.assertHttpRequest(new HttpGet(requestUrl), redirectUrl, 200,
-				"submitted" + linkUrl);
+		this.assertHttpRequest(new HttpGet(requestUrl), redirectUrl, 200, "submitted" + linkUrl);
 	}
 
 	/**
@@ -595,26 +548,23 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testInheritTemplate() throws Exception {
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
-				"/target", this.getClassPath("/template.ofp"),
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add parent template
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
-				"/parent", this.getClassPath("Parent.ofp"), null);
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+				null);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
-				"/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		child.setSuperSection(parent);
 
 		// Open OfficeFloor
 		this.source.openOfficeFloor();
 
 		// Ensure child inherits content
-		this.assertHttpRequest("/child", 200,
-				"Parent CHILD introduced /child-submit");
+		this.assertHttpRequest("/child", 200, "Parent CHILD introduced /child-submit");
 
 		// Ensure child inherits link configuration
 		this.assertHttpRequest("/child-submit", 200, "/target-submit");
@@ -626,31 +576,28 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testInheritTemplateHierarchy() throws Exception {
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
-				"/target", this.getClassPath("/template.ofp"),
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add parent template
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
-				"/parent", this.getClassPath("Parent.ofp"), null);
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+				null);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
-				"/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		child.setSuperSection(parent);
 
 		// Add grand child template (override the link)
-		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate(
-				"/grandchild", this.getClassPath("GrandChild.ofp"), null);
+		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate("/grandchild",
+				this.getClassPath("GrandChild.ofp"), null);
 		grandChild.setSuperSection(child);
 
 		// Open OfficeFloor
 		this.source.openOfficeFloor();
 
 		// Ensure grand child overrides section with link (no need to inherit)
-		this.assertHttpRequest("/grandchild", 200,
-				"Grandchild CHILD introduced Overridden");
+		this.assertHttpRequest("/grandchild", 200, "Grandchild CHILD introduced Overridden");
 	}
 
 	/**
@@ -659,32 +606,28 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testTemplateInheritSectionLinkConfiguration() throws Exception {
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
-				"/target", this.getClassPath("/template.ofp"),
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add grand parent section
-		AutoWireSection grandParent = this.source.addSection("GRAND_PARENT",
-				ClassSectionSource.class.getName(),
+		AutoWireSection grandParent = this.source.addSection("GRAND_PARENT", ClassSectionSource.class.getName(),
 				GrandParentSection.class.getName());
 		this.source.linkToHttpTemplate(grandParent, "submit", target);
 
 		// Add parent template (inheriting link configuration)
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
-				"/parent", this.getClassPath("Parent.ofp"), null);
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+				null);
 		parent.setSuperSection(grandParent);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
-				"/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		child.setSuperSection(parent);
 
 		// Open OfficeFloor
 		this.source.openOfficeFloor();
 
 		// Ensure child inherits content
-		this.assertHttpRequest("/child", 200,
-				"Parent CHILD introduced /child-submit");
+		this.assertHttpRequest("/child", 200, "Parent CHILD introduced /child-submit");
 
 		// Ensure child inherits link configuration
 		this.assertHttpRequest("/child-submit", 200, "/target-submit");
@@ -705,25 +648,23 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testInheritTemplateLinkSecure() throws Exception {
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
-				"/target", this.getClassPath("/template.ofp"),
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add parent template
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
-				"/parent", this.getClassPath("Parent.ofp"), null);
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+				null);
 		parent.setLinkSecure("submit", false);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
-				"/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		parent.setLinkSecure("submit", true); // overrides parent
 		child.setSuperSection(parent);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate(
-				"/grandchild", this.getClassPath("LinkChild.ofp"), null);
+		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate("/grandchild",
+				this.getClassPath("LinkChild.ofp"), null);
 		grandChild.setSuperSection(child);
 
 		// Open OfficeFloor
@@ -731,12 +672,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Ensure child inherits link secure
 		this.assertHttpRequest("/grandchild", 200,
-				"Parent LINK_CHILD override https://" + HOST_NAME + ":"
-						+ this.securePort + "/grandchild-submit");
+				"Parent LINK_CHILD override https://" + HOST_NAME + ":" + this.securePort + "/grandchild-submit");
 
 		// Ensure child inherits link secure
-		this.assertHttpRequest("/grandchild-submit", true, 200, "http://"
-				+ HOST_NAME + ":" + this.port + "/target-submit");
+		this.assertHttpRequest("/grandchild-submit", true, 200,
+				"http://" + HOST_NAME + ":" + this.port + "/target-submit");
 	}
 
 	/**
@@ -746,32 +686,29 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testNotInheritMissingTemplateLinkSecure() throws Exception {
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
-				"/target", this.getClassPath("/template.ofp"),
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add parent template
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
-				"/parent", this.getClassPath("Parent.ofp"), null);
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+				null);
 		parent.setLinkSecure("submit", true);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
-				"/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		child.setSuperSection(parent);
 
 		// Add grand child template (override the link)
-		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate(
-				"/grandchild", this.getClassPath("GrandChild.ofp"), null);
+		HttpTemplateAutoWireSection grandChild = this.source.addHttpTemplate("/grandchild",
+				this.getClassPath("GrandChild.ofp"), null);
 		grandChild.setSuperSection(child);
 
 		// Open OfficeFloor
 		this.source.openOfficeFloor();
 
 		// Ensure grand child overrides section with link (no need to inherit)
-		this.assertHttpRequest("/grandchild", 200,
-				"Grandchild CHILD introduced Overridden");
+		this.assertHttpRequest("/grandchild", 200, "Grandchild CHILD introduced Overridden");
 	}
 
 	/**
@@ -779,52 +716,40 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public void testCyclicTemplateInheritanceHierarchy() throws Exception {
 
-		final String parentTemplatePath = this.getClassPath("Parent.ofp");
-		final Error error = new Error("TEST");
+		final CyclicInheritanceException exception = new CyclicInheritanceException(
+				"Template /parent has a cyclic inheritance hierarchy ( child : parent : child : ... )");
 
 		// Record issue of cyclic inheritance hierarchy
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 		this.source.getOfficeFloorCompiler().setCompilerIssues(issues);
-		issues.addIssue(
-				LocationType.OFFICE_FLOOR,
-				"auto-wire",
-				null,
-				null,
+		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class,
 				"Template /parent has a cyclic inheritance hierarchy ( child : parent : child : ... )");
-		this.control(issues).setThrowable(error);
-		issues.addIssue(
-				LocationType.OFFICE_FLOOR,
-				"auto-wire",
-				null,
-				null,
+		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class,
 				"Failed to source OfficeFloor from OfficeFloorSource (source="
-						+ WebApplicationAutoWireOfficeFloorSource.class
-								.getName() + ", location=auto-wire)", error);
+						+ WebApplicationAutoWireOfficeFloorSource.class.getName() + ", location=auto-wire)",
+				exception);
 
 		// Test
 		this.replayMockObjects();
 
 		// Add link target template
-		HttpTemplateAutoWireSection target = this.source.addHttpTemplate(
-				"/target", this.getClassPath("/template.ofp"),
+		HttpTemplateAutoWireSection target = this.source.addHttpTemplate("/target", this.getClassPath("/template.ofp"),
 				MockTemplateLogic.class);
 
 		// Add parent template
-		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate(
-				"/parent", parentTemplatePath, null);
+		HttpTemplateAutoWireSection parent = this.source.addHttpTemplate("/parent", this.getClassPath("Parent.ofp"),
+				null);
 		this.source.linkToHttpTemplate(parent, "submit", target);
 
 		// Add child template (inheriting content and links)
-		HttpTemplateAutoWireSection child = this.source.addHttpTemplate(
-				"/child", this.getClassPath("Child.ofp"), null);
+		HttpTemplateAutoWireSection child = this.source.addHttpTemplate("/child", this.getClassPath("Child.ofp"), null);
 		child.setSuperSection(parent);
 
 		// Cyclic inheritance hierarchy
 		parent.setSuperSection(child);
 
 		// Open OfficeFloor (manually to use mock compiler issues)
-		OfficeFloor officeFloor = this.source.getOfficeFloorCompiler().compile(
-				"auto-wire");
+		OfficeFloor officeFloor = this.source.getOfficeFloorCompiler().compile("auto-wire");
 		assertNull("Should not have loaded the OfficeFloor", officeFloor);
 
 		// Ensure report cyclic inheritance hierarchy
@@ -841,8 +766,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String LINK_URI = "/uri-submit" + SUFFIX;
 
 		// Add HTTP template with default template URI suffix
-		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
+		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class);
 		this.source.setDefaultHttpTemplateUriSuffix(SUFFIX);
 		this.source.openOfficeFloor();
 
@@ -863,8 +787,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String LINK_URI = "/-submit" + SUFFIX;
 
 		// Add root HTTP template with default template URI suffix
-		this.source.addHttpTemplate("/", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
+		this.source.addHttpTemplate("/", this.getClassPath("template.ofp"), MockTemplateLogic.class);
 		this.source.setDefaultHttpTemplateUriSuffix(SUFFIX);
 		this.source.openOfficeFloor();
 
@@ -884,8 +807,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String LINK_URI = "/uri-submit";
 
 		// Add HTTP template with default template URI suffix
-		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
+		this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"), MockTemplateLogic.class);
 		this.source.setDefaultHttpTemplateUriSuffix(null);
 		this.source.openOfficeFloor();
 
@@ -906,8 +828,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String LINK_URI = "/uri-submit" + SUFFIX;
 
 		// Add HTTP template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"uri", this.getClassPath("template.ofp"),
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
 				MockTemplateLogic.class);
 		template.setTemplateUriSuffix(SUFFIX);
 		this.source.openOfficeFloor();
@@ -931,8 +852,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		this.source.setDefaultHttpTemplateUriSuffix(".suffix");
 
 		// Add HTTP template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"uri", this.getClassPath("template.ofp"),
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("uri", this.getClassPath("template.ofp"),
 				MockTemplateLogic.class);
 		template.setTemplateUriSuffix(".override");
 		this.source.openOfficeFloor();
@@ -950,20 +870,17 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testLinkedUris() {
 
 		// Add HTTP template (not root so should not be included)
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"template", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("template",
+				this.getClassPath("template.ofp"), MockTemplateLogic.class);
 
 		// Provide URI link
-		this.source.linkUri("uri", template,
-				HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
+		this.source.linkUri("uri", template, HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 
 		// Validate URIs
 		assertUris(this.source.getURIs(), "/uri");
 
 		// Validate with root HTTP template
-		this.source.addHttpTemplate("/", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
+		this.source.addHttpTemplate("/", this.getClassPath("template.ofp"), MockTemplateLogic.class);
 		assertUris(this.source.getURIs(), "/", "/uri");
 	}
 
@@ -976,8 +893,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 *            Expected URIs.
 	 */
 	private static void assertUris(String[] actualUris, String... expectedUris) {
-		assertEquals("Incorrect number of URIs", expectedUris.length,
-				actualUris.length);
+		assertEquals("Incorrect number of URIs", expectedUris.length, actualUris.length);
 		for (int i = 0; i < expectedUris.length; i++) {
 			assertEquals("Incorrect URI " + i, expectedUris[i], actualUris[i]);
 		}
@@ -989,9 +905,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testTemplateExtension() throws Exception {
 
 		// Add HTTP template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"template", this.getClassPath("Extension.ofp"),
-				MockExtensionTemplateLogic.class);
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("template",
+				this.getClassPath("Extension.ofp"), MockExtensionTemplateLogic.class);
 
 		// Add template extension
 		HttpTemplateAutoWireSectionExtension extension = template
@@ -1008,11 +923,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	/**
 	 * Mock {@link HttpTemplateSectionExtension} for testing.
 	 */
-	public static class MockHttpTemplateSectionExtension implements
-			HttpTemplateSectionExtension {
+	public static class MockHttpTemplateSectionExtension implements HttpTemplateSectionExtension {
 		@Override
-		public void extendTemplate(HttpTemplateSectionExtensionContext context)
-				throws Exception {
+		public void extendTemplate(HttpTemplateSectionExtensionContext context) throws Exception {
 			context.setTemplateContent("${extend}");
 		}
 	}
@@ -1052,8 +965,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void doLinkUriToSectionInputTest(boolean isSecure) throws Exception {
 
 		// Add section for handling request
-		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class.getName(),
+		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
 				MockTemplateLogic.class.getName());
 		this.source.linkUri("test", section, "submit").setUriSecure(isSecure);
 		this.source.openOfficeFloor();
@@ -1068,13 +980,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testLinkToHttpTemplate() throws Exception {
 
 		// Add linking to HTTP template
-		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class.getName(),
+		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
 				MockLinkHttpTemplate.class.getName());
 		this.source.linkUri("test", section, "service");
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"template", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("template",
+				this.getClassPath("template.ofp"), MockTemplateLogic.class);
 		this.source.linkToHttpTemplate(section, "http-template", template);
 		this.source.openOfficeFloor();
 
@@ -1088,19 +998,16 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testInheritLinkToHttpTemplate() throws Exception {
 
 		// Add the template
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"template", this.getClassPath("template.ofp"),
-				MockTemplateLogic.class);
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("template",
+				this.getClassPath("template.ofp"), MockTemplateLogic.class);
 
 		// Add parent linking to resource
-		AutoWireSection parent = this.source.addSection("PARENT",
-				ClassSectionSource.class.getName(),
+		AutoWireSection parent = this.source.addSection("PARENT", ClassSectionSource.class.getName(),
 				MockLinkHttpTemplate.class.getName());
 		this.source.linkToHttpTemplate(parent, "http-template", template);
 
 		// Add child inheriting link configuration
-		AutoWireSection child = this.source.addSection("CHILD",
-				ClassSectionSource.class.getName(),
+		AutoWireSection child = this.source.addSection("CHILD", ClassSectionSource.class.getName(),
 				MockLinkHttpTemplate.class.getName());
 		this.source.linkUri("test", child, "service");
 		child.setSuperSection(parent);
@@ -1118,8 +1025,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public static class MockLinkHttpTemplate {
 		@NextTask("http-template")
 		public void service(ServerHttpConnection connection) throws IOException {
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"LINK to ", connection);
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse("LINK to ", connection);
 		}
 	}
 
@@ -1129,8 +1035,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testLinkToResource() throws Exception {
 
 		// Add linking to resource
-		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class.getName(),
+		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
 				MockLinkResource.class.getName());
 		this.source.linkUri("test", section, "service");
 		this.source.linkToResource(section, "resource", "resource.html");
@@ -1146,14 +1051,12 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testInheritLinkToResource() throws Exception {
 
 		// Add parent linking to resource
-		AutoWireSection parent = this.source.addSection("PARENT",
-				ClassSectionSource.class.getName(),
+		AutoWireSection parent = this.source.addSection("PARENT", ClassSectionSource.class.getName(),
 				MockLinkResource.class.getName());
 		this.source.linkToResource(parent, "resource", "resource.html");
 
 		// Add child inheriting link configuration
-		AutoWireSection child = this.source.addSection("CHILD",
-				ClassSectionSource.class.getName(),
+		AutoWireSection child = this.source.addSection("CHILD", ClassSectionSource.class.getName(),
 				MockLinkResource.class.getName());
 		this.source.linkUri("test", child, "service");
 		child.setSuperSection(parent);
@@ -1171,8 +1074,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public static class MockLinkResource {
 		@NextTask("resource")
 		public void service(ServerHttpConnection connection) throws IOException {
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"LINK to ", connection);
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse("LINK to ", connection);
 		}
 	}
 
@@ -1183,12 +1085,10 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testLinkEscalationToTemplate() throws Exception {
 
 		// Add escalation to template
-		AutoWireSection failingSection = this.source.addSection("FAILING",
-				ClassSectionSource.class.getName(),
+		AutoWireSection failingSection = this.source.addSection("FAILING", ClassSectionSource.class.getName(),
 				FailingSection.class.getName());
 		this.source.linkUri("test", failingSection, "task");
-		HttpTemplateAutoWireSection template = this.source.addHttpTemplate(
-				"handler", this.getClassPath("template.ofp"),
+		HttpTemplateAutoWireSection template = this.source.addHttpTemplate("handler", this.getClassPath("template.ofp"),
 				MockTemplateLogic.class);
 		this.source.linkEscalation(SQLException.class, template);
 		this.source.openOfficeFloor();
@@ -1202,8 +1102,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public static class FailingSection {
 		public void task(ServerHttpConnection connection) throws Exception {
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"Escalated to ", connection);
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse("Escalated to ", connection);
 			throw new SQLException("Test failure");
 		}
 	}
@@ -1214,8 +1113,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testLinkEscalationToResource() throws Exception {
 
 		// Add escalation to resource
-		AutoWireSection failingSection = this.source.addSection("FAILING",
-				ClassSectionSource.class.getName(),
+		AutoWireSection failingSection = this.source.addSection("FAILING", ClassSectionSource.class.getName(),
 				FailingSection.class.getName());
 		this.source.linkUri("test", failingSection, "task");
 		this.source.linkEscalation(SQLException.class, "resource.html");
@@ -1231,16 +1129,14 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testHttpSessionObject() throws Exception {
 
 		// Provide HTTP Session
-		this.source.addManagedObject(
-				HttpSessionManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
+		this.source
+				.addManagedObject(HttpSessionManagedObjectSource.class.getName(), null, new AutoWire(HttpSession.class))
+				.setTimeout(10 * 1000);
 
 		// Add two templates to ensure object available to both
-		this.source.addHttpTemplate("one",
-				this.getClassPath("StatefulObject.ofp"),
+		this.source.addHttpTemplate("one", this.getClassPath("StatefulObject.ofp"),
 				MockHttpSessionObjectTemplate.class);
-		this.source.addHttpTemplate("two",
-				this.getClassPath("StatefulObject.ofp"),
+		this.source.addHttpTemplate("two", this.getClassPath("StatefulObject.ofp"),
 				MockHttpSessionObjectTemplate.class);
 
 		// Add the HTTP Session object
@@ -1287,16 +1183,14 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testHttpSessionStatefulAnnotation() throws Exception {
 
 		// Provide HTTP Session
-		this.source.addManagedObject(
-				HttpSessionManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
+		this.source
+				.addManagedObject(HttpSessionManagedObjectSource.class.getName(), null, new AutoWire(HttpSession.class))
+				.setTimeout(10 * 1000);
 
 		// Add two templates with annotations for HttpSessionStateful
-		this.source.addHttpTemplate("one",
-				this.getClassPath("StatefulObject.ofp"),
+		this.source.addHttpTemplate("one", this.getClassPath("StatefulObject.ofp"),
 				MockAnnotatedHttpSessionStatefulTemplate.class);
-		this.source.addHttpTemplate("two",
-				this.getClassPath("StatefulObject.ofp"),
+		this.source.addHttpTemplate("two", this.getClassPath("StatefulObject.ofp"),
 				MockAnnotatedHttpSessionStatefulTemplate.class);
 
 		// HTTP Session Object should be detected and added
@@ -1320,8 +1214,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * annotation.
 	 */
 	public static class MockAnnotatedHttpSessionStatefulTemplate {
-		public MockAnnotatedHttpSessionStatefulObject getTemplate(
-				MockAnnotatedHttpSessionStatefulObject object) {
+		public MockAnnotatedHttpSessionStatefulObject getTemplate(MockAnnotatedHttpSessionStatefulObject object) {
 			object.count++; // increment count to indicate maintaining state
 			return object;
 		}
@@ -1331,8 +1224,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * Mock Http Session Object as annotated.
 	 */
 	@HttpSessionStateful
-	public static class MockAnnotatedHttpSessionStatefulObject implements
-			Serializable {
+	public static class MockAnnotatedHttpSessionStatefulObject implements Serializable {
 		public int count = 0;
 
 		public int getCount() {
@@ -1343,20 +1235,16 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	/**
 	 * Ensure can override the binding name to the {@link HttpSession}.
 	 */
-	public void testHttpSessionStatefulAnnotationOverridingBoundName()
-			throws Exception {
+	public void testHttpSessionStatefulAnnotationOverridingBoundName() throws Exception {
 
 		// Provide HTTP Session
-		this.source.addManagedObject(
-				HttpSessionManagedObjectSource.class.getName(), null,
-				new AutoWire(HttpSession.class)).setTimeout(10 * 1000);
+		this.source
+				.addManagedObject(HttpSessionManagedObjectSource.class.getName(), null, new AutoWire(HttpSession.class))
+				.setTimeout(10 * 1000);
 
 		// Add the template
-		this.source
-				.addHttpTemplate(
-						"template",
-						this.getClassPath("StatefulObject.ofp"),
-						MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate.class);
+		this.source.addHttpTemplate("template", this.getClassPath("StatefulObject.ofp"),
+				MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate.class);
 
 		// HTTP Session object should be detected and added
 
@@ -1371,11 +1259,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * Provides mock template logic for validating the overriding binding name
 	 * for the {@link HttpSession} object.
 	 */
-	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate
-			implements Serializable {
+	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulTemplate implements Serializable {
 		public MockAnnotatedOverriddenBindNameHttpSessionStatefulObject getTemplate(
-				MockAnnotatedOverriddenBindNameHttpSessionStatefulObject object,
-				HttpSession session) {
+				MockAnnotatedOverriddenBindNameHttpSessionStatefulObject object, HttpSession session) {
 
 			// Ensure object bound under annotated name within the session
 			Object sessionObject = session.getAttribute("BIND");
@@ -1390,8 +1276,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * Mock Http Session Object with overridden binding name.
 	 */
 	@HttpSessionStateful("BIND")
-	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulObject
-			implements Serializable {
+	public static class MockAnnotatedOverriddenBindNameHttpSessionStatefulObject implements Serializable {
 		public int getCount() {
 			return 1;
 		}
@@ -1405,13 +1290,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String URI = "/template-submit";
 
 		// Provide HTTP Request State
-		this.source.addManagedObject(
-				HttpRequestStateManagedObjectSource.class.getName(), null,
+		this.source.addManagedObject(HttpRequestStateManagedObjectSource.class.getName(), null,
 				new AutoWire(HttpRequestState.class));
 
 		// Add the template
-		this.source.addHttpTemplate("template",
-				this.getClassPath("HttpStateObject.ofp"),
+		this.source.addHttpTemplate("template", this.getClassPath("HttpStateObject.ofp"),
 				MockHttpRequestStateTemplate.class);
 
 		// HTTP request object should be detected and added
@@ -1428,8 +1311,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public static class MockHttpRequestStateTemplate {
 
-		public void submit(MockHttpRequestStateObject object,
-				HttpRequestState state) {
+		public void submit(MockHttpRequestStateObject object, HttpRequestState state) {
 
 			// Ensure object bound under annotated name within the request state
 			Object requestObject = state.getAttribute("BIND");
@@ -1439,8 +1321,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			object.text = "maintained state";
 		}
 
-		public MockHttpRequestStateObject getTemplate(
-				MockHttpRequestStateObject object) {
+		public MockHttpRequestStateObject getTemplate(MockHttpRequestStateObject object) {
 			// Value should be specified in submit
 			return object;
 		}
@@ -1465,8 +1346,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testRequestObjectLoadingParameters() throws Exception {
 
 		// Add the template to use parameters object
-		this.source.addHttpTemplate("template",
-				this.getClassPath("ParametersObject.ofp"),
+		this.source.addHttpTemplate("template", this.getClassPath("ParametersObject.ofp"),
 				MockHttpParametersObjectTemplate.class);
 
 		// Add the HTTP Request Object to load parameters
@@ -1483,8 +1363,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * Provides mock template logic for the HTTP Parameters Object.
 	 */
 	public static class MockHttpParametersObjectTemplate {
-		public MockHttpParametersObject getTemplate(
-				MockHttpParametersObject object) {
+		public MockHttpParametersObject getTemplate(MockHttpParametersObject object) {
 			return object;
 		}
 	}
@@ -1511,8 +1390,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testAnnotatedHttpParameters() throws Exception {
 
 		// Add the template to use parameters object
-		this.source.addHttpTemplate("template",
-				this.getClassPath("ParametersObject.ofp"),
+		this.source.addHttpTemplate("template", this.getClassPath("ParametersObject.ofp"),
 				MockAnnotatedHttpParametersTemplate.class);
 
 		// Start the HTTP Server
@@ -1526,8 +1404,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * Provides mock template logic for the HTTP Parameters Object.
 	 */
 	public static class MockAnnotatedHttpParametersTemplate {
-		public MockAnnotatedHttpParameters getTemplate(
-				MockAnnotatedHttpParameters object) {
+		public MockAnnotatedHttpParameters getTemplate(MockAnnotatedHttpParameters object) {
 			return object;
 		}
 	}
@@ -1557,13 +1434,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		final String URI = "/template-submit";
 
 		// Provide HTTP Application State
-		this.source.addManagedObject(
-				HttpApplicationStateManagedObjectSource.class.getName(),
-				processScopeWirer, new AutoWire(HttpApplicationState.class));
+		this.source.addManagedObject(HttpApplicationStateManagedObjectSource.class.getName(), processScopeWirer,
+				new AutoWire(HttpApplicationState.class));
 
 		// Add the template
-		this.source.addHttpTemplate("template",
-				this.getClassPath("HttpStateObject.ofp"),
+		this.source.addHttpTemplate("template", this.getClassPath("HttpStateObject.ofp"),
 				MockHttpApplicationStateTemplate.class);
 
 		// HTTP application state object should be detected and added
@@ -1581,8 +1456,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 */
 	public static class MockHttpApplicationStateTemplate {
 
-		public void submit(MockHttpApplicationStateObject object,
-				HttpApplicationState state) {
+		public void submit(MockHttpApplicationStateObject object, HttpApplicationState state) {
 
 			// Ensure object bound under annotated name within application state
 			Object applicationObject = state.getAttribute("BIND");
@@ -1592,8 +1466,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			object.text = "maintained state";
 		}
 
-		public MockHttpApplicationStateObject getTemplate(
-				MockHttpApplicationStateObject object) {
+		public MockHttpApplicationStateObject getTemplate(MockHttpApplicationStateObject object) {
 			// Value should be specified in submit
 			return object;
 		}
@@ -1618,17 +1491,12 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testObtainResources() throws Exception {
 
 		// Obtain war directory
-		File warDirectory = this.findFile(this.getClass(), "template.ofp")
-				.getParentFile();
+		File warDirectory = this.findFile(this.getClass(), "template.ofp").getParentFile();
 
 		// Add configuration
 		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
-		compiler.addProperty(
-				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES,
-				warDirectory.getAbsolutePath());
-		compiler.addProperty(
-				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
-				"resource.html");
+		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, warDirectory.getAbsolutePath());
+		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, "resource.html");
 
 		// Start the HTTP Server
 		this.source.openOfficeFloor();
@@ -1647,8 +1515,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testObtainChangingResources() throws Exception {
 
 		// Create WAR directory in temp for testing
-		File warDirectory = new File(System.getProperty("java.io.tmpdir"), this
-				.getClass().getSimpleName() + "-" + this.getName());
+		File warDirectory = new File(System.getProperty("java.io.tmpdir"),
+				this.getClass().getSimpleName() + "-" + this.getName());
 		if (warDirectory.exists()) {
 			this.deleteDirectory(warDirectory);
 		}
@@ -1661,15 +1529,9 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 		// Add configuration
 		OfficeFloorCompiler compiler = this.source.getOfficeFloorCompiler();
-		compiler.addProperty(
-				SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES,
-				warDirectory.getAbsolutePath());
-		compiler.addProperty(
-				SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES,
-				"test.html");
-		compiler.addProperty(
-				SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT,
-				String.valueOf(false));
+		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_RESOURCE_DIRECTORIES, warDirectory.getAbsolutePath());
+		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_DEFAULT_DIRECTORY_FILE_NAMES, "test.html");
+		compiler.addProperty(SourceHttpResourceFactory.PROPERTY_DIRECT_STATIC_CONTENT, String.valueOf(false));
 
 		// Start the HTTP Server
 		this.source.openOfficeFloor();
@@ -1694,8 +1556,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testChainServicer() throws Exception {
 
 		// Add section to override servicing
-		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class.getName(),
+		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
 				MockChainedServicer.class.getName());
 		this.source.chainServicer(section, "service", "notHandled");
 
@@ -1725,8 +1586,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			void notHandled();
 		}
 
-		public void service(ServerHttpConnection connection, Flows flows)
-				throws IOException {
+		public void service(ServerHttpConnection connection, Flows flows) throws IOException {
 
 			// Flag that serviced
 			isServiced = true;
@@ -1735,12 +1595,10 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			String uri = connection.getHttpRequest().getRequestURI();
 			if ("/chain".equals(uri)) {
 				// Service the request
-				WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-						"CHAIN SERVICED - " + uri, connection);
+				WebApplicationAutoWireOfficeFloorSourceTest.writeResponse("CHAIN SERVICED - " + uri, connection);
 			} else {
 				// Write some content to indicate chained
-				WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-						"CHAIN - ", connection);
+				WebApplicationAutoWireOfficeFloorSourceTest.writeResponse("CHAIN - ", connection);
 
 				// Hand off to next in chain
 				flows.notHandled();
@@ -1754,14 +1612,12 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public void testChainLastServicer() throws Exception {
 
 		// Add section to override servicing
-		AutoWireSection section = this.source.addSection("SECTION",
-				ClassSectionSource.class.getName(),
+		AutoWireSection section = this.source.addSection("SECTION", ClassSectionSource.class.getName(),
 				MockLastChainServicer.class.getName());
 		this.source.chainServicer(section, "service", null);
 
 		// Add another in chain (which should be ignored with log warning)
-		AutoWireSection ignore = this.source.addSection("ANOTHER",
-				ClassSectionSource.class.getName(),
+		AutoWireSection ignore = this.source.addSection("ANOTHER", ClassSectionSource.class.getName(),
 				MockChainedServicer.class.getName());
 		this.source.chainServicer(ignore, "service", "notHandled");
 
@@ -1771,8 +1627,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Ensure override non-routed servicing
 		MockChainedServicer.isServiced = false;
 		this.assertHttpRequest("/unhandled", 200, "CHAIN END - /unhandled");
-		assertFalse("Should not be part of chain",
-				MockChainedServicer.isServiced);
+		assertFalse("Should not be part of chain", MockChainedServicer.isServiced);
 	}
 
 	/**
@@ -1781,8 +1636,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	public static class MockLastChainServicer {
 		public void service(ServerHttpConnection connection) throws IOException {
 			String uri = connection.getHttpRequest().getRequestURI();
-			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse(
-					"CHAIN END - " + uri, connection);
+			WebApplicationAutoWireOfficeFloorSourceTest.writeResponse("CHAIN END - " + uri, connection);
 		}
 	}
 
@@ -1797,10 +1651,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 *            Expected response entity.
 	 * @return {@link HttpResponse}.
 	 */
-	private HttpResponse assertHttpRequest(String uri,
-			int expectedResponseStatus, String expectedResponseEntity) {
-		return this.assertHttpRequest(uri, false, expectedResponseStatus,
-				expectedResponseEntity);
+	private HttpResponse assertHttpRequest(String uri, int expectedResponseStatus, String expectedResponseEntity) {
+		return this.assertHttpRequest(uri, false, expectedResponseStatus, expectedResponseEntity);
 	}
 
 	/**
@@ -1817,8 +1669,8 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 *            Expected response entity.
 	 * @return {@link HttpResponse}.
 	 */
-	private HttpResponse assertHttpRequest(String uri, boolean isRedirect,
-			int expectedResponseStatus, String expectedResponseEntity) {
+	private HttpResponse assertHttpRequest(String uri, boolean isRedirect, int expectedResponseStatus,
+			String expectedResponseEntity) {
 
 		// Create the request
 		String url = "http://" + HOST_NAME + ":" + this.port + uri;
@@ -1827,13 +1679,11 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 		// Provide redirect URL if expecting to redirect
 		String redirectUrl = null;
 		if (isRedirect) {
-			redirectUrl = "https://" + HOST_NAME + ":" + this.securePort + uri
-					+ HttpRouteTask.REDIRECT_URI_SUFFIX;
+			redirectUrl = "https://" + HOST_NAME + ":" + this.securePort + uri + HttpRouteTask.REDIRECT_URI_SUFFIX;
 		}
 
 		// Assert HTTP request
-		return this.assertHttpRequest(request, redirectUrl,
-				expectedResponseStatus, expectedResponseEntity);
+		return this.assertHttpRequest(request, redirectUrl, expectedResponseStatus, expectedResponseEntity);
 	}
 
 	/**
@@ -1850,8 +1700,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 *            Expected response entity.
 	 * @return {@link HttpResponse}.
 	 */
-	private HttpResponse assertHttpRequest(HttpUriRequest request,
-			String redirectUrl, int expectedResponseStatus,
+	private HttpResponse assertHttpRequest(HttpUriRequest request, String redirectUrl, int expectedResponseStatus,
 			String expectedResponseEntity) {
 		try {
 
@@ -1862,18 +1711,15 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 			if (redirectUrl != null) {
 
 				// Ensure appropriate redirect
-				assertEquals("Should be redirect", 303, response
-						.getStatusLine().getStatusCode());
-				assertEquals("Incorrect redirect URL", redirectUrl, response
-						.getFirstHeader("Location").getValue());
+				assertEquals("Should be redirect", 303, response.getStatusLine().getStatusCode());
+				assertEquals("Incorrect redirect URL", redirectUrl, response.getFirstHeader("Location").getValue());
 
 				// Consume response to allow sending next request
 				response.getEntity().getContent().close();
 
 				// Handle server relative redirect
 				if (redirectUrl.startsWith("/")) {
-					redirectUrl = "http://" + HOST_NAME + ":" + this.port
-							+ redirectUrl;
+					redirectUrl = "http://" + HOST_NAME + ":" + this.port + redirectUrl;
 				}
 
 				// Send the redirect for response
@@ -1882,12 +1728,10 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 
 			// Ensure obtained as expected
 			String actualResponseBody = HttpTestUtil.getEntityBody(response);
-			assertEquals("Incorrect response", expectedResponseEntity,
-					actualResponseBody);
+			assertEquals("Incorrect response", expectedResponseEntity, actualResponseBody);
 
 			// Ensure correct response status
-			assertEquals("Should be successful", expectedResponseStatus,
-					response.getStatusLine().getStatusCode());
+			assertEquals("Should be successful", expectedResponseStatus, response.getStatusLine().getStatusCode());
 
 			// Return the response
 			return response;
@@ -1916,8 +1760,7 @@ public class WebApplicationAutoWireOfficeFloorSourceTest extends
 	 * @param connection
 	 *            {@link ServerHttpConnection}.
 	 */
-	private static void writeResponse(String response,
-			ServerHttpConnection connection) throws IOException {
+	private static void writeResponse(String response, ServerHttpConnection connection) throws IOException {
 		Writer writer = connection.getHttpResponse().getEntityWriter();
 		writer.append(response);
 	}

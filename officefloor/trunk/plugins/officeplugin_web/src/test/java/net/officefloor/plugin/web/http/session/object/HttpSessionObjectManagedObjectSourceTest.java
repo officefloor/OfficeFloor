@@ -20,17 +20,15 @@ package net.officefloor.plugin.web.http.session.object;
 import java.io.Serializable;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.web.http.session.HttpSession;
-import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.plugin.web.http.session.object.HttpSessionObjectManagedObject.Dependencies;
 
 import org.easymock.AbstractMatcher;
@@ -40,17 +38,14 @@ import org.easymock.AbstractMatcher;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSessionObjectManagedObjectSourceTest extends
-		OfficeFrameTestCase {
+public class HttpSessionObjectManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(
-				HttpSessionObjectManagedObjectSource.class,
-				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-				"Class");
+		ManagedObjectLoaderUtil.validateSpecification(HttpSessionObjectManagedObjectSource.class,
+				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME, "Class");
 	}
 
 	/**
@@ -59,18 +54,14 @@ public class HttpSessionObjectManagedObjectSourceTest extends
 	public void testType() {
 
 		// Obtain the type
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil
-				.createManagedObjectTypeBuilder();
+		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
 		type.setObjectClass(MockObject.class);
-		type.addDependency(Dependencies.HTTP_SESSION.name(), HttpSession.class,
-				null, Dependencies.HTTP_SESSION.ordinal(),
-				Dependencies.HTTP_SESSION);
+		type.addDependency(Dependencies.HTTP_SESSION.name(), HttpSession.class, null,
+				Dependencies.HTTP_SESSION.ordinal(), Dependencies.HTTP_SESSION);
 
 		// Validate the managed object type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type,
-				HttpSessionObjectManagedObjectSource.class,
-				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-				MockObject.class.getName());
+		ManagedObjectLoaderUtil.validateManagedObjectType(type, HttpSessionObjectManagedObjectSource.class,
+				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME, MockObject.class.getName());
 	}
 
 	/**
@@ -78,37 +69,20 @@ public class HttpSessionObjectManagedObjectSourceTest extends
 	 */
 	public void testInvalidObjectAsNotSerializable() {
 
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Record issue as not serializable object
-		issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
-				"Failed to init", null);
-		this.control(issues).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				for (int i = 0; i < (expected.length - 1); i++) {
-					assertEquals("Invalid parameter " + i, expected[i],
-							actual[i]);
-				}
-				Exception cause = (Exception) actual[expected.length - 1];
-				assertEquals("Incorrect cause", "HttpSession object "
-						+ MockInvalidObject.class.getName()
-						+ " must be Serializable", cause.getMessage());
-				return true;
-			}
-		});
+		issues.recordIssue("Failed to init",
+				new Exception("HttpSession object " + MockInvalidObject.class.getName() + " must be Serializable"));
 
 		// Test
 		this.replayMockObjects();
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(issues);
 		PropertyList properties = compiler.createPropertyList();
-		properties.addProperty(
-				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME)
+		properties.addProperty(HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME)
 				.setValue(MockInvalidObject.class.getName());
-		compiler.getManagedObjectLoader().loadManagedObjectType(
-				HttpSessionObjectManagedObjectSource.class, properties);
+		compiler.getManagedObjectLoader().loadManagedObjectType(HttpSessionObjectManagedObjectSource.class, properties);
 		this.verifyMockObjects();
 	}
 
@@ -116,7 +90,7 @@ public class HttpSessionObjectManagedObjectSourceTest extends
 	 * Ensure can use the {@link ManagedObject} name.
 	 */
 	public void testUseManagedObjectName() throws Throwable {
-		this.doTest(null);
+		this.doTest((String) null);
 	}
 
 	/**
@@ -143,8 +117,7 @@ public class HttpSessionObjectManagedObjectSourceTest extends
 
 		// Record instantiate and cache in session
 		final MockObject[] instantiatedObject = new MockObject[1];
-		this.recordReturn(httpSession, httpSession.getAttribute(RETRIEVE_NAME),
-				null);
+		this.recordReturn(httpSession, httpSession.getAttribute(RETRIEVE_NAME), null);
 		httpSession.setAttribute(RETRIEVE_NAME, null);
 		this.control(httpSession).setMatcher(new AbstractMatcher() {
 			@Override
@@ -159,20 +132,15 @@ public class HttpSessionObjectManagedObjectSourceTest extends
 
 		// Record cached within session
 		final MockObject CACHED_OBJECT = new MockObject();
-		this.recordReturn(httpSession, httpSession.getAttribute(RETRIEVE_NAME),
-				CACHED_OBJECT);
+		this.recordReturn(httpSession, httpSession.getAttribute(RETRIEVE_NAME), CACHED_OBJECT);
 
 		this.replayMockObjects();
 
 		// Load the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		loader.addProperty(
-				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-				MockObject.class.getName());
+		loader.addProperty(HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME, MockObject.class.getName());
 		if (boundName != null) {
-			loader.addProperty(
-					HttpSessionObjectManagedObjectSource.PROPERTY_BIND_NAME,
-					boundName);
+			loader.addProperty(HttpSessionObjectManagedObjectSource.PROPERTY_BIND_NAME, boundName);
 		}
 		HttpSessionObjectManagedObjectSource source = loader
 				.loadManagedObjectSource(HttpSessionObjectManagedObjectSource.class);
@@ -182,13 +150,11 @@ public class HttpSessionObjectManagedObjectSourceTest extends
 		user.setBoundManagedObjectName(MO_NAME);
 		user.mapDependency(Dependencies.HTTP_SESSION, httpSession);
 		ManagedObject managedObject = user.sourceManagedObject(source);
-		assertEquals("Incorrect instantiated object", instantiatedObject[0],
-				managedObject.getObject());
+		assertEquals("Incorrect instantiated object", instantiatedObject[0], managedObject.getObject());
 
 		// Obtain the cached object
 		managedObject = user.sourceManagedObject(source);
-		assertEquals("Incorrect cached object", CACHED_OBJECT,
-				managedObject.getObject());
+		assertEquals("Incorrect cached object", CACHED_OBJECT, managedObject.getObject());
 
 		this.verifyMockObjects();
 	}
