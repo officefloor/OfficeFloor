@@ -59,11 +59,8 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		SectionLoaderUtil
-				.validateSpecification(
-						HttpUrlContinuationSectionSource.class,
-						HttpUrlContinuationSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME,
-						"Section Source");
+		SectionLoaderUtil.validateSpecification(HttpUrlContinuationSectionSource.class,
+				HttpUrlContinuationSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME, "Section Source");
 	}
 
 	/**
@@ -72,46 +69,32 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create the expected type
-		SectionDesigner type = SectionLoaderUtil
-				.createSectionDesigner(HttpUrlContinuationSectionSource.class);
+		SectionDesigner type = SectionLoaderUtil.createSectionDesigner();
 
 		// Load the initial type from class
 		type.addSectionInput("inputOne", null);
 		type.addSectionInput("inputTwo", null);
 		type.addSectionOutput("next", null, false);
-		type.addSubSection("TRANSFORMED", ClassSectionSource.class.getName(),
-				MockSectionTypeClass.class.getName());
+		type.addSubSection("TRANSFORMED", ClassSectionSource.class.getName(), MockSectionTypeClass.class.getName());
 
 		// Provide the transformations for URL continuations
-		SectionWork pathWork = type.addSectionWork("path",
-				HttpUrlContinuationWorkSource.class.getName());
+		SectionWork pathWork = type.addSectionWork("path", HttpUrlContinuationWorkSource.class.getName());
+		pathWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "/");
 		pathWork.addSectionTask("path", HttpUrlContinuationWorkSource.TASK_NAME);
-		SectionWork uriWork = type.addSectionWork("uri",
-				HttpUrlContinuationWorkSource.class.getName());
+		SectionWork uriWork = type.addSectionWork("uri", HttpUrlContinuationWorkSource.class.getName());
+		uriWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "/");
 		uriWork.addSectionTask("uri", HttpUrlContinuationWorkSource.TASK_NAME);
-		SectionWork rootWork = type.addSectionWork("_root_",
-				HttpUrlContinuationWorkSource.class.getName());
-		rootWork.addSectionTask("_root_",
-				HttpUrlContinuationWorkSource.TASK_NAME);
+		SectionWork rootWork = type.addSectionWork("_root_", HttpUrlContinuationWorkSource.class.getName());
+		rootWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "/");
+		rootWork.addSectionTask("_root_", HttpUrlContinuationWorkSource.TASK_NAME);
 
 		// Validate the type
-		SectionLoaderUtil
-				.validateSection(
-						type,
-						HttpUrlContinuationSectionSource.class,
-						(String) null,
-						HttpUrlContinuationSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME,
-						ClassSectionSource.class.getName(),
-						HttpUrlContinuationSectionSource.PROPERTY_SECTION_LOCATION,
-						MockSectionTypeClass.class.getName(),
-						HttpUrlContinuationSectionSource.PROPERTY_URL_LINK_PREFIX
-								+ "path",
-						"inputOne",
-						HttpUrlContinuationSectionSource.PROPERTY_URL_LINK_PREFIX
-								+ "/uri",
-						"inputTwo",
-						HttpUrlContinuationSectionSource.PROPERTY_URL_LINK_PREFIX
-								+ "/", "inputOne");
+		SectionLoaderUtil.validateSection(type, HttpUrlContinuationSectionSource.class, (String) null,
+				HttpUrlContinuationSectionSource.PROPERTY_SECTION_SOURCE_CLASS_NAME, ClassSectionSource.class.getName(),
+				HttpUrlContinuationSectionSource.PROPERTY_SECTION_LOCATION, MockSectionTypeClass.class.getName(),
+				HttpUrlContinuationSectionSource.PROPERTY_URL_LINK_PREFIX + "path", "inputOne",
+				HttpUrlContinuationSectionSource.PROPERTY_URL_LINK_PREFIX + "/uri", "inputTwo",
+				HttpUrlContinuationSectionSource.PROPERTY_URL_LINK_PREFIX + "/", "inputOne");
 	}
 
 	/**
@@ -137,28 +120,22 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		AutoWireApplication source = new AutoWireOfficeFloorSource();
 
 		// Add the servicer
-		AutoWireSection section = source.addSection("SECTION",
-				ClassSectionSource.class.getName(),
+		AutoWireSection section = source.addSection("SECTION", ClassSectionSource.class.getName(),
 				MockSectionRunClass.class.getName());
 
 		// Provide remaining configuration
-		HttpServerSocketManagedObjectSource.autoWire(source, 7878, "ROUTE",
+		HttpServerSocketManagedObjectSource.autoWire(source, 7878, "ROUTE", HttpRouteWorkSource.TASK_NAME);
+		HttpsServerSocketManagedObjectSource.autoWire(source, 7979, HttpTestUtil.getSslEngineSourceClass(), "ROUTE",
 				HttpRouteWorkSource.TASK_NAME);
-		HttpsServerSocketManagedObjectSource.autoWire(source, 7979,
-				HttpTestUtil.getSslEngineSourceClass(), "ROUTE",
-				HttpRouteWorkSource.TASK_NAME);
-		AutoWireSection route = source.addSection("ROUTE",
-				WorkSectionSource.class.getName(),
+		AutoWireSection route = source.addSection("ROUTE", WorkSectionSource.class.getName(),
 				HttpRouteWorkSource.class.getName());
 		source.link(route, "NOT_HANDLED", section, "notHandled");
-		source.addManagedObject(
-				HttpApplicationLocationManagedObjectSource.class.getName(),
-				null, new AutoWire(HttpApplicationLocation.class));
-		source.addManagedObject(
-				HttpRequestStateManagedObjectSource.class.getName(), null,
+		source.addManagedObject(HttpApplicationLocationManagedObjectSource.class.getName(), null,
+				new AutoWire(HttpApplicationLocation.class));
+		source.addManagedObject(HttpRequestStateManagedObjectSource.class.getName(), null,
 				new AutoWire(HttpRequestState.class));
-		source.addManagedObject(HttpSessionManagedObjectSource.class.getName(),
-				null, new AutoWire(HttpSession.class)).setTimeout(1000);
+		source.addManagedObject(HttpSessionManagedObjectSource.class.getName(), null, new AutoWire(HttpSession.class))
+				.setTimeout(1000);
 
 		// Add the transformer
 		HttpUrlContinuationSectionSource transformer = new HttpUrlContinuationSectionSource();
@@ -172,14 +149,11 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		}
 		assertEquals("Incorrect URI", "uri", link.getApplicationUriPath());
 		assertSame("Incorrect Section", section, link.getAutoWireSection());
-		assertEquals("Incorrect Section Input", "service",
-				link.getAutoWireSectionInputName());
+		assertEquals("Incorrect Section Input", "service", link.getAutoWireSectionInputName());
 
 		// Ensure return listing of all registered URI paths
-		HttpUriLink[] registeredUriLinks = transformer
-				.getRegisteredHttpUriLinks();
-		assertEquals("Incorrect number of registered URI links", 1,
-				registeredUriLinks.length);
+		HttpUriLink[] registeredUriLinks = transformer.getRegisteredHttpUriLinks();
+		assertEquals("Incorrect number of registered URI links", 1, registeredUriLinks.length);
 		assertSame("Incorrect URI link", link, registeredUriLinks[0]);
 
 		// Create the client (without redirect)
@@ -189,8 +163,7 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 		CloseableHttpClient client = builder.build();
 
 		// Obtain the host name
-		String hostName = HttpApplicationLocationManagedObjectSource
-				.getDefaultHostName();
+		String hostName = HttpApplicationLocationManagedObjectSource.getDefaultHostName();
 
 		// Obtain the URLs
 		final String SECURE_URL = "https://" + hostName + ":7979/uri";
@@ -211,18 +184,14 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 
 			// Ensure redirect if not appropriately secure
 			HttpResponse response = client.execute(new HttpGet(urlInitial));
-			assertEquals("Should be redirect", 303, response.getStatusLine()
-					.getStatusCode());
-			assertEquals("Incorrect redirect location", urlRedirect, response
-					.getFirstHeader("Location").getValue());
+			assertEquals("Should be redirect", 303, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect redirect location", urlRedirect, response.getFirstHeader("Location").getValue());
 			response.getEntity().getContent().close();
 
 			// Ensure servicing request
 			response = client.execute(new HttpGet(urlRedirect));
-			assertEquals("Should be successful", 200, response.getStatusLine()
-					.getStatusCode());
-			assertEquals("Incorrect response", "SERVICED",
-					HttpTestUtil.getEntityBody(response));
+			assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect response", "SERVICED", HttpTestUtil.getEntityBody(response));
 
 		} finally {
 			try {
@@ -262,8 +231,7 @@ public class HttpUrlContinuationSectionSourceTest extends OfficeFrameTestCase {
 			connection.getHttpResponse().getEntityWriter().write("SERVICED");
 		}
 
-		public void notHandled(ServerHttpConnection connection)
-				throws Exception {
+		public void notHandled(ServerHttpConnection connection) throws Exception {
 			connection.getHttpResponse().getEntityWriter().write("Not handled");
 		}
 	}

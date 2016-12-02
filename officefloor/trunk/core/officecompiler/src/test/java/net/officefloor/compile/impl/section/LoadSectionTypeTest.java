@@ -24,7 +24,6 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
@@ -48,6 +47,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.source.ResourceSource;

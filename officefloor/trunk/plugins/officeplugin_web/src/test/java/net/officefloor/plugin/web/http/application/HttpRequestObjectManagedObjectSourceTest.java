@@ -23,11 +23,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
@@ -110,25 +109,12 @@ public class HttpRequestObjectManagedObjectSourceTest extends
 	 */
 	public void testInvalidObjectAsNotSerializable() {
 
-		final CompilerIssues issues = this.createMock(CompilerIssues.class);
+		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Record issue as not serializable object
-		issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
-				"Failed to init", null);
-		this.control(issues).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				for (int i = 0; i < (expected.length - 1); i++) {
-					assertEquals("Invalid parameter " + i, expected[i],
-							actual[i]);
-				}
-				Exception cause = (Exception) actual[expected.length - 1];
-				assertEquals("Incorrect cause", "HttpRequestState object "
-						+ MockInvalidObject.class.getName()
-						+ " must be Serializable", cause.getMessage());
-				return true;
-			}
-		});
+		issues.recordIssue("Failed to init", new Exception(
+				"HttpRequestState object " + MockInvalidObject.class.getName()
+						+ " must be Serializable"));
 
 		// Test
 		this.replayMockObjects();

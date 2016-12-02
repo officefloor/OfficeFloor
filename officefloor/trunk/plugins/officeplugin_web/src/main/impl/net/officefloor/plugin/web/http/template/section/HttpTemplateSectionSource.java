@@ -47,7 +47,6 @@ import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.work.TaskType;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
@@ -123,8 +122,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	 *            Listing of {@link HttpTemplateSection} instances.
 	 * @return Filtered listing of {@link HttpTemplateSection} instances.
 	 */
-	public static HttpTemplateSection[] filterCommentHttpTemplateSections(
-			HttpTemplateSection[] sections) {
+	public static HttpTemplateSection[] filterCommentHttpTemplateSections(HttpTemplateSection[] sections) {
 
 		// Filter comment sections
 		List<HttpTemplateSection> filteredSections = new LinkedList<HttpTemplateSection>();
@@ -140,8 +138,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Return the filtered sections
-		return filteredSections
-				.toArray(new HttpTemplateSection[filteredSections.size()]);
+		return filteredSections.toArray(new HttpTemplateSection[filteredSections.size()]);
 	}
 
 	/**
@@ -156,8 +153,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	 *            {@link SectionDesigner}.
 	 * @return {@link HttpTemplateSection} instances from result of inheritance.
 	 */
-	public static HttpTemplateSection[] inheritHttpTemplateSections(
-			HttpTemplateSection[] parentSections,
+	public static HttpTemplateSection[] inheritHttpTemplateSections(HttpTemplateSection[] parentSections,
 			HttpTemplateSection[] childSections, SectionDesigner designer) {
 
 		// Create the listing of sections for overriding
@@ -182,16 +178,12 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				if (overrideSectionName == null) {
 
 					// Invalid introduced if not the default first section
-					if (!((isFirstSection) && (HttpTemplateParserImpl.DEFAULT_FIRST_SECTION_NAME
-							.equals(sectionName)))) {
+					if (!((isFirstSection)
+							&& (HttpTemplateParserImpl.DEFAULT_FIRST_SECTION_NAME.equals(sectionName)))) {
 						// Invalid introduced section
-						designer.addIssue(
-								"Section '"
-										+ sectionName
-										+ "' can not be introduced, as no previous override section (section prefixed with '"
-										+ OVERRIDE_SECTION_PREFIX
-										+ "') to identify where to inherit",
-								null, null);
+						designer.addIssue("Section '" + sectionName
+								+ "' can not be introduced, as no previous override section (section prefixed with '"
+								+ OVERRIDE_SECTION_PREFIX + "') to identify where to inherit");
 					}
 				}
 			}
@@ -204,8 +196,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		// Obtain the names of all parent sections
 		Set<String> parentSectionNames = new HashSet<String>();
 		for (HttpTemplateSection parentSection : parentSections) {
-			parentSectionNames.add(getHttpTemplateSectionName(parentSection
-					.getSectionName()));
+			parentSectionNames.add(getHttpTemplateSectionName(parentSection.getSectionName()));
 		}
 
 		// Create the listing sections from inheritance
@@ -213,12 +204,10 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		for (HttpTemplateSection parentSection : parentSections) {
 
 			// Obtain the parent section name
-			String parentSectionName = getHttpTemplateSectionName(parentSection
-					.getSectionName());
+			String parentSectionName = getHttpTemplateSectionName(parentSection.getSectionName());
 
 			// Determine if overriding parent
-			List<HttpTemplateSection> overridingSections = overrideSections
-					.remove(parentSectionName);
+			List<HttpTemplateSection> overridingSections = overrideSections.remove(parentSectionName);
 			if (overridingSections == null) {
 				// Parent section not overridden, so include
 				inheritanceSections.add(parentSection);
@@ -229,18 +218,12 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				for (HttpTemplateSection overrideSection : overridingSections) {
 
 					// Determine if introduced section already exists in parent
-					String introducedSectionName = getHttpTemplateSectionName(overrideSection
-							.getSectionName());
-					if ((isIntroducedSection)
-							&& (parentSectionNames
-									.contains(introducedSectionName))) {
+					String introducedSectionName = getHttpTemplateSectionName(overrideSection.getSectionName());
+					if ((isIntroducedSection) && (parentSectionNames.contains(introducedSectionName))) {
 						// Must override to include the child introduced section
-						designer.addIssue(
-								"Section '"
-										+ introducedSectionName
-										+ "' already exists by inheritance and not flagged for overriding (with '"
-										+ OVERRIDE_SECTION_PREFIX + "' prefix)",
-								null, null);
+						designer.addIssue("Section '" + introducedSectionName
+								+ "' already exists by inheritance and not flagged for overriding (with '"
+								+ OVERRIDE_SECTION_PREFIX + "' prefix)");
 
 					} else {
 						// Include the override/introduced section
@@ -255,14 +238,11 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		// Provide issues for any child sections not overriding
 		for (String notOverrideSectionName : overrideSections.keySet()) {
-			designer.addIssue(
-					"No inherited section exists for overriding by section '"
-							+ notOverrideSectionName + "'", null, null);
+			designer.addIssue("No inherited section exists for overriding by section '" + notOverrideSectionName + "'");
 		}
 
 		// Return the sections from inheritance
-		return inheritanceSections
-				.toArray(new HttpTemplateSection[inheritanceSections.size()]);
+		return inheritanceSections.toArray(new HttpTemplateSection[inheritanceSections.size()]);
 	}
 
 	/**
@@ -274,8 +254,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	 * @return {@link HttpTemplateSection} name.
 	 */
 	private static String getHttpTemplateSectionName(String sectionName) {
-		return sectionName.startsWith(OVERRIDE_SECTION_PREFIX) ? sectionName
-				.substring(OVERRIDE_SECTION_PREFIX.length()) : sectionName;
+		return sectionName.startsWith(OVERRIDE_SECTION_PREFIX) ? sectionName.substring(OVERRIDE_SECTION_PREFIX.length())
+				: sectionName;
 	}
 
 	/**
@@ -287,8 +267,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	 * @return Raw {@link HttpTemplate} content from reconstruction from the
 	 *         {@link HttpTemplateSection} instances.
 	 */
-	public static String reconstructHttpTemplateContent(
-			HttpTemplateSection[] sections) {
+	public static String reconstructHttpTemplateContent(HttpTemplateSection[] sections) {
 
 		// Reconstruct the raw HTTP template content
 		StringBuilder content = new StringBuilder();
@@ -296,12 +275,10 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		for (HttpTemplateSection section : sections) {
 
 			// Obtain the template section name
-			String sectionName = getHttpTemplateSectionName(section
-					.getSectionName());
+			String sectionName = getHttpTemplateSectionName(section.getSectionName());
 
 			// Add the section tag (only if not first default section)
-			if (!((isFirstSection) && (HttpTemplateParserImpl.DEFAULT_FIRST_SECTION_NAME
-					.equals(sectionName)))) {
+			if (!((isFirstSection) && (HttpTemplateParserImpl.DEFAULT_FIRST_SECTION_NAME.equals(sectionName)))) {
 				// Include section as not first default section
 				content.append("<!-- {" + sectionName + "} -->");
 			}
@@ -338,21 +315,15 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	 * @throws IOException
 	 *             If fails to obtain the {@link HttpTemplate}.
 	 */
-	private static HttpTemplate getHttpTemplate(String templateLocation,
-			SourceContext context) throws IOException {
+	private static HttpTemplate getHttpTemplate(String templateLocation, SourceContext context) throws IOException {
 
 		// Create the context to source the HTTP template
-		SourcePropertiesImpl templateProperties = new SourcePropertiesImpl(
-				context);
-		templateProperties
-				.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE,
-						templateLocation);
-		SourceContext templateContext = new SourceContextImpl(
-				context.isLoadingType(), context, templateProperties);
+		SourcePropertiesImpl templateProperties = new SourcePropertiesImpl(context);
+		templateProperties.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_FILE, templateLocation);
+		SourceContext templateContext = new SourceContextImpl(context.isLoadingType(), context, templateProperties);
 
 		// Obtain the HTTP template
-		HttpTemplate template = HttpTemplateWorkSource
-				.getHttpTemplate(templateContext);
+		HttpTemplate template = HttpTemplateWorkSource.getHttpTemplate(templateContext);
 
 		// Return the HTTP template
 		return template;
@@ -412,12 +383,10 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner designer,
-			SectionSourceContext context) throws Exception {
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// Obtain the section class
-		String sectionClassName = context
-				.getProperty(PROPERTY_CLASS_NAME, null);
+		String sectionClassName = context.getProperty(PROPERTY_CLASS_NAME, null);
 		boolean isLogicClass = true;
 		if (CompileUtil.isBlank(sectionClassName)) {
 			// Use the no logic class
@@ -434,8 +403,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		// Calculate inheritance hierarchy of templates
 		String[] templateInheritanceHierarchy = new String[] { templateLocation };
-		String inheritedTemplatesValue = context.getProperty(
-				PROPERTY_INHERITED_TEMPLATES, null);
+		String inheritedTemplatesValue = context.getProperty(PROPERTY_INHERITED_TEMPLATES, null);
 		if (inheritedTemplatesValue != null) {
 			// Create the inheritance hierarchy for the template
 			String[] inheritedTemplates = inheritedTemplatesValue.split(",");
@@ -447,8 +415,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Obtain the template for the highest ancestor in inheritance hierarchy
-		HttpTemplate highestAncestorTemplate = getHttpTemplate(
-				templateInheritanceHierarchy[0], context);
+		HttpTemplate highestAncestorTemplate = getHttpTemplate(templateInheritanceHierarchy[0], context);
 
 		/*
 		 * Keep track of all link names. This is to allow inherited links to be
@@ -456,8 +423,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 * (i.e. containing sections have been overridden).
 		 */
 		Set<String> knownLinkNames = new HashSet<String>();
-		knownLinkNames.addAll(Arrays.asList(HttpTemplateWorkSource
-				.getHttpTemplateLinkNames(highestAncestorTemplate)));
+		knownLinkNames.addAll(Arrays.asList(HttpTemplateWorkSource.getHttpTemplateLinkNames(highestAncestorTemplate)));
 
 		// Undertake inheritance of the template (first does not inherit)
 		HttpTemplateSection[] sections = highestAncestorTemplate.getSections();
@@ -465,18 +431,14 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		for (int i = 1; i < templateInheritanceHierarchy.length; i++) {
 
 			// Obtain the child sections
-			HttpTemplate childTemplate = getHttpTemplate(
-					templateInheritanceHierarchy[i], context);
-			HttpTemplateSection[] childSections = filterCommentHttpTemplateSections(childTemplate
-					.getSections());
+			HttpTemplate childTemplate = getHttpTemplate(templateInheritanceHierarchy[i], context);
+			HttpTemplateSection[] childSections = filterCommentHttpTemplateSections(childTemplate.getSections());
 
 			// Add the child link names
-			knownLinkNames.addAll(Arrays.asList(HttpTemplateWorkSource
-					.getHttpTemplateLinkNames(childTemplate)));
+			knownLinkNames.addAll(Arrays.asList(HttpTemplateWorkSource.getHttpTemplateLinkNames(childTemplate)));
 
 			// Obtain the sections from child inheritance
-			sections = inheritHttpTemplateSections(sections, childSections,
-					designer);
+			sections = inheritHttpTemplateSections(sections, childSections, designer);
 		}
 
 		// Reconstruct the resulting inherited template content for use
@@ -491,8 +453,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		// Extend the template content as necessary
 		final String EXTENSION_PREFIX = "extension.";
 		int extensionIndex = 1;
-		String extensionClassName = context.getProperty(EXTENSION_PREFIX
-				+ extensionIndex, null);
+		String extensionClassName = context.getProperty(EXTENSION_PREFIX + extensionIndex, null);
 		while (extensionClassName != null) {
 
 			// Create an instance of the extension class
@@ -500,11 +461,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					.loadClass(extensionClassName).newInstance();
 
 			// Extend the template
-			String extensionPropertyPrefix = EXTENSION_PREFIX + extensionIndex
-					+ ".";
+			String extensionPropertyPrefix = EXTENSION_PREFIX + extensionIndex + ".";
 			HttpTemplateSectionExtensionContext extensionContext = new HttpTemplateSectionExtensionContextImpl(
-					templateContent, extensionPropertyPrefix,
-					nonRenderTemplateTaskKeys);
+					templateContent, extensionPropertyPrefix, nonRenderTemplateTaskKeys);
 			extension.extendTemplate(extensionContext);
 
 			// Override template details
@@ -512,75 +471,50 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 			// Initiate for next extension
 			extensionIndex++;
-			extensionClassName = context.getProperty(EXTENSION_PREFIX
-					+ extensionIndex, null);
+			extensionClassName = context.getProperty(EXTENSION_PREFIX + extensionIndex, null);
 		}
 
 		// Obtain the HTTP template
-		HttpTemplate template = HttpTemplateWorkSource
-				.getHttpTemplate(new StringReader(templateContent));
+		HttpTemplate template = HttpTemplateWorkSource.getHttpTemplate(new StringReader(templateContent));
 
 		// Create the necessary dependency objects
-		SectionObject connectionObject = this.getOrCreateObject(null,
-				ServerHttpConnection.class.getName());
-		SectionObject locationObject = this.getOrCreateObject(null,
-				HttpApplicationLocation.class.getName());
-		SectionObject requestStateObject = this.getOrCreateObject(null,
-				HttpRequestState.class.getName());
-		SectionObject sessionObject = this.getOrCreateObject(null,
-				HttpSession.class.getName());
+		SectionObject connectionObject = this.getOrCreateObject(null, ServerHttpConnection.class.getName());
+		SectionObject locationObject = this.getOrCreateObject(null, HttpApplicationLocation.class.getName());
+		SectionObject requestStateObject = this.getOrCreateObject(null, HttpRequestState.class.getName());
+		SectionObject sessionObject = this.getOrCreateObject(null, HttpSession.class.getName());
 
 		// Create the I/O escalation
-		SectionOutput ioEscalation = this.getOrCreateOutput(
-				IOException.class.getName(), IOException.class.getName(), true);
+		SectionOutput ioEscalation = this.getOrCreateOutput(IOException.class.getName(), IOException.class.getName(),
+				true);
 
 		// Load the initial task
-		SectionWork initialWork = designer.addSectionWork("INITIAL",
-				HttpTemplateInitialWorkSource.class.getName());
-		PropertiesUtil
-				.copyProperties(
-						context,
-						initialWork,
-						HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
-						HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
-						HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-						HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
-						HttpTemplateInitialWorkSource.PROPERTY_CONTENT_TYPE,
-						HttpTemplateInitialWorkSource.PROPERTY_CHARSET);
-		SectionTask initialTask = initialWork.addSectionTask("_INITIAL_TASK_",
-				HttpTemplateInitialWorkSource.TASK_NAME);
-		designer.link(initialTask.getTaskObject("SERVER_HTTP_CONNECTION"),
-				connectionObject);
-		designer.link(initialTask.getTaskObject("HTTP_APPLICATION_LOCATION"),
-				locationObject);
-		designer.link(initialTask.getTaskObject("REQUEST_STATE"),
-				requestStateObject);
+		SectionWork initialWork = designer.addSectionWork("INITIAL", HttpTemplateInitialWorkSource.class.getName());
+		PropertiesUtil.copyProperties(context, initialWork, HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+				HttpTemplateInitialWorkSource.PROPERTY_CONTENT_TYPE, HttpTemplateInitialWorkSource.PROPERTY_CHARSET);
+		SectionTask initialTask = initialWork.addSectionTask("_INITIAL_TASK_", HttpTemplateInitialWorkSource.TASK_NAME);
+		designer.link(initialTask.getTaskObject("SERVER_HTTP_CONNECTION"), connectionObject);
+		designer.link(initialTask.getTaskObject("HTTP_APPLICATION_LOCATION"), locationObject);
+		designer.link(initialTask.getTaskObject("REQUEST_STATE"), requestStateObject);
 		designer.link(initialTask.getTaskObject("HTTP_SESSION"), sessionObject);
-		designer.link(
-				initialTask.getTaskEscalation(IOException.class.getName()),
-				ioEscalation, FlowInstigationStrategyEnum.SEQUENTIAL);
+		designer.link(initialTask.getTaskEscalation(IOException.class.getName()), ioEscalation,
+				FlowInstigationStrategyEnum.SEQUENTIAL);
 
 		// Create and link rendering input to initial task
-		SectionInput sectionInput = designer.addSectionInput(
-				RENDER_TEMPLATE_INPUT_NAME, null);
+		SectionInput sectionInput = designer.addSectionInput(RENDER_TEMPLATE_INPUT_NAME, null);
 		designer.link(sectionInput, initialTask);
 
 		// Load the HTTP template
 		final String TEMPLATE_WORK_NANE = "TEMPLATE";
-		SectionWork templateWork = designer.addSectionWork(TEMPLATE_WORK_NANE,
-				HttpTemplateWorkSource.class.getName());
-		templateWork.addProperty(
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_CONTENT,
-				templateContent);
+		SectionWork templateWork = designer.addSectionWork(TEMPLATE_WORK_NANE, HttpTemplateWorkSource.class.getName());
+		templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_CONTENT, templateContent);
 
 		// Copy the template configuration
-		PropertiesUtil.copyProperties(context, templateWork,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+		PropertiesUtil.copyProperties(context, templateWork, HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI,
+				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
 				HttpTemplateWorkSource.PROPERTY_CHARSET);
-		PropertiesUtil.copyPrefixedProperties(context,
-				HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX,
+		PropertiesUtil.copyPrefixedProperties(context, HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX,
 				templateWork);
 
 		// Create the template tasks and ensure registered for logic flows
@@ -591,8 +525,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			String templateTaskName = templateSection.getSectionName();
 
 			// Add the template task
-			SectionTask templateTask = templateWork.addSectionTask(
-					templateTaskName, templateTaskName);
+			SectionTask templateTask = templateWork.addSectionTask(templateTaskName, templateTaskName);
 
 			// Register the template task
 			templateTasks.put(templateTaskName, templateTask);
@@ -608,26 +541,20 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			SectionTask templateTask = templateTasks.get(templateTaskName);
 
 			// Link the dependencies (later will determine if bean dependency)
-			designer.link(templateTask.getTaskObject("SERVER_HTTP_CONNECTION"),
-					connectionObject);
-			designer.link(
-					templateTask.getTaskObject("HTTP_APPLICATION_LOCATION"),
-					locationObject);
+			designer.link(templateTask.getTaskObject("SERVER_HTTP_CONNECTION"), connectionObject);
+			designer.link(templateTask.getTaskObject("HTTP_APPLICATION_LOCATION"), locationObject);
 
 			// Link the I/O escalation
-			designer.link(
-					templateTask.getTaskEscalation(IOException.class.getName()),
-					ioEscalation, FlowInstigationStrategyEnum.SEQUENTIAL);
+			designer.link(templateTask.getTaskEscalation(IOException.class.getName()), ioEscalation,
+					FlowInstigationStrategyEnum.SEQUENTIAL);
 
 			// Keep track of task for later flow linking
-			contentTasksByName.put(createTaskKey(templateTaskName),
-					templateTask);
+			contentTasksByName.put(createTaskKey(templateTaskName), templateTask);
 
 			// Obtain the possible bean task method for the section
 			String beanMethodName = "get" + templateTaskName;
 			String beanTaskKey = createTaskKey(beanMethodName);
-			TemplateClassTask beanTask = this.sectionClassMethodTasksByName
-					.get(beanTaskKey);
+			TemplateClassTask beanTask = this.sectionClassMethodTasksByName.get(beanTaskKey);
 			if (beanTask == null) {
 				// Attempt to find with Data suffix
 				beanTaskKey = beanTaskKey + "DATA";
@@ -638,23 +565,16 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			nonRenderTemplateTaskKeys.add(beanTaskKey);
 
 			// Determine if template section requires a bean
-			boolean isRequireBean = HttpTemplateWorkSource
-					.isHttpTemplateSectionRequireBean(templateSection);
+			boolean isRequireBean = HttpTemplateWorkSource.isHttpTemplateSectionRequireBean(templateSection);
 			if ((isRequireBean) && (beanTask == null)) {
 				// Section method required, determine if just missing method
 				if (!isLogicClass) {
 					// No template logic
-					designer.addIssue(
-							"Must provide template logic class for template "
-									+ templateUriPath, AssetType.WORK,
-							TEMPLATE_WORK_NANE);
+					designer.addIssue("Must provide template logic class for template " + templateUriPath);
 				} else {
 					// Have template logic, so missing method
-					designer.addIssue("Missing method '" + beanMethodName
-							+ "' on class " + this.sectionClass.getName()
-							+ " to provide bean for template "
-							+ templateUriPath, AssetType.WORK,
-							TEMPLATE_WORK_NANE);
+					designer.addIssue("Missing method '" + beanMethodName + "' on class " + this.sectionClass.getName()
+							+ " to provide bean for template " + templateUriPath);
 				}
 			}
 
@@ -663,22 +583,15 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 				// Ensure bean task does not have a @Parameter
 				if (beanTask.parameter != null) {
-					designer.addIssue(
-							"Template bean method '" + beanMethodName
-									+ "' must not have a "
-									+ Parameter.class.getSimpleName()
-									+ " annotation", AssetType.TASK,
-							beanMethodName);
+					designer.addIssue("Template bean method '" + beanMethodName + "' must not have a "
+							+ Parameter.class.getSimpleName() + " annotation");
 				}
 
 				// Ensure no next task (as must render section next)
 				Method method = beanTask.method;
 				if (method.isAnnotationPresent(NextTask.class)) {
-					designer.addIssue(
-							"Template bean method '" + method.getName()
-									+ "' must not be annotated with "
-									+ NextTask.class.getSimpleName(),
-							AssetType.TASK, beanTaskKey);
+					designer.addIssue("Template bean method '" + method.getName() + "' (task " + beanTaskKey
+							+ ") must not be annotated with " + NextTask.class.getSimpleName());
 
 					// As NextTask annotation, do not render section
 					continue;
@@ -689,9 +602,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				if ((returnType == null) || (Void.class.equals(returnType))) {
 					// Must provide return if require a bean
 					if (isRequireBean) {
-						designer.addIssue("Bean method '" + beanMethodName
-								+ "' must have return value", AssetType.TASK,
-								beanMethodName);
+						designer.addIssue("Bean method '" + beanMethodName + "' must have return value");
 					}
 
 				} else {
@@ -703,9 +614,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					}
 
 					// Inform template of bean type
-					templateWork.addProperty(
-							HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX
-									+ templateTaskName, beanType.getName());
+					templateWork.addProperty(HttpTemplateWorkSource.PROPERTY_BEAN_PREFIX + templateTaskName,
+							beanType.getName());
 
 					// Flag bean as parameter
 					templateTask.getTaskObject("OBJECT").flagAsParameter();
@@ -713,30 +623,18 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 					// Handle iterating over array of beans
 					if (isArray) {
 						// Provide iterator task if array
-						SectionWork arrayIteratorWork = designer
-								.addSectionWork(
-										templateTaskName + "ArrayIterator",
-										HttpTemplateArrayIteratorWorkSource.class
-												.getName());
-						arrayIteratorWork
-								.addProperty(
-										HttpTemplateArrayIteratorWorkSource.PROPERTY_COMPONENT_TYPE_NAME,
-										beanType.getName());
-						SectionTask arrayIteratorTask = arrayIteratorWork
-								.addSectionTask(
-										templateTaskName + "ArrayIterator",
-										HttpTemplateArrayIteratorWorkSource.TASK_NAME);
-						arrayIteratorTask
-								.getTaskObject(
-										HttpTemplateArrayIteratorWorkSource.OBJECT_NAME)
+						SectionWork arrayIteratorWork = designer.addSectionWork(templateTaskName + "ArrayIterator",
+								HttpTemplateArrayIteratorWorkSource.class.getName());
+						arrayIteratorWork.addProperty(HttpTemplateArrayIteratorWorkSource.PROPERTY_COMPONENT_TYPE_NAME,
+								beanType.getName());
+						SectionTask arrayIteratorTask = arrayIteratorWork.addSectionTask(
+								templateTaskName + "ArrayIterator", HttpTemplateArrayIteratorWorkSource.TASK_NAME);
+						arrayIteratorTask.getTaskObject(HttpTemplateArrayIteratorWorkSource.OBJECT_NAME)
 								.flagAsParameter();
 
 						// Link iteration of array to rendering
-						designer.link(
-								arrayIteratorTask
-										.getTaskFlow(HttpTemplateArrayIteratorWorkSource.FLOW_NAME),
-								templateTask,
-								FlowInstigationStrategyEnum.PARALLEL);
+						designer.link(arrayIteratorTask.getTaskFlow(HttpTemplateArrayIteratorWorkSource.FLOW_NAME),
+								templateTask, FlowInstigationStrategyEnum.PARALLEL);
 
 						// Iterator is now controller for template
 						templateTask = arrayIteratorTask;
@@ -747,17 +645,14 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			// Determine if linking from initial task
 			if (previousTemplateTask == initialTask) {
 				// Link as flow from initial task
-				TaskFlow renderFlow = initialTask.getTaskFlow(Flows.RENDER
-						.name());
+				TaskFlow renderFlow = initialTask.getTaskFlow(Flows.RENDER.name());
 				if (beanTask != null) {
 					// Link with bean task then template
-					designer.link(renderFlow, beanTask.task,
-							FlowInstigationStrategyEnum.SEQUENTIAL);
+					designer.link(renderFlow, beanTask.task, FlowInstigationStrategyEnum.SEQUENTIAL);
 					designer.link(beanTask.task, templateTask);
 				} else {
 					// No bean task so link to template
-					designer.link(renderFlow, templateTask,
-							FlowInstigationStrategyEnum.SEQUENTIAL);
+					designer.link(renderFlow, templateTask, FlowInstigationStrategyEnum.SEQUENTIAL);
 				}
 
 			} else {
@@ -784,38 +679,31 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			String flowName = taskFlow.getTaskFlowName();
 
 			// Determine if linking to content task
-			SectionTask contentTask = contentTasksByName
-					.get(createTaskKey(flowName));
+			SectionTask contentTask = contentTasksByName.get(createTaskKey(flowName));
 			if (contentTask != null) {
 				// Link to content task
-				designer.link(taskFlow, contentTask,
-						FlowInstigationStrategyEnum.SEQUENTIAL);
+				designer.link(taskFlow, contentTask, FlowInstigationStrategyEnum.SEQUENTIAL);
 
 			} else {
 				// Not linked to content task, so use default behaviour
-				super.linkTaskFlow(flowLink.taskFlow, flowLink.taskType,
-						flowLink.flowInterfaceType, flowLink.flowMethod,
-						flowLink.flowArgumentType);
+				super.linkTaskFlow(flowLink.taskFlow, flowLink.taskType, flowLink.flowInterfaceType,
+						flowLink.flowMethod, flowLink.flowArgumentType);
 			}
 		}
 
 		// Determine if the template is secure
-		boolean isTemplateSecure = HttpTemplateWorkSource
-				.isHttpTemplateSecure(context);
+		boolean isTemplateSecure = HttpTemplateWorkSource.isHttpTemplateSecure(context);
 
 		// Obtain the template URI suffix
-		String templateUriSuffix = context.getProperty(
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, null);
+		String templateUriSuffix = context.getProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, null);
 
 		// Determine if any unknown configured links
 		NEXT_PROPERTY: for (String propertyName : context.getPropertyNames()) {
-			if (propertyName
-					.startsWith(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX)) {
+			if (propertyName.startsWith(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX)) {
 
 				// Obtain the link name
 				String configuredLinkName = propertyName
-						.substring(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
-								.length());
+						.substring(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX.length());
 
 				// Ignore if known link
 				if (knownLinkNames.contains(configuredLinkName)) {
@@ -823,56 +711,44 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 				}
 
 				// Link not exist so provide issue as invalid configuration
-				designer.addIssue("Link '" + configuredLinkName
-						+ "' does not exist on template " + templateUriPath,
-						null, null);
+				designer.addIssue("Link '" + configuredLinkName + "' does not exist on template " + templateUriPath);
 			}
 		}
 
 		// Register the #{link} URL continuation tasks
-		String[] linkNames = HttpTemplateWorkSource
-				.getHttpTemplateLinkNames(template);
+		String[] linkNames = HttpTemplateWorkSource.getHttpTemplateLinkNames(template);
 		final String linkUrlContinuationPrefix = "HTTP_URL_CONTINUATION_";
 		for (String linkTaskName : linkNames) {
 
 			// Obtain the link URI path
-			String linkUriPath = HttpTemplateWorkSource
-					.getHttpTemplateLinkUrlContinuationPath(templateUriPath,
-							linkTaskName, templateUriSuffix);
+			String linkUriPath = HttpTemplateWorkSource.getHttpTemplateLinkUrlContinuationPath(templateUriPath,
+					linkTaskName, templateUriSuffix);
 
 			// Determine if link is to be secure
-			boolean isLinkSecure = HttpTemplateTask.isLinkSecure(linkTaskName,
-					isTemplateSecure, context);
+			boolean isLinkSecure = HttpTemplateTask.isLinkSecure(linkTaskName, isTemplateSecure, context);
 
 			// Create HTTP URL continuation
-			SectionWork urlContinuationWork = designer.addSectionWork(
-					linkUrlContinuationPrefix + linkTaskName,
+			SectionWork urlContinuationWork = designer.addSectionWork(linkUrlContinuationPrefix + linkTaskName,
 					HttpUrlContinuationWorkSource.class.getName());
-			urlContinuationWork.addProperty(
-					HttpUrlContinuationWorkSource.PROPERTY_URI_PATH,
-					linkUriPath);
+			urlContinuationWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, linkUriPath);
 			if (isLinkSecure) {
 				/*
 				 * Only upgrade to secure connection. For non-secure will
 				 * already have the request and no need to close the existing
 				 * secure connection and establish a new non-secure connection.
 				 */
-				urlContinuationWork.addProperty(
-						HttpUrlContinuationWorkSource.PROPERTY_SECURE,
+				urlContinuationWork.addProperty(HttpUrlContinuationWorkSource.PROPERTY_SECURE,
 						String.valueOf(isLinkSecure));
 			}
 			SectionTask urlContinuationTask = urlContinuationWork
-					.addSectionTask(linkUrlContinuationPrefix + linkTaskName,
-							HttpUrlContinuationWorkSource.TASK_NAME);
+					.addSectionTask(linkUrlContinuationPrefix + linkTaskName, HttpUrlContinuationWorkSource.TASK_NAME);
 
 			// Obtain the link method task
 			String linkMethodTaskKey = createTaskKey(linkTaskName);
-			TemplateClassTask methodTask = this.sectionClassMethodTasksByName
-					.get(linkMethodTaskKey);
+			TemplateClassTask methodTask = this.sectionClassMethodTasksByName.get(linkMethodTaskKey);
 			if (methodTask == null) {
 				// No backing method, so output flow from template
-				SectionOutput sectionOutput = this.getOrCreateOutput(
-						linkTaskName, null, false);
+				SectionOutput sectionOutput = this.getOrCreateOutput(linkTaskName, null, false);
 				designer.link(urlContinuationTask, sectionOutput);
 				continue; // linked
 			}
@@ -882,8 +758,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Link bean tasks to re-render template by default
-		List<String> sectionClassMethodTaskNames = new ArrayList<String>(
-				this.sectionClassMethodTasksByName.keySet());
+		List<String> sectionClassMethodTaskNames = new ArrayList<String>(this.sectionClassMethodTasksByName.keySet());
 		Collections.sort(sectionClassMethodTaskNames);
 		for (String beanTaskKey : sectionClassMethodTaskNames) {
 
@@ -891,8 +766,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			if (!(nonRenderTemplateTaskKeys.contains(beanTaskKey))) {
 
 				// Potentially rendering so obtain the class method
-				TemplateClassTask methodTask = this.sectionClassMethodTasksByName
-						.get(beanTaskKey);
+				TemplateClassTask methodTask = this.sectionClassMethodTasksByName.get(beanTaskKey);
 				Method method = methodTask.method;
 
 				// Determine if not render template after
@@ -911,8 +785,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		}
 
 		// Link last template task to output
-		SectionOutput output = this.getOrCreateOutput(
-				ON_COMPLETION_OUTPUT_NAME, null, false);
+		SectionOutput output = this.getOrCreateOutput(ON_COMPLETION_OUTPUT_NAME, null, false);
 		designer.link(previousTemplateTask, output);
 	}
 
@@ -955,8 +828,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 *            Type of parameter for {@link SectionTask}.
 		 *            <code>null</code> indicates no parameter.
 		 */
-		public TemplateClassTask(SectionTask task, TaskType<?, ?, ?> type,
-				Method method, Class<?> parameter) {
+		public TemplateClassTask(SectionTask task, TaskType<?, ?, ?> type, Method method, Class<?> parameter) {
 			this.task = task;
 			this.type = type;
 			this.method = method;
@@ -1009,9 +881,8 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 * @param flowArgumentType
 		 *            Flow interface method argument type.
 		 */
-		public TemplateFlowLink(TaskFlow taskFlow, TaskType<?, ?, ?> taskType,
-				Class<?> flowInterfaceType, Method flowMethod,
-				Class<?> flowArgumentType) {
+		public TemplateFlowLink(TaskFlow taskFlow, TaskType<?, ?, ?> taskType, Class<?> flowInterfaceType,
+				Method flowMethod, Class<?> flowArgumentType) {
 			this.taskFlow = taskFlow;
 			this.taskType = taskType;
 			this.flowInterfaceType = flowInterfaceType;
@@ -1023,8 +894,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	/**
 	 * {@link HttpTemplateSectionExtensionContext} implementation.
 	 */
-	private class HttpTemplateSectionExtensionContextImpl implements
-			HttpTemplateSectionExtensionContext {
+	private class HttpTemplateSectionExtensionContextImpl implements HttpTemplateSectionExtensionContext {
 
 		/**
 		 * Raw {@link HttpTemplate} content.
@@ -1054,8 +924,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 *            instances that are not to have the template rendered on
 		 *            their completion.
 		 */
-		public HttpTemplateSectionExtensionContextImpl(String templateContent,
-				String extensionPropertyPrefix,
+		public HttpTemplateSectionExtensionContextImpl(String templateContent, String extensionPropertyPrefix,
 				Set<String> nonRenderTemplateTaskKeys) {
 			this.templateContent = templateContent;
 			this.extensionPropertyPrefix = extensionPropertyPrefix;
@@ -1083,24 +952,21 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		@Override
 		public void flagAsNonRenderTemplateMethod(String templateClassMethodName) {
-			this.nonRenderTemplateTaskKeys
-					.add(createTaskKey(templateClassMethodName));
+			this.nonRenderTemplateTaskKeys.add(createTaskKey(templateClassMethodName));
 		}
 
 		@Override
 		public String[] getPropertyNames() {
 
 			// Obtain all the property names
-			String[] contextNames = HttpTemplateSectionSource.this.getContext()
-					.getPropertyNames();
+			String[] contextNames = HttpTemplateSectionSource.this.getContext().getPropertyNames();
 
 			// Filter to just this extension's properties
 			List<String> extensionNames = new LinkedList<String>();
 			for (String contextName : contextNames) {
 				if (contextName.startsWith(this.extensionPropertyPrefix)) {
 					// Add the extension property name
-					String extensionName = contextName
-							.substring(this.extensionPropertyPrefix.length());
+					String extensionName = contextName.substring(this.extensionPropertyPrefix.length());
 					extensionNames.add(extensionName);
 				}
 			}
@@ -1112,15 +978,14 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		@Override
 		public String getProperty(String name) throws UnknownPropertyError {
 			// Obtain the extension property value
-			return HttpTemplateSectionSource.this.getContext().getProperty(
-					this.extensionPropertyPrefix + name);
+			return HttpTemplateSectionSource.this.getContext().getProperty(this.extensionPropertyPrefix + name);
 		}
 
 		@Override
 		public String getProperty(String name, String defaultValue) {
 			// Obtain the extension property value
-			return HttpTemplateSectionSource.this.getContext().getProperty(
-					this.extensionPropertyPrefix + name, defaultValue);
+			return HttpTemplateSectionSource.this.getContext().getProperty(this.extensionPropertyPrefix + name,
+					defaultValue);
 		}
 
 		@Override
@@ -1130,15 +995,12 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 			Properties properties = new Properties();
 
 			// Filter to just this extension's properties
-			String[] contextNames = HttpTemplateSectionSource.this.getContext()
-					.getPropertyNames();
+			String[] contextNames = HttpTemplateSectionSource.this.getContext().getPropertyNames();
 			for (String contextName : contextNames) {
 				if (contextName.startsWith(this.extensionPropertyPrefix)) {
 					// Add the extension property name
-					String extensionName = contextName
-							.substring(this.extensionPropertyPrefix.length());
-					String value = HttpTemplateSectionSource.this.getContext()
-							.getProperty(contextName);
+					String extensionName = contextName.substring(this.extensionPropertyPrefix.length());
+					String value = HttpTemplateSectionSource.this.getContext().getProperty(contextName);
 					properties.setProperty(extensionName, value);
 				}
 			}
@@ -1169,15 +1031,12 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		@Override
 		public SectionObject getOrCreateSectionObject(String typeName) {
-			return HttpTemplateSectionSource.this.getOrCreateObject(null,
-					typeName);
+			return HttpTemplateSectionSource.this.getOrCreateObject(null, typeName);
 		}
 
 		@Override
-		public SectionOutput getOrCreateSectionOutput(String name,
-				String argumentType, boolean isEscalationOnly) {
-			return HttpTemplateSectionSource.this.getOrCreateOutput(name,
-					argumentType, isEscalationOnly);
+		public SectionOutput getOrCreateSectionOutput(String name, String argumentType, boolean isEscalationOnly) {
+			return HttpTemplateSectionSource.this.getOrCreateOutput(name, argumentType, isEscalationOnly);
 		}
 	}
 
@@ -1192,8 +1051,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	private boolean isHttpSessionStateful(Class<?> sectionClass) {
 
 		// Determine if stateful
-		boolean isStateful = sectionClass
-				.isAnnotationPresent(HttpSessionStateful.class);
+		boolean isStateful = sectionClass.isAnnotationPresent(HttpSessionStateful.class);
 
 		// Return indicating if stateful
 		return isStateful;
@@ -1209,14 +1067,12 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	@Override
-	protected Class<?> getSectionClass(String sectionClassName)
-			throws Exception {
+	protected Class<?> getSectionClass(String sectionClassName) throws Exception {
 		return this.sectionClass;
 	}
 
 	@Override
-	protected SectionManagedObject createClassManagedObject(String objectName,
-			Class<?> sectionClass) {
+	protected SectionManagedObject createClassManagedObject(String objectName, Class<?> sectionClass) {
 
 		// Determine if already loaded the Section Managed Object
 		if (this.sectionClassManagedObject != null) {
@@ -1229,35 +1085,26 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		// Default behaviour if not stateful
 		if (!isStateful) {
 			// Defer to default behaviour
-			this.sectionClassManagedObject = super.createClassManagedObject(
-					objectName, sectionClass);
+			this.sectionClassManagedObject = super.createClassManagedObject(objectName, sectionClass);
 
 		} else {
 			// As stateful, the class must be serialisable
 			if (!(Serializable.class.isAssignableFrom(sectionClass))) {
-				this.getDesigner().addIssue(
-						"Template logic class " + sectionClass.getName()
-								+ " is annotated with "
-								+ HttpSessionStateful.class.getSimpleName()
-								+ " but is not "
-								+ Serializable.class.getSimpleName(),
-						AssetType.MANAGED_OBJECT, objectName);
+				this.getDesigner()
+						.addIssue("Template logic class " + sectionClass.getName() + " is annotated with "
+								+ HttpSessionStateful.class.getSimpleName() + " but is not "
+								+ Serializable.class.getSimpleName());
 			}
 
 			// Create the managed object for the stateful template logic
 			SectionManagedObjectSource managedObjectSource = this.getDesigner()
-					.addSectionManagedObjectSource(
-							objectName,
-							HttpSessionObjectManagedObjectSource.class
-									.getName());
-			managedObjectSource.addProperty(
-					HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
+					.addSectionManagedObjectSource(objectName, HttpSessionObjectManagedObjectSource.class.getName());
+			managedObjectSource.addProperty(HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
 					sectionClass.getName());
 
 			// Create the managed object
-			this.sectionClassManagedObject = managedObjectSource
-					.addSectionManagedObject(objectName,
-							ManagedObjectScope.PROCESS);
+			this.sectionClassManagedObject = managedObjectSource.addSectionManagedObject(objectName,
+					ManagedObjectScope.PROCESS);
 		}
 
 		// Return the managed object
@@ -1265,12 +1112,11 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	@Override
-	protected DependencyMetaData[] extractClassManagedObjectDependencies(
-			String objectName, Class<?> sectionClass) throws Exception {
+	protected DependencyMetaData[] extractClassManagedObjectDependencies(String objectName, Class<?> sectionClass)
+			throws Exception {
 
 		// Extract the dependency meta-data for default behaviour
-		DependencyMetaData[] metaData = super
-				.extractClassManagedObjectDependencies(objectName, sectionClass);
+		DependencyMetaData[] metaData = super.extractClassManagedObjectDependencies(objectName, sectionClass);
 
 		// Determine if stateful
 		boolean isStateful = this.isHttpSessionStateful(sectionClass);
@@ -1283,13 +1129,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		// As stateful, must not have any dependencies into object
 		if (metaData.length > 0) {
 			this.getDesigner()
-					.addIssue(
-							"Template logic class "
-									+ sectionClass.getName()
-									+ " is annotated with "
-									+ HttpSessionStateful.class.getSimpleName()
-									+ " and therefore can not have dependencies injected into the object (only its methods)",
-							AssetType.MANAGED_OBJECT, objectName);
+					.addIssue("Template logic class " + sectionClass.getName() + " is annotated with "
+							+ HttpSessionStateful.class.getSimpleName()
+							+ " and therefore can not have dependencies injected into the object (only its methods)");
 		}
 
 		// Return the dependency meta-data for stateful template logic
@@ -1297,8 +1139,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	@Override
-	protected void enrichTask(SectionTask task, TaskType<?, ?, ?> taskType,
-			Method method, Class<?> parameterType) {
+	protected void enrichTask(SectionTask task, TaskType<?, ?, ?> taskType, Method method, Class<?> parameterType) {
 
 		// Do not include if no logic class
 		if (NoLogicClass.class.equals(this.sectionClass)) {
@@ -1307,21 +1148,18 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 
 		// Keep track of the tasks to allow linking by case-insensitive names
 		String taskKey = createTaskKey(task.getSectionTaskName());
-		this.sectionClassMethodTasksByName.put(taskKey, new TemplateClassTask(
-				task, taskType, method, parameterType));
+		this.sectionClassMethodTasksByName.put(taskKey, new TemplateClassTask(task, taskType, method, parameterType));
 
 		// Enrich the task
 		super.enrichTask(task, taskType, method, parameterType);
 	}
 
 	@Override
-	protected void linkTaskFlow(TaskFlow taskFlow, TaskType<?, ?, ?> taskType,
-			Class<?> flowInterfaceType, Method flowMethod,
-			Class<?> flowArgumentType) {
+	protected void linkTaskFlow(TaskFlow taskFlow, TaskType<?, ?, ?> taskType, Class<?> flowInterfaceType,
+			Method flowMethod, Class<?> flowArgumentType) {
 		// At this stage, the template content tasks are not available.
 		// Therefore just keep track of flows for later linking.
-		this.flowLinks.add(new TemplateFlowLink(taskFlow, taskType,
-				flowInterfaceType, flowMethod, flowArgumentType));
+		this.flowLinks.add(new TemplateFlowLink(taskFlow, taskType, flowInterfaceType, flowMethod, flowArgumentType));
 	}
 
 }

@@ -18,13 +18,13 @@
 package net.officefloor.compile.impl.team;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.issues.MockCompilerIssues;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;

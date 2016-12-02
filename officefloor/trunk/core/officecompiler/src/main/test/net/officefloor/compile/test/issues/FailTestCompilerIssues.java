@@ -17,11 +17,9 @@
  */
 package net.officefloor.compile.test.issues;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import junit.framework.TestCase;
 import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
 import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -39,20 +37,20 @@ public class FailTestCompilerIssues extends AbstractCompilerIssues {
 	 */
 
 	@Override
-	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+	public void addIssue(Node node, String issueDescription, Throwable cause) {
 
-		// Obtain the stack trace
-		Throwable cause = issue.getCause();
-		StringWriter stackTrace = new StringWriter();
-		if (cause != null) {
-			stackTrace.append("\n");
-			cause.printStackTrace(new PrintWriter(stackTrace));
+		// Enable test failures to bubble up
+		if (cause instanceof AssertionError) {
+			throw (AssertionError) cause;
 		}
 
-		// Fail because of the issue
-		Node node = issue.getNode();
-		TestCase.fail(issue.getIssueDescription() + " [" + node.getNodeName()
-				+ " (" + node.getClass().getSimpleName() + "]"
-				+ stackTrace.toString());
+		// Handle non-test failure issue
+		super.addIssue(node, issueDescription, cause);
 	}
+
+	@Override
+	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+		TestCase.fail(new CompileException(issue).toString());
+	}
+
 }

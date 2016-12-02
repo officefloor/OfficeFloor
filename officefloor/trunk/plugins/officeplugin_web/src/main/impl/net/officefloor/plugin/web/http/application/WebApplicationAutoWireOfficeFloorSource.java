@@ -72,8 +72,8 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSourc
  * 
  * @author Daniel Sagenschneider
  */
-public class WebApplicationAutoWireOfficeFloorSource extends
-		AutoWireOfficeFloorSource implements WebAutoWireApplication {
+public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloorSource
+		implements WebAutoWireApplication {
 
 	/**
 	 * Obtains the {@link HttpTemplate} section name from the
@@ -93,8 +93,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		} else {
 			// Use template URI stripping off leading '/'
-			sectionName = (templateUri.startsWith("/") ? templateUri
-					.substring("/".length()) : templateUri);
+			sectionName = (templateUri.startsWith("/") ? templateUri.substring("/".length()) : templateUri);
 		}
 
 		// Return the section name
@@ -193,8 +192,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Obtain the template URI Suffix
 		String templateUriSuffix = template.getTemplateUriSuffix();
 		if (templateUriSuffix == null) {
-			templateUriSuffix = (this.defaultTemplateUriSuffix == null ? ""
-					: this.defaultTemplateUriSuffix);
+			templateUriSuffix = (this.defaultTemplateUriSuffix == null ? "" : this.defaultTemplateUriSuffix);
 		}
 
 		// Return the URI suffix
@@ -206,13 +204,12 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	 */
 
 	@Override
-	public HttpTemplateAutoWireSection addHttpTemplate(String templateUri,
-			String templateFilePath, final Class<?> templateLogicClass) {
+	public HttpTemplateAutoWireSection addHttpTemplate(String templateUri, String templateFilePath,
+			final Class<?> templateLogicClass) {
 
 		// Obtain canonical template URI path
 		try {
-			templateUri = HttpUrlContinuationWorkSource
-					.getApplicationUriPath(templateUri);
+			templateUri = HttpUrlContinuationWorkSource.getApplicationUriPath(templateUri);
 		} catch (InvalidHttpRequestUriException ex) {
 			// Use the template URI as is
 		}
@@ -220,9 +217,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		// Ensure URI is not already registered
 		for (HttpTemplateAutoWireSection template : this.httpTemplates) {
 			if (templateUri.equals(template.getTemplateUri())) {
-				throw new IllegalStateException(
-						"HTTP Template already added for URI '" + templateUri
-								+ "'");
+				throw new IllegalStateException("HTTP Template already added for URI '" + templateUri + "'");
 			}
 		}
 
@@ -231,22 +226,18 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 		// Add the HTTP template section
 		final String uriPath = templateUri;
-		HttpTemplateAutoWireSection template = this.addSection(sectionName,
-				HttpTemplateSectionSource.class.getName(), templateFilePath,
-				new AutoWireSectionFactory<HttpTemplateAutoWireSection>() {
+		HttpTemplateAutoWireSection template = this.addSection(sectionName, HttpTemplateSectionSource.class.getName(),
+				templateFilePath, new AutoWireSectionFactory<HttpTemplateAutoWireSection>() {
 					@Override
-					public HttpTemplateAutoWireSection createAutoWireSection(
-							AutoWireSection seed) {
+					public HttpTemplateAutoWireSection createAutoWireSection(AutoWireSection seed) {
 						// Create and return the template
 						return new HttpTemplateAutoWireSectionImpl(
-								WebApplicationAutoWireOfficeFloorSource.this
-										.getOfficeFloorCompiler(), seed,
+								WebApplicationAutoWireOfficeFloorSource.this.getOfficeFloorCompiler(), seed,
 								templateLogicClass, uriPath);
 					}
 				});
 		if (templateLogicClass != null) {
-			template.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
-					templateLogicClass.getName());
+			template.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME, templateLogicClass.getName());
 		}
 
 		// Register the HTTP template
@@ -261,32 +252,25 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					HttpApplicationStateful applicationAnnotation = parameterType
 							.getAnnotation(HttpApplicationStateful.class);
 					if (applicationAnnotation != null) {
-						this.addHttpApplicationObject(parameterType,
-								applicationAnnotation.value());
+						this.addHttpApplicationObject(parameterType, applicationAnnotation.value());
 					}
 
 					// HTTP Session Stateful
-					HttpSessionStateful sessionAnnotation = parameterType
-							.getAnnotation(HttpSessionStateful.class);
+					HttpSessionStateful sessionAnnotation = parameterType.getAnnotation(HttpSessionStateful.class);
 					if (sessionAnnotation != null) {
-						this.addHttpSessionObject(parameterType,
-								sessionAnnotation.value());
+						this.addHttpSessionObject(parameterType, sessionAnnotation.value());
 					}
 
 					// HTTP Request Stateful
-					HttpRequestStateful requestAnnotation = parameterType
-							.getAnnotation(HttpRequestStateful.class);
+					HttpRequestStateful requestAnnotation = parameterType.getAnnotation(HttpRequestStateful.class);
 					if (requestAnnotation != null) {
-						this.addHttpRequestObject(parameterType, false,
-								requestAnnotation.value());
+						this.addHttpRequestObject(parameterType, false, requestAnnotation.value());
 					}
 
 					// HTTP Parameters
-					HttpParameters parameters = parameterType
-							.getAnnotation(HttpParameters.class);
+					HttpParameters parameters = parameterType.getAnnotation(HttpParameters.class);
 					if (parameters != null) {
-						this.addHttpRequestObject(parameterType, true,
-								parameters.value());
+						this.addHttpRequestObject(parameterType, true, parameters.value());
 					}
 				}
 			}
@@ -311,16 +295,13 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		}
 
 		// Add the HTTP Security
-		HttpSecurityAutoWireSection security = this.addSection("SECURITY",
-				HttpSecuritySectionSource.class.getName(), null,
-				new AutoWireSectionFactory<HttpSecurityAutoWireSection>() {
+		HttpSecurityAutoWireSection security = this.addSection("SECURITY", HttpSecuritySectionSource.class.getName(),
+				null, new AutoWireSectionFactory<HttpSecurityAutoWireSection>() {
 					@Override
-					public HttpSecurityAutoWireSection createAutoWireSection(
-							AutoWireSection seed) {
+					public HttpSecurityAutoWireSection createAutoWireSection(AutoWireSection seed) {
 						// Create and return the template
 						return new HttpSecurityAutoWireSectionImpl(
-								WebApplicationAutoWireOfficeFloorSource.this
-										.getOfficeFloorCompiler(), seed,
+								WebApplicationAutoWireOfficeFloorSource.this.getOfficeFloorCompiler(), seed,
 								httpSecuritySourceClass);
 					}
 				});
@@ -338,8 +319,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	@Override
-	public AutoWireObject addHttpApplicationObject(Class<?> objectClass,
-			String bindName) {
+	public AutoWireObject addHttpApplicationObject(Class<?> objectClass, String bindName) {
 
 		// Determine if already registered the type
 		AutoWireObject object = this.httpApplicationObjects.get(objectClass);
@@ -348,16 +328,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		}
 
 		// Not registered, so register
-		object = this.addManagedObject(
-				HttpApplicationObjectManagedObjectSource.class.getName(),
-				processScopeWirer, new AutoWire(objectClass));
-		object.addProperty(
-				HttpApplicationObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-				objectClass.getName());
+		object = this.addManagedObject(HttpApplicationObjectManagedObjectSource.class.getName(), processScopeWirer,
+				new AutoWire(objectClass));
+		object.addProperty(HttpApplicationObjectManagedObjectSource.PROPERTY_CLASS_NAME, objectClass.getName());
 		if ((bindName != null) && (bindName.trim().length() > 0)) {
-			object.addProperty(
-					HttpApplicationObjectManagedObjectSource.PROPERTY_BIND_NAME,
-					bindName);
+			object.addProperty(HttpApplicationObjectManagedObjectSource.PROPERTY_BIND_NAME, bindName);
 		}
 		this.httpApplicationObjects.put(objectClass, object);
 
@@ -371,8 +346,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	@Override
-	public AutoWireObject addHttpSessionObject(Class<?> objectClass,
-			String bindName) {
+	public AutoWireObject addHttpSessionObject(Class<?> objectClass, String bindName) {
 
 		// Determine if already registered the type
 		AutoWireObject object = this.httpSessionObjects.get(objectClass);
@@ -381,16 +355,11 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		}
 
 		// Not registered, so register
-		object = this.addManagedObject(
-				HttpSessionObjectManagedObjectSource.class.getName(),
-				processScopeWirer, new AutoWire(objectClass));
-		object.addProperty(
-				HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-				objectClass.getName());
+		object = this.addManagedObject(HttpSessionObjectManagedObjectSource.class.getName(), processScopeWirer,
+				new AutoWire(objectClass));
+		object.addProperty(HttpSessionObjectManagedObjectSource.PROPERTY_CLASS_NAME, objectClass.getName());
 		if ((bindName != null) && (bindName.trim().length() > 0)) {
-			object.addProperty(
-					HttpSessionObjectManagedObjectSource.PROPERTY_BIND_NAME,
-					bindName);
+			object.addProperty(HttpSessionObjectManagedObjectSource.PROPERTY_BIND_NAME, bindName);
 		}
 		this.httpSessionObjects.put(objectClass, object);
 
@@ -404,24 +373,18 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	@Override
-	public AutoWireObject addHttpRequestObject(Class<?> objectClass,
-			boolean isLoadParameters, String bindName) {
+	public AutoWireObject addHttpRequestObject(Class<?> objectClass, boolean isLoadParameters, String bindName) {
 
 		// Determine if already registered the type
 		AutoWireObject object = this.httpRequestObjects.get(objectClass);
 		if (object == null) {
 
 			// Not registered, so register
-			object = this.addManagedObject(
-					HttpRequestObjectManagedObjectSource.class.getName(),
-					processScopeWirer, new AutoWire(objectClass));
-			object.addProperty(
-					HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME,
-					objectClass.getName());
+			object = this.addManagedObject(HttpRequestObjectManagedObjectSource.class.getName(), processScopeWirer,
+					new AutoWire(objectClass));
+			object.addProperty(HttpRequestObjectManagedObjectSource.PROPERTY_CLASS_NAME, objectClass.getName());
 			if ((bindName != null) && (bindName.trim().length() > 0)) {
-				object.addProperty(
-						HttpRequestObjectManagedObjectSource.PROPERTY_BIND_NAME,
-						bindName);
+				object.addProperty(HttpRequestObjectManagedObjectSource.PROPERTY_BIND_NAME, bindName);
 			}
 			this.httpRequestObjects.put(objectClass, object);
 		}
@@ -432,8 +395,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			// Obtain the load HTTP parameters property
 			Property loadParametersProperty = null;
 			for (Property property : object.getProperties()) {
-				if (HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS
-						.equals(property.getName())) {
+				if (HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS.equals(property.getName())) {
 					loadParametersProperty = property;
 				}
 			}
@@ -441,8 +403,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			// Flag to load parameters
 			if (loadParametersProperty == null) {
 				// Add the property to load parameters
-				object.addProperty(
-						HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
+				object.addProperty(HttpRequestObjectManagedObjectSource.PROPERTY_IS_LOAD_HTTP_PARAMETERS,
 						String.valueOf(true));
 			} else {
 				// Ensure flagged to load parameters
@@ -455,43 +416,33 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	@Override
-	public AutoWireObject addHttpRequestObject(Class<?> objectClass,
-			boolean isLoadParameters) {
+	public AutoWireObject addHttpRequestObject(Class<?> objectClass, boolean isLoadParameters) {
 		return this.addHttpRequestObject(objectClass, isLoadParameters, null);
 	}
 
 	@Override
-	public HttpUriLink linkUri(String uri, AutoWireSection section,
-			String inputName) {
+	public HttpUriLink linkUri(String uri, AutoWireSection section, String inputName) {
 		return this.urlContinuations.linkUri(uri, section, inputName);
 	}
 
 	@Override
-	public void linkToHttpTemplate(AutoWireSection section, String outputName,
-			HttpTemplateAutoWireSection template) {
-		this.link(section, outputName, template,
-				HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
+	public void linkToHttpTemplate(AutoWireSection section, String outputName, HttpTemplateAutoWireSection template) {
+		this.link(section, outputName, template, HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 	}
 
 	@Override
-	public void linkToResource(AutoWireSection section, String outputName,
-			String resourcePath) {
-		this.resourceLinks.add(new ResourceLink(section, outputName,
-				resourcePath));
+	public void linkToResource(AutoWireSection section, String outputName, String resourcePath) {
+		this.resourceLinks.add(new ResourceLink(section, outputName, resourcePath));
 	}
 
 	@Override
-	public void linkEscalation(Class<? extends Throwable> escalation,
-			HttpTemplateAutoWireSection template) {
-		this.linkEscalation(escalation, template,
-				HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
+	public void linkEscalation(Class<? extends Throwable> escalation, HttpTemplateAutoWireSection template) {
+		this.linkEscalation(escalation, template, HttpTemplateSectionSource.RENDER_TEMPLATE_INPUT_NAME);
 	}
 
 	@Override
-	public void linkEscalation(Class<? extends Throwable> escalation,
-			String resourcePath) {
-		this.escalationResources.add(new EscalationResource(escalation,
-				resourcePath));
+	public void linkEscalation(Class<? extends Throwable> escalation, String resourcePath) {
+		this.escalationResources.add(new EscalationResource(escalation, resourcePath));
 	}
 
 	@Override
@@ -500,10 +451,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 	}
 
 	@Override
-	public void chainServicer(AutoWireSection section, String inputName,
-			String notHandledOutputName) {
-		this.chainedServicers.add(new ChainedServicer(section, inputName,
-				notHandledOutputName));
+	public void chainServicer(AutoWireSection section, String inputName, String notHandledOutputName) {
+		this.chainedServicers.add(new ChainedServicer(section, inputName, notHandledOutputName));
 	}
 
 	@Override
@@ -521,14 +470,12 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		}
 
 		// Add the linked URIs
-		for (HttpUriLink link : this.urlContinuations
-				.getRegisteredHttpUriLinks()) {
+		for (HttpUriLink link : this.urlContinuations.getRegisteredHttpUriLinks()) {
 
 			// Obtain the URI path
 			String uriPath = link.getApplicationUriPath();
 			try {
-				uriPath = HttpUrlContinuationWorkSource
-						.getApplicationUriPath(uriPath);
+				uriPath = HttpUrlContinuationWorkSource.getApplicationUriPath(uriPath);
 			} catch (InvalidHttpRequestUriException ex) {
 				// Do nothing and keep URI path as is
 			}
@@ -547,8 +494,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected void initOfficeFloor(OfficeFloorDeployer deployer,
-			OfficeFloorSourceContext context) throws Exception {
+	protected void initOfficeFloor(OfficeFloorDeployer deployer, OfficeFloorSourceContext context) throws Exception {
 
 		// Specify process managed object scope
 		final ManagedObjectSourceWirer processScopeWirer = new ManagedObjectSourceWirer() {
@@ -559,22 +505,18 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		};
 
 		// Add the HTTP section
-		AutoWireSection httpSection = this.addSection(HANDLER_SECTION_NAME,
-				WebApplicationSectionSource.class.getName(), null);
-		httpSection
-				.addProperty(
-						WebApplicationSectionSource.PROPERTY_LINK_SERVICE_TASK_NAME_PREFIX,
-						LINK_SERVICE_TASK_NAME_PREFIX);
+		AutoWireSection httpSection = this.addSection(HANDLER_SECTION_NAME, WebApplicationSectionSource.class.getName(),
+				null);
+		httpSection.addProperty(WebApplicationSectionSource.PROPERTY_LINK_SERVICE_TASK_NAME_PREFIX,
+				LINK_SERVICE_TASK_NAME_PREFIX);
 
 		// Ensure have HTTP Application Location
 		AutoWire locationAutoWire = new AutoWire(HttpApplicationLocation.class);
 		if (!(this.isObjectAvailable(locationAutoWire))) {
 			// Add the HTTP Application Location
-			AutoWireObject location = this.addManagedObject(
-					HttpApplicationLocationManagedObjectSource.class.getName(),
+			AutoWireObject location = this.addManagedObject(HttpApplicationLocationManagedObjectSource.class.getName(),
 					processScopeWirer, locationAutoWire);
-			HttpApplicationLocationManagedObjectSource.copyProperties(context,
-					location);
+			HttpApplicationLocationManagedObjectSource.copyProperties(context, location);
 		}
 
 		// Load the HTTP security
@@ -582,9 +524,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			// Provide anonymous authentication (if not already configured)
 			AutoWire httpAuthentication = new AutoWire(HttpAuthentication.class);
 			if (!(this.isObjectAvailable(httpAuthentication))) {
-				this.addManagedObject(
-						AnonymousHttpAuthenticationManagedObjectSource.class
-								.getName(), processScopeWirer,
+				this.addManagedObject(AnonymousHttpAuthenticationManagedObjectSource.class.getName(), processScopeWirer,
 						httpAuthentication);
 			}
 
@@ -599,67 +539,48 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					.loadClass(httpSecuritySourceClass.getName()).newInstance();
 
 			// Load the type (which also initialises the source)
-			HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(
-					context);
-			HttpSecurityType httpSecurityType = securityLoader
-					.loadHttpSecurityType(httpSecuritySource,
-							this.security.getProperties());
+			HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(context);
+			HttpSecurityType httpSecurityType = securityLoader.loadHttpSecurityType(httpSecuritySource,
+					this.security.getProperties());
 
 			// Obtain the security class
 			Class<?> securityClass = httpSecurityType.getSecurityClass();
 
 			// Register the HTTP security
-			String key = HttpSecurityConfigurator.registerHttpSecuritySource(
-					httpSecuritySource, httpSecurityType);
-			this.security
-					.addProperty(
-							HttpSecuritySectionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
-							key);
+			String key = HttpSecurityConfigurator.registerHttpSecuritySource(httpSecuritySource, httpSecurityType);
+			this.security.addProperty(HttpSecuritySectionSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
 
 			// Provide automated flow linking
-			this.linkEscalation(HttpAuthenticationRequiredException.class,
-					this.security, "Challenge");
-			this.link(this.security, "Recontinue", httpSection,
-					HANDLER_INPUT_NAME);
+			this.linkEscalation(HttpAuthenticationRequiredException.class, this.security, "Challenge");
+			this.link(this.security, "Recontinue", httpSection, HANDLER_INPUT_NAME);
 
 			// Add the HTTP Authentication Managed Object
 			AutoWireObject httpAuthentication = this.addManagedObject(
-					HttpAuthenticationManagedObjectSource.class.getName(),
-					new ManagedObjectSourceWirer() {
+					HttpAuthenticationManagedObjectSource.class.getName(), new ManagedObjectSourceWirer() {
 						@Override
 						public void wire(ManagedObjectSourceWirerContext context) {
 							context.setManagedObjectScope(ManagedObjectScope.PROCESS);
-							context.mapFlow(
-									"AUTHENTICATE",
-									WebApplicationAutoWireOfficeFloorSource.this.security
-											.getSectionName(),
+							context.mapFlow("AUTHENTICATE",
+									WebApplicationAutoWireOfficeFloorSource.this.security.getSectionName(),
 									"ManagedObjectAuthenticate");
-							context.mapFlow(
-									"LOGOUT",
-									WebApplicationAutoWireOfficeFloorSource.this.security
-											.getSectionName(),
+							context.mapFlow("LOGOUT",
+									WebApplicationAutoWireOfficeFloorSource.this.security.getSectionName(),
 									"ManagedObjectLogout");
 						}
 					}, new AutoWire(HttpAuthentication.class));
 			httpAuthentication.setTimeout(securityTimeout);
-			httpAuthentication
-					.addProperty(
-							HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
-							key);
+			httpAuthentication.addProperty(HttpAuthenticationManagedObjectSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY,
+					key);
 
 			// Determine if HTTP Security already configured
 			AutoWire httpSecurityAutoWire = new AutoWire(securityClass);
 			if (!(this.isObjectAvailable(httpSecurityAutoWire))) {
 				// Add the HTTP Security Managed Object
-				AutoWireObject httpSecurity = this.addManagedObject(
-						HttpSecurityManagedObjectSource.class.getName(),
-						processScopeWirer,
-						httpSecurityAutoWire);
+				AutoWireObject httpSecurity = this.addManagedObject(HttpSecurityManagedObjectSource.class.getName(),
+						processScopeWirer, httpSecurityAutoWire);
 				httpSecurity.setTimeout(securityTimeout);
-				httpSecurity
-						.addProperty(
-								HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
-								securityClass.getName());
+				httpSecurity.addProperty(HttpSecurityManagedObjectSource.PROPERTY_HTTP_SECURITY_TYPE,
+						securityClass.getName());
 			}
 		}
 
@@ -670,8 +591,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 			// Link the chained servicer (if previous chained output)
 			if (previousChainedOutput != null) {
-				this.link(previousChainedSection, previousChainedOutput,
-						chainedServicer.section, chainedServicer.inputName);
+				this.link(previousChainedSection, previousChainedOutput, chainedServicer.section,
+						chainedServicer.inputName);
 			}
 
 			// Configure for next in chain
@@ -683,17 +604,13 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		if (previousChainedOutput != null) {
 
 			// Create the filer sender servicer
-			AutoWireSection nonHandledServicer = this.addSection(
-					"NON_HANDLED_SERVICER",
+			AutoWireSection nonHandledServicer = this.addSection("NON_HANDLED_SERVICER",
 					HttpFileSenderSectionSource.class.getName(), null);
-			SourceHttpResourceFactory.copyProperties(context,
-					nonHandledServicer);
-			this.linkToSendResponse(nonHandledServicer,
-					HttpFileSenderSectionSource.FILE_SENT_OUTPUT_NAME);
+			SourceHttpResourceFactory.copyProperties(context, nonHandledServicer);
+			this.linkToSendResponse(nonHandledServicer, HttpFileSenderSectionSource.FILE_SENT_OUTPUT_NAME);
 
 			// Link into the chain
-			this.link(previousChainedSection, previousChainedOutput,
-					nonHandledServicer,
+			this.link(previousChainedSection, previousChainedOutput, nonHandledServicer,
 					HttpFileSenderSectionSource.SERVICE_INPUT_NAME);
 		}
 
@@ -718,13 +635,14 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 			if (isCyclicInheritance) {
 				// Provide issue of cyclic inheritance
 				StringBuilder logCycle = new StringBuilder();
-				logCycle.append("Template " + httpTemplate.getTemplateUri()
-						+ " has a cyclic inheritance hierarchy ( ");
+				logCycle.append("Template " + httpTemplate.getTemplateUri() + " has a cyclic inheritance hierarchy ( ");
 				for (AutoWireSection section : inheritanceHierarchy) {
 					logCycle.append(section.getSectionName() + " : ");
 				}
 				logCycle.append("... )");
-				deployer.addIssue(logCycle.toString(), null, null);
+				String logCycleMessage = logCycle.toString();
+				deployer.addIssue(logCycleMessage);
+				throw new CyclicInheritanceException(logCycleMessage);
 			}
 
 			// Obtain inheritance hierarchy of templates (including current)
@@ -753,8 +671,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 			// Provide inheritance hierarchy for template (must be at least 2)
 			if (templateInheritanceHierarchy.size() > 1) {
-				httpTemplate.addProperty(
-						HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
+				httpTemplate.addProperty(HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
 						inheritedTemplates.toString());
 			}
 
@@ -771,10 +688,8 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					contentTypeBuilder.append(contentTypeEntries[0]);
 					for (int i = 1; i < contentTypeEntries.length; i++) {
 						String contentTypeParameter = contentTypeEntries[i];
-						String[] parameterNameValues = contentTypeParameter
-								.split("=");
-						if ("charset".equalsIgnoreCase(parameterNameValues[0]
-								.trim())) {
+						String[] parameterNameValues = contentTypeParameter.split("=");
+						if ("charset".equalsIgnoreCase(parameterNameValues[0].trim())) {
 							// Load the charset for the template
 							StringBuilder charset = new StringBuilder();
 							for (int c = 1; c < parameterNameValues.length; c++) {
@@ -783,9 +698,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 								}
 								charset.append(parameterNameValues[c]);
 							}
-							httpTemplate.addProperty(
-									HttpTemplateSectionSource.PROPERTY_CHARSET,
-									charset.toString());
+							httpTemplate.addProperty(HttpTemplateSectionSource.PROPERTY_CHARSET, charset.toString());
 
 						} else {
 							// Include the parameter (as is)
@@ -799,9 +712,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 				}
 
 				// Provide the content type
-				httpTemplate.addProperty(
-						HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE,
-						contentType);
+				httpTemplate.addProperty(HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE, contentType);
 			}
 
 			// Determine if template is secure
@@ -812,27 +723,20 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 
 			// Provide the template URI (and potential URL continuation)
 			String templateUri = httpTemplate.getTemplateUri();
-			httpTemplate.addProperty(
-					HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI,
-					templateUri);
+			httpTemplate.addProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, templateUri);
 			if (templateUriSuffix != null) {
-				httpTemplate.addProperty(
-						HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX,
-						templateUriSuffix);
+				httpTemplate.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_URI_SUFFIX, templateUriSuffix);
 			}
 
 			// Secure the template
-			httpTemplate.addProperty(
-					HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
-					String.valueOf(isTemplateSecure));
+			httpTemplate.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE, String.valueOf(isTemplateSecure));
 
 			// Secure the specific template links (following inheritance)
 			Set<String> configuredLinks = new HashSet<String>();
 			for (HttpTemplateAutoWireSection currentTemplate : templateInheritanceHierarchy) {
 
 				// Provide the links for the current template
-				Map<String, Boolean> secureLinks = currentTemplate
-						.getSecureLinks();
+				Map<String, Boolean> secureLinks = currentTemplate.getSecureLinks();
 				for (String link : secureLinks.keySet()) {
 
 					// Ignore if already configured link (by child)
@@ -845,17 +749,14 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 					Boolean isLinkSecure = secureLinks.get(link);
 
 					// Configure the link secure for the template
-					httpTemplate.addProperty(
-							HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX
-									+ link, String.valueOf(isLinkSecure));
+					httpTemplate.addProperty(HttpTemplateWorkSource.PROPERTY_LINK_SECURE_PREFIX + link,
+							String.valueOf(isLinkSecure));
 				}
 			}
 
 			// Render redirect HTTP methods
-			String[] renderRedirectHttpMethods = httpTemplate
-					.getRenderRedirectHttpMethods();
-			if ((renderRedirectHttpMethods != null)
-					&& (renderRedirectHttpMethods.length > 0)) {
+			String[] renderRedirectHttpMethods = httpTemplate.getRenderRedirectHttpMethods();
+			if ((renderRedirectHttpMethods != null) && (renderRedirectHttpMethods.length > 0)) {
 
 				// Create the listing of rendering redirect HTTP methods
 				StringBuilder renderRedirectHttpMethodValue = new StringBuilder();
@@ -865,61 +766,47 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 						renderRedirectHttpMethodValue.append(", ");
 					}
 					isFirstRenderRedirectHttpMethod = false;
-					renderRedirectHttpMethodValue
-							.append(renderRedirectHttpMethod);
+					renderRedirectHttpMethodValue.append(renderRedirectHttpMethod);
 				}
 
 				// Configure the property for render redirect HTTP methods
-				httpTemplate
-						.addProperty(
-								HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
-								renderRedirectHttpMethodValue.toString());
+				httpTemplate.addProperty(HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
+						renderRedirectHttpMethodValue.toString());
 			}
 
 			// Link completion of template rendering (if not already linked)
-			if (!this.isLinked(httpTemplate,
-					HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME)) {
+			if (!this.isLinked(httpTemplate, HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME)) {
 				// Not linked, so link to sending HTTP response
-				this.linkToSendResponse(httpTemplate,
-						HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME);
+				this.linkToSendResponse(httpTemplate, HttpTemplateSectionSource.ON_COMPLETION_OUTPUT_NAME);
 			}
 		}
 
 		// Link to resources
-		if ((this.resourceLinks.size() > 0)
-				|| (this.escalationResources.size() > 0)) {
+		if ((this.resourceLinks.size() > 0) || (this.escalationResources.size() > 0)) {
 
 			// Create section to send resources
-			AutoWireSection section = this.addSection("RESOURCES",
-					HttpFileSectionSource.class.getName(),
+			AutoWireSection section = this.addSection("RESOURCES", HttpFileSectionSource.class.getName(),
 					WEB_PUBLIC_RESOURCES_CLASS_PATH_PREFIX);
 			SourceHttpResourceFactory.copyProperties(context, section);
 
 			// Link section outputs to the resources
 			for (ResourceLink resourceLink : this.resourceLinks) {
-				this.link(resourceLink.section, resourceLink.outputName,
-						section, resourceLink.resourcePath);
-				section.addProperty(
-						HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX
-								+ resourceLink.resourcePath,
+				this.link(resourceLink.section, resourceLink.outputName, section, resourceLink.resourcePath);
+				section.addProperty(HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX + resourceLink.resourcePath,
 						resourceLink.resourcePath);
 			}
 
 			// Link escalations to the resources
 			for (EscalationResource escalation : this.escalationResources) {
-				this.linkEscalation(escalation.escalationType, section,
-						escalation.resourcePath);
-				section.addProperty(
-						HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX
-								+ escalation.resourcePath,
+				this.linkEscalation(escalation.escalationType, section, escalation.resourcePath);
+				section.addProperty(HttpFileSectionSource.PROPERTY_RESOURCE_PREFIX + escalation.resourcePath,
 						escalation.resourcePath);
 			}
 		}
 
 		// Link sending the response
 		for (SendLink link : this.sendLinks) {
-			this.link(link.section, link.outputName, httpSection,
-					WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME);
+			this.link(link.section, link.outputName, httpSection, WebApplicationSectionSource.SEND_RESPONSE_INPUT_NAME);
 		}
 	}
 
@@ -953,8 +840,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		 * @param resourcePath
 		 *            Resource path.
 		 */
-		public ResourceLink(AutoWireSection section, String outputName,
-				String resourcePath) {
+		public ResourceLink(AutoWireSection section, String outputName, String resourcePath) {
 			this.section = section;
 			this.outputName = outputName;
 			this.resourcePath = resourcePath;
@@ -984,8 +870,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		 * @param resourcePath
 		 *            Resource path.
 		 */
-		public EscalationResource(Class<? extends Throwable> escalationType,
-				String resourcePath) {
+		public EscalationResource(Class<? extends Throwable> escalationType, String resourcePath) {
 			this.escalationType = escalationType;
 			this.resourcePath = resourcePath;
 		}
@@ -1051,8 +936,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends
 		 *            Name of the {@link SectionOutput}. May be
 		 *            <code>null</code>.
 		 */
-		public ChainedServicer(AutoWireSection section, String inputName,
-				String notHandledOutputName) {
+		public ChainedServicer(AutoWireSection section, String inputName, String notHandledOutputName) {
 			this.section = section;
 			this.inputName = inputName;
 			this.notHandledOutputName = notHandledOutputName;
