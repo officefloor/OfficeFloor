@@ -26,14 +26,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.autowire.AutoWireManagement;
-import net.officefloor.building.classpath.ClassPathFactoryImpl;
-import net.officefloor.building.classpath.RemoteRepository;
-import net.officefloor.compile.impl.issues.FailCompilerIssues;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -43,13 +35,20 @@ import org.apache.maven.project.MavenProject;
 
 import com.google.gwt.dev.DevMode;
 
+import net.officefloor.autowire.AutoWireManagement;
+import net.officefloor.building.classpath.ClassPathFactoryImpl;
+import net.officefloor.building.classpath.RemoteRepository;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+
 /**
  * Tests the {@link WoofDevelopmentLauncher}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
-		GwtLauncher {
+public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements GwtLauncher {
 
 	/**
 	 * {@link MockDevMode}.
@@ -95,8 +94,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	 */
 	public void testDefaultGwtVersion() throws Exception {
 		String officeFloorGwtVersion = this.getGwtVersion();
-		assertEquals("Not using GWT version aligned to OfficeFloor",
-				officeFloorGwtVersion,
+		assertEquals("Not using GWT version aligned to OfficeFloor", officeFloorGwtVersion,
 				WoofDevelopmentConfigurationLoader.DEFAULT_GWT_DEV_VERSION);
 	}
 
@@ -137,12 +135,10 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 		String gwtDevVersion = this.getGwtVersion();
 
 		// Load the class path entries
-		String[] classpathEntries = WoofDevelopmentConfigurationLoader
-				.getDevModeClassPath(pomFile);
+		String[] classpathEntries = WoofDevelopmentConfigurationLoader.getDevModeClassPath(pomFile);
 
 		// Ensure gwt-dev on class path
-		String gwtDevClasspathSuffix = "/"
-				+ WoofDevelopmentConfigurationLoader.GWT_DEV_ARTIFACT_ID + "-"
+		String gwtDevClasspathSuffix = "/" + WoofDevelopmentConfigurationLoader.GWT_DEV_ARTIFACT_ID + "-"
 				+ gwtDevVersion + ".jar";
 		boolean isGwtDevOnClasspath = false;
 		for (String classpathEntry : classpathEntries) {
@@ -164,16 +160,13 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 		File pomFile = this.findFile("pom.xml");
 
 		// Obtain the GWT version
-		MavenProject project = new ClassPathFactoryImpl(null,
-				new RemoteRepository[0]).getMavenProject(pomFile);
+		MavenProject project = new ClassPathFactoryImpl(null, new RemoteRepository[0]).getMavenProject(pomFile);
 		String gwtDevVersion = null;
 		for (Dependency dependency : project.getDependencies()) {
 			String groupId = dependency.getGroupId();
 			String artifactId = dependency.getArtifactId();
-			if ((WoofDevelopmentConfigurationLoader.GWT_GROUP_ID
-					.equals(groupId))
-					&& (WoofDevelopmentConfigurationLoader.GWT_DEV_ARTIFACT_ID
-							.equals(artifactId))) {
+			if ((WoofDevelopmentConfigurationLoader.GWT_GROUP_ID.equals(groupId))
+					&& (WoofDevelopmentConfigurationLoader.GWT_DEV_ARTIFACT_ID.equals(artifactId))) {
 				gwtDevVersion = dependency.getVersion();
 			}
 		}
@@ -210,8 +203,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	public void testEmbeddedWoofServer() throws Exception {
 
 		// Launch the application with default configuration
-		this.launchApplication(null, "net.officefloor.launch.woof.Test",
-				"/Test.woof", "/section");
+		this.launchApplication(null, "net.officefloor.launch.woof.Test", "/Test.woof", "/section");
 
 		// Ensure template available
 		this.doHttpRequest(8888, "Test.woof", "TEMPLATE");
@@ -229,9 +221,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	public void testEnsureNoGwtRuns() throws Exception {
 		try {
 			// Run application
-			WoofOfficeFloorSource.start(
-					WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
-					"noGwt.woof");
+			WoofOfficeFloorSource.start(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION, "noGwt.woof");
 
 			// Ensure template available
 			this.doHttpRequest(7878, "noGwt.woof", "TEMPLATE");
@@ -249,8 +239,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	public void testEmbeddedNoGwtWoofServer() throws Exception {
 
 		// Launch the application with alternate configuration
-		this.launchApplication("noGwt.woof", "net.officefloor.launch.NoGwt",
-				"/noGwt.woof");
+		this.launchApplication("noGwt.woof", "net.officefloor.launch.NoGwt", "/noGwt.woof");
 
 		// Ensure start alternate configuration
 		this.doHttpRequest(8888, "noGwt.woof", "TEMPLATE");
@@ -262,17 +251,14 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	public void testEnsureInvalidWoof() throws Exception {
 		try {
 			// Run application
-			WoofOfficeFloorSource.main(
-					WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
-					"invalid.woof");
+			WoofOfficeFloorSource.main(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION, "invalid.woof");
 
 			// Ensure did not successfully start (as invalid)
 			fail("Should not be valid");
 
-		} catch (FailCompilerIssues ex) {
+		} catch (CompileException ex) {
 			// Cause should be class not found
-			assertTrue("Invalid cause",
-					ex.getCause() instanceof ClassNotFoundException);
+			assertTrue("Invalid cause", ex.getCompilerIssue().getCause() instanceof ClassNotFoundException);
 
 		} finally {
 			// Ensure clean up and stop
@@ -286,8 +272,7 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	public void testEmbeddedInvalidWoofServer() throws Exception {
 
 		// Launch the application with alternate configuration
-		this.launchApplication("invalid.woof", "net.officefloor.launch.NoGwt",
-				"/invalid.woof");
+		this.launchApplication("invalid.woof", "net.officefloor.launch.NoGwt", "/invalid.woof");
 
 	}
 
@@ -302,8 +287,8 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	 * @param expectedStartupUrls
 	 *            Expected startup URLs.
 	 */
-	private void launchApplication(String woofFileName, String gwtModuleName,
-			String... expectedStartupUrls) throws Exception {
+	private void launchApplication(String woofFileName, String gwtModuleName, String... expectedStartupUrls)
+			throws Exception {
 
 		// Re-use test class path for running
 
@@ -316,8 +301,8 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 		}
 
 		// Create the WAR directory
-		File warDirectory = new File(System.getProperty("java.io.tmpdir"), this
-				.getClass().getSimpleName() + "-" + this.getName());
+		File warDirectory = new File(System.getProperty("java.io.tmpdir"),
+				this.getClass().getSimpleName() + "-" + this.getName());
 		if (warDirectory.exists()) {
 			this.deleteDirectory(warDirectory);
 		}
@@ -331,14 +316,11 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		// Provide alternate WoOF configuration
 		if (!isDefaultWoofConfiguration) {
-			configuration.addProperty(
-					WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
-					woofFileName);
+			configuration.addProperty(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION, woofFileName);
 		}
 
 		// Store the configuration
-		File configurationFile = new File(warDirectory,
-				WoofServletContainerLauncher.CONFIGURATION_FILE_NAME);
+		File configurationFile = new File(warDirectory, WoofServletContainerLauncher.CONFIGURATION_FILE_NAME);
 		configuration.storeConfiguration(configurationFile);
 
 		// Run the dev mode (with WoOF embedded server)
@@ -346,21 +328,16 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 
 		// Validate the arguments for dev mode
 		List<String> expectedArgumentList = new LinkedList<String>();
-		expectedArgumentList.addAll(Arrays.asList("-server",
-				WoofServletContainerLauncher.class.getName(), "-war",
+		expectedArgumentList.addAll(Arrays.asList("-server", WoofServletContainerLauncher.class.getName(), "-war",
 				warDirectory.getAbsolutePath()));
 		for (String startupUrl : expectedStartupUrls) {
-			expectedArgumentList.addAll(Arrays
-					.asList("-startupUrl", startupUrl));
+			expectedArgumentList.addAll(Arrays.asList("-startupUrl", startupUrl));
 		}
 		expectedArgumentList.add(gwtModuleName);
-		String[] expectedArguments = expectedArgumentList
-				.toArray(new String[expectedArgumentList.size()]);
-		assertEquals("Incorrect number of arguments", expectedArguments.length,
-				this.devMode.arguments.length);
+		String[] expectedArguments = expectedArgumentList.toArray(new String[expectedArgumentList.size()]);
+		assertEquals("Incorrect number of arguments", expectedArguments.length, this.devMode.arguments.length);
 		for (int i = 0; i < expectedArguments.length; i++) {
-			assertEquals("Incorrect argument " + i, expectedArguments[i],
-					this.devMode.arguments[i]);
+			assertEquals("Incorrect argument " + i, expectedArguments[i], this.devMode.arguments[i]);
 		}
 
 		// Allow some time for GWT development to start up
@@ -377,24 +354,18 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 	 * @param expectedResponseContent
 	 *            Expected content in the {@link HttpResponse} entity.
 	 */
-	private void doHttpRequest(int port, String templateUri,
-			String expectedResponseContent) throws IOException {
+	private void doHttpRequest(int port, String templateUri, String expectedResponseContent) throws IOException {
 
 		// Ensure able to call application
-		HttpResponse httpResponse = this.client.execute(new HttpGet(
-				"http://localhost:" + port + "/" + templateUri));
-		assertEquals("Ensure successful", 200, httpResponse.getStatusLine()
-				.getStatusCode());
+		HttpResponse httpResponse = this.client.execute(new HttpGet("http://localhost:" + port + "/" + templateUri));
+		assertEquals("Ensure successful", 200, httpResponse.getStatusLine().getStatusCode());
 
 		// Validate appropriate response entity
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		httpResponse.getEntity().writeTo(buffer);
 		String responseText = new String(buffer.toByteArray());
-		assertTrue(
-				"Incorrect response as not contain expected content (content="
-						+ expectedResponseContent + ", response="
-						+ responseText + ")",
-				responseText.contains(expectedResponseContent));
+		assertTrue("Incorrect response as not contain expected content (content=" + expectedResponseContent
+				+ ", response=" + responseText + ")", responseText.contains(expectedResponseContent));
 	}
 
 	/*
@@ -435,20 +406,16 @@ public class WoofDevelopmentLauncherTest extends OfficeFrameTestCase implements
 			this.arguments = arguments;
 
 			// Run GWT on unique port (to stop conflicts)
-			List<String> argumentsList = new ArrayList<String>(
-					this.arguments.length + 2);
-			argumentsList.addAll(Arrays.asList("-codeServerPort",
-					String.valueOf(HttpTestUtil.getAvailablePort())));
+			List<String> argumentsList = new ArrayList<String>(this.arguments.length + 2);
+			argumentsList.addAll(Arrays.asList("-codeServerPort", String.valueOf(HttpTestUtil.getAvailablePort())));
 			argumentsList.addAll(Arrays.asList(this.arguments));
 
 			// By default run head less (for continuous integration)
-			boolean isHeadless = Boolean.parseBoolean(System.getProperty(
-					"hide.gwt.devmode", String.valueOf(true)));
+			boolean isHeadless = Boolean.parseBoolean(System.getProperty("hide.gwt.devmode", String.valueOf(true)));
 			this.setHeadless(isHeadless);
 
 			// Process arguments and if successful run
-			if (new ArgProcessor(this.options).processArgs(argumentsList
-					.toArray(new String[argumentsList.size()]))) {
+			if (new ArgProcessor(this.options).processArgs(argumentsList.toArray(new String[argumentsList.size()]))) {
 				// Run in new thread as blocks until complete
 				new Thread() {
 					@Override

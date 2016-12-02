@@ -88,8 +88,8 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		this.port = HttpTestUtil.getAvailablePort();
 
 		// Obtain the temp location to create necessary directories
-		File tempDir = new File(System.getProperty("java.io.tmpdir"), this
-				.getClass().getSimpleName() + "-" + this.getName());
+		File tempDir = new File(System.getProperty("java.io.tmpdir"),
+				this.getClass().getSimpleName() + "-" + this.getName());
 		if (tempDir.exists()) {
 			this.deleteDirectory(tempDir);
 		}
@@ -97,8 +97,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 
 		// Create the webapp directory
 		this.webappDirectory = new File(tempDir, "webapp");
-		assertTrue("Failed to setup src directory",
-				this.webappDirectory.mkdir());
+		assertTrue("Failed to setup src directory", this.webappDirectory.mkdir());
 
 		// Ensure webapp directory contains web.xml
 		File webInfDir = new File(this.webappDirectory, "WEB-INF");
@@ -110,30 +109,27 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 
 		// Create the war target directory
 		this.warDirectory = new File(tempDir, "war");
-		assertTrue("Failed to setup target directory",
-				this.warDirectory.mkdir());
+		assertTrue("Failed to setup target directory", this.warDirectory.mkdir());
 
 		// Create file within target directory
 		this.writeFile(this.warDirectory, "target.html", "TARGET");
 
 		// Ensure class path resource available
 		assertNotNull("Invalid testing as class path resource not available",
-				Thread.currentThread().getContextClassLoader()
-						.getResourceAsStream("PUBLIC/classpath.html"));
+				Thread.currentThread().getContextClassLoader().getResourceAsStream("PUBLIC/classpath.html"));
 
 		// Provide WoOF configuration for launcher
 		WoofDevelopmentConfiguration configuration = new WoofDevelopmentConfiguration();
 		configuration.setWarDirectory(this.warDirectory);
 		configuration.setWebAppDirectory(this.webappDirectory);
 		configuration.addResourceDirectory(this.webappDirectory);
-		configuration.storeConfiguration(new File(this.warDirectory,
-				WoofServletContainerLauncher.CONFIGURATION_FILE_NAME));
+		configuration
+				.storeConfiguration(new File(this.warDirectory, WoofServletContainerLauncher.CONFIGURATION_FILE_NAME));
 
 		// Start WoOF
 		this.logger = new MockTreeLogger();
 		WoofServletContainerLauncher launcher = new WoofServletContainerLauncher();
-		this.servletContainer = launcher.start(this.logger, this.port,
-				this.warDirectory);
+		this.servletContainer = launcher.start(this.logger, this.port, this.warDirectory);
 	}
 
 	@Override
@@ -185,10 +181,8 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		this.doHttpRequest("target.html", "TARGET");
 
 		// Ensure resource not available
-		HttpResponse response = this.client.execute(new HttpGet(
-				"http://localhost:" + this.port + "/new.html"));
-		assertEquals("Should not find resource", 404, response.getStatusLine()
-				.getStatusCode());
+		HttpResponse response = this.client.execute(new HttpGet("http://localhost:" + this.port + "/new.html"));
+		assertEquals("Should not find resource", 404, response.getStatusLine().getStatusCode());
 		EntityUtils.consume(response.getEntity());
 
 		// Provide new resource
@@ -211,18 +205,15 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 
 		try {
 			// Attempt to start new instance that has invalid configuration
-			this.servletContainer = new WoofServletContainer(logger, "NAME",
-					HttpTestUtil.getAvailablePort(), this.webappDirectory,
-					new File[0], OfficeFloorCompiler.newPropertyList()) {
+			this.servletContainer = new WoofServletContainer(logger, "NAME", HttpTestUtil.getAvailablePort(),
+					this.webappDirectory, new File[0], OfficeFloorCompiler.newPropertyList()) {
 				@Override
 				protected WoofOfficeFloorSource createWoofOfficeFloorSource() {
 
 					// Create WoOF configured with invalid configuration
 					WoofOfficeFloorSource source = new WoofOfficeFloorSource();
 					source.getOfficeFloorCompiler()
-							.addProperty(
-									WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION,
-									"fail.woof");
+							.addProperty(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION, "fail.woof");
 
 					// Return WoOF
 					return source;
@@ -233,14 +224,12 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 			fail("Should not be successful in starting");
 
 		} catch (UnableToCompleteException ex) {
-			assertEquals("Incorrect cause", "(see previous log entries)",
-					ex.getMessage());
+			assertEquals("Incorrect cause", "(see previous log entries)", ex.getMessage());
 		}
 
 		// Validate the logging of failure to start
-		String expectedMessage = "null null: Failed to source OfficeFloor from OfficeFloorSource (source="
-				+ WoofOfficeFloorSource.class.getName()
-				+ ", location=auto-wire)";
+		String expectedMessage = "Failed to source OfficeFloor from OfficeFloorSource (source="
+				+ WoofOfficeFloorSource.class.getName() + ", location=auto-wire)";
 		logger.validateLogMessages(expectedMessage);
 	}
 
@@ -258,8 +247,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		this.doHttpRequest("classpath.html", "CLASSPATH");
 
 		// Validate logging (starting/stopping)
-		this.logger.validateLogMessages("OfficeFloor (WoOF) started on port "
-				+ this.port, "OfficeFloor (WoOF) stopped",
+		this.logger.validateLogMessages("OfficeFloor (WoOF) started on port " + this.port, "OfficeFloor (WoOF) stopped",
 				"OfficeFloor (WoOF) started on port " + this.port);
 	}
 
@@ -271,23 +259,19 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 	 * @param expectedResourceContent
 	 *            Expected resource content.
 	 */
-	private void doHttpRequest(String resourceUri,
-			String expectedResourceContent) throws IOException {
+	private void doHttpRequest(String resourceUri, String expectedResourceContent) throws IOException {
 
 		// Do the request
-		HttpResponse response = this.client.execute(new HttpGet(
-				"http://localhost:" + this.port + "/" + resourceUri));
+		HttpResponse response = this.client.execute(new HttpGet("http://localhost:" + this.port + "/" + resourceUri));
 
 		// Validate the successful
-		assertEquals("Should be successful", 200, response.getStatusLine()
-				.getStatusCode());
+		assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Validate correct content
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		response.getEntity().writeTo(buffer);
 		String responseText = new String(buffer.toByteArray());
-		assertEquals("Incorrect resource content", expectedResourceContent,
-				responseText);
+		assertEquals("Incorrect resource content", expectedResourceContent, responseText);
 	}
 
 	/**
@@ -300,8 +284,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 	 * @param fileContent
 	 *            Content for {@link File}.
 	 */
-	private void writeFile(File directory, String fileName, String fileContent)
-			throws IOException {
+	private void writeFile(File directory, String fileName, String fileContent) throws IOException {
 		Writer writer = new FileWriter(new File(directory, fileName));
 		writer.append(fileContent);
 		writer.close();
@@ -324,11 +307,9 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		 *            Expected messages.
 		 */
 		private void validateLogMessages(String... expectedMessages) {
-			assertEquals("Incorrect number of log messages",
-					expectedMessages.length, this.messages.size());
+			assertEquals("Incorrect number of log messages", expectedMessages.length, this.messages.size());
 			for (int i = 0; i < expectedMessages.length; i++) {
-				assertEquals("Incorrect log message " + i, expectedMessages[i],
-						this.messages.get(i));
+				assertEquals("Incorrect log message " + i, expectedMessages[i], this.messages.get(i));
 			}
 		}
 
@@ -337,8 +318,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public TreeLogger branch(Type type, String msg, Throwable caught,
-				HelpInfo helpInfo) {
+		public TreeLogger branch(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
 			fail("Should not require to branch");
 			return this;
 		}
@@ -349,8 +329,7 @@ public class WoofServletContainerLauncherTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void log(Type type, String msg, Throwable caught,
-				HelpInfo helpInfo) {
+		public void log(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
 			this.messages.add(msg);
 		}
 	}

@@ -20,12 +20,15 @@ package net.officefloor.plugin.gwt.service;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import com.gdevelop.gwt.syncrpc.SyncProxy;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
+
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireManagement;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -39,23 +42,17 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.gwt.service.GwtServiceTask.Dependencies;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.server.HttpServerAutoWireOfficeFloorSource;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
-
-import org.easymock.AbstractMatcher;
-
-import com.gdevelop.gwt.syncrpc.SyncProxy;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 
 /**
  * Tests the {@link GwtServiceWorkSource}.
@@ -67,7 +64,7 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link CompilerIssues}.
 	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -80,30 +77,27 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		WorkLoaderUtil.validateSpecification(GwtServiceWorkSource.class,
-				GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE,
-				"Interface");
+				GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE, "Interface");
 	}
 
 	/**
 	 * Validate type with valid Async interface methods.
 	 */
 	public void testType_ValidMethods() {
-		this.doTypeTest(GwtServiceInterfaceAsync.class.getName(),
-				new TaskFlowTypeLoader() {
-					@Override
-					public void loadTasks(
-							TaskTypeBuilder<Dependencies, Indexed> task) {
-						TaskFlowTypeBuilder<Indexed> call = task.addFlow();
-						call.setLabel("call");
-						TaskFlowTypeBuilder<Indexed> generic = task.addFlow();
-						generic.setLabel("generic");
-						TaskFlowTypeBuilder<Indexed> parameter = task.addFlow();
-						parameter.setLabel("parameter");
-						parameter.setArgumentType(Long.class);
-						TaskFlowTypeBuilder<Indexed> raw = task.addFlow();
-						raw.setLabel("raw");
-					}
-				}, null);
+		this.doTypeTest(GwtServiceInterfaceAsync.class.getName(), new TaskFlowTypeLoader() {
+			@Override
+			public void loadTasks(TaskTypeBuilder<Dependencies, Indexed> task) {
+				TaskFlowTypeBuilder<Indexed> call = task.addFlow();
+				call.setLabel("call");
+				TaskFlowTypeBuilder<Indexed> generic = task.addFlow();
+				generic.setLabel("generic");
+				TaskFlowTypeBuilder<Indexed> parameter = task.addFlow();
+				parameter.setLabel("parameter");
+				parameter.setArgumentType(Long.class);
+				TaskFlowTypeBuilder<Indexed> raw = task.addFlow();
+				raw.setLabel("raw");
+			}
+		}, null);
 	}
 
 	/**
@@ -131,8 +125,7 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 				+ "Method names must be unique per GWT service interface.";
 
 		// Test
-		this.doTypeTest(DuplicateMethodNameAsync.class.getName(), null,
-				errorMessage);
+		this.doTypeTest(DuplicateMethodNameAsync.class.getName(), null, errorMessage);
 	}
 
 	/**
@@ -153,12 +146,10 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 		// Obtain the expected error message
 		Method method = InvalidMethodAsync.class.getMethod("invalid");
 		GwtAsyncMethodMetaData metaData = new GwtAsyncMethodMetaData(method);
-		final String expectedErrorMessage = "Invalid async method InvalidMethodAsync.invalid: "
-				+ metaData.getError();
+		final String expectedErrorMessage = "Invalid async method InvalidMethodAsync.invalid: " + metaData.getError();
 
 		// Test
-		this.doTypeTest(InvalidMethodAsync.class.getName(), null,
-				expectedErrorMessage);
+		this.doTypeTest(InvalidMethodAsync.class.getName(), null, expectedErrorMessage);
 	}
 
 	/**
@@ -175,8 +166,7 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 	public void testInvokeGwtService() throws Exception {
 
 		// Start the Server
-		MockGwtServiceInterface service = this
-				.startServer(MockGwtServiceInterface.class);
+		MockGwtServiceInterface service = this.startServer(MockGwtServiceInterface.class);
 
 		// Ensure services request
 		String result = service.service(new Integer(1));
@@ -189,8 +179,7 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 	public void testUnknownGwtService() throws Exception {
 
 		// Start the Server
-		UnknownGwtServiceInterface service = this
-				.startServer(UnknownGwtServiceInterface.class);
+		UnknownGwtServiceInterface service = this.startServer(UnknownGwtServiceInterface.class);
 
 		// Ensure services request
 		try {
@@ -198,10 +187,8 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 			fail("Should not be successful on unknown method");
 		} catch (IncompatibleRemoteServiceException ex) {
 			String causeMessage = ex.getMessage();
-			assertTrue(
-					"Incorrect exception: " + causeMessage,
-					causeMessage
-							.endsWith("( Unknown service method 'unknown(...)' )"));
+			assertTrue("Incorrect exception: " + causeMessage,
+					causeMessage.endsWith("( Unknown service method 'unknown(...)' )"));
 		}
 	}
 
@@ -213,44 +200,27 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 	 * @param flows
 	 *            {@link TaskFlowTypeLoader}.
 	 */
-	private void doTypeTest(String gwtServiceAsyncInterfaceName,
-			TaskFlowTypeLoader flows, final String expectedErrorMessage) {
+	private void doTypeTest(String gwtServiceAsyncInterfaceName, TaskFlowTypeLoader flows,
+			final String expectedErrorMessage) {
 
 		// Determine if error message
 		if (expectedErrorMessage != null) {
 			// Record expected error message
-			this.issues.addIssue(LocationType.SECTION, null, AssetType.WORK,
-					null,
-					"Failed to source WorkType definition from WorkSource "
-							+ GwtServiceWorkSource.class.getName(), null);
-			this.control(this.issues).setMatcher(new AbstractMatcher() {
-				@Override
-				public boolean matches(Object[] expected, Object[] actual) {
-					for (int i = 0; i < 5; i++) {
-						assertEquals("Incorrect parameter " + i, expected[i],
-								actual[i]);
-					}
-					IllegalArgumentException cause = (IllegalArgumentException) actual[5];
-					assertEquals("Incorrect cause", expectedErrorMessage,
-							cause.getMessage());
-					return true;
-				}
-			});
+			this.issues.recordIssue(
+					"Failed to source WorkType definition from WorkSource " + GwtServiceWorkSource.class.getName(),
+					new IllegalArgumentException(expectedErrorMessage));
 		}
 
 		// Create the expected type
-		GwtServiceTask factory = new GwtServiceTask(
-				new GwtAsyncMethodMetaData[0]);
-		WorkTypeBuilder<GwtServiceTask> type = WorkLoaderUtil
-				.createWorkTypeBuilder(factory);
+		GwtServiceTask factory = new GwtServiceTask(new GwtAsyncMethodMetaData[0]);
+		WorkTypeBuilder<GwtServiceTask> type = WorkLoaderUtil.createWorkTypeBuilder(factory);
 
 		// Add task to service request
-		TaskTypeBuilder<Dependencies, Indexed> task = type.addTaskType(
-				"service", factory, Dependencies.class, Indexed.class);
+		TaskTypeBuilder<Dependencies, Indexed> task = type.addTaskType("service", factory, Dependencies.class,
+				Indexed.class);
 
 		// Task requires GWT RPC connection
-		task.addObject(ServerGwtRpcConnection.class).setKey(
-				Dependencies.SERVER_GWT_RPC_CONNECTION);
+		task.addObject(ServerGwtRpcConnection.class).setKey(Dependencies.SERVER_GWT_RPC_CONNECTION);
 
 		// Provide flows to service each interface method
 		if (flows != null) {
@@ -261,22 +231,18 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		if (expectedErrorMessage != null) {
 			// Error, therefore allow play back
-			OfficeFloorCompiler compiler = OfficeFloorCompiler
-					.newOfficeFloorCompiler(null);
+			OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 			compiler.setCompilerIssues(this.issues);
 
 			// Load work type as expecting it not to be loaded
-			WorkType<GwtServiceTask> workType = WorkLoaderUtil.loadWorkType(
-					GwtServiceWorkSource.class, compiler,
-					GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE,
-					gwtServiceAsyncInterfaceName);
+			WorkType<GwtServiceTask> workType = WorkLoaderUtil.loadWorkType(GwtServiceWorkSource.class, compiler,
+					GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE, gwtServiceAsyncInterfaceName);
 			assertNull("Should not load WorkType if expecting error", workType);
 
 		} else {
 			// Validate work (as expect to load successfully)
 			WorkLoaderUtil.validateWorkType(type, GwtServiceWorkSource.class,
-					GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE,
-					gwtServiceAsyncInterfaceName);
+					GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE, gwtServiceAsyncInterfaceName);
 		}
 		this.verifyMockObjects();
 	}
@@ -305,23 +271,20 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 
 		// Configure the server for GWT service
 		final int PORT = HttpTestUtil.getAvailablePort();
-		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource(
-				PORT);
+		HttpServerAutoWireOfficeFloorSource source = new HttpServerAutoWireOfficeFloorSource(PORT);
 
 		// Configure GWT service
-		AutoWireSection section = source.addSection("SECTION",
-				MockGwtServiceSection.class.getName(), "LOCATION");
+		AutoWireSection section = source.addSection("SECTION", MockGwtServiceSection.class.getName(), "LOCATION");
 		source.linkUri("template/GwtServicePath", section, "service");
-		source.addManagedObject(ServerGwtRpcConnectionManagedObjectSource.class
-				.getName(), null, new AutoWire(ServerGwtRpcConnection.class),
-				new AutoWire(AsyncCallback.class));
+		source.addManagedObject(ServerGwtRpcConnectionManagedObjectSource.class.getName(), null,
+				new AutoWire(ServerGwtRpcConnection.class), new AutoWire(AsyncCallback.class));
 
 		// Start the server
 		source.openOfficeFloor();
 
 		// Create proxy to the GWT Service
-		T service = (T) SyncProxy.newProxyInstance(serviceInterfaceType,
-				"http://localhost:" + PORT + "/template/", "GwtServicePath");
+		T service = (T) SyncProxy.newProxyInstance(serviceInterfaceType, "http://localhost:" + PORT + "/template/",
+				"GwtServicePath");
 
 		// Return the service
 		return service;
@@ -342,14 +305,11 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void sourceSection(SectionDesigner designer,
-				SectionSourceContext context) throws Exception {
+		public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 			// Create the service task
-			SectionWork work = designer.addSectionWork("GWT",
-					GwtServiceWorkSource.class.getName());
-			work.addProperty(
-					GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE,
+			SectionWork work = designer.addSectionWork("GWT", GwtServiceWorkSource.class.getName());
+			work.addProperty(GwtServiceWorkSource.PROPERTY_GWT_ASYNC_SERVICE_INTERFACE,
 					MockGwtServiceInterfaceAsync.class.getName());
 			SectionTask task = work.addSectionTask("service", "service");
 
@@ -358,28 +318,21 @@ public class GwtServiceWorkSourceTest extends OfficeFrameTestCase {
 			designer.link(input, task);
 
 			// Add Server GWT RPC Connection
-			TaskObject taskConnection = task
-					.getTaskObject("SERVER_GWT_RPC_CONNECTION");
-			SectionObject sectionConnection = designer.addSectionObject(
-					"SERVER_GWT_RPC_CONNECTION",
+			TaskObject taskConnection = task.getTaskObject("SERVER_GWT_RPC_CONNECTION");
+			SectionObject sectionConnection = designer.addSectionObject("SERVER_GWT_RPC_CONNECTION",
 					ServerGwtRpcConnection.class.getName());
 			designer.link(taskConnection, sectionConnection);
 
 			// Add servicing method
-			SectionWork classWork = designer.addSectionWork("CLASS",
-					ClassWorkSource.class.getName());
-			classWork.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
-					Service.class.getName());
-			SectionTask classTask = classWork
-					.addSectionTask("handle", "handle");
-			TaskObject classObject = classTask
-					.getTaskObject(AsyncCallback.class.getName());
+			SectionWork classWork = designer.addSectionWork("CLASS", ClassWorkSource.class.getName());
+			classWork.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME, Service.class.getName());
+			SectionTask classTask = classWork.addSectionTask("handle", "handle");
+			TaskObject classObject = classTask.getTaskObject(AsyncCallback.class.getName());
 			designer.link(classObject, sectionConnection);
 
 			// Link servicing
 			TaskFlow serviceFlow = task.getTaskFlow("service");
-			designer.link(serviceFlow, classTask,
-					FlowInstigationStrategyEnum.SEQUENTIAL);
+			designer.link(serviceFlow, classTask, FlowInstigationStrategyEnum.SEQUENTIAL);
 		}
 	}
 
