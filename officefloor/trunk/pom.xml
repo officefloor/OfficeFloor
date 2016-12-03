@@ -41,10 +41,6 @@
 	</developers>
 	<contributors>
 		<contributor>
-			<name>Melanie Sagenschneider</name>
-			<email>melanies@users.sourceforge.net</email>
-		</contributor>
-		<contributor>
 			<name>Matthew Brown</name>
 			<email>yellowduckphoto@users.sourceforge.net</email>
 		</contributor>
@@ -69,9 +65,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<officefloor.skin.version>${project.version}</officefloor.skin.version>
 		<projectVersion>${project.version}</projectVersion>
-		<tycho-version>0.21.0</tycho-version>
-		<maven-version>3.1.1</maven-version>
-		<maven-major-version>3.1</maven-major-version>
+		<tycho-version>0.26.0</tycho-version>
+		<maven-version>3.3.9</maven-version>
+		<maven-plugin-version>3.5</maven-plugin-version>
 		<aether-version>1.0.0.v20140518</aether-version>
 		<plexus-version>1.5.5</plexus-version>
 		<maven-project-info-reports-version>2.8</maven-project-info-reports-version>
@@ -381,7 +377,7 @@
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
-				<version>${maven-major-version}</version>
+				<version>${maven-plugin-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -691,7 +687,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
-					<version>${maven-major-version}</version>
+					<version>${maven-plugin-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
