@@ -27,41 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.properties.Property;
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.section.SectionLoader;
-import net.officefloor.compile.section.SectionType;
-import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.dialog.input.InputHandler;
-import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.dialog.input.WoofFileInput;
-import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.WoofExtensionUtil;
-import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
-import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
-import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
-import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
-import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.eclipse.util.JavaUtil;
-import net.officefloor.eclipse.util.LogUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.model.woof.WoofTemplateInheritance;
-import net.officefloor.model.woof.WoofTemplateLinkModel;
-import net.officefloor.model.woof.WoofTemplateModel;
-import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
-import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
-import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialWorkSource;
-import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
-import net.officefloor.plugin.woof.WoofContextConfigurable;
-import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -82,13 +47,50 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
+import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.section.SectionType;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.dialog.input.InputHandler;
+import net.officefloor.eclipse.common.dialog.input.InputListener;
+import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.dialog.input.WoofFileInput;
+import net.officefloor.eclipse.extension.ExtensionUtil;
+import net.officefloor.eclipse.extension.WoofExtensionUtil;
+import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
+import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtension;
+import net.officefloor.eclipse.extension.template.WoofTemplateExtensionSourceExtensionContext;
+import net.officefloor.eclipse.extension.util.SourceExtensionUtil;
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.eclipse.util.JavaUtil;
+import net.officefloor.eclipse.util.LogUtil;
+import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.model.woof.WoofTemplateInheritance;
+import net.officefloor.model.woof.WoofTemplateLinkModel;
+import net.officefloor.model.woof.WoofTemplateModel;
+import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
+import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
+import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialWorkSource;
+import net.officefloor.plugin.web.http.template.section.HttpTemplateSectionSource;
+import net.officefloor.plugin.woof.WoofContextConfigurable;
+import net.officefloor.plugin.woof.WoofOfficeFloorSource;
+import net.officefloor.plugin.woof.template.WoofTemplateExtensionSource;
+
 /**
  * Wizard page providing the details of the {@link HttpTemplate}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpTemplateWizardPage extends WizardPage implements
-		CompilerIssues, SectionSourceExtensionContext {
+public class HttpTemplateWizardPage extends WizardPage implements SectionSourceExtensionContext {
 
 	/**
 	 * {@link Property} specifying the super {@link WoofTemplateModel} name.
@@ -120,20 +122,17 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Obtain from project class path
 		try {
 			// Obtain the types on the class path
-			IType[] types = JavaUtil.getSubTypes(project,
-					WoofTemplateExtensionSource.class.getName());
+			IType[] types = JavaUtil.getSubTypes(project, WoofTemplateExtensionSource.class.getName());
 			for (IType type : types) {
 				String className = type.getFullyQualifiedName();
 				if (ExtensionUtil.isIgnoreSource(className, classLoader)) {
 					continue; // ignore source
 				}
 				extensionSourceInstances.put(className,
-						new HttpTemplateExtensionSourceInstance(className,
-								null, project));
+						new HttpTemplateExtensionSourceInstance(className, null, project));
 			}
 		} catch (Throwable ex) {
-			LogUtil.logError(
-					"Failed to obtain java types from project class path", ex);
+			LogUtil.logError("Failed to obtain java types from project class path", ex);
 		}
 
 		// Obtain via extension point second to override
@@ -142,17 +141,13 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			try {
 				Class<?> woofTemplateExtensionSourceClass = woofTemplateExtensionSourceExtension
 						.getWoofTemplateExtensionSourceClass();
-				String woofTemplateExtensionSourceClassName = woofTemplateExtensionSourceClass
-						.getName();
-				extensionSourceInstances.put(
-						woofTemplateExtensionSourceClassName,
-						new HttpTemplateExtensionSourceInstance(
-								woofTemplateExtensionSourceClassName,
+				String woofTemplateExtensionSourceClassName = woofTemplateExtensionSourceClass.getName();
+				extensionSourceInstances.put(woofTemplateExtensionSourceClassName,
+						new HttpTemplateExtensionSourceInstance(woofTemplateExtensionSourceClassName,
 								woofTemplateExtensionSourceExtension, project));
 			} catch (Throwable ex) {
 				LogUtil.logError("Failed to create source instance for "
-						+ woofTemplateExtensionSourceExtension.getClass()
-								.getName(), ex);
+						+ woofTemplateExtensionSourceExtension.getClass().getName(), ex);
 			}
 		}
 
@@ -290,6 +285,23 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	private final List<HttpTemplateExtensionStruct> templateExtensions = new LinkedList<HttpTemplateExtensionStruct>();
 
 	/**
+	 * Allows determining if an issue occurred. Reset this to <code>false</code>
+	 * before undertaking operation to determine if causes an issue.
+	 */
+	private boolean isIssue = false;
+
+	/**
+	 * {@link CompilerIssues}.
+	 */
+	private final CompilerIssues issues = new AbstractCompilerIssues() {
+		@Override
+		protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+			HttpTemplateWizardPage.this.setErrorMessage(CompileException.toIssueString(issue));
+			HttpTemplateWizardPage.this.isIssue = true;
+		}
+	};
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param project
@@ -302,10 +314,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 *            {@link WoofTemplateInheritance} instances by their
 	 *            {@link WoofTemplateModel} name.
 	 */
-	protected HttpTemplateWizardPage(final IProject project,
-			final AbstractOfficeFloorEditPart<?, ?, ?> editPart,
-			HttpTemplateInstance templateInstance,
-			Map<String, WoofTemplateInheritance> templateInheritances) {
+	protected HttpTemplateWizardPage(final IProject project, final AbstractOfficeFloorEditPart<?, ?, ?> editPart,
+			HttpTemplateInstance templateInstance, Map<String, WoofTemplateInheritance> templateInheritances) {
 		super("HTTP Template");
 		this.project = project;
 		this.templateInstance = templateInstance;
@@ -314,9 +324,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.classLoader = ProjectClassLoader.create(project);
 
 		// Configure the OfficeFloor compiler to obtain the section loader
-		this.compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(this.classLoader);
-		this.compiler.setCompilerIssues(this);
+		this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
+		this.compiler.setCompilerIssues(this.issues);
 
 		// Provide configuration of WoOF context
 		final List<ResourceSource> resourceSources = new LinkedList<ResourceSource>();
@@ -334,18 +343,15 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 			@Override
 			public void addResources(ResourceSource resourceSource) {
-				HttpTemplateWizardPage.this.compiler
-						.addResources(resourceSource);
+				HttpTemplateWizardPage.this.compiler.addResources(resourceSource);
 				resourceSources.add(resourceSource);
 			}
 		};
-		this.resourceSources = resourceSources
-				.toArray(new ResourceSource[resourceSources.size()]);
+		this.resourceSources = resourceSources.toArray(new ResourceSource[resourceSources.size()]);
 
 		// Load access to web resources
 		File projectDir = project.getLocation().toFile();
-		WoofOfficeFloorSource.loadWebResourcesFromMavenProject(configurable,
-				projectDir);
+		WoofOfficeFloorSource.loadWebResourcesFromMavenProject(configurable, projectDir);
 
 		// Obtain the section loader
 		this.sectionLoader = this.compiler.getSectionLoader();
@@ -369,24 +375,19 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			initialUriPath = this.templateInstance.getUri();
 			initialLogicClassName = this.templateInstance.getLogicClassName();
 			initialContentType = this.templateInstance.getContentType();
-			initialIsTemplateSecure = String.valueOf(this.templateInstance
-					.isTemplateSecure());
-			initialIsContinueRendering = String.valueOf(this.templateInstance
-					.isContinueRendering());
+			initialIsTemplateSecure = String.valueOf(this.templateInstance.isTemplateSecure());
+			initialIsContinueRendering = String.valueOf(this.templateInstance.isContinueRendering());
 
 			// Remove the template from inheriting itself
-			String woofTemplateName = this.templateInstance
-					.getWoofTemplateName();
+			String woofTemplateName = this.templateInstance.getWoofTemplateName();
 			this.templateInheritances.remove(woofTemplateName);
 
 			// Provide the initial super template (if inheriting)
-			WoofTemplateModel superTemplate = this.templateInstance
-					.getSuperTemplate();
+			WoofTemplateModel superTemplate = this.templateInstance.getSuperTemplate();
 			if (superTemplate != null) {
 				// Specify the initial super template
 				initialSuperTemplateName = superTemplate.getWoofTemplateName();
-				this.superTemplateInheritance = this.templateInheritances
-						.get(initialSuperTemplateName);
+				this.superTemplateInheritance = this.templateInheritances.get(initialSuperTemplateName);
 
 				// Specify initial inheriting template paths
 				if (this.superTemplateInheritance != null) {
@@ -396,8 +397,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			}
 
 			// Create the render redirect HTTP methods value
-			String[] initialRenderRedirectHttpMethodsList = this.templateInstance
-					.getRenderRedirectHttpMethods();
+			String[] initialRenderRedirectHttpMethodsList = this.templateInstance.getRenderRedirectHttpMethods();
 			if (initialRenderRedirectHttpMethodsList != null) {
 				StringBuilder httpMethods = new StringBuilder();
 				boolean isFirst = true;
@@ -412,16 +412,14 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			}
 
 			// Configure the links secure (ensure consistent order)
-			Map<String, Boolean> configuredLinks = this.templateInstance
-					.getLinksSecure();
-			List<String> linkNames = new ArrayList<String>(
-					configuredLinks.keySet());
+			Map<String, Boolean> configuredLinks = this.templateInstance.getLinksSecure();
+			List<String> linkNames = new ArrayList<String>(configuredLinks.keySet());
 			Collections.sort(linkNames, String.CASE_INSENSITIVE_ORDER);
 			this.linksSecure = new WoofTemplateLinkModel[linkNames.size()];
 			int linkIndex = 0;
 			for (String linkName : linkNames) {
-				this.linksSecure[linkIndex++] = new WoofTemplateLinkModel(
-						linkName, configuredLinks.get(linkName).booleanValue());
+				this.linksSecure[linkIndex++] = new WoofTemplateLinkModel(linkName,
+						configuredLinks.get(linkName).booleanValue());
 			}
 		}
 
@@ -429,44 +427,30 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.initialUriPath = initialUriPath;
 
 		// Add the properties
-		this.uriPath = this
-				.addProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI,
-						initialUriPath);
-		this.logicClassName = this.addProperty(
-				HttpTemplateSectionSource.PROPERTY_CLASS_NAME,
-				initialLogicClassName);
-		this.superTemplateName = this.addProperty(SUPER_TEMPLATE_NAME,
-				initialSuperTemplateName);
-		this.inheritedTemplatePaths = this.addProperty(
-				HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
+		this.uriPath = this.addProperty(HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, initialUriPath);
+		this.logicClassName = this.addProperty(HttpTemplateSectionSource.PROPERTY_CLASS_NAME, initialLogicClassName);
+		this.superTemplateName = this.addProperty(SUPER_TEMPLATE_NAME, initialSuperTemplateName);
+		this.inheritedTemplatePaths = this.addProperty(HttpTemplateSectionSource.PROPERTY_INHERITED_TEMPLATES,
 				initialInheritedTemplatePaths);
-		this.contentType = this.addProperty(
-				HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE,
-				initialContentType);
-		this.isTemplateSecure = this.addProperty(
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+		this.contentType = this.addProperty(HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE, initialContentType);
+		this.isTemplateSecure = this.addProperty(HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
 				initialIsTemplateSecure);
-		this.renderRedirectHttpMethods = this
-				.addProperty(
-						HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
-						initialRenderRedirectHttpMethods);
-		this.isContinueRendering = this.addProperty(
-				PROPERTY_IS_CONTINUE_RENDERING, initialIsContinueRendering);
+		this.renderRedirectHttpMethods = this.addProperty(
+				HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, initialRenderRedirectHttpMethods);
+		this.isContinueRendering = this.addProperty(PROPERTY_IS_CONTINUE_RENDERING, initialIsContinueRendering);
 
 		// Obtain the map of HTTP template extension source instances
 		Map<String, HttpTemplateExtensionSourceInstance> httpTemplateExtensionSourceInstanceMap = createHttpTemplateExtensionSourceInstanceMap(
 				this.classLoader, project);
 
 		// Obtain the HTTP template extension source instances (in order)
-		this.availableHttpTemplateExtensionSourceInstances = httpTemplateExtensionSourceInstanceMap
-				.values().toArray(new HttpTemplateExtensionSourceInstance[0]);
+		this.availableHttpTemplateExtensionSourceInstances = httpTemplateExtensionSourceInstanceMap.values()
+				.toArray(new HttpTemplateExtensionSourceInstance[0]);
 		Arrays.sort(this.availableHttpTemplateExtensionSourceInstances,
 				new Comparator<HttpTemplateExtensionSourceInstance>() {
 					@Override
-					public int compare(HttpTemplateExtensionSourceInstance a,
-							HttpTemplateExtensionSourceInstance b) {
-						return String.CASE_INSENSITIVE_ORDER.compare(
-								a.getWoofTemplateExtensionSourceClassName(),
+					public int compare(HttpTemplateExtensionSourceInstance a, HttpTemplateExtensionSourceInstance b) {
+						return String.CASE_INSENSITIVE_ORDER.compare(a.getWoofTemplateExtensionSourceClassName(),
 								b.getWoofTemplateExtensionSourceClassName());
 					}
 				});
@@ -616,18 +600,15 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		for (HttpTemplateExtensionStruct struct : this.templateExtensions) {
 
 			// Obtain the details
-			String woofTemplateExtensionSourceClassName = struct.source
-					.getWoofTemplateExtensionSourceClassName();
+			String woofTemplateExtensionSourceClassName = struct.source.getWoofTemplateExtensionSourceClassName();
 			PropertyList properties = struct.properties;
 
 			// Add the extension instance
-			instances.add(new HttpTemplateExtensionInstance(
-					woofTemplateExtensionSourceClassName, properties));
+			instances.add(new HttpTemplateExtensionInstance(woofTemplateExtensionSourceClassName, properties));
 		}
 
 		// Return the listing of template extensions
-		return instances.toArray(new HttpTemplateExtensionInstance[instances
-				.size()]);
+		return instances.toArray(new HttpTemplateExtensionInstance[instances.size()]);
 	}
 
 	/*
@@ -646,45 +627,35 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		String initialTemplatePath = "";
 		String initialSuperTemplateName = "";
 		if (this.templateInstance != null) {
-			initialTemplatePath = getTextValue(this.templateInstance
-					.getTemplatePath());
-			initialSuperTemplateName = getTextValue(this.superTemplateName
-					.getValue());
+			initialTemplatePath = getTextValue(this.templateInstance.getTemplatePath());
+			initialSuperTemplateName = getTextValue(this.superTemplateName.getValue());
 		}
 
 		// Determine if valid src/main/webapp directory
-		IFolder webappDirectory = this.project
-				.getFolder(WoofOfficeFloorSource.WEBAPP_PATH);
-		IFile webXmlFile = webappDirectory
-				.getFile(WoofOfficeFloorSource.WEBXML_FILE_PATH);
-		if ((webappDirectory != null && webappDirectory.exists())
-				&& (!(webXmlFile.exists()))) {
+		IFolder webappDirectory = this.project.getFolder(WoofOfficeFloorSource.WEBAPP_PATH);
+		IFile webXmlFile = webappDirectory.getFile(WoofOfficeFloorSource.WEBXML_FILE_PATH);
+		if ((webappDirectory != null && webappDirectory.exists()) && (!(webXmlFile.exists()))) {
 			// Invalid webapp directory
 			new Label(page, SWT.NONE);
 			Label webappInvalid = new Label(page, SWT.NONE);
 			webappInvalid.setForeground(ColorConstants.red);
-			webappInvalid.setText("WARNING: "
-					+ WoofOfficeFloorSource.WEBAPP_PATH
-					+ " resources unavailable as missing "
+			webappInvalid.setText("WARNING: " + WoofOfficeFloorSource.WEBAPP_PATH + " resources unavailable as missing "
 					+ WoofOfficeFloorSource.WEBXML_FILE_PATH);
 		}
 
 		// Provide means to specify URI path
-		SourceExtensionUtil.createPropertyText("URI path",
-				HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, null, page,
+		SourceExtensionUtil.createPropertyText("URI path", HttpTemplateSectionSource.PROPERTY_TEMPLATE_URI, null, page,
 				this, null);
 
 		// Provide means to specify template location
 		new Label(page, SWT.NONE).setText("Template path: ");
 		this.templatePath = initialTemplatePath;
-		InputHandler<String> path = new InputHandler<String>(page,
-				new WoofFileInput(this.project, page.getShell()),
+		InputHandler<String> path = new InputHandler<String>(page, new WoofFileInput(this.project, page.getShell()),
 				this.templatePath, new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 						// Specify the location and indicate changed
-						HttpTemplateWizardPage.this.templatePath = (value == null ? ""
-								: value.toString());
+						HttpTemplateWizardPage.this.templatePath = (value == null ? "" : value.toString());
 						HttpTemplateWizardPage.this.handleChange();
 					}
 
@@ -693,33 +664,25 @@ public class HttpTemplateWizardPage extends WizardPage implements
 						HttpTemplateWizardPage.this.setErrorMessage(message);
 					}
 				});
-		path.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		path.getControl().setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
 		// Provide means to specify logic class
-		SourceExtensionUtil
-				.createPropertyClass("Logic class",
-						HttpTemplateSectionSource.PROPERTY_CLASS_NAME, page,
-						this, null);
+		SourceExtensionUtil.createPropertyClass("Logic class", HttpTemplateSectionSource.PROPERTY_CLASS_NAME, page,
+				this, null);
 
 		// Provide ability to specify super template
-		String[] inheritableSuperTemplateNames = this.templateInheritances
-				.keySet().toArray(new String[0]);
-		Arrays.sort(inheritableSuperTemplateNames,
-				String.CASE_INSENSITIVE_ORDER);
-		SourceExtensionUtil.createPropertyCombo("Extend template",
-				SUPER_TEMPLATE_NAME, initialSuperTemplateName,
+		String[] inheritableSuperTemplateNames = this.templateInheritances.keySet().toArray(new String[0]);
+		Arrays.sort(inheritableSuperTemplateNames, String.CASE_INSENSITIVE_ORDER);
+		SourceExtensionUtil.createPropertyCombo("Extend template", SUPER_TEMPLATE_NAME, initialSuperTemplateName,
 				inheritableSuperTemplateNames, page, this, null);
 
 		// Provide means to specify Content-Type
-		SourceExtensionUtil.createPropertyText("Content type",
-				HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE, null, page,
-				this, null);
+		SourceExtensionUtil.createPropertyText("Content type", HttpTemplateSectionSource.PROPERTY_CONTENT_TYPE, null,
+				page, this, null);
 
 		// Provide means to specify if secure
-		SourceExtensionUtil.createPropertyCheckbox("Template secure",
-				HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE, false,
-				String.valueOf(true), String.valueOf(false), page, this, null);
+		SourceExtensionUtil.createPropertyCheckbox("Template secure", HttpTemplateWorkSource.PROPERTY_TEMPLATE_SECURE,
+				false, String.valueOf(true), String.valueOf(false), page, this, null);
 
 		// Provide means to configure the links
 		new Label(page, SWT.NONE).setText("Links secure: ");
@@ -730,15 +693,14 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		for (WoofTemplateLinkModel link : this.linksSecure) {
 			linksInput.addBean(link);
 		}
-		InputHandler<WoofTemplateLinkModel[]> links = new InputHandler<WoofTemplateLinkModel[]>(
-				page, linksInput, null, new InputListener() {
+		InputHandler<WoofTemplateLinkModel[]> links = new InputHandler<WoofTemplateLinkModel[]>(page, linksInput, null,
+				new InputListener() {
 					@Override
 					@SuppressWarnings("unchecked")
 					public void notifyValueChanged(Object value) {
 						// Specify the links and indicate changed
 						List<WoofTemplateLinkModel> list = (List<WoofTemplateLinkModel>) value;
-						HttpTemplateWizardPage.this.linksSecure = list
-								.toArray(new WoofTemplateLinkModel[list.size()]);
+						HttpTemplateWizardPage.this.linksSecure = list.toArray(new WoofTemplateLinkModel[list.size()]);
 						HttpTemplateWizardPage.this.handleChange();
 					}
 
@@ -747,27 +709,21 @@ public class HttpTemplateWizardPage extends WizardPage implements
 						HttpTemplateWizardPage.this.setErrorMessage(message);
 					}
 				});
-		links.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		links.getControl().setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
 		// Provide means to specify render redirect HTTP methods
-		SourceExtensionUtil
-				.createPropertyText(
-						"Render Redirect HTTP methods",
-						HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS,
-						null, page, this, null);
+		SourceExtensionUtil.createPropertyText("Render Redirect HTTP methods",
+				HttpTemplateInitialWorkSource.PROPERTY_RENDER_REDIRECT_HTTP_METHODS, null, page, this, null);
 
 		// Provide means to specify if may continue rendering
-		SourceExtensionUtil.createPropertyCheckbox("Continue Rendering",
-				PROPERTY_IS_CONTINUE_RENDERING, false, String.valueOf(true),
-				String.valueOf(false), page, this, null);
+		SourceExtensionUtil.createPropertyCheckbox("Continue Rendering", PROPERTY_IS_CONTINUE_RENDERING, false,
+				String.valueOf(true), String.valueOf(false), page, this, null);
 
 		// Configure the template extensions
 		new Label(page, SWT.NONE).setText("Extensions");
 		final TabFolder extensionTabs = new TabFolder(page, SWT.NONE);
 		extensionTabs.setLayout(new GridLayout(1, false));
-		extensionTabs
-				.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		extensionTabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Provide the extension add button
 		final TabItem addExtensionTab = new TabItem(extensionTabs, SWT.NONE);
@@ -778,15 +734,13 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Add the existing extensions (possibly being refactored)
 		if (this.templateInstance != null) {
-			for (HttpTemplateExtensionInstance instance : this.templateInstance
-					.getTemplateExtensionInstances()) {
+			for (HttpTemplateExtensionInstance instance : this.templateInstance.getTemplateExtensionInstances()) {
 
 				// Find the matching source
 				HttpTemplateExtensionSourceInstance source = null;
 				for (HttpTemplateExtensionSourceInstance availableSource : this.availableHttpTemplateExtensionSourceInstances) {
-					if (availableSource
-							.getWoofTemplateExtensionSourceClassName().equals(
-									instance.getTemplateExtensionClassName())) {
+					if (availableSource.getWoofTemplateExtensionSourceClassName()
+							.equals(instance.getTemplateExtensionClassName())) {
 						source = availableSource;
 					}
 				}
@@ -806,16 +760,15 @@ public class HttpTemplateWizardPage extends WizardPage implements
 				if (clickedTab == addExtensionTab) {
 
 					// Provide dialog to select extension
-					HttpTemplateExtensionSourceInstance source = SelectHttpTemplateExtensionSourceInstanceDialog.getHttpTemplateExtensionSourceInstance(
-							extensionTabs.getShell(),
-							HttpTemplateWizardPage.this.availableHttpTemplateExtensionSourceInstances);
+					HttpTemplateExtensionSourceInstance source = SelectHttpTemplateExtensionSourceInstanceDialog
+							.getHttpTemplateExtensionSourceInstance(extensionTabs.getShell(),
+									HttpTemplateWizardPage.this.availableHttpTemplateExtensionSourceInstances);
 					if (source == null) {
 						return; // not add extension
 					}
 
 					// Add the extension
-					HttpTemplateWizardPage.this.addTemplateExtension(source,
-							extensionTabs, null);
+					HttpTemplateWizardPage.this.addTemplateExtension(source, extensionTabs, null);
 				}
 			}
 		});
@@ -839,16 +792,14 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	 *            {@link HttpTemplateExtensionInstance}. May be
 	 *            <code>null</code>.
 	 */
-	private void addTemplateExtension(
-			HttpTemplateExtensionSourceInstance source,
-			TabFolder extensionTabs, HttpTemplateExtensionInstance instance) {
+	private void addTemplateExtension(HttpTemplateExtensionSourceInstance source, TabFolder extensionTabs,
+			HttpTemplateExtensionInstance instance) {
 
 		// Obtain the class name of the extension
 		String extensionClassName = "Unknown";
 		if (source != null) {
 			// Provide details from source
-			extensionClassName = source
-					.getWoofTemplateExtensionSourceClassName();
+			extensionClassName = source.getWoofTemplateExtensionSourceClassName();
 		} else if (instance != null) {
 			// Provide details from instance
 			extensionClassName = instance.getTemplateExtensionClassName();
@@ -856,8 +807,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Provide unknown source if no source
 		if (source == null) {
-			source = new UnknownHttpTemplateExtensionSourceInstance(
-					extensionClassName, this.project);
+			source = new UnknownHttpTemplateExtensionSourceInstance(extensionClassName, this.project);
 		}
 
 		// Add a tab (as second last item)
@@ -871,14 +821,12 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			// Use existing properties (taking copy so as not to alter original)
 			properties = this.compiler.createPropertyList();
 			for (Property property : instance.getProperties()) {
-				properties.addProperty(property.getName(), property.getLabel())
-						.setValue(property.getValue());
+				properties.addProperty(property.getName(), property.getLabel()).setValue(property.getValue());
 			}
 
 		} else {
 			// Seed properties from specification
-			properties = source
-					.createSpecification(HttpTemplateWizardPage.this);
+			properties = source.createSpecification(HttpTemplateWizardPage.this.issues);
 		}
 
 		// Create the context
@@ -897,22 +845,19 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		controls.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Add extension to listing (ensuring have properties)
-		final HttpTemplateExtensionStruct templateExtension = new HttpTemplateExtensionStruct(
-				source, properties);
+		final HttpTemplateExtensionStruct templateExtension = new HttpTemplateExtensionStruct(source, properties);
 		this.templateExtensions.add(templateExtension);
 
 		// Add button to remove extension
 		Button removeButton = new Button(panel, SWT.PUSH);
 		removeButton.setText("Remove extension");
-		removeButton.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false,
-				false));
+		removeButton.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false));
 		removeButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
 				// Remove the template extension
-				HttpTemplateWizardPage.this.templateExtensions
-						.remove(templateExtension);
+				HttpTemplateWizardPage.this.templateExtensions.remove(templateExtension);
 
 				// Remove from display
 				extraTab.dispose();
@@ -941,15 +886,14 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		this.sectionType = null;
 
 		// Ensure have appropriate super template inheritance
-		this.superTemplateInheritance = this.templateInheritances
-				.get(this.superTemplateName.getValue());
+		this.superTemplateInheritance = this.templateInheritances.get(this.superTemplateName.getValue());
 		if (this.superTemplateInheritance == null) {
 			// No inherited template paths
 			this.inheritedTemplatePaths.setValue(null);
 		} else {
 			// Specify the inherited template paths
-			this.inheritedTemplatePaths.setValue(this.superTemplateInheritance
-					.getInheritedTemplatePathsPropertyValue());
+			this.inheritedTemplatePaths
+					.setValue(this.superTemplateInheritance.getInheritedTemplatePathsPropertyValue());
 		}
 
 		// Ensure have template URI path
@@ -968,8 +912,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 
 		// Load the Section Type
 		this.isIssue = false; // reset to determine if issue
-		this.sectionType = this.sectionLoader.loadSectionType(
-				HttpTemplateSectionSource.class, this.templatePath,
+		this.sectionType = this.sectionLoader.loadSectionType(HttpTemplateSectionSource.class, this.templatePath,
 				this.properties);
 		if ((this.sectionType == null) || (this.isIssue)) {
 			// Must have section (issue reported as error message)
@@ -981,16 +924,13 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		for (HttpTemplateExtensionStruct extension : this.templateExtensions) {
 
 			// Obtain the extension source class name
-			String extensionSourceClassName = extension.source
-					.getWoofTemplateExtensionSourceClassName();
+			String extensionSourceClassName = extension.source.getWoofTemplateExtensionSourceClassName();
 
 			// Match against old extensions to find old properties
 			PropertyList oldProperties = null;
 			if (this.templateInstance != null) {
-				for (HttpTemplateExtensionInstance instance : this.templateInstance
-						.getTemplateExtensionInstances()) {
-					if (extensionSourceClassName.equals(instance
-							.getTemplateExtensionClassName())) {
+				for (HttpTemplateExtensionInstance instance : this.templateInstance.getTemplateExtensionInstances()) {
+					if (extensionSourceClassName.equals(instance.getTemplateExtensionClassName())) {
 						oldProperties = instance.getProperties();
 					}
 				}
@@ -1006,8 +946,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 			PropertyList newProperties = extension.properties;
 
 			// Validate the change
-			extension.source.validateChange(oldUri, oldProperties, newUri,
-					newProperties, this.resourceSources, this);
+			extension.source.validateChange(oldUri, oldProperties, newUri, newProperties, this.resourceSources,
+					this.issues, this.compiler);
 			if (this.isIssue) {
 				// Issue reported as error
 				this.setPageComplete(false);
@@ -1018,35 +958,6 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		// Specification of template details complete
 		this.setErrorMessage(null);
 		this.setPageComplete(true);
-	}
-
-	/*
-	 * ===================== CompilerIssues ===============================
-	 */
-
-	/**
-	 * Allows determining if an issue occurred. Reset this to <code>false</code>
-	 * before undertaking operation to determine if causes an issue.
-	 */
-	private boolean isIssue = false;
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Provide as error message
-		this.setErrorMessage(issueDescription);
-		this.isIssue = true;
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-		// Provide as error message
-		this.setErrorMessage(issueDescription + " ("
-				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
-				+ ")");
-		this.isIssue = true;
 	}
 
 	/*
@@ -1091,9 +1002,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		 * @param properties
 		 *            {@link PropertyList}.
 		 */
-		public HttpTemplateExtensionStruct(
-				HttpTemplateExtensionSourceInstance source,
-				PropertyList properties) {
+		public HttpTemplateExtensionStruct(HttpTemplateExtensionSourceInstance source, PropertyList properties) {
 			this.source = source;
 			this.properties = properties;
 		}
@@ -1102,8 +1011,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 	/**
 	 * Unknown {@link HttpTemplateExtensionSourceInstance}.
 	 */
-	private class UnknownHttpTemplateExtensionSourceInstance extends
-			HttpTemplateExtensionSourceInstance {
+	private class UnknownHttpTemplateExtensionSourceInstance extends HttpTemplateExtensionSourceInstance {
 
 		/**
 		 * Initiate.
@@ -1113,8 +1021,8 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		 * @param project
 		 *            {@link IProject}.
 		 */
-		public UnknownHttpTemplateExtensionSourceInstance(
-				String woofTemplateExtensionSourceClassName, IProject project) {
+		public UnknownHttpTemplateExtensionSourceInstance(String woofTemplateExtensionSourceClassName,
+				IProject project) {
 			super(woofTemplateExtensionSourceClassName, null, project);
 		}
 
@@ -1124,8 +1032,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		 * @return Error message.
 		 */
 		private String getErrorMessage() {
-			return "Could not find extension source "
-					+ this.getWoofTemplateExtensionSourceClassName()
+			return "Could not find extension source " + this.getWoofTemplateExtensionSourceClassName()
 					+ ". Please ensure it is on the project's class path.";
 		}
 
@@ -1140,8 +1047,7 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		}
 
 		@Override
-		public void createControl(Composite page,
-				WoofTemplateExtensionSourceExtensionContext context) {
+		public void createControl(Composite page, WoofTemplateExtensionSourceExtensionContext context) {
 
 			// No source so provide error
 			page.setLayout(new GridLayout(1, false));
@@ -1151,12 +1057,11 @@ public class HttpTemplateWizardPage extends WizardPage implements
 		}
 
 		@Override
-		public void validateChange(String oldUri, PropertyList oldProperties,
-				String newUri, PropertyList newProperties,
-				ResourceSource[] resourceSources, CompilerIssues issues) {
+		public void validateChange(String oldUri, PropertyList oldProperties, String newUri, PropertyList newProperties,
+				ResourceSource[] resourceSources, CompilerIssues issues, Node node) {
 
 			// Indicate unknown extension source class name
-			issues.addIssue(null, null, null, null, this.getErrorMessage());
+			issues.addIssue(node, this.getErrorMessage());
 		}
 	}
 

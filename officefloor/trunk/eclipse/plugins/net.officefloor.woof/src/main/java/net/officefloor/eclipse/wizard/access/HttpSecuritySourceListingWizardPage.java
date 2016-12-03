@@ -17,11 +17,6 @@
  */
 package net.officefloor.eclipse.wizard.access;
 
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.plugin.web.http.security.HttpSecuritySource;
-
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -36,14 +31,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
 
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.plugin.web.http.security.HttpSecuritySource;
+
 /**
  * {@link IWizardPage} providing the listing of
  * {@link HttpSecuritySourceInstance}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecuritySourceListingWizardPage extends WizardPage implements
-		CompilerIssues {
+public class HttpSecuritySourceListingWizardPage extends WizardPage {
 
 	/**
 	 * {@link HttpSecuritySourceInstance} listing.
@@ -86,8 +83,7 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage implements
 	 *            {@link AccessInstance} to refactor or <code>null</code> if
 	 *            creating new.
 	 */
-	HttpSecuritySourceListingWizardPage(
-			HttpSecuritySourceInstance[] httpSecuritySourceInstances,
+	HttpSecuritySourceListingWizardPage(HttpSecuritySourceInstance[] httpSecuritySourceInstances,
 			AccessInstance accessInstance) {
 		super("SectionSource listing");
 		this.httpSecuritySourceInstances = httpSecuritySourceInstances;
@@ -96,8 +92,7 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage implements
 		// Create the listing of labels
 		this.httpSecuritySourceLabels = new String[this.httpSecuritySourceInstances.length];
 		for (int i = 0; i < this.httpSecuritySourceLabels.length; i++) {
-			this.httpSecuritySourceLabels[i] = this.httpSecuritySourceInstances[i]
-					.getHttpSecuritySourceLabel();
+			this.httpSecuritySourceLabels[i] = this.httpSecuritySourceInstances[i].getHttpSecuritySourceLabel();
 		}
 
 		// Specify page details
@@ -129,14 +124,11 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage implements
 		int initialSectionSourceIndex = -1;
 		if (this.accessInstance != null) {
 			// Have access instance, so provide initial source details
-			initialAuthenticationTimeout = this.accessInstance
-					.getAuthenticationTimeout();
-			String httpSecuritySourceClassName = this.accessInstance
-					.getHttpSecuritySourceClassName();
+			initialAuthenticationTimeout = this.accessInstance.getAuthenticationTimeout();
+			String httpSecuritySourceClassName = this.accessInstance.getHttpSecuritySourceClassName();
 			for (int i = 0; i < this.httpSecuritySourceInstances.length; i++) {
 				if (httpSecuritySourceClassName
-						.equals(this.httpSecuritySourceInstances[i]
-								.getHttpSecuritySourceClassName())) {
+						.equals(this.httpSecuritySourceInstances[i].getHttpSecuritySourceClassName())) {
 					initialSectionSourceIndex = i;
 				}
 			}
@@ -144,8 +136,7 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage implements
 
 		// Add listing of HTTP Security sources
 		this.list = new List(page, SWT.SINGLE | SWT.BORDER);
-		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		this.list.setItems(this.httpSecuritySourceLabels);
 		this.list.setSelection(initialSectionSourceIndex);
 		this.list.addSelectionListener(new SelectionAdapter() {
@@ -157,16 +148,13 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage implements
 
 		// Add means to specify authentication timeout
 		Composite timeoutComposite = new Composite(page, SWT.NONE);
-		timeoutComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
-				true, false));
+		timeoutComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		timeoutComposite.setLayout(new GridLayout(2, false));
 		Label timeoutLabel = new Label(timeoutComposite, SWT.NONE);
 		timeoutLabel.setText("Authentication Timeout (ms): ");
 		this.authenticationTimeoutText = new Text(timeoutComposite, SWT.BORDER);
-		this.authenticationTimeoutText.setLayoutData(new GridData(SWT.FILL,
-				SWT.BEGINNING, true, false));
-		this.authenticationTimeoutText.setText(String
-				.valueOf(initialAuthenticationTimeout));
+		this.authenticationTimeoutText.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		this.authenticationTimeoutText.setText(String.valueOf(initialAuthenticationTimeout));
 		this.authenticationTimeoutText.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -209,8 +197,7 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage implements
 
 		// Ensure have authentication timeout
 		long authenticationTimeout;
-		String authenticationTimeoutValue = this.authenticationTimeoutText
-				.getText();
+		String authenticationTimeoutValue = this.authenticationTimeoutText.getText();
 		if (EclipseUtil.isBlank(authenticationTimeoutValue)) {
 			this.setErrorMessage("Must specify authentication timeout");
 			this.setPageComplete(false);
@@ -230,27 +217,6 @@ public class HttpSecuritySourceListingWizardPage extends WizardPage implements
 		// No issue
 		this.setErrorMessage(null);
 		this.setPageComplete(true);
-	}
-
-	/*
-	 * ========================== CompilerIssues =========================
-	 */
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Provide as error message
-		this.setErrorMessage(issueDescription);
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-		// Provide as error message
-		this.setErrorMessage(issueDescription + " ("
-				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
-				+ ")");
 	}
 
 }

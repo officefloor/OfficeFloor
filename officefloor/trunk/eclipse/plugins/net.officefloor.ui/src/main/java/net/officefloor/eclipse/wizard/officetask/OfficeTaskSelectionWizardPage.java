@@ -17,13 +17,6 @@
  */
 package net.officefloor.eclipse.wizard.officetask;
 
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeTask;
-import net.officefloor.eclipse.common.dialog.input.InputAdapter;
-import net.officefloor.eclipse.common.dialog.input.InputHandler;
-import net.officefloor.eclipse.common.dialog.input.impl.OfficeSectionInput;
-import net.officefloor.frame.spi.administration.Duty;
-
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -35,18 +28,26 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.eclipse.common.dialog.input.InputAdapter;
+import net.officefloor.eclipse.common.dialog.input.InputHandler;
+import net.officefloor.eclipse.common.dialog.input.impl.OfficeSectionInput;
+import net.officefloor.frame.spi.administration.Duty;
+
 /**
- * {@link IWizardPage} to select the {@link OfficeTask} from the
- * {@link OfficeSection}.
+ * {@link IWizardPage} to select the {@link OfficeTaskType} from the
+ * {@link OfficeSectionType}.
  * 
  * @author Daniel Sagenschneider
  */
 public class OfficeTaskSelectionWizardPage extends WizardPage {
 
 	/**
-	 * {@link OfficeSection}.
+	 * {@link OfficeSectionType}.
 	 */
-	private final OfficeSection section;
+	private final OfficeSectionType sectionType;
 
 	/**
 	 * Radio {@link Button} indicating if pre {@link Duty}.
@@ -54,33 +55,33 @@ public class OfficeTaskSelectionWizardPage extends WizardPage {
 	private Button preDuty;
 
 	/**
-	 * Selected {@link OfficeTask}.
+	 * Selected {@link OfficeTaskType}.
 	 */
-	private OfficeTask selectedOfficeTask = null;
+	private OfficeTaskType selectedOfficeTaskType = null;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param section
-	 *            {@link OfficeSection}. May be <code>null</code> if failed to
-	 *            load {@link OfficeSection}.
+	 *            {@link OfficeSectionType}. May be <code>null</code> if failed
+	 *            to load {@link OfficeSectionType}.
 	 */
-	OfficeTaskSelectionWizardPage(OfficeSection section) {
+	OfficeTaskSelectionWizardPage(OfficeSectionType sectionType) {
 		super("OfficeSection load issues");
-		this.section = section;
+		this.sectionType = sectionType;
 
 		// Specify page details
-		this.setTitle("Select " + OfficeTask.class.getSimpleName());
+		this.setTitle("Select " + OfficeTaskType.class.getSimpleName());
 	}
 
 	/**
-	 * Obtains the selected {@link OfficeTask}.
+	 * Obtains the selected {@link OfficeTaskType}.
 	 * 
-	 * @return Selected {@link OfficeTask} or <code>null</code> if no
-	 *         {@link OfficeTask} is selected.
+	 * @return Selected {@link OfficeTaskType} or <code>null</code> if no
+	 *         {@link OfficeTaskType} is selected.
 	 */
-	public OfficeTask getSelectedOfficeTask() {
-		return this.selectedOfficeTask;
+	public OfficeTaskType getSelectedOfficeTaskType() {
+		return this.selectedOfficeTaskType;
 	}
 
 	/**
@@ -104,15 +105,13 @@ public class OfficeTaskSelectionWizardPage extends WizardPage {
 		Composite page = new Composite(parent, SWT.NONE);
 		page.setLayout(new GridLayout(1, true));
 
-		// Determine if have office section
-		if (this.section == null) {
+		// Determine if have office section type
+		if (this.sectionType == null) {
 			// No office section so provide error
 			Label label = new Label(page, SWT.NONE);
-			label.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-					false));
+			label.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 			label.setForeground(ColorConstants.red);
-			label.setText("Failed to load the "
-					+ OfficeSection.class.getSimpleName());
+			label.setText("Failed to load the " + OfficeSection.class.getSimpleName());
 			return;
 		}
 
@@ -127,27 +126,26 @@ public class OfficeTaskSelectionWizardPage extends WizardPage {
 		postDuty.setText("post");
 		new Label(duty, SWT.NONE).setText(" task");
 
-		// Have section so provide ability to select task
-		new InputHandler<OfficeTask>(page, new OfficeSectionInput(this.section,
-				OfficeTask.class), new InputAdapter() {
-			@Override
-			public void notifyValueChanged(Object value) {
-				if (value instanceof OfficeTask) {
-					// Office task selected
-					OfficeTaskSelectionWizardPage.this.selectedOfficeTask = (OfficeTask) value;
-					OfficeTaskSelectionWizardPage.this.setErrorMessage(null);
-					OfficeTaskSelectionWizardPage.this.setPageComplete(true);
+		// Have section so provide ability to select task Type
+		new InputHandler<OfficeTaskType>(page, new OfficeSectionInput(this.sectionType, OfficeTaskType.class),
+				new InputAdapter() {
+					@Override
+					public void notifyValueChanged(Object value) {
+						if (value instanceof OfficeTaskType) {
+							// Office task selected
+							OfficeTaskSelectionWizardPage.this.selectedOfficeTaskType = (OfficeTaskType) value;
+							OfficeTaskSelectionWizardPage.this.setErrorMessage(null);
+							OfficeTaskSelectionWizardPage.this.setPageComplete(true);
 
-				} else {
-					// Office task not selected
-					OfficeTaskSelectionWizardPage.this.selectedOfficeTask = null;
-					OfficeTaskSelectionWizardPage.this
-							.setErrorMessage("Select an "
-									+ OfficeTask.class.getSimpleName());
-					OfficeTaskSelectionWizardPage.this.setPageComplete(false);
-				}
-			}
-		});
+						} else {
+							// Office task not selected
+							OfficeTaskSelectionWizardPage.this.selectedOfficeTaskType = null;
+							OfficeTaskSelectionWizardPage.this
+									.setErrorMessage("Select an " + OfficeTaskType.class.getSimpleName());
+							OfficeTaskSelectionWizardPage.this.setPageComplete(false);
+						}
+					}
+				});
 
 		// Specify the control
 		this.setControl(page);

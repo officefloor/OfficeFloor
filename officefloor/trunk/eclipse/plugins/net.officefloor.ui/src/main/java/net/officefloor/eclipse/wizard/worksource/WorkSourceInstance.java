@@ -17,8 +17,18 @@
  */
 package net.officefloor.eclipse.wizard.worksource;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -31,24 +41,14 @@ import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link WorkSource} instance.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkSourceInstance implements WorkSourceExtensionContext,
-		CompilerIssues {
+public class WorkSourceInstance extends AbstractCompilerIssues implements WorkSourceExtensionContext {
 
 	/**
 	 * Fully qualified class name of the {@link WorkSource}.
@@ -116,10 +116,8 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	 * @param context
 	 *            {@link WorkSourceInstanceContext}.
 	 */
-	WorkSourceInstance(String workSourceClassName,
-			WorkSourceExtension<?, ?> workSourceExtension,
-			ClassLoader classLoader, IProject project,
-			WorkSourceInstanceContext context) {
+	WorkSourceInstance(String workSourceClassName, WorkSourceExtension<?, ?> workSourceExtension,
+			ClassLoader classLoader, IProject project, WorkSourceInstanceContext context) {
 		this.workSourceClassName = workSourceClassName;
 		this.workSourceExtension = workSourceExtension;
 		this.classLoader = classLoader;
@@ -127,8 +125,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 		this.context = context;
 
 		// Obtain the work loader
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(this.classLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this);
 		this.workLoader = compiler.getWorkLoader();
 	}
@@ -150,8 +147,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	@SuppressWarnings("unchecked")
 	public void loadWorkType() {
 		// Attempt to load the work type
-		this.workType = this.workLoader.loadWorkType(this.workSourceClass,
-				this.properties);
+		this.workType = this.workLoader.loadWorkType(this.workSourceClass, this.properties);
 	}
 
 	/**
@@ -230,14 +226,12 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 
 		// Obtain the work source class
 		if (this.workSourceExtension != null) {
-			this.workSourceClass = this.workSourceExtension
-					.getWorkSourceClass();
+			this.workSourceClass = this.workSourceExtension.getWorkSourceClass();
 			if (this.workSourceClass == null) {
 				page.setLayout(new GridLayout());
 				Label label = new Label(page, SWT.NONE);
 				label.setForeground(ColorConstants.red);
-				label.setText("Extension did not provide class "
-						+ this.workSourceClassName);
+				label.setText("Extension did not provide class " + this.workSourceClassName);
 				return;
 			}
 		} else {
@@ -248,25 +242,21 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 				page.setLayout(new GridLayout());
 				Label label = new Label(page, SWT.NONE);
 				label.setForeground(ColorConstants.red);
-				label.setText("Could not find class "
-						+ this.workSourceClassName + "\n\n"
-						+ ex.getClass().getSimpleName() + ": "
-						+ ex.getMessage());
+				label.setText("Could not find class " + this.workSourceClassName + "\n\n"
+						+ ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				return;
 			}
 		}
 
 		// Obtain specification properties for work source
 		try {
-			this.properties = this.workLoader
-					.loadSpecification(this.workSourceClass);
+			this.properties = this.workLoader.loadSpecification(this.workSourceClass);
 		} catch (Throwable ex) {
 			// Failed to find/instantiate the class with project class loader
 			page.setLayout(new GridLayout());
 			Label label = new Label(page, SWT.NONE);
 			label.setForeground(ColorConstants.red);
-			label.setText("Could not find class "
-					+ this.workSourceClass.getName() + "\n\n"
+			label.setText("Could not find class " + this.workSourceClass.getName() + "\n\n"
 					+ ex.getClass().getSimpleName() + ": " + ex.getMessage());
 			return;
 		}
@@ -274,8 +264,7 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 		// Load work instance properties if available
 		if (this.workInstance != null) {
 			for (Property property : this.workInstance.getPropertyList()) {
-				this.properties.getOrAddProperty(property.getName()).setValue(
-						property.getValue());
+				this.properties.getOrAddProperty(property.getName()).setValue(property.getValue());
 			}
 		}
 
@@ -287,22 +276,19 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 				this.workSourceExtension.createControl(page, this);
 			} catch (Throwable ex) {
 				// Failed to load page
-				this.context.setErrorMessage(ex.getMessage() + " ("
-						+ ex.getClass().getSimpleName() + ")");
+				this.context.setErrorMessage(ex.getMessage() + " (" + ex.getClass().getSimpleName() + ")");
 			}
 
 		} else {
 			// No an extension so provide properties table to fill out
 			page.setLayout(new GridLayout());
-			PropertyListInput propertyListInput = new PropertyListInput(
-					this.properties);
-			new InputHandler<PropertyList>(page, propertyListInput,
-					new InputAdapter() {
-						@Override
-						public void notifyValueChanged(Object value) {
-							WorkSourceInstance.this.notifyPropertiesChanged();
-						}
-					});
+			PropertyListInput propertyListInput = new PropertyListInput(this.properties);
+			new InputHandler<PropertyList>(page, propertyListInput, new InputAdapter() {
+				@Override
+				public void notifyValueChanged(Object value) {
+					WorkSourceInstance.this.notifyPropertiesChanged();
+				}
+			});
 		}
 
 		// Notify properties changed to set initial state
@@ -352,20 +338,8 @@ public class WorkSourceInstance implements WorkSourceExtensionContext,
 	 */
 
 	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription);
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription + " ("
-				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
-				+ ")");
+	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+		this.context.setErrorMessage(CompileException.toIssueString(issue));
 	}
 
 }

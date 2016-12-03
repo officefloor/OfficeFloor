@@ -17,17 +17,6 @@
  */
 package net.officefloor.eclipse.wizard.sectionsource;
 
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.eclipse.common.dialog.input.InputHandler;
-import net.officefloor.eclipse.common.dialog.input.InputListener;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
-import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -45,13 +34,25 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Text;
 
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.eclipse.common.dialog.input.InputHandler;
+import net.officefloor.eclipse.common.dialog.input.InputListener;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathClassInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathFileInput;
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+
 /**
  * {@link IWizardPage} providing the listing of {@link SectionSourceInstance}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionSourceListingWizardPage extends WizardPage implements
-		CompilerIssues {
+public class SectionSourceListingWizardPage extends WizardPage {
 
 	/**
 	 * Choices for selection.
@@ -123,8 +124,7 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 	 *            {@link SectionInstance} to refactor or <code>null</code> if
 	 *            creating new.
 	 */
-	SectionSourceListingWizardPage(
-			SectionSourceInstance[] sectionSourceInstances, IProject project,
+	SectionSourceListingWizardPage(SectionSourceInstance[] sectionSourceInstances, IProject project,
 			SectionInstance sectionInstance) {
 		super("SectionSource listing");
 		this.sectionSourceInstances = sectionSourceInstances;
@@ -134,8 +134,7 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 		// Create the listing of labels
 		this.sectionSourceLabels = new String[this.sectionSourceInstances.length];
 		for (int i = 0; i < this.sectionSourceLabels.length; i++) {
-			this.sectionSourceLabels[i] = this.sectionSourceInstances[i]
-					.getSectionSourceLabel();
+			this.sectionSourceLabels[i] = this.sectionSourceInstances[i].getSectionSourceLabel();
 		}
 
 		// Specify page details
@@ -179,12 +178,9 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 			// Have section instance, so provide initial name, source, location
 			initialSectionName = this.sectionInstance.getSectionName();
 			initialSectionLocation = this.sectionInstance.getSectionLocation();
-			String sectionSourceClassName = this.sectionInstance
-					.getSectionSourceClassName();
+			String sectionSourceClassName = this.sectionInstance.getSectionSourceClassName();
 			for (int i = 0; i < this.sectionSourceInstances.length; i++) {
-				if (sectionSourceClassName
-						.equals(this.sectionSourceInstances[i]
-								.getSectionSourceClassName())) {
+				if (sectionSourceClassName.equals(this.sectionSourceInstances[i].getSectionSourceClassName())) {
 					initialSectionSourceIndex = i;
 				}
 			}
@@ -192,14 +188,12 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 
 		// Add means to specify section name
 		Composite nameComposite = new Composite(page, SWT.NONE);
-		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		nameComposite.setLayout(new GridLayout(2, false));
 		Label nameLabel = new Label(nameComposite, SWT.NONE);
 		nameLabel.setText("Section name: ");
 		this.sectionName = new Text(nameComposite, SWT.BORDER);
-		this.sectionName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
-				true, false));
+		this.sectionName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		this.sectionName.setText(initialSectionName);
 		this.sectionName.addModifyListener(new ModifyListener() {
 			@Override
@@ -211,8 +205,7 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 
 		// Add buttons to choose between Class and Selection
 		Composite choiceComposite = new Composite(page, SWT.NONE);
-		choiceComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
-				true, false));
+		choiceComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		choiceComposite.setLayout(new GridLayout(2, false));
 		Button classButton = new Button(choiceComposite, SWT.RADIO);
 		classButton.setText("Class");
@@ -223,11 +216,9 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 		Composite populateComposite = new Composite(page, SWT.NONE);
 		StackLayout populateLayout = new StackLayout();
 		populateComposite.setLayout(populateLayout);
-		final Composite selectionComposite = new Composite(populateComposite,
-				SWT.NONE);
+		final Composite selectionComposite = new Composite(populateComposite, SWT.NONE);
 		selectionComposite.setLayout(new GridLayout(1, true));
-		final Composite classComposite = new Composite(populateComposite,
-				SWT.NONE);
+		final Composite classComposite = new Composite(populateComposite, SWT.NONE);
 		classComposite.setLayout(new GridLayout(2, false));
 
 		// Specify the composite visible on button selection
@@ -260,34 +251,28 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 		// Add listing for selecting the class
 		new Label(classComposite, SWT.NONE).setText("Class:");
 		this.sectionClassName = initialSectionLocation;
-		InputHandler<String> sectionClass = new InputHandler<String>(
-				classComposite, new ClasspathClassInput(this.project,
-						page.getShell()), this.sectionClassName,
-				new InputListener() {
+		InputHandler<String> sectionClass = new InputHandler<String>(classComposite,
+				new ClasspathClassInput(this.project, page.getShell()), this.sectionClassName, new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 						// Specify the class name and indicate changed
-						String className = (value == null ? "" : value
-								.toString());
+						String className = (value == null ? "" : value.toString());
 						SectionSourceListingWizardPage.this.sectionClassName = className;
 						SectionSourceListingWizardPage.this.handleChange();
 					}
 
 					@Override
 					public void notifyValueInvalid(String message) {
-						SectionSourceListingWizardPage.this
-								.setErrorMessage(message);
+						SectionSourceListingWizardPage.this.setErrorMessage(message);
 					}
 				});
-		sectionClass.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		sectionClass.getControl().setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
 		// --------------- Selection ---------------------
 
 		// Add listing of section sources
 		this.list = new List(selectionComposite, SWT.SINGLE | SWT.BORDER);
-		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
-				false));
+		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		this.list.setItems(this.sectionSourceLabels);
 		this.list.setSelection(initialSectionSourceIndex);
 		this.list.addSelectionListener(new SelectionAdapter() {
@@ -298,31 +283,24 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 		});
 
 		// Provide means to specify section location
-		Composite locationComposite = new Composite(selectionComposite,
-				SWT.NONE);
-		locationComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
-				true, false));
+		Composite locationComposite = new Composite(selectionComposite, SWT.NONE);
+		locationComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 		locationComposite.setLayout(new GridLayout(2, false));
 		Label locationLabel = new Label(locationComposite, SWT.NONE);
 		locationLabel.setText("Location: ");
 		this.sectionLocation = initialSectionLocation;
-		InputHandler<String> location = new InputHandler<String>(
-				locationComposite, new ClasspathFileInput(this.project,
-						page.getShell()), initialSectionLocation,
-				new InputListener() {
+		InputHandler<String> location = new InputHandler<String>(locationComposite,
+				new ClasspathFileInput(this.project, page.getShell()), initialSectionLocation, new InputListener() {
 					@Override
 					public void notifyValueChanged(Object value) {
 
 						// Obtain the location
-						String location = (value == null ? "" : value
-								.toString());
+						String location = (value == null ? "" : value.toString());
 
 						// Determine if default section name
-						String name = SectionSourceListingWizardPage.this.sectionName
-								.getText();
+						String name = SectionSourceListingWizardPage.this.sectionName.getText();
 						if ((!EclipseUtil.isBlank(location))
-								&& ((EclipseUtil.isBlank(name)) || (location
-										.startsWith(name)))) {
+								&& ((EclipseUtil.isBlank(name)) || (location.startsWith(name)))) {
 							// Use simple name of location
 							name = location;
 							int index = name.lastIndexOf('/');
@@ -333,8 +311,7 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 							if (index >= 0) {
 								name = name.substring(0, index);
 							}
-							SectionSourceListingWizardPage.this.sectionName
-									.setText(name);
+							SectionSourceListingWizardPage.this.sectionName.setText(name);
 						}
 
 						// Specify the location
@@ -346,12 +323,10 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 
 					@Override
 					public void notifyValueInvalid(String message) {
-						SectionSourceListingWizardPage.this
-								.setErrorMessage(message);
+						SectionSourceListingWizardPage.this.setErrorMessage(message);
 					}
 				});
-		location.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		location.getControl().setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
 		// Indicate initial state
 		this.handleChange();
@@ -389,8 +364,7 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 			String classSectionSourceName = ClassSectionSource.class.getName();
 			for (int i = 0; i < this.sectionSourceInstances.length; i++) {
 				SectionSourceInstance instance = this.sectionSourceInstances[i];
-				if (classSectionSourceName.equals(instance
-						.getSectionSourceClassName())) {
+				if (classSectionSourceName.equals(instance.getSectionSourceClassName())) {
 					// Found the ClassSectionSource
 					this.selectedInstance = instance;
 				}
@@ -440,7 +414,17 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 
 		// No properties for ClassSectionSource, so validate it now
 		if (Choice.CLASS.equals(this.choice)) {
-			if (!this.selectedInstance.loadSectionType(this)) {
+
+			// Create compiler issues to report issues
+			CompilerIssues issues = new AbstractCompilerIssues() {
+				@Override
+				protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+					SectionSourceListingWizardPage.this.setErrorMessage(CompileException.toIssueString(issue));
+				}
+			};
+
+			// Load the section type
+			if (!this.selectedInstance.loadSectionType(issues)) {
 				this.setPageComplete(false);
 				return;
 			}
@@ -449,27 +433,6 @@ public class SectionSourceListingWizardPage extends WizardPage implements
 		// No issue
 		this.setErrorMessage(null);
 		this.setPageComplete(true);
-	}
-
-	/*
-	 * ========================== CompilerIssues =========================
-	 */
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Provide as error message
-		this.setErrorMessage(issueDescription);
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-		// Provide as error message
-		this.setErrorMessage(issueDescription + " ("
-				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
-				+ ")");
 	}
 
 }

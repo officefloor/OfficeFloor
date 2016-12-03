@@ -23,12 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeTask;
-import net.officefloor.eclipse.common.dialog.input.Input;
-import net.officefloor.eclipse.common.dialog.input.InputContext;
-
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -42,6 +36,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeSubSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSubSection;
+import net.officefloor.eclipse.common.dialog.input.Input;
+import net.officefloor.eclipse.common.dialog.input.InputContext;
+
 /**
  * {@link Input} to obtain an item within the {@link OfficeSection}.
  * 
@@ -50,28 +52,27 @@ import org.eclipse.swt.widgets.TreeItem;
 public class OfficeSectionInput implements Input<Tree> {
 
 	/**
-	 * {@link OfficeSection}.
+	 * {@link OfficeSectionType}.
 	 */
-	private final OfficeSection officeSection;
+	private final OfficeSectionType officeSectionType;
 
 	/**
-	 * Listing of the types of objects within the {@link OfficeSection} that may
-	 * be selected for returning.
+	 * Listing of the types of objects within the {@link OfficeSectionType} that
+	 * may be selected for returning.
 	 */
 	private final Class<?>[] selectionTypes;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeSection
-	 *            {@link OfficeSection}.
+	 * @param officeSectionType
+	 *            {@link OfficeSectionType}.
 	 * @param selectionTypes
 	 *            Listing of the types of objects within the
 	 *            {@link OfficeSection} that may be selected for returning.
 	 */
-	public OfficeSectionInput(OfficeSection officeSection,
-			Class<?>... selectionTypes) {
-		this.officeSection = officeSection;
+	public OfficeSectionInput(OfficeSectionType officeSectionType, Class<?>... selectionTypes) {
+		this.officeSectionType = officeSectionType;
 		this.selectionTypes = selectionTypes;
 	}
 
@@ -90,13 +91,12 @@ public class OfficeSectionInput implements Input<Tree> {
 		treeViewer.setAutoExpandLevel(2);
 		treeViewer.setContentProvider(new OfficeSectionTreeContentProvider());
 		treeViewer.setLabelProvider(new OfficeSectionLabelProvider());
-		treeViewer.setInput(this.officeSection);
+		treeViewer.setInput(this.officeSectionType);
 		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				// Notify of change
-				context.notifyValueChanged(OfficeSectionInput.this.getValue(
-						tree, context));
+				context.notifyValueChanged(OfficeSectionInput.this.getValue(tree, context));
 			}
 		});
 
@@ -140,8 +140,7 @@ public class OfficeSectionInput implements Input<Tree> {
 	/**
 	 * {@link ITreeContentProvider} for the {@link OfficeSection}.
 	 */
-	private class OfficeSectionTreeContentProvider implements
-			ITreeContentProvider {
+	private class OfficeSectionTreeContentProvider implements ITreeContentProvider {
 
 		/**
 		 * Keeps track of the child to parent.
@@ -167,11 +166,10 @@ public class OfficeSectionInput implements Input<Tree> {
 
 			// Create the listing of children
 			List<Object> children = new LinkedList<Object>();
-			if (parent instanceof OfficeSubSection) {
-				OfficeSubSection subSection = (OfficeSubSection) parent;
-				children.addAll(Arrays.asList(subSection.getOfficeTasks()));
-				children.addAll(Arrays
-						.asList(subSection.getOfficeSubSections()));
+			if (parent instanceof OfficeSubSectionType) {
+				OfficeSubSectionType subSectionType = (OfficeSubSectionType) parent;
+				children.addAll(Arrays.asList(subSectionType.getOfficeTaskTypes()));
+				children.addAll(Arrays.asList(subSectionType.getOfficeSubSectionTypes()));
 
 			} else {
 				// Unknown type, so no children
@@ -205,8 +203,7 @@ public class OfficeSectionInput implements Input<Tree> {
 	/**
 	 * {@link OfficeSection} {@link ILabelProvider}.
 	 */
-	private class OfficeSectionLabelProvider extends BaseLabelProvider
-			implements ILabelProvider {
+	private class OfficeSectionLabelProvider extends BaseLabelProvider implements ILabelProvider {
 
 		/*
 		 * ================= ILabelProvider ============================
@@ -221,18 +218,14 @@ public class OfficeSectionInput implements Input<Tree> {
 		@Override
 		public String getText(Object element) {
 			// Return description
-			if (element instanceof OfficeSubSection) {
-				return "Section: "
-						+ ((OfficeSubSection) element).getOfficeSectionName();
-			} else if (element instanceof OfficeTask) {
-				return "Task: " + ((OfficeTask) element).getOfficeTaskName();
+			if (element instanceof OfficeSubSectionType) {
+				return "Section: " + ((OfficeSubSection) element).getOfficeSectionName();
+			} else if (element instanceof OfficeTaskType) {
+				return "Task: " + ((OfficeTaskType) element).getOfficeTaskName();
 			} else {
 				// Unknown type
-				return "UNKNOWN TYPE: "
-						+ element
-						+ " ["
-						+ (element == null ? null : element.getClass()
-								.getName()) + "]";
+				return "UNKNOWN TYPE: " + element + " [" + (element == null ? null : element.getClass().getName())
+						+ "]";
 			}
 		}
 	}

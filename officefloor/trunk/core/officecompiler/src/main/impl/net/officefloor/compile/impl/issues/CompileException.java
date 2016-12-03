@@ -34,6 +34,19 @@ import net.officefloor.compile.issues.CompilerIssue;
 public class CompileException extends Exception {
 
 	/**
+	 * Obtains the {@link DefaultCompilerIssue} as string.
+	 * 
+	 * @param issue
+	 *            {@link DefaultCompilerIssue}.
+	 * @return Text details of the {@link DefaultCompilerIssue}.
+	 */
+	public static String toIssueString(DefaultCompilerIssue issue) {
+		StringWriter message = new StringWriter();
+		printIssue(issue, new PrintWriter(message));
+		return message.toString();
+	}
+
+	/**
 	 * Prints the {@link DefaultCompilerIssue} to the {@link PrintStream}.
 	 * 
 	 * @param issue

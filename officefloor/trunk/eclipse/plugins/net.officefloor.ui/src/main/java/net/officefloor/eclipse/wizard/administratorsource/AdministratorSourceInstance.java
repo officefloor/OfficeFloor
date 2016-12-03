@@ -17,23 +17,6 @@
  */
 package net.officefloor.eclipse.wizard.administratorsource;
 
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.administrator.AdministratorLoader;
-import net.officefloor.compile.administrator.AdministratorType;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeAdministrator;
-import net.officefloor.eclipse.common.dialog.input.InputAdapter;
-import net.officefloor.eclipse.common.dialog.input.InputHandler;
-import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
-import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtension;
-import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtensionContext;
-import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.internal.structure.AdministratorScope;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.SWT;
@@ -42,13 +25,30 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.eclipse.common.dialog.input.InputAdapter;
+import net.officefloor.eclipse.common.dialog.input.InputHandler;
+import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
+import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtension;
+import net.officefloor.eclipse.extension.administratorsource.AdministratorSourceExtensionContext;
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
+
 /**
  * {@link AdministratorSource} instance.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorSourceInstance implements
-		AdministratorSourceExtensionContext, CompilerIssues {
+public class AdministratorSourceInstance extends AbstractCompilerIssues implements AdministratorSourceExtensionContext {
 
 	/**
 	 * Fully qualified class name of the {@link AdministratorSource}.
@@ -123,9 +123,8 @@ public class AdministratorSourceInstance implements
 	 *            {@link AdministratorSourceInstanceContext}.
 	 */
 	AdministratorSourceInstance(String administratorSourceClassName,
-			AdministratorSourceExtension<?, ?, ?> administratorSourceExtension,
-			ClassLoader classLoader, IProject project,
-			AdministratorSourceInstanceContext context) {
+			AdministratorSourceExtension<?, ?, ?> administratorSourceExtension, ClassLoader classLoader,
+			IProject project, AdministratorSourceInstanceContext context) {
 		this.administratorSourceClassName = administratorSourceClassName;
 		this.administratorSourceExtension = administratorSourceExtension;
 		this.classLoader = classLoader;
@@ -133,8 +132,7 @@ public class AdministratorSourceInstance implements
 		this.context = context;
 
 		// Obtain the administrator loader
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(this.classLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this);
 		this.administratorLoader = compiler.getAdministratorLoader();
 	}
@@ -148,8 +146,7 @@ public class AdministratorSourceInstance implements
 	 * @param administratorScope
 	 *            {@link AdministratorScope}.
 	 */
-	public void setAdministratorNameAndScope(String administratorName,
-			AdministratorScope administratorScope) {
+	public void setAdministratorNameAndScope(String administratorName, AdministratorScope administratorScope) {
 		this.administratorName = administratorName;
 		this.administratorScope = administratorScope;
 
@@ -181,9 +178,8 @@ public class AdministratorSourceInstance implements
 		}
 
 		// Attempt to load the administrator type
-		this.administratorType = this.administratorLoader
-				.loadAdministratorType(this.administratorSourceClass,
-						this.properties);
+		this.administratorType = this.administratorLoader.loadAdministratorType(this.administratorSourceClass,
+				this.properties);
 	}
 
 	/**
@@ -197,8 +193,7 @@ public class AdministratorSourceInstance implements
 			return this.administratorSourceClassName;
 		} else {
 			// Attempt to obtain from extension
-			String name = this.administratorSourceExtension
-					.getAdministratorSourceLabel();
+			String name = this.administratorSourceExtension.getAdministratorSourceLabel();
 			if (EclipseUtil.isBlank(name)) {
 				// No name so use class name
 				name = this.administratorSourceClassName;
@@ -267,14 +262,12 @@ public class AdministratorSourceInstance implements
 
 		// Obtain the administrator source class
 		if (this.administratorSourceExtension != null) {
-			this.administratorSourceClass = this.administratorSourceExtension
-					.getAdministratorSourceClass();
+			this.administratorSourceClass = this.administratorSourceExtension.getAdministratorSourceClass();
 			if (this.administratorSourceClass == null) {
 				page.setLayout(new GridLayout());
 				Label label = new Label(page, SWT.NONE);
 				label.setForeground(ColorConstants.red);
-				label.setText("Extension did not provide class "
-						+ this.administratorSourceClassName);
+				label.setText("Extension did not provide class " + this.administratorSourceClassName);
 				return;
 			}
 		} else {
@@ -285,23 +278,19 @@ public class AdministratorSourceInstance implements
 				page.setLayout(new GridLayout());
 				Label label = new Label(page, SWT.NONE);
 				label.setForeground(ColorConstants.red);
-				label.setText("Could not find class "
-						+ this.administratorSourceClassName + "\n\n"
-						+ ex.getClass().getSimpleName() + ": "
-						+ ex.getMessage());
+				label.setText("Could not find class " + this.administratorSourceClassName + "\n\n"
+						+ ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				return;
 			}
 		}
 
 		// Obtain specification properties for administrator source
-		this.properties = this.administratorLoader
-				.loadSpecification(this.administratorSourceClass);
+		this.properties = this.administratorLoader.loadSpecification(this.administratorSourceClass);
 		if (this.properties == null) {
 			page.setLayout(new GridLayout());
 			Label label = new Label(page, SWT.NONE);
 			label.setForeground(ColorConstants.red);
-			label.setText("Could not obtain properties from specification for "
-					+ this.administratorSourceClassName);
+			label.setText("Could not obtain properties from specification for " + this.administratorSourceClassName);
 			return;
 		}
 
@@ -313,23 +302,19 @@ public class AdministratorSourceInstance implements
 				this.administratorSourceExtension.createControl(page, this);
 			} catch (Throwable ex) {
 				// Failed to load page
-				this.context.setErrorMessage(ex.getMessage() + " ("
-						+ ex.getClass().getSimpleName() + ")");
+				this.context.setErrorMessage(ex.getMessage() + " (" + ex.getClass().getSimpleName() + ")");
 			}
 
 		} else {
 			// No an extension so provide properties table to fill out
 			page.setLayout(new GridLayout());
-			PropertyListInput propertyListInput = new PropertyListInput(
-					this.properties);
-			new InputHandler<PropertyList>(page, propertyListInput,
-					new InputAdapter() {
-						@Override
-						public void notifyValueChanged(Object value) {
-							AdministratorSourceInstance.this
-									.notifyPropertiesChanged();
-						}
-					});
+			PropertyListInput propertyListInput = new PropertyListInput(this.properties);
+			new InputHandler<PropertyList>(page, propertyListInput, new InputAdapter() {
+				@Override
+				public void notifyValueChanged(Object value) {
+					AdministratorSourceInstance.this.notifyPropertiesChanged();
+				}
+			});
 		}
 
 		// Notify properties changed to set initial state
@@ -374,20 +359,8 @@ public class AdministratorSourceInstance implements
 	 */
 
 	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription);
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription + " ("
-				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
-				+ ")");
+	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+		this.context.setErrorMessage(CompileException.toIssueString(issue));
 	}
 
 }

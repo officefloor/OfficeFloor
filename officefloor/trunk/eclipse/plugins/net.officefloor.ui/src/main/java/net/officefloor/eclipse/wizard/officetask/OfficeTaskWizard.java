@@ -20,23 +20,25 @@ package net.officefloor.eclipse.wizard.officetask;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeTask;
-import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.util.ModelUtil;
-import net.officefloor.eclipse.wizard.WizardUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.model.office.OfficeSectionModel;
-
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.util.ModelUtil;
+import net.officefloor.eclipse.wizard.WizardUtil;
+import net.officefloor.model.office.OfficeSectionModel;
+
 /**
- * {@link IWizard} to select an {@link OfficeTask}.
+ * {@link IWizard} to select an {@link OfficeTaskType}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -47,15 +49,14 @@ public class OfficeTaskWizard extends Wizard {
 	 * 
 	 * @param officeSection
 	 *            {@link OfficeSectionModel} from which to select the
-	 *            {@link OfficeTask}.
+	 *            {@link OfficeTaskType}.
 	 * @param editor
 	 *            {@link AbstractOfficeFloorEditor} requiring the
-	 *            {@link OfficeTask}.
+	 *            {@link OfficeTaskType}.
 	 * @return {@link OfficeTaskInstance} or <code>null</code> if
-	 *         {@link OfficeTask} not selected.
+	 *         {@link OfficeTaskType} not selected.
 	 */
-	public static OfficeTaskInstance getOfficeTask(
-			OfficeSectionModel officeSection,
+	public static OfficeTaskInstance getOfficeTask(OfficeSectionModel officeSection,
 			AbstractOfficeFloorEditor<?, ?> editor) {
 		// Create and run the wizard
 		OfficeTaskWizard wizard = new OfficeTaskWizard(officeSection, editor);
@@ -69,9 +70,9 @@ public class OfficeTaskWizard extends Wizard {
 	}
 
 	/**
-	 * {@link OfficeSection}.
+	 * {@link OfficeSectionType}.
 	 */
-	private final OfficeSection section;
+	private final OfficeSectionType sectionType;
 
 	/**
 	 * {@link OfficeSectionLoadIssuesWizardPage}.
@@ -92,50 +93,32 @@ public class OfficeTaskWizard extends Wizard {
 	 * Initiate.
 	 * 
 	 * @param officeSection
-	 *            {@link OfficeSectionModel} to select {@link OfficeTask} from.
+	 *            {@link OfficeSectionModel} to select {@link OfficeTaskType} from.
 	 * @param editor
 	 *            {@link AbstractOfficeFloorEditor}.
 	 */
-	public OfficeTaskWizard(OfficeSectionModel officeSection,
-			AbstractOfficeFloorEditor<?, ?> editor) {
+	public OfficeTaskWizard(OfficeSectionModel officeSection, AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the compiler that collects issues
 		final List<String> sectionIssues = new LinkedList<String>();
-		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
-				.createCompiler(editor);
-		CompilerIssues issues = new CompilerIssues() {
+		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault().createCompiler(editor);
+		CompilerIssues issues = new AbstractCompilerIssues() {
 			@Override
-			public void addIssue(LocationType locationType, String location,
-					AssetType assetType, String assetName,
-					String issueDescription) {
-				sectionIssues.add(issueDescription);
-			}
-
-			@Override
-			public void addIssue(LocationType locationType, String location,
-					AssetType assetType, String assetName,
-					String issueDescription, Throwable cause) {
-				String failure = "";
-				if (cause != null) {
-					failure = " " + cause.getMessage() + " ["
-							+ cause.getClass().getSimpleName() + "]";
-				}
-				sectionIssues.add(issueDescription + failure);
+			protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+				sectionIssues.add(CompileException.toIssueString(issue));
 			}
 		};
 		compiler.setCompilerIssues(issues);
 
-		// Obtain the office section
-		this.section = ModelUtil.getOfficeSection(officeSection, compiler,
-				issues, editor);
+		// Obtain the office section type
+		this.sectionType = ModelUtil.getOfficeSectionType(officeSection, compiler, issues, editor);
 
 		// Provide page if issues in loading office section
 		this.loadIssuesPage = (sectionIssues.size() == 0 ? null
-				: new OfficeSectionLoadIssuesWizardPage(sectionIssues
-						.toArray(new String[0])));
+				: new OfficeSectionLoadIssuesWizardPage(sectionIssues.toArray(new String[0])));
 
 		// Provide page to select the office task
-		this.selectTaskPage = new OfficeTaskSelectionWizardPage(this.section);
+		this.selectTaskPage = new OfficeTaskSelectionWizardPage(this.sectionType);
 	}
 
 	/**
@@ -187,12 +170,11 @@ public class OfficeTaskWizard extends Wizard {
 	public boolean performFinish() {
 
 		// Obtain the selected task
-		OfficeTask task = this.selectTaskPage.getSelectedOfficeTask();
+		OfficeTaskType taskType = this.selectTaskPage.getSelectedOfficeTaskType();
 		boolean isPreRatherThanPost = this.selectTaskPage.isPreRatherThanPost();
 
 		// Load the office task instance
-		this.officeTaskInstance = new OfficeTaskInstance(task, this.section,
-				isPreRatherThanPost);
+		this.officeTaskInstance = new OfficeTaskInstance(taskType, this.sectionType, isPreRatherThanPost);
 
 		// Finished
 		return true;

@@ -17,14 +17,15 @@
  */
 package net.officefloor.eclipse.util;
 
+import org.eclipse.core.resources.IProject;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.eclipse.OfficeFloorPlugin;
@@ -38,8 +39,6 @@ import net.officefloor.model.office.OfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.section.SectionManagedObjectSourceModel;
-
-import org.eclipse.core.resources.IProject;
 
 /**
  * Utility class for working with the {@link Model} instances.
@@ -58,12 +57,10 @@ public class ModelUtil {
 	 *            {@link WorkType}.
 	 * @return {@link WorkType} or <code>null</code> if issue obtaining it.
 	 */
-	public static WorkType<?> getWorkType(WorkModel workModel,
-			AbstractOfficeFloorEditor<?, ?> editor) {
+	public static WorkType<?> getWorkType(WorkModel workModel, AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the office floor compiler
-		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
-				.createCompiler(editor);
+		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault().createCompiler(editor);
 
 		// Obtain the type loader
 		TypeLoader typeLoader = compiler.getTypeLoader();
@@ -71,13 +68,11 @@ public class ModelUtil {
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();
 		for (PropertyModel property : workModel.getProperties()) {
-			properties.addProperty(property.getName()).setValue(
-					property.getValue());
+			properties.addProperty(property.getName()).setValue(property.getValue());
 		}
 
 		// Load and return the work type
-		WorkType<?> workType = typeLoader.loadWorkType(
-				workModel.getWorkSourceClassName(), properties);
+		WorkType<?> workType = typeLoader.loadWorkType(workModel.getWorkSourceClassName(), properties);
 		return workType;
 	}
 
@@ -93,29 +88,23 @@ public class ModelUtil {
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
 	 *         it.
 	 */
-	public static ManagedObjectType<?> getManagedObjectType(
-			OfficeFloorManagedObjectSourceModel managedObjectSource,
+	public static ManagedObjectType<?> getManagedObjectType(OfficeFloorManagedObjectSourceModel managedObjectSource,
 			AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the office floor compiler
-		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
-				.createCompiler(editor);
+		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault().createCompiler(editor);
 
 		// Obtain the managed object source class name
-		String managedObjectSourceClassName = managedObjectSource
-				.getManagedObjectSourceClassName();
+		String managedObjectSourceClassName = managedObjectSource.getManagedObjectSourceClassName();
 
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();
-		for (net.officefloor.model.officefloor.PropertyModel property : managedObjectSource
-				.getProperties()) {
-			properties.addProperty(property.getName()).setValue(
-					property.getValue());
+		for (net.officefloor.model.officefloor.PropertyModel property : managedObjectSource.getProperties()) {
+			properties.addProperty(property.getName()).setValue(property.getValue());
 		}
 
 		// Load and return the managed object type
-		return getManagedObjectType(managedObjectSourceClassName, properties,
-				compiler, editor);
+		return getManagedObjectType(managedObjectSourceClassName, properties, compiler, editor);
 	}
 
 	/**
@@ -130,29 +119,23 @@ public class ModelUtil {
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
 	 *         it.
 	 */
-	public static ManagedObjectType<?> getManagedObjectType(
-			OfficeManagedObjectSourceModel managedObjectSource,
+	public static ManagedObjectType<?> getManagedObjectType(OfficeManagedObjectSourceModel managedObjectSource,
 			AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the office floor compiler
-		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
-				.createCompiler(editor);
+		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault().createCompiler(editor);
 
 		// Obtain the class name
-		String managedObjectSourceClassName = managedObjectSource
-				.getManagedObjectSourceClassName();
+		String managedObjectSourceClassName = managedObjectSource.getManagedObjectSourceClassName();
 
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();
-		for (net.officefloor.model.office.PropertyModel property : managedObjectSource
-				.getProperties()) {
-			properties.addProperty(property.getName()).setValue(
-					property.getValue());
+		for (net.officefloor.model.office.PropertyModel property : managedObjectSource.getProperties()) {
+			properties.addProperty(property.getName()).setValue(property.getValue());
 		}
 
 		// Load and return the managed object type
-		return getManagedObjectType(managedObjectSourceClassName, properties,
-				compiler, editor);
+		return getManagedObjectType(managedObjectSourceClassName, properties, compiler, editor);
 	}
 
 	/**
@@ -167,29 +150,23 @@ public class ModelUtil {
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
 	 *         it.
 	 */
-	public static ManagedObjectType<?> getManagedObjectType(
-			SectionManagedObjectSourceModel managedObjectSource,
+	public static ManagedObjectType<?> getManagedObjectType(SectionManagedObjectSourceModel managedObjectSource,
 			AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the office floor compiler
-		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
-				.createCompiler(editor);
+		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault().createCompiler(editor);
 
 		// Obtain the class name
-		String managedObjectSourceClassName = managedObjectSource
-				.getManagedObjectSourceClassName();
+		String managedObjectSourceClassName = managedObjectSource.getManagedObjectSourceClassName();
 
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();
-		for (net.officefloor.model.section.PropertyModel property : managedObjectSource
-				.getProperties()) {
-			properties.addProperty(property.getName()).setValue(
-					property.getValue());
+		for (net.officefloor.model.section.PropertyModel property : managedObjectSource.getProperties()) {
+			properties.addProperty(property.getName()).setValue(property.getValue());
 		}
 
 		// Load and return the managed object type
-		return getManagedObjectType(managedObjectSourceClassName, properties,
-				compiler, editor);
+		return getManagedObjectType(managedObjectSourceClassName, properties, compiler, editor);
 	}
 
 	/**
@@ -204,29 +181,23 @@ public class ModelUtil {
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
 	 *         it.
 	 */
-	public static ManagedObjectType<?> getManagedObjectType(
-			DeskManagedObjectSourceModel managedObjectSource,
+	public static ManagedObjectType<?> getManagedObjectType(DeskManagedObjectSourceModel managedObjectSource,
 			AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the office floor compiler
-		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
-				.createCompiler(editor);
+		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault().createCompiler(editor);
 
 		// Obtain the class name
-		String managedObjectSourceClassName = managedObjectSource
-				.getManagedObjectSourceClassName();
+		String managedObjectSourceClassName = managedObjectSource.getManagedObjectSourceClassName();
 
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();
-		for (net.officefloor.model.desk.PropertyModel property : managedObjectSource
-				.getProperties()) {
-			properties.addProperty(property.getName()).setValue(
-					property.getValue());
+		for (net.officefloor.model.desk.PropertyModel property : managedObjectSource.getProperties()) {
+			properties.addProperty(property.getName()).setValue(property.getValue());
 		}
 
 		// Load and return the managed object type
-		return getManagedObjectType(managedObjectSourceClassName, properties,
-				compiler, editor);
+		return getManagedObjectType(managedObjectSourceClassName, properties, compiler, editor);
 	}
 
 	/**
@@ -245,21 +216,20 @@ public class ModelUtil {
 	 * @return {@link ManagedObjectType} or <code>null</code> if issue obtaining
 	 *         it.
 	 */
-	public static ManagedObjectType<?> getManagedObjectType(
-			String managedObjectSourceClassName, PropertyList properties,
-			OfficeFloorCompiler compiler, AbstractOfficeFloorEditor<?, ?> editor) {
+	public static ManagedObjectType<?> getManagedObjectType(String managedObjectSourceClassName,
+			PropertyList properties, OfficeFloorCompiler compiler, AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the type loader
 		TypeLoader typeLoader = compiler.getTypeLoader();
 
 		// Load and return the managed object type
-		ManagedObjectType<?> managedObjectType = typeLoader
-				.loadManagedObjectType(managedObjectSourceClassName, properties);
+		ManagedObjectType<?> managedObjectType = typeLoader.loadManagedObjectType(managedObjectSourceClassName,
+				properties);
 		return managedObjectType;
 	}
 
 	/**
-	 * Obtains the {@link OfficeSection} for the {@link OfficeSectionModel}.
+	 * Obtains the {@link OfficeSectionType} for the {@link OfficeSectionModel}.
 	 * 
 	 * @param officeSection
 	 *            {@link OfficeSectionModel}.
@@ -269,42 +239,35 @@ public class ModelUtil {
 	 *            {@link CompilerIssues}.
 	 * @param editor
 	 *            {@link AbstractOfficeFloorEditor}.
-	 * @return {@link OfficeSection} or <code>null</code> if failed to load.
+	 * @return {@link OfficeSectionType} or <code>null</code> if failed to load.
 	 */
-	public static OfficeSection getOfficeSection(
-			OfficeSectionModel officeSection, OfficeFloorCompiler compiler,
+	public static OfficeSectionType getOfficeSectionType(OfficeSectionModel officeSection, OfficeFloorCompiler compiler,
 			CompilerIssues issues, AbstractOfficeFloorEditor<?, ?> editor) {
 		try {
 			// Obtain the class loader
 			ClassLoader classLoader = compiler.getClassLoader();
 
 			// Obtain the section source class
-			Class<? extends SectionSource> sectionSourceClass = obtainClass(
-					officeSection.getSectionSourceClassName(),
+			Class<? extends SectionSource> sectionSourceClass = obtainClass(officeSection.getSectionSourceClassName(),
 					SectionSource.class, classLoader, editor);
 
 			// Create the property list
 			PropertyList propertyList = compiler.createPropertyList();
-			for (net.officefloor.model.office.PropertyModel property : officeSection
-					.getProperties()) {
-				propertyList.addProperty(property.getName()).setValue(
-						property.getValue());
+			for (net.officefloor.model.office.PropertyModel property : officeSection.getProperties()) {
+				propertyList.addProperty(property.getName()).setValue(property.getValue());
 			}
 
 			// Obtain the section loader
 			SectionLoader sectionLoader = compiler.getSectionLoader();
 
-			// Load and return the section
-			return sectionLoader.loadOfficeSection(
-					officeSection.getOfficeSectionName(), sectionSourceClass,
+			// Load and return the section type
+			return sectionLoader.loadOfficeSectionType(officeSection.getOfficeSectionName(), sectionSourceClass,
 					officeSection.getSectionLocation(), propertyList);
 
 		} catch (Throwable ex) {
 			// Report issue in loading section
-			issues.addIssue(LocationType.SECTION,
-					officeSection.getSectionLocation(), null, null,
-					"Failed to load office section: " + ex.getMessage() + " ["
-							+ ex.getClass().getSimpleName() + "]");
+			issues.addIssue(compiler, "Failed to load office section type: " + ex.getMessage() + " ["
+					+ ex.getClass().getSimpleName() + "]");
 			return null;
 		}
 	}
@@ -326,8 +289,7 @@ public class ModelUtil {
 	 * @return {@link Class} or <code>null</code> if could not obtain.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static <S> Class<S> obtainClass(String className,
-			Class<S> superType, ClassLoader classLoader,
+	public static <S> Class<S> obtainClass(String className, Class<S> superType, ClassLoader classLoader,
 			AbstractOfficeFloorEditor<?, ?> editor) {
 		try {
 			// Create the class
@@ -335,8 +297,7 @@ public class ModelUtil {
 
 			// Ensure correct super type
 			if (!(superType.isAssignableFrom(clazz))) {
-				editor.messageError("Class '" + clazz.getName()
-						+ "' must be a sub type of " + superType.getName());
+				editor.messageError("Class '" + clazz.getName() + "' must be a sub type of " + superType.getName());
 			}
 
 			// Return the class

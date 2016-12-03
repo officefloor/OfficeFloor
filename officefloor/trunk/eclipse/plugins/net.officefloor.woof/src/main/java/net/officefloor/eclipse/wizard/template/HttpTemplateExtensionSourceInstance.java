@@ -18,6 +18,7 @@
 package net.officefloor.eclipse.wizard.template;
 
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
@@ -60,16 +61,14 @@ public class HttpTemplateExtensionSourceInstance {
 	 *            Class name of the {@link WoofTemplateExtensionSource}.
 	 * @return Label.
 	 */
-	public static String getLabelFromWoofTemplateExtensionClassName(
-			String woofTemplateExtensionSourceClassName) {
+	public static String getLabelFromWoofTemplateExtensionClassName(String woofTemplateExtensionSourceClassName) {
 		String label = woofTemplateExtensionSourceClassName;
 		int index = label.lastIndexOf('.');
 		if (index > 0) {
 			// Strip off package name
 			label = label.substring(index + ".".length());
 		}
-		label = label.replace(
-				WoofTemplateExtensionSource.class.getSimpleName(), "");
+		label = label.replace(WoofTemplateExtensionSource.class.getSimpleName(), "");
 		return label;
 
 	}
@@ -101,8 +100,7 @@ public class HttpTemplateExtensionSourceInstance {
 	 * @param project
 	 *            {@link IProject}.
 	 */
-	public HttpTemplateExtensionSourceInstance(
-			String woofTemplateExtensionSourceClassName,
+	public HttpTemplateExtensionSourceInstance(String woofTemplateExtensionSourceClassName,
 			WoofTemplateExtensionSourceExtension<?> extension, IProject project) {
 		this.woofTemplateExtensionSourceClassName = woofTemplateExtensionSourceClassName;
 		this.extension = extension;
@@ -152,8 +150,8 @@ public class HttpTemplateExtensionSourceInstance {
 
 		// Load the specification
 		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
-		PropertyList properties = loader.loadSpecification(
-				this.woofTemplateExtensionSourceClassName, classLoader, issues);
+		PropertyList properties = loader.loadSpecification(this.woofTemplateExtensionSourceClassName, classLoader,
+				issues);
 
 		// Return the specification
 		return properties;
@@ -168,8 +166,7 @@ public class HttpTemplateExtensionSourceInstance {
 	 * @param context
 	 *            {@link WoofTemplateExtensionSourceExtensionContext}.
 	 */
-	public void createControl(Composite page,
-			final WoofTemplateExtensionSourceExtensionContext context) {
+	public void createControl(Composite page, final WoofTemplateExtensionSourceExtensionContext context) {
 
 		// Determine if have extension
 		if (this.extension != null) {
@@ -179,8 +176,7 @@ public class HttpTemplateExtensionSourceInstance {
 		} else {
 			// Provide default editing of the extension properties
 			page.setLayout(new GridLayout());
-			PropertyListInput input = new PropertyListInput(
-					context.getPropertyList());
+			PropertyListInput input = new PropertyListInput(context.getPropertyList());
 			new InputHandler<PropertyList>(page, input, new InputAdapter() {
 				@Override
 				public void notifyValueChanged(Object value) {
@@ -206,55 +202,50 @@ public class HttpTemplateExtensionSourceInstance {
 	 *            {@link ResourceSource} instances.
 	 * @param issues
 	 *            {@link CompilerIssues}.
+	 * @param node
+	 *            {@link Node} to report issues against.
 	 */
-	public void validateChange(String oldUri, PropertyList oldProperties,
-			String newUri, PropertyList newProperties,
-			ResourceSource[] resourceSources, final CompilerIssues issues) {
+	public void validateChange(String oldUri, PropertyList oldProperties, String newUri, PropertyList newProperties,
+			ResourceSource[] resourceSources, final CompilerIssues issues, final Node node) {
 
 		// Create the configuration context
-		ConfigurationContext configurationContext = new ProjectConfigurationContext(
-				this.project);
+		ConfigurationContext configurationContext = new ProjectConfigurationContext(this.project);
 
 		// Create the class loader
 		ClassLoader classLoader = ProjectClassLoader.create(this.project,
 				Thread.currentThread().getContextClassLoader());
 
 		// Create the source context
-		SourceContext sourceContext = new SourceContextImpl(true, classLoader,
-				resourceSources);
+		SourceContext sourceContext = new SourceContextImpl(true, classLoader, resourceSources);
 
 		// Create the property lists
 		SourceProperties oldSourceProperties = null;
 		if (oldProperties != null) {
-			oldSourceProperties = new PropertyListSourceProperties(
-					oldProperties);
+			oldSourceProperties = new PropertyListSourceProperties(oldProperties);
 		}
 		SourceProperties newSourceProperties = null;
 		if (newProperties != null) {
-			newSourceProperties = new PropertyListSourceProperties(
-					newProperties);
+			newSourceProperties = new PropertyListSourceProperties(newProperties);
 		}
 
-		// Report issues to compiler
+		// Report issues regarding compilation
 		WoofChangeIssues changeIssues = new WoofChangeIssues() {
 
 			@Override
 			public void addIssue(String message, Throwable cause) {
-				issues.addIssue(null, null, null, null, message, cause);
+				issues.addIssue(node, message, cause);
 			}
 
 			@Override
 			public void addIssue(String message) {
-				issues.addIssue(null, null, null, null, message);
+				issues.addIssue(node, message);
 			}
 		};
 
 		// Load the possible change
 		WoofTemplateExtensionLoader loader = new WoofTemplateExtensionLoaderImpl();
-		Change<?> change = loader.refactorTemplateExtension(
-				this.woofTemplateExtensionSourceClassName, oldUri,
-				oldSourceProperties, newUri, newSourceProperties,
-				configurationContext, sourceContext, changeIssues);
+		Change<?> change = loader.refactorTemplateExtension(this.woofTemplateExtensionSourceClassName, oldUri,
+				oldSourceProperties, newUri, newSourceProperties, configurationContext, sourceContext, changeIssues);
 
 		// Determine if issue
 		if (change != null) {
@@ -263,8 +254,7 @@ public class HttpTemplateExtensionSourceInstance {
 			Conflict[] conflicts = change.getConflicts();
 			if ((conflicts != null) && (conflicts.length > 0)) {
 				// Report the first conflict
-				issues.addIssue(null, null, null, null,
-						conflicts[0].getConflictDescription());
+				issues.addIssue(node, conflicts[0].getConflictDescription());
 			}
 		}
 	}

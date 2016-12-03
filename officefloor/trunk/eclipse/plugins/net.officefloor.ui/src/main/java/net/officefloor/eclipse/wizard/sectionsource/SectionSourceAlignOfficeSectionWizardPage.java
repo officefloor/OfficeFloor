@@ -21,6 +21,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
+import net.officefloor.compile.section.OfficeSectionInputType;
+import net.officefloor.compile.section.OfficeSectionObjectType;
+import net.officefloor.compile.section.OfficeSectionOutputType;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
@@ -36,14 +48,6 @@ import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
-
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link IWizardPage} to align refactoring of {@link OfficeSection}.
@@ -108,8 +112,7 @@ public class SectionSourceAlignOfficeSectionWizardPage extends WizardPage {
 	 * @param isAuotWire
 	 *            <code>true</code> if auto-wire section.
 	 */
-	protected SectionSourceAlignOfficeSectionWizardPage(
-			SectionInstance sectionInstance, boolean isLoadType,
+	protected SectionSourceAlignOfficeSectionWizardPage(SectionInstance sectionInstance, boolean isLoadType,
 			boolean isAuotWire) {
 		super("Refactor Office Section");
 		this.sectionInstance = sectionInstance;
@@ -157,8 +160,7 @@ public class SectionSourceAlignOfficeSectionWizardPage extends WizardPage {
 			for (SectionInputType input : sectionType.getSectionInputTypes()) {
 				inputs.add(input.getSectionInputName());
 			}
-			this.inputConform.setConform(this.sectionInputs,
-					inputs.toArray(new String[0]));
+			this.inputConform.setConform(this.sectionInputs, inputs.toArray(new String[0]));
 
 			// Load the output conforms
 			List<String> outputs = new LinkedList<String>();
@@ -172,54 +174,45 @@ public class SectionSourceAlignOfficeSectionWizardPage extends WizardPage {
 				// Include the output
 				outputs.add(output.getSectionOutputName());
 			}
-			this.outputConform.setConform(this.sectionOutputs,
-					outputs.toArray(new String[0]));
+			this.outputConform.setConform(this.sectionOutputs, outputs.toArray(new String[0]));
 
 			// Only load objects if not auto-wire
 			if (!this.isAuotWire) {
 				// Load the object conforms
 				List<String> objects = new LinkedList<String>();
-				for (SectionObjectType object : sectionType
-						.getSectionObjectTypes()) {
+				for (SectionObjectType object : sectionType.getSectionObjectTypes()) {
 					objects.add(object.getSectionObjectName());
 				}
-				this.objectConform.setConform(this.sectionObjects,
-						objects.toArray(new String[0]));
+				this.objectConform.setConform(this.sectionObjects, objects.toArray(new String[0]));
 			}
 
 		} else {
 			// Ensure obtain office section (may still require properties)
-			OfficeSection officeSection = instance.getOfficeSection();
-			if (officeSection == null) {
+			OfficeSectionType officeSectionType = instance.getOfficeSectionType();
+			if (officeSectionType == null) {
 				return;
 			}
 
 			// Load the input conforms
 			List<String> inputs = new LinkedList<String>();
-			for (OfficeSectionInput input : officeSection
-					.getOfficeSectionInputs()) {
-				inputs.add(input.getOfficeSectionInputName());
+			for (OfficeSectionInputType inputType : officeSectionType.getOfficeSectionInputTypes()) {
+				inputs.add(inputType.getOfficeSectionInputName());
 			}
-			this.inputConform.setConform(this.sectionInputs,
-					inputs.toArray(new String[0]));
+			this.inputConform.setConform(this.sectionInputs, inputs.toArray(new String[0]));
 
 			// Load the output conforms
 			List<String> outputs = new LinkedList<String>();
-			for (OfficeSectionOutput output : officeSection
-					.getOfficeSectionOutputs()) {
-				outputs.add(output.getOfficeSectionOutputName());
+			for (OfficeSectionOutputType outputType : officeSectionType.getOfficeSectionOutputTypes()) {
+				outputs.add(outputType.getOfficeSectionOutputName());
 			}
-			this.outputConform.setConform(this.sectionOutputs,
-					outputs.toArray(new String[0]));
+			this.outputConform.setConform(this.sectionOutputs, outputs.toArray(new String[0]));
 
 			// Load the object conforms
 			List<String> objects = new LinkedList<String>();
-			for (OfficeSectionObject object : officeSection
-					.getOfficeSectionObjects()) {
-				objects.add(object.getOfficeSectionObjectName());
+			for (OfficeSectionObjectType objectType : officeSectionType.getOfficeSectionObjectTypes()) {
+				objects.add(objectType.getOfficeSectionObjectName());
 			}
-			this.objectConform.setConform(this.sectionObjects,
-					objects.toArray(new String[0]));
+			this.objectConform.setConform(this.sectionObjects, objects.toArray(new String[0]));
 		}
 	}
 
@@ -268,25 +261,19 @@ public class SectionSourceAlignOfficeSectionWizardPage extends WizardPage {
 
 		// Create conform for inputs
 		new Label(page, SWT.NONE).setText("Inputs");
-		InputHandler<ConformModel> inputHandler = new InputHandler<ConformModel>(
-				page, this.inputConform);
-		inputHandler.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
+		InputHandler<ConformModel> inputHandler = new InputHandler<ConformModel>(page, this.inputConform);
+		inputHandler.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Create conform for outputs
 		new Label(page, SWT.NONE).setText("Outputs");
-		InputHandler<ConformModel> outputHandler = new InputHandler<ConformModel>(
-				page, this.outputConform);
-		outputHandler.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
+		InputHandler<ConformModel> outputHandler = new InputHandler<ConformModel>(page, this.outputConform);
+		outputHandler.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Create conform for objects (if not auto-wire)
 		if (!this.isAuotWire) {
 			new Label(page, SWT.NONE).setText("Objects");
-			InputHandler<ConformModel> objectHandler = new InputHandler<ConformModel>(
-					page, this.objectConform);
-			objectHandler.getControl().setLayoutData(
-					new GridData(SWT.FILL, SWT.FILL, true, true));
+			InputHandler<ConformModel> objectHandler = new InputHandler<ConformModel>(page, this.objectConform);
+			objectHandler.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		}
 
 		// Specify the control
