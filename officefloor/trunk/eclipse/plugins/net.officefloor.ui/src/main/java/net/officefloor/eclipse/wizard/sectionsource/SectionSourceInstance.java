@@ -17,10 +17,23 @@
  */
 package net.officefloor.eclipse.wizard.sectionsource;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -32,24 +45,14 @@ import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtension;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link SectionSource} instance.
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionSourceInstance implements SectionSourceExtensionContext,
-		CompilerIssues {
+public class SectionSourceInstance extends AbstractCompilerIssues implements SectionSourceExtensionContext {
 
 	/**
 	 * Fully qualified class name of the {@link SectionSource}.
@@ -61,11 +64,6 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 * via extension point.
 	 */
 	private final SectionSourceExtension<?> sectionSourceExtension;
-
-	/**
-	 * {@link SectionLoader}.
-	 */
-	private final SectionLoader sectionLoader;
 
 	/**
 	 * {@link ClassLoader}.
@@ -103,9 +101,9 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	private SectionType sectionType;
 
 	/**
-	 * {@link OfficeSection}.
+	 * {@link OfficeSectionType}.
 	 */
-	private OfficeSection officeSection;
+	private OfficeSectionType officeSectionType;
 
 	/**
 	 * Name of the {@link OfficeSection}.
@@ -131,18 +129,13 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 * @param context
 	 *            {@link SectionSourceInstanceContext}.
 	 */
-	SectionSourceInstance(String sectionSourceClassName,
-			SectionSourceExtension<?> sectionSourceExtension,
-			ClassLoader classLoader, IProject project,
-			SectionSourceInstanceContext context) {
+	SectionSourceInstance(String sectionSourceClassName, SectionSourceExtension<?> sectionSourceExtension,
+			ClassLoader classLoader, IProject project, SectionSourceInstanceContext context) {
 		this.sectionSourceClassName = sectionSourceClassName;
 		this.sectionSourceExtension = sectionSourceExtension;
 		this.classLoader = classLoader;
 		this.project = project;
 		this.context = context;
-
-		// Obtain the section loader
-		this.sectionLoader = this.createSectionLoader(this);
 	}
 
 	/**
@@ -153,8 +146,7 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
 	 */
-	public void setSectionNameAndLocation(String sectionName,
-			String sectionLocation) {
+	public void setSectionNameAndLocation(String sectionName, String sectionLocation) {
 		this.sectionName = sectionName;
 		this.sectionLocation = sectionLocation;
 
@@ -177,7 +169,7 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 * Attempts to load the {@link SectionType}.
 	 */
 	public void loadSectionType() {
-		this.loadSectionType(this.sectionLoader, this);
+		this.loadSectionType(this);
 	}
 
 	/**
@@ -189,45 +181,44 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 * @return <code>true</code> if loaded.
 	 */
 	public boolean loadSectionType(CompilerIssues issues) {
-		// Create SectionLoader to use issues
-		SectionLoader sectionLoader = this.createSectionLoader(issues);
+		// Create OfficeFloor compiler
+		OfficeFloorCompiler compiler = this.createOfficeFloorCompiler(issues);
 
 		// Load the Section Type returning whether successful
-		return this.loadSectionType(sectionLoader, issues);
+		return this.loadSectionType(compiler, issues);
 	}
 
 	/**
 	 * Attempts to load the {@link SectionType}.
 	 * 
-	 * @param loader
-	 *            {@link SectionLoader}.
+	 * @param compiler
+	 *            {@link OfficeFloorCompiler}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 * @return <code>true</code> if loaded.
 	 */
-	private boolean loadSectionType(SectionLoader loader, CompilerIssues issues) {
+	private boolean loadSectionType(OfficeFloorCompiler compiler, CompilerIssues issues) {
 
 		// Ensure have name
 		if (EclipseUtil.isBlank(this.sectionName)) {
 			this.sectionType = null;
-			this.officeSection = null;
-			issues.addIssue(null, null, null, null, "Must specify section name");
+			this.officeSectionType = null;
+			issues.addIssue(compiler, "Must specify section name");
 			return false; // must have name
 		}
 
 		// Ensure have location
 		if (EclipseUtil.isBlank(this.sectionLocation)) {
 			this.sectionType = null;
-			this.officeSection = null;
-			issues.addIssue(null, null, null, null,
-					"Must specify section location");
+			this.officeSectionType = null;
+			issues.addIssue(compiler, "Must specify section location");
 			return false; // must have location
 		}
 
 		// Ensure have section source class
 		if (this.sectionSourceClass == null) {
 			// Attempt to load section source class
-			if (!this.loadSectionSourceClass(null, issues)) {
+			if (!this.loadSectionSourceClass(null, issues, compiler)) {
 				return false; // not able to load section source class
 			}
 		}
@@ -238,21 +229,20 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 		}
 
 		// Load the section type or office section
+		SectionLoader loader = compiler.getSectionLoader();
 		if (this.context.isLoadType()) {
 			// Attempt to load the section type
-			this.sectionType = loader.loadSectionType(this.sectionSourceClass,
-					this.sectionLocation, this.properties);
+			this.sectionType = loader.loadSectionType(this.sectionSourceClass, this.sectionLocation, this.properties);
 
 			// Return indicating if loaded
 			return (this.sectionType != null);
 		} else {
 			// Attempt to load the office section
-			this.officeSection = loader.loadOfficeSection(this.sectionName,
-					this.sectionSourceClass, this.sectionLocation,
-					this.properties);
+			this.officeSectionType = loader.loadOfficeSectionType(this.sectionName, this.sectionSourceClass,
+					this.sectionLocation, this.properties);
 
 			// Return indicating if loaded
-			return (this.officeSection != null);
+			return (this.officeSectionType != null);
 		}
 	}
 
@@ -323,13 +313,13 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	}
 
 	/**
-	 * Obtains the loaded {@link OfficeSection}.
+	 * Obtains the loaded {@link OfficeSectionType}.
 	 * 
-	 * @return Loaded {@link OfficeSection} or <code>null</code> if issue
+	 * @return Loaded {@link OfficeSectionType} or <code>null</code> if issue
 	 *         loading.
 	 */
-	public OfficeSection getOfficeSection() {
-		return this.officeSection;
+	public OfficeSectionType getOfficeSectionType() {
+		return this.officeSectionType;
 	}
 
 	/**
@@ -343,19 +333,19 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 
 		// Obtain the section source class.
 		// (Always attempt to obtain to provide details on page)
-		if (!this.loadSectionSourceClass(page, null)) {
+		if (!this.loadSectionSourceClass(page, null, null)) {
 			return; // did not load SectionSource class
 		}
 
 		// Obtain specification properties for section source
-		this.properties = this.sectionLoader
-				.loadSpecification(this.sectionSourceClass);
+		OfficeFloorCompiler compiler = this.createOfficeFloorCompiler(this);
+		SectionLoader loader = compiler.getSectionLoader();
+		this.properties = loader.loadSpecification(this.sectionSourceClass);
 
 		// Load section instance properties if available
 		if (this.sectionInstance != null) {
 			for (Property property : this.sectionInstance.getPropertylist()) {
-				this.properties.getOrAddProperty(property.getName()).setValue(
-						property.getValue());
+				this.properties.getOrAddProperty(property.getName()).setValue(property.getValue());
 			}
 		}
 
@@ -367,23 +357,19 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 				this.sectionSourceExtension.createControl(page, this);
 			} catch (Throwable ex) {
 				// Failed to load page
-				this.context.setErrorMessage(ex.getMessage() + " ("
-						+ ex.getClass().getSimpleName() + ")");
+				this.context.setErrorMessage(ex.getMessage() + " (" + ex.getClass().getSimpleName() + ")");
 			}
 
 		} else {
 			// No an extension so provide properties table to fill out
 			page.setLayout(new GridLayout());
-			PropertyListInput propertyListInput = new PropertyListInput(
-					this.properties);
-			new InputHandler<PropertyList>(page, propertyListInput,
-					new InputAdapter() {
-						@Override
-						public void notifyValueChanged(Object value) {
-							SectionSourceInstance.this
-									.notifyPropertiesChanged();
-						}
-					});
+			PropertyListInput propertyListInput = new PropertyListInput(this.properties);
+			new InputHandler<PropertyList>(page, propertyListInput, new InputAdapter() {
+				@Override
+				public void notifyValueChanged(Object value) {
+					SectionSourceInstance.this.notifyPropertiesChanged();
+				}
+			});
 		}
 
 		// Notify properties changed to set initial state
@@ -397,29 +383,27 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 *            {@link Composite} to provide error if unable to load.
 	 * @param issues
 	 *            {@link CompilerIssues} to provide error if unable to load.
+	 * @param node
+	 *            {@link Node} to use for reporting the issue.
 	 * @return <code>true</code> if loaded the {@link SectionSource} class.
 	 */
 	@SuppressWarnings("unchecked")
-	private boolean loadSectionSourceClass(Composite page, CompilerIssues issues) {
+	private boolean loadSectionSourceClass(Composite page, CompilerIssues issues, Node node) {
 
 		// Obtain the section source class
 		String errorMessage = null;
 		if (this.sectionSourceExtension != null) {
-			this.sectionSourceClass = this.sectionSourceExtension
-					.getSectionSourceClass();
+			this.sectionSourceClass = this.sectionSourceExtension.getSectionSourceClass();
 			if (this.sectionSourceClass == null) {
-				errorMessage = "Extension did not provide class "
-						+ this.sectionSourceClassName;
+				errorMessage = "Extension did not provide class " + this.sectionSourceClassName;
 			}
 		} else {
 			try {
 				this.sectionSourceClass = (Class<? extends SectionSource>) this.classLoader
 						.loadClass(this.sectionSourceClassName);
 			} catch (Throwable ex) {
-				errorMessage = "Could not find class "
-						+ this.sectionSourceClassName + "\n\n"
-						+ ex.getClass().getSimpleName() + ": "
-						+ ex.getMessage();
+				errorMessage = "Could not find class " + this.sectionSourceClassName + "\n\n"
+						+ ex.getClass().getSimpleName() + ": " + ex.getMessage();
 			}
 		}
 
@@ -433,10 +417,9 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 				label.setText(errorMessage);
 			} else if (issues != null) {
 				// Provide error to issues
-				issues.addIssue(null, null, null, null, errorMessage);
+				issues.addIssue(node, errorMessage);
 			} else {
-				throw new IllegalStateException(
-						"Must provide either Page or CompilerIssues");
+				throw new IllegalStateException("Must provide either Page or CompilerIssues");
 			}
 		}
 
@@ -445,17 +428,16 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	}
 
 	/**
-	 * Creates the {@link SectionLoader}.
+	 * Creates the {@link OfficeFloorCompiler}.
 	 * 
 	 * @param issues
 	 *            {@link CompilerIssues}.
-	 * @return {@link SectionLoader}.
+	 * @return {@link OfficeFloorCompiler}.
 	 */
-	private SectionLoader createSectionLoader(CompilerIssues issues) {
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(this.classLoader);
+	private OfficeFloorCompiler createOfficeFloorCompiler(CompilerIssues issues) {
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(issues);
-		return compiler.getSectionLoader();
+		return compiler;
 	}
 
 	/*
@@ -486,7 +468,7 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 		if (this.context.isLoadType()) {
 			this.context.setSectionLoaded(this.sectionType != null);
 		} else {
-			this.context.setSectionLoaded(this.officeSection != null);
+			this.context.setSectionLoaded(this.officeSectionType != null);
 		}
 	}
 
@@ -500,20 +482,8 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 */
 
 	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription);
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription + " ("
-				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
-				+ ")");
+	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+		this.context.setErrorMessage(CompileException.toIssueString(issue));
 	}
 
 }

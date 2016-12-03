@@ -17,7 +17,19 @@
  */
 package net.officefloor.eclipse.wizard.access;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -27,27 +39,17 @@ import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.extension.access.HttpSecuritySourceExtension;
 import net.officefloor.eclipse.extension.access.HttpSecuritySourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.type.HttpSecuritySourceSpecificationRunnable;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityTypeRunnable;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link HttpSecuritySource} instance.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecuritySourceInstance implements
-		HttpSecuritySourceExtensionContext, CompilerIssues {
+public class HttpSecuritySourceInstance extends AbstractCompilerIssues implements HttpSecuritySourceExtensionContext {
 
 	/**
 	 * Fully qualified class name of the {@link HttpSecuritySource}.
@@ -110,8 +112,7 @@ public class HttpSecuritySourceInstance implements
 	 *            {@link HttpSecuritySourceInstanceContext}.
 	 */
 	HttpSecuritySourceInstance(String httpSecuritySourceClassName,
-			HttpSecuritySourceExtension<?> httpSecuritySourceExtension,
-			ClassLoader classLoader, IProject project,
+			HttpSecuritySourceExtension<?> httpSecuritySourceExtension, ClassLoader classLoader, IProject project,
 			HttpSecuritySourceInstanceContext context) {
 		this.httpSecuritySourceClassName = httpSecuritySourceClassName;
 		this.httpSecuritySourceExtension = httpSecuritySourceExtension;
@@ -157,10 +158,12 @@ public class HttpSecuritySourceInstance implements
 	 */
 	public boolean loadHttpSecurityType(CompilerIssues issues) {
 
+		// Create the compiler
+		OfficeFloorCompiler compiler = this.createOfficeFloorCompiler(issues);
+
 		// Obtain the HTTP Security Source class.
 		// (Always attempt to obtain to provide details on page)
-		Class<?> httpSecuritySourceClass = this.loadHttpSecuritySourceClass(
-				null, issues);
+		Class<?> httpSecuritySourceClass = this.loadHttpSecuritySourceClass(null, issues, compiler);
 		if (httpSecuritySourceClass == null) {
 			return false; // did not load HttpSecuritySource class
 		}
@@ -171,15 +174,12 @@ public class HttpSecuritySourceInstance implements
 		}
 
 		// Attempt to load the HTTP Security type
-		OfficeFloorCompiler compiler = this.createOfficeFloorCompiler(issues);
 		try {
-			this.httpSecurityType = HttpSecurityTypeRunnable
-					.loadHttpSecurityType(httpSecuritySourceClass.getName(),
-							this.properties, compiler);
+			this.httpSecurityType = HttpSecurityTypeRunnable.loadHttpSecurityType(httpSecuritySourceClass.getName(),
+					this.properties, compiler);
 		} catch (Throwable ex) {
 			// Failed to load properties
-			this.context.setErrorMessage(ex.getMessage() + " ("
-					+ ex.getClass().getSimpleName() + ")");
+			this.context.setErrorMessage(ex.getMessage() + " (" + ex.getClass().getSimpleName() + ")");
 			return false; // must load type
 		}
 
@@ -198,8 +198,7 @@ public class HttpSecuritySourceInstance implements
 			return this.httpSecuritySourceClassName;
 		} else {
 			// Attempt to obtain from extension
-			String name = this.httpSecuritySourceExtension
-					.getHttpSecuritySourceLabel();
+			String name = this.httpSecuritySourceExtension.getHttpSecuritySourceLabel();
 			if (EclipseUtil.isBlank(name)) {
 				// No name so use class name
 				name = this.httpSecuritySourceClassName;
@@ -257,8 +256,7 @@ public class HttpSecuritySourceInstance implements
 
 		// Obtain the HTTP Security Source class.
 		// (Always attempt to obtain to provide details on page)
-		Class<?> httpSecuritySourceClass = this.loadHttpSecuritySourceClass(
-				page, null);
+		Class<?> httpSecuritySourceClass = this.loadHttpSecuritySourceClass(page, null, null);
 		if (httpSecuritySourceClass == null) {
 			return; // did not load HttpSecuritySource class
 		}
@@ -267,20 +265,17 @@ public class HttpSecuritySourceInstance implements
 		OfficeFloorCompiler compiler = this.createOfficeFloorCompiler(this);
 		try {
 			this.properties = HttpSecuritySourceSpecificationRunnable
-					.loadSpecification(httpSecuritySourceClass.getName(),
-							compiler);
+					.loadSpecification(httpSecuritySourceClass.getName(), compiler);
 		} catch (Throwable ex) {
 			// Failed to load properties
-			this.context.setErrorMessage(ex.getMessage() + " ("
-					+ ex.getClass().getSimpleName() + ")");
+			this.context.setErrorMessage(ex.getMessage() + " (" + ex.getClass().getSimpleName() + ")");
 			return; // must load properties
 		}
 
 		// Load Access instance properties if available
 		if (this.accessInstance != null) {
 			for (Property property : this.accessInstance.getPropertylist()) {
-				this.properties.getOrAddProperty(property.getName()).setValue(
-						property.getValue());
+				this.properties.getOrAddProperty(property.getName()).setValue(property.getValue());
 			}
 		}
 
@@ -292,23 +287,19 @@ public class HttpSecuritySourceInstance implements
 				this.httpSecuritySourceExtension.createControl(page, this);
 			} catch (Throwable ex) {
 				// Failed to load page
-				this.context.setErrorMessage(ex.getMessage() + " ("
-						+ ex.getClass().getSimpleName() + ")");
+				this.context.setErrorMessage(ex.getMessage() + " (" + ex.getClass().getSimpleName() + ")");
 			}
 
 		} else {
 			// Not an extension so provide properties table to fill out
 			page.setLayout(new GridLayout());
-			PropertyListInput propertyListInput = new PropertyListInput(
-					this.properties);
-			new InputHandler<PropertyList>(page, propertyListInput,
-					new InputAdapter() {
-						@Override
-						public void notifyValueChanged(Object value) {
-							HttpSecuritySourceInstance.this
-									.notifyPropertiesChanged();
-						}
-					});
+			PropertyListInput propertyListInput = new PropertyListInput(this.properties);
+			new InputHandler<PropertyList>(page, propertyListInput, new InputAdapter() {
+				@Override
+				public void notifyValueChanged(Object value) {
+					HttpSecuritySourceInstance.this.notifyPropertiesChanged();
+				}
+			});
 		}
 
 		// Notify properties changed to set initial state
@@ -322,31 +313,27 @@ public class HttpSecuritySourceInstance implements
 	 *            {@link Composite} to provide error if unable to load.
 	 * @param issues
 	 *            {@link CompilerIssues} to provide error if unable to load.
+	 * @param node
+	 *            {@link Node} to report the issues against.
 	 * @return {@link HttpSecuritySource} class or <code>null</code> if not able
 	 *         to load.
 	 */
-	private Class<?> loadHttpSecuritySourceClass(Composite page,
-			CompilerIssues issues) {
+	private Class<?> loadHttpSecuritySourceClass(Composite page, CompilerIssues issues, Node node) {
 
 		// Obtain the HTTP Security source class
 		String errorMessage = null;
 		Class<?> httpSecuritySourceClass = null;
 		if (this.httpSecuritySourceExtension != null) {
-			httpSecuritySourceClass = this.httpSecuritySourceExtension
-					.getHttpSecuritySourceClass();
+			httpSecuritySourceClass = this.httpSecuritySourceExtension.getHttpSecuritySourceClass();
 			if (httpSecuritySourceClass == null) {
-				errorMessage = "Extension did not provide class "
-						+ this.httpSecuritySourceClassName;
+				errorMessage = "Extension did not provide class " + this.httpSecuritySourceClassName;
 			}
 		} else {
 			try {
-				httpSecuritySourceClass = (Class<?>) this.classLoader
-						.loadClass(this.httpSecuritySourceClassName);
+				httpSecuritySourceClass = (Class<?>) this.classLoader.loadClass(this.httpSecuritySourceClassName);
 			} catch (Throwable ex) {
-				errorMessage = "Could not find class "
-						+ this.httpSecuritySourceClassName + "\n\n"
-						+ ex.getClass().getSimpleName() + ": "
-						+ ex.getMessage();
+				errorMessage = "Could not find class " + this.httpSecuritySourceClassName + "\n\n"
+						+ ex.getClass().getSimpleName() + ": " + ex.getMessage();
 			}
 		}
 
@@ -360,10 +347,9 @@ public class HttpSecuritySourceInstance implements
 				label.setText(errorMessage);
 			} else if (issues != null) {
 				// Provide error to issues
-				issues.addIssue(null, null, null, null, errorMessage);
+				issues.addIssue(node, errorMessage);
 			} else {
-				throw new IllegalStateException(
-						"Must provide either Page or CompilerIssues");
+				throw new IllegalStateException("Must provide either Page or CompilerIssues");
 			}
 		}
 
@@ -379,8 +365,7 @@ public class HttpSecuritySourceInstance implements
 	 * @return {@link OfficeFloorCompiler}.
 	 */
 	private OfficeFloorCompiler createOfficeFloorCompiler(CompilerIssues issues) {
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(this.classLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(issues);
 		return compiler;
 	}
@@ -423,20 +408,8 @@ public class HttpSecuritySourceInstance implements
 	 */
 
 	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription);
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription + " ("
-				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
-				+ ")");
+	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+		this.context.setErrorMessage(CompileException.toIssueString(issue));
 	}
 
 }

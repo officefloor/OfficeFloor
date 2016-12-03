@@ -32,8 +32,7 @@ import net.officefloor.model.office.OfficeSectionModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class RefactorOfficeSectionChangeOperation extends
-		AbstractOfficeChangeOperation<OfficeSectionEditPart> {
+public class RefactorOfficeSectionChangeOperation extends AbstractOfficeChangeOperation<OfficeSectionEditPart> {
 
 	/**
 	 * Initiate.
@@ -57,28 +56,21 @@ public class RefactorOfficeSectionChangeOperation extends
 		OfficeSectionModel officeSection = editPart.getCastedModel();
 
 		// Obtain the refactored office section
-		SectionInstance sectionInstance = SectionSourceWizard
-				.loadOfficeSection(editPart,
-						new SectionInstance(officeSection), false);
+		SectionInstance sectionInstance = SectionSourceWizard.loadOfficeSection(editPart,
+				new SectionInstance(officeSection), false);
 		if (sectionInstance == null) {
 			return null; // section not being refactored
 		}
 
 		// Obtain the mappings
-		Map<String, String> inputNameMapping = sectionInstance
-				.getInputNameMapping();
-		Map<String, String> outputNameMapping = sectionInstance
-				.getOutputNameMapping();
-		Map<String, String> objectNameMapping = sectionInstance
-				.getObjectNameMapping();
+		Map<String, String> inputNameMapping = sectionInstance.getInputNameMapping();
+		Map<String, String> outputNameMapping = sectionInstance.getOutputNameMapping();
+		Map<String, String> objectNameMapping = sectionInstance.getObjectNameMapping();
 
 		// Return change to refactor the office section
-		return changes.refactorOfficeSection(officeSection,
-				sectionInstance.getSectionName(),
-				sectionInstance.getSectionSourceClassName(),
-				sectionInstance.getSectionLocation(),
-				sectionInstance.getPropertylist(),
-				sectionInstance.getOfficeSection(), inputNameMapping,
+		return changes.refactorOfficeSection(officeSection, sectionInstance.getSectionName(),
+				sectionInstance.getSectionSourceClassName(), sectionInstance.getSectionLocation(),
+				sectionInstance.getPropertylist(), sectionInstance.getOfficeSectionType(), inputNameMapping,
 				outputNameMapping, objectNameMapping);
 	}
 

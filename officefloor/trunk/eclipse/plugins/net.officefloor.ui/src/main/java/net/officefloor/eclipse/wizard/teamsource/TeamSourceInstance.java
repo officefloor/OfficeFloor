@@ -17,8 +17,18 @@
  */
 package net.officefloor.eclipse.wizard.teamsource;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.team.TeamLoader;
@@ -29,25 +39,15 @@ import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.extension.teamsource.TeamSourceExtension;
 import net.officefloor.eclipse.extension.teamsource.TeamSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceProperty;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link TeamSource} instance.
  * 
  * @author Daniel Sagenschneider
  */
-public class TeamSourceInstance implements TeamSourceExtensionContext,
-		CompilerIssues {
+public class TeamSourceInstance extends AbstractCompilerIssues implements TeamSourceExtensionContext {
 
 	/**
 	 * Fully qualified class name of the {@link TeamSource}.
@@ -114,10 +114,8 @@ public class TeamSourceInstance implements TeamSourceExtensionContext,
 	 * @param context
 	 *            {@link TeamSourceInstanceContext}.
 	 */
-	TeamSourceInstance(String teamSourceClassName,
-			TeamSourceExtension<?> teamSourceExtension,
-			ClassLoader classLoader, IProject project,
-			TeamSourceInstanceContext context) {
+	TeamSourceInstance(String teamSourceClassName, TeamSourceExtension<?> teamSourceExtension, ClassLoader classLoader,
+			IProject project, TeamSourceInstanceContext context) {
 		this.teamSourceClassName = teamSourceClassName;
 		this.teamSourceExtension = teamSourceExtension;
 		this.classLoader = classLoader;
@@ -125,8 +123,7 @@ public class TeamSourceInstance implements TeamSourceExtensionContext,
 		this.context = context;
 
 		// Obtain the team loader
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(this.classLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this);
 		this.teamLoader = compiler.getTeamLoader();
 	}
@@ -162,8 +159,7 @@ public class TeamSourceInstance implements TeamSourceExtensionContext,
 		}
 
 		// Attempt to load the team type
-		this.teamType = this.teamLoader.loadTeamType(this.teamSourceClass,
-				this.properties);
+		this.teamType = this.teamLoader.loadTeamType(this.teamName, this.teamSourceClass, this.properties);
 	}
 
 	/**
@@ -235,14 +231,12 @@ public class TeamSourceInstance implements TeamSourceExtensionContext,
 
 		// Obtain the team source class
 		if (this.teamSourceExtension != null) {
-			this.teamSourceClass = this.teamSourceExtension
-					.getTeamSourceClass();
+			this.teamSourceClass = this.teamSourceExtension.getTeamSourceClass();
 			if (this.teamSourceClass == null) {
 				page.setLayout(new GridLayout());
 				Label label = new Label(page, SWT.NONE);
 				label.setForeground(ColorConstants.red);
-				label.setText("Extension did not provide class "
-						+ this.teamSourceClassName);
+				label.setText("Extension did not provide class " + this.teamSourceClassName);
 				return;
 			}
 		} else {
@@ -253,10 +247,8 @@ public class TeamSourceInstance implements TeamSourceExtensionContext,
 				page.setLayout(new GridLayout());
 				Label label = new Label(page, SWT.NONE);
 				label.setForeground(ColorConstants.red);
-				label.setText("Could not find class "
-						+ this.teamSourceClassName + "\n\n"
-						+ ex.getClass().getSimpleName() + ": "
-						+ ex.getMessage());
+				label.setText("Could not find class " + this.teamSourceClassName + "\n\n"
+						+ ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				return;
 			}
 		}
@@ -272,22 +264,19 @@ public class TeamSourceInstance implements TeamSourceExtensionContext,
 				this.teamSourceExtension.createControl(page, this);
 			} catch (Throwable ex) {
 				// Failed to load page
-				this.context.setErrorMessage(ex.getMessage() + " ("
-						+ ex.getClass().getSimpleName() + ")");
+				this.context.setErrorMessage(ex.getMessage() + " (" + ex.getClass().getSimpleName() + ")");
 			}
 
 		} else {
 			// No an extension so provide properties table to fill out
 			page.setLayout(new GridLayout());
-			PropertyListInput propertyListInput = new PropertyListInput(
-					this.properties);
-			new InputHandler<PropertyList>(page, propertyListInput,
-					new InputAdapter() {
-						@Override
-						public void notifyValueChanged(Object value) {
-							TeamSourceInstance.this.notifyPropertiesChanged();
-						}
-					});
+			PropertyListInput propertyListInput = new PropertyListInput(this.properties);
+			new InputHandler<PropertyList>(page, propertyListInput, new InputAdapter() {
+				@Override
+				public void notifyValueChanged(Object value) {
+					TeamSourceInstance.this.notifyPropertiesChanged();
+				}
+			});
 		}
 
 		// Notify properties changed to set initial state
@@ -332,20 +321,8 @@ public class TeamSourceInstance implements TeamSourceExtensionContext,
 	 */
 
 	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription);
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription + " ("
-				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
-				+ ")");
+	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+		this.context.setErrorMessage(CompileException.toIssueString(issue));
 	}
 
 }

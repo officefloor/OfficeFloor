@@ -17,75 +17,75 @@
  */
 package net.officefloor.eclipse.wizard.officetask;
 
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
- * Instance of an {@link OfficeTask}.
+ * Instance of an {@link OfficeTaskType}.
  * 
  * @author Daniel Sagenschneider
  */
 public class OfficeTaskInstance {
 
 	/**
-	 * {@link OfficeTask} selected.
+	 * {@link OfficeTaskType} selected.
 	 */
-	private final OfficeTask officeTask;
+	private final OfficeTaskType officeTaskType;
 
 	/**
-	 * {@link OfficeSection} from which the {@link OfficeTask} was selected.
+	 * {@link OfficeSectionType} from which the {@link OfficeTaskType} was selected.
 	 */
-	private final OfficeSection officeSection;
+	private final OfficeSectionType officeSectionType;
 
 	/**
 	 * Flag indicating if pre rather than post {@link Duty} being linked to
-	 * {@link OfficeTask}.
+	 * {@link OfficeTaskType}.
 	 */
 	private final boolean isPreRatherThanPostDuty;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeTask
-	 *            {@link OfficeTask} selected.
-	 * @param officeSection
-	 *            {@link OfficeSection} from which the {@link OfficeTask} was
+	 * @param officeTaskType
+	 *            {@link OfficeTaskType} selected.
+	 * @param officeSectionType
+	 *            {@link OfficeSectionType} from which the {@link OfficeTaskType} was
 	 *            selected.
 	 * @param isPreRatherThanPostDuty
 	 *            Flag indicating if pre rather than post {@link Duty} being
-	 *            linked to {@link OfficeTask}.
+	 *            linked to {@link OfficeTaskType}.
 	 */
-	OfficeTaskInstance(OfficeTask officeTask, OfficeSection officeSection,
+	OfficeTaskInstance(OfficeTaskType officeTaskType, OfficeSectionType officeSectionType,
 			boolean isPreRatherThanPostDuty) {
-		this.officeTask = officeTask;
-		this.officeSection = officeSection;
+		this.officeTaskType = officeTaskType;
+		this.officeSectionType = officeSectionType;
 		this.isPreRatherThanPostDuty = isPreRatherThanPostDuty;
 	}
 
 	/**
-	 * Obtains the selected {@link OfficeTask}.
+	 * Obtains the selected {@link OfficeTaskType}.
 	 * 
-	 * @return Selected {@link OfficeTask}.
+	 * @return Selected {@link OfficeTaskType}.
 	 */
-	public OfficeTask getOfficeTask() {
-		return this.officeTask;
+	public OfficeTaskType getOfficeTaskType() {
+		return this.officeTaskType;
 	}
 
 	/**
-	 * Obtains the {@link OfficeSection} from which the {@link OfficeTask} was
+	 * Obtains the {@link OfficeSectionType} from which the {@link OfficeTaskType} was
 	 * selected.
 	 * 
-	 * @return {@link OfficeSection} from which the {@link OfficeTask} was
+	 * @return {@link OfficeSectionType} from which the {@link OfficeTaskType} was
 	 *         selected.
 	 */
-	public OfficeSection getOfficeSection() {
-		return this.officeSection;
+	public OfficeSectionType getOfficeSectionType() {
+		return this.officeSectionType;
 	}
 
 	/**
 	 * Indicates if pre rather than post {@link Duty} being linked to
-	 * {@link OfficeTask}.
+	 * {@link OfficeTaskType}.
 	 * 
 	 * @return <code>true</code> if pre {@link Duty}, otherwise
 	 *         <code>false</code> if post {@link Duty}.

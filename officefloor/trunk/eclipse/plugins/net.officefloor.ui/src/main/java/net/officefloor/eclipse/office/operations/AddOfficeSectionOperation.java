@@ -30,8 +30,7 @@ import net.officefloor.model.office.OfficeSectionModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class AddOfficeSectionOperation extends
-		AbstractOfficeChangeOperation<OfficeEditPart> {
+public class AddOfficeSectionOperation extends AbstractOfficeChangeOperation<OfficeEditPart> {
 
 	/**
 	 * Initiate.
@@ -50,17 +49,14 @@ public class AddOfficeSectionOperation extends
 	protected Change<?> getChange(OfficeChanges changes, Context context) {
 
 		// Obtain the section instance with the office section
-		SectionInstance section = SectionSourceWizard.loadOfficeSection(
-				context.getEditPart(), null, false);
+		SectionInstance section = SectionSourceWizard.loadOfficeSection(context.getEditPart(), null, false);
 		if (section == null) {
 			return null; // must have section
 		}
 
 		// Obtain the add office section change
-		Change<OfficeSectionModel> change = changes.addOfficeSection(
-				section.getSectionSourceClassName(),
-				section.getSectionLocation(), section.getPropertylist(),
-				section.getOfficeSection());
+		Change<OfficeSectionModel> change = changes.addOfficeSection(section.getSectionSourceClassName(),
+				section.getSectionLocation(), section.getPropertylist(), section.getOfficeSectionType());
 
 		// Position the office section
 		context.positionModel(change.getTarget());

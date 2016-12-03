@@ -17,18 +17,22 @@
  */
 package net.officefloor.eclipse;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
+
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorSkin;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorSkin;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.BundleContext;
 
 /**
  * The plug-in class.
@@ -117,33 +121,22 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	 *            {@link AbstractOfficeFloorEditor}.
 	 * @return {@link OfficeFloorCompiler}.
 	 */
-	public OfficeFloorCompiler createCompiler(
-			final AbstractOfficeFloorEditor<?, ?> editor) {
+	public OfficeFloorCompiler createCompiler(final AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the class loader for the project
 		ClassLoader classLoader = ProjectClassLoader.create(editor);
 
 		// Create the compiler
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(classLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
 
 		// Provide error reporting
-		compiler.setCompilerIssues(new CompilerIssues() {
-
+		compiler.setCompilerIssues(new AbstractCompilerIssues() {
 			@Override
-			public void addIssue(LocationType locationType, String location,
-					AssetType assetType, String assetName,
-					String issueDescription) {
-				editor.messageError(issueDescription);
-			}
+			protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+				StringWriter message = new StringWriter();
+				CompileException.printIssue(issue, new PrintWriter(message));
+				editor.messageError(message.toString());
 
-			@Override
-			public void addIssue(LocationType locationType, String location,
-					AssetType assetType, String assetName,
-					String issueDescription, Throwable cause) {
-				editor.messageError(issueDescription + "\n\n"
-						+ cause.getClass().getSimpleName() + ": "
-						+ cause.getMessage());
 			}
 		});
 

@@ -21,6 +21,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
+import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
@@ -33,14 +42,6 @@ import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
-
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link IWizardPage} to provide refactoring of {@link DeployedOfficeModel}.
@@ -90,25 +91,21 @@ public class OfficeSourceAlignDeployedOfficeWizardPage extends WizardPage {
 	 * @param officeInstance
 	 *            {@link OfficeInstance}.
 	 */
-	protected OfficeSourceAlignDeployedOfficeWizardPage(
-			OfficeInstance officeInstance) {
+	protected OfficeSourceAlignDeployedOfficeWizardPage(OfficeInstance officeInstance) {
 		super("Refactor Office");
 		this.officeInstance = officeInstance;
 		this.setTitle("Refactor Office");
 
 		// Create the objects/inputs/teams from office
-		DeployedOfficeModel office = this.officeInstance
-				.getDeployedOfficeModel();
+		DeployedOfficeModel office = this.officeInstance.getDeployedOfficeModel();
 		List<String> objects = new LinkedList<String>();
-		for (DeployedOfficeObjectModel object : office
-				.getDeployedOfficeObjects()) {
+		for (DeployedOfficeObjectModel object : office.getDeployedOfficeObjects()) {
 			objects.add(object.getDeployedOfficeObjectName());
 		}
 		this.officeObjects = objects.toArray(new String[0]);
 		List<String> inputs = new LinkedList<String>();
 		for (DeployedOfficeInputModel input : office.getDeployedOfficeInputs()) {
-			String name = input.getSectionName()
-					+ OfficeFloorChanges.SECTION_INPUT_SEPARATOR
+			String name = input.getSectionName() + OfficeFloorChanges.SECTION_INPUT_SEPARATOR
 					+ input.getSectionInputName();
 			inputs.add(name);
 		}
@@ -136,31 +133,26 @@ public class OfficeSourceAlignDeployedOfficeWizardPage extends WizardPage {
 
 		// Load the object conforms
 		List<String> objects = new LinkedList<String>();
-		for (OfficeManagedObjectType object : officeType
-				.getOfficeManagedObjectTypes()) {
+		for (OfficeManagedObjectType object : officeType.getOfficeManagedObjectTypes()) {
 			objects.add(object.getOfficeManagedObjectName());
 		}
-		this.objectConform.setConform(this.officeObjects,
-				objects.toArray(new String[0]));
+		this.objectConform.setConform(this.officeObjects, objects.toArray(new String[0]));
 
 		// Load the input conforms
 		List<String> inputs = new LinkedList<String>();
-		for (OfficeInputType input : officeType.getOfficeInputTypes()) {
-			String name = input.getOfficeSectionName()
-					+ OfficeFloorChanges.SECTION_INPUT_SEPARATOR
-					+ input.getOfficeSectionInputName();
+		for (OfficeAvailableSectionInputType inputType : officeType.getOfficeSectionInputTypes()) {
+			String name = inputType.getOfficeSectionName() + OfficeFloorChanges.SECTION_INPUT_SEPARATOR
+					+ inputType.getOfficeSectionInputName();
 			inputs.add(name);
 		}
-		this.inputConform.setConform(this.officeInputs,
-				inputs.toArray(new String[0]));
+		this.inputConform.setConform(this.officeInputs, inputs.toArray(new String[0]));
 
 		// Load the team conforms
 		List<String> teams = new LinkedList<String>();
 		for (OfficeTeamType team : officeType.getOfficeTeamTypes()) {
 			teams.add(team.getOfficeTeamName());
 		}
-		this.teamConform.setConform(this.officeTeams,
-				teams.toArray(new String[0]));
+		this.teamConform.setConform(this.officeTeams, teams.toArray(new String[0]));
 	}
 
 	/**
@@ -208,24 +200,18 @@ public class OfficeSourceAlignDeployedOfficeWizardPage extends WizardPage {
 
 		// Create conform for objects
 		new Label(page, SWT.NONE).setText("Objects");
-		InputHandler<ConformModel> objectHandler = new InputHandler<ConformModel>(
-				page, this.objectConform);
-		objectHandler.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
+		InputHandler<ConformModel> objectHandler = new InputHandler<ConformModel>(page, this.objectConform);
+		objectHandler.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Create conform for inputs
 		new Label(page, SWT.NONE).setText("Inputs");
-		InputHandler<ConformModel> inputHandler = new InputHandler<ConformModel>(
-				page, this.inputConform);
-		inputHandler.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
+		InputHandler<ConformModel> inputHandler = new InputHandler<ConformModel>(page, this.inputConform);
+		inputHandler.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Create conform for teams
 		new Label(page, SWT.NONE).setText("Teams");
-		InputHandler<ConformModel> teamHandler = new InputHandler<ConformModel>(
-				page, this.teamConform);
-		teamHandler.getControl().setLayoutData(
-				new GridData(SWT.FILL, SWT.FILL, true, true));
+		InputHandler<ConformModel> teamHandler = new InputHandler<ConformModel>(page, this.teamConform);
+		teamHandler.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// Specify the control
 		this.setControl(page);

@@ -17,10 +17,20 @@
  */
 package net.officefloor.eclipse.wizard.governancesource;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
@@ -30,24 +40,14 @@ import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtension;
 import net.officefloor.eclipse.extension.governancesource.GovernanceSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.governance.Governance;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link GovernanceSource} instance.
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceSourceInstance implements
-		GovernanceSourceExtensionContext, CompilerIssues {
+public class GovernanceSourceInstance extends AbstractCompilerIssues implements GovernanceSourceExtensionContext {
 
 	/**
 	 * Fully qualified class name of the {@link GovernanceSource}.
@@ -120,8 +120,7 @@ public class GovernanceSourceInstance implements
 	 *            {@link GovernanceSourceInstanceContext}.
 	 */
 	GovernanceSourceInstance(String governanceSourceClassName,
-			GovernanceSourceExtension<?, ?, ?> governanceSourceExtension,
-			ClassLoader classLoader, IProject project,
+			GovernanceSourceExtension<?, ?, ?> governanceSourceExtension, ClassLoader classLoader, IProject project,
 			GovernanceSourceInstanceContext context) {
 		this.governanceSourceClassName = governanceSourceClassName;
 		this.governanceSourceExtension = governanceSourceExtension;
@@ -130,8 +129,7 @@ public class GovernanceSourceInstance implements
 		this.context = context;
 
 		// Obtain the governance loader
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(this.classLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this);
 		this.governanceLoader = compiler.getGovernanceLoader();
 	}
@@ -178,8 +176,7 @@ public class GovernanceSourceInstance implements
 		}
 
 		// Attempt to load the governance type
-		this.governanceType = this.governanceLoader.loadGovernanceType(
-				this.governanceSourceClass, this.properties);
+		this.governanceType = this.governanceLoader.loadGovernanceType(this.governanceSourceClass, this.properties);
 	}
 
 	/**
@@ -193,8 +190,7 @@ public class GovernanceSourceInstance implements
 			return this.governanceSourceClassName;
 		} else {
 			// Attempt to obtain from extension
-			String name = this.governanceSourceExtension
-					.getGovernanceSourceLabel();
+			String name = this.governanceSourceExtension.getGovernanceSourceLabel();
 			if (EclipseUtil.isBlank(name)) {
 				// No name so use class name
 				name = this.governanceSourceClassName;
@@ -259,8 +255,7 @@ public class GovernanceSourceInstance implements
 				page.setLayout(new GridLayout());
 				Label label = new Label(page, SWT.NONE);
 				label.setForeground(ColorConstants.red);
-				label.setText("Extension did not provide class "
-						+ this.governanceSourceClassName);
+				label.setText("Extension did not provide class " + this.governanceSourceClassName);
 				return;
 			}
 		} else {
@@ -271,23 +266,19 @@ public class GovernanceSourceInstance implements
 				page.setLayout(new GridLayout());
 				Label label = new Label(page, SWT.NONE);
 				label.setForeground(ColorConstants.red);
-				label.setText("Could not find class "
-						+ this.governanceSourceClassName + "\n\n"
-						+ ex.getClass().getSimpleName() + ": "
-						+ ex.getMessage());
+				label.setText("Could not find class " + this.governanceSourceClassName + "\n\n"
+						+ ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				return;
 			}
 		}
 
 		// Obtain specification properties for governance source
-		this.properties = this.governanceLoader
-				.loadSpecification(this.governanceSourceClass);
+		this.properties = this.governanceLoader.loadSpecification(this.governanceSourceClass);
 
 		// Load governance instance properties if available
 		if (this.governanceInstance != null) {
 			for (Property property : this.governanceInstance.getPropertyList()) {
-				this.properties.getOrAddProperty(property.getName()).setValue(
-						property.getValue());
+				this.properties.getOrAddProperty(property.getName()).setValue(property.getValue());
 			}
 		}
 
@@ -299,23 +290,19 @@ public class GovernanceSourceInstance implements
 				this.governanceSourceExtension.createControl(page, this);
 			} catch (Throwable ex) {
 				// Failed to load page
-				this.context.setErrorMessage(ex.getMessage() + " ("
-						+ ex.getClass().getSimpleName() + ")");
+				this.context.setErrorMessage(ex.getMessage() + " (" + ex.getClass().getSimpleName() + ")");
 			}
 
 		} else {
 			// No an extension so provide properties table to fill out
 			page.setLayout(new GridLayout());
-			PropertyListInput propertyListInput = new PropertyListInput(
-					this.properties);
-			new InputHandler<PropertyList>(page, propertyListInput,
-					new InputAdapter() {
-						@Override
-						public void notifyValueChanged(Object value) {
-							GovernanceSourceInstance.this
-									.notifyPropertiesChanged();
-						}
-					});
+			PropertyListInput propertyListInput = new PropertyListInput(this.properties);
+			new InputHandler<PropertyList>(page, propertyListInput, new InputAdapter() {
+				@Override
+				public void notifyValueChanged(Object value) {
+					GovernanceSourceInstance.this.notifyPropertiesChanged();
+				}
+			});
 		}
 
 		// Notify properties changed to set initial state
@@ -360,20 +347,8 @@ public class GovernanceSourceInstance implements
 	 */
 
 	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription);
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription + " ("
-				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
-				+ ")");
+	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+		this.context.setErrorMessage(CompileException.toIssueString(issue));
 	}
 
 }

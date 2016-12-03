@@ -21,12 +21,17 @@ import java.util.Map;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionObjectModel;
+import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.PropertyModel;
 
 /**
@@ -67,9 +72,9 @@ public class SectionInstance {
 	private final SectionType sectionType;
 
 	/**
-	 * {@link OfficeSection}.
+	 * {@link OfficeSectionType}.
 	 */
-	private final OfficeSection officeSection;
+	private final OfficeSectionType officeSectionType;
 
 	/**
 	 * Mapping of {@link OfficeSectionInput} name to
@@ -99,15 +104,14 @@ public class SectionInstance {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
 	 */
-	public SectionInstance(String sectionName, String sectionSourceClassName,
-			String sectionLocation) {
+	public SectionInstance(String sectionName, String sectionSourceClassName, String sectionLocation) {
 		this.sectionName = sectionName;
 		this.sectionSourceClassName = sectionSourceClassName;
 		this.sectionLocation = sectionLocation;
 		this.propertyList = OfficeFloorCompiler.newPropertyList();
 		this.officeSectionModel = null;
 		this.sectionType = null;
-		this.officeSection = null;
+		this.officeSectionType = null;
 		this.inputNameMapping = null;
 		this.outputNameMapping = null;
 		this.objectNameMapping = null;
@@ -125,7 +129,7 @@ public class SectionInstance {
 		this.sectionLocation = model.getSectionLocation();
 		this.officeSectionModel = model;
 		this.sectionType = null;
-		this.officeSection = null;
+		this.officeSectionType = null;
 		this.inputNameMapping = null;
 		this.outputNameMapping = null;
 		this.objectNameMapping = null;
@@ -133,8 +137,7 @@ public class SectionInstance {
 		// Load the properties
 		this.propertyList = OfficeFloorCompiler.newPropertyList();
 		for (PropertyModel property : model.getProperties()) {
-			this.propertyList.addProperty(property.getName()).setValue(
-					property.getValue());
+			this.propertyList.addProperty(property.getName()).setValue(property.getValue());
 		}
 	}
 
@@ -151,8 +154,8 @@ public class SectionInstance {
 	 *            {@link PropertyList}.
 	 * @param sectionType
 	 *            {@link SectionType}.
-	 * @param officeSection
-	 *            {@link OfficeSection}.
+	 * @param officeSectionType
+	 *            {@link OfficeSectionType}.
 	 * @param inputNameMapping
 	 *            Mapping of {@link OfficeSectionInput} name to
 	 *            {@link OfficeSectionInputModel} name.
@@ -163,11 +166,9 @@ public class SectionInstance {
 	 *            Mapping of {@link OfficeSectionObject} name to
 	 *            {@link OfficeSectionObjectModel} name.
 	 */
-	SectionInstance(String sectionName, String sectionSourceClassName,
-			String sectionLocation, PropertyList propertyList,
-			SectionType sectionType, OfficeSection officeSection,
-			Map<String, String> inputNameMapping,
-			Map<String, String> outputNameMapping,
+	SectionInstance(String sectionName, String sectionSourceClassName, String sectionLocation,
+			PropertyList propertyList, SectionType sectionType, OfficeSectionType officeSectionType,
+			Map<String, String> inputNameMapping, Map<String, String> outputNameMapping,
 			Map<String, String> objectNameMapping) {
 		this.sectionName = sectionName;
 		this.sectionSourceClassName = sectionSourceClassName;
@@ -175,7 +176,7 @@ public class SectionInstance {
 		this.propertyList = propertyList;
 		this.officeSectionModel = null;
 		this.sectionType = sectionType;
-		this.officeSection = officeSection;
+		this.officeSectionType = officeSectionType;
 		this.inputNameMapping = inputNameMapping;
 		this.outputNameMapping = outputNameMapping;
 		this.objectNameMapping = objectNameMapping;
@@ -250,8 +251,8 @@ public class SectionInstance {
 	 *         <li>loading {@link SectionType}</li>
 	 *         </ol>
 	 */
-	public OfficeSection getOfficeSection() {
-		return this.officeSection;
+	public OfficeSectionType getOfficeSectionType() {
+		return this.officeSectionType;
 	}
 
 	/**

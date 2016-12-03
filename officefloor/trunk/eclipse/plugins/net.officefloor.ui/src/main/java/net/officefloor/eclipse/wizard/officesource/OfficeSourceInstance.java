@@ -17,8 +17,18 @@
  */
 package net.officefloor.eclipse.wizard.officesource;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.impl.issues.AbstractCompilerIssues;
+import net.officefloor.compile.impl.issues.CompileException;
+import net.officefloor.compile.impl.issues.DefaultCompilerIssue;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
@@ -30,24 +40,14 @@ import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
 import net.officefloor.eclipse.extension.officesource.OfficeSourceExtension;
 import net.officefloor.eclipse.extension.officesource.OfficeSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link OfficeSource} instance.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeSourceInstance implements OfficeSourceExtensionContext,
-		CompilerIssues {
+public class OfficeSourceInstance extends AbstractCompilerIssues implements OfficeSourceExtensionContext {
 
 	/**
 	 * Fully qualified class name of the {@link OfficeSource}.
@@ -119,10 +119,8 @@ public class OfficeSourceInstance implements OfficeSourceExtensionContext,
 	 * @param context
 	 *            {@link OfficeSourceInstanceContext}.
 	 */
-	OfficeSourceInstance(String officeSourceClassName,
-			OfficeSourceExtension<?> officeSourceExtension,
-			ClassLoader classLoader, IProject project,
-			OfficeSourceInstanceContext context) {
+	OfficeSourceInstance(String officeSourceClassName, OfficeSourceExtension<?> officeSourceExtension,
+			ClassLoader classLoader, IProject project, OfficeSourceInstanceContext context) {
 		this.officeSourceClassName = officeSourceClassName;
 		this.officeSourceExtension = officeSourceExtension;
 		this.classLoader = classLoader;
@@ -130,8 +128,7 @@ public class OfficeSourceInstance implements OfficeSourceExtensionContext,
 		this.context = context;
 
 		// Obtain the office loader
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(this.classLoader);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 		compiler.setCompilerIssues(this);
 		this.officeLoader = compiler.getOfficeLoader();
 	}
@@ -144,8 +141,7 @@ public class OfficeSourceInstance implements OfficeSourceExtensionContext,
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
 	 */
-	public void setOfficeNameAndLocation(String officeName,
-			String officeLocation) {
+	public void setOfficeNameAndLocation(String officeName, String officeLocation) {
 		this.officeName = officeName;
 		this.officeLocation = officeLocation;
 
@@ -178,8 +174,8 @@ public class OfficeSourceInstance implements OfficeSourceExtensionContext,
 		}
 
 		// Attempt to load the office type
-		this.officeType = this.officeLoader.loadOfficeType(
-				this.officeSourceClass, this.officeLocation, this.properties);
+		this.officeType = this.officeLoader.loadOfficeType(this.officeSourceClass, this.officeLocation,
+				this.properties);
 	}
 
 	/**
@@ -260,14 +256,12 @@ public class OfficeSourceInstance implements OfficeSourceExtensionContext,
 
 		// Obtain the office source class
 		if (this.officeSourceExtension != null) {
-			this.officeSourceClass = this.officeSourceExtension
-					.getOfficeSourceClass();
+			this.officeSourceClass = this.officeSourceExtension.getOfficeSourceClass();
 			if (this.officeSourceClass == null) {
 				page.setLayout(new GridLayout());
 				Label label = new Label(page, SWT.NONE);
 				label.setForeground(ColorConstants.red);
-				label.setText("Extension did not provide class "
-						+ this.officeSourceClassName);
+				label.setText("Extension did not provide class " + this.officeSourceClassName);
 				return;
 			}
 		} else {
@@ -278,17 +272,14 @@ public class OfficeSourceInstance implements OfficeSourceExtensionContext,
 				page.setLayout(new GridLayout());
 				Label label = new Label(page, SWT.NONE);
 				label.setForeground(ColorConstants.red);
-				label.setText("Could not find class "
-						+ this.officeSourceClassName + "\n\n"
-						+ ex.getClass().getSimpleName() + ": "
-						+ ex.getMessage());
+				label.setText("Could not find class " + this.officeSourceClassName + "\n\n"
+						+ ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				return;
 			}
 		}
 
 		// Obtain specification properties for office source
-		this.properties = this.officeLoader
-				.loadSpecification(officeSourceClass);
+		this.properties = this.officeLoader.loadSpecification(officeSourceClass);
 
 		// Determine if have extension
 		if (this.officeSourceExtension != null) {
@@ -298,22 +289,19 @@ public class OfficeSourceInstance implements OfficeSourceExtensionContext,
 				this.officeSourceExtension.createControl(page, this);
 			} catch (Throwable ex) {
 				// Failed to load page
-				this.context.setErrorMessage(ex.getMessage() + " ("
-						+ ex.getClass().getSimpleName() + ")");
+				this.context.setErrorMessage(ex.getMessage() + " (" + ex.getClass().getSimpleName() + ")");
 			}
 
 		} else {
 			// No an extension so provide properties table to fill out
 			page.setLayout(new GridLayout());
-			PropertyListInput propertyListInput = new PropertyListInput(
-					this.properties);
-			new InputHandler<PropertyList>(page, propertyListInput,
-					new InputAdapter() {
-						@Override
-						public void notifyValueChanged(Object value) {
-							OfficeSourceInstance.this.notifyPropertiesChanged();
-						}
-					});
+			PropertyListInput propertyListInput = new PropertyListInput(this.properties);
+			new InputHandler<PropertyList>(page, propertyListInput, new InputAdapter() {
+				@Override
+				public void notifyValueChanged(Object value) {
+					OfficeSourceInstance.this.notifyPropertiesChanged();
+				}
+			});
 		}
 
 		// Notify properties changed to set initial state
@@ -358,20 +346,8 @@ public class OfficeSourceInstance implements OfficeSourceExtensionContext,
 	 */
 
 	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription);
-	}
-
-	@Override
-	public void addIssue(LocationType locationType, String location,
-			AssetType assetType, String assetName, String issueDescription,
-			Throwable cause) {
-		// Provide as error message
-		this.context.setErrorMessage(issueDescription + " ("
-				+ cause.getClass().getSimpleName() + ": " + cause.getMessage()
-				+ ")");
+	protected void handleDefaultIssue(DefaultCompilerIssue issue) {
+		this.context.setErrorMessage(CompileException.toIssueString(issue));
 	}
 
 }
