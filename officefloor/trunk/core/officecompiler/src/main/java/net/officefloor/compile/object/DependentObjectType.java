@@ -36,7 +36,7 @@ public interface DependentObjectType {
 	/**
 	 * <p>
 	 * Obtains the {@link TypeQualification} instances for this
-	 * {@link DependentObject}.
+	 * {@link DependentObjectType}.
 	 * <p>
 	 * Should no {@link TypeQualification} instances be manually assigned, the
 	 * {@link TypeQualification} should be derived from the object type (i.e.

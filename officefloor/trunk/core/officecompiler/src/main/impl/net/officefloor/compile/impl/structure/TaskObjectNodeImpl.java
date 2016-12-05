@@ -78,11 +78,11 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	 * @param objectName
 	 *            Name of this {@link TaskObject}.
 	 * @param taskNode
-	 *            {@link TaskNode} containing this {@link TaskObjectNode}. F * @param
-	 *            context {@link NodeContext}.
+	 *            {@link TaskNode} containing this {@link TaskObjectNode}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
-	public TaskObjectNodeImpl(String objectName, TaskNode taskNode,
-			NodeContext context) {
+	public TaskObjectNodeImpl(String objectName, TaskNode taskNode, NodeContext context) {
 		this.objectName = objectName;
 		this.taskNode = taskNode;
 		this.context = context;
@@ -119,8 +119,7 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -153,10 +152,8 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 			}
 		}
 		if (object == null) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					TaskObjectNode.TYPE + " does not have object "
-							+ this.objectName);
+			this.context.getCompilerIssues().addIssue(this,
+					TaskObjectNode.TYPE + " does not have object " + this.objectName);
 			return null;
 		}
 
@@ -169,24 +166,22 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 		if (!this.isParameter) {
 
 			// Not parameter, so must obtain dependent object
-			DependentObjectNode dependentObjectNode = LinkUtil
-					.retrieveFurtherestTarget(this, DependentObjectNode.class,
-							this.context.getCompilerIssues());
+			DependentObjectNode dependentObjectNode = LinkUtil.retrieveFurtherestTarget(this, DependentObjectNode.class,
+					this.context.getCompilerIssues());
 			if (dependentObjectNode == null) {
 				return null;
 			}
 
 			// Obtain the dependent object type
-			dependentObjectType = dependentObjectNode
-					.loadDependentObjectType(typeContext);
+			dependentObjectType = dependentObjectNode.loadDependentObjectType(typeContext);
 			if (dependentObjectType == null) {
 				return null;
 			}
 		}
 
 		// Create and return the type
-		return new ObjectDependencyTypeImpl(this.objectName, dependencyType,
-				typeQualifier, this.isParameter, dependentObjectType);
+		return new ObjectDependencyTypeImpl(this.objectName, dependencyType, typeQualifier, this.isParameter,
+				dependentObjectType);
 	}
 
 	/*
@@ -214,8 +209,7 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-		return LinkUtil.linkObjectNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkObjectNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedObjectNode = link);
 	}
 

@@ -35,6 +35,8 @@ public class NodeUtil {
 	/**
 	 * Obtains the particular {@link Node}.
 	 * 
+	 * @param <N>
+	 *            {@link Node} type.
 	 * @param nodeName
 	 *            Name of the {@link Node}.
 	 * @param nodes
@@ -43,8 +45,7 @@ public class NodeUtil {
 	 *            {@link Supplier} to create the {@link Node}.
 	 * @return {@link Node} for the name.
 	 */
-	public static <N extends Node> N getNode(String nodeName,
-			Map<String, N> nodes, Supplier<N> create) {
+	public static <N extends Node> N getNode(String nodeName, Map<String, N> nodes, Supplier<N> create) {
 		N node = nodes.get(nodeName);
 		if (node == null) {
 			node = create.get();
@@ -60,6 +61,8 @@ public class NodeUtil {
 	 * Should the {@link Node} be already initialised, an issue will be reported
 	 * to the {@link CompilerIssues}.
 	 * 
+	 * @param <N>
+	 *            {@link Node} type.
 	 * @param nodeName
 	 *            Name of the {@link Node}.
 	 * @param nodes
@@ -72,9 +75,8 @@ public class NodeUtil {
 	 *            {@link Consumer} to initialise the {@link Node}.
 	 * @return Initialised {@link Node}.
 	 */
-	public static <N extends Node> N getInitialisedNode(String nodeName,
-			Map<String, N> nodes, NodeContext context, Supplier<N> create,
-			Consumer<N> initialiser) {
+	public static <N extends Node> N getInitialisedNode(String nodeName, Map<String, N> nodes, NodeContext context,
+			Supplier<N> create, Consumer<N> initialiser) {
 
 		// Obtain the node
 		N node = getNode(nodeName, nodes, create);
@@ -85,8 +87,7 @@ public class NodeUtil {
 			initialiser.accept(node);
 		} else {
 			// Node already added and initialised
-			context.getCompilerIssues().addIssue(node,
-					node.getNodeType() + " " + nodeName + " already added");
+			context.getCompilerIssues().addIssue(node, node.getNodeType() + " " + nodeName + " already added");
 		}
 
 		// Return the node
@@ -97,6 +98,8 @@ public class NodeUtil {
 	/**
 	 * Initialises the {@link Node}.
 	 * 
+	 * @param <S>
+	 *            Type of state.
 	 * @param node
 	 *            {@link Node} to be initialised.
 	 * @param context
@@ -108,15 +111,12 @@ public class NodeUtil {
 	 *            {@link Supplier} to create the initialised state.
 	 * @return Initialised state for the {@link Node}.
 	 */
-	public static <S> S initialise(Node node, NodeContext context,
-			S existingState, Supplier<S> createState) {
+	public static <S> S initialise(Node node, NodeContext context, S existingState, Supplier<S> createState) {
 
 		// Ensure not already initialised
 		if (existingState != null) {
-			context.getCompilerIssues().addIssue(
-					node,
-					node.getNodeType() + " " + node.getNodeName()
-							+ " already initialised");
+			context.getCompilerIssues().addIssue(node,
+					node.getNodeType() + " " + node.getNodeName() + " already initialised");
 			return existingState;
 		}
 

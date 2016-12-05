@@ -18,6 +18,7 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.manage.Office;
@@ -29,8 +30,8 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeManagedObject extends DependentManagedObject,
-		AdministerableManagedObject, GovernerableManagedObject {
+public interface OfficeManagedObject
+		extends DependentManagedObject, AdministerableManagedObject, GovernerableManagedObject {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject}.
@@ -61,7 +62,6 @@ public interface OfficeManagedObject extends DependentManagedObject,
 	 *            Name of the {@link ManagedObjectDependencyType}.
 	 * @return {@link ManagedObjectDependency}.
 	 */
-	ManagedObjectDependency getManagedObjectDependency(
-			String managedObjectDependencyName);
+	ManagedObjectDependency getManagedObjectDependency(String managedObjectDependencyName);
 
 }

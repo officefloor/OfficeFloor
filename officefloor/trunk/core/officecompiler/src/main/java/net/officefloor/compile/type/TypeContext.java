@@ -28,6 +28,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.spi.administration.Duty;
 
 /**
  * Context for loading a type.
@@ -46,8 +47,7 @@ public interface TypeContext {
 	 * @return {@link ManagedObjectType} or <code>null</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	ManagedObjectType<?> getOrLoadManagedObjectType(
-			ManagedObjectSourceNode managedObjectSourceNode);
+	ManagedObjectType<?> getOrLoadManagedObjectType(ManagedObjectSourceNode managedObjectSourceNode);
 
 	/**
 	 * Obtains the existing or loads the {@link WorkType} for the
@@ -75,25 +75,31 @@ public interface TypeContext {
 	 * Obtains the existing or loads the {@link AdministratorType} for the
 	 * {@link AdministratorNode}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <A>
+	 *            {@link Duty} key {@link Enum} type.
 	 * @param administratorNode
 	 *            {@link AdministratorNode} to obtain the
 	 *            {@link AdministratorType}.
 	 * @return {@link AdministratorType} or <code>null</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<I, A extends Enum<A>> AdministratorType<I, A> getOrLoadAdministratorType(
-			AdministratorNode administratorNode);
+	<I, A extends Enum<A>> AdministratorType<I, A> getOrLoadAdministratorType(AdministratorNode administratorNode);
 
 	/**
 	 * Obtains the existing or loads the {@link GovernanceType} for the
 	 * {@link GovernanceNode}.
 	 * 
+	 * @param <I>
+	 *            Extension interface type.
+	 * @param <F>
+	 *            Flow key {@link Enum} type.
 	 * @param governanceNode
 	 *            {@link GovernanceNode} to obtain the {@link GovernanceType}.
 	 * @return {@link GovernanceType} or <code>null</code> with issue report to
 	 *         the {@link CompilerIssues}.
 	 */
-	<I, F extends Enum<F>> GovernanceType<I, F> getOrLoadGovernanceType(
-			GovernanceNode governanceNode);
+	<I, F extends Enum<F>> GovernanceType<I, F> getOrLoadGovernanceType(GovernanceNode governanceNode);
 
 }

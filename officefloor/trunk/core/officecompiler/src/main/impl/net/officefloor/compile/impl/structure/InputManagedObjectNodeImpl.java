@@ -86,13 +86,12 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	 * 
 	 * @param inputManagedObjectName
 	 *            Name of this {@link InputManagedObjectNode}.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
+	 * @param officeFloor
+	 *            {@link OfficeFloorNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public InputManagedObjectNodeImpl(String inputManagedObjectName,
-			OfficeFloorNode officeFloor, NodeContext context) {
+	public InputManagedObjectNodeImpl(String inputManagedObjectName, OfficeFloorNode officeFloor, NodeContext context) {
 		this.inputManagedObjectName = inputManagedObjectName;
 		this.officeFloor = officeFloor;
 		this.context = context;
@@ -129,8 +128,7 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -155,8 +153,7 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	public void addGovernance(GovernanceNode governance, OfficeNode office) {
 
 		// Obtain the listing of governances for the office
-		List<GovernanceNode> governances = this.governancesPerOffice
-				.get(office);
+		List<GovernanceNode> governances = this.governancesPerOffice.get(office);
 		if (governances == null) {
 			governances = new LinkedList<GovernanceNode>();
 			this.governancesPerOffice.put(office, governances);
@@ -172,8 +169,7 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	}
 
 	@Override
-	public void buildOfficeManagedObject(OfficeNode office,
-			OfficeBuilder officeBuilder, OfficeBindings officeBindings,
+	public void buildOfficeManagedObject(OfficeNode office, OfficeBuilder officeBuilder, OfficeBindings officeBindings,
 			TypeContext typeContext) {
 
 		// Provide binding to managed object source if specified
@@ -186,12 +182,11 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	public GovernanceNode[] getGovernances(OfficeNode managingOffice) {
 
 		// Obtain the governances
-		List<GovernanceNode> governances = this.governancesPerOffice
-				.get(managingOffice);
+		List<GovernanceNode> governances = this.governancesPerOffice.get(managingOffice);
 
 		// Return the governances
-		return (governances == null ? new GovernanceNode[0] : governances
-				.toArray(new GovernanceNode[governances.size()]));
+		return (governances == null ? new GovernanceNode[0]
+				: governances.toArray(new GovernanceNode[governances.size()]));
 	}
 
 	/*
@@ -204,29 +199,22 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	}
 
 	@Override
-	public void setBoundOfficeFloorManagedObjectSource(
-			OfficeFloorManagedObjectSource managedObjectSource) {
+	public void setBoundOfficeFloorManagedObjectSource(OfficeFloorManagedObjectSource managedObjectSource) {
 
 		// Ensure is a Managed Object Source Node
 		if (!(managedObjectSource instanceof ManagedObjectSourceNode)) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Invalid managed object source node: "
-							+ managedObjectSource
-							+ " ["
-							+ (managedObjectSource == null ? null
-									: managedObjectSource.getClass().getName())
-							+ ", required "
-							+ ManagedObjectSourceNode.class.getName() + "]");
+			this.context.getCompilerIssues().addIssue(this,
+					"Invalid managed object source node: " + managedObjectSource + " ["
+							+ (managedObjectSource == null ? null : managedObjectSource.getClass().getName())
+							+ ", required " + ManagedObjectSourceNode.class.getName() + "]");
 			return; // can not bind
 		}
 
 		// Ensure not already bound
 		if (this.boundManagedObjectSource != null) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Managed Object Source already bound for Input Managed Object '"
-							+ this.inputManagedObjectName + "'");
+			this.context.getCompilerIssues().addIssue(this,
+					"Managed Object Source already bound for Input Managed Object '" + this.inputManagedObjectName
+							+ "'");
 			return; // already bound
 		}
 
@@ -245,8 +233,7 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-		return LinkUtil.linkObjectNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkObjectNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedObjectNode = link);
 	}
 

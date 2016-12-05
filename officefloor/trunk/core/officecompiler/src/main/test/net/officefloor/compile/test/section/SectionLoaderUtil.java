@@ -114,13 +114,9 @@ public class SectionLoaderUtil {
 	 * Creates the {@link SectionDesigner} to create the expected
 	 * {@link SectionType}/{@link OfficeSection}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param location
-	 *            Location of the {@link OfficeSection}.
 	 * @return {@link SectionDesigner}.
 	 */
-	public static <S extends SectionSource> SectionDesigner createSectionDesigner() {
+	public static SectionDesigner createSectionDesigner() {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
 		return context.createSectionNode(SectionLoaderUtil.class.getSimpleName(), (OfficeNode) null);

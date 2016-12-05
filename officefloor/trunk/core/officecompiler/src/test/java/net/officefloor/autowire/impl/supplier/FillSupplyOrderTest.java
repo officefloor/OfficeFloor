@@ -38,7 +38,6 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.UnknownType;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.TestSource;
@@ -91,10 +90,15 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 		// Record obtaining the managed object types
 		this.recordLoadingManagedObjects();
 
-		MockSupplyOrder order = new MockSupplyOrder(new AutoWire(
-				UnknownType.class));
+		MockSupplyOrder order = new MockSupplyOrder(new AutoWire(UnknownType.class));
 		this.fillSupplyOrders(order);
 		assertNull("Order should not be filled", order.suppliedManagedObject);
+	}
+
+	/**
+	 * Unknown type that can not be fulfilled.
+	 */
+	public static class UnknownType {
 	}
 
 	/**
@@ -123,8 +127,7 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 		MockSupplyOrder three = new MockSupplyOrder(new AutoWire(Long.class));
 		this.fillSupplyOrders(one, two, three);
 		validateSuppliedManagedObject(one, String.class, 0, 0);
-		validateSuppliedManagedObject(two, Property.class, 0, 0, "MO_NAME",
-				"MO_VALUE");
+		validateSuppliedManagedObject(two, Property.class, 0, 0, "MO_NAME", "MO_VALUE");
 		validateSuppliedManagedObject(three, Long.class, 1000, 0);
 	}
 
@@ -132,14 +135,12 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	 * Ensure can fill a qualified {@link SupplyOrder}.
 	 */
 	public void testFillQualifiedSupplyOrder() {
-		
+
 		// Record obtaining the managed object types
 		this.recordLoadingManagedObjects();
 
-		MockSupplyOrder defaultOrder = new MockSupplyOrder(new AutoWire(
-				String.class));
-		MockSupplyOrder qualifiedOrder = new MockSupplyOrder(new AutoWire(
-				"QUALIFIED", String.class.getName()));
+		MockSupplyOrder defaultOrder = new MockSupplyOrder(new AutoWire(String.class));
+		MockSupplyOrder qualifiedOrder = new MockSupplyOrder(new AutoWire("QUALIFIED", String.class.getName()));
 		this.fillSupplyOrders(defaultOrder, qualifiedOrder);
 		validateSuppliedManagedObject(defaultOrder, String.class, 0, 0);
 		validateSuppliedManagedObject(qualifiedOrder, String.class, 0, 0);
@@ -152,26 +153,21 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	 * Ensure can provide {@link SuppliedManagedObjectTeam} instances.
 	 */
 	public void testFillSupplyOrderHavingSuppliedTeams() {
-		
+
 		// Record obtaining the managed object types
 		this.recordLoadingManagedObjects();
 
-		MockSupplyOrder complex = new MockSupplyOrder(new AutoWire(
-				Connection.class));
+		MockSupplyOrder complex = new MockSupplyOrder(new AutoWire(Connection.class));
 		this.fillSupplyOrders(complex);
 		validateSuppliedManagedObject(complex, Connection.class, 0, 1);
 
 		// Ensure correct details for team
-		SuppliedManagedObjectTeam team = complex.suppliedManagedObject
-				.getSuppliedTeams()[0];
+		SuppliedManagedObjectTeam team = complex.suppliedManagedObject.getSuppliedTeams()[0];
 		assertEquals("Incorrect team name", "SUPPLIED_TEAM", team.getTeamName());
-		assertEquals("Incorrect team source class name", "PASSIVE",
-				team.getTeamSourceClassName());
+		assertEquals("Incorrect team source class name", "PASSIVE", team.getTeamSourceClassName());
 		Properties properties = team.getProperties().getProperties();
-		assertEquals("Incorrect number of team properties", 1,
-				properties.size());
-		assertEquals("Incorrect team property", "TEAM_VALUE",
-				properties.get("TEAM_NAME"));
+		assertEquals("Incorrect number of team properties", 1, properties.size());
+		assertEquals("Incorrect team property", "TEAM_VALUE", properties.get("TEAM_NAME"));
 	}
 
 	/**
@@ -190,53 +186,42 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 	 * @param propertyNameValuePairs
 	 *            Expected properties.
 	 */
-	private static void validateSuppliedManagedObject(
-			MockSupplyOrder supplyOrder, Class<?> objectClass, int timeout,
+	private static void validateSuppliedManagedObject(MockSupplyOrder supplyOrder, Class<?> objectClass, int timeout,
 			int numberOfSuppliedTeams, String... propertyNameValuePairs) {
 
 		// Obtain the supplied managed object
 		SuppliedManagedObject<?, ?> suppliedManagedObject = supplyOrder.suppliedManagedObject;
 
 		// Ensure have supplied managed object
-		assertNotNull("Should have supplied managed object",
-				suppliedManagedObject);
+		assertNotNull("Should have supplied managed object", suppliedManagedObject);
 
 		// Validate the managed object type
-		ManagedObjectType<?> managedObjectType = suppliedManagedObject
-				.getManagedObjectType();
+		ManagedObjectType<?> managedObjectType = suppliedManagedObject.getManagedObjectType();
 		assertNotNull("Should have managed object type", managedObjectType);
-		assertEquals("Incorrect object class for managed object type",
-				objectClass, managedObjectType.getObjectClass());
+		assertEquals("Incorrect object class for managed object type", objectClass, managedObjectType.getObjectClass());
 
 		// Validate the managed object source
-		ManagedObjectSource<?, ?> managedObjectSource = suppliedManagedObject
-				.getManagedObjectSource();
+		ManagedObjectSource<?, ?> managedObjectSource = suppliedManagedObject.getManagedObjectSource();
 		assertNotNull("Should have managed object source", managedObjectSource);
 		MockTypeManagedObjectSource mockSource = (MockTypeManagedObjectSource) managedObjectSource;
-		assertEquals("Incorrect managed object source (by auto wire type)",
-				objectClass.getName(), mockSource.getAutoWire().getType());
+		assertEquals("Incorrect managed object source (by auto wire type)", objectClass.getName(),
+				mockSource.getAutoWire().getType());
 
 		// Validate the timeout
-		assertEquals("Incorrect timeout", timeout,
-				suppliedManagedObject.getTimeout());
+		assertEquals("Incorrect timeout", timeout, suppliedManagedObject.getTimeout());
 
 		// Validate the properties
-		Properties properties = suppliedManagedObject.getProperties()
-				.getProperties();
-		assertEquals("Incorrect number of properties",
-				(propertyNameValuePairs.length / 2), properties.size());
+		Properties properties = suppliedManagedObject.getProperties().getProperties();
+		assertEquals("Incorrect number of properties", (propertyNameValuePairs.length / 2), properties.size());
 		for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
 			String name = propertyNameValuePairs[i];
 			String value = propertyNameValuePairs[i + 1];
-			assertEquals("Incorrect property " + name, value,
-					properties.get(name));
+			assertEquals("Incorrect property " + name, value, properties.get(name));
 		}
 
 		// Ensure correct number of supplied teams
-		SuppliedManagedObjectTeam[] suppliedTeams = suppliedManagedObject
-				.getSuppliedTeams();
-		assertEquals("Incorrect number of supplied teams",
-				numberOfSuppliedTeams, suppliedTeams.length);
+		SuppliedManagedObjectTeam[] suppliedTeams = suppliedManagedObject.getSuppliedTeams();
+		assertEquals("Incorrect number of supplied teams", numberOfSuppliedTeams, suppliedTeams.length);
 	}
 
 	/**
@@ -266,13 +251,11 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 		PropertyList propertyList = new PropertyListImpl();
 
 		// Create the supply loader and fill supply orders
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		SupplierLoader supplierLoader = compiler.getSupplierLoader();
 		MockSupplierSource.init = init;
-		supplierLoader.fillSupplyOrders(MockSupplierSource.class, propertyList,
-				supplyOrders);
+		supplierLoader.fillSupplyOrders(MockSupplierSource.class, propertyList, supplyOrders);
 
 		// Verify the mock objects
 		this.verifyMockObjects();
@@ -299,43 +282,35 @@ public class FillSupplyOrderTest extends OfficeFrameTestCase {
 			// Provide various managed object instances
 
 			// Simple managed object
-			context.addManagedObject(new MockTypeManagedObjectSource(
-					String.class), null, new AutoWire(String.class));
+			context.addManagedObject(new MockTypeManagedObjectSource(String.class), null, new AutoWire(String.class));
 
 			// Qualified managed object
-			context.addManagedObject(new MockTypeManagedObjectSource(
-					String.class), null,
+			context.addManagedObject(new MockTypeManagedObjectSource(String.class), null,
 					new AutoWire("QUALIFIED", String.class.getName()));
 
 			// Managed object with properties
-			AutoWireObject property = context.addManagedObject(
-					new MockTypeManagedObjectSource(Property.class), null,
+			AutoWireObject property = context.addManagedObject(new MockTypeManagedObjectSource(Property.class), null,
 					new AutoWire(Property.class));
 			property.addProperty("MO_NAME", "MO_VALUE");
 
 			// Managed object with timeout
-			AutoWireObject timeout = context.addManagedObject(
-					new MockTypeManagedObjectSource(Long.class), null,
+			AutoWireObject timeout = context.addManagedObject(new MockTypeManagedObjectSource(Long.class), null,
 					new AutoWire(Long.class));
 			timeout.setTimeout(1000);
 
 			// Managed object with team
-			MockTypeManagedObjectSource teamMo = new MockTypeManagedObjectSource(
-					Connection.class);
+			MockTypeManagedObjectSource teamMo = new MockTypeManagedObjectSource(Connection.class);
 			teamMo.addTeam("SUPPLIED_TEAM");
 			teamMo.addTeam("LINK_TEAM");
 			ManagedObjectSourceWirer teamWirer = new ManagedObjectSourceWirer() {
 				@Override
 				public void wire(ManagedObjectSourceWirerContext context) {
-					AutoWireTeam team = context.mapTeam("SUPPLIED_TEAM",
-							"PASSIVE");
+					AutoWireTeam team = context.mapTeam("SUPPLIED_TEAM", "PASSIVE");
 					team.addProperty("TEAM_NAME", "TEAM_VALUE");
-					context.mapTeam("LINK_TEAM", new AutoWire(
-							OnePersonTeam.class));
+					context.mapTeam("LINK_TEAM", new AutoWire(OnePersonTeam.class));
 				}
 			};
-			context.addManagedObject(teamMo, teamWirer, new AutoWire(
-					Connection.class));
+			context.addManagedObject(teamMo, teamWirer, new AutoWire(Connection.class));
 		}
 	}
 

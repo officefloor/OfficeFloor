@@ -26,8 +26,7 @@ import net.officefloor.compile.type.TypeContext;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeInputNode extends LinkFlowNode, LinkSynchronousNode,
-		OfficeInput {
+public interface OfficeInputNode extends LinkFlowNode, LinkSynchronousNode, OfficeInput {
 
 	/**
 	 * {@link Node} type.
@@ -38,7 +37,7 @@ public interface OfficeInputNode extends LinkFlowNode, LinkSynchronousNode,
 	 * Initialises the {@link OfficeInputNode}.
 	 * 
 	 * @param parameterType
-	 *            Parameter type of {@link OfficeFloorInput}.
+	 *            Parameter type of {@link OfficeInput}.
 	 */
 	void initialise(String parameterType);
 
