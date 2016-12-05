@@ -61,8 +61,7 @@ public interface TaskNode extends LinkFlowNode, SectionTask, OfficeSectionTask {
 	 * @return {@link OfficeTaskType} or <code>null</code> with issues reported
 	 *         to the {@link CompilerIssues}.
 	 */
-	OfficeTaskType loadOfficeTaskType(
-			OfficeSubSectionType parentSubSectionType, TypeContext typeContext);
+	OfficeTaskType loadOfficeTaskType(OfficeSubSectionType parentSubSectionType, TypeContext typeContext);
 
 	/**
 	 * Obtains the {@link WorkNode} containing this {@link TaskNode}.
@@ -84,12 +83,13 @@ public interface TaskNode extends LinkFlowNode, SectionTask, OfficeSectionTask {
 	/**
 	 * Builds the {@link Task} for this {@link TaskNode}.
 	 * 
+	 * @param <W>
+	 *            {@link Work} type.
 	 * @param workBuilder
 	 *            {@link WorkBuilder} for the {@link Work} of this {@link Task}.
 	 * @param typeContext
 	 *            {@link TypeContext}.
 	 */
-	<W extends Work> void buildTask(WorkBuilder<W> workBuilder,
-			TypeContext typeContext);
+	<W extends Work> void buildTask(WorkBuilder<W> workBuilder, TypeContext typeContext);
 
 }

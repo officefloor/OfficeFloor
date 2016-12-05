@@ -18,7 +18,6 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.section.OfficeSectionInputType;
-import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionObjectType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
@@ -71,8 +70,8 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 	 * @param objects
 	 *            {@link OfficeSectionObjectType} instances.
 	 */
-	public OfficeSectionTypeImpl(String name, OfficeSectionInputType[] inputs,
-			OfficeSectionOutputType[] outputs, OfficeSectionObjectType[] objects) {
+	public OfficeSectionTypeImpl(String name, OfficeSectionInputType[] inputs, OfficeSectionOutputType[] outputs,
+			OfficeSectionObjectType[] objects) {
 		this.name = name;
 		this.inputs = inputs;
 		this.outputs = outputs;
@@ -88,14 +87,12 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 	 *            {@link OfficeSubSectionType} instances.
 	 * @param tasks
 	 *            {@link OfficeTaskType} instances.
-	 * @param managedObjectSources
-	 *            {@link OfficeSectionManagedObjectSourceType} instances.
+	 * @param managedObjects
+	 *            {@link OfficeSectionManagedObjectType} instances.
 	 */
-	public void initialiseAsOfficeSubSectionType(OfficeSubSectionType parent,
-			OfficeSubSectionType[] subSections, OfficeTaskType[] tasks,
-			OfficeSectionManagedObjectType[] managedObjects) {
-		this.subSectionState = new SubSectionState(parent, subSections, tasks,
-				managedObjects);
+	public void initialiseAsOfficeSubSectionType(OfficeSubSectionType parent, OfficeSubSectionType[] subSections,
+			OfficeTaskType[] tasks, OfficeSectionManagedObjectType[] managedObjects) {
+		this.subSectionState = new SubSectionState(parent, subSections, tasks, managedObjects);
 	}
 
 	/*
@@ -179,8 +176,7 @@ public class OfficeSectionTypeImpl implements OfficeSectionType {
 		 * @param managedObjects
 		 *            {@link OfficeSectionManagedObjectType} instances.
 		 */
-		public SubSectionState(OfficeSubSectionType parent,
-				OfficeSubSectionType[] subSections, OfficeTaskType[] tasks,
+		public SubSectionState(OfficeSubSectionType parent, OfficeSubSectionType[] subSections, OfficeTaskType[] tasks,
 				OfficeSectionManagedObjectType[] managedObjects) {
 			this.parent = parent;
 			this.subSections = subSections;

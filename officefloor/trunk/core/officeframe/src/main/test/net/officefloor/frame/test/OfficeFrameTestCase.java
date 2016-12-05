@@ -103,9 +103,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			if (testMethod.getAnnotation(GuiTest.class) != null) {
 				// Determine if headed environment (i.e. can run graphical test)
 				if (!this.isGuiAvailable()) {
-					System.out.println("NOT RUNNING GUI TEST "
-							+ this.getClass().getSimpleName() + "."
-							+ this.getName());
+					System.out
+							.println("NOT RUNNING GUI TEST " + this.getClass().getSimpleName() + "." + this.getName());
 					return;
 				}
 			}
@@ -127,9 +126,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		// Determine if run the stress test
 		if (isStressTest) {
 			if (this.isIgnoreStressTests()) {
-				System.out.println("NOT RUNNING STRESS TEST "
-						+ this.getClass().getSimpleName() + "."
-						+ this.getName());
+				System.out.println("NOT RUNNING STRESS TEST " + this.getClass().getSimpleName() + "." + this.getName());
 				return;
 			}
 		}
@@ -143,8 +140,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		} finally {
 			// Provide start of verbose output
 			if (this.isVerbose) {
-				System.out.println("++++++++++++++++++++++++++ END:"
-						+ this.getName() + " ++++++++++++++++++++++++++");
+				System.out.println("++++++++++++++++++++++++++ END:" + this.getName() + " ++++++++++++++++++++++++++");
 			}
 		}
 	}
@@ -225,16 +221,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		try {
 			// Create Class Loader for testing
-			String[] classPathEntries = System.getProperty("java.class.path")
-					.split(File.pathSeparator);
+			String[] classPathEntries = System.getProperty("java.class.path").split(File.pathSeparator);
 			URL[] urls = new URL[classPathEntries.length];
 			for (int i = 0; i < urls.length; i++) {
 				String classPathEntry = classPathEntries[i];
-				classPathEntry = (classPathEntry.startsWith(File.separator) ? "file://"
-						+ classPathEntry
+				classPathEntry = (classPathEntry.startsWith(File.separator) ? "file://" + classPathEntry
 						: classPathEntry);
-				classPathEntry = (classPathEntry.endsWith(".jar") ? classPathEntry
-						: classPathEntry + "/");
+				classPathEntry = (classPathEntry.endsWith(".jar") ? classPathEntry : classPathEntry + "/");
 				urls[i] = new URL(classPathEntry);
 			}
 			ClassLoader classLoader = new URLClassLoader(urls, null);
@@ -270,11 +263,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws Exception
 	 *             If fails.
 	 */
-	public static void displayGraph(Object root, String... ignoreMethodNames)
-			throws Exception {
+	public static void displayGraph(Object root, String... ignoreMethodNames) throws Exception {
 		PrintWriter writer = new PrintWriter(System.out);
-		displayGraph(root, new HashSet<Object>(), 0, "root", ignoreMethodNames,
-				writer);
+		displayGraph(root, new HashSet<Object>(), 0, "root", ignoreMethodNames, writer);
 		writer.flush();
 	}
 
@@ -294,9 +285,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param writer
 	 *            Writer to output display.
 	 */
-	private static void displayGraph(Object root, Set<Object> displayedObjects,
-			int depth, String path, String[] ignoreMethodNames,
-			PrintWriter writer) throws Exception {
+	private static void displayGraph(Object root, Set<Object> displayedObjects, int depth, String path,
+			String[] ignoreMethodNames, PrintWriter writer) throws Exception {
 
 		// Display path
 		for (int i = 0; i < depth; i++) {
@@ -326,16 +316,14 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			for (Object item : collection) {
 
 				// Display collection item
-				displayGraph(item, displayedObjects, (depth + 1), (path + "["
-						+ index + "]"), ignoreMethodNames, writer);
+				displayGraph(item, displayedObjects, (depth + 1), (path + "[" + index + "]"), ignoreMethodNames,
+						writer);
 				index++;
 			}
 
-		} else if ((root.getClass().isPrimitive())
-				|| (root instanceof Class<?>) || (root instanceof String)
-				|| (root instanceof Boolean) || (root instanceof Byte)
-				|| (root instanceof Character) || (root instanceof Short)
-				|| (root instanceof Integer) || (root instanceof Long)
+		} else if ((root.getClass().isPrimitive()) || (root instanceof Class<?>) || (root instanceof String)
+				|| (root instanceof Boolean) || (root instanceof Byte) || (root instanceof Character)
+				|| (root instanceof Short) || (root instanceof Integer) || (root instanceof Long)
 				|| (root instanceof Float) || (root instanceof Double)) {
 
 			// Display raw type
@@ -368,14 +356,12 @@ public abstract class OfficeFrameTestCase extends TestCase {
 					}
 				}
 				if (isIgnore) {
-					writer.println("- " + root.getClass().getSimpleName() + "."
-							+ methodName + "() -");
+					writer.println("- " + root.getClass().getSimpleName() + "." + methodName + "() -");
 					continue;
 				}
 
 				// Determine if accessor method
-				if ((!Modifier.isPublic(method.getModifiers()))
-						|| (method.getReturnType() == Void.TYPE)
+				if ((!Modifier.isPublic(method.getModifiers())) || (method.getReturnType() == Void.TYPE)
 						|| (method.getParameterTypes().length != 0)) {
 					continue;
 				}
@@ -384,9 +370,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				Object value = method.invoke(root, (Object[]) null);
 
 				// Do deep display
-				displayGraph(value, displayedObjects, (depth + 1), root
-						.getClass().getSimpleName() + "." + methodName + "()",
-						ignoreMethodNames, writer);
+				displayGraph(value, displayedObjects, (depth + 1),
+						root.getClass().getSimpleName() + "." + methodName + "()", ignoreMethodNames, writer);
 			}
 		}
 	}
@@ -417,12 +402,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Actual failure for further assertions.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <F extends Throwable> F assertFail(FailOperation operation,
-			Class<F> expectedFailureType) {
+	public static <F extends Throwable> F assertFail(FailOperation operation, Class<F> expectedFailureType) {
 		try {
 			operation.run();
-			fail("Operation expected to fail with cause "
-					+ expectedFailureType.getSimpleName());
+			fail("Operation expected to fail with cause " + expectedFailureType.getSimpleName());
 			return null; // for compilation
 
 		} catch (AssertionFailedError ex) {
@@ -430,8 +413,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			throw ex;
 		} catch (Throwable ex) {
 			// Ensure the correct type
-			assertEquals("Incorrect cause of failure", expectedFailureType,
-					ex.getClass());
+			assertEquals("Incorrect cause of failure", expectedFailureType, ex.getClass());
 			return (F) ex;
 		}
 	}
@@ -451,8 +433,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Parameters for the {@link Method}.
 	 * @return Actual failure for further assertions.
 	 */
-	public static <F extends Throwable> F assertFail(
-			Class<F> expectedFailureType, final Object object,
+	public static <F extends Throwable> F assertFail(Class<F> expectedFailureType, final Object object,
 			final String methodName, final Object... parameters) {
 		try {
 			// Obtain the listing of parameter types
@@ -462,8 +443,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			}
 
 			// Obtain the method
-			Method method = object.getClass().getMethod(methodName,
-					parameterTypes);
+			Method method = object.getClass().getMethod(methodName, parameterTypes);
 
 			// Assert fail
 			return assertFail(expectedFailureType, object, method, parameters);
@@ -488,8 +468,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Parameters for the {@link Method}.
 	 * @return Actual failure for further assertions.
 	 */
-	public static <F extends Throwable> F assertFail(
-			Class<F> expectedFailureType, final Object object,
+	public static <F extends Throwable> F assertFail(Class<F> expectedFailureType, final Object object,
 			final Method method, final Object... parameters) {
 		return assertFail(new FailOperation() {
 			@Override
@@ -515,8 +494,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param actual
 	 *            Raw actual text.
 	 */
-	public static void assertTextEquals(String message, String expected,
-			String actual) {
+	public static void assertTextEquals(String message, String expected, String actual) {
 		String expectedText = createPlatformIndependentText(expected);
 		String actualText = createPlatformIndependentText(actual);
 		assertEquals(message, expectedText, actualText);
@@ -545,8 +523,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param actual
 	 *            Raw actual text.
 	 */
-	public static void assertXmlEquals(String message, String expected,
-			String actual) {
+	public static void assertXmlEquals(String message, String expected, String actual) {
 		String expectedXml = removeXmlWhiteSpacing(createPlatformIndependentText(expected));
 		String actualXml = removeXmlWhiteSpacing(createPlatformIndependentText(actual));
 		assertEquals(message, expectedXml, actualXml);
@@ -606,8 +583,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws Exception
 	 *             If fails to compare graphs.
 	 */
-	public synchronized static <O> void assertGraph(O expectedRoot, O actualRoot)
-			throws Exception {
+	public synchronized static <O> void assertGraph(O expectedRoot, O actualRoot) throws Exception {
 		assertGraph(expectedRoot, actualRoot, new String[0]);
 	}
 
@@ -625,11 +601,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws Exception
 	 *             If fails.
 	 */
-	public synchronized static <O> void assertGraph(O expectedRoot,
-			O actualRoot, String... ignoreMethodNames) throws Exception {
-		assertGraph(expectedRoot, actualRoot,
-				new HashMap<CheckedObject, Integer>(), "<root>",
-				ignoreMethodNames);
+	public synchronized static <O> void assertGraph(O expectedRoot, O actualRoot, String... ignoreMethodNames)
+			throws Exception {
+		assertGraph(expectedRoot, actualRoot, new HashMap<CheckedObject, Integer>(), "<root>", ignoreMethodNames);
 	}
 
 	/**
@@ -668,8 +642,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		public boolean equals(Object obj) {
 
 			// Object must be checked object
-			assertTrue("Must be CheckedObject " + obj,
-					(obj instanceof CheckedObject));
+			assertTrue("Must be CheckedObject " + obj, (obj instanceof CheckedObject));
 			CheckedObject that = (CheckedObject) obj;
 
 			// Ensure same instance (rather than equals)
@@ -700,9 +673,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Listing of methods to be ignored in checking.
 	 */
 	@SuppressWarnings("unchecked")
-	private static <O> void assertGraph(O expectedRoot, O actualRoot,
-			Map<CheckedObject, Integer> checkedObjects, String path,
-			String[] ignoreMethodNames) throws Exception {
+	private static <O> void assertGraph(O expectedRoot, O actualRoot, Map<CheckedObject, Integer> checkedObjects,
+			String path, String[] ignoreMethodNames) throws Exception {
 
 		// Reset
 		isAssetGraphExceptionLogged = false;
@@ -714,8 +686,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			// - Collection
 			// - primitive types
 			// (stops equals instances from matching)
-			if ((expectedRoot != null)
-					&& (!(expectedRoot instanceof Collection))
+			if ((expectedRoot != null) && (!(expectedRoot instanceof Collection))
 					&& (!(expectedRoot.getClass().isPrimitive()))) {
 				// Ensure checked only twice
 				// (allows checking bi-directional references)
@@ -743,31 +714,22 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				return;
 			} else if ((expectedRoot != null) && (actualRoot != null)) {
 				// Both not null therefore ensure of same type
-				assertEquals("Path " + path + " type mismatch",
-						expectedRoot.getClass(), actualRoot.getClass());
+				assertEquals("Path " + path + " type mismatch", expectedRoot.getClass(), actualRoot.getClass());
 
 				if (expectedRoot instanceof Class) {
 					// Validate the same class
-					assertEquals("Path " + path + " incorrect type",
-							expectedRoot, actualRoot);
-				} else if ((expectedRoot.getClass().isPrimitive())
-						|| (expectedRoot instanceof String)
-						|| (expectedRoot instanceof Boolean)
-						|| (expectedRoot instanceof Byte)
-						|| (expectedRoot instanceof Character)
-						|| (expectedRoot instanceof Short)
-						|| (expectedRoot instanceof Integer)
-						|| (expectedRoot instanceof Long)
-						|| (expectedRoot instanceof Float)
-						|| (expectedRoot instanceof Double)) {
+					assertEquals("Path " + path + " incorrect type", expectedRoot, actualRoot);
+				} else if ((expectedRoot.getClass().isPrimitive()) || (expectedRoot instanceof String)
+						|| (expectedRoot instanceof Boolean) || (expectedRoot instanceof Byte)
+						|| (expectedRoot instanceof Character) || (expectedRoot instanceof Short)
+						|| (expectedRoot instanceof Integer) || (expectedRoot instanceof Long)
+						|| (expectedRoot instanceof Float) || (expectedRoot instanceof Double)) {
 					// Do primitive comparison
-					assertEquals("Path " + path + " mismatch", expectedRoot,
-							actualRoot);
+					assertEquals("Path " + path + " mismatch", expectedRoot, actualRoot);
 				} else if (expectedRoot instanceof Collection) {
 					// Do deep collection comparison
-					assertGraphCollection((Collection<Object>) expectedRoot,
-							(Collection<Object>) actualRoot, checkedObjects,
-							path, ignoreMethodNames);
+					assertGraphCollection((Collection<Object>) expectedRoot, (Collection<Object>) actualRoot,
+							checkedObjects, path, ignoreMethodNames);
 				} else {
 					// Do POJO comparison of accessors
 					for (Method method : expectedRoot.getClass().getMethods()) {
@@ -792,28 +754,23 @@ public abstract class OfficeFrameTestCase extends TestCase {
 						}
 
 						// Determine if accessor method
-						if ((!Modifier.isPublic(method.getModifiers()))
-								|| (method.getReturnType() == Void.TYPE)
+						if ((!Modifier.isPublic(method.getModifiers())) || (method.getReturnType() == Void.TYPE)
 								|| (method.getParameterTypes().length != 0)) {
 							continue;
 						}
 
 						// Obtain the values of the accessors
-						Object expectedValue = method.invoke(expectedRoot,
-								(Object[]) null);
-						Object actualValue = method.invoke(actualRoot,
-								(Object[]) null);
+						Object expectedValue = method.invoke(expectedRoot, (Object[]) null);
+						Object actualValue = method.invoke(actualRoot, (Object[]) null);
 
 						// Do deep comparison
-						assertGraph(expectedValue, actualValue, checkedObjects,
-								path + "." + methodName + "()",
+						assertGraph(expectedValue, actualValue, checkedObjects, path + "." + methodName + "()",
 								ignoreMethodNames);
 					}
 				}
 			} else {
 				// One null while other not
-				fail("Path " + path + " mismatch [e " + expectedRoot + ", a "
-						+ actualRoot + "]");
+				fail("Path " + path + " mismatch [e " + expectedRoot + ", a " + actualRoot + "]");
 			}
 		} catch (Exception ex) {
 			if (!isAssetGraphExceptionLogged) {
@@ -847,13 +804,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Listing of methods to be ignored in checking.
 	 */
 	@SuppressWarnings("unchecked")
-	private static <O> void assertGraphCollection(Collection<O> expected,
-			Collection<O> actual, Map<CheckedObject, Integer> checkedObjects,
-			String path, String[] ignoreMethodNames) throws Exception {
+	private static <O> void assertGraphCollection(Collection<O> expected, Collection<O> actual,
+			Map<CheckedObject, Integer> checkedObjects, String path, String[] ignoreMethodNames) throws Exception {
 
 		// Validate the size
-		assertEquals("Path " + path + " incorrect size", expected.size(),
-				actual.size());
+		assertEquals("Path " + path + " incorrect size", expected.size(), actual.size());
 
 		if (expected instanceof List) {
 			// Downcast to list for checking
@@ -861,13 +816,12 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			List<Object> actualList = (List<Object>) actual;
 			for (int i = 0; i < expectedList.size(); i++) {
 				// Do deep comparison of item
-				assertGraph(expectedList.get(i), actualList.get(i),
-						checkedObjects, path + "[" + i + "]", ignoreMethodNames);
+				assertGraph(expectedList.get(i), actualList.get(i), checkedObjects, path + "[" + i + "]",
+						ignoreMethodNames);
 			}
 		} else {
 			// Unknown collection type
-			fail("Path " + path + " unknown collection type "
-					+ expected.getClass().getName());
+			fail("Path " + path + " unknown collection type " + expected.getClass().getName());
 		}
 	}
 
@@ -881,8 +835,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws IOException
 	 *             If fails to read contents.
 	 */
-	public static void assertContents(File expected, File actual)
-			throws IOException {
+	public static void assertContents(File expected, File actual) throws IOException {
 		assertContents(new FileReader(expected), new FileReader(actual));
 	}
 
@@ -896,8 +849,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws IOException
 	 *             If fails to read contents.
 	 */
-	public static void assertContents(Reader expected, Reader actual)
-			throws IOException {
+	public static void assertContents(Reader expected, Reader actual) throws IOException {
 		BufferedReader expectedReader = new BufferedReader(expected);
 		BufferedReader actualReader = new BufferedReader(actual);
 		String expectedLine;
@@ -905,8 +857,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		int lineNumber = 1;
 		while ((actualLine = actualReader.readLine()) != null) {
 			expectedLine = expectedReader.readLine();
-			assertEquals("Incorrect line " + lineNumber, expectedLine,
-					actualLine);
+			assertEquals("Incorrect line " + lineNumber, expectedLine, actualLine);
 			lineNumber++;
 		}
 	}
@@ -924,12 +875,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Items expected to be in the list.
 	 */
 	@SafeVarargs
-	public static <O> void assertList(ListItemMatcher<O> matcher, List<O> list,
-			O... expectedItems) {
+	public static <O> void assertList(ListItemMatcher<O> matcher, List<O> list, O... expectedItems) {
 
 		// Ensure similar number of items in each list
-		assertEquals("List lengths not match", expectedItems.length,
-				list.size());
+		assertEquals("List lengths not match", expectedItems.length, list.size());
 
 		// Ensure similar items
 		for (int i = 0; i < expectedItems.length; i++) {
@@ -969,14 +918,12 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Items expected in the list.
 	 */
 	@SafeVarargs
-	public static <O> void assertList(final String[] methods, List<O> list,
-			O... expectedItems) {
+	public static <O> void assertList(final String[] methods, List<O> list, O... expectedItems) {
 		assertList(new ListItemMatcher<O>() {
 			public void match(int index, O expected, O actual) {
 				// Match the properties
 				for (String method : methods) {
-					assertEquals("Incorrect property " + method + " for item "
-							+ index, getProperty(expected, method),
+					assertEquals("Incorrect property " + method + " for item " + index, getProperty(expected, method),
 							getProperty(actual, method));
 				}
 			}
@@ -996,8 +943,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Items expected in the array.
 	 */
 	@SafeVarargs
-	public static <O> void assertList(final String[] methods, O[] array,
-			O... expectedItems) {
+	public static <O> void assertList(final String[] methods, O[] array, O... expectedItems) {
 		assertList(methods, Arrays.asList(array), expectedItems);
 	}
 
@@ -1018,8 +964,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Items expected in the list.
 	 */
 	@SafeVarargs
-	public static <O> void assertList(final String sortMethod,
-			String[] methods, List<O> list, O... expectedItems) {
+	public static <O> void assertList(final String sortMethod, String[] methods, List<O> list, O... expectedItems) {
 
 		// Sort the list
 		Collections.sort(list, new Comparator<O>() {
@@ -1054,12 +999,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param methods
 	 *            Method names to specify the properties on the item to match.
 	 */
-	public static <O> void assertProperties(O expected, O actual,
-			String... methods) {
+	public static <O> void assertProperties(O expected, O actual, String... methods) {
 		// Match the properties
 		for (String method : methods) {
-			assertEquals("Incorrect property " + method,
-					getProperty(expected, method), getProperty(actual, method));
+			assertEquals("Incorrect property " + method, getProperty(expected, method), getProperty(actual, method));
 		}
 	}
 
@@ -1075,33 +1018,26 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	public static Object getProperty(Object object, String methodName) {
 
 		// Ensure have an object to retrieve value
-		assertNotNull("Can not source property '" + methodName
-				+ "' from null object", object);
+		assertNotNull("Can not source property '" + methodName + "' from null object", object);
 
 		Object value = null;
 		try {
 			// Find the method on the object
-			Method method = object.getClass().getMethod(methodName,
-					(Class[]) new Class[0]);
+			Method method = object.getClass().getMethod(methodName, (Class[]) new Class[0]);
 
 			// Obtain the property value
 			value = method.invoke(object, new Object[0]);
 
 		} catch (SecurityException ex) {
-			fail("No access to method '" + methodName + "' on object of class "
-					+ object.getClass().getName());
+			fail("No access to method '" + methodName + "' on object of class " + object.getClass().getName());
 		} catch (NoSuchMethodException ex) {
-			fail("Method '" + methodName + "' not found on object of class "
-					+ object.getClass().getName());
+			fail("Method '" + methodName + "' not found on object of class " + object.getClass().getName());
 		} catch (IllegalArgumentException ex) {
-			fail(ex.getMessage() + " [" + object.getClass().getName() + "#"
-					+ methodName + "()]");
+			fail(ex.getMessage() + " [" + object.getClass().getName() + "#" + methodName + "()]");
 		} catch (IllegalAccessException ex) {
-			fail(ex.getMessage() + " [" + object.getClass().getName() + "#"
-					+ methodName + "()]");
+			fail(ex.getMessage() + " [" + object.getClass().getName() + "#" + methodName + "()]");
 		} catch (InvocationTargetException ex) {
-			fail(ex.getMessage() + " [" + object.getClass().getName() + "#"
-					+ methodName + "()]");
+			fail(ex.getMessage() + " [" + object.getClass().getName() + "#" + methodName + "()]");
 		}
 
 		// Return the value
@@ -1122,8 +1058,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Value of property the item should match.
 	 * @return Item with the matching property.
 	 */
-	public static <T> T getItem(Collection<T> items, String methodName,
-			Object value) {
+	public static <T> T getItem(Collection<T> items, String methodName, Object value) {
 
 		// Iterate over the items finding the matching item
 		for (T item : items) {
@@ -1139,8 +1074,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		}
 
 		// Did not find the item
-		fail("Did not find item by property '" + methodName
-				+ "' for return value " + value);
+		fail("Did not find item by property '" + methodName + "' for return value " + value);
 		return null;
 	}
 
@@ -1182,8 +1116,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		// Provide start of verbose output
 		if (this.isVerbose) {
-			System.out.println("++++++++++++++++++++++++++ START:"
-					+ this.getName() + " ++++++++++++++++++++++++++");
+			System.out.println("++++++++++++++++++++++++++ START:" + this.getName() + " ++++++++++++++++++++++++++");
 		}
 	}
 
@@ -1207,9 +1140,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		// Output details of mock
 		if (this.isVerbose) {
-			printMessage("mock '" + mockObject.getClass().getName()
-					+ "' is of class " + classToMock.getSimpleName() + " ["
-					+ classToMock.getName() + "]");
+			printMessage("mock '" + mockObject.getClass().getName() + "' is of class " + classToMock.getSimpleName()
+					+ " [" + classToMock.getName() + "]");
 		}
 
 		// Register the mock object
@@ -1239,11 +1171,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		final MockControl control = this.control(mockObject);
 
 		// Create a synchronised proxy wrapper around mock
-		M proxy = (M) Proxy.newProxyInstance(interfaceToMock.getClassLoader(),
-				new Class[] { interfaceToMock }, new InvocationHandler() {
+		M proxy = (M) Proxy.newProxyInstance(interfaceToMock.getClassLoader(), new Class[] { interfaceToMock },
+				new InvocationHandler() {
 					@Override
-					public Object invoke(Object proxy, Method method,
-							Object[] args) throws Throwable {
+					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 						// Invoke method with lock on control
 						try {
 							synchronized (control) {
@@ -1271,8 +1202,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param mockControl
 	 *            {@link MockControl} of the mock object.
 	 */
-	public final void registerMockObject(Object mockObject,
-			MockControl mockControl) {
+	public final void registerMockObject(Object mockObject, MockControl mockControl) {
 		this.registry.put(mockObject, mockControl);
 	}
 
@@ -1300,16 +1230,14 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param recordedReturn
 	 *            Value that is recorded to be returned from the mock object.
 	 */
-	public final <T> void recordReturn(Object mockObject, T ignore,
-			T recordedReturn) {
+	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn) {
 		// Obtain the control
 		MockControl control = this.control(mockObject);
 		synchronized (control) {
 
 			// Handle primitive types
 			if (recordedReturn instanceof Boolean) {
-				control.setReturnValue(((Boolean) recordedReturn)
-						.booleanValue());
+				control.setReturnValue(((Boolean) recordedReturn).booleanValue());
 			} else if (recordedReturn instanceof Character) {
 				control.setReturnValue(((Character) recordedReturn).charValue());
 			} else if (recordedReturn instanceof Short) {
@@ -1345,8 +1273,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @param matcher
 	 *            {@link ArgumentsMatcher}.
 	 */
-	public final <T> void recordReturn(Object mockObject, T ignore,
-			T recordedReturn, ArgumentsMatcher matcher) {
+	public final <T> void recordReturn(Object mockObject, T ignore, T recordedReturn, ArgumentsMatcher matcher) {
 		// Obtain the control
 		MockControl control = this.control(mockObject);
 		synchronized (control) {
@@ -1386,7 +1313,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Undertakes test wrapping with mock object replay and verify.
 	 * 
-	 * @param supplier
+	 * @param <T>
+	 *            Return type of test logic.
+	 * @param test
 	 *            {@link Supplier} with test logic to wrap in replay/verify.
 	 * @return Result of test logic.
 	 */
@@ -1414,14 +1343,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		// Create the listing of paths to find the file
 		List<File> paths = new LinkedList<File>();
 		paths.add(new File(currentDirectory, relativePath));
-		paths.add(new File(new File(currentDirectory, "target/test-classes"),
-				relativePath));
-		paths.add(new File(new File(currentDirectory, "target/classes"),
-				relativePath));
+		paths.add(new File(new File(currentDirectory, "target/test-classes"), relativePath));
+		paths.add(new File(new File(currentDirectory, "target/classes"), relativePath));
 
 		// As last resource, use src as target resources not copied
-		paths.add(new File(new File(currentDirectory, "src/test/resources/"),
-				relativePath));
+		paths.add(new File(new File(currentDirectory, "src/test/resources/"), relativePath));
 
 		// Obtain the file
 		for (File path : paths) {
@@ -1431,8 +1357,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		}
 
 		// File not found
-		throw new FileNotFoundException(
-				"Can not find file with relative path '" + relativePath + "'");
+		throw new FileNotFoundException("Can not find file with relative path '" + relativePath + "'");
 	}
 
 	/**
@@ -1447,12 +1372,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws FileNotFoundException
 	 *             Should the file not be found.
 	 */
-	public File findFile(Class<?> packageClass, String fileName)
-			throws FileNotFoundException {
+	public File findFile(Class<?> packageClass, String fileName) throws FileNotFoundException {
 
 		// Obtain the relative file path
-		File relativePath = new File(this.getPackageRelativePath(packageClass),
-				fileName);
+		File relativePath = new File(this.getPackageRelativePath(packageClass), fileName);
 
 		// Obtain the file
 		return this.findFile(relativePath.getPath());
@@ -1533,14 +1456,12 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	public void copyDirectory(File source, File target) throws IOException {
 
 		// Ensure the source directory exists
-		assertTrue("Can not find source directory " + source.getAbsolutePath(),
-				source.isDirectory());
+		assertTrue("Can not find source directory " + source.getAbsolutePath(), source.isDirectory());
 
 		// Ensure the target directory is available
 		if (target.exists()) {
 			// Ensure is a directory
-			assertTrue("Target is not a directory " + target.getAbsolutePath(),
-					target.isDirectory());
+			assertTrue("Target is not a directory " + target.getAbsolutePath(), target.isDirectory());
 		} else {
 			// Create the target directory
 			target.mkdir();
@@ -1550,13 +1471,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		for (File file : source.listFiles()) {
 			if (file.isDirectory()) {
 				// Recursively copy sub directories
-				this.copyDirectory(new File(source, file.getName()), new File(
-						target, file.getName()));
+				this.copyDirectory(new File(source, file.getName()), new File(target, file.getName()));
 			} else {
 				// Copy the file
 				InputStream reader = new FileInputStream(file);
-				OutputStream writer = new FileOutputStream(new File(target,
-						file.getName()));
+				OutputStream writer = new FileOutputStream(new File(target, file.getName()));
 				int value;
 				while ((value = reader.read()) != -1) {
 					writer.write((byte) value);
@@ -1582,16 +1501,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws FileNotFoundException
 	 *             Should the file not be found.
 	 */
-	public InputStream findInputStream(Class<?> packageClass, String fileName)
-			throws FileNotFoundException {
+	public InputStream findInputStream(Class<?> packageClass, String fileName) throws FileNotFoundException {
 
 		// Obtain the relative file path
-		File relativePath = new File(this.getPackageRelativePath(packageClass),
-				fileName);
+		File relativePath = new File(this.getPackageRelativePath(packageClass), fileName);
 
 		// Attempt to obtain input stream to file from class path
-		InputStream inputStream = ClassLoader
-				.getSystemResourceAsStream(relativePath.getPath());
+		InputStream inputStream = ClassLoader.getSystemResourceAsStream(relativePath.getPath());
 		if (inputStream != null) {
 			return inputStream;
 		}
@@ -1626,8 +1542,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws IOException
 	 *             Should fail to read from output file.
 	 */
-	public String getFileContents(File file) throws FileNotFoundException,
-			IOException {
+	public String getFileContents(File file) throws FileNotFoundException, IOException {
 
 		// Read in contents of file
 		StringWriter contents = new StringWriter();
@@ -1655,8 +1570,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		// Ensure the target file does not exist
 		if (target.exists()) {
-			throw new IOException("Target file already exists ["
-					+ target.getAbsolutePath() + "]");
+			throw new IOException("Target file already exists [" + target.getAbsolutePath() + "]");
 		}
 
 		// Load the file content
@@ -1712,8 +1626,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return <code>true</code> to print messages.
 	 */
 	protected boolean isPrintMessages() {
-		return Boolean.parseBoolean(System.getProperty("print.messages",
-				Boolean.FALSE.toString())) || this.isVerbose;
+		return Boolean.parseBoolean(System.getProperty("print.messages", Boolean.FALSE.toString())) || this.isVerbose;
 	}
 
 	/**
@@ -1728,8 +1641,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return <code>true</code> to ignore doing a stress test.
 	 */
 	private boolean isIgnoreStressTests() {
-		return Boolean.parseBoolean(System.getProperty("ignore.stress.tests",
-				Boolean.FALSE.toString()));
+		return Boolean.parseBoolean(System.getProperty("ignore.stress.tests", Boolean.FALSE.toString()));
 	}
 
 	/**
@@ -1755,11 +1667,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		// Print the results
 		NumberFormat format = NumberFormat.getPercentInstance();
-		this.printMessage("HEAP: " + format.format(usedPercentage) + " (used="
-				+ this.getMemorySize(heap.getUsed()) + ", max="
-				+ this.getMemorySize(heap.getMax()) + ", init="
-				+ this.getMemorySize(heap.getInit()) + ", commit="
-				+ this.getMemorySize(heap.getCommitted()) + ", fq="
+		this.printMessage("HEAP: " + format.format(usedPercentage) + " (used=" + this.getMemorySize(heap.getUsed())
+				+ ", max=" + this.getMemorySize(heap.getMax()) + ", init=" + this.getMemorySize(heap.getInit())
+				+ ", commit=" + this.getMemorySize(heap.getCommitted()) + ", fq="
 				+ memoryBean.getObjectPendingFinalizationCount() + ")");
 	}
 
@@ -1826,8 +1736,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		}
 
 		// Print the message
-		System.out.println(this.getClass().getSimpleName() + "."
-				+ this.getName() + ": " + message);
+		System.out.println(this.getClass().getSimpleName() + "." + this.getName() + ": " + message);
 	}
 
 	/**

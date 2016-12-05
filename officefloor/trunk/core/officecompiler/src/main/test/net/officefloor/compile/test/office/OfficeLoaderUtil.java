@@ -52,8 +52,7 @@ public class OfficeLoaderUtil {
 	/**
 	 * {@link Office} location for loading.
 	 */
-	private static final String OFFICE_LOCATION = OfficeLoaderUtil.class
-			.getSimpleName();
+	private static final String OFFICE_LOCATION = OfficeLoaderUtil.class.getSimpleName();
 
 	/**
 	 * Validates the {@link OfficeSourceSpecification} for the
@@ -68,16 +67,14 @@ public class OfficeLoaderUtil {
 	 *            instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
-	public static <O extends OfficeSource> PropertyList validateSpecification(
-			Class<O> officeSourceClass, String... propertyNameLabels) {
+	public static <O extends OfficeSource> PropertyList validateSpecification(Class<O> officeSourceClass,
+			String... propertyNameLabels) {
 
 		// Load the specification
-		PropertyList properties = getOfficeFloorCompiler().getOfficeLoader()
-				.loadSpecification(officeSourceClass);
+		PropertyList properties = getOfficeFloorCompiler().getOfficeLoader().loadSpecification(officeSourceClass);
 
 		// Validate the properties of the specification
-		PropertyListUtil.validatePropertyNameLabels(properties,
-				propertyNameLabels);
+		PropertyListUtil.validatePropertyNameLabels(properties, propertyNameLabels);
 
 		// Return the specification properties
 		return properties;
@@ -93,10 +90,8 @@ public class OfficeLoaderUtil {
 	 *            Name of the resource.
 	 * @return Class path location of the resource.
 	 */
-	public static String getClassPathLocation(Class<?> offsetClass,
-			String resourceName) {
-		return SectionLoaderUtil
-				.getClassPathLocation(offsetClass, resourceName);
+	public static String getClassPathLocation(Class<?> offsetClass, String resourceName) {
+		return SectionLoaderUtil.getClassPathLocation(offsetClass, resourceName);
 	}
 
 	/**
@@ -107,12 +102,10 @@ public class OfficeLoaderUtil {
 	 *            {@link OfficeSource} class name.
 	 * @return {@link OfficeArchitect}.
 	 */
-	public static OfficeArchitect createOfficeArchitect(
-			String officeSourceClassName) {
+	public static OfficeArchitect createOfficeArchitect(String officeSourceClassName) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		OfficeNode office = new OfficeNodeImpl(
-				OfficeLoaderUtil.class.getSimpleName(), null, context);
+		OfficeNode office = new OfficeNodeImpl(OfficeLoaderUtil.class.getSimpleName(), null, context);
 		office.initialise(officeSourceClassName, null, OFFICE_LOCATION);
 		return office;
 	}
@@ -121,20 +114,15 @@ public class OfficeLoaderUtil {
 	 * Creates the {@link OfficeArchitect} to create the expected
 	 * {@link OfficeType}.
 	 * 
-	 * @param <O>
-	 *            {@link OfficeSource} type.
-	 * @param officeSourceClass
+	 * @param officeSource
 	 *            {@link OfficeSource} instance.
 	 * @return {@link OfficeArchitect}.
 	 */
-	public static <O extends OfficeSource> OfficeArchitect createOfficeArchitect(
-			O officeSource) {
+	public static OfficeArchitect createOfficeArchitect(OfficeSource officeSource) {
 		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
 		NodeContext context = (NodeContext) compiler;
-		OfficeNode office = new OfficeNodeImpl(
-				OfficeLoaderUtil.class.getSimpleName(), null, context);
-		office.initialise(officeSource.getClass().getName(), officeSource,
-				OFFICE_LOCATION);
+		OfficeNode office = new OfficeNodeImpl(OfficeLoaderUtil.class.getSimpleName(), null, context);
+		office.initialise(officeSource.getClass().getName(), officeSource, OFFICE_LOCATION);
 		return office;
 	}
 
@@ -158,17 +146,14 @@ public class OfficeLoaderUtil {
 	 *            {@link Property} name/value listings.
 	 * @return {@link OfficeType}.
 	 */
-	public static <O extends OfficeSource> OfficeType validateOffice(
-			OfficeArchitect architect, Class<O> officeSourceClass,
-			Class<?> offsetClass, String resourceName,
-			String... propertyNameValuePairs) {
+	public static <O extends OfficeSource> OfficeType validateOffice(OfficeArchitect architect,
+			Class<O> officeSourceClass, Class<?> offsetClass, String resourceName, String... propertyNameValuePairs) {
 
 		// Obtain the location of the office
 		String officeLocation = getClassPathLocation(offsetClass, resourceName);
 
 		// Validate the office type
-		return validateOffice(architect, officeSourceClass, officeLocation,
-				propertyNameValuePairs);
+		return validateOffice(architect, officeSourceClass, officeLocation, propertyNameValuePairs);
 	}
 
 	/**
@@ -188,136 +173,107 @@ public class OfficeLoaderUtil {
 	 *            {@link Property} name/value listings.
 	 * @return {@link OfficeType}.
 	 */
-	public static <O extends OfficeSource> OfficeType validateOffice(
-			OfficeArchitect architect, Class<O> officeSourceClass,
-			String officeLocation, String... propertyNameValuePairs) {
+	public static <O extends OfficeSource> OfficeType validateOffice(OfficeArchitect architect,
+			Class<O> officeSourceClass, String officeLocation, String... propertyNameValuePairs) {
 
 		// Cast to obtain expected office type
 		if (!(architect instanceof OfficeNode)) {
 			TestCase.fail("architect must be created from createOfficeArchitect");
 		}
-		OfficeType expectedOffice = ((OfficeNode) architect)
-				.loadOfficeType(new TypeContextImpl());
+		OfficeType expectedOffice = ((OfficeNode) architect).loadOfficeType(new TypeContextImpl());
 
 		// Load the actual office type
-		OfficeType actualOffice = loadOfficeType(officeSourceClass,
-				officeLocation, propertyNameValuePairs);
+		OfficeType actualOffice = loadOfficeType(officeSourceClass, officeLocation, propertyNameValuePairs);
 
 		// Validate the section inputs
-		OfficeAvailableSectionInputType[] eSectionInputs = expectedOffice
-				.getOfficeSectionInputTypes();
-		OfficeAvailableSectionInputType[] aSectionInputs = actualOffice
-				.getOfficeSectionInputTypes();
-		TestCase.assertEquals("Incorrect number of section inputs",
-				eSectionInputs.length, aSectionInputs.length);
+		OfficeAvailableSectionInputType[] eSectionInputs = expectedOffice.getOfficeSectionInputTypes();
+		OfficeAvailableSectionInputType[] aSectionInputs = actualOffice.getOfficeSectionInputTypes();
+		TestCase.assertEquals("Incorrect number of section inputs", eSectionInputs.length, aSectionInputs.length);
 		for (int i = 0; i < eSectionInputs.length; i++) {
 			OfficeAvailableSectionInputType eSectionInput = eSectionInputs[i];
 			OfficeAvailableSectionInputType aSectionInput = aSectionInputs[i];
-			TestCase.assertEquals("Incorrect name for section input " + i,
-					eSectionInput.getOfficeSectionInputName(),
+			TestCase.assertEquals("Incorrect name for section input " + i, eSectionInput.getOfficeSectionInputName(),
 					aSectionInput.getOfficeSectionInputName());
-			TestCase.assertEquals("Incorrect section for section input " + i,
-					eSectionInput.getOfficeSectionName(),
+			TestCase.assertEquals("Incorrect section for section input " + i, eSectionInput.getOfficeSectionName(),
 					aSectionInput.getOfficeSectionName());
-			TestCase.assertEquals("Incorrect parameter type for section input "
-					+ i, eSectionInput.getParameterType(),
+			TestCase.assertEquals("Incorrect parameter type for section input " + i, eSectionInput.getParameterType(),
 					aSectionInput.getParameterType());
 		}
 
 		// Validate the inputs
 		OfficeInputType[] eInputs = expectedOffice.getOfficeInputTypes();
 		OfficeInputType[] aInputs = actualOffice.getOfficeInputTypes();
-		TestCase.assertEquals("Incorrect number of inputs", eInputs.length,
-				aInputs.length);
+		TestCase.assertEquals("Incorrect number of inputs", eInputs.length, aInputs.length);
 		for (int i = 0; i < eInputs.length; i++) {
 			OfficeInputType eInput = eInputs[i];
 			OfficeInputType aInput = aInputs[i];
-			TestCase.assertEquals("Incorrect name for input " + i,
-					eInput.getOfficeInputName(), aInput.getOfficeInputName());
-			TestCase.assertEquals("Incorrect parameter type for input " + i,
-					eInput.getParameterType(), aInput.getParameterType());
+			TestCase.assertEquals("Incorrect name for input " + i, eInput.getOfficeInputName(),
+					aInput.getOfficeInputName());
+			TestCase.assertEquals("Incorrect parameter type for input " + i, eInput.getParameterType(),
+					aInput.getParameterType());
 			OfficeOutputType eResponse = eInput.getResponseOfficeOutputType();
 			if (eResponse == null) {
-				TestCase.assertNull(
-						"Should not have response output for input " + i,
+				TestCase.assertNull("Should not have response output for input " + i,
 						aInput.getResponseOfficeOutputType());
 			} else {
-				OfficeOutputType aResponse = aInput
-						.getResponseOfficeOutputType();
-				TestCase.assertEquals(
-						"Incorrect response output for input " + i,
-						eResponse.getOfficeOutputName(),
-						(aResponse == null ? null : aResponse
-								.getOfficeOutputName()));
+				OfficeOutputType aResponse = aInput.getResponseOfficeOutputType();
+				TestCase.assertEquals("Incorrect response output for input " + i, eResponse.getOfficeOutputName(),
+						(aResponse == null ? null : aResponse.getOfficeOutputName()));
 			}
 		}
 
 		// Validate the outputs
 		OfficeOutputType[] eOutputs = expectedOffice.getOfficeOutputTypes();
 		OfficeOutputType[] aOutputs = actualOffice.getOfficeOutputTypes();
-		TestCase.assertEquals("Incorrect number of outputs", eOutputs.length,
-				aOutputs.length);
+		TestCase.assertEquals("Incorrect number of outputs", eOutputs.length, aOutputs.length);
 		for (int i = 0; i < eOutputs.length; i++) {
 			OfficeOutputType eOutput = eOutputs[i];
 			OfficeOutputType aOutput = aOutputs[i];
-			TestCase.assertEquals("Incorrect name for output " + i,
-					eOutput.getOfficeOutputName(),
+			TestCase.assertEquals("Incorrect name for output " + i, eOutput.getOfficeOutputName(),
 					aOutput.getOfficeOutputName());
-			TestCase.assertEquals("Incorrect argument type for output " + i,
-					eOutput.getArgumentType(), aOutput.getArgumentType());
+			TestCase.assertEquals("Incorrect argument type for output " + i, eOutput.getArgumentType(),
+					aOutput.getArgumentType());
 			OfficeInputType eHandler = eOutput.getHandlingOfficeInputType();
 			if (eHandler == null) {
-				TestCase.assertEquals(
-						"Should not have handler input for output " + i,
+				TestCase.assertEquals("Should not have handler input for output " + i,
 						aOutput.getHandlingOfficeInputType());
 			} else {
 				OfficeInputType aHandler = aOutput.getHandlingOfficeInputType();
-				TestCase.assertEquals(
-						"Incorrect handler input for output " + i, eHandler
-								.getOfficeInputName(), (aHandler == null ? null
-								: aHandler.getOfficeInputName()));
+				TestCase.assertEquals("Incorrect handler input for output " + i, eHandler.getOfficeInputName(),
+						(aHandler == null ? null : aHandler.getOfficeInputName()));
 			}
 		}
 
 		// Validate the managed objects
-		OfficeManagedObjectType[] eManagedObjects = expectedOffice
-				.getOfficeManagedObjectTypes();
-		OfficeManagedObjectType[] aManagedObjects = actualOffice
-				.getOfficeManagedObjectTypes();
-		TestCase.assertEquals("Incorrect number of managed objects",
-				eManagedObjects.length, aManagedObjects.length);
+		OfficeManagedObjectType[] eManagedObjects = expectedOffice.getOfficeManagedObjectTypes();
+		OfficeManagedObjectType[] aManagedObjects = actualOffice.getOfficeManagedObjectTypes();
+		TestCase.assertEquals("Incorrect number of managed objects", eManagedObjects.length, aManagedObjects.length);
 		for (int i = 0; i < eManagedObjects.length; i++) {
 			OfficeManagedObjectType eManagedObject = eManagedObjects[i];
 			OfficeManagedObjectType aManagedObject = aManagedObjects[i];
-			TestCase.assertEquals("Incorrect name for managed object " + i,
-					eManagedObject.getOfficeManagedObjectName(),
+			TestCase.assertEquals("Incorrect name for managed object " + i, eManagedObject.getOfficeManagedObjectName(),
 					aManagedObject.getOfficeManagedObjectName());
-			TestCase.assertEquals("Incorrect object type for managed object "
-					+ i, eManagedObject.getObjectType(),
+			TestCase.assertEquals("Incorrect object type for managed object " + i, eManagedObject.getObjectType(),
 					aManagedObject.getObjectType());
 
 			// Validate the supported extension interfaces
 			String[] eEis = eManagedObject.getExtensionInterfaces();
 			String[] aEis = aManagedObject.getExtensionInterfaces();
-			TestCase.assertEquals(
-					"Incorrect number of extension interfaces for managed object "
-							+ i, eEis.length, aEis.length);
+			TestCase.assertEquals("Incorrect number of extension interfaces for managed object " + i, eEis.length,
+					aEis.length);
 			for (int j = 0; j < eEis.length; j++) {
-				TestCase.assertEquals("Incorrect extension interface " + j,
-						eEis[j], aEis[j]);
+				TestCase.assertEquals("Incorrect extension interface " + j, eEis[j], aEis[j]);
 			}
 		}
 
 		// Validate the teams
 		OfficeTeamType[] eTeams = expectedOffice.getOfficeTeamTypes();
 		OfficeTeamType[] aTeams = actualOffice.getOfficeTeamTypes();
-		TestCase.assertEquals("Incorrect number of teams", eTeams.length,
-				aTeams.length);
+		TestCase.assertEquals("Incorrect number of teams", eTeams.length, aTeams.length);
 		for (int i = 0; i < eTeams.length; i++) {
 			OfficeTeamType eTeam = eTeams[i];
 			OfficeTeamType aTeam = aTeams[i];
-			TestCase.assertEquals("Incorrect team " + i,
-					eTeam.getOfficeTeamName(), aTeam.getOfficeTeamName());
+			TestCase.assertEquals("Incorrect team " + i, eTeam.getOfficeTeamName(), aTeam.getOfficeTeamName());
 		}
 
 		// Return the actual office type
@@ -339,18 +295,16 @@ public class OfficeLoaderUtil {
 	 *            {@link Property} name/value listing.
 	 * @return {@link OfficeType}.
 	 */
-	public static <O extends OfficeSource> OfficeType loadOfficeType(
-			Class<O> officeSourceClass, String officeLocation,
+	public static <O extends OfficeSource> OfficeType loadOfficeType(Class<O> officeSourceClass, String officeLocation,
 			String... propertyNameValuePairs) {
 
 		// Obtain the class loader and configuration context
 		ClassLoader classLoader = officeSourceClass.getClassLoader();
-		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
-				classLoader);
+		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader);
 
 		// Return the loaded office type
-		return loadOfficeType(officeSourceClass, officeLocation,
-				configurationContext, classLoader, propertyNameValuePairs);
+		return loadOfficeType(officeSourceClass, officeLocation, configurationContext, classLoader,
+				propertyNameValuePairs);
 	}
 
 	/**
@@ -370,14 +324,11 @@ public class OfficeLoaderUtil {
 	 *            {@link Property} name/value listing.
 	 * @return {@link OfficeType}.
 	 */
-	public static <O extends OfficeSource> OfficeType loadOfficeType(
-			Class<O> officeSourceClass, String officeLocation,
-			ConfigurationContext configurationContext, ClassLoader classLoader,
-			String... propertyNameValuePairs) {
+	public static <O extends OfficeSource> OfficeType loadOfficeType(Class<O> officeSourceClass, String officeLocation,
+			ConfigurationContext configurationContext, ClassLoader classLoader, String... propertyNameValuePairs) {
 
 		// Return the loaded office type
-		return getOfficeFloorCompiler().getOfficeLoader().loadOfficeType(
-				officeSourceClass, officeLocation,
+		return getOfficeFloorCompiler().getOfficeLoader().loadOfficeType(officeSourceClass, officeLocation,
 				new PropertyListImpl(propertyNameValuePairs));
 	}
 
@@ -388,8 +339,7 @@ public class OfficeLoaderUtil {
 	 */
 	private static OfficeFloorCompiler getOfficeFloorCompiler() {
 		// Create the office floor compiler that fails on first issue
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		return compiler;
 	}

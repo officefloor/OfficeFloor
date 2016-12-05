@@ -87,8 +87,8 @@ public class CompileUtil {
 	 * @return Collection as a sorted array.
 	 */
 	@Deprecated
-	public static <T> T[] toSortedArray(Collection<T> collection,
-			Object[] type, final StringExtractor<? super T> extractor) {
+	public static <T> T[] toSortedArray(Collection<T> collection, Object[] type,
+			final StringExtractor<? super T> extractor) {
 
 		// Create the array
 		T[] array = toArray(collection, type);
@@ -120,8 +120,7 @@ public class CompileUtil {
 	 * @return Compare result for sorting.
 	 */
 	public static int sortCompare(String a, String b) {
-		return String.CASE_INSENSITIVE_ORDER.compare(a == null ? "" : a,
-				b == null ? "" : b);
+		return String.CASE_INSENSITIVE_ORDER.compare(a == null ? "" : a, b == null ? "" : b);
 	}
 
 	/**
@@ -144,9 +143,8 @@ public class CompileUtil {
 	 * @return {@link Class}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Class<? extends T> obtainClass(String className,
-			Class<T> expectedType, Map<String, Class<?>> aliases,
-			SourceContext context, Node node, CompilerIssues issues) {
+	public static <T> Class<? extends T> obtainClass(String className, Class<T> expectedType,
+			Map<String, Class<?>> aliases, SourceContext context, Node node, CompilerIssues issues) {
 		try {
 
 			// Obtain the class (first checking for an alias)
@@ -160,8 +158,7 @@ public class CompileUtil {
 			if (!expectedType.isAssignableFrom(clazz)) {
 				// Not of expected type
 				issues.addIssue(node,
-						"Must implement " + expectedType.getSimpleName()
-								+ " (class=" + clazz.getName() + ")");
+						"Must implement " + expectedType.getSimpleName() + " (class=" + clazz.getName() + ")");
 				return null; // instance not of type
 			}
 
@@ -194,8 +191,7 @@ public class CompileUtil {
 	 *            {@link CompilerIssues}.
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
-	public static <T, E> T newInstance(Class<T> clazz, Class<E> expectedType,
-			Node node, CompilerIssues issues) {
+	public static <T, E> T newInstance(Class<T> clazz, Class<E> expectedType, Node node, CompilerIssues issues) {
 		try {
 			// Create the instance
 			T instance = clazz.newInstance();
@@ -204,8 +200,7 @@ public class CompileUtil {
 			if (!expectedType.isInstance(instance)) {
 				// Indicate issue
 				issues.addIssue(node,
-						"Must implement " + expectedType.getSimpleName()
-								+ " (class=" + clazz.getName() + ")");
+						"Must implement " + expectedType.getSimpleName() + " (class=" + clazz.getName() + ")");
 				return null; // instance not of type
 			}
 
@@ -214,9 +209,9 @@ public class CompileUtil {
 
 		} catch (Throwable ex) {
 			// Indicate issue (catching exception from constructor)
-			issues.addIssue(node, "Failed to instantiate "
-					+ (clazz != null ? clazz.getName() : null)
-					+ " by default constructor", ex);
+			issues.addIssue(node,
+					"Failed to instantiate " + (clazz != null ? clazz.getName() : null) + " by default constructor",
+					ex);
 			return null; // no instance
 		}
 	}
@@ -241,13 +236,11 @@ public class CompileUtil {
 	 *            {@link CompilerIssues}.
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
-	public static <T> T newInstance(String className, Class<T> expectedType,
-			Map<String, Class<?>> aliases, SourceContext context, Node node,
-			CompilerIssues issues) {
+	public static <T> T newInstance(String className, Class<T> expectedType, Map<String, Class<?>> aliases,
+			SourceContext context, Node node, CompilerIssues issues) {
 
 		// Obtain the class
-		Class<? extends T> clazz = obtainClass(className, expectedType,
-				aliases, context, node, issues);
+		Class<? extends T> clazz = obtainClass(className, expectedType, aliases, context, node, issues);
 		if (clazz == null) {
 			return null; // must have class
 		}
@@ -265,6 +258,8 @@ public class CompileUtil {
 	/**
 	 * Convenience method to load a type.
 	 * 
+	 * @param <T>
+	 *            Type to be loaded.
 	 * @param type
 	 *            Type to be loaded.
 	 * @param sourceClassName
@@ -277,8 +272,8 @@ public class CompileUtil {
 	 * @throws LoadTypeError
 	 *             If fails to load the type.
 	 */
-	public static <T> T loadType(Class<T> type, String sourceClassName,
-			CompilerIssues issues, Supplier<T> supplier) throws LoadTypeError {
+	public static <T> T loadType(Class<T> type, String sourceClassName, CompilerIssues issues, Supplier<T> supplier)
+			throws LoadTypeError {
 
 		// Load the type
 		IssueCapture<T> capture = issues.captureIssues(supplier);
@@ -287,8 +282,7 @@ public class CompileUtil {
 		T loadedType = capture.getReturnValue();
 		if (loadedType == null) {
 			// Failed to load type
-			throw new LoadTypeError(type, sourceClassName,
-					capture.getCompilerIssues());
+			throw new LoadTypeError(type, sourceClassName, capture.getCompilerIssues());
 		}
 
 		// Return the loaded type
@@ -298,6 +292,11 @@ public class CompileUtil {
 	/**
 	 * Convenience method to load a listing of types.
 	 * 
+	 * @param <N>
+	 *            {@link Node} type within the listing.
+	 * @param <T>
+	 *            Type returned from the {@link Node} instances within the
+	 *            listing.
 	 * @param nodesMap
 	 *            {@link Map} of {@link Node} instances by their names to load
 	 *            types from.
@@ -311,16 +310,19 @@ public class CompileUtil {
 	 * @return Array of types or <code>null</code> with issues reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	public static <N, T> T[] loadTypes(Map<String, N> nodesMap,
-			Function<N, String> sortKeyExtractor, Function<N, T> typeLoader,
-			IntFunction<T[]> arrayGenerator) {
-		return loadTypes(nodesMap.values().stream(), sortKeyExtractor,
-				typeLoader, arrayGenerator);
+	public static <N, T> T[] loadTypes(Map<String, N> nodesMap, Function<N, String> sortKeyExtractor,
+			Function<N, T> typeLoader, IntFunction<T[]> arrayGenerator) {
+		return loadTypes(nodesMap.values().stream(), sortKeyExtractor, typeLoader, arrayGenerator);
 	}
 
 	/**
 	 * Convenience method to load a listing of types.
 	 * 
+	 * @param <N>
+	 *            {@link Node} type within the listing.
+	 * @param <T>
+	 *            Type returned from the {@link Node} instances within the
+	 *            listing.
 	 * @param nodes
 	 *            {@link Stream} of {@link Node} instances to load types from.
 	 * @param sortKeyExtractor
@@ -333,16 +335,12 @@ public class CompileUtil {
 	 * @return Array of types or <code>null</code> with issues reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	public static <N, T> T[] loadTypes(Stream<N> nodes,
-			Function<N, String> sortKeyExtractor, Function<N, T> typeLoader,
+	public static <N, T> T[] loadTypes(Stream<N> nodes, Function<N, String> sortKeyExtractor, Function<N, T> typeLoader,
 			IntFunction<T[]> arrayGenerator) {
 		try {
 			// Load the types
-			return nodes
-					.sorted((a, b) -> CompileUtil.sortCompare(
-							sortKeyExtractor.apply(a),
-							sortKeyExtractor.apply(b))).map(typeLoader)
-					.filter((type) -> {
+			return nodes.sorted((a, b) -> CompileUtil.sortCompare(sortKeyExtractor.apply(a), sortKeyExtractor.apply(b)))
+					.map(typeLoader).filter((type) -> {
 						if (type == null) {
 							throw new LoadTypesException();
 						}
@@ -363,6 +361,8 @@ public class CompileUtil {
 	/**
 	 * Convenience method to source a listing of sub {@link Node} instances.
 	 * 
+	 * @param <N>
+	 *            {@link Node} type.
 	 * @param nodesMap
 	 *            {@link Map} of {@link Node} instances by their names to
 	 *            source.
@@ -376,13 +376,10 @@ public class CompileUtil {
 	 *         Otherwise, <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	public static <N> boolean sourceTree(Map<String, N> nodesMap,
-			Function<N, String> sortKeyExtractor, Predicate<N> sourcer) {
-		return nodesMap
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						sortKeyExtractor.apply(a), sortKeyExtractor.apply(b)))
+	public static <N> boolean sourceTree(Map<String, N> nodesMap, Function<N, String> sortKeyExtractor,
+			Predicate<N> sourcer) {
+		return nodesMap.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(sortKeyExtractor.apply(a), sortKeyExtractor.apply(b)))
 				.allMatch(sourcer);
 	}
 

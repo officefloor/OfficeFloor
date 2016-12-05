@@ -51,7 +51,7 @@ public interface TaskRegistry {
 	 *            Name of the {@link TaskNode}.
 	 * @param taskTypeName
 	 *            Type name of the {@link Task} within the {@link Work}.
-	 * @param work
+	 * @param workNode
 	 *            Parent {@link WorkNode}.
 	 * @return Initialised {@link TaskNode} by the name.
 	 */

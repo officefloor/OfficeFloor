@@ -147,8 +147,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		 *            {@link ManagedObjectSource}.
 		 */
 		@SuppressWarnings("rawtypes")
-		public InitialisedState(String managedObjectSourceClassName,
-				ManagedObjectSource managedObjectSource) {
+		public InitialisedState(String managedObjectSourceClassName, ManagedObjectSource managedObjectSource) {
 			this.managedObjectSourceClassName = managedObjectSourceClassName;
 			this.managedObjectSource = managedObjectSource;
 		}
@@ -223,7 +222,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 *            {@link SuppliedManagedObjectNode} containing this
 	 *            {@link ManagedObjectSource}. <code>null</code> if not provided
 	 *            from {@link SupplierSource}.
-	 * @param suppliedManagedObjectNode
+	 * @param containingSuppliedManagedObjectNode
 	 *            {@link SuppliedManagedObjectNode} should this be a supplied
 	 *            {@link ManagedObjectSource}. Will be <code>null</code> if not
 	 *            supplied.
@@ -233,21 +232,19 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagedObjectSourceNodeImpl(String managedObjectSourceName,
-			SectionNode containingSectionNode, OfficeNode containingOfficeNode,
-			SuppliedManagedObjectNode suppliedManagedObjectNode,
+	public ManagedObjectSourceNodeImpl(String managedObjectSourceName, SectionNode containingSectionNode,
+			OfficeNode containingOfficeNode, SuppliedManagedObjectNode containingSuppliedManagedObjectNode,
 			OfficeFloorNode containingOfficeFloorNode, NodeContext context) {
 		this.managedObjectSourceName = managedObjectSourceName;
 		this.containingSectionNode = containingSectionNode;
 		this.containingOfficeNode = containingOfficeNode;
-		this.suppliedManagedObjectNode = suppliedManagedObjectNode;
+		this.suppliedManagedObjectNode = containingSuppliedManagedObjectNode;
 		this.containingOfficeFloorNode = containingOfficeFloorNode;
 		this.context = context;
 
 		// Specify the registry (wrapping to keep track of managed objects)
 		this.managedObjectRegistry = (this.containingSectionNode != null ? this.containingSectionNode
-				: (this.containingOfficeNode != null ? this.containingOfficeNode
-						: this.containingOfficeFloorNode));
+				: (this.containingOfficeNode != null ? this.containingOfficeNode : this.containingOfficeFloorNode));
 
 		// Create the additional objects
 		this.propertyList = this.context.createPropertyList();
@@ -288,11 +285,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public void initialise(String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource) {
+	public void initialise(String managedObjectSourceClassName, ManagedObjectSource<?, ?> managedObjectSource) {
 		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState(managedObjectSourceClassName,
-						managedObjectSource));
+				() -> new InitialisedState(managedObjectSourceClassName, managedObjectSource));
 	}
 
 	/*
@@ -316,10 +311,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public boolean hasManagedObjectSource() {
-		return (this.suppliedManagedObjectNode != null)
-				|| (this.state.managedObjectSource != null)
-				|| (!CompileUtil
-						.isBlank(this.state.managedObjectSourceClassName));
+		return (this.suppliedManagedObjectNode != null) || (this.state.managedObjectSource != null)
+				|| (!CompileUtil.isBlank(this.state.managedObjectSourceClassName));
 	}
 
 	@Override
@@ -336,75 +329,63 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		} else {
 
 			// Create the loader to obtain the managed object type
-			ManagedObjectLoader loader = this.context
-					.getManagedObjectLoader(this);
+			ManagedObjectLoader loader = this.context.getManagedObjectLoader(this);
 
 			// Load the managed object type
 			if (this.state.managedObjectSource != null) {
 				// Load and return the managed object type from instance
-				return loader.loadManagedObjectType(
-						this.state.managedObjectSource, this.propertyList);
+				return loader.loadManagedObjectType(this.state.managedObjectSource, this.propertyList);
 
 			} else {
 				// Obtain the managed object source class
 				Class managedObjectSourceClass = this.context
-						.getManagedObjectSourceClass(
-								this.state.managedObjectSourceClassName, this);
+						.getManagedObjectSourceClass(this.state.managedObjectSourceClassName, this);
 				if (managedObjectSourceClass == null) {
 					return null; // must have managed object source class
 				}
 
 				// Load and return the managed object type from class
-				return loader.loadManagedObjectType(managedObjectSourceClass,
-						this.propertyList);
+				return loader.loadManagedObjectType(managedObjectSourceClass, this.propertyList);
 			}
 		}
 	}
 
 	@Override
-	public OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType(
-			TypeContext typeContext) {
+	public OfficeSectionManagedObjectSourceType loadOfficeSectionManagedObjectSourceType(TypeContext typeContext) {
 
 		// Load the managed object type
-		ManagedObjectType<?> managedObjectType = typeContext
-				.getOrLoadManagedObjectType(this);
+		ManagedObjectType<?> managedObjectType = typeContext.getOrLoadManagedObjectType(this);
 		if (managedObjectType == null) {
 			return null;
 		}
 
 		// Load the teams types
-		OfficeSectionManagedObjectTeamType[] teamTypes = CompileUtil.loadTypes(
-				this.teams, (team) -> team.getManagedObjectTeamName(),
-				(team) -> team
-						.loadOfficeSectionManagedObjectTeamType(typeContext),
+		OfficeSectionManagedObjectTeamType[] teamTypes = CompileUtil.loadTypes(this.teams,
+				(team) -> team.getManagedObjectTeamName(),
+				(team) -> team.loadOfficeSectionManagedObjectTeamType(typeContext),
 				OfficeSectionManagedObjectTeamType[]::new);
 		if (teamTypes == null) {
 			return null;
 		}
 
 		// Create and return the type
-		return new OfficeSectionManagedObjectSourceTypeImpl(
-				this.managedObjectSourceName, teamTypes);
+		return new OfficeSectionManagedObjectSourceTypeImpl(this.managedObjectSourceName, teamTypes);
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
-			TypeContext typeContext) {
+	public OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(TypeContext typeContext) {
 
 		// Ensure have the managed object source name
 		if (CompileUtil.isBlank(this.managedObjectSourceName)) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Null name for " + TYPE);
+			this.context.getCompilerIssues().addIssue(this, "Null name for " + TYPE);
 			return null; // must have name
 		}
 
 		// Ensure have the managed object source
 		if (!this.hasManagedObjectSource()) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Null source for " + TYPE + " "
-							+ this.managedObjectSourceName);
+			this.context.getCompilerIssues().addIssue(this,
+					"Null source for " + TYPE + " " + this.managedObjectSourceName);
 			return null; // must have source
 		}
 
@@ -414,22 +395,19 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Load the managed object type
 		if (this.state.managedObjectSource != null) {
 			// Load and return the managed object type from instance
-			return loader.loadOfficeFloorManagedObjectSourceType(
-					this.managedObjectSourceName,
+			return loader.loadOfficeFloorManagedObjectSourceType(this.managedObjectSourceName,
 					this.state.managedObjectSource, this.propertyList);
 
 		} else {
 			// Obtain the managed object source class
 			Class managedObjectSourceClass = this.context
-					.getManagedObjectSourceClass(
-							this.state.managedObjectSourceClassName, this);
+					.getManagedObjectSourceClass(this.state.managedObjectSourceClassName, this);
 			if (managedObjectSourceClass == null) {
 				return null; // must have managed object source class
 			}
 
 			// Load and return the managed object type from class
-			return loader.loadOfficeFloorManagedObjectSourceType(
-					this.managedObjectSourceName, managedObjectSourceClass,
+			return loader.loadOfficeFloorManagedObjectSourceType(this.managedObjectSourceName, managedObjectSourceClass,
 					this.propertyList);
 		}
 	}
@@ -439,15 +417,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Obtain the name based on location
 		if (this.containingSectionNode != null) {
 			// Use name qualified with both office and section
-			return this.containingOfficeNode.getDeployedOfficeName()
-					+ "."
-					+ this.containingSectionNode
-							.getSectionQualifiedName(this.managedObjectSourceName);
+			return this.containingOfficeNode.getDeployedOfficeName() + "."
+					+ this.containingSectionNode.getSectionQualifiedName(this.managedObjectSourceName);
 
 		} else if (this.containingOfficeNode != null) {
 			// Use name qualified with office name
-			return this.containingOfficeNode.getDeployedOfficeName() + "."
-					+ this.managedObjectSourceName;
+			return this.containingOfficeNode.getDeployedOfficeName() + "." + this.managedObjectSourceName;
 
 		} else {
 			// Use name unqualified
@@ -459,8 +434,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public OfficeNode getManagingOfficeNode() {
 
 		// Obtain the managing office
-		OfficeNode managingOffice = LinkUtil.retrieveTarget(
-				this.managingOffice, OfficeNode.class,
+		OfficeNode managingOffice = LinkUtil.retrieveTarget(this.managingOffice, OfficeNode.class,
 				this.context.getCompilerIssues());
 
 		// Return the managing office
@@ -468,16 +442,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public boolean linkInputManagedObjectNode(
-			InputManagedObjectNode inputManagedObject) {
+	public boolean linkInputManagedObjectNode(InputManagedObjectNode inputManagedObject) {
 
 		// Determine if already linked
 		if (this.inputManagedObjectNode != null) {
 			// Already linked
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Managed object source " + this.managedObjectSourceName
-							+ " already linked to an input managed object");
+			this.context.getCompilerIssues().addIssue(this, "Managed object source " + this.managedObjectSourceName
+					+ " already linked to an input managed object");
 			return false;
 		}
 
@@ -493,17 +464,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void buildManagedObject(OfficeFloorBuilder builder,
-			OfficeNode managingOffice, OfficeBuilder officeBuilder,
+	public void buildManagedObject(OfficeFloorBuilder builder, OfficeNode managingOffice, OfficeBuilder officeBuilder,
 			OfficeBindings officeBindings, TypeContext typeContext) {
 
 		// Obtain the name to add this managed object source
-		final String managedObjectSourceName = this
-				.getManagedObjectSourceName();
+		final String managedObjectSourceName = this.getManagedObjectSourceName();
 
 		// Obtain the managed object type
-		ManagedObjectType<?> managedObjectType = typeContext
-				.getOrLoadManagedObjectType(this);
+		ManagedObjectType<?> managedObjectType = typeContext.getOrLoadManagedObjectType(this);
 		if (managedObjectType == null) {
 			return; // must have managed object type
 		}
@@ -523,11 +491,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					.loadSuppliedManagedObject();
 			if (suppliedManagedObject == null) {
 				// Must have supplied managed object
-				this.context.getCompilerIssues().addIssue(
-						this,
-						"No " + SuppliedManagedObject.class.getSimpleName()
-								+ " available for managed object source "
-								+ managedObjectSourceName);
+				this.context.getCompilerIssues().addIssue(this, "No " + SuppliedManagedObject.class.getSimpleName()
+						+ " available for managed object source " + managedObjectSourceName);
 				return; // must have supplied managed object
 			}
 
@@ -544,54 +509,45 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			moBuilder.setTimeout(suppliedManagedObject.getTimeout());
 
 			// Add the necessary supplied teams
-			for (SuppliedManagedObjectTeam suppliedTeam : suppliedManagedObject
-					.getSuppliedTeams()) {
+			for (SuppliedManagedObjectTeam suppliedTeam : suppliedManagedObject.getSuppliedTeams()) {
 
 				// Obtain the team name and flag that being supplied
 				String teamName = suppliedTeam.getTeamName();
 				suppliedTeamNames.add(teamName);
 
 				// Obtain the qualified team name
-				String qualifiedTeamName = managedObjectSourceName + "-"
-						+ teamName;
+				String qualifiedTeamName = managedObjectSourceName + "-" + teamName;
 
 				// Obtain the team source class
-				Class teamSourceClass = this.context.getTeamSourceClass(
-						suppliedTeam.getTeamSourceClassName(), this);
+				Class teamSourceClass = this.context.getTeamSourceClass(suppliedTeam.getTeamSourceClassName(), this);
 				if (teamSourceClass == null) {
 					continue; // must have team source class
 				}
 
 				// Build the supplied team
-				TeamBuilder<?> teamBuilder = builder.addTeam(qualifiedTeamName,
-						teamSourceClass);
+				TeamBuilder<?> teamBuilder = builder.addTeam(qualifiedTeamName, teamSourceClass);
 				for (Property property : suppliedTeam.getProperties()) {
-					teamBuilder.addProperty(property.getName(),
-							property.getValue());
+					teamBuilder.addProperty(property.getName(), property.getValue());
 				}
 
 				// Register the supplied team to the office
-				officeBuilder
-						.registerTeam(qualifiedTeamName, qualifiedTeamName);
+				officeBuilder.registerTeam(qualifiedTeamName, qualifiedTeamName);
 			}
 
 		} else if (this.state.managedObjectSource != null) {
 			// Build the managed object source from instance
-			moBuilder = builder.addManagedObject(managedObjectSourceName,
-					this.state.managedObjectSource);
+			moBuilder = builder.addManagedObject(managedObjectSourceName, this.state.managedObjectSource);
 
 		} else {
 			// No instance, so obtain by managed object source class
 			Class managedObjectSourceClass = this.context
-					.getManagedObjectSourceClass(
-							this.state.managedObjectSourceClassName, this);
+					.getManagedObjectSourceClass(this.state.managedObjectSourceClassName, this);
 			if (managedObjectSourceClass == null) {
 				return; // must have managed object source class
 			}
 
 			// Build the managed object source from class
-			moBuilder = builder.addManagedObject(managedObjectSourceName,
-					managedObjectSourceClass);
+			moBuilder = builder.addManagedObject(managedObjectSourceName, managedObjectSourceClass);
 		}
 
 		// Add properties for Managed Object Source
@@ -617,21 +573,18 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			// Ensure have Input ManagedObject name
 			String inputBoundManagedObjectName = null;
-			if ((this.containingSectionNode != null)
-					|| (this.containingOfficeNode != null)) {
+			if ((this.containingSectionNode != null) || (this.containingOfficeNode != null)) {
 				// Can not link to managed object initiating flow.
 				// Use name of managed object source.
 				inputBoundManagedObjectName = managedObjectSourceName;
 
 			} else {
 				// Determine if require configuring as Input Managed Object
-				ManagedObjectLoader loader = this.context
-						.getManagedObjectLoader(this);
+				ManagedObjectLoader loader = this.context.getManagedObjectLoader(this);
 				if (loader.isInputManagedObject(managedObjectType)) {
 					// Must configure as Input Managed Object (as shared)
 					if (this.inputManagedObjectNode != null) {
-						inputBoundManagedObjectName = this.inputManagedObjectNode
-								.getBoundManagedObjectName();
+						inputBoundManagedObjectName = this.inputManagedObjectNode.getBoundManagedObjectName();
 					}
 				} else {
 					// Never shared (tasks specific to Managed Object Source)
@@ -641,10 +594,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			if (CompileUtil.isBlank(inputBoundManagedObjectName)) {
 				// Provide issue as should be input
-				this.context.getCompilerIssues().addIssue(
-						this,
-						"Must provide input managed object for managed object source "
-								+ this.managedObjectSourceName
+				this.context.getCompilerIssues().addIssue(this,
+						"Must provide input managed object for managed object source " + this.managedObjectSourceName
 								+ " as managed object source has flows/teams");
 			} else {
 				// Bind the managed object to process state of managing office
@@ -655,38 +606,30 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				// For others, should be configured through Office (for flows).
 				if (this.inputManagedObjectNode != null) {
 					// Get governances for input managed object of office
-					GovernanceNode[] governances = this.inputManagedObjectNode
-							.getGovernances(managingOffice);
+					GovernanceNode[] governances = this.inputManagedObjectNode.getGovernances(managingOffice);
 
 					// Map in the governances
 					for (GovernanceNode governance : governances) {
-						inputDependencyMappings.mapGovernance(governance
-								.getOfficeGovernanceName());
+						inputDependencyMappings.mapGovernance(governance.getOfficeGovernanceName());
 					}
 				}
 
 				// Determine if dependencies
-				ManagedObjectDependencyType<?>[] dependencyTypes = managedObjectType
-						.getDependencyTypes();
+				ManagedObjectDependencyType<?>[] dependencyTypes = managedObjectType.getDependencyTypes();
 				if (dependencyTypes.length > 0) {
 
 					// Load the dependencies for the input managed object
-					for (ManagedObjectDependencyType<?> dependencyType : managedObjectType
-							.getDependencyTypes()) {
+					for (ManagedObjectDependencyType<?> dependencyType : managedObjectType.getDependencyTypes()) {
 
 						// Obtain the dependency type details
-						String dependencyName = dependencyType
-								.getDependencyName();
+						String dependencyName = dependencyType.getDependencyName();
 						Enum dependencyKey = dependencyType.getKey();
 						int dependencyIndex = dependencyType.getIndex();
 
 						// Obtain the dependency
-						ManagedObjectDependencyNode dependencyNode = this.inputDependencies
-								.get(dependencyName);
-						BoundManagedObjectNode dependency = LinkUtil
-								.retrieveTarget(dependencyNode,
-										BoundManagedObjectNode.class,
-										this.context.getCompilerIssues());
+						ManagedObjectDependencyNode dependencyNode = this.inputDependencies.get(dependencyName);
+						BoundManagedObjectNode dependency = LinkUtil.retrieveTarget(dependencyNode,
+								BoundManagedObjectNode.class, this.context.getCompilerIssues());
 						if (dependency == null) {
 							continue; // must have dependency
 						}
@@ -695,15 +638,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						officeBindings.buildManagedObjectIntoOffice(dependency);
 
 						// Link the dependency
-						String dependentManagedObjectName = dependency
-								.getBoundManagedObjectName();
+						String dependentManagedObjectName = dependency.getBoundManagedObjectName();
 						if (dependencyKey != null) {
-							inputDependencyMappings.mapDependency(
-									dependencyKey, dependentManagedObjectName);
+							inputDependencyMappings.mapDependency(dependencyKey, dependentManagedObjectName);
 						} else {
-							inputDependencyMappings
-									.mapDependency(dependencyIndex,
-											dependentManagedObjectName);
+							inputDependencyMappings.mapDependency(dependencyIndex, dependentManagedObjectName);
 						}
 					}
 				}
@@ -720,8 +659,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			// Obtain the task for the flow
 			ManagedObjectFlowNode flowNode = this.flows.get(flowName);
-			TaskNode taskNode = LinkUtil.retrieveTarget(flowNode,
-					TaskNode.class, this.context.getCompilerIssues());
+			TaskNode taskNode = LinkUtil.retrieveTarget(flowNode, TaskNode.class, this.context.getCompilerIssues());
 			if (taskNode == null) {
 				continue; // must have task node
 			}
@@ -731,12 +669,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			SectionNode section = workNode.getSectionNode();
 			OfficeNode taskOffice = section.getOfficeNode();
 			if (taskOffice != managingOffice) {
-				this.context.getCompilerIssues().addIssue(
-						this,
-						"Linked task of flow " + flowName
-								+ " from managed object source "
-								+ this.managedObjectSourceName
-								+ " must be within the managing office");
+				this.context.getCompilerIssues().addIssue(this,
+						"Linked task of flow " + flowName + " from managed object source "
+								+ this.managedObjectSourceName + " must be within the managing office");
 				continue; // task must be within managing office
 			}
 
@@ -749,11 +684,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			if (CompileUtil.isBlank(flowTaskName)) {
 				// Link the flow directly from managed object source to the task
 				if (flowKey != null) {
-					managingOfficeBuilder.linkProcess(flowKey, workName,
-							taskName);
+					managingOfficeBuilder.linkProcess(flowKey, workName, taskName);
 				} else {
-					managingOfficeBuilder.linkProcess(flowIndex, workName,
-							taskName);
+					managingOfficeBuilder.linkProcess(flowIndex, workName, taskName);
 				}
 
 			} else {
@@ -766,24 +699,20 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					public void enhanceOffice(OfficeEnhancerContext context) {
 
 						// Obtain the flow builder for the task
-						String flowWorkName = OfficeBuilderImpl
-								.getNamespacedName(managedObjectSourceName,
-										flowType.getWorkName());
+						String flowWorkName = OfficeBuilderImpl.getNamespacedName(managedObjectSourceName,
+								flowType.getWorkName());
 						String flowTaskName = flowType.getTaskName();
-						FlowNodeBuilder flowBuilder = context
-								.getFlowNodeBuilder(flowWorkName, flowTaskName);
+						FlowNodeBuilder flowBuilder = context.getFlowNodeBuilder(flowWorkName, flowTaskName);
 
 						// Link in the flow
 						Enum<?> flowKey = flowType.getKey();
 						Class<?> argumentType = flowType.getArgumentType();
 						if (flowKey != null) {
-							flowBuilder.linkFlow(flowKey, workName, taskName,
-									FlowInstigationStrategyEnum.SEQUENTIAL,
+							flowBuilder.linkFlow(flowKey, workName, taskName, FlowInstigationStrategyEnum.SEQUENTIAL,
 									argumentType);
 						} else {
 							int flowIndex = flowType.getIndex();
-							flowBuilder.linkFlow(flowIndex, workName, taskName,
-									FlowInstigationStrategyEnum.SEQUENTIAL,
+							flowBuilder.linkFlow(flowIndex, workName, taskName, FlowInstigationStrategyEnum.SEQUENTIAL,
 									argumentType);
 						}
 					}
@@ -804,16 +733,15 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 			// Obtain the team
 			ManagedObjectTeamNode managedObjectTeam = this.teams.get(teamName);
-			TeamNode team = LinkUtil.retrieveTarget(managedObjectTeam,
-					TeamNode.class, this.context.getCompilerIssues());
+			TeamNode team = LinkUtil.retrieveTarget(managedObjectTeam, TeamNode.class,
+					this.context.getCompilerIssues());
 			if (team == null) {
 				continue; // must have the team
 			}
 
 			// Register the team to the office
 			String officeTeamName = managedObjectSourceName + "." + teamName;
-			officeBuilder.registerTeam(officeTeamName,
-					team.getOfficeFloorTeamName());
+			officeBuilder.registerTeam(officeTeamName, team.getOfficeFloorTeamName());
 		}
 	}
 
@@ -832,28 +760,21 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public ManagedObjectFlow getManagedObjectFlow(
-			String managedObjectSourceFlowName) {
+	public ManagedObjectFlow getManagedObjectFlow(String managedObjectSourceFlowName) {
 		return NodeUtil.getNode(managedObjectSourceFlowName, this.flows,
-				() -> this.context.createManagedObjectFlowNode(
-						managedObjectSourceFlowName, this));
+				() -> this.context.createManagedObjectFlowNode(managedObjectSourceFlowName, this));
 	}
 
 	@Override
-	public ManagedObjectTeam getManagedObjectTeam(
-			String managedObjectSourceTeamName) {
+	public ManagedObjectTeam getManagedObjectTeam(String managedObjectSourceTeamName) {
 		return NodeUtil.getNode(managedObjectSourceTeamName, this.teams,
-				() -> this.context.createManagedObjectTeamNode(
-						managedObjectSourceTeamName, this));
+				() -> this.context.createManagedObjectTeamNode(managedObjectSourceTeamName, this));
 	}
 
 	@Override
-	public ManagedObjectDependency getInputManagedObjectDependency(
-			String managedObjectDependencyName) {
-		return NodeUtil.getNode(managedObjectDependencyName,
-				this.inputDependencies, () -> this.context
-						.createManagedObjectDependencyNode(
-								managedObjectDependencyName, this));
+	public ManagedObjectDependency getInputManagedObjectDependency(String managedObjectDependencyName) {
+		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
+				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
 	}
 
 	/*
@@ -862,15 +783,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public String getSectionManagedObjectSourceName() {
-		return (this.containingSectionNode != null ? this.managedObjectSourceName
-				: null);
+		return (this.containingSectionNode != null ? this.managedObjectSourceName : null);
 	}
 
 	@Override
-	public SectionManagedObject addSectionManagedObject(
-			String managedObjectName, ManagedObjectScope managedObjectScope) {
-		return this.managedObjectRegistry.addManagedObjectNode(
-				managedObjectName, managedObjectScope, this);
+	public SectionManagedObject addSectionManagedObject(String managedObjectName,
+			ManagedObjectScope managedObjectScope) {
+		return this.managedObjectRegistry.addManagedObjectNode(managedObjectName, managedObjectScope, this);
 	}
 
 	/*
@@ -879,21 +798,17 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public String getOfficeSectionManagedObjectSourceName() {
-		return (this.containingSectionNode != null ? this.managedObjectSourceName
-				: null);
+		return (this.containingSectionNode != null ? this.managedObjectSourceName : null);
 	}
 
 	@Override
 	public ManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName) {
-		return NodeUtil.getNode(teamName, this.teams,
-				() -> this.context.createManagedObjectTeamNode(teamName, this));
+		return NodeUtil.getNode(teamName, this.teams, () -> this.context.createManagedObjectTeamNode(teamName, this));
 	}
 
 	@Override
-	public OfficeSectionManagedObject getOfficeSectionManagedObject(
-			String managedObjectName) {
-		return this.managedObjectRegistry
-				.getManagedObjectNode(managedObjectName);
+	public OfficeSectionManagedObject getOfficeSectionManagedObject(String managedObjectName) {
+		return this.managedObjectRegistry.getManagedObjectNode(managedObjectName);
 	}
 
 	/*
@@ -902,15 +817,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public String getOfficeManagedObjectSourceName() {
-		return (this.containingOfficeNode != null ? this.managedObjectSourceName
-				: null);
+		return (this.containingOfficeNode != null ? this.managedObjectSourceName : null);
 	}
 
 	@Override
-	public OfficeManagedObject addOfficeManagedObject(String managedObjectName,
-			ManagedObjectScope managedObjectScope) {
-		return this.managedObjectRegistry.addManagedObjectNode(
-				managedObjectName, managedObjectScope, this);
+	public OfficeManagedObject addOfficeManagedObject(String managedObjectName, ManagedObjectScope managedObjectScope) {
+		return this.managedObjectRegistry.addManagedObjectNode(managedObjectName, managedObjectScope, this);
 	}
 
 	/*
@@ -928,10 +840,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public OfficeFloorManagedObject addOfficeFloorManagedObject(
-			String managedObjectName, ManagedObjectScope managedObjectScope) {
-		return this.managedObjectRegistry.addManagedObjectNode(
-				managedObjectName, managedObjectScope, this);
+	public OfficeFloorManagedObject addOfficeFloorManagedObject(String managedObjectName,
+			ManagedObjectScope managedObjectScope) {
+		return this.managedObjectRegistry.addManagedObjectNode(managedObjectName, managedObjectScope, this);
 	}
 
 }

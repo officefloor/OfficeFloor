@@ -32,6 +32,8 @@ public interface CompilerIssues {
 	/**
 	 * Captures {@link CompilerIssue} instances.
 	 * 
+	 * @param <R>
+	 *            Return type of {@link Supplier} logic.
 	 * @param supplier
 	 *            {@link Supplier} of code to capture {@link CompilerIssue}
 	 *            within.
@@ -50,8 +52,6 @@ public interface CompilerIssues {
 	 *            Possible {@link CompilerIssue} instances causing this issue.
 	 * @throws Error
 	 *             If fail compile fast.
-	 * 
-	 * @see CompilerIssues#captureIssues(Runnable)
 	 */
 	void addIssue(Node node, String issueDescription, CompilerIssue... causes);
 

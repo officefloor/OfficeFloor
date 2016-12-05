@@ -27,6 +27,7 @@ import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.office.OfficeOutputType;
+import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.type.TypeContext;
 
 /**
@@ -62,7 +63,7 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode {
 	private static class InitialisedState {
 
 		/**
-		 * Argument type from this {@link OfficeFloorOutput}.
+		 * Argument type from this {@link OfficeOutput}.
 		 */
 		private final String argumentType;
 
@@ -70,7 +71,7 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode {
 		 * Instantiate.
 		 * 
 		 * @param argumentType
-		 *            Argument type from this {@link OfficeFloorOutput}.
+		 *            Argument type from this {@link OfficeOutput}.
 		 */
 		public InitialisedState(String argumentType) {
 			this.argumentType = argumentType;
@@ -81,14 +82,13 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode {
 	 * Instantiate.
 	 * 
 	 * @param name
-	 *            Name of this {@link OfficeFloorOutput}.
+	 *            Name of this {@link OfficeOutput}.
 	 * @param office
 	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeOutputNodeImpl(String name, OfficeNode office,
-			NodeContext context) {
+	public OfficeOutputNodeImpl(String name, OfficeNode office, NodeContext context) {
 		this.name = name;
 		this.officeNode = office;
 		this.context = context;
@@ -125,8 +125,7 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode {
 
 	@Override
 	public void initialise(String argumentType) {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState(argumentType));
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState(argumentType));
 	}
 
 	/*
@@ -144,10 +143,8 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode {
 
 	@Override
 	public OfficeOutputType loadOfficeOutputType(TypeContext typeContext) {
-		return new OfficeOutputTypeImpl(this.name, this.state.argumentType,
-				(this.linkedSynchronousNode == null ? null
-						: this.linkedSynchronousNode
-								.loadOfficeInputType(typeContext)));
+		return new OfficeOutputTypeImpl(this.name, this.state.argumentType, (this.linkedSynchronousNode == null ? null
+				: this.linkedSynchronousNode.loadOfficeInputType(typeContext)));
 	}
 
 	/*
@@ -164,18 +161,14 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode {
 
 		// Ensure not already linked
 		if (this.linkedSynchronousNode != null) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Output " + this.name + " linked more than once");
+			this.context.getCompilerIssues().addIssue(this, "Output " + this.name + " linked more than once");
 			return false; // already linked
 		}
 
 		// Ensure is an input
 		if (!(node instanceof OfficeInputNode)) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Output " + this.name
-							+ " may only be synchronously linked to an "
-							+ OfficeInputNode.class.getSimpleName());
+			this.context.getCompilerIssues().addIssue(this, "Output " + this.name
+					+ " may only be synchronously linked to an " + OfficeInputNode.class.getSimpleName());
 			return false; // already linked
 		}
 
@@ -200,8 +193,7 @@ public class OfficeOutputNodeImpl implements OfficeOutputNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-		return LinkUtil.linkFlowNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkFlowNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedFlowNode = link);
 	}
 

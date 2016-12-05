@@ -27,17 +27,18 @@ import net.officefloor.compile.internal.structure.OfficeInputNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.spi.office.OfficeInput;
 import net.officefloor.compile.type.TypeContext;
 
 /**
- * Implementation of the {@link OfficeFloorInputNode}.
+ * Implementation of the {@link OfficeInputNode}.
  *
  * @author Daniel Sagenschneider
  */
 public class OfficeInputNodeImpl implements OfficeInputNode {
 
 	/**
-	 * Name of this {@link OfficeFloorInput}.
+	 * Name of this {@link OfficeInput}.
 	 */
 	private final String name;
 
@@ -62,7 +63,7 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	private static class InitialisedState {
 
 		/**
-		 * Parameter type of this {@link OfficeFloorInput}.
+		 * Parameter type of this {@link OfficeInput}.
 		 */
 		private final String parameterType;
 
@@ -70,7 +71,7 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 		 * Instantiate.
 		 * 
 		 * @param parameterType
-		 *            Parameter type of this {@link OfficeFloorInput}.
+		 *            Parameter type of this {@link OfficeInput}.
 		 */
 		public InitialisedState(String parameterType) {
 			this.parameterType = parameterType;
@@ -81,14 +82,13 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 	 * Initialise.
 	 * 
 	 * @param name
-	 *            Name of {@link OfficeFloorInput}.
+	 *            Name of {@link OfficeInput}.
 	 * @param officeNode
 	 *            Parent {@link OfficeNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public OfficeInputNodeImpl(String name, OfficeNode officeNode,
-			NodeContext context) {
+	public OfficeInputNodeImpl(String name, OfficeNode officeNode, NodeContext context) {
 		this.name = name;
 		this.officeNode = officeNode;
 		this.context = context;
@@ -125,8 +125,7 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 
 	@Override
 	public void initialise(String parameterType) {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState(parameterType));
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState(parameterType));
 	}
 
 	/*
@@ -135,10 +134,8 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 
 	@Override
 	public OfficeInputType loadOfficeInputType(TypeContext typeContext) {
-		return new OfficeInputTypeImpl(this.name, this.state.parameterType,
-				(this.linkedSynchronousNode == null ? null
-						: this.linkedSynchronousNode
-								.loadOfficeOutputType(typeContext)));
+		return new OfficeInputTypeImpl(this.name, this.state.parameterType, (this.linkedSynchronousNode == null ? null
+				: this.linkedSynchronousNode.loadOfficeOutputType(typeContext)));
 	}
 
 	/*
@@ -152,18 +149,14 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 
 		// Ensure not already linked
 		if (this.linkedSynchronousNode != null) {
-			this.context.getCompilerIssues().addIssue(this,
-					"Input " + this.name + " linked more than once");
+			this.context.getCompilerIssues().addIssue(this, "Input " + this.name + " linked more than once");
 			return false; // already linked
 		}
 
 		// Ensure is an output
 		if (!(node instanceof OfficeOutputNode)) {
-			this.context.getCompilerIssues().addIssue(
-					this,
-					"Input " + this.name
-							+ " may only be synchronously linked to an "
-							+ OfficeOutputNode.class.getSimpleName());
+			this.context.getCompilerIssues().addIssue(this, "Input " + this.name
+					+ " may only be synchronously linked to an " + OfficeOutputNode.class.getSimpleName());
 			return false; // already linked
 		}
 
@@ -188,8 +181,7 @@ public class OfficeInputNodeImpl implements OfficeInputNode {
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
-		return LinkUtil.linkFlowNode(this, node,
-				this.context.getCompilerIssues(),
+		return LinkUtil.linkFlowNode(this, node, this.context.getCompilerIssues(),
 				(link) -> this.linkedFlowNode = link);
 	}
 
