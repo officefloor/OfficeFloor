@@ -63,12 +63,11 @@
 	<properties>
 		<current.year>2015</current.year>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<officefloor.skin.version>${project.version}</officefloor.skin.version>
 		<projectVersion>${project.version}</projectVersion>
 		<tycho-version>0.26.0</tycho-version>
 		<maven-version>3.3.9</maven-version>
 		<maven-plugin-version>3.5</maven-plugin-version>
-		<aether-version>1.0.0.v20140518</aether-version>
+		<aether-version>1.1.0</aether-version>
 		<plexus-version>1.5.5</plexus-version>
 		<maven-project-info-reports-version>2.8</maven-project-info-reports-version>
 		<maven-changes-version>2.11</maven-changes-version>
@@ -76,8 +75,8 @@
 		<gwt-version>2.6.0</gwt-version>
 		<syncrpc-version>0.3</syncrpc-version>
 		<datanucleus-version>4.0.0-release</datanucleus-version>
-		<failsafe-version>2.16</failsafe-version>
-		<compiler-version>3.1</compiler-version>
+		<failsafe-version>2.19.1</failsafe-version>
+		<compiler-version>3.6.0</compiler-version>
 		<ant-jsch-version>1.8.4</ant-jsch-version>
 	</properties>
 	<dependencyManagement>
@@ -332,7 +331,7 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.11</version>
+				<version>4.12</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.aether</groupId>
@@ -397,7 +396,7 @@
 			<dependency>
 				<groupId>commons-httpclient</groupId>
 				<artifactId>commons-httpclient</artifactId>
-				<version>4.2.2</version>
+				<version>4.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.openejb</groupId>
@@ -422,7 +421,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.9</version>
+				<version>1.10</version>
 			</dependency>
 			<dependency>
 				<groupId>hsqldb</groupId>
@@ -488,7 +487,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.3.2</version>
+				<version>4.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.gwt</groupId>
@@ -513,17 +512,17 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.3.1</version>
+				<version>2.8.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
-				<version>1.16.10</version>
+				<version>1.16.12</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.4</version>
+				<version>3.5</version>
 			</dependency>
 			<!-- Following plug-ins are dependency managed to ensure available for 
 				woof-archetype to check using the latest. -->
@@ -590,7 +589,8 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.3</version>
+					<version>3.5</version>
+					<!--  
 					<dependencies>
 						<dependency>
 							<groupId>com.anasoft.os</groupId>
@@ -598,6 +598,7 @@
 							<version>2.0</version>
 						</dependency>
 					</dependencies>
+					-->
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

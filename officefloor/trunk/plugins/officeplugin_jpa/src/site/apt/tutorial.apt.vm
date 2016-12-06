@@ -51,7 +51,7 @@ OfficeFloor Extension Type
    
   To simplify creating extensions, each <<<Extension>>>Source interface has a corresponding Abstract<<<Extension>>>Source abstract class.  For JPA the following is the specification and meta-data methods.  Note that for simplicity the <<<init(...)>>> and <<<getMetaData()>>> methods are implemented by the one abstract method <<<loadMetaData(...)>>>.  The following code also contains the class signature and fields to have the code sequentially displayed through this tutorial.
   
-%{code-snippet|brush-autodetect=1|id=type|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.java}
+%{snippet|id=type|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.java}
 
   As the {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} are responsible for providing dependency objects, there are three aspects of type information provided:
   
@@ -67,7 +67,7 @@ ManagedObjectSource
 
   The remaining methods are specific to the {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}}.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.java}
+%{snippet|id=tutorial|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.java}
 
   Managed objects have four aspects to them:
   
@@ -81,7 +81,7 @@ ManagedObjectSource
   
   The JPA {{{/apidocs/net/officefloor/frame/spi/managedobject/ManagedObject.html}ManagedObject}} is as follows.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObject.java}
+%{snippet|id=tutorial|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObject.java}
 
   
     
@@ -93,7 +93,7 @@ WorkSource
   
   The {{{/apidocs/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.html}JpaEntityManagerManagedObjectSource}} uses the recycle {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} to ensure the <<<EntityManager>>> is closed.  The following is the recycle {{{/apidocs/net/officefloor/frame/api/execute/Task.html}Task}} code to close the <<<EntityManager>>>.  It uses the {{{/apidocs/net/officefloor/frame/util/AbstractSingleTask.html}AbstractSingleTask}} to simplify the implementation. 
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/CloseEntityManagerTask.java}
+%{snippet|id=tutorial|file=${projectBasedir}/src/main/java/net/officefloor/plugin/jpa/CloseEntityManagerTask.java}
 
 
 
@@ -101,13 +101,13 @@ Unit Test
 
   Each <<<Extension>>>Source has a corresponding <<<Extension>>>LoaderUtil that eases unit testing implementations.  The following unit tests show testing the specification and meta-data.
 
-%{code-snippet|brush-autodetect=1|id=type|file=${projectBasedir}/src/test/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSourceTest.java}
+%{snippet|id=type|file=${projectBasedir}/src/test/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSourceTest.java}
 
   Once the type information is correct, the implementation may be utilised in running instances of OfficeFloor to test it.  The following unit tests demonstrate using the {{{/apidocs/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.html}JpaEntityManagerManagedObjectSource}} to read and write data from a database.
   
   Note that the OfficeFloor graphical configuration uses the same API to configure an application as used by the unit tests below.  This ensures consistency between use in the unit tests and in applications.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/src/test/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSourceTest.java}
+%{snippet|id=tutorial|file=${projectBasedir}/src/test/java/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSourceTest.java}
 
 
 
@@ -117,11 +117,11 @@ Eclipse Extension
   
   The code for the <<<Extension>>>SourceExtension of {{{/apidocs/net/officefloor/plugin/jpa/JpaEntityManagerManagedObjectSource.html}JpaEntityManagerManagedObjectSource}} is as follows.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/../../eclipse/plugins/net.officefloor.extras/src/main/java/net/officefloor/eclipse/jpa/JpaEntityManagerManagedObjectSourceExtension.java}
+%{snippet|id=tutorial|file=${projectBasedir}/../../eclipse/plugins/net.officefloor.extras/src/main/java/net/officefloor/eclipse/jpa/JpaEntityManagerManagedObjectSourceExtension.java}
  
   Making this available to the OfficeFloor Eclipse plug-ins is undertaken by wrapping the above in an Eclipse plug-in with the following extension configuration.  There are extension points following the below naming convention for all Sources within OfficeFloor.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${projectBasedir}/../../eclipse/plugins/net.officefloor.extras/plugin.xml}
+%{snippet|id=tutorial|file=${projectBasedir}/../../eclipse/plugins/net.officefloor.extras/plugin.xml}
 
 
 Next
