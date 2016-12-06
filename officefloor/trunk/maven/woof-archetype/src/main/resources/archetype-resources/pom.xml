@@ -11,9 +11,9 @@
 		<officefloor-version>${version}</officefloor-version>
 		<gwt-version>2.6.0</gwt-version>
 		<jetty-version>9.2.2.v20140723</jetty-version>
-		<compiler-version>3.1</compiler-version>
-		<failsafe-version>2.16</failsafe-version>
-		<junit-version>4.11</junit-version>
+		<compiler-version>3.6.0</compiler-version>
+		<failsafe-version>2.19.1</failsafe-version>
+		<junit-version>4.12</junit-version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -52,8 +52,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>\${compiler-version}</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 			<plugin>

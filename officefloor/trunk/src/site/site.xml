@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
 	<bannerLeft>
-		<src>./images/OfficeFloorBannerImage.png</src>
+		<name>OfficeFloor</name>
+		<src>http://www.officefloor.net/images/OfficeFloorBannerImage.png</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<poweredBy>
+	<!--  
 		<logo name="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
 			href="http://marketplace.eclipse.org/content/officefloor"
 			title="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
 			img="http://officefloor.net/images/powerbyspace.png"
 			width="90" height="45" />
+	-->
 		<logo name="Drag and drop into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
 			href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=32712"
 			title="Drag and drop into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
@@ -33,14 +36,14 @@
 	<publishDate position="right" />
 	<version position="right" />
 	<skin>
-		<groupId>net.officefloor.maven</groupId>
-		<artifactId>officefloor-maven-skin</artifactId>
-		<version>${officefloor.skin.version}</version>
-	</skin>
+		<groupId>org.apache.maven.skins</groupId>
+    	<artifactId>maven-fluido-skin</artifactId>
+	    <version>1.5</version>
+   	</skin>
 	<body>
-		<head>
+		<head><![CDATA[
 			<!-- shortcut icon -->
-			<link rel="shortcut icon" href="./favicon.ico" />
+			<link rel="shortcut icon" href="/favicon.ico" />
 			<!-- Syntax Highlighter -->
 			<link type="text/css" rel="stylesheet" href="./css/shCore.css" />
 			<link type="text/css" rel="stylesheet" href="./css/shThemeDefault.css" />
@@ -91,7 +94,10 @@
 			<!-- Facebook administration -->
 			<meta property="fb:admins" content="sagenschneider" />
 			<meta property="fb:app_id" content="336336786442645" />
-		</head>
+		]]></head>
+		<footer><![CDATA[
+		TODO replace with facebook comments plugin
+		]]></footer>
 		<menu name="${project.name}">
 			<item name="Welcome" href="./index.html" />
 			<item name="Mission" href="./mission.html" />

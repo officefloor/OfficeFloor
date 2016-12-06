@@ -71,7 +71,8 @@
 								<mkdir dir="${css.dir}" />
 
 								<!-- Setup URLs for download -->
-								<property name="css.url" value="http://maven.apache.org/plugins/maven-dependency-plugin/css" />
+								<property name="css.url"
+									value="http://maven.apache.org/plugins/maven-dependency-plugin/css" />
 
 								<!-- Download the maven css files -->
 								<echo>Download maven css files: ${project.build.outputDirectory}</echo>
@@ -98,13 +99,15 @@
 
 								<!-- Setup paths and URLs for download -->
 								<property name="site.vm.file" value="${metainf.dir}/site.vm" />
-								<property name="site.vm.url"
-									value="http://svn.apache.org/repos/asf/maven/doxia/doxia-sitetools/trunk/doxia-site-renderer/src/main/resources/org/apache/maven/doxia/siterenderer/resources/default-site.vm" />
+								<property name="site.dir.url"
+									value="http://svn.apache.org/repos/asf/maven/doxia/doxia-sitetools/trunk/doxia-site-renderer/src/main/resources/org/apache/maven/doxia/siterenderer/resources" />
 
-								<!-- Download site.vm file -->
+								<!-- Download site.vm and default-site-macros file -->
 								<echo>Download default site.vm: ${metainf.dir}</echo>
-								<get dest="${site.vm.file}" src="${site.vm.url}" verbose="true"
-									skipexisting="false" />
+								<get dest="${site.vm.file}" src="${site.dir.url}/default-site.vm"
+									verbose="true" skipexisting="false" />
+								<get dest="${metainf.dir}/default-site-macros.vm" src="${site.dir.url}/default-site-macros.vm"
+									verbose="true" skipexisting="false" />
 
 								<!-- Alter default site.vm for Sharing -->
 								<replace file="${site.vm.file}">
@@ -119,7 +122,7 @@
 									
 									]]></replacevalue>
 								</replace>
-								
+
 								<!-- Alter default site.vm for Facebook comments -->
 								<replace file="${site.vm.file}">
 									<replacetoken><![CDATA[<body class="composite">]]></replacetoken>
