@@ -77,8 +77,7 @@ import net.officefloor.frame.spi.source.UnknownResourceError;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorNodeImpl extends AbstractNode implements
-		OfficeFloorNode {
+public class OfficeFloorNodeImpl extends AbstractNode implements OfficeFloorNode {
 
 	/**
 	 * {@link Class} name of the {@link OfficeFloorSource}.
@@ -169,9 +168,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	 * @param profilers
 	 *            Mapping of {@link Profiler} by their {@link Office} name.
 	 */
-	public OfficeFloorNodeImpl(String officeFloorSourceClassName,
-			OfficeFloorSource officeFloorSource, String officeFloorLocation,
-			NodeContext context, Map<String, Profiler> profilers) {
+	public OfficeFloorNodeImpl(String officeFloorSourceClassName, OfficeFloorSource officeFloorSource,
+			String officeFloorLocation, NodeContext context, Map<String, Profiler> profilers) {
 		this.officeFloorSourceClassName = officeFloorSourceClassName;
 		this.officeFloorSource = officeFloorSource;
 		this.officeFloorLocation = officeFloorLocation;
@@ -198,7 +196,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	@Override
 	public String getLocation() {
-		return this.officeFloorLocation;
+		return NodeUtil.getLocation(this.officeFloorSourceClassName, this.officeFloorSource, this.officeFloorLocation);
 	}
 
 	@Override
@@ -213,8 +211,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	@Override
 	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state,
-				() -> new InitialisedState());
+		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
 	}
 
 	/*
@@ -228,14 +225,11 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public ManagedObjectNode addManagedObjectNode(String managedObjectName,
-			ManagedObjectScope managedObjectScope,
+	public ManagedObjectNode addManagedObjectNode(String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
-		return NodeUtil.getInitialisedNode(managedObjectName,
-				this.managedObjects, this.context, () -> this.context
-						.createManagedObjectNode(managedObjectName), (
-						managedObject) -> managedObject.initialise(
-						managedObjectScope, managedObjectSourceNode));
+		return NodeUtil.getInitialisedNode(managedObjectName, this.managedObjects, this.context,
+				() -> this.context.createManagedObjectNode(managedObjectName),
+				(managedObject) -> managedObject.initialise(managedObjectScope, managedObjectSourceNode));
 	}
 
 	/*
@@ -243,77 +237,60 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	 */
 
 	@Override
-	public OfficeFloorManagedObjectSource addManagedObjectSource(
-			String managedObjectSourceName, String managedObjectSourceClassName) {
-		return NodeUtil.getInitialisedNode(managedObjectSourceName,
-				this.managedObjectSources, this.context, () -> this.context
-						.createManagedObjectSourceNode(managedObjectSourceName,
-								this),
-				(managedObjectSource) -> managedObjectSource.initialise(
-						managedObjectSourceClassName, null));
+	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
+			String managedObjectSourceClassName) {
+		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
+				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, this),
+				(managedObjectSource) -> managedObjectSource.initialise(managedObjectSourceClassName, null));
 	}
 
 	@Override
-	public OfficeFloorManagedObjectSource addManagedObjectSource(
-			String managedObjectSourceName,
+	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource) {
-		return NodeUtil.getInitialisedNode(managedObjectSourceName,
-				this.managedObjectSources, this.context, () -> this.context
-						.createManagedObjectSourceNode(managedObjectSourceName,
-								this),
+		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
+				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, this),
 				(managedObjectSourceNode) -> managedObjectSourceNode
-						.initialise(managedObjectSource.getClass().getName(),
-								managedObjectSource));
+						.initialise(managedObjectSource.getClass().getName(), managedObjectSource));
 	}
 
 	@Override
-	public OfficeFloorInputManagedObject addInputManagedObject(
-			String inputManagedObjectName) {
-		return NodeUtil.getInitialisedNode(inputManagedObjectName,
-				this.inputManagedObjects, this.context, () -> this.context
-						.createInputManagedNode(inputManagedObjectName, this),
+	public OfficeFloorInputManagedObject addInputManagedObject(String inputManagedObjectName) {
+		return NodeUtil.getInitialisedNode(inputManagedObjectName, this.inputManagedObjects, this.context,
+				() -> this.context.createInputManagedNode(inputManagedObjectName, this),
 				(inputManagedObject) -> inputManagedObject.initialise());
 	}
 
 	@Override
-	public OfficeFloorSupplier addSupplier(String supplierName,
-			String supplierSourceClassName) {
-		return NodeUtil.getInitialisedNode(supplierName, this.suppliers,
-				this.context, () -> this.context.createSupplierNode(
-						supplierName, supplierSourceClassName, this),
+	public OfficeFloorSupplier addSupplier(String supplierName, String supplierSourceClassName) {
+		return NodeUtil.getInitialisedNode(supplierName, this.suppliers, this.context,
+				() -> this.context.createSupplierNode(supplierName, supplierSourceClassName, this),
 				(supplier) -> supplier.initialise());
 	}
 
 	@Override
 	public OfficeFloorTeam addTeam(String teamName, String teamSourceClassName) {
 		return NodeUtil.getInitialisedNode(teamName, this.teams, this.context,
-				() -> this.context.createTeamNode(teamName, this),
-				(team) -> team.initialise(teamSourceClassName));
+				() -> this.context.createTeamNode(teamName, this), (team) -> team.initialise(teamSourceClassName));
 	}
 
 	@Override
-	public DeployedOffice addDeployedOffice(String officeName,
-			OfficeSource officeSource, String officeLocation) {
-		return NodeUtil.getInitialisedNode(officeName, this.offices,
-				this.context, () -> this.context.createOfficeNode(officeName,
-						this), (office) -> office.initialise(officeSource
-						.getClass().getName(), officeSource, officeLocation));
+	public DeployedOffice addDeployedOffice(String officeName, OfficeSource officeSource, String officeLocation) {
+		return NodeUtil.getInitialisedNode(officeName, this.offices, this.context,
+				() -> this.context.createOfficeNode(officeName, this),
+				(office) -> office.initialise(officeSource.getClass().getName(), officeSource, officeLocation));
 	}
 
 	@Override
-	public DeployedOffice addDeployedOffice(String officeName,
-			String officeSourceClassName, String officeLocation) {
-		return NodeUtil.getInitialisedNode(officeName, this.offices,
-				this.context, () -> this.context.createOfficeNode(officeName,
-						this), (office) -> office.initialise(
-						officeSourceClassName, null, officeLocation));
+	public DeployedOffice addDeployedOffice(String officeName, String officeSourceClassName, String officeLocation) {
+		return NodeUtil.getInitialisedNode(officeName, this.offices, this.context,
+				() -> this.context.createOfficeNode(officeName, this),
+				(office) -> office.initialise(officeSourceClassName, null, officeLocation));
 	}
 
 	@Override
 	public void link(OfficeFloorManagedObjectSource managedObjectSource,
 			OfficeFloorInputManagedObject inputManagedObject) {
-		this.linkManagedObjectSourceInput(managedObjectSource,
-				inputManagedObject);
+		this.linkManagedObjectSourceInput(managedObjectSource, inputManagedObject);
 	}
 
 	@Override
@@ -322,14 +299,12 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public void link(ManagedObjectDependency dependency,
-			OfficeFloorManagedObject managedObject) {
+	public void link(ManagedObjectDependency dependency, OfficeFloorManagedObject managedObject) {
 		this.linkObject(dependency, managedObject);
 	}
 
 	@Override
-	public void link(ManagedObjectDependency dependency,
-			OfficeFloorInputManagedObject inputManagedObject) {
+	public void link(ManagedObjectDependency dependency, OfficeFloorInputManagedObject inputManagedObject) {
 		this.linkObject(dependency, inputManagedObject);
 	}
 
@@ -349,14 +324,12 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public void link(OfficeObject requiredManagedObject,
-			OfficeFloorManagedObject officeFloorManagedObject) {
+	public void link(OfficeObject requiredManagedObject, OfficeFloorManagedObject officeFloorManagedObject) {
 		this.linkObject(requiredManagedObject, officeFloorManagedObject);
 	}
 
 	@Override
-	public void link(OfficeObject officeObject,
-			OfficeFloorInputManagedObject inputManagedObject) {
+	public void link(OfficeObject officeObject, OfficeFloorInputManagedObject inputManagedObject) {
 		this.linkObject(officeObject, inputManagedObject);
 	}
 
@@ -367,8 +340,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	@Override
 	public void addIssue(String issueDescription, Throwable cause) {
-		this.context.getCompilerIssues()
-				.addIssue(this, issueDescription, cause);
+		this.context.getCompilerIssues().addIssue(this, issueDescription, cause);
 	}
 
 	/*
@@ -387,21 +359,16 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	@Override
 	public void addProfiler(String officeName, Profiler profiler) {
 		// TODO implement OfficeFloorNode.addProfiler
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorNode.addProfiler");
+		throw new UnsupportedOperationException("TODO implement OfficeFloorNode.addProfiler");
 
 	}
 
 	@Override
-	public OfficeFloorManagedObjectSource addManagedObjectSource(
-			String managedObjectSourceName,
+	public OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
 			SuppliedManagedObjectNode suppliedManagedObject) {
-		return NodeUtil.getInitialisedNode(managedObjectSourceName,
-				this.managedObjectSources, this.context, () -> this.context
-						.createManagedObjectSourceNode(managedObjectSourceName,
-								suppliedManagedObject),
-				(managedObjectSource) -> managedObjectSource.initialise(null,
-						null));
+		return NodeUtil.getInitialisedNode(managedObjectSourceName, this.managedObjectSources, this.context,
+				() -> this.context.createManagedObjectSourceNode(managedObjectSourceName, suppliedManagedObject),
+				(managedObjectSource) -> managedObjectSource.initialise(null, null));
 	}
 
 	@Override
@@ -413,15 +380,13 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 			// Obtain the OfficeFloor source class
 			Class<? extends OfficeFloorSource> officeFloorSourceClass = this.context
-					.getOfficeFloorSourceClass(this.officeFloorSourceClassName,
-							this);
+					.getOfficeFloorSourceClass(this.officeFloorSourceClassName, this);
 			if (officeFloorSourceClass == null) {
 				return false; // must have OfficeFloor source class
 			}
 
 			// Instantiate the office floor source
-			source = CompileUtil.newInstance(officeFloorSourceClass,
-					OfficeFloorSource.class, this,
+			source = CompileUtil.newInstance(officeFloorSourceClass, OfficeFloorSource.class, this,
 					this.context.getCompilerIssues());
 			if (officeFloorSource == null) {
 				return false; // failed to instantiate
@@ -429,31 +394,26 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		}
 
 		// Create the OfficeFloor source context
-		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
-				false, this.officeFloorLocation, this.properties, this,
-				this.context);
+		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(false, this.officeFloorLocation,
+				this.properties, this, this.context);
 
 		try {
 			// Source the OfficeFloor
 			source.sourceOfficeFloor(this, sourceContext);
 
 		} catch (UnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
-					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
-					+ source.getClass().getName());
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName() + "' for "
+					+ OfficeFloorSource.class.getSimpleName() + " " + source.getClass().getName());
 			return false; // must have property
 
 		} catch (UnknownClassError ex) {
-			this.addIssue("Can not load class '" + ex.getUnknownClassName()
-					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
-					+ source.getClass().getName());
+			this.addIssue("Can not load class '" + ex.getUnknownClassName() + "' for "
+					+ OfficeFloorSource.class.getSimpleName() + " " + source.getClass().getName());
 			return false; // must have class
 
 		} catch (UnknownResourceError ex) {
-			this.addIssue("Can not obtain resource at location '"
-					+ ex.getUnknownResourceLocation() + "' for "
-					+ OfficeFloorSource.class.getSimpleName() + " "
-					+ source.getClass().getName());
+			this.addIssue("Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "' for "
+					+ OfficeFloorSource.class.getSimpleName() + " " + source.getClass().getName());
 			return false; // must have resource
 
 		} catch (LoadTypeError ex) {
@@ -461,12 +421,9 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			return false; // must not fail in loading types
 
 		} catch (Throwable ex) {
-			this.addIssue(
-					"Failed to source " + OfficeFloor.class.getSimpleName()
-							+ " from "
-							+ OfficeFloorSource.class.getSimpleName()
-							+ " (source=" + source.getClass().getName()
-							+ ", location=" + officeFloorLocation + ")", ex);
+			this.addIssue("Failed to source " + OfficeFloor.class.getSimpleName() + " from "
+					+ OfficeFloorSource.class.getSimpleName() + " (source=" + source.getClass().getName()
+					+ ", location=" + officeFloorLocation + ")", ex);
 			return false; // must be successful
 		}
 
@@ -484,11 +441,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		}
 
 		// Source all the offices
-		isSourced = this.offices
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+		isSourced = this.offices.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
 				.allMatch((office) -> office.sourceOfficeTree());
 		if (!isSourced) {
 			return false;
@@ -503,19 +457,17 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 		// Obtain the OfficeFloor source class
 		Class<? extends OfficeFloorSource> officeFloorSourceClass = this.context
-				.getOfficeFloorSourceClass(this.officeFloorSourceClassName,
-						this);
+				.getOfficeFloorSourceClass(this.officeFloorSourceClassName, this);
 
 		// Obtain the loader to load properties
 		OfficeFloorLoader loader = this.context.getOfficeFloorLoader(this);
 
 		// Load the specification properties
-		PropertyList properties = loader
-				.loadSpecification(officeFloorSourceClass);
+		PropertyList properties = loader.loadSpecification(officeFloorSourceClass);
 
 		// Load the required properties
-		PropertyList requiredProperties = loader.loadRequiredProperties(
-				officeFloorSourceClass, officeFloorLocation, this.properties);
+		PropertyList requiredProperties = loader.loadRequiredProperties(officeFloorSourceClass, officeFloorLocation,
+				this.properties);
 		for (Property property : requiredProperties) {
 			String propertyName = property.getName();
 			if (properties.getProperty(propertyName) == null) {
@@ -525,157 +477,121 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 		// Load optional properties
 		for (Property property : this.properties) {
-			properties.getOrAddProperty(property.getName()).setValue(
-					property.getValue());
+			properties.getOrAddProperty(property.getName()).setValue(property.getValue());
 		}
 
 		// Load the properties
-		OfficeFloorPropertyType[] propertyTypes = PropertyNode
-				.constructPropertyNodes(properties);
+		OfficeFloorPropertyType[] propertyTypes = PropertyNode.constructPropertyNodes(properties);
 
 		// Load the managed object source types (in deterministic order)
-		OfficeFloorManagedObjectSourceType[] managedObjectSourceTypes = CompileUtil
-				.loadTypes(
-						this.managedObjectSources,
-						(managedObjectSource) -> managedObjectSource
-								.getOfficeFloorManagedObjectSourceName(),
-						(managedObjectSource) -> managedObjectSource
-								.loadOfficeFloorManagedObjectSourceType(typeContext),
-						OfficeFloorManagedObjectSourceType[]::new);
+		OfficeFloorManagedObjectSourceType[] managedObjectSourceTypes = CompileUtil.loadTypes(this.managedObjectSources,
+				(managedObjectSource) -> managedObjectSource.getOfficeFloorManagedObjectSourceName(),
+				(managedObjectSource) -> managedObjectSource.loadOfficeFloorManagedObjectSourceType(typeContext),
+				OfficeFloorManagedObjectSourceType[]::new);
 		if (managedObjectSourceTypes == null) {
 			return null;
 		}
 
 		// Load the team sources (in deterministic order)
-		OfficeFloorTeamSourceType[] teamTypes = CompileUtil.loadTypes(
-				this.teams, (team) -> team.getOfficeFloorTeamName(),
-				(team) -> team.loadOfficeFloorTeamSourceType(typeContext),
+		OfficeFloorTeamSourceType[] teamTypes = CompileUtil.loadTypes(this.teams,
+				(team) -> team.getOfficeFloorTeamName(), (team) -> team.loadOfficeFloorTeamSourceType(typeContext),
 				OfficeFloorTeamSourceType[]::new);
 		if (teamTypes == null) {
 			return null;
 		}
 
 		// Load and return the type
-		return new OfficeFloorTypeImpl(propertyTypes, managedObjectSourceTypes,
-				teamTypes);
+		return new OfficeFloorTypeImpl(propertyTypes, managedObjectSourceTypes, teamTypes);
 	}
 
 	@Override
-	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame,
-			TypeContext typeContext) {
+	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame, TypeContext typeContext) {
 
 		// Obtain the OfficeFloor builder
-		OfficeFloorBuilder builder = officeFrame
-				.createOfficeFloorBuilder(this.officeFloorLocation);
+		OfficeFloorBuilder builder = officeFrame.createOfficeFloorBuilder(this.officeFloorLocation);
 
 		// Initiate the OfficeFloor builder with compiler details
 		this.context.initiateOfficeFloorBuilder(builder);
 
 		// Build the teams (in deterministic order)
-		this.teams
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeFloorTeamName(), b.getOfficeFloorTeamName()))
+		this.teams.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorTeamName(), b.getOfficeFloorTeamName()))
 				.forEachOrdered((team) -> team.buildTeam(builder));
 
 		// Build the offices (in deterministic order)
 		Map<OfficeNode, OfficeBindings> officeBindings = new HashMap<OfficeNode, OfficeBindings>();
-		this.offices
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getDeployedOfficeName(), b.getDeployedOfficeName()))
+		this.offices.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
 				.forEachOrdered((office) -> {
 
 					// Obtain possible profiler to office
-						String officeName = office.getDeployedOfficeName();
-						Profiler profiler = this.profilers.get(officeName);
+					String officeName = office.getDeployedOfficeName();
+					Profiler profiler = this.profilers.get(officeName);
 
-						// Build the office
-						OfficeBindings bindings = office.buildOffice(builder,
-								typeContext, profiler);
+					// Build the office
+					OfficeBindings bindings = office.buildOffice(builder, typeContext, profiler);
 
-						// Keep track of the offices
-						officeBindings.put(office, bindings);
-					});
+					// Keep track of the offices
+					officeBindings.put(office, bindings);
+				});
 
 		// Obtains the Office bindings for the managed object source
-		Function<ManagedObjectSourceNode, OfficeBindings> getOfficeBindings = (
-				managedObjectSource) -> {
-			OfficeNode managingOffice = managedObjectSource
-					.getManagingOfficeNode();
+		Function<ManagedObjectSourceNode, OfficeBindings> getOfficeBindings = (managedObjectSource) -> {
+			OfficeNode managingOffice = managedObjectSource.getManagingOfficeNode();
 			return officeBindings.get(managingOffice);
 		};
 
 		// Build the managed object sources (in deterministic order)
-		this.managedObjectSources
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeManagedObjectSourceName(),
-						b.getOfficeManagedObjectSourceName()))
+		this.managedObjectSources.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getOfficeManagedObjectSourceName(), b.getOfficeManagedObjectSourceName()))
 				.forEachOrdered((managedObjectSource) -> {
 
 					// Obtain the managing office for managed object
-						OfficeBindings bindings = getOfficeBindings
-								.apply(managedObjectSource);
-						if (bindings == null) {
-							return; // must have office
-						}
+					OfficeBindings bindings = getOfficeBindings.apply(managedObjectSource);
+					if (bindings == null) {
+						return; // must have office
+					}
 
-						// Build the managed object source into the office
-						bindings.buildManagedObjectSourceIntoOffice(managedObjectSource);
-					});
+					// Build the managed object source into the office
+					bindings.buildManagedObjectSourceIntoOffice(managedObjectSource);
+				});
 
 		// Build the managed objects (in deterministic order)
-		this.managedObjects
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeFloorManagedObjectName(),
-						b.getOfficeFloorManagedObjectName()))
+		this.managedObjects.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getOfficeFloorManagedObjectName(), b.getOfficeFloorManagedObjectName()))
 				.forEachOrdered((managedObject) -> {
 					// Obtain the managed object source
-						ManagedObjectSourceNode managedObjectSource = managedObject
-								.getManagedObjectSourceNode();
+					ManagedObjectSourceNode managedObjectSource = managedObject.getManagedObjectSourceNode();
 
-						// Obtain the managing office for managed object
-						OfficeBindings bindings = getOfficeBindings
-								.apply(managedObjectSource);
-						if (bindings == null) {
-							return; // must have office
-						}
+					// Obtain the managing office for managed object
+					OfficeBindings bindings = getOfficeBindings.apply(managedObjectSource);
+					if (bindings == null) {
+						return; // must have office
+					}
 
-						// Build the managed object into the office
-						bindings.buildManagedObjectIntoOffice(managedObject);
-					});
+					// Build the managed object into the office
+					bindings.buildManagedObjectIntoOffice(managedObject);
+				});
 
 		// Build the input managed objects (in deterministic order)
-		this.inputManagedObjects
-				.values()
-				.stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(
-						a.getOfficeFloorInputManagedObjectName(),
-						b.getOfficeFloorInputManagedObjectName()))
+		this.inputManagedObjects.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getOfficeFloorInputManagedObjectName(), b.getOfficeFloorInputManagedObjectName()))
 				.forEachOrdered((inputManagedObject) -> {
 					// Obtain the managed object source
-						ManagedObjectSourceNode managedObjectSource = inputManagedObject
-								.getBoundManagedObjectSourceNode();
-						if (managedObjectSource == null) {
-							return; // must have managed object source
-						}
+					ManagedObjectSourceNode managedObjectSource = inputManagedObject.getBoundManagedObjectSourceNode();
+					if (managedObjectSource == null) {
+						return; // must have managed object source
+					}
 
-						// Obtain the managing office for managed object
-						OfficeBindings bindings = getOfficeBindings
-								.apply(managedObjectSource);
-						if (bindings == null) {
-							return; // must have office
-						}
+					// Obtain the managing office for managed object
+					OfficeBindings bindings = getOfficeBindings.apply(managedObjectSource);
+					if (bindings == null) {
+						return; // must have office
+					}
 
-						// Build the input managed object into the office
-						bindings.buildInputManagedObjectIntoOffice(inputManagedObject);
-					});
+					// Build the input managed object into the office
+					bindings.buildInputManagedObjectIntoOffice(inputManagedObject);
+				});
 
 		// Return the built office floor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
@@ -691,17 +607,14 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		 */
 
 		@Override
-		public void addIssue(AssetType assetType, String assetName,
-				String issueDescription) {
-			OfficeFloorNodeImpl.this.context.getCompilerIssues().addIssue(
-					OfficeFloorNodeImpl.this, issueDescription);
+		public void addIssue(AssetType assetType, String assetName, String issueDescription) {
+			OfficeFloorNodeImpl.this.context.getCompilerIssues().addIssue(OfficeFloorNodeImpl.this, issueDescription);
 		}
 
 		@Override
-		public void addIssue(AssetType assetType, String assetName,
-				String issueDescription, Throwable cause) {
-			OfficeFloorNodeImpl.this.context.getCompilerIssues().addIssue(
-					OfficeFloorNodeImpl.this, issueDescription, cause);
+		public void addIssue(AssetType assetType, String assetName, String issueDescription, Throwable cause) {
+			OfficeFloorNodeImpl.this.context.getCompilerIssues().addIssue(OfficeFloorNodeImpl.this, issueDescription,
+					cause);
 		}
 	}
 

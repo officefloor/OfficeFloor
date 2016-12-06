@@ -35,7 +35,6 @@ import net.officefloor.autowire.AutoWireSectionTransformer;
 import net.officefloor.autowire.AutoWireSectionTransformerContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceType;
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.object.DependentObjectType;
@@ -61,9 +60,9 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
-import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
@@ -174,13 +173,11 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @return {@link AutoWireSection} to configure properties and link flows.
 	 */
 	@SuppressWarnings("unchecked")
-	public <S extends SectionSource, A extends AutoWireSection> A addSection(
-			String sectionName, String sectionSourceClassName,
-			String sectionLocation, AutoWireSectionFactory<A> sectionFactory) {
+	public <S extends SectionSource, A extends AutoWireSection> A addSection(String sectionName,
+			String sectionSourceClassName, String sectionLocation, AutoWireSectionFactory<A> sectionFactory) {
 
 		// Create the section
-		AutoWireSection section = this.createSection(sectionName,
-				sectionSourceClassName, sectionLocation);
+		AutoWireSection section = this.createSection(sectionName, sectionSourceClassName, sectionLocation);
 
 		// Determine if override the section
 		if (sectionFactory != null) {
@@ -212,11 +209,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 *            {@link OfficeSection} location.
 	 * @return {@link AutoWireSection} to configure properties and link flows.
 	 */
-	public <S extends SectionSource> AutoWireSection addSection(
-			String sectionName, String sectionSourceClassName,
+	public <S extends SectionSource> AutoWireSection addSection(String sectionName, String sectionSourceClassName,
 			String sectionLocation) {
-		return this.addSection(sectionName, sectionSourceClassName,
-				sectionLocation, null);
+		return this.addSection(sectionName, sectionSourceClassName, sectionLocation, null);
 	}
 
 	/**
@@ -262,10 +257,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param targetInputName
 	 *            Name of the target {@link SectionInput}.
 	 */
-	public void link(AutoWireSection sourceSection, String sourceOutputName,
-			AutoWireSection targetSection, String targetInputName) {
-		this.links.add(new Link(sourceSection, sourceOutputName, targetSection,
-				targetInputName));
+	public void link(AutoWireSection sourceSection, String sourceOutputName, AutoWireSection targetSection,
+			String targetInputName) {
+		this.links.add(new Link(sourceSection, sourceOutputName, targetSection, targetInputName));
 	}
 
 	/**
@@ -287,8 +281,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 		// Determine if linked
 		for (Link link : this.links) {
-			if ((link.sourceSection.getSectionName().equals(section
-					.getSectionName()))
+			if ((link.sourceSection.getSectionName().equals(section.getSectionName()))
 					&& (link.sourceOutputName.equals(sectionOutputName))) {
 				// Matching section output so configured for linking
 				return true;
@@ -310,10 +303,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param sectionInputName
 	 *            Name of the {@link OfficeSectionInput}.
 	 */
-	public void linkEscalation(Class<? extends Throwable> escalationType,
-			AutoWireSection section, String sectionInputName) {
-		this.escalations.add(new EscalationLink(escalationType, section,
-				sectionInputName));
+	public void linkEscalation(Class<? extends Throwable> escalationType, AutoWireSection section,
+			String sectionInputName) {
+		this.escalations.add(new EscalationLink(escalationType, section, sectionInputName));
 	}
 
 	/**
@@ -345,16 +337,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * 
 	 * @see ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
 	 */
-	public AutoWireGovernance addGovernance(String governanceName,
-			String governanceSourceClassName) {
+	public AutoWireGovernance addGovernance(String governanceName, String governanceSourceClassName) {
 
 		// Create the properties
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create the auto-wire governance
-		AutoWireGovernance governance = new AutoWireGovernanceImpl(
-				governanceName, governanceSourceClassName, this.compiler,
-				properties);
+		AutoWireGovernance governance = new AutoWireGovernanceImpl(governanceName, governanceSourceClassName,
+				this.compiler, properties);
 
 		// Register the auto-wire governance
 		this.governances.add(governance);
@@ -376,8 +366,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param extensionInterfaces
 	 *            Extension interfaces available for the {@link OfficeObject}.
 	 */
-	public void addAvailableOfficeObject(AutoWire autoWire,
-			Class<?>... extensionInterfaces) {
+	public void addAvailableOfficeObject(AutoWire autoWire, Class<?>... extensionInterfaces) {
 
 		// Add the available Object auto-wiring
 		this.availableObjectAutoWiring.add(autoWire);
@@ -386,12 +375,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		for (Class<?> extensionInterface : extensionInterfaces) {
 
 			// Obtain the auto wiring for the extension type
-			List<AutoWire> autoWiring = this.extensionInterfaceToAutoWiring
-					.get(extensionInterface);
+			List<AutoWire> autoWiring = this.extensionInterfaceToAutoWiring.get(extensionInterface);
 			if (autoWiring == null) {
 				autoWiring = new LinkedList<AutoWire>();
-				this.extensionInterfaceToAutoWiring.put(extensionInterface,
-						autoWiring);
+				this.extensionInterfaceToAutoWiring.put(extensionInterface, autoWiring);
 			}
 
 			// Add the auto wire
@@ -421,16 +408,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 *            {@link SectionSource} location.
 	 * @return Created {@link AutoWireSection}.
 	 */
-	private AutoWireSection createSection(String sectionName,
-			String sectionSourceClassName, String sectionLocation) {
+	private AutoWireSection createSection(String sectionName, String sectionSourceClassName, String sectionLocation) {
 
 		// Create the properties
 		PropertyList properties = this.compiler.createPropertyList();
 
 		// Create section
-		AutoWireSection section = new AutoWireSectionImpl(this.compiler,
-				sectionName, sectionSourceClassName, sectionLocation,
-				properties);
+		AutoWireSection section = new AutoWireSectionImpl(this.compiler, sectionName, sectionSourceClassName,
+				sectionLocation, properties);
 
 		// Return the section
 		return section;
@@ -446,12 +431,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	@Override
-	public void sourceOffice(OfficeArchitect architect,
-			OfficeSourceContext context) throws Exception {
+	public void sourceOffice(OfficeArchitect architect, OfficeSourceContext context) throws Exception {
 
 		// Add the available teams
-		List<ResponsibleTeam> responsibleTeams = new ArrayList<ResponsibleTeam>(
-				this.availableTeamAutoWiring.size());
+		List<ResponsibleTeam> responsibleTeams = new ArrayList<ResponsibleTeam>(this.availableTeamAutoWiring.size());
 		for (AutoWire availableTeamAutoWire : this.availableTeamAutoWiring) {
 			responsibleTeams.add(new ResponsibleTeam(availableTeamAutoWire));
 		}
@@ -469,24 +452,20 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			// Apply all AutoWireSectionTransformers
 			for (AutoWireSectionTransformer transformer : this.sectionTransformers) {
 				final AutoWireSection currentSection = section;
-				section = transformer
-						.transformAutoWireSection(new AutoWireSectionTransformerContext() {
+				section = transformer.transformAutoWireSection(new AutoWireSectionTransformerContext() {
 
-							@Override
-							public AutoWireSection getSection() {
-								return currentSection;
-							}
+					@Override
+					public AutoWireSection getSection() {
+						return currentSection;
+					}
 
-							@Override
-							public AutoWireSection createSection(
-									String sectionName,
-									String sectionSourceClassName,
-									String sectionLocation) {
-								return AutoWireOfficeSource.this.createSection(
-										sectionName, sectionSourceClassName,
-										sectionLocation);
-							}
-						});
+					@Override
+					public AutoWireSection createSection(String sectionName, String sectionSourceClassName,
+							String sectionLocation) {
+						return AutoWireOfficeSource.this.createSection(sectionName, sectionSourceClassName,
+								sectionLocation);
+					}
+				});
 			}
 
 			// Obtain the details for the section
@@ -496,24 +475,22 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			PropertyList sectionProperties = section.getProperties();
 
 			// Add the section
-			OfficeSection officeSection = architect.addOfficeSection(
-					sectionName, sectionSourceClassName, sectionLocation);
+			OfficeSection officeSection = architect.addOfficeSection(sectionName, sectionSourceClassName,
+					sectionLocation);
 			sectionProperties.configureProperties(officeSection);
 
 			// Register the section
 			officeSectionsByName.put(sectionName, officeSection);
 
 			// Obtain the section type
-			OfficeSectionType officeSectionType = context
-					.loadOfficeSectionType(sectionName, sectionSourceClassName,
-							sectionLocation, sectionProperties);
+			OfficeSectionType officeSectionType = context.loadOfficeSectionType(sectionName, sectionSourceClassName,
+					sectionLocation, sectionProperties);
 
 			// Register the section type
 			officeSectionTypesByName.put(sectionName, officeSectionType);
 
 			// Link the objects
-			for (OfficeSectionObjectType objectType : officeSectionType
-					.getOfficeSectionObjectTypes()) {
+			for (OfficeSectionObjectType objectType : officeSectionType.getOfficeSectionObjectTypes()) {
 
 				// Obtain object details
 				String objectTypeName = objectType.getObjectType();
@@ -521,30 +498,24 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				String objectName = objectType.getOfficeSectionObjectName();
 
 				// Obtain appropriate auto-wire
-				AutoWire autoWire = AutoWireOfficeFloorSource
-						.getAppropriateAutoWire(typeQualifier, objectTypeName,
-								this.availableObjectAutoWiring);
+				AutoWire autoWire = AutoWireOfficeFloorSource.getAppropriateAutoWire(typeQualifier, objectTypeName,
+						this.availableObjectAutoWiring);
 				if (autoWire == null) {
-					architect.addIssue("No available auto-wiring for "
-							+ SectionObjectNode.TYPE + " " + objectName
-							+ " (qualifier=" + typeQualifier + ", type="
-							+ objectTypeName + ") from "
-							+ OfficeSection.class.getSimpleName() + " "
-							+ sectionName);
+					architect.addIssue("No available auto-wiring for " + SectionObjectNode.TYPE + " " + objectName
+							+ " (qualifier=" + typeQualifier + ", type=" + objectTypeName + ") from "
+							+ OfficeSection.class.getSimpleName() + " " + sectionName);
 					continue; // no available auto-wiring for section object
 				}
 
 				// Obtain the section object
-				OfficeSectionObject sectionObject = officeSection
-						.getOfficeSectionObject(objectName);
+				OfficeSectionObject sectionObject = officeSection.getOfficeSectionObject(objectName);
 
 				// Link to appropriate Office Object
 				OfficeObject officeObject = objects.get(autoWire);
 				if (officeObject == null) {
 
 					// Create the office object
-					officeObject = architect.addOfficeObject(
-							autoWire.getQualifiedType(), autoWire.getType());
+					officeObject = architect.addOfficeObject(autoWire.getQualifiedType(), autoWire.getType());
 					String autoWireQualifier = autoWire.getQualifier();
 					if (autoWireQualifier != null) {
 						officeObject.setTypeQualifier(autoWireQualifier);
@@ -559,13 +530,11 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			// Register the inputs
 			Map<String, OfficeSectionInput> sectionInputs = new HashMap<String, OfficeSectionInput>();
 			inputs.put(sectionName, sectionInputs);
-			for (OfficeSectionInputType inputType : officeSectionType
-					.getOfficeSectionInputTypes()) {
+			for (OfficeSectionInputType inputType : officeSectionType.getOfficeSectionInputTypes()) {
 
 				// Obtain the section input
 				String inputName = inputType.getOfficeSectionInputName();
-				OfficeSectionInput input = officeSection
-						.getOfficeSectionInput(inputName);
+				OfficeSectionInput input = officeSection.getOfficeSectionInput(inputName);
 
 				// Register the input
 				sectionInputs.put(inputName, input);
@@ -573,38 +542,32 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Link section tasks to team.
 			// Must be after objects to ensure linked.
-			for (OfficeTaskType taskType : officeSectionType
-					.getOfficeTaskTypes()) {
+			for (OfficeTaskType taskType : officeSectionType.getOfficeTaskTypes()) {
 
 				// Obtain the task
 				String taskName = taskType.getOfficeTaskName();
 				OfficeSectionTask task = officeSection.getOfficeSectionTask(taskName);
 
 				// Assign the team
-				this.assignTeam(task, taskType, responsibleTeams, defaultTeam,
-						architect);
+				this.assignTeam(task, taskType, responsibleTeams, defaultTeam, architect);
 			}
 
 			// Link sub section tasks to team
-			for (OfficeSubSectionType subSectionType : officeSectionType
-					.getOfficeSubSectionTypes()) {
+			for (OfficeSubSectionType subSectionType : officeSectionType.getOfficeSubSectionTypes()) {
 
 				// Obtain the sub section
 				String subSectionName = subSectionType.getOfficeSectionName();
-				OfficeSubSection subSection = officeSection
-						.getOfficeSubSection(subSectionName);
+				OfficeSubSection subSection = officeSection.getOfficeSubSection(subSectionName);
 
 				// Link sub section tasks to team
-				this.linkTasksToTeams(subSection, subSectionType,
-						responsibleTeams, defaultTeam, architect);
+				this.linkTasksToTeams(subSection, subSectionType, responsibleTeams, defaultTeam, architect);
 			}
 		}
 
 		// Create the listing of links by section/output
 		DoubleKeyMap<String, String, Link> keyedLinks = new DoubleKeyMap<String, String, Link>();
 		for (Link link : this.links) {
-			keyedLinks.put(link.sourceSection.getSectionName(),
-					link.sourceOutputName, link);
+			keyedLinks.put(link.sourceSection.getSectionName(), link.sourceOutputName, link);
 		}
 
 		// Link outputs to inputs (keeping track of used links)
@@ -614,12 +577,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			// Obtain the office section and its type
 			String sectionName = section.getSectionName();
 			OfficeSection officeSection = officeSectionsByName.get(sectionName);
-			OfficeSectionType officeSectionType = officeSectionTypesByName
-					.get(sectionName);
+			OfficeSectionType officeSectionType = officeSectionTypesByName.get(sectionName);
 
 			// Link the outputs
-			NEXT_OUTPUT: for (OfficeSectionOutputType outputType : officeSectionType
-					.getOfficeSectionOutputTypes()) {
+			NEXT_OUTPUT: for (OfficeSectionOutputType outputType : officeSectionType.getOfficeSectionOutputTypes()) {
 				String outputName = outputType.getOfficeSectionOutputName();
 
 				// Obtain the output name (for issues)
@@ -648,20 +609,16 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 					// Use super section in next iteration if no link
 					searchSection = searchSection.getSuperSection();
 
-				} while ((link == null) && (!isCyclicInheritance)
-						&& (searchSection != null));
+				} while ((link == null) && (!isCyclicInheritance) && (searchSection != null));
 
 				// Provide issue if cyclic inheritance hierarchy
 				if (isCyclicInheritance) {
 					// Cyclic inheritance, so provide issue
 					StringBuilder hierarchyLog = new StringBuilder();
-					for (Iterator<String> iterator = inheritanceHierarchy
-							.iterator(); iterator.hasNext();) {
+					for (Iterator<String> iterator = inheritanceHierarchy.iterator(); iterator.hasNext();) {
 						hierarchyLog.append(iterator.next() + " : ");
 					}
-					architect
-							.addIssue("Cyclic section inheritance hierarchy ( "
-									+ hierarchyLog.toString() + "... )");
+					architect.addIssue("Cyclic section inheritance hierarchy ( " + hierarchyLog.toString() + "... )");
 				}
 
 				// Provide issue if no link
@@ -672,8 +629,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 					}
 
 					// Issue as require link configuration
-					architect.addIssue("Section output '" + logOutputName
-							+ "' is not linked");
+					architect.addIssue("Section output '" + logOutputName + "' is not linked");
 					continue NEXT_OUTPUT;
 				}
 
@@ -687,21 +643,18 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 				// Obtain the input
 				OfficeSectionInput sectionInput = null;
-				Map<String, OfficeSectionInput> sectionInputs = inputs
-						.get(targetSectionName);
+				Map<String, OfficeSectionInput> sectionInputs = inputs.get(targetSectionName);
 				if (sectionInputs != null) {
 					sectionInput = sectionInputs.get(targetInputName);
 				}
 				if (sectionInput == null) {
-					architect.addIssue("Unknown section input '" + logInputName
-							+ "' for linking section output '" + logOutputName
-							+ "'");
+					architect.addIssue("Unknown section input '" + logInputName + "' for linking section output '"
+							+ logOutputName + "'");
 					continue; // no input so can not link
 				}
 
 				// Obtain the section output
-				OfficeSectionOutput output = officeSection
-						.getOfficeSectionOutput(outputName);
+				OfficeSectionOutput output = officeSection.getOfficeSectionOutput(outputName);
 
 				// Link the output to the input
 				architect.link(output, sectionInput);
@@ -717,12 +670,10 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			}
 
 			// Link is not used (so must be unknown output)
-			String logOutputName = link.sourceSection.getSectionName() + ":"
-					+ link.sourceOutputName;
-			String logInputName = link.targetSection.getSectionName() + ":"
-					+ link.targetInputName;
-			architect.addIssue("Unknown section output '" + logOutputName
-					+ "' to link to section input '" + logInputName + "'");
+			String logOutputName = link.sourceSection.getSectionName() + ":" + link.sourceOutputName;
+			String logInputName = link.targetSection.getSectionName() + ":" + link.targetInputName;
+			architect.addIssue(
+					"Unknown section output '" + logOutputName + "' to link to section input '" + logInputName + "'");
 		}
 
 		// Only configure if have escalations
@@ -730,15 +681,11 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		if (this.escalations.size() > 0) {
 
 			// Properties for failed to source managed object handling
-			PropertyList failedToSourceProperties = context
-					.createPropertyList();
-			failedToSourceProperties.addProperty(
-					WorkSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle")
-					.setValue("1");
+			PropertyList failedToSourceProperties = context.createPropertyList();
+			failedToSourceProperties.addProperty(WorkSectionSource.PROPERTY_PARAMETER_PREFIX + "Handle").setValue("1");
 
 			// Link escalations to inputs
-			OfficeSectionInput[] escalationSectionInput = new OfficeSectionInput[this.escalations
-					.size()];
+			OfficeSectionInput[] escalationSectionInput = new OfficeSectionInput[this.escalations.size()];
 			boolean isFailedToSourceManuallyConfigured = false;
 			for (int i = 0; i < this.escalations.size(); i++) {
 				EscalationLink link = this.escalations.get(i);
@@ -749,26 +696,22 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				String inputName = link.targetInputName;
 
 				// Determine if manually handling failed to source escalation
-				if (FailedToSourceManagedObjectEscalation.class.getName()
-						.equals(escalationTypeName)) {
+				if (FailedToSourceManagedObjectEscalation.class.getName().equals(escalationTypeName)) {
 					isFailedToSourceManuallyConfigured = true;
 				}
 
 				// Add the Escalation
-				OfficeEscalation escalation = architect
-						.addOfficeEscalation(escalationTypeName);
+				OfficeEscalation escalation = architect.addOfficeEscalation(escalationTypeName);
 
 				// Obtain the input
 				OfficeSectionInput sectionInput = null;
-				Map<String, OfficeSectionInput> sectionInputs = inputs
-						.get(sectionName);
+				Map<String, OfficeSectionInput> sectionInputs = inputs.get(sectionName);
 				if (sectionInputs != null) {
 					sectionInput = sectionInputs.get(inputName);
 				}
 				if (sectionInput == null) {
-					architect.addIssue("Unknown section input '" + sectionName
-							+ ":" + inputName + "' for linking escalation '"
-							+ escalationTypeName + "'");
+					architect.addIssue("Unknown section input '" + sectionName + ":" + inputName
+							+ "' for linking escalation '" + escalationTypeName + "'");
 					continue; // no input so can not link
 				}
 
@@ -776,11 +719,9 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				architect.link(escalation, sectionInput);
 
 				// Provide property and section input for failed to source
-				failedToSourceProperties
-						.addProperty(
-								AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE
-										+ String.valueOf(i)).setValue(
-								escalationTypeName);
+				failedToSourceProperties.addProperty(
+						AutoWireEscalationCauseRouteWorkSource.PROPERTY_PREFIX_ESCALATION_TYPE + String.valueOf(i))
+						.setValue(escalationTypeName);
 				escalationSectionInput[i] = sectionInput;
 			}
 
@@ -788,36 +729,25 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			if (!isFailedToSourceManuallyConfigured) {
 
 				// Add handling of failing to source managed object
-				OfficeSection failedToSourceSection = architect
-						.addOfficeSection(
-								FailedToSourceManagedObjectEscalation.class
-										.getSimpleName(),
-								WorkSectionSource.class.getName(),
-								AutoWireEscalationCauseRouteWorkSource.class
-										.getName());
-				failedToSourceProperties
-						.configureProperties(failedToSourceSection);
+				OfficeSection failedToSourceSection = architect.addOfficeSection(
+						FailedToSourceManagedObjectEscalation.class.getSimpleName(), WorkSectionSource.class.getName(),
+						AutoWireEscalationCauseRouteWorkSource.class.getName());
+				failedToSourceProperties.configureProperties(failedToSourceSection);
 
 				// Obtain the type
-				OfficeSectionType failedToSourceSectionType = context
-						.loadOfficeSectionType(
-								FailedToSourceManagedObjectEscalation.class
-										.getSimpleName(),
-								WorkSectionSource.class.getName(),
-								AutoWireEscalationCauseRouteWorkSource.class
-										.getName(), failedToSourceProperties);
+				OfficeSectionType failedToSourceSectionType = context.loadOfficeSectionType(
+						FailedToSourceManagedObjectEscalation.class.getSimpleName(), WorkSectionSource.class.getName(),
+						AutoWireEscalationCauseRouteWorkSource.class.getName(), failedToSourceProperties);
 
 				// Configure the outputs
 				for (OfficeSectionOutputType escalationOutputType : failedToSourceSectionType
 						.getOfficeSectionOutputTypes()) {
-					String escalationTypeName = escalationOutputType
-							.getOfficeSectionOutputName();
+					String escalationTypeName = escalationOutputType.getOfficeSectionOutputName();
 
 					// Find escalation for output
 					for (int i = 0; i < this.escalations.size(); i++) {
 						EscalationLink link = this.escalations.get(i);
-						if (!(escalationTypeName.equals(link.escalationType
-								.getName()))) {
+						if (!(escalationTypeName.equals(link.escalationType.getName()))) {
 							continue; // not match
 						}
 
@@ -838,16 +768,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 				// Provide handling of failed to source escalation
 				OfficeEscalation failedToSourceEscalation = architect
-						.addOfficeEscalation(FailedToSourceManagedObjectEscalation.class
-								.getName());
+						.addOfficeEscalation(FailedToSourceManagedObjectEscalation.class.getName());
 				OfficeSectionInput failedToSourceHandler = failedToSourceSection
 						.getOfficeSectionInput(AutoWireEscalationCauseRouteWorkSource.HANDLER_TASK_NAME);
 				architect.link(failedToSourceEscalation, failedToSourceHandler);
 
 				// Link teams for failed to source tasks
-				this.linkTasksToTeams(failedToSourceSection,
-						failedToSourceSectionType, responsibleTeams,
-						defaultTeam, architect);
+				this.linkTasksToTeams(failedToSourceSection, failedToSourceSectionType, responsibleTeams, defaultTeam,
+						architect);
 			}
 		}
 
@@ -856,52 +784,48 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Obtain the governance details
 			String governanceName = governance.getGovernanceName();
-			String governanceSourceClassName = governance
-					.getGovernanceSourceClassName();
+			String governanceSourceClassName = governance.getGovernanceSourceClassName();
 			PropertyList properties = governance.getProperties();
 
 			// Add the Governance
-			OfficeGovernance officeGovernance = architect.addOfficeGovernance(
-					governance.getGovernanceName(), governanceSourceClassName);
+			OfficeGovernance officeGovernance = architect.addOfficeGovernance(governance.getGovernanceName(),
+					governanceSourceClassName);
 			for (Property property : properties) {
-				officeGovernance.addProperty(property.getName(),
-						property.getValue());
+				officeGovernance.addProperty(property.getName(), property.getValue());
 			}
 
 			// Obtain the extension interface for the governance
-			GovernanceType<?, ?> governanceType = context.loadGovernanceType(
-					governanceSourceClassName, properties);
+			GovernanceType<?, ?> governanceType = context.loadGovernanceType(governanceSourceClassName, properties);
 			if (governanceType == null) {
 				continue; // need extension interface from type
 			}
-			Class<?> extensionInterface = governanceType
-					.getExtensionInterface();
+			Class<?> extensionInterface = governanceType.getExtensionInterface();
 
 			// Assign team for governance
-			this.assignTeam(officeGovernance, extensionInterface,
-					responsibleTeams, defaultTeam, architect);
+			this.assignTeam(officeGovernance, extensionInterface, responsibleTeams, defaultTeam, architect);
 
 			// Govern the sections
 			for (AutoWireSection section : governance.getGovernedSections()) {
 
 				// Obtain the section
 				String sectionName = section.getSectionName();
-				OfficeSection officeSection = officeSectionsByName
-						.get(sectionName);
+				OfficeSection officeSection = officeSectionsByName.get(sectionName);
 				if (officeSection == null) {
-					architect.addIssue("Unknown section '" + sectionName
-							+ "' to be governed by governance "
-							+ governanceName);
+					architect.addIssue(
+							"Unknown section '" + sectionName + "' to be governed by governance " + governanceName);
 					continue; // can not govern unknown section
 				}
+				OfficeSectionType sectionType = officeSectionTypesByName.get(sectionName);
 
 				// Govern the section
 				officeSection.addGovernance(officeGovernance);
+
+				// Govern the managed objects of the section
+				this.governSectionManagedObjects(officeSection, sectionType, extensionInterface, officeGovernance);
 			}
 
 			// Govern the Office Objects (via auto-wiring extensions)
-			List<AutoWire> autoWiring = this.extensionInterfaceToAutoWiring
-					.get(extensionInterface);
+			List<AutoWire> autoWiring = this.extensionInterfaceToAutoWiring.get(extensionInterface);
 			if (autoWiring != null) {
 
 				// Govern the office objects
@@ -916,24 +840,6 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 					// Govern the office object
 					officeGovernance.governManagedObject(officeObject);
 				}
-			}
-
-			// Traverse the sections to govern managed objects
-			String[] orderedOfficeSectionNames = officeSectionTypesByName
-					.keySet().stream()
-					.sorted((a, b) -> CompileUtil.sortCompare(a, b))
-					.toArray(String[]::new);
-			for (String officeSectionName : orderedOfficeSectionNames) {
-
-				// Obtain the section and its type
-				OfficeSection section = officeSectionsByName
-						.get(officeSectionName);
-				OfficeSectionType sectionType = officeSectionTypesByName
-						.get(officeSectionName);
-
-				// Govern the managed objects of the section
-				this.governSectionManagedObjects(section, sectionType,
-						extensionInterface, officeGovernance);
 			}
 		}
 
@@ -950,14 +856,12 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Obtain the section input
 			OfficeSectionInput input = null;
-			Map<String, OfficeSectionInput> sectionInputs = inputs
-					.get(startupSection);
+			Map<String, OfficeSectionInput> sectionInputs = inputs.get(startupSection);
 			if (sectionInputs != null) {
 				input = sectionInputs.get(startupInput);
 			}
 			if (input == null) {
-				architect.addIssue("Unknown section '" + startupSection
-						+ "' input '" + startupInput
+				architect.addIssue("Unknown section '" + startupSection + "' input '" + startupInput
 						+ "' to be triggered on start-up");
 				continue; // can not trigger flow on start-up
 			}
@@ -982,21 +886,17 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param governance
 	 *            {@link OfficeGovernance}.
 	 */
-	private void governSectionManagedObjects(OfficeSubSection section,
-			OfficeSubSectionType sectionType, Class<?> extensionInterface,
-			OfficeGovernance governance) {
+	private void governSectionManagedObjects(OfficeSubSection section, OfficeSubSectionType sectionType,
+			Class<?> extensionInterface, OfficeGovernance governance) {
 
 		// Check all section managed objects
-		for (OfficeSectionManagedObjectType moType : sectionType
-				.getOfficeSectionManagedObjectTypes()) {
-			for (Class<?> supportedExtensionInterface : moType
-					.getSupportedExtensionInterfaces()) {
+		for (OfficeSectionManagedObjectType moType : sectionType.getOfficeSectionManagedObjectTypes()) {
+			for (Class<?> supportedExtensionInterface : moType.getSupportedExtensionInterfaces()) {
 				if (extensionInterface.equals(supportedExtensionInterface)) {
 
 					// Obtain the managed object
 					String moName = moType.getOfficeSectionManagedObjectName();
-					OfficeSectionManagedObject mo = section
-							.getOfficeSectionManagedObject(moName);
+					OfficeSectionManagedObject mo = section.getOfficeSectionManagedObject(moName);
 
 					// Supports extension so govern
 					governance.governManagedObject(mo);
@@ -1005,23 +905,20 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		}
 
 		// Recursively govern the sub sections
-		for (OfficeSubSectionType subSectionType : sectionType
-				.getOfficeSubSectionTypes()) {
+		for (OfficeSubSectionType subSectionType : sectionType.getOfficeSubSectionTypes()) {
 
 			// Obtain the sub section
-			String subSectionName = sectionType.getOfficeSectionName();
-			OfficeSubSection subSection = section
-					.getOfficeSubSection(subSectionName);
+			String subSectionName = subSectionType.getOfficeSectionName();
+			OfficeSubSection subSection = section.getOfficeSubSection(subSectionName);
 
 			// Govern the sub section
-			this.governSectionManagedObjects(subSection, subSectionType,
-					extensionInterface, governance);
+			this.governSectionManagedObjects(subSection, subSectionType, extensionInterface, governance);
 		}
 	}
 
 	/**
-	 * Links the {@link OfficeSectionTask} instances of the {@link OfficeSubSection} to
-	 * the {@link OfficeTeam}.
+	 * Links the {@link OfficeSectionTask} instances of the
+	 * {@link OfficeSubSection} to the {@link OfficeTeam}.
 	 * 
 	 * @param subSection
 	 *            {@link OfficeSubSection}.
@@ -1034,10 +931,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 */
-	private void linkTasksToTeams(OfficeSubSection subSection,
-			OfficeSubSectionType subSectionType,
-			List<ResponsibleTeam> responsibleTeams,
-			ResponsibleTeam defaultTeam, OfficeArchitect architect) {
+	private void linkTasksToTeams(OfficeSubSection subSection, OfficeSubSectionType subSectionType,
+			List<ResponsibleTeam> responsibleTeams, ResponsibleTeam defaultTeam, OfficeArchitect architect) {
 
 		// Link section tasks to team
 		for (OfficeTaskType taskType : subSectionType.getOfficeTaskTypes()) {
@@ -1047,22 +942,18 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			OfficeSectionTask task = subSection.getOfficeSectionTask(taskName);
 
 			// Assign the team
-			this.assignTeam(task, taskType, responsibleTeams, defaultTeam,
-					architect);
+			this.assignTeam(task, taskType, responsibleTeams, defaultTeam, architect);
 		}
 
 		// Recursively link the sub sections
-		for (OfficeSubSectionType subSubSectionType : subSectionType
-				.getOfficeSubSectionTypes()) {
+		for (OfficeSubSectionType subSubSectionType : subSectionType.getOfficeSubSectionTypes()) {
 
 			// Obtain the sub section
 			String subSubSectionName = subSubSectionType.getOfficeSectionName();
-			OfficeSubSection subSubSection = subSection
-					.getOfficeSubSection(subSubSectionName);
+			OfficeSubSection subSubSection = subSection.getOfficeSubSection(subSubSectionName);
 
 			// Link the tasks
-			this.linkTasksToTeams(subSubSection, subSubSectionType,
-					responsibleTeams, defaultTeam, architect);
+			this.linkTasksToTeams(subSubSection, subSubSectionType, responsibleTeams, defaultTeam, architect);
 		}
 	}
 
@@ -1080,8 +971,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 */
-	private void assignTeam(OfficeSectionTask task, OfficeTaskType taskType,
-			List<ResponsibleTeam> responsibleTeams,
+	private void assignTeam(OfficeSectionTask task, OfficeTaskType taskType, List<ResponsibleTeam> responsibleTeams,
 			ResponsibleTeam defaultTeam, OfficeArchitect architect) {
 
 		// Determine if team to be responsible
@@ -1118,10 +1008,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	 * @param architect
 	 *            {@link OfficeArchitect}.
 	 */
-	private void assignTeam(OfficeGovernance governance,
-			Class<?> extensionInterface,
-			List<ResponsibleTeam> responsibleTeams,
-			ResponsibleTeam defaultTeam, OfficeArchitect architect) {
+	private void assignTeam(OfficeGovernance governance, Class<?> extensionInterface,
+			List<ResponsibleTeam> responsibleTeams, ResponsibleTeam defaultTeam, OfficeArchitect architect) {
 
 		// Determine if team to be responsible
 		for (ResponsibleTeam responsibleTeam : responsibleTeams) {
@@ -1180,8 +1068,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		 * @param targetInputName
 		 *            Target {@link SectionInput} name.
 		 */
-		public Link(AutoWireSection sourceSection, String sourceOutputName,
-				AutoWireSection targetSection, String targetInputName) {
+		public Link(AutoWireSection sourceSection, String sourceOutputName, AutoWireSection targetSection,
+				String targetInputName) {
 			this.sourceSection = sourceSection;
 			this.sourceOutputName = sourceOutputName;
 			this.targetSection = targetSection;
@@ -1219,8 +1107,8 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		 * @param targetInputName
 		 *            Target {@link SectionInput} name.
 		 */
-		public EscalationLink(Class<? extends Throwable> escalationType,
-				AutoWireSection targetSection, String targetInputName) {
+		public EscalationLink(Class<? extends Throwable> escalationType, AutoWireSection targetSection,
+				String targetInputName) {
 			this.escalationType = escalationType;
 			this.targetSection = targetSection;
 			this.targetInputName = targetInputName;
@@ -1292,9 +1180,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 
 			// Lazy create the OfficeTeam
 			if (this.officeTeam == null) {
-				this.officeTeam = architect
-						.addOfficeTeam(this.dependencyAutoWire
-								.getQualifiedType());
+				this.officeTeam = architect.addOfficeTeam(this.dependencyAutoWire.getQualifiedType());
 			}
 
 			// Return the OfficeTeam
@@ -1311,8 +1197,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		 *         responsible for the {@link OfficeSectionTask}.
 		 */
 		public boolean isResponsible(OfficeTaskType taskType) {
-			return this.isResponsible(taskType.getObjectDependencies(),
-					new HashSet<DependentObjectType>());
+			return this.isResponsible(taskType.getObjectDependencies(), new HashSet<DependentObjectType>());
 		}
 
 		/**
@@ -1332,8 +1217,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			}
 
 			// Return based on type matching
-			return (this.dependencyAutoWire.getType().equals(extensionInterface
-					.getName()));
+			return (this.dependencyAutoWire.getType().equals(extensionInterface.getName()));
 		}
 
 		/**
@@ -1347,8 +1231,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 		 * @return <code>true</code> if the {@link OfficeTeam} is potentially
 		 *         responsible for the {@link ObjectDependencyType} instances.
 		 */
-		private boolean isResponsible(ObjectDependencyType[] dependencies,
-				Set<DependentObjectType> objects) {
+		private boolean isResponsible(ObjectDependencyType[] dependencies, Set<DependentObjectType> objects) {
 
 			// Obtain details of auto-wire
 			String autoWireQualifier = this.dependencyAutoWire.getQualifier();
@@ -1358,8 +1241,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 			for (ObjectDependencyType dependencyType : dependencies) {
 
 				// Obtain the dependent object
-				DependentObjectType objectType = dependencyType
-						.getDependentObjectType();
+				DependentObjectType objectType = dependencyType.getDependentObjectType();
 				if (objectType == null) {
 					continue; // ignore if dependency not linked
 				}
@@ -1371,8 +1253,7 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 				objects.add(objectType);
 
 				// Determine if responsible
-				for (TypeQualification qualification : objectType
-						.getTypeQualifications()) {
+				for (TypeQualification qualification : objectType.getTypeQualifications()) {
 
 					// Must match on type
 					if (!(autoWireType.equals(qualification.getType()))) {
@@ -1384,16 +1265,14 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 						// No qualifier, so matches just on type
 						return true;
 
-					} else if (autoWireQualifier.equals(qualification
-							.getQualifier())) {
+					} else if (autoWireQualifier.equals(qualification.getQualifier())) {
 						// Qualifier and type matches, so matches
 						return true;
 					}
 				}
 
 				// Recursively determine if responsible
-				if (this.isResponsible(objectType.getObjectDependencies(),
-						objects)) {
+				if (this.isResponsible(objectType.getObjectDependencies(), objects)) {
 					return true; // responsible
 				}
 			}

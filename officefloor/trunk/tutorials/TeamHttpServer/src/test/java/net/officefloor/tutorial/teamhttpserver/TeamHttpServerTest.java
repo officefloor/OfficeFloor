@@ -96,6 +96,7 @@ public class TeamHttpServerTest extends TestCase {
 		Connection connection = dataSource.getConnection();
 
 		// Ensure can get initial row
+		Thread.sleep(100); // allow time for database setup
 		ResultSet resultSet = connection.createStatement().executeQuery(
 				"SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
 		assertTrue("Ensure have result", resultSet.next());

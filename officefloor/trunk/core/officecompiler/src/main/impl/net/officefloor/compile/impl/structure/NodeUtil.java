@@ -125,6 +125,21 @@ public class NodeUtil {
 	}
 
 	/**
+	 * Obtains the location for the {@link Node}.
+	 * 
+	 * @param sourceClassName
+	 *            Source {@link Class} name.
+	 * @param sourceInstance
+	 *            Instance of the source. May be <code>null</code>.
+	 * @param location
+	 *            Location of the source.
+	 * @return Location for the {@link Node}.
+	 */
+	public static String getLocation(String sourceClassName, Object sourceInstance, String location) {
+		return (sourceInstance != null ? sourceInstance.toString() : sourceClassName) + "(" + location + ")";
+	}
+
+	/**
 	 * All access via static methods.
 	 */
 	private NodeUtil() {
