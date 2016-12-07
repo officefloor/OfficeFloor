@@ -43,17 +43,8 @@
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_gwt-@{officeplugin_gwt_version}.jar]]></contains>
-		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_json-@{officeplugin_json_version}.jar]]></contains>
 		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-ClassPath:([^:]*)officeplugin_launch-@{officeplugin_launch_version}.jar]]></contains>
-		</file>
-
 
 		<!-- Ensure correct versions included for build -->
 		<file>
@@ -74,16 +65,7 @@
 		</file>
 		<file>
 			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officeplugin_gwt-@{officeplugin_gwt_version}.jar]]></contains>
-		</file>
-		<file>
-			<location>build.properties</location>
 			<contains><![CDATA[bin.includes =([^=]*)officeplugin_json-@{officeplugin_json_version}.jar]]></contains>
 		</file>
-		<file>
-			<location>build.properties</location>
-			<contains><![CDATA[bin.includes =([^=]*)officeplugin_launch-@{officeplugin_launch_version}.jar]]></contains>
-		</file>
-
 	</files>
 </verifications>

@@ -94,6 +94,7 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.extension.administratorsource.clazz,
  net.officefloor.eclipse.extension.classpath,
  net.officefloor.eclipse.extension.governancesource,
+ net.officefloor.eclipse.extension.governancesource.clazz,
  net.officefloor.eclipse.extension.managedobjectsource,
  net.officefloor.eclipse.extension.managedobjectsource.clazz,
  net.officefloor.eclipse.extension.managedobjectsource.xml,
@@ -144,4 +145,8 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.wizard.worksource
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: net.officefloor.eclipse.OfficeFloorPlugin
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ jconsole.jar,
+ junit.jar,
+ jdi.jar,
+ jdimodel.jar

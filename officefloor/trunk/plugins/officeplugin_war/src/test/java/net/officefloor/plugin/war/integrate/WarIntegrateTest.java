@@ -21,10 +21,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+
 import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
@@ -35,10 +38,6 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationManagedObjectSource;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  * Integration testing of running a WAR.
@@ -51,8 +50,7 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 	 * Ensure can integrate with raw {@link OfficeFloor} configuration.
 	 */
 	public void testViaOfficeFloorRawConfiguration() throws Throwable {
-		this.doWarStartAndService(null,
-				"net/officefloor/plugin/war/integrate/WarOfficeFloor.officefloor");
+		this.doWarStartAndService(null, "net/officefloor/plugin/war/integrate/WarOfficeFloor.officefloor");
 	}
 
 	/**
@@ -83,8 +81,7 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor} configuration to use.
 	 */
-	public void doWarStartAndService(
-			Class<? extends OfficeFloorSource> officeFloorSourceClass,
+	public void doWarStartAndService(Class<? extends OfficeFloorSource> officeFloorSourceClass,
 			String officeFloorLocation) throws Throwable {
 
 		final int PORT = HttpTestUtil.getAvailablePort();
@@ -94,47 +91,29 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 
 		// Obtain location of war directory
 		File warDir = new File(".", "target/test-classes");
-		assertTrue("Test invalid as WAR directory not available",
-				warDir.isDirectory());
+		assertTrue("Test invalid as WAR directory not available", warDir.isDirectory());
 
 		// Obtain the password file location
 		File passwordFile = this.findFile(this.getClass(), "../password.txt");
 
 		// Open the OfficeBuilding
-		this.officeBuildingManager = OfficeBuildingManager
-				.startOfficeBuilding(
-						null,
-						OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
-						KeyStoreOfficeFloorCommandParameter
-								.getDefaultKeyStoreFile(),
-						KeyStorePasswordOfficeFloorCommandParameter.DEFAULT_KEY_STORE_PASSWORD,
-						"admin",
-						"password",
-						null,
-						false,
-						new Properties(),
-						null,
-						null,
-						true,
-						RemoteRepositoryUrlsOfficeFloorCommandParameterImpl.DEFAULT_REMOTE_REPOSITORY_URLS);
+		this.officeBuildingManager = OfficeBuildingManager.startOfficeBuilding(null,
+				OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
+				KeyStoreOfficeFloorCommandParameter.getDefaultKeyStoreFile(),
+				KeyStorePasswordOfficeFloorCommandParameter.DEFAULT_KEY_STORE_PASSWORD, "admin", "password", null,
+				false, new Properties(), null, null, true);
 
 		try (CloseableHttpClient client = HttpTestUtil.createHttpClient()) {
 
 			// Open the WAR by decoration of OfficeFloor
-			OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
-					officeFloorLocation);
+			OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(officeFloorLocation);
 			if (officeFloorSourceClass != null) {
-				configuration
-						.setOfficeFloorSourceClassName(officeFloorSourceClass
-								.getName());
+				configuration.setOfficeFloorSourceClassName(officeFloorSourceClass.getName());
 			}
 			configuration.addClassPathEntry(warDir.getAbsolutePath());
-			configuration
-					.addOfficeFloorProperty(
-							HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
-							String.valueOf(PORT));
-			configuration.addOfficeFloorProperty("password.file.location",
-					passwordFile.getAbsolutePath());
+			configuration.addOfficeFloorProperty(HttpApplicationLocationManagedObjectSource.PROPERTY_HTTP_PORT,
+					String.valueOf(PORT));
+			configuration.addOfficeFloorProperty("password.file.location", passwordFile.getAbsolutePath());
 			this.officeBuildingManager.openOfficeFloor(configuration);
 
 			// Allow to start
@@ -170,8 +149,7 @@ public class WarIntegrateTest extends OfficeFrameTestCase {
 			HttpResponse response = client.execute(request);
 
 			// Ensure valid response
-			assertEquals("Response should be successful", 200, response
-					.getStatusLine().getStatusCode());
+			assertEquals("Response should be successful", 200, response.getStatusLine().getStatusCode());
 			String body = HttpTestUtil.getEntityBody(response);
 			assertEquals("Incorrect response body", "WAR", body);
 		}

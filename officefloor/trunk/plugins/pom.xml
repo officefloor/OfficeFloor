@@ -16,13 +16,11 @@
 		<module>officeplugin_base</module>
 		<module>officeplugin_bayeux</module>
 		<module>officeplugin_ejb</module>
-		<module>officeplugin_gwt</module>
 		<module>officeplugin_jdbc</module>
 		<module>officeplugin_jms</module>
 		<module>officeplugin_jndi</module>
 		<module>officeplugin_jpa</module>
 		<module>officeplugin_json</module>
-		<module>officeplugin_launch</module>
 		<module>officeplugin_servlet</module>
 		<module>officeplugin_socket</module>
 		<module>officeplugin_war</module>
