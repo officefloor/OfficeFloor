@@ -20,10 +20,6 @@
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>
-			<location>officeplugin_gwt/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
 			<location>officeplugin_jdbc/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
@@ -41,10 +37,6 @@
 		</file>
 		<file>
 			<location>officeplugin_json/pom.xml</location>
-			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>officeplugin_launch/pom.xml</location>
 			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>

@@ -20,9 +20,6 @@ package net.officefloor.eclipse.launch;
 import java.io.File;
 import java.util.Map;
 
-import net.officefloor.console.OpenOfficeFloor;
-import net.officefloor.frame.api.manage.OfficeFloor;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -33,6 +30,9 @@ import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
+
+import net.officefloor.console.OpenOfficeFloor;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link ILaunchConfigurationDelegate} for the {@link OfficeFloor}.

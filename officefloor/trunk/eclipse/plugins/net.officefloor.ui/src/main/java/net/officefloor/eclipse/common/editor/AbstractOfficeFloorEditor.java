@@ -18,25 +18,11 @@
 package net.officefloor.eclipse.common.editor;
 
 import java.awt.Dialog;
-import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.action.OperationAction;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
-import net.officefloor.eclipse.common.editpolicies.layout.CommonGraphicalViewerKeyHandler;
-import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
-import net.officefloor.eclipse.repository.project.FileConfigurationItem;
-import net.officefloor.eclipse.util.EclipseUtil;
-import net.officefloor.model.Model;
-import net.officefloor.model.repository.ConfigurationItem;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -49,7 +35,8 @@ import org.eclipse.gef.EditPartFactory;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.commands.CommandStack;
-import org.eclipse.gef.commands.CommandStackListener;
+import org.eclipse.gef.commands.CommandStackEvent;
+import org.eclipse.gef.commands.CommandStackEventListener;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
 import org.eclipse.gef.editpolicies.GraphicalEditPolicy;
 import org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy;
@@ -74,14 +61,27 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorInput;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
+import net.officefloor.eclipse.common.action.OperationAction;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.layout.CommonGraphicalViewerKeyHandler;
+import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
+import net.officefloor.eclipse.repository.project.FileConfigurationItem;
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.model.Model;
+import net.officefloor.model.repository.ConfigurationItem;
+
 /**
  * Provides an abstract {@link GraphicalEditor} for the Office Floor items to
  * edit.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
-		GraphicalEditorWithFlyoutPalette implements EditPartFactory {
+public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends GraphicalEditorWithFlyoutPalette
+		implements EditPartFactory {
 
 	/**
 	 * Root {@link Model} being edited.
@@ -126,13 +126,11 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		// Set up the command stack
 		CommandStack commandStack = new CommandStack();
 		editDomain.setCommandStack(commandStack);
-		commandStack.addCommandStackListener(new CommandStackListener() {
+		commandStack.addCommandStackEventListener(new CommandStackEventListener() {
 			@Override
-			public void commandStackChanged(EventObject event) {
+			public void stackChanged(CommandStackEvent event) {
 				// Update property dependent actions
-				AbstractOfficeFloorEditor.this
-						.updateActions(AbstractOfficeFloorEditor.this
-								.getPropertyActions());
+				AbstractOfficeFloorEditor.this.updateActions(AbstractOfficeFloorEditor.this.getPropertyActions());
 
 				// Notify change in dirty state
 				AbstractOfficeFloorEditor.this.firePropertyChange(PROP_DIRTY);
@@ -199,10 +197,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 			location.append("\n ...");
 		}
 
-		this.messageError(new Status(IStatus.ERROR,
-				OfficeFloorPlugin.PLUGIN_ID, error.getClass().getSimpleName()
-						+ ": " + error.getMessage() + "\n"
-						+ location.toString(), error));
+		this.messageError(new Status(IStatus.ERROR, OfficeFloorPlugin.PLUGIN_ID,
+				error.getClass().getSimpleName() + ": " + error.getMessage() + "\n" + location.toString(), error));
 	}
 
 	/**
@@ -212,8 +208,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 *            Error message.
 	 */
 	public void messageError(String message) {
-		this.messageError(new Status(IStatus.ERROR,
-				OfficeFloorPlugin.PLUGIN_ID, message));
+		this.messageError(new Status(IStatus.ERROR, OfficeFloorPlugin.PLUGIN_ID, message));
 	}
 
 	/**
@@ -225,8 +220,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 *            Cause of error.
 	 */
 	public void messageError(String message, Throwable cause) {
-		this.messageError(message + "\n\n" + cause.getClass().getSimpleName()
-				+ ": " + cause.getMessage());
+		this.messageError(message + "\n\n" + cause.getClass().getSimpleName() + ": " + cause.getMessage());
 	}
 
 	/**
@@ -236,8 +230,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 *            Warning message
 	 */
 	public void messageWarning(String message) {
-		this.messageStatus(new Status(IStatus.WARNING,
-				OfficeFloorPlugin.PLUGIN_ID, message), "Warning");
+		this.messageStatus(new Status(IStatus.WARNING, OfficeFloorPlugin.PLUGIN_ID, message), "Warning");
 	}
 
 	/**
@@ -259,8 +252,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 *            Title for {@link Dialog}.
 	 */
 	public void messageStatus(IStatus status, String title) {
-		ErrorDialog.openError(this.getEditorSite().getShell(), title, null,
-				status);
+		ErrorDialog.openError(this.getEditorSite().getShell(), title, null, status);
 	}
 
 	/**
@@ -280,8 +272,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 * @param policy
 	 *            {@link OfficeFloorLayoutEditPolicy}.
 	 */
-	protected abstract void populateLayoutEditPolicy(
-			OfficeFloorLayoutEditPolicy policy);
+	protected abstract void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy);
 
 	/**
 	 * Creates the {@link GraphicalEditPolicy} to be installed.
@@ -300,8 +291,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 * @param policy
 	 *            {@link OfficeFloorGraphicalNodeEditPolicy}.
 	 */
-	protected abstract void populateGraphicalEditPolicy(
-			OfficeFloorGraphicalNodeEditPolicy policy);
+	protected abstract void populateGraphicalEditPolicy(OfficeFloorGraphicalNodeEditPolicy policy);
 
 	/*
 	 * =================== GraphicalEditor =========================
@@ -381,8 +371,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		this.getGraphicalControl().addMouseListener(mouseLocation);
 
 		// Create the context menu
-		ContextMenuProvider menuProvider = new ContextMenuProvider(
-				this.getGraphicalViewer()) {
+		ContextMenuProvider menuProvider = new ContextMenuProvider(this.getGraphicalViewer()) {
 			@Override
 			public void buildContextMenu(IMenuManager menuManager) {
 
@@ -391,19 +380,16 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 				// Obtain the selected edit parts
 				List<EditPart> selectedEditPartList = new LinkedList<EditPart>();
-				ISelection selection = AbstractOfficeFloorEditor.this
-						.getGraphicalViewer().getSelection();
+				ISelection selection = AbstractOfficeFloorEditor.this.getGraphicalViewer().getSelection();
 				IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-				for (Iterator<?> iterator = structuredSelection.iterator(); iterator
-						.hasNext();) {
+				for (Iterator<?> iterator = structuredSelection.iterator(); iterator.hasNext();) {
 					Object selectedItem = iterator.next();
 
 					// Obtain the edit part and add to listing
 					EditPart editPart = (EditPart) selectedItem;
 					selectedEditPartList.add(editPart);
 				}
-				EditPart[] selectedEditParts = selectedEditPartList
-						.toArray(new EditPart[0]);
+				EditPart[] selectedEditParts = selectedEditPartList.toArray(new EditPart[0]);
 
 				// Ensure have selected edit parts
 				if (selectedEditParts.length == 0) {
@@ -415,15 +401,12 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 				for (Operation operation : AbstractOfficeFloorEditor.this.operations) {
 
 					// Determine if handles all edit part types selected
-					boolean isHandled = operation
-							.isApplicable(selectedEditParts);
+					boolean isHandled = operation.isApplicable(selectedEditParts);
 
 					// Add if handles all model types
 					if (isHandled) {
 						// Add action for the commands to the menu
-						menuManager.add(new OperationAction(
-								AbstractOfficeFloorEditor.this
-										.getCommandStack(), operation,
+						menuManager.add(new OperationAction(AbstractOfficeFloorEditor.this.getCommandStack(), operation,
 								selectedEditParts, location));
 					}
 				}
@@ -457,21 +440,18 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		}
 
 		// Obtain the edit part type for the model
-		Class<EditPart> editPartType = (Class<EditPart>) this.modelTypeToEditPartTypeMap
-				.get(model.getClass());
+		Class<EditPart> editPartType = (Class<EditPart>) this.modelTypeToEditPartTypeMap.get(model.getClass());
 
 		// Ensure have type
 		if (editPartType == null) {
-			this.messageError("No EditPart for model "
-					+ model.getClass().getSimpleName());
+			this.messageError("No EditPart for model " + model.getClass().getSimpleName());
 			return null;
 		}
 
 		// Create the instance of the edit part
 		EditPart editPart = EclipseUtil.createInstance(editPartType, this);
 		if (editPart == null) {
-			this.messageError("Failed to obtain EditPart for model "
-					+ model.getClass().getSimpleName());
+			this.messageError("Failed to obtain EditPart for model " + model.getClass().getSimpleName());
 			return null;
 		}
 
@@ -505,8 +485,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 * @param map
 	 *            Registry to load the mappings.
 	 */
-	protected abstract void populateEditPartTypes(
-			Map<Class<?>, Class<? extends EditPart>> map);
+	protected abstract void populateEditPartTypes(Map<Class<?>, Class<? extends EditPart>> map);
 
 	/*
 	 * ================== EditorPart ====================================
@@ -517,8 +496,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		super.setInput(input);
 
 		// Obtain the configuration
-		FileConfigurationItem configuration = new FileConfigurationItem(
-				this.getEditorInput());
+		FileConfigurationItem configuration = new FileConfigurationItem(this.getEditorInput());
 
 		// Retrieve the Model
 		try {
@@ -553,8 +531,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 * @throws Exception
 	 *             If fails to obtain the Model.
 	 */
-	protected abstract M retrieveModel(ConfigurationItem configuration)
-			throws Exception;
+	protected abstract M retrieveModel(ConfigurationItem configuration) throws Exception;
 
 	/*
 	 * ==================== EditorPart ====================================
@@ -563,8 +540,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		// Obtain the configuration
-		FileConfigurationItem configuration = new FileConfigurationItem(
-				this.getEditorInput(), monitor);
+		FileConfigurationItem configuration = new FileConfigurationItem(this.getEditorInput(), monitor);
 
 		try {
 			// Store the Model
@@ -588,8 +564,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 * @throws Exception
 	 *             If fails to store the Model.
 	 */
-	protected abstract void storeModel(M model, ConfigurationItem configuration)
-			throws Exception;
+	protected abstract void storeModel(M model, ConfigurationItem configuration) throws Exception;
 
 	@Override
 	public void doSaveAs() {
@@ -620,19 +595,18 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 			// Add the connection group
 			PaletteGroup connectionGroup = new PaletteGroup("Connection");
-			connectionGroup.add(new ConnectionCreationToolEntry("Connection",
-					"conn", new CreationFactory() {
+			connectionGroup.add(new ConnectionCreationToolEntry("Connection", "conn", new CreationFactory() {
 
-						public Object getNewObject() {
-							// Connection determined in command
-							return null;
-						}
+				public Object getNewObject() {
+					// Connection determined in command
+					return null;
+				}
 
-						public Object getObjectType() {
-							// Connection determined in command
-							return null;
-						}
-					}, null, null));
+				public Object getObjectType() {
+					// Connection determined in command
+					return null;
+				}
+			}, null, null));
 			paletteRoot.add(connectionGroup);
 
 			// Initialise remaining palette root

@@ -19,9 +19,5 @@
 			<groupId>net.officefloor.core</groupId>
 			<artifactId>officebuilding</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>easymock</groupId>
-			<artifactId>easymock</artifactId>
-		</dependency>
 	</dependencies>
 </project>
