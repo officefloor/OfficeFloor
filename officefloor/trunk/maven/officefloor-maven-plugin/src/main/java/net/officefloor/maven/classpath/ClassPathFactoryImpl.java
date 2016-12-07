@@ -30,11 +30,6 @@ import java.util.zip.ZipFile;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.io.ModelReader;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuilder;
-import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
@@ -211,31 +206,6 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 */
 	public ClassPathFactoryImpl(File localRepository, RemoteRepository[] remoteRepositories) throws Exception {
 		this(null, null, localRepository, remoteRepositories);
-	}
-
-	/**
-	 * Obtains the {@link MavenProject} for the <code>pom.xml</code>.
-	 * 
-	 * @param pomFile
-	 *            <code>pom.xml</code> {@link File}.
-	 * @return {@link MavenProject} for the <code>pom.xml</code>.
-	 * @throws Exception
-	 *             If fails to obtain the {@link MavenProject}.
-	 */
-	public MavenProject getMavenProject(File pomFile) throws Exception {
-
-		// Create the repository session
-		RepositorySystemSession session = this.createRepositorySystemSession();
-
-		// Obtain the Maven Project
-		ProjectBuilder builder = this.plexusContainer.lookup(ProjectBuilder.class);
-		ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
-		request.setRepositorySession(session);
-		ProjectBuildingResult result = builder.build(pomFile, request);
-		MavenProject project = result.getProject();
-
-		// Return the Maven Project
-		return project;
 	}
 
 	/**

@@ -16,11 +16,6 @@
 		<file>
 			<location>${basedir}/src/main/resources/archetype-resources/pom.xml
 			</location>
-			<contains><![CDATA[<gwt-version>@{gwt-user_version}</gwt-version>]]></contains>
-		</file>
-		<file>
-			<location>${basedir}/src/main/resources/archetype-resources/pom.xml
-			</location>
 			<contains><![CDATA[<jetty-version>@{jetty-maven-plugin_version}</jetty-version>]]></contains>
 		</file>
 		<file>

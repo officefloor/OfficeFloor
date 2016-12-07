@@ -15,9 +15,8 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<!-- Test with GWT to enable determining version of USER for DEV -->
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-user</artifactId>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officecompiler</artifactId>
 		</dependency>
 	</dependencies>
 </project>

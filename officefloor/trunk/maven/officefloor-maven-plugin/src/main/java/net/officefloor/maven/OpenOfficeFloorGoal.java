@@ -21,16 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import net.officefloor.building.manager.OfficeBuildingManager;
-import net.officefloor.building.manager.OfficeBuildingManagerMBean;
-import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
-import net.officefloor.building.manager.UploadArtifact;
-import net.officefloor.building.process.ProcessShell;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.console.OfficeBuilding;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.maven.classpath.ArtifactReference;
-
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -39,6 +29,15 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+
+import net.officefloor.building.manager.OfficeBuildingManager;
+import net.officefloor.building.manager.OfficeBuildingManagerMBean;
+import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
+import net.officefloor.building.manager.UploadArtifact;
+import net.officefloor.building.process.ProcessShell;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.console.OfficeBuilding;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * Maven goal to open the {@link OfficeFloor}.
@@ -68,10 +67,8 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 	 *            {@link Log}.
 	 * @return {@link OpenOfficeFloorGoal}.
 	 */
-	public static OpenOfficeFloorGoal createOfficeFloorGoal(
-			String defaultProcessName, MavenProject project,
-			List<Artifact> pluginDependencies, String officeFloorLocation,
-			Log log) {
+	public static OpenOfficeFloorGoal createOfficeFloorGoal(String defaultProcessName, MavenProject project,
+			List<Artifact> pluginDependencies, String officeFloorLocation, Log log) {
 		OpenOfficeFloorGoal goal = new OpenOfficeFloorGoal();
 		goal.defaultProcessName = defaultProcessName;
 		goal.project = project;
@@ -193,34 +190,25 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		// Ensure have required values
 		ensureNotNull("Must have project", this.project);
 		ensureNotNull("Must have plug-in dependencies", this.pluginDependencies);
-		ensureNotNull(
-				"Port not configured for the "
-						+ OfficeBuilding.class.getSimpleName(), this.port);
-		ensureNotNull(OfficeFloor.class.getSimpleName()
-				+ " configuration location not specified",
+		ensureNotNull("Port not configured for the " + OfficeBuilding.class.getSimpleName(), this.port);
+		ensureNotNull(OfficeFloor.class.getSimpleName() + " configuration location not specified",
 				this.officeFloorLocation);
 
 		// Ensure default non-required values
-		this.processName = defaultValue(this.processName,
-				this.defaultProcessName);
+		this.processName = defaultValue(this.processName, this.defaultProcessName);
 
 		// Obtain the OfficeBuilding manager
 		OfficeBuildingManagerMBean officeBuildingManager;
 		try {
-			officeBuildingManager = OfficeBuildingManager
-					.getOfficeBuildingManager(null, this.port.intValue(),
-							StartOfficeBuildingGoal.getKeyStoreFile(),
-							StartOfficeBuildingGoal.KEY_STORE_PASSWORD,
-							StartOfficeBuildingGoal.USER_NAME,
-							StartOfficeBuildingGoal.PASSWORD);
+			officeBuildingManager = OfficeBuildingManager.getOfficeBuildingManager(null, this.port.intValue(),
+					StartOfficeBuildingGoal.getKeyStoreFile(), StartOfficeBuildingGoal.KEY_STORE_PASSWORD,
+					StartOfficeBuildingGoal.USER_NAME, StartOfficeBuildingGoal.PASSWORD);
 		} catch (Throwable ex) {
-			throw newMojoExecutionException("Failed accessing the "
-					+ OfficeBuilding.class.getSimpleName(), ex);
+			throw newMojoExecutionException("Failed accessing the " + OfficeBuilding.class.getSimpleName(), ex);
 		}
 
 		// Create the open OfficeFloor configuration
-		OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(
-				this.officeFloorLocation);
+		OpenOfficeFloorConfiguration configuration = new OpenOfficeFloorConfiguration(this.officeFloorLocation);
 		configuration.setOfficeFloorSourceClassName(this.officeFloorSource);
 		configuration.setProcessName(this.processName);
 
@@ -238,9 +226,8 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 				configuration.addClassPathEntry(element);
 			}
 		} catch (Throwable ex) {
-			throw newMojoExecutionException(
-					"Failed creating class path for the "
-							+ OfficeFloor.class.getSimpleName(), ex);
+			throw newMojoExecutionException("Failed creating class path for the " + OfficeFloor.class.getSimpleName(),
+					ex);
 		}
 
 		// Add additional class path entries
@@ -254,18 +241,12 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		log.debug("\tProcess name = " + configuration.getProcessName());
 		log.debug("\t" + OfficeFloorSource.class.getSimpleName() + " class = "
 				+ configuration.getOfficeFloorSourceClassName());
-		log.debug("\t" + OfficeFloorSource.class.getSimpleName()
-				+ " location = " + configuration.getOfficeFloorLocation());
+		log.debug("\t" + OfficeFloorSource.class.getSimpleName() + " location = "
+				+ configuration.getOfficeFloorLocation());
 		log.debug("\tProperties:");
-		Properties configurationOfficeFloorProperties = configuration
-				.getOfficeFloorProperties();
-		for (String propertyName : configurationOfficeFloorProperties
-				.stringPropertyNames()) {
-			log.debug("\t\t"
-					+ propertyName
-					+ " = "
-					+ configurationOfficeFloorProperties
-							.getProperty(propertyName));
+		Properties configurationOfficeFloorProperties = configuration.getOfficeFloorProperties();
+		for (String propertyName : configurationOfficeFloorProperties.stringPropertyNames()) {
+			log.debug("\t\t" + propertyName + " = " + configurationOfficeFloorProperties.getProperty(propertyName));
 		}
 		log.debug("\tClass path entries:");
 		for (String classPathEntry : configuration.getClassPathEntries()) {
@@ -275,40 +256,24 @@ public class OpenOfficeFloorGoal extends AbstractGoal {
 		for (UploadArtifact uploadArtifact : configuration.getUploadArtifacts()) {
 			log.debug("\t\t" + uploadArtifact.getName());
 		}
-		log.debug("\tArtifact References:");
-		for (ArtifactReference artifactReference : configuration
-				.getArtifactReferences()) {
-			log.debug("\t\t" + artifactReference.getId());
-		}
-		log.debug("\tRemote repository URLs:");
-		for (String remoteRepositoryUrl : configuration
-				.getRemoteRepositoryUrls()) {
-			log.debug("\t\t" + remoteRepositoryUrl);
-		}
 		log.debug("\tJVM options:");
 		for (String jvmOption : configuration.getJvmOptions()) {
 			log.debug("\t\t" + jvmOption);
 		}
-		log.debug("\tInitial task = " + configuration.getOfficeName() + " "
-				+ configuration.getWorkName() + "."
-				+ configuration.getTaskName() + "("
-				+ configuration.getParameter() + ")");
+		log.debug("\tInitial task = " + configuration.getOfficeName() + " " + configuration.getWorkName() + "."
+				+ configuration.getTaskName() + "(" + configuration.getParameter() + ")");
 
 		// Open the OfficeFloor
 		String processNameSpace;
 		try {
-			processNameSpace = officeBuildingManager
-					.openOfficeFloor(configuration);
+			processNameSpace = officeBuildingManager.openOfficeFloor(configuration);
 		} catch (Throwable ex) {
-			throw newMojoExecutionException("Failed opening the "
-					+ OfficeFloor.class.getSimpleName(), ex);
+			throw newMojoExecutionException("Failed opening the " + OfficeFloor.class.getSimpleName(), ex);
 		}
 
 		// Log opened the OfficeFloor
-		this.getLog().info(
-				"Opened " + OfficeFloor.class.getSimpleName()
-						+ " under process name space '" + processNameSpace
-						+ "' for " + this.officeFloorLocation);
+		this.getLog().info("Opened " + OfficeFloor.class.getSimpleName() + " under process name space '"
+				+ processNameSpace + "' for " + this.officeFloorLocation);
 	}
 
 }
