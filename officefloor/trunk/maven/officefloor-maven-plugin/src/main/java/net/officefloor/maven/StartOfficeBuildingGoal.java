@@ -26,9 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import net.officefloor.building.classpath.ClassPathFactory;
-import net.officefloor.building.classpath.ClassPathFactoryImpl;
-import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.building.command.parameters.KeyStoreOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.KeyStorePasswordOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
@@ -39,6 +36,9 @@ import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.process.ProcessConfiguration;
 import net.officefloor.building.process.ProcessOutputStreamFactory;
 import net.officefloor.console.OfficeBuilding;
+import net.officefloor.maven.classpath.ClassPathFactory;
+import net.officefloor.maven.classpath.ClassPathFactoryImpl;
+import net.officefloor.maven.classpath.RemoteRepository;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;

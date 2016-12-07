@@ -67,17 +67,6 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	private List<UploadArtifact> uploadArtifacts = new LinkedList<UploadArtifact>();
 
 	/**
-	 * Listing of {@link ArtifactReference} instances.
-	 */
-	private List<ArtifactReference> artifactReferences = new LinkedList<ArtifactReference>();
-
-	/**
-	 * Listing of additional remote repository URLs to find artifacts for the
-	 * {@link ArtifactReference} instances.
-	 */
-	private List<String> remoteRepositoryUrls = new LinkedList<String>();
-
-	/**
 	 * Class path entries.
 	 */
 	private List<String> classPathEntries = new LinkedList<String>();
@@ -152,48 +141,7 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	 * @return Listing of {@link UploadArtifact} instances.
 	 */
 	public UploadArtifact[] getUploadArtifacts() {
-		return this.uploadArtifacts
-				.toArray(new UploadArtifact[this.uploadArtifacts.size()]);
-	}
-
-	/**
-	 * Adds an {@link ArtifactReference}.
-	 * 
-	 * @param artifactReference
-	 *            {@link ArtifactReference}.
-	 */
-	public void addArtifactReference(ArtifactReference artifactReference) {
-		this.artifactReferences.add(artifactReference);
-	}
-
-	/**
-	 * Obtains the listing of {@link ArtifactReference} instances.
-	 * 
-	 * @return Listing of {@link ArtifactReference} instances.
-	 */
-	public ArtifactReference[] getArtifactReferences() {
-		return this.artifactReferences
-				.toArray(new ArtifactReference[this.artifactReferences.size()]);
-	}
-
-	/**
-	 * Adds a remote repository URL.
-	 * 
-	 * @param remoteRepositoryUrl
-	 *            Remote repository URL.
-	 */
-	public void addRemoteRepositoryUrl(String remoteRepositoryUrl) {
-		this.remoteRepositoryUrls.add(remoteRepositoryUrl);
-	}
-
-	/**
-	 * Obtains the remote repository URLs.
-	 * 
-	 * @return Remote repository URLs.
-	 */
-	public String[] getRemoteRepositoryUrls() {
-		return this.remoteRepositoryUrls
-				.toArray(new String[this.remoteRepositoryUrls.size()]);
+		return this.uploadArtifacts.toArray(new UploadArtifact[this.uploadArtifacts.size()]);
 	}
 
 	/**
@@ -220,8 +168,7 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	 * @return Class path entries.
 	 */
 	public String[] getClassPathEntries() {
-		return this.classPathEntries.toArray(new String[this.classPathEntries
-				.size()]);
+		return this.classPathEntries.toArray(new String[this.classPathEntries.size()]);
 	}
 
 	/**
@@ -314,8 +261,7 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	 * @param parameter
 	 *            Parameter to the {@link Task}.
 	 */
-	public void setOpenTask(String officeName, String workName,
-			String taskName, String parameter) {
+	public void setOpenTask(String officeName, String workName, String taskName, String parameter) {
 		this.officeName = officeName;
 		this.workName = workName;
 		this.taskName = taskName;

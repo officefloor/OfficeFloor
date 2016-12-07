@@ -19,7 +19,6 @@ package net.officefloor.building.execute;
 
 import java.io.File;
 
-import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.decorate.OfficeFloorDecoratorContext;
@@ -32,12 +31,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
-
-	/**
-	 * {@link ClassPathFactory}.
-	 */
-	private final ClassPathFactory classPathFactory = this
-			.createMock(ClassPathFactory.class);
 
 	/**
 	 * {@link OfficeFloorCommandContext} to test.
@@ -57,48 +50,6 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 		// Create non-decorated context for testing
 		this.context = this.createContext();
-	}
-
-	/**
-	 * Ensure can include artifact in class path.
-	 */
-	public void testIncludeArtifact() throws Exception {
-
-		final String PATH = "path.jar";
-		this.recordReturn(this.classPathFactory, this.classPathFactory
-				.createArtifactClassPath("group.id", "artifact", "1.0.0",
-						"jar", "test"), new String[] { PATH });
-
-		// Include jar
-		this.replayMockObjects();
-		this.context.includeClassPathArtifact("group.id", "artifact", "1.0.0",
-				"jar", "test");
-		this.verifyMockObjects();
-
-		// Ensure jar on class path with no warnings
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, PATH);
-	}
-
-	/**
-	 * Ensure able to include an artifact location.
-	 */
-	public void testIncludeArtifactLocation() throws Exception {
-
-		final String LOCATION = "test.jar";
-		final String PATH = "path.jar";
-		this.recordReturn(this.classPathFactory,
-				this.classPathFactory.createArtifactClassPath(LOCATION),
-				new String[] { PATH });
-
-		// Include jar
-		this.replayMockObjects();
-		this.context.includeClassPathArtifact(LOCATION);
-		this.verifyMockObjects();
-
-		// Ensure jar on class path with no warnings
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, PATH);
 	}
 
 	/**
@@ -132,10 +83,8 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 		// Create the decorator
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				assertEquals("Incorrect entry", JAR,
-						context.getRawClassPathEntry());
+			public void decorate(OfficeFloorDecoratorContext context) throws Exception {
+				assertEquals("Incorrect entry", JAR, context.getRawClassPathEntry());
 				context.includeResolvedClassPathEntry(CLASS_PATH_OVERRIDE);
 			}
 		};
@@ -154,101 +103,17 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link OfficeFloorDecorator} can override the artifact
-	 * dependencies.
-	 */
-	public void testDecoratorOverrideArtifactDependencies() throws Exception {
-
-		// Override class path entry
-		final String CLASS_PATH_OVERRIDE = "/test/override.jar";
-
-		// Path to artifact
-		final String ARTIFACT = "test.jar";
-
-		// Create the decorator
-		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
-			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				assertEquals("Incorrect entry", ARTIFACT,
-						context.getRawClassPathEntry());
-				context.includeResolvedClassPathEntry(CLASS_PATH_OVERRIDE);
-			}
-		};
-
-		// Create the context with the decorator
-		this.context = this.createContext(decorator);
-
-		// Include jar for decoration
-		this.replayMockObjects();
-		this.context.includeClassPathArtifact(ARTIFACT);
-		this.verifyMockObjects();
-
-		// Ensure class path not changed (not decorated)
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, CLASS_PATH_OVERRIDE);
-	}
-
-	/**
-	 * Ensure {@link OfficeFloorDecorator} will not resolve remaining
-	 * dependencies of a reference artifact should the reference artifact be
-	 * decorated.
-	 */
-	public void testDecoratorOverrideReferencedArtifactResolution()
-			throws Exception {
-
-		// Obtain paths to jars
-		final String JAR_ONE = "one.jar";
-		final String JAR_TWO = "two.jar";
-
-		// Record creating two class path entries
-		this.recordReturn(this.classPathFactory, this.classPathFactory
-				.createArtifactClassPath("group.id", "artifact", "1.0.0",
-						"jar", "test"), new String[] { JAR_ONE, JAR_TWO });
-
-		// Create the decorator
-		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
-			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
-				// Will only include the first resolved class path entry
-				context.includeResolvedClassPathEntry(context
-						.getRawClassPathEntry());
-			}
-		};
-
-		// Create the context with the decorator
-		this.context = this.createContext(decorator);
-
-		// Include artifact with dependencies
-		this.replayMockObjects();
-		this.context.includeClassPathArtifact("group.id", "artifact", "1.0.0",
-				"jar", "test");
-		this.verifyMockObjects();
-
-		// Ensure only the first class path entry included due to decoration
-		assertNoWarnings(this.context);
-		assertClassPath(this.context, JAR_ONE);
-	}
-
-	/**
 	 * Ensure able to create a {@link File} by the {@link OfficeFloorDecorator}.
 	 */
 	public void testDecoratingCreateFile() throws Exception {
 
 		final String FILE_PATH = "test.war";
 
-		// Record not enhancing class path
-		this.recordReturn(this.classPathFactory,
-				this.classPathFactory.createArtifactClassPath(FILE_PATH),
-				new String[] { FILE_PATH });
-
 		// Create the decorator
 		final File[] file = new File[1];
 		final OfficeFloorDecorator decorator = new OfficeFloorDecorator() {
 			@Override
-			public void decorate(OfficeFloorDecoratorContext context)
-					throws Exception {
+			public void decorate(OfficeFloorDecoratorContext context) throws Exception {
 				// Create the file
 				file[0] = context.createWorkspaceFile("decorate", "test");
 			}
@@ -259,17 +124,15 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 
 		// Include artifact with dependencies
 		this.replayMockObjects();
-		this.context.includeClassPathArtifact(FILE_PATH);
+		this.context.includeClassPathEntry(FILE_PATH);
 		this.verifyMockObjects();
 
 		// Ensure no class path warnings
-		assertEquals("Should be no class path warnings", 0,
-				this.context.getWarnings().length);
+		assertEquals("Should be no class path warnings", 0, this.context.getWarnings().length);
 
 		// Ensure file created in the workspace
 		assertTrue("File should be created", file[0].exists());
-		assertEquals("File should be in workspace", this.workspace,
-				file[0].getParentFile());
+		assertEquals("File should be in workspace", this.workspace, file[0].getParentFile());
 	}
 
 	/**
@@ -279,10 +142,8 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	 *            {@link OfficeFloorDecorator} instances.
 	 * @return {@link OfficeFloorCommandContext} for testing.
 	 */
-	private OfficeFloorCommandContextImpl createContext(
-			OfficeFloorDecorator... decorators) throws Exception {
-		return new OfficeFloorCommandContextImpl(this.classPathFactory,
-				this.workspace, decorators);
+	private OfficeFloorCommandContextImpl createContext(OfficeFloorDecorator... decorators) throws Exception {
+		return new OfficeFloorCommandContextImpl(this.workspace, decorators);
 	}
 
 	/**
@@ -310,8 +171,8 @@ public class OfficeFloorCommandContextTest extends OfficeFrameTestCase {
 	 * @param expectedClassPathEntries
 	 *            Expected class path entries.
 	 */
-	private static void assertClassPath(OfficeFloorCommandContextImpl context,
-			String... expectedClassPathEntries) throws Exception {
+	private static void assertClassPath(OfficeFloorCommandContextImpl context, String... expectedClassPathEntries)
+			throws Exception {
 
 		// Create the expected class path
 		StringBuilder path = new StringBuilder();

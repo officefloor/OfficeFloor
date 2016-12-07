@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import net.officefloor.building.manager.ArtifactReference;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
@@ -30,6 +29,7 @@ import net.officefloor.building.process.ProcessShell;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.console.OfficeBuilding;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.maven.classpath.ArtifactReference;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;

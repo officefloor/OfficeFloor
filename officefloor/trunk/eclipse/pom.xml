@@ -177,9 +177,9 @@
 			<repositories>
 				<repository>
 					<!-- Eclipse -->
-					<id>eclipse-luna</id>
+					<id>eclipse-neon</id>
 					<layout>p2</layout>
-					<url>http://download.eclipse.org/releases/luna</url>
+					<url>http://download.eclipse.org/releases/neon</url>
 				</repository>
 			</repositories>
 		</profile>

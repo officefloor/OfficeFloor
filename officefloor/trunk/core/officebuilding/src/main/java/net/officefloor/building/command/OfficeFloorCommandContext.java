@@ -28,42 +28,11 @@ import net.officefloor.building.process.ManagedProcess;
 public interface OfficeFloorCommandContext {
 
 	/**
-	 * <p>
 	 * Provides support for including a class path entry.
-	 * <p>
-	 * The class path entry is included as specified without interrogation for
-	 * dependencies.
 	 * 
 	 * @param classPathEntry
 	 *            Class path entry.
 	 */
 	void includeClassPathEntry(String classPathEntry);
-
-	/**
-	 * Provides support for including an Artifact and its dependencies (via
-	 * <code>META-INF/maven/.../pom.xml</code>) on the class path.
-	 * 
-	 * @param artifactLocation
-	 *            Artifact location.
-	 */
-	void includeClassPathArtifact(String artifactLocation);
-
-	/**
-	 * Provides support for including an Artifact and its dependencies on the
-	 * class path.
-	 * 
-	 * @param groupId
-	 *            Group Id.
-	 * @param artifactId
-	 *            Artifact Id.
-	 * @param version
-	 *            Version.
-	 * @param type
-	 *            Type. <code>null</code> will default to <code>jar</code>.
-	 * @param classifier
-	 *            Classifier, may be <code>null</code>.
-	 */
-	void includeClassPathArtifact(String groupId, String artifactId,
-			String version, String type, String classifier);
 
 }

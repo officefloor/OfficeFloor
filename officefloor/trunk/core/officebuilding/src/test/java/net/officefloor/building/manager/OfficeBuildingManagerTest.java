@@ -93,11 +93,6 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 */
 	private MBeanServer mbeanServer;
 
-	/**
-	 * Remote repository URLs.
-	 */
-	private String[] remoteRepositoryUrls;
-
 	@Override
 	protected void setUp() throws Exception {
 
@@ -109,8 +104,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Obtain the trust store for SSL to work
 		this.trustStore = OfficeBuildingTestUtil.getTrustStore();
-		this.trustStorePassword = OfficeBuildingTestUtil
-				.getTrustStorePassword();
+		this.trustStorePassword = OfficeBuildingTestUtil.getTrustStorePassword();
 
 		// Obtain the credentials
 		this.username = OfficeBuildingTestUtil.getLoginUsername();
@@ -118,11 +112,6 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 
 		// Obtain the MBean Server
 		this.mbeanServer = ManagementFactory.getPlatformMBeanServer();
-
-		// Setup the remote repository URLs
-		this.remoteRepositoryUrls = new String[] { "file://"
-				+ OfficeBuildingTestUtil.getUserLocalRepository()
-						.getAbsolutePath() };
 	}
 
 	@Override
@@ -144,24 +133,18 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		String keyStorePassword = OfficeBuildingTestUtil.getKeyStorePassword();
 
 		// Start the office building
-		OfficeBuildingManagerMBean manager = OfficeBuildingManager
-				.startOfficeBuilding(null, this.port, keyStore,
-						keyStorePassword, this.username, this.password, null,
-						false, new Properties(), this.mbeanServer,
-						new String[0], false, this.remoteRepositoryUrls);
+		OfficeBuildingManagerMBean manager = OfficeBuildingManager.startOfficeBuilding(null, this.port, keyStore,
+				keyStorePassword, this.username, this.password, null, false, new Properties(), this.mbeanServer,
+				new String[0], false);
 
 		// Ensure not a proxy implementation on starting
-		assertTrue("Should be the manager (not proxy MBean)",
-				manager.getClass() == OfficeBuildingManager.class);
-		assertFalse("Should not be proxy MBean",
-				Proxy.isProxyClass(manager.getClass()));
+		assertTrue("Should be the manager (not proxy MBean)", manager.getClass() == OfficeBuildingManager.class);
+		assertFalse("Should not be proxy MBean", Proxy.isProxyClass(manager.getClass()));
 
 		// Ensure office building is available
-		boolean isOfficeBuildingAvailable = OfficeBuildingManager
-				.isOfficeBuildingAvailable(null, nextPort, keyStore,
-						keyStorePassword, this.username, this.password);
-		assertTrue("OfficeBuilding should be available",
-				isOfficeBuildingAvailable);
+		boolean isOfficeBuildingAvailable = OfficeBuildingManager.isOfficeBuildingAvailable(null, nextPort, keyStore,
+				keyStorePassword, this.username, this.password);
+		assertTrue("OfficeBuilding should be available", isOfficeBuildingAvailable);
 
 		// Return the manager
 		return manager;
@@ -178,76 +161,59 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		long afterTime = System.currentTimeMillis();
 
 		// Ensure OfficeBuilding is available
-		assertTrue("OfficeBuilding should be available",
-				OfficeBuildingManager.isOfficeBuildingAvailable(null,
-						this.port, this.trustStore, this.trustStorePassword,
-						this.username, this.password));
+		assertTrue("OfficeBuilding should be available", OfficeBuildingManager.isOfficeBuildingAvailable(null,
+				this.port, this.trustStore, this.trustStorePassword, this.username, this.password));
 
 		// Ensure correct JMX Service URL
 		String actualServiceUrl = manager.getOfficeBuildingJmxServiceUrl();
 		String hostName = InetAddress.getLocalHost().getHostName();
-		String expectedServiceUrl = "service:jmx:rmi://" + hostName + ":"
-				+ this.port + "/jndi/rmi://" + hostName + ":" + this.port
-				+ "/OfficeBuilding";
-		assertEquals("Incorrect service url", expectedServiceUrl,
-				actualServiceUrl);
+		String expectedServiceUrl = "service:jmx:rmi://" + hostName + ":" + this.port + "/jndi/rmi://" + hostName + ":"
+				+ this.port + "/OfficeBuilding";
+		assertEquals("Incorrect service url", expectedServiceUrl, actualServiceUrl);
 
 		// Obtain the Office Building Manager MBean
-		OfficeBuildingManagerMBean managerMBean = OfficeBuildingManager
-				.getOfficeBuildingManager(hostName, this.port, this.trustStore,
-						this.trustStorePassword, this.username, this.password);
+		OfficeBuildingManagerMBean managerMBean = OfficeBuildingManager.getOfficeBuildingManager(hostName, this.port,
+				this.trustStore, this.trustStorePassword, this.username, this.password);
 
 		// Ensure start time is accurate
 		long startTime = managerMBean.getStartTime().getTime();
-		assertTrue("Start time recorded incorrectly",
-				((beforeTime <= startTime) && (startTime <= afterTime)));
+		assertTrue("Start time recorded incorrectly", ((beforeTime <= startTime) && (startTime <= afterTime)));
 
 		// Ensure MBean reports correct service URL
-		String mbeanReportedServiceUrl = managerMBean
-				.getOfficeBuildingJmxServiceUrl();
-		assertEquals("Incorrect MBean service URL", expectedServiceUrl,
-				mbeanReportedServiceUrl);
+		String mbeanReportedServiceUrl = managerMBean.getOfficeBuildingJmxServiceUrl();
+		assertEquals("Incorrect MBean service URL", expectedServiceUrl, mbeanReportedServiceUrl);
 
 		// Ensure correct host and port
 		String mbeanReportedHostName = managerMBean.getOfficeBuildingHostName();
-		assertEquals("Incorrect MBean host name", hostName,
-				mbeanReportedHostName);
+		assertEquals("Incorrect MBean host name", hostName, mbeanReportedHostName);
 		int mbeanReportedPort = managerMBean.getOfficeBuildingPort();
 		assertEquals("Incorrect MBean port", this.port, mbeanReportedPort);
 
 		// Ensure no processes running
 		String[] processNamespaces = managerMBean.listProcessNamespaces();
-		assertEquals("Should be no processes running", 0,
-				processNamespaces.length);
+		assertEquals("Should be no processes running", 0, processNamespaces.length);
 
 		// OfficeBuilding should still be available
-		assertTrue("OfficeBuilding should still be available",
-				OfficeBuildingManager.isOfficeBuildingAvailable(null,
-						this.port, this.trustStore, this.trustStorePassword,
-						this.username, this.password));
+		assertTrue("OfficeBuilding should still be available", OfficeBuildingManager.isOfficeBuildingAvailable(null,
+				this.port, this.trustStore, this.trustStorePassword, this.username, this.password));
 
 		// Stop the Office Building
 		String stopDetails = managerMBean.stopOfficeBuilding(10000);
-		assertEquals("Incorrect stop details", "OfficeBuilding stopped",
-				stopDetails);
+		assertEquals("Incorrect stop details", "OfficeBuilding stopped", stopDetails);
 
 		// OfficeBuilding now not be available
-		assertFalse(
-				"OfficeBuilding should be stopped and therefore unavailable",
-				OfficeBuildingManager.isOfficeBuildingAvailable(null,
-						this.port, this.trustStore, this.trustStorePassword,
-						this.username, this.password));
+		assertFalse("OfficeBuilding should be stopped and therefore unavailable",
+				OfficeBuildingManager.isOfficeBuildingAvailable(null, this.port, this.trustStore,
+						this.trustStorePassword, this.username, this.password));
 	}
 
 	/**
 	 * Ensure able to open the configured {@link OfficeFloor}.
 	 */
 	public void testEnsureOfficeFloorOpens() throws Exception {
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.addSourceAliases();
-		OfficeFloor officeFloor = compiler.compile(this
-				.getOfficeFloorLocation());
+		OfficeFloor officeFloor = compiler.compile(this.getOfficeFloorLocation());
 		officeFloor.openOfficeFloor();
 		officeFloor.closeOfficeFloor();
 	}
@@ -258,39 +224,12 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	public void testOfficeFloorJarManagement() throws Exception {
 		this.doOfficeFloorManagementTest(new OfficeFloorOpener() {
 			@Override
-			public String openOfficeFloor(String processName,
-					String officeFloorLocation,
-					OfficeBuildingManagerMBean buildingManager)
-					throws Exception {
-				OpenOfficeFloorConfiguration config = new OpenOfficeFloorConfiguration(
-						officeFloorLocation);
+			public String openOfficeFloor(String processName, String officeFloorLocation,
+					OfficeBuildingManagerMBean buildingManager) throws Exception {
+				OpenOfficeFloorConfiguration config = new OpenOfficeFloorConfiguration(officeFloorLocation);
 				config.setProcessName(processName);
-				config.addUploadArtifact(new UploadArtifact(
-						OfficeBuildingTestUtil.getOfficeCompilerArtifactJar()));
-				return buildingManager.openOfficeFloor(config);
-			}
-		});
-	}
-
-	/**
-	 * Ensure able to open the {@link OfficeFloor} for JMX.
-	 */
-	public void testOfficeFloorArtifactManagement() throws Exception {
-		this.doOfficeFloorManagementTest(new OfficeFloorOpener() {
-			@Override
-			public String openOfficeFloor(String processName,
-					String officeFloorLocation,
-					OfficeBuildingManagerMBean buildingManager)
-					throws Exception {
-				OpenOfficeFloorConfiguration config = new OpenOfficeFloorConfiguration(
-						officeFloorLocation);
-				config.setProcessName(processName);
-				config.addArtifactReference(new ArtifactReference(
-						"net.officefloor.core", "officecompiler",
-						OfficeBuildingTestUtil
-								.getOfficeCompilerArtifactVersion(), null, null));
-				config.addRemoteRepositoryUrl(OfficeBuildingTestUtil
-						.getUserLocalRepository().toURI().toURL().toString());
+				config.addUploadArtifact(
+						new UploadArtifact(OfficeBuildingManagerTest.this.findFile("lib/MockCore.jar")));
 				return buildingManager.openOfficeFloor(config);
 			}
 		});
@@ -302,12 +241,9 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	public void testOfficeFloorJmxManagement() throws Exception {
 		this.doOfficeFloorManagementTest(new OfficeFloorOpener() {
 			@Override
-			public String openOfficeFloor(String processName,
-					String officeFloorLocation,
-					OfficeBuildingManagerMBean buildingManager)
-					throws Exception {
-				return buildingManager.openOfficeFloor("--officefloor "
-						+ officeFloorLocation);
+			public String openOfficeFloor(String processName, String officeFloorLocation,
+					OfficeBuildingManagerMBean buildingManager) throws Exception {
+				return buildingManager.openOfficeFloor("--officefloor " + officeFloorLocation);
 			}
 		});
 	}
@@ -341,58 +277,44 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 * @param opener
 	 *            {@link OfficeFloorOpener}.
 	 */
-	private void doOfficeFloorManagementTest(OfficeFloorOpener opener)
-			throws Exception {
+	private void doOfficeFloorManagementTest(OfficeFloorOpener opener) throws Exception {
 
 		// Start the OfficeBuilding
 		this.startOfficeBuilding();
 
 		// Obtain the manager MBean
-		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
-				.getOfficeBuildingManager(null, this.port, this.trustStore,
-						this.trustStorePassword, this.username, this.password);
+		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager.getOfficeBuildingManager(null, this.port,
+				this.trustStore, this.trustStorePassword, this.username, this.password);
 
 		// Open the OfficeFloor
 		String officeFloorLocation = this.getOfficeFloorLocation();
-		String processNamespace = opener.openOfficeFloor(this.getName(),
-				officeFloorLocation, buildingManager);
+		String processNamespace = opener.openOfficeFloor(this.getName(), officeFloorLocation, buildingManager);
 
 		// Ensure process running
 		String[] processNamespaces = buildingManager.listProcessNamespaces();
-		assertEquals("Incorrect number of processes running", 1,
-				processNamespaces.length);
-		assertEquals("Incorrect process running", processNamespace,
-				processNamespaces[0]);
+		assertEquals("Incorrect number of processes running", 1, processNamespaces.length);
+		assertEquals("Incorrect process running", processNamespace, processNamespaces[0]);
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
-		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
-				.getOfficeFloorManager(null, this.port, processNamespace,
-						this.trustStore, this.trustStorePassword,
-						this.username, this.password);
-		assertEquals("Incorrect OfficeFloor location", officeFloorLocation,
-				localFloorManager.getOfficeFloorLocation());
+		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager.getOfficeFloorManager(null, this.port,
+				processNamespace, this.trustStore, this.trustStorePassword, this.username, this.password);
+		assertEquals("Incorrect OfficeFloor location", officeFloorLocation, localFloorManager.getOfficeFloorLocation());
 
 		// Obtain the local Process Manager MBean
-		ProcessManagerMBean processManager = OfficeBuildingManager
-				.getProcessManager(null, this.port, processNamespace,
-						this.trustStore, this.trustStorePassword,
-						this.username, this.password);
+		ProcessManagerMBean processManager = OfficeBuildingManager.getProcessManager(null, this.port, processNamespace,
+				this.trustStore, this.trustStorePassword, this.username, this.password);
 
 		// Obtain the local Process Shell MBean
-		ProcessShellMBean localProcessShell = OfficeBuildingManager
-				.getProcessShell(null, this.port, processNamespace,
-						this.trustStore, this.trustStorePassword,
-						this.username, this.password);
+		ProcessShellMBean localProcessShell = OfficeBuildingManager.getProcessShell(null, this.port, processNamespace,
+				this.trustStore, this.trustStorePassword, this.username, this.password);
 
 		// Validate the process host and port
 		String remoteHostName = processManager.getProcessHostName();
 		int remotePort = processManager.getProcessPort();
 		String serviceUrlValue = localProcessShell.getJmxConnectorServiceUrl();
 		JMXServiceURL remoteServiceUrl = new JMXServiceURL(serviceUrlValue);
-		assertEquals("Incorrect process host", remoteServiceUrl.getHost(),
-				remoteHostName);
-		assertEquals("Incorrect process port", remoteServiceUrl.getPort(),
-				remotePort);
+		assertEquals("Incorrect process host", remoteServiceUrl.getHost(), remoteHostName);
+		assertEquals("Incorrect process port", remoteServiceUrl.getPort(), remotePort);
 
 		// Ensure OfficeFloor running
 		this.validateRemoteProcessRunning(remoteServiceUrl);
@@ -401,34 +323,25 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		ListedTask[] listedTasks = localFloorManager.listTasks();
 		assertEquals("Incorrect number of taks", 1, listedTasks.length);
 		ListedTask listedTask = listedTasks[0];
-		assertEquals("Incorrect listed task office name", "OFFICE",
-				listedTask.getOfficeName());
-		assertEquals("Incorrect listed task work name", "SECTION.WORK",
-				listedTask.getWorkName());
-		assertEquals("Incorrect listed task task name", "writeMessage",
-				listedTask.getTaskName());
-		assertEquals("Incorrect listed task parameter type",
-				String.class.getName(), listedTask.getParameterType());
+		assertEquals("Incorrect listed task office name", "OFFICE", listedTask.getOfficeName());
+		assertEquals("Incorrect listed task work name", "SECTION.WORK", listedTask.getWorkName());
+		assertEquals("Incorrect listed task task name", "writeMessage", listedTask.getTaskName());
+		assertEquals("Incorrect listed task parameter type", String.class.getName(), listedTask.getParameterType());
 
 		// Invoke the work
 		File file = OfficeBuildingTestUtil.createTempFile(this);
-		localFloorManager.invokeTask("OFFICE", "SECTION.WORK", null,
-				file.getAbsolutePath());
+		localFloorManager.invokeTask("OFFICE", "SECTION.WORK", null, file.getAbsolutePath());
 
 		// Ensure work invoked (content in file)
-		OfficeBuildingTestUtil.validateFileContent("Work should be invoked",
-				MockWork.MESSAGE, file);
+		OfficeBuildingTestUtil.validateFileContent("Work should be invoked", MockWork.MESSAGE, file);
 
 		// Obtain expected details of stopping the OfficeBuilding
-		String expectedStopDetails = "Stopping processes:\n\t"
-				+ processManager.getProcessName() + " ["
-				+ processManager.getProcessNamespace()
-				+ "]\n\nOfficeBuilding stopped";
+		String expectedStopDetails = "Stopping processes:\n\t" + processManager.getProcessName() + " ["
+				+ processManager.getProcessNamespace() + "]\n\nOfficeBuilding stopped";
 
 		// Stop the OfficeBuilding
 		String stopDetails = buildingManager.stopOfficeBuilding(10000);
-		assertEquals("Ensure correct stop details", expectedStopDetails,
-				stopDetails);
+		assertEquals("Ensure correct stop details", expectedStopDetails, stopDetails);
 
 		// Ensure the OfficeFloor process is also stopped
 		this.validateRemoteProcessStopped(remoteServiceUrl);
@@ -443,38 +356,29 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 		this.startOfficeBuilding();
 
 		// Obtain the manager MBean
-		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager
-				.getOfficeBuildingManager(null, this.port, this.trustStore,
-						this.trustStorePassword, this.username, this.password);
+		OfficeBuildingManagerMBean buildingManager = OfficeBuildingManager.getOfficeBuildingManager(null, this.port,
+				this.trustStore, this.trustStorePassword, this.username, this.password);
 
 		// Open the OfficeFloor
 		String officeFloorLocation = this.getOfficeFloorLocation();
 		String processNamespace = buildingManager
-				.openOfficeFloor(new OpenOfficeFloorConfiguration(
-						officeFloorLocation));
+				.openOfficeFloor(new OpenOfficeFloorConfiguration(officeFloorLocation));
 
 		// Ensure OfficeFloor opened (obtaining local floor manager)
-		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager
-				.getOfficeFloorManager(null, this.port, processNamespace,
-						this.trustStore, this.trustStorePassword,
-						this.username, this.password);
-		assertEquals("Incorrect OfficeFloor location", officeFloorLocation,
-				localFloorManager.getOfficeFloorLocation());
+		OfficeFloorManagerMBean localFloorManager = OfficeBuildingManager.getOfficeFloorManager(null, this.port,
+				processNamespace, this.trustStore, this.trustStorePassword, this.username, this.password);
+		assertEquals("Incorrect OfficeFloor location", officeFloorLocation, localFloorManager.getOfficeFloorLocation());
 
 		// Obtain the local process shell
-		JMXConnector localConnector = connectToJmxAgent(new JMXServiceURL(
-				buildingManager.getOfficeBuildingJmxServiceUrl()), true);
-		MBeanServerConnection localMBeanServer = localConnector
-				.getMBeanServerConnection();
-		ProcessShellMBean localProcessShell = JMX.newMBeanProxy(
-				localMBeanServer, ProcessManager.getLocalObjectName(
-						processNamespace,
-						ProcessShell.getProcessShellObjectName()),
+		JMXConnector localConnector = connectToJmxAgent(
+				new JMXServiceURL(buildingManager.getOfficeBuildingJmxServiceUrl()), true);
+		MBeanServerConnection localMBeanServer = localConnector.getMBeanServerConnection();
+		ProcessShellMBean localProcessShell = JMX.newMBeanProxy(localMBeanServer,
+				ProcessManager.getLocalObjectName(processNamespace, ProcessShell.getProcessShellObjectName()),
 				ProcessShellMBean.class);
 
 		// Obtain the remote process JMX service URL
-		JMXServiceURL remoteServiceUrl = new JMXServiceURL(
-				localProcessShell.getJmxConnectorServiceUrl());
+		JMXServiceURL remoteServiceUrl = new JMXServiceURL(localProcessShell.getJmxConnectorServiceUrl());
 
 		// Ensure the OfficeFloor process is running
 		this.validateRemoteProcessRunning(remoteServiceUrl);
@@ -495,33 +399,22 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	public void testSpawnOfficeBuilding() throws Exception {
 
 		// Spawn the OfficeBuilding
-		ProcessManager process = OfficeBuildingManager.spawnOfficeBuilding(
-				null, this.port, this.trustStore, this.trustStorePassword,
-				this.username, this.password, null, false, null, null, false,
-				new String[] { OfficeBuildingTestUtil.getUserLocalRepository()
-						.getAbsolutePath() }, null);
+		ProcessManager process = OfficeBuildingManager.spawnOfficeBuilding(null, this.port, this.trustStore,
+				this.trustStorePassword, this.username, this.password, null, false, null, null, false, null);
 		try {
 
 			// Ensure the OfficeBuilding is available
-			assertTrue("OfficeBuilding should be available",
-					OfficeBuildingManager.isOfficeBuildingAvailable(null,
-							this.port, this.trustStore,
-							this.trustStorePassword, this.username,
-							this.password));
+			assertTrue("OfficeBuilding should be available", OfficeBuildingManager.isOfficeBuildingAvailable(null,
+					this.port, this.trustStore, this.trustStorePassword, this.username, this.password));
 
 			// Stop the spawned OfficeBuilding
-			OfficeBuildingManagerMBean manager = OfficeBuildingManager
-					.getOfficeBuildingManager(null, this.port, this.trustStore,
-							this.trustStorePassword, this.username,
-							this.password);
+			OfficeBuildingManagerMBean manager = OfficeBuildingManager.getOfficeBuildingManager(null, this.port,
+					this.trustStore, this.trustStorePassword, this.username, this.password);
 			manager.stopOfficeBuilding(1000);
 
 			// Ensure the OfficeBuilding stopped
-			assertFalse("OfficeBuilding should be stopped",
-					OfficeBuildingManager.isOfficeBuildingAvailable(null,
-							this.port, this.trustStore,
-							this.trustStorePassword, this.username,
-							this.password));
+			assertFalse("OfficeBuilding should be stopped", OfficeBuildingManager.isOfficeBuildingAvailable(null,
+					this.port, this.trustStore, this.trustStorePassword, this.username, this.password));
 
 		} finally {
 			// Ensure process stopped
@@ -535,8 +428,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 * @return {@link OfficeFloor} location.
 	 */
 	private String getOfficeFloorLocation() {
-		return this.getClass().getPackage().getName().replace('.', '/')
-				+ "/TestOfficeFloor.officefloor";
+		return this.getClass().getPackage().getName().replace('.', '/') + "/TestOfficeFloor.officefloor";
 	}
 
 	/**
@@ -545,8 +437,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 * @param serviceUrl
 	 *            {@link JMXServiceURL} to determine if running.
 	 */
-	private void validateRemoteProcessRunning(JMXServiceURL serviceUrl)
-			throws IOException {
+	private void validateRemoteProcessRunning(JMXServiceURL serviceUrl) throws IOException {
 		try {
 			this.connectToJmxAgent(serviceUrl, false);
 			fail("Security should prevent connection to running remote process");
@@ -561,8 +452,7 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 * @param serviceUrl
 	 *            {@link JMXServiceURL} to determine if stopped.
 	 */
-	private void validateRemoteProcessStopped(JMXServiceURL serviceUrl)
-			throws InterruptedException {
+	private void validateRemoteProcessStopped(JMXServiceURL serviceUrl) throws InterruptedException {
 
 		// Allow time for process to stop (10 seconds)
 		long endTime = System.currentTimeMillis() + 10000;
@@ -576,19 +466,16 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 				// In process of shutting down (keep waiting)
 
 			} catch (ConnectException ex) {
-				assertEquals("Incorrect cause", "Connection refused", ex
-						.getCause().getMessage());
+				assertEquals("Incorrect cause", "Connection refused", ex.getCause().getMessage());
 				return; // successfully identified as closed
 
 			} catch (UnmarshalException ex) {
-				assertTrue("Incorrect cause "
-						+ ex.getCause().getClass().getName(),
+				assertTrue("Incorrect cause " + ex.getCause().getClass().getName(),
 						(ex.getCause() instanceof EOFException));
 				return; // successfully identified as closed
 
 			} catch (IOException ex) {
-				fail("Should only be ConnectionException but was "
-						+ ex.getMessage() + " [" + ex.getClass().getName()
+				fail("Should only be ConnectionException but was " + ex.getMessage() + " [" + ex.getClass().getName()
 						+ "]");
 			}
 
@@ -609,19 +496,15 @@ public class OfficeBuildingManagerTest extends OfficeFrameTestCase {
 	 *            Indicates if to provide security details to connect.
 	 * @return {@link JMXConnector}.
 	 */
-	private JMXConnector connectToJmxAgent(JMXServiceURL serviceUrl,
-			boolean isSecure) throws IOException {
+	private JMXConnector connectToJmxAgent(JMXServiceURL serviceUrl, boolean isSecure) throws IOException {
 		Map<String, Object> environment = new HashMap<String, Object>();
 		if (isSecure) {
-			byte[] keyStoreContent = OfficeBuildingRmiServerSocketFactory
-					.getKeyStoreContent(this.trustStore);
+			byte[] keyStoreContent = OfficeBuildingRmiServerSocketFactory.getKeyStoreContent(this.trustStore);
 			RMIClientSocketFactory socketFactory = new OfficeBuildingRmiClientSocketFactory(
-					OfficeBuildingManager.getSslProtocol(),
-					OfficeBuildingManager.getSslAlgorithm(), keyStoreContent,
+					OfficeBuildingManager.getSslProtocol(), OfficeBuildingManager.getSslAlgorithm(), keyStoreContent,
 					this.trustStorePassword);
 			environment.put("com.sun.jndi.rmi.factory.socket", socketFactory);
-			environment.put(JMXConnector.CREDENTIALS, new String[] {
-					this.username, this.password });
+			environment.put(JMXConnector.CREDENTIALS, new String[] { this.username, this.password });
 		}
 		return JMXConnectorFactory.connect(serviceUrl, environment);
 	}

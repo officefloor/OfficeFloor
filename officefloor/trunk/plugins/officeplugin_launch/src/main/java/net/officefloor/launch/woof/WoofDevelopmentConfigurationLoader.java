@@ -23,9 +23,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.building.classpath.ClassPathFactory;
-import net.officefloor.building.classpath.ClassPathFactoryImpl;
-import net.officefloor.building.classpath.RemoteRepository;
+import net.officefloor.maven.ClassPathFactoryImpl;
+import net.officefloor.maven.RemoteRepository;
+import net.officefloor.maven.classpath.ClassPathFactory;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.inputstream.InputStreamConfigurationItem;
 import net.officefloor.model.woof.PropertyModel;

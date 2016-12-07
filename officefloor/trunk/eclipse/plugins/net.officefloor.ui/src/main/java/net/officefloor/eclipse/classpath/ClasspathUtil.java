@@ -17,24 +17,9 @@
  */
 package net.officefloor.eclipse.classpath;
 
-import java.io.File;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-
-import net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainer;
-import net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainerInitialiser;
-import net.officefloor.eclipse.classpathcontainer.SourceAttachmentEntry;
-import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.VariableClasspathProvision;
-import net.officefloor.eclipse.repository.project.FileConfigurationItem;
-import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
-import net.officefloor.eclipse.util.LogUtil;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -43,9 +28,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -62,6 +45,9 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.ide.IDE;
+
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 
 /**
  * Utility methods for working with class path.
@@ -81,8 +67,7 @@ public class ClasspathUtil {
 	 * @throws ClassNotFoundException
 	 *             If {@link Class} not found.
 	 */
-	public static Class<?> loadProjectClass(IProject project, String className)
-			throws ClassNotFoundException {
+	public static Class<?> loadProjectClass(IProject project, String className) throws ClassNotFoundException {
 
 		// Obtain via project class loader
 		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
@@ -101,102 +86,8 @@ public class ClasspathUtil {
 	 * @throws ClassNotFoundException
 	 *             If {@link Class} not found.
 	 */
-	public static Class<?> loadPluginClass(String className)
-			throws ClassNotFoundException {
-		return Thread.currentThread().getContextClassLoader()
-				.loadClass(className);
-	}
-
-	/**
-	 * Ensures the {@link OfficeFloorClasspathContainer} is on the
-	 * {@link IJavaProject}.
-	 * 
-	 * @param project
-	 *            {@link IJavaProject}.
-	 * @param monitor
-	 *            {@link IProgressMonitor}. May be <code>null</code>.
-	 */
-	public static void ensureProjectHasOfficeFloorClasspathContainer(
-			IJavaProject project, IProgressMonitor monitor) {
-		try {
-			// Attempt to ensure OfficeFloor class path container on project
-			OfficeFloorClasspathContainerInitialiser
-					.ensureOfficeFloorClasspathContainerOnProject(project,
-							monitor);
-		} catch (Throwable ex) {
-			// Indicate failure to update class path
-			LogUtil.logError(
-					"Failed to ensure OfficeFloor class path container on project",
-					ex);
-		}
-	}
-
-	/**
-	 * <p>
-	 * Attempts to add the {@link ExtensionClasspathProvider} instances to the
-	 * class path of the {@link IJavaProject} for the edit part.
-	 * <p>
-	 * No exception is thrown if unable to update the class path and the class
-	 * path is subsequently not updated.
-	 * 
-	 * @param editPart
-	 *            {@link AbstractOfficeFloorEditPart}.
-	 * @param monitor
-	 *            {@link IProgressMonitor}.
-	 * @param extensionClassNames
-	 *            Listing of class names that may have extension associated.
-	 */
-	public static void attemptAddExtensionClasspathProvidersToOfficeFloorClasspath(
-			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
-			IProgressMonitor monitor, String... extensionClassNames) {
-		try {
-			// Obtain the java project for the edit part
-			IProject project = FileConfigurationItem.getProject(editPart);
-			IJavaProject javaProject = JavaCore.create(project);
-
-			// Attempt to update the class path
-			OfficeFloorClasspathContainerInitialiser
-					.addExtensionClasspathProvidersToOfficeFloorClassPath(
-							javaProject, monitor, extensionClassNames);
-
-		} catch (Throwable ex) {
-			// Indicate failure to update class path
-			LogUtil.logError("Failed to update OfficeFloor class path", ex);
-		}
-	}
-
-	/**
-	 * Creates the {@link IClasspathEntry} from a {@link ClasspathProvision}.
-	 * 
-	 * @param provision
-	 *            {@link ClasspathProvision}.
-	 * @param container
-	 *            {@link OfficeFloorClasspathContainer}.
-	 * @return {@link IClasspathEntry} or <code>null</code> if fails.
-	 */
-	public static IClasspathEntry createClasspathEntry(
-			ClasspathProvision provision,
-			OfficeFloorClasspathContainer container) {
-
-		// Handle based on type of provision
-		if (provision instanceof TypeClasspathProvision) {
-			// Type provision
-			TypeClasspathProvision typeProvision = (TypeClasspathProvision) provision;
-			return createClasspathEntry(typeProvision.getType(), container);
-		} else if (provision instanceof VariableClasspathProvision) {
-			// Variable provision
-			VariableClasspathProvision variableProvision = (VariableClasspathProvision) provision;
-			return createClasspathEntry(variableProvision.getVariable(),
-					variableProvision.getPath());
-		} else {
-			// Unknown provision type
-			String provisionTypeName = (provision == null ? null : provision
-					.getClass().getName());
-			LogUtil.logError("Unknown "
-					+ ClasspathProvision.class.getSimpleName() + " type "
-					+ provisionTypeName);
-			return null;
-		}
+	public static Class<?> loadPluginClass(String className) throws ClassNotFoundException {
+		return Thread.currentThread().getContextClassLoader().loadClass(className);
 	}
 
 	/**
@@ -209,87 +100,13 @@ public class ClasspathUtil {
 	 * @return {@link IClasspathEntry} for the variable or <code>null</code> if
 	 *         fails to create.
 	 */
-	public static IClasspathEntry createClasspathEntry(String variable,
-			String path) {
+	public static IClasspathEntry createClasspathEntry(String variable, String path) {
 
 		// Create the path
 		IPath variablePath = new Path(variable).append(path);
 
 		// Return the variable class path entry
 		return JavaCore.newVariableEntry(variablePath, null, null);
-	}
-
-	/**
-	 * Obtains the {@link IClasspathEntry} of the class path containing the
-	 * {@link Class}.
-	 * 
-	 * @param clazz
-	 *            {@link Class}.
-	 * @param container
-	 *            {@link OfficeFloorClasspathContainer}. May be
-	 *            <code>null</code> if do not require source attachments.
-	 * @return {@link IClasspathEntry} of the class path containing the
-	 *         {@link Class} or <code>null</code> if issue obtaining.
-	 */
-	public static IClasspathEntry createClasspathEntry(Class<?> clazz,
-			OfficeFloorClasspathContainer container) {
-
-		try {
-			// Obtain the class resource name
-			String classResourceName = clazz.getName().replace('.', '/')
-					+ ".class";
-
-			// Obtain the URL to the class resource
-			URL classUrl = clazz.getClassLoader()
-					.getResource(classResourceName);
-			URL resolvedUrl = FileLocator.resolve(classUrl);
-			String resolvedPath = resolvedUrl.getPath();
-
-			// Determine the class path
-			String classpath;
-			if (resolvedPath.startsWith("file:")) {
-				// Class contained in file, strip path to obtain file
-				resolvedPath = resolvedPath.substring("file:".length());
-				int endOfFilePath = resolvedPath.indexOf('!');
-				classpath = resolvedPath.substring(0, endOfFilePath);
-
-			} else {
-				// Plain directory, obtain path to start of class directory
-				String path = new File(resolvedUrl.toURI()).getAbsolutePath();
-				classpath = path.substring(0,
-						(path.length() - classResourceName.length()));
-			}
-
-			// Obtain the path for the class path
-			IPath classpathPath = new Path(classpath);
-
-			// Obtain the source attachment paths
-			IPath sourceAttachmentPath = null;
-			IPath sourceAttachmentRootPath = null;
-			if (container != null) {
-				SourceAttachmentEntry entry = container
-						.getSourceAttachmentEntry(classpathPath);
-				if (entry != null) {
-					// Provide source attachment paths
-					sourceAttachmentPath = entry.getSourceAttachmentIPath();
-					sourceAttachmentRootPath = entry
-							.getSourceAttachmentRootIPath();
-				}
-			}
-
-			// Return the class path entry
-			return JavaCore.newLibraryEntry(classpathPath,
-					sourceAttachmentPath, sourceAttachmentRootPath);
-
-		} catch (Throwable ex) {
-
-			// Log failure to obtain class path for class
-			LogUtil.logError("Failed to obtain class path for class "
-					+ (clazz == null ? null : clazz.getName()), ex);
-
-			// No class path as failed to obtain
-			return null;
-		}
 	}
 
 	/**
@@ -300,8 +117,7 @@ public class ClasspathUtil {
 	 * @param editor
 	 *            {@link AbstractOfficeFloorEditor} opening the resource.
 	 */
-	public static void openClasspathResource(String resourcePath,
-			AbstractOfficeFloorEditor<?, ?> editor) {
+	public static void openClasspathResource(String resourcePath, AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Extensions
 		final String CLASS_EXTENSION = ".class";
@@ -310,29 +126,26 @@ public class ClasspathUtil {
 		try {
 			// Obtain the package and resource name
 			int index = resourcePath.lastIndexOf('/');
-			String packageName = (index < 0 ? "" : resourcePath.substring(0,
-					index)).replace('/', '.');
-			String resourceName = (index < 0 ? resourcePath : resourcePath
-					.substring(index + 1)); // +1 to skip separator
+			String packageName = (index < 0 ? "" : resourcePath.substring(0, index)).replace('/', '.');
+			String resourceName = (index < 0 ? resourcePath : resourcePath.substring(index + 1)); // +1
+																									// to
+																									// skip
+																									// separator
 
 			// Obtain the java project
-			IJavaProject project = JavaCore.create(ProjectConfigurationContext
-					.getProject(editor.getEditorInput()));
+			IJavaProject project = JavaCore.create(ProjectConfigurationContext.getProject(editor.getEditorInput()));
 
 			// Iterate over the fragment roots searching for the file
-			for (IPackageFragmentRoot root : project
-					.getAllPackageFragmentRoots()) {
+			for (IPackageFragmentRoot root : project.getAllPackageFragmentRoots()) {
 
 				// Attempt to obtain the package
-				IPackageFragment packageFragment = root
-						.getPackageFragment(packageName);
+				IPackageFragment packageFragment = root.getPackageFragment(packageName);
 				if (!packageFragment.exists()) {
 					continue; // must have package
 				}
 
 				// Handle if a java or class file
-				if (JavaCore.isJavaLikeFileName(resourceName)
-						|| resourceName.endsWith(CLASS_EXTENSION)) {
+				if (JavaCore.isJavaLikeFileName(resourceName) || resourceName.endsWith(CLASS_EXTENSION)) {
 
 					// Handle based on kind of fragment root
 					int rootKind = root.getKind();
@@ -340,13 +153,11 @@ public class ClasspathUtil {
 					case IPackageFragmentRoot.K_BINARY:
 						// Binary, so ensure extension is class
 						if (resourceName.endsWith(SOURCE_EXTENSION)) {
-							resourceName = resourceName.replace(
-									SOURCE_EXTENSION, CLASS_EXTENSION);
+							resourceName = resourceName.replace(SOURCE_EXTENSION, CLASS_EXTENSION);
 						}
 
 						// Attempt to obtain and open the class file
-						IClassFile classFile = packageFragment
-								.getClassFile(resourceName);
+						IClassFile classFile = packageFragment.getClassFile(resourceName);
 						if (classFile != null) {
 							openEditor(editor, classFile);
 							return; // opened
@@ -356,13 +167,11 @@ public class ClasspathUtil {
 					case IPackageFragmentRoot.K_SOURCE:
 						// Source, so ensure extension is java
 						if (resourceName.endsWith(CLASS_EXTENSION)) {
-							resourceName = resourceName.replace(
-									CLASS_EXTENSION, SOURCE_EXTENSION);
+							resourceName = resourceName.replace(CLASS_EXTENSION, SOURCE_EXTENSION);
 						}
 
 						// Attempt to obtain the compilation unit (source file)
-						ICompilationUnit sourceFile = packageFragment
-								.getCompilationUnit(resourceName);
+						ICompilationUnit sourceFile = packageFragment.getCompilationUnit(resourceName);
 						if (sourceFile != null) {
 							openEditor(editor, sourceFile);
 							return; // opened
@@ -370,15 +179,12 @@ public class ClasspathUtil {
 						break;
 
 					default:
-						throw new IllegalStateException(
-								"Unknown package fragment root kind: "
-										+ rootKind);
+						throw new IllegalStateException("Unknown package fragment root kind: " + rootKind);
 					}
 
 				} else {
 					// Not java file, so open as resource
-					for (Object nonJavaResource : packageFragment
-							.getNonJavaResources()) {
+					for (Object nonJavaResource : packageFragment.getNonJavaResources()) {
 						// Should only be opening files
 						if (nonJavaResource instanceof IFile) {
 							IFile file = (IFile) nonJavaResource;
@@ -392,26 +198,19 @@ public class ClasspathUtil {
 						} else {
 							// Unknown resource type
 							throw new IllegalStateException(
-									"Unkown resource type: "
-											+ nonJavaResource.getClass()
-													.getName());
+									"Unkown resource type: " + nonJavaResource.getClass().getName());
 						}
 					}
 				}
 			}
 
 			// Unable to open as could not find
-			MessageDialog.openWarning(editor.getEditorSite().getShell(),
-					"Open", "Could not find: " + resourcePath);
+			MessageDialog.openWarning(editor.getEditorSite().getShell(), "Open", "Could not find: " + resourcePath);
 
 		} catch (Throwable ex) {
 			// Failed to open file
-			MessageDialog
-					.openInformation(
-							editor.getEditorSite().getShell(),
-							"Open",
-							"Failed to open '" + resourcePath + "': "
-									+ ex.getMessage());
+			MessageDialog.openInformation(editor.getEditorSite().getShell(), "Open",
+					"Failed to open '" + resourcePath + "': " + ex.getMessage());
 		}
 	}
 
@@ -424,8 +223,7 @@ public class ClasspathUtil {
 	 * @param file
 	 *            {@link IFile} to open.
 	 */
-	public static void openEditor(AbstractOfficeFloorEditor<?, ?> editor,
-			IFile file) {
+	public static void openEditor(AbstractOfficeFloorEditor<?, ?> editor, IFile file) {
 		try {
 
 			// Open the file
@@ -433,9 +231,8 @@ public class ClasspathUtil {
 
 		} catch (Throwable ex) {
 			// Failed to open file
-			MessageDialog.openInformation(editor.getEditorSite().getShell(),
-					"Open", "Failed to open '" + file.getFullPath().toString()
-							+ "': " + ex.getMessage());
+			MessageDialog.openInformation(editor.getEditorSite().getShell(), "Open",
+					"Failed to open '" + file.getFullPath().toString() + "': " + ex.getMessage());
 		}
 	}
 
@@ -448,8 +245,7 @@ public class ClasspathUtil {
 	 * @param element
 	 *            {@link IEditorInput} to open.
 	 */
-	private static void openEditor(AbstractOfficeFloorEditor<?, ?> editor,
-			IJavaElement element) {
+	private static void openEditor(AbstractOfficeFloorEditor<?, ?> editor, IJavaElement element) {
 		try {
 
 			// Open the java element
@@ -457,9 +253,8 @@ public class ClasspathUtil {
 
 		} catch (Throwable ex) {
 			// Failed to open file
-			MessageDialog.openInformation(editor.getEditorSite().getShell(),
-					"Open", "Failed to open '" + element.getElementName()
-							+ "': " + ex.getMessage());
+			MessageDialog.openInformation(editor.getEditorSite().getShell(), "Open",
+					"Failed to open '" + element.getElementName() + "': " + ex.getMessage());
 		}
 	}
 
@@ -565,9 +360,7 @@ public class ClasspathUtil {
 		}
 
 		// Obtain the fragment root full path
-		String fragmentPath = fragmentRoot.getResource().getFullPath()
-				.toString()
-				+ "/";
+		String fragmentPath = fragmentRoot.getResource().getFullPath().toString() + "/";
 
 		// Obtain the class path location (by removing fragment root path)
 		String fullPath = pathResource.getFullPath().toString();
@@ -642,8 +435,7 @@ public class ClasspathUtil {
 
 		} else {
 			// Unhandled type
-			MessageDialog.openWarning(null, "Unknown", "Unhandled parent type "
-					+ parent.getClass().getName());
+			MessageDialog.openWarning(null, "Unknown", "Unhandled parent type " + parent.getClass().getName());
 			return new Object[0];
 		}
 	}
@@ -702,8 +494,7 @@ public class ClasspathUtil {
 			} else {
 				// Unhandled resource
 				MessageDialog.openWarning(null, "Unhandled resource type",
-						"Unhandled resource type "
-								+ resource.getClass().getName());
+						"Unhandled resource type " + resource.getClass().getName());
 				return new Object[0];
 			}
 
@@ -730,13 +521,11 @@ public class ClasspathUtil {
 				IJavaProject javaProject = (IJavaProject) javaElement;
 
 				// Add the package fragment roots on the class path
-				IClasspathEntry[] classPath = javaProject
-						.getResolvedClasspath(true);
+				IClasspathEntry[] classPath = javaProject.getResolvedClasspath(true);
 				for (IClasspathEntry entry : classPath) {
 					// Obtain the Package Fragment Root of the class path entry
 					IPath entryPath = entry.getPath();
-					IPackageFragmentRoot fragmentRoot = javaProject
-							.findPackageFragmentRoot(entryPath);
+					IPackageFragmentRoot fragmentRoot = javaProject.findPackageFragmentRoot(entryPath);
 
 					// Add the package fragment root
 					children.add(fragmentRoot);
@@ -747,8 +536,7 @@ public class ClasspathUtil {
 
 				// Add the package fragment root children
 				children.addAll(Arrays.asList(fragmentRoot.getChildren()));
-				children.addAll(Arrays.asList(fragmentRoot
-						.getNonJavaResources()));
+				children.addAll(Arrays.asList(fragmentRoot.getNonJavaResources()));
 
 			} else if (javaElement instanceof IPackageFragment) {
 				IPackageFragment fragment = (IPackageFragment) javaElement;
@@ -765,8 +553,7 @@ public class ClasspathUtil {
 			} else {
 				// Unhandled java type
 				MessageDialog.openWarning(null, "Unhandled java element type",
-						"Unhandled java element type "
-								+ javaElement.getClass().getName());
+						"Unhandled java element type " + javaElement.getClass().getName());
 			}
 
 			// Return the children

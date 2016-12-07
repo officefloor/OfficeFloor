@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.building.classpath;
+package net.officefloor.maven.classpath;
 
 /**
  * Factory for the creation of artifact class path entries.

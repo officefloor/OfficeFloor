@@ -18,22 +18,14 @@
 package net.officefloor.building.console;
 
 import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
-import net.officefloor.building.classpath.ClassPathFactory;
-import net.officefloor.building.classpath.ClassPathFactoryImpl;
-import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandFactory;
-import net.officefloor.building.command.OfficeFloorCommandParameter;
 import net.officefloor.building.command.OfficeFloorCommandParseException;
 import net.officefloor.building.command.OfficeFloorCommandParser;
 import net.officefloor.building.command.OfficeFloorCommandParserImpl;
 import net.officefloor.building.command.OfficeFloorNoCommandsException;
-import net.officefloor.building.command.RemoteRepositoryUrlsOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.RemoteRepositoryUrlsOfficeFloorCommandParameterImpl;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
 import net.officefloor.building.execute.OfficeFloorExecutionUnit;
 import net.officefloor.building.execute.OfficeFloorExecutionUnitCreateException;
@@ -95,8 +87,7 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 	 * @param decorators
 	 *            {@link OfficeFloorDecorator} instances.
 	 */
-	public OfficeFloorConsoleImpl(String scriptName,
-			OfficeFloorCommandFactory[] commandFactories,
+	public OfficeFloorConsoleImpl(String scriptName, OfficeFloorCommandFactory[] commandFactories,
 			Properties environment, OfficeFloorDecorator[] decorators) {
 		this.scriptName = scriptName;
 		this.environment = environment;
@@ -105,8 +96,7 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 		// Create the OfficeFloor command parser
 		if (commandFactories.length == 1) {
 			// Single command so wrap to provide help options
-			OfficeFloorCommandFactory commandWithHelp = new HelpOfficeFloorCommandFactory(
-					commandFactories[0]);
+			OfficeFloorCommandFactory commandWithHelp = new HelpOfficeFloorCommandFactory(commandFactories[0]);
 			this.parser = new OfficeFloorCommandParserImpl(commandWithHelp);
 			this.commandFactories = new OfficeFloorCommandFactory[] { commandWithHelp };
 			this.helpCommandFactory = null; // no help as always a command
@@ -117,11 +107,9 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 
 			// Multiple commands (+1 to include help command)
 			this.commandFactories = new OfficeFloorCommandFactory[commandFactories.length + 1];
-			System.arraycopy(commandFactories, 0, this.commandFactories, 0,
-					commandFactories.length);
+			System.arraycopy(commandFactories, 0, this.commandFactories, 0, commandFactories.length);
 			this.commandFactories[commandFactories.length] = this.helpCommandFactory;
-			this.parser = new OfficeFloorCommandParserImpl(
-					this.commandFactories);
+			this.parser = new OfficeFloorCommandParserImpl(this.commandFactories);
 		}
 	}
 
@@ -145,8 +133,7 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 	 */
 
 	@Override
-	public boolean run(PrintStream out, PrintStream err,
-			ProcessStartListener startListener,
+	public boolean run(PrintStream out, PrintStream err, ProcessStartListener startListener,
 			ProcessCompletionListener completionListener, String... arguments) {
 
 		// Parse the commands to execute
@@ -156,8 +143,7 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 
 		} catch (OfficeFloorNoCommandsException ex) {
 			// Provide help message as no command
-			OfficeFloorCommand helpCommand = this.helpCommandFactory
-					.createCommand();
+			OfficeFloorCommand helpCommand = this.helpCommandFactory.createCommand();
 			commands = new OfficeFloorCommand[] { helpCommand };
 
 		} catch (OfficeFloorCommandParseException ex) {
@@ -169,51 +155,14 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 		// Execute each command
 		for (OfficeFloorCommand command : commands) {
 
-			// Obtain the parameters
-			OfficeFloorCommandParameter[] parameters = command.getParameters();
-
-			// Obtain remote repositories (from properties and environment)
-			List<RemoteRepository> remoteRepositories = new LinkedList<RemoteRepository>();
-			for (OfficeFloorCommandParameter parameter : parameters) {
-				if (parameter instanceof RemoteRepositoryUrlsOfficeFloorCommandParameter) {
-					// Have remote repository URLs parameter so use
-					RemoteRepositoryUrlsOfficeFloorCommandParameter remoteRepositoryUrlsParameter = (RemoteRepositoryUrlsOfficeFloorCommandParameter) parameter;
-					for (String remoteRepositoryUrl : remoteRepositoryUrlsParameter
-							.getRemoteRepositoryUrls()) {
-						remoteRepositories.add(new RemoteRepository(
-								remoteRepositoryUrl));
-					}
-				}
-			}
-			for (String remoteRepositoryUrl : RemoteRepositoryUrlsOfficeFloorCommandParameterImpl
-					.getRemoteRepositoryUrls(this.environment)) {
-				remoteRepositories
-						.add(new RemoteRepository(remoteRepositoryUrl));
-			}
-
-			// Create the class path factory
-			ClassPathFactory classPathFactory;
-			try {
-				classPathFactory = new ClassPathFactoryImpl(
-						null,
-						remoteRepositories
-								.toArray(new RemoteRepository[remoteRepositories
-										.size()]));
-			} catch (Exception ex) {
-				// Failed to create execution unit for command
-				this.writeErr(err, ex);
-				return false;
-			}
-
 			// Create the OfficeFloor execution unit factory
 			OfficeFloorExecutionUnitFactory executionUnitFactory = new OfficeFloorExecutionUnitFactoryImpl(
-					classPathFactory, this.environment, this.decorators);
+					this.environment, this.decorators);
 
 			// Create execution unit for command
 			OfficeFloorExecutionUnit executionUnit;
 			try {
-				executionUnit = executionUnitFactory
-						.createExecutionUnit(command);
+				executionUnit = executionUnitFactory.createExecutionUnit(command);
 			} catch (OfficeFloorExecutionUnitCreateException ex) {
 				// Failed to create execution unit for command
 				this.writeErr(err, ex);
@@ -230,8 +179,7 @@ public class OfficeFloorConsoleImpl implements OfficeFloorConsole {
 			}
 
 			// Enrich configuration with completion listener
-			ProcessConfiguration configuration = executionUnit
-					.getProcessConfiguration();
+			ProcessConfiguration configuration = executionUnit.getProcessConfiguration();
 			configuration.setProcessStartListener(startListener);
 			configuration.setProcessCompletionListener(completionListener);
 

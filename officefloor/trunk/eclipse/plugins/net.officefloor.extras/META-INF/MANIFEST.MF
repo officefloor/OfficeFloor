@@ -69,6 +69,7 @@ Import-Package: org.eclipse.core.resources,
  org.eclipse.swt.widgets,
  org.eclipse.ui
 Bundle-ClassPath: .,
+ jconsole.jar,
  officeplugin_jdbc-2.17.0.jar,
  officeplugin_jndi-2.17.0.jar,
  officeplugin_jpa-2.17.0.jar,
@@ -76,5 +77,4 @@ Bundle-ClassPath: .,
  officeplugin_json-2.17.0.jar,
  officeplugin_launch-2.17.0.jar,
  jdi.jar,
- jdimodel.jar,
- javax.persistence-2.1.0.jar
+ jdimodel.jar

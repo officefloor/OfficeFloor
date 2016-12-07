@@ -56,9 +56,6 @@ import javax.management.remote.rmi.RMIConnectorServer;
 import javax.net.ssl.KeyManagerFactory;
 
 import mx4j.tools.remote.PasswordAuthenticator;
-import net.officefloor.building.classpath.ClassPathFactory;
-import net.officefloor.building.classpath.ClassPathFactoryImpl;
-import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandParser;
 import net.officefloor.building.command.OfficeFloorCommandParserImpl;
@@ -89,8 +86,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger
-			.getLogger(OfficeBuildingManager.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(OfficeBuildingManager.class.getName());
 
 	/**
 	 * Maven Group Id for the {@link OfficeBuilding}.
@@ -106,8 +102,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * Prefix to property names from {@link System#getProperties()} for
 	 * configuration.
 	 */
-	public static final String OFFICE_BUILDING_PROPERTY_PREFIX = OFFICE_BUILDING_GROUP_ID
-			+ "." + OFFICE_BUILDING_ARTIFACT_ID;
+	public static final String OFFICE_BUILDING_PROPERTY_PREFIX = OFFICE_BUILDING_GROUP_ID + "."
+			+ OFFICE_BUILDING_ARTIFACT_ID;
 
 	/**
 	 * Name of the {@link OfficeBuilding} within the {@link Registry}.
@@ -123,8 +119,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		// Load the Office Building Manager Object Name
 		ObjectName officeBuildingManagerObjectName = null;
 		try {
-			officeBuildingManagerObjectName = new ObjectName(
-					OFFICE_BUILDING_REGISTERED_NAME, "type",
+			officeBuildingManagerObjectName = new ObjectName(OFFICE_BUILDING_REGISTERED_NAME, "type",
 					"OfficeBuildingManager");
 		} catch (MalformedObjectNameException ex) {
 			// This should never be the case
@@ -147,8 +142,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @return SSL protocol being used.
 	 */
 	public static String getSslProtocol() {
-		String sslProtocol = System.getProperty(OFFICE_BUILDING_PROPERTY_PREFIX
-				+ ".ssl.protocol", "SSLv3");
+		String sslProtocol = System.getProperty(OFFICE_BUILDING_PROPERTY_PREFIX + ".ssl.protocol", "SSLv3");
 		return sslProtocol;
 	}
 
@@ -158,8 +152,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @return SSL algorithm being used.
 	 */
 	public static String getSslAlgorithm() {
-		String sslAlgorithm = System.getProperty(
-				OFFICE_BUILDING_PROPERTY_PREFIX + ".ssl.algorithm",
+		String sslAlgorithm = System.getProperty(OFFICE_BUILDING_PROPERTY_PREFIX + ".ssl.algorithm",
 				KeyManagerFactory.getDefaultAlgorithm());
 		return sslAlgorithm;
 	}
@@ -206,20 +199,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @param isAllowClassPathEntries
 	 *            Flag indicating if allow class path entries via the
 	 *            {@link OpenOfficeFloorConfiguration}.
-	 * @param remoteRepositoryUrls
-	 *            Remote repository URLs to find artifacts by their
-	 *            {@link ArtifactReference}.
 	 * @return {@link OfficeBuildingManager} managing the started
 	 *         {@link OfficeBuilding}.
 	 * @throws Exception
 	 *             If fails to start the {@link OfficeBuilding}.
 	 */
-	public static OfficeBuildingManagerMBean startOfficeBuilding(
-			String hostName, int port, File keyStore, String keyStorePassword,
-			String userName, String password, File workspace,
-			boolean isIsolateProcesses, Properties environment,
-			MBeanServer mbeanServer, String[] jvmOptions,
-			boolean isAllowClassPathEntries, String[] remoteRepositoryUrls)
+	public static OfficeBuildingManagerMBean startOfficeBuilding(String hostName, int port, File keyStore,
+			String keyStorePassword, String userName, String password, File workspace, boolean isIsolateProcesses,
+			Properties environment, MBeanServer mbeanServer, String[] jvmOptions, boolean isAllowClassPathEntries)
 			throws Exception {
 
 		// Obtain the start time
@@ -240,13 +227,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			// Use default location of user specific temporary directory.
 			// Note: Avoids file permission errors on cleaning the workspace of
 			// running under different users.
-			workspace = new File(new File(System.getProperty("java.io.tmpdir"),
-					System.getProperty("user.name")), "officebuilding");
+			workspace = new File(new File(System.getProperty("java.io.tmpdir"), System.getProperty("user.name")),
+					"officebuilding");
 		}
 
 		// Ensure start with empty work space
-		deleteDirectory(workspace, "Failed clearing work space for "
-				+ OfficeBuildingManager.class.getSimpleName());
+		deleteDirectory(workspace, "Failed clearing work space for " + OfficeBuildingManager.class.getSimpleName());
 
 		// Ensure the work space exists
 		if (!(workspace.exists())) {
@@ -256,12 +242,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		// Create the socket factories
 		String sslProtocol = getSslProtocol();
 		String sslAlgorithm = getSslAlgorithm();
-		byte[] keyStoreContent = OfficeBuildingRmiServerSocketFactory
-				.getKeyStoreContent(keyStore);
-		OfficeBuildingRmiServerSocketFactory serverSocketFactory = new OfficeBuildingRmiServerSocketFactory(
-				sslProtocol, sslAlgorithm, keyStoreContent, keyStorePassword);
-		RMIClientSocketFactory clientSocketFactory = new OfficeBuildingRmiClientSocketFactory(
-				sslProtocol, sslAlgorithm, keyStoreContent, keyStorePassword);
+		byte[] keyStoreContent = OfficeBuildingRmiServerSocketFactory.getKeyStoreContent(keyStore);
+		OfficeBuildingRmiServerSocketFactory serverSocketFactory = new OfficeBuildingRmiServerSocketFactory(sslProtocol,
+				sslAlgorithm, keyStoreContent, keyStorePassword);
+		RMIClientSocketFactory clientSocketFactory = new OfficeBuildingRmiClientSocketFactory(sslProtocol, sslAlgorithm,
+				keyStoreContent, keyStorePassword);
 
 		// Loop attempting to start
 		boolean isStarted = false;
@@ -274,55 +259,41 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			// Ensure have Registry on the port
 			try {
 				// Attempt to create on port
-				registry = LocateRegistry.createRegistry(port,
-						clientSocketFactory, serverSocketFactory);
+				registry = LocateRegistry.createRegistry(port, clientSocketFactory, serverSocketFactory);
 			} catch (RemoteException ex) {
 				// Registry already on port, so obtain it
-				registry = LocateRegistry.getRegistry(null, port,
-						clientSocketFactory);
+				registry = LocateRegistry.getRegistry(null, port, clientSocketFactory);
 			}
 
 			// Determine if already running the Office Building
 			Remote officeBuildingRemote = null;
 			try {
 				// Determine if Office Building Manager in registry
-				officeBuildingRemote = registry
-						.lookup(OFFICE_BUILDING_REGISTERED_NAME);
+				officeBuildingRemote = registry.lookup(OFFICE_BUILDING_REGISTERED_NAME);
 			} catch (NotBoundException | NoSuchObjectException ex) {
 				// Not available, so carry on to start
 			}
 			if (officeBuildingRemote != null) {
 				// Return the already running Office Building Manager
-				return getOfficeBuildingManager(hostName, port, keyStore,
-						keyStorePassword, userName, password);
+				return getOfficeBuildingManager(hostName, port, keyStore, keyStorePassword, userName, password);
 			}
 
 			// Provide secure server environment
 			Map<String, Object> serverEnv = new HashMap<String, Object>();
 
 			// Configure authenticated communication
-			InputStream passwordStream = new ByteArrayInputStream((userName
-					+ "=" + password).getBytes());
-			serverEnv.put(RMIConnectorServer.AUTHENTICATOR,
-					new PasswordAuthenticator(passwordStream));
+			InputStream passwordStream = new ByteArrayInputStream((userName + "=" + password).getBytes());
+			serverEnv.put(RMIConnectorServer.AUTHENTICATOR, new PasswordAuthenticator(passwordStream));
 
 			// Configure encrypted communication
-			serverEnv.put(
-					RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE,
-					clientSocketFactory);
-			serverEnv.put(
-					RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE,
-					serverSocketFactory);
-			serverEnv.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY,
-					clientSocketFactory);
+			serverEnv.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, clientSocketFactory);
+			serverEnv.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, serverSocketFactory);
+			serverEnv.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY, clientSocketFactory);
 
 			// Start the JMX connector server (on local host)
 			try {
-				JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(
-						hostName, port);
-				connectorServer = JMXConnectorServerFactory
-						.newJMXConnectorServer(serviceUrl, serverEnv,
-								mbeanServer);
+				JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(hostName, port);
+				connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(serviceUrl, serverEnv, mbeanServer);
 				connectorServer.start();
 
 				// As here, flag that started
@@ -348,10 +319,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		JMXServiceURL connectorServerAddress = connectorServer.getAddress();
 
 		// Create the Office Building Manager
-		OfficeBuildingManager manager = new OfficeBuildingManager(startTime,
-				connectorServerAddress, connectorServer, registry, mbeanServer,
-				workspace, isIsolateProcesses, environment, jvmOptions,
-				isAllowClassPathEntries, remoteRepositoryUrls);
+		OfficeBuildingManager manager = new OfficeBuildingManager(startTime, connectorServerAddress, connectorServer,
+				registry, mbeanServer, workspace, isIsolateProcesses, environment, jvmOptions, isAllowClassPathEntries);
 
 		// Register the Office Building Manager
 		mbeanServer.registerMBean(manager, OFFICE_BUILDING_MANAGER_OBJECT_NAME);
@@ -363,10 +332,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 			// Ensure time out to not keep checking forever
 			if ((System.currentTimeMillis() - timeoutTimestamp) > 10000) {
-				System.err
-						.println("WARNING: Timed out waiting for confirmation of "
-								+ OfficeBuildingManager.class.getSimpleName()
-								+ " starting.  Allowing use as is.");
+				System.err.println("WARNING: Timed out waiting for confirmation of "
+						+ OfficeBuildingManager.class.getSimpleName() + " starting.  Allowing use as is.");
 
 				// Return the (possibly not ready) Office Building Manager.
 				// (Best chance has been given for it to start)
@@ -374,9 +341,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			}
 
 			// Determine if office building is available
-			isOfficeBuildingAvailable = OfficeBuildingManager
-					.isOfficeBuildingAvailable(hostName, port, keyStore,
-							keyStorePassword, userName, password);
+			isOfficeBuildingAvailable = OfficeBuildingManager.isOfficeBuildingAvailable(hostName, port, keyStore,
+					keyStorePassword, userName, password);
 
 			// Sleep some time if not available
 			if (!isOfficeBuildingAvailable) {
@@ -406,14 +372,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 *            Password to connect.
 	 * @return <code>true</code> if the {@link OfficeBuilding} is available.
 	 */
-	public static boolean isOfficeBuildingAvailable(String hostName, int port,
-			File trustStore, String trustStorePassword, String userName,
-			String password) {
+	public static boolean isOfficeBuildingAvailable(String hostName, int port, File trustStore,
+			String trustStorePassword, String userName, String password) {
 		try {
 			// Obtain the OfficeBuilding manager
-			OfficeBuildingManagerMBean manager = getOfficeBuildingManager(
-					hostName, port, trustStore, trustStorePassword, userName,
-					password);
+			OfficeBuildingManagerMBean manager = getOfficeBuildingManager(hostName, port, trustStore,
+					trustStorePassword, userName, password);
 
 			// Available if not stopped
 			return (!manager.isOfficeBuildingStopped());
@@ -453,19 +417,15 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @param isAllowClassPathEntries
 	 *            Flag indicating if the {@link OfficeBuilding} will allow
 	 *            configured class path entries.
-	 * @param remoteRepositoryUrls
-	 *            Remote repository URLs.
 	 * @return {@link ProcessManager} managing the started
 	 *         {@link OfficeBuilding}.
 	 * @throws ProcessException
 	 *             If fails to spawn the {@link OfficeBuilding}.
 	 */
-	public static ProcessManager spawnOfficeBuilding(String hostName, int port,
-			File keyStore, String keyStorePassword, String userName,
-			String password, File workspace, boolean isIsolateProcesses,
-			Properties environment, String[] jvmOptions,
-			boolean isAllowClassPathEntries, String[] remoteRepositoryUrls,
-			ProcessConfiguration configuration) throws ProcessException {
+	public static ProcessManager spawnOfficeBuilding(String hostName, int port, File keyStore, String keyStorePassword,
+			String userName, String password, File workspace, boolean isIsolateProcesses, Properties environment,
+			String[] jvmOptions, boolean isAllowClassPathEntries, ProcessConfiguration configuration)
+			throws ProcessException {
 
 		// Ensure have environment
 		if (environment == null) {
@@ -473,10 +433,9 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		}
 
 		// Create the OfficeBuilding managed process
-		OfficeBuildingManagedProcess managedProcess = new OfficeBuildingManagedProcess(
-				hostName, port, keyStore, keyStorePassword, userName, password,
-				workspace, isIsolateProcesses, environment, jvmOptions,
-				isAllowClassPathEntries, remoteRepositoryUrls);
+		OfficeBuildingManagedProcess managedProcess = new OfficeBuildingManagedProcess(hostName, port, keyStore,
+				keyStorePassword, userName, password, workspace, isIsolateProcesses, environment, jvmOptions,
+				isAllowClassPathEntries);
 
 		// Ensure have process configuration
 		if (configuration == null) {
@@ -484,8 +443,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		}
 
 		// Spawn the OfficeBuilding
-		ProcessManager manager = ProcessManager.startProcess(managedProcess,
-				configuration);
+		ProcessManager manager = ProcessManager.startProcess(managedProcess, configuration);
 
 		// Return the Process Manager
 		return manager;
@@ -516,13 +474,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @throws Exception
 	 *             If fails to obtain the {@link OfficeBuildingManagerMBean}.
 	 */
-	public static OfficeBuildingManagerMBean getOfficeBuildingManager(
-			String hostName, int port, File trustStore,
-			String trustStorePassword, String userName, String password)
-			throws Exception {
-		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
-				userName, password, OFFICE_BUILDING_MANAGER_OBJECT_NAME,
-				OfficeBuildingManagerMBean.class);
+	public static OfficeBuildingManagerMBean getOfficeBuildingManager(String hostName, int port, File trustStore,
+			String trustStorePassword, String userName, String password) throws Exception {
+		return getMBeanProxy(hostName, port, trustStore, trustStorePassword, userName, password,
+				OFFICE_BUILDING_MANAGER_OBJECT_NAME, OfficeBuildingManagerMBean.class);
 	}
 
 	/**
@@ -554,14 +509,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @throws Exception
 	 *             If fails to obtain the {@link ProcessManagerMBean}.
 	 */
-	public static ProcessManagerMBean getProcessManager(String hostName,
-			int port, String processNamespace, File trustStore,
-			String trustStorePassword, String userName, String password)
-			throws Exception {
-		ObjectName objectName = ProcessManager.getLocalObjectName(
-				processNamespace, ProcessManager.getProcessManagerObjectName());
-		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
-				userName, password, objectName, ProcessManagerMBean.class);
+	public static ProcessManagerMBean getProcessManager(String hostName, int port, String processNamespace,
+			File trustStore, String trustStorePassword, String userName, String password) throws Exception {
+		ObjectName objectName = ProcessManager.getLocalObjectName(processNamespace,
+				ProcessManager.getProcessManagerObjectName());
+		return getMBeanProxy(hostName, port, trustStore, trustStorePassword, userName, password, objectName,
+				ProcessManagerMBean.class);
 	}
 
 	/**
@@ -593,14 +546,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @throws Exception
 	 *             If fails to obtain the {@link ProcessShellMBean}.
 	 */
-	public static ProcessShellMBean getProcessShell(String hostName, int port,
-			String processNamespace, File trustStore,
-			String trustStorePassword, String userName, String password)
-			throws Exception {
-		ObjectName objectName = ProcessManager.getLocalObjectName(
-				processNamespace, ProcessShell.getProcessShellObjectName());
-		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
-				userName, password, objectName, ProcessShellMBean.class);
+	public static ProcessShellMBean getProcessShell(String hostName, int port, String processNamespace, File trustStore,
+			String trustStorePassword, String userName, String password) throws Exception {
+		ObjectName objectName = ProcessManager.getLocalObjectName(processNamespace,
+				ProcessShell.getProcessShellObjectName());
+		return getMBeanProxy(hostName, port, trustStore, trustStorePassword, userName, password, objectName,
+				ProcessShellMBean.class);
 	}
 
 	/**
@@ -631,15 +582,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @throws Exception
 	 *             If fails to obtain {@link OfficeFloorManagerMBean}.
 	 */
-	public static OfficeFloorManagerMBean getOfficeFloorManager(
-			String hostName, int port, String processNamespace,
-			File trustStore, String trustStorePassword, String userName,
-			String password) throws Exception {
-		ObjectName objectName = ProcessManager.getLocalObjectName(
-				processNamespace,
+	public static OfficeFloorManagerMBean getOfficeFloorManager(String hostName, int port, String processNamespace,
+			File trustStore, String trustStorePassword, String userName, String password) throws Exception {
+		ObjectName objectName = ProcessManager.getLocalObjectName(processNamespace,
 				OfficeFloorManager.getOfficeFloorManagerObjectName());
-		return getMBeanProxy(hostName, port, trustStore, trustStorePassword,
-				userName, password, objectName, OfficeFloorManagerMBean.class);
+		return getMBeanProxy(hostName, port, trustStore, trustStorePassword, userName, password, objectName,
+				OfficeFloorManagerMBean.class);
 	}
 
 	/**
@@ -660,8 +608,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @throws IOException
 	 *             If fails to obtain the {@link JMXServiceURL}.
 	 */
-	public static JMXServiceURL getOfficeBuildingJmxServiceUrl(String hostName,
-			int port) throws IOException {
+	public static JMXServiceURL getOfficeBuildingJmxServiceUrl(String hostName, int port) throws IOException {
 
 		// Ensure have the host name
 		if ((hostName == null) || (hostName.trim().length() == 0)) {
@@ -670,8 +617,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		}
 
 		// Create and return the JMX service URL
-		return new JMXServiceURL("service:jmx:rmi://" + hostName + ":" + port
-				+ "/jndi/rmi://" + hostName + ":" + port + "/OfficeBuilding");
+		return new JMXServiceURL("service:jmx:rmi://" + hostName + ":" + port + "/jndi/rmi://" + hostName + ":" + port
+				+ "/OfficeBuilding");
 	}
 
 	/**
@@ -703,30 +650,22 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @throws IOException
 	 *             If fails to obtain the MBean proxy.
 	 */
-	public static <I> I getMBeanProxy(String hostName, int port,
-			File trustStore, String trustStorePassword, String userName,
-			String password, ObjectName mbeanName, Class<I> mbeanInterface)
-			throws IOException {
+	public static <I> I getMBeanProxy(String hostName, int port, File trustStore, String trustStorePassword,
+			String userName, String password, ObjectName mbeanName, Class<I> mbeanInterface) throws IOException {
 
 		// Create the client socket factory
 		String sslProtocol = getSslProtocol();
 		String sslAlgorithm = getSslAlgorithm();
-		byte[] trustStoreContent = OfficeBuildingRmiServerSocketFactory
-				.getKeyStoreContent(trustStore);
-		RMIClientSocketFactory clientSocketFactory = new OfficeBuildingRmiClientSocketFactory(
-				sslProtocol, sslAlgorithm, trustStoreContent,
-				trustStorePassword);
+		byte[] trustStoreContent = OfficeBuildingRmiServerSocketFactory.getKeyStoreContent(trustStore);
+		RMIClientSocketFactory clientSocketFactory = new OfficeBuildingRmiClientSocketFactory(sslProtocol, sslAlgorithm,
+				trustStoreContent, trustStorePassword);
 
 		// Obtain the MBean Server connection
-		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(hostName,
-				port);
+		JMXServiceURL serviceUrl = getOfficeBuildingJmxServiceUrl(hostName, port);
 		Map<String, Object> environment = new HashMap<String, Object>();
-		environment
-				.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY, clientSocketFactory);
-		environment.put(JMXConnector.CREDENTIALS, new String[] { userName,
-				password });
-		JMXConnector connector = JMXConnectorFactory.connect(serviceUrl,
-				environment);
+		environment.put(PROPERTY_RMI_CLIENT_SOCKET_FACTORY, clientSocketFactory);
+		environment.put(JMXConnector.CREDENTIALS, new String[] { userName, password });
+		JMXConnector connector = JMXConnectorFactory.connect(serviceUrl, environment);
 		MBeanServerConnection connection = connector.getMBeanServerConnection();
 
 		// Create and return the MBean proxy
@@ -743,8 +682,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @throws IOException
 	 *             If fails to delete the directory.
 	 */
-	private static void deleteDirectory(File directory, String errorMessage)
-			throws IOException {
+	private static void deleteDirectory(File directory, String errorMessage) throws IOException {
 
 		// Do nothing if directory not exists
 		if (!(directory.exists())) {
@@ -839,12 +777,6 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	private final boolean isAllowClassPathEntries;
 
 	/**
-	 * Listing of remote repository URLs to obtain artifacts for the
-	 * {@link ArtifactReference} instances.
-	 */
-	private final String[] remoteRepositoryUrls;
-
-	/**
 	 * Index of the next {@link Process}.
 	 */
 	private long processInstanceIndex = 0;
@@ -874,17 +806,10 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	 * @param isAllowClassPathEntries
 	 *            Flag indicating if allow class path entries via the
 	 *            {@link OpenOfficeFloorConfiguration}.
-	 * @param remoteRepositoryUrls
-	 *            Listing of remote repository URLs to obtain artifacts for the
-	 *            {@link ArtifactReference} instances.
 	 */
-	private OfficeBuildingManager(Date startTime,
-			JMXServiceURL officeBuildingServiceUrl,
-			JMXConnectorServer connectorServer, Registry registry,
-			MBeanServer mbeanServer, File workspace,
-			boolean isIsolateProcesses, Properties environment,
-			String[] jvmOptions, boolean isAllowClassPathEntries,
-			String[] remoteRepositoryUrls) {
+	private OfficeBuildingManager(Date startTime, JMXServiceURL officeBuildingServiceUrl,
+			JMXConnectorServer connectorServer, Registry registry, MBeanServer mbeanServer, File workspace,
+			boolean isIsolateProcesses, Properties environment, String[] jvmOptions, boolean isAllowClassPathEntries) {
 		this.startTime = startTime;
 		this.officeBuildingServiceUrl = officeBuildingServiceUrl;
 		this.connectorServer = connectorServer;
@@ -895,8 +820,6 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 		this.environment = environment;
 		this.jvmOptions = (jvmOptions == null ? new String[0] : jvmOptions);
 		this.isAllowClassPathEntries = isAllowClassPathEntries;
-		this.remoteRepositoryUrls = (remoteRepositoryUrls == null ? new String[0]
-				: remoteRepositoryUrls);
 	}
 
 	/**
@@ -942,13 +865,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			// Parse the parameters (always the one command)
 			OfficeFloorCommandParser parser = new OfficeFloorCommandParserImpl(
 					new OfficeBuildingOpenOfficeFloorCommand(false, false));
-			OfficeFloorCommand[] commands = parser
-					.parseCommands(argumentEntries);
+			OfficeFloorCommand[] commands = parser.parseCommands(argumentEntries);
 			OfficeBuildingOpenOfficeFloorCommand command = (OfficeBuildingOpenOfficeFloorCommand) commands[0];
 
 			// Obtain the open OfficeFloor configuration
-			OpenOfficeFloorConfiguration configuration = command
-					.getOpenOfficeFloorConfiguration();
+			OpenOfficeFloorConfiguration configuration = command.getOpenOfficeFloorConfiguration();
 
 			// Open the OfficeFloor
 			return this.openOfficeFloor(configuration);
@@ -959,8 +880,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	@Override
-	public String openOfficeFloor(OpenOfficeFloorConfiguration configuration)
-			throws ProcessException {
+	public String openOfficeFloor(OpenOfficeFloorConfiguration configuration) throws ProcessException {
 		try {
 
 			// Ensure the OfficeBuilding is open
@@ -977,10 +897,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			}
 
 			// Obtain the process work space location
-			String processWorkspaceFolderName = processName
-					+ this.getProcessInstanceIndex();
-			final File processWorkspace = new File(this.workspace,
-					processWorkspaceFolderName);
+			String processWorkspaceFolderName = processName + this.getProcessInstanceIndex();
+			final File processWorkspace = new File(this.workspace, processWorkspaceFolderName);
 
 			// Ensure clean up process
 			boolean isCleanup = true;
@@ -989,8 +907,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				// Create the process work space
 				if (!(processWorkspace.mkdirs())) {
 					// Failed to create the process workspace
-					throw new IOException(
-							"Failed to create process workspace directory");
+					throw new IOException("Failed to create process workspace directory");
 				}
 
 				// Obtain the local repository (null will share the artifacts)
@@ -1000,77 +917,40 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					localRepository = new File(processWorkspace, "repo");
 					if (!(localRepository.mkdirs())) {
 						// Failed to create isolated local repository
-						throw new IOException(
-								"Failed to create isolated local repository");
+						throw new IOException("Failed to create isolated local repository");
 					}
 				}
 
-				// Obtain the remote repositories
-				List<RemoteRepository> remoteRepositories = new LinkedList<RemoteRepository>();
-				for (String remoteRepositoryUrl : this.remoteRepositoryUrls) {
-					remoteRepositories.add(new RemoteRepository(
-							remoteRepositoryUrl));
-				}
-				for (String remoteRepositoryUrl : configuration
-						.getRemoteRepositoryUrls()) {
-					remoteRepositories.add(new RemoteRepository(
-							remoteRepositoryUrl));
-				}
-
-				// Configure class path factory
-				ClassPathFactory classPathFactory = new ClassPathFactoryImpl(
-						localRepository,
-						remoteRepositories
-								.toArray(new RemoteRepository[remoteRepositories
-										.size()]));
-
 				// Obtain the decorators
 				OfficeFloorDecorator[] decorators = OfficeFloorDecoratorServiceLoader
-						.loadOfficeFloorDecorators(Thread.currentThread()
-								.getContextClassLoader());
+						.loadOfficeFloorDecorators(Thread.currentThread().getContextClassLoader());
 
 				// Create the context for building class path
-				OfficeFloorCommandContextImpl commandContext = new OfficeFloorCommandContextImpl(
-						classPathFactory, processWorkspace, decorators);
+				OfficeFloorCommandContextImpl commandContext = new OfficeFloorCommandContextImpl(processWorkspace,
+						decorators);
 
 				// Make the uploaded artifacts available on the class path
-				for (UploadArtifact artifact : configuration
-						.getUploadArtifacts()) {
+				for (UploadArtifact artifact : configuration.getUploadArtifacts()) {
 
 					// Write the artifact to the workspace
 					String fileName = artifact.getName();
 					File artifactFile = new File(processWorkspace, fileName);
-					FileOutputStream output = new FileOutputStream(
-							artifactFile, false);
+					FileOutputStream output = new FileOutputStream(artifactFile, false);
 					output.write(artifact.getContent());
 					output.close();
 
 					// Add the uploaded artifact to the class path
-					commandContext.includeClassPathArtifact(artifactFile
-							.getAbsolutePath());
-				}
-
-				// Make the reference artifacts available on the class path
-				for (ArtifactReference reference : configuration
-						.getArtifactReferences()) {
-
-					// Add the referenced artifacts to the class path
-					commandContext.includeClassPathArtifact(
-							reference.getGroupId(), reference.getArtifactId(),
-							reference.getVersion(), reference.getType(),
-							reference.getClassifier());
+					commandContext.includeClassPathEntry(artifactFile.getAbsolutePath());
 				}
 
 				// Make the class path entries available on the class path
-				String[] configuredClassPathEntries = configuration
-						.getClassPathEntries();
+				String[] configuredClassPathEntries = configuration.getClassPathEntries();
 				if (configuredClassPathEntries.length > 0) {
 
 					// Ensure allowed to provide class path entries
 					if (!this.isAllowClassPathEntries) {
-						throw new IllegalArgumentException(
-								OfficeBuilding.class.getSimpleName()
-										+ " is not allowing configured class path entries");
+						throw new IllegalArgumentException(OfficeBuilding.class.getSimpleName()
+								+ " is not allowing configured class path entries");
 					}
 
 					/*
@@ -1086,16 +966,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					 * to potentially non-resolvable artifacts.
 					 */
 					for (String configuredClassPathEntry : configuredClassPathEntries) {
-						commandContext
-								.includeClassPathEntry(configuredClassPathEntry);
+						commandContext.includeClassPathEntry(configuredClassPathEntry);
 					}
 				}
 
 				// Configure the process for the OfficeFloor
 				ProcessConfiguration processConfig = new ProcessConfiguration();
 				processConfig.setProcessName(processName);
-				processConfig.setAdditionalClassPath(commandContext
-						.getCommandClassPath());
+				processConfig.setAdditionalClassPath(commandContext.getCommandClassPath());
 				processConfig.setMbeanServer(this.mbeanServer);
 
 				// Add the JVM options
@@ -1109,17 +987,14 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				// Create the start listener
 				ProcessStartListener startListener = new ProcessStartListener() {
 					@Override
-					public void processStarted(
-							ProcessManagerMBean processManager)
-							throws IOException {
+					public void processStarted(ProcessManagerMBean processManager) throws IOException {
 
 						// Only register if process not already complete
 						synchronized (OfficeBuildingManager.this) {
 							synchronized (processManager) {
 								if (!processManager.isProcessComplete()) {
 									// Register manager for the running process
-									OfficeBuildingManager.this.processManagers
-											.add(processManager);
+									OfficeBuildingManager.this.processManagers.add(processManager);
 								}
 							}
 						}
@@ -1135,8 +1010,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 						// Unregister the process
 						synchronized (OfficeBuildingManager.this) {
 							// Remove manager as process no longer running
-							OfficeBuildingManager.this.processManagers
-									.remove(manager);
+							OfficeBuildingManager.this.processManagers.remove(manager);
 
 							// Notify that a process manager complete
 							OfficeBuildingManager.this.notify();
@@ -1145,8 +1019,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 						// Clean up the process work space
 						try {
 							deleteDirectory(processWorkspace,
-									"Failed cleaning up workspace for process "
-											+ manager.getProcessNamespace());
+									"Failed cleaning up workspace for process " + manager.getProcessNamespace());
 						} catch (IOException ex) {
 							// Log warning but do no further
 							LOGGER.log(Level.WARNING, ex.getMessage());
@@ -1156,17 +1029,13 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				processConfig.setProcessCompletionListener(completionListener);
 
 				// Create the OfficeFloor manager (process)
-				String officeFloorSourceClassName = configuration
-						.getOfficeFloorSourceClassName();
-				String officeFloorLocation = configuration
-						.getOfficeFloorLocation();
+				String officeFloorSourceClassName = configuration.getOfficeFloorSourceClassName();
+				String officeFloorLocation = configuration.getOfficeFloorLocation();
 				Properties officeFloorProperties = new Properties();
 				officeFloorProperties.putAll(this.environment);
-				officeFloorProperties.putAll(configuration
-						.getOfficeFloorProperties());
-				OfficeFloorManager officeFloorManager = new OfficeFloorManager(
-						officeFloorSourceClassName, officeFloorLocation,
-						officeFloorProperties);
+				officeFloorProperties.putAll(configuration.getOfficeFloorProperties());
+				OfficeFloorManager officeFloorManager = new OfficeFloorManager(officeFloorSourceClassName,
+						officeFloorLocation, officeFloorProperties);
 
 				// Determine if invoking task
 				String officeName = configuration.getOfficeName();
@@ -1174,13 +1043,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				String taskName = configuration.getTaskName();
 				String parameter = configuration.getParameter();
 				if (workName != null) {
-					officeFloorManager.invokeTask(officeName, workName,
-							taskName, parameter);
+					officeFloorManager.invokeTask(officeName, workName, taskName, parameter);
 				}
 
 				// Open the OfficeFloor
-				ProcessManager processManager = ProcessManager.startProcess(
-						officeFloorManager, processConfig);
+				ProcessManager processManager = ProcessManager.startProcess(officeFloorManager, processConfig);
 
 				// Started so allow process to clean itself
 				isCleanup = false;
@@ -1193,8 +1060,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				// Determine if clean up
 				if (isCleanup) {
 					try {
-						deleteDirectory(processWorkspace,
-								"Failed to clean up workspace for process");
+						deleteDirectory(processWorkspace, "Failed to clean up workspace for process");
 					} catch (IOException ex) {
 						// Log warning but do no further
 						LOGGER.log(Level.WARNING, ex.getMessage());
@@ -1208,13 +1074,11 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	@Override
-	public synchronized String[] listProcessNamespaces()
-			throws ProcessException {
+	public synchronized String[] listProcessNamespaces() throws ProcessException {
 		try {
 
 			// Create listing of process name spaces
-			List<String> namespaces = new ArrayList<>(
-					this.processManagers.size());
+			List<String> namespaces = new ArrayList<>(this.processManagers.size());
 			for (ProcessManagerMBean manager : this.processManagers) {
 
 				// Include the name space
@@ -1231,8 +1095,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	@Override
-	public synchronized void closeOfficeFloor(String processNamespace,
-			long waitTime) throws ProcessException {
+	public synchronized void closeOfficeFloor(String processNamespace, long waitTime) throws ProcessException {
 		try {
 
 			// Find the process manager for the OfficeFloor
@@ -1244,9 +1107,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 			}
 			if (processManager == null) {
 				// OfficeFloor not running
-				throw new ProcessException(
-						"OfficeFloor by process name space '"
-								+ processNamespace + "' not running");
+				throw new ProcessException("OfficeFloor by process name space '" + processNamespace + "' not running");
 			}
 
 			// Close the OfficeFloor
@@ -1271,10 +1132,8 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					processManager.destroyProcess();
 
 					// Indicate failure in closing OfficeFloor
-					throw new ProcessException("Destroyed OfficeFloor '"
-							+ processNamespace
-							+ "' as timed out waiting for close of " + waitTime
-							+ " milliseconds");
+					throw new ProcessException("Destroyed OfficeFloor '" + processNamespace
+							+ "' as timed out waiting for close of " + waitTime + " milliseconds");
 				}
 			}
 
@@ -1284,8 +1143,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 	}
 
 	@Override
-	public synchronized String stopOfficeBuilding(long waitTime)
-			throws ProcessException {
+	public synchronized String stopOfficeBuilding(long waitTime) throws ProcessException {
 		try {
 
 			// Flag no longer open
@@ -1301,16 +1159,13 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 					for (ProcessManagerMBean processManager : this.processManagers) {
 						try {
 							// Stop process, keeping track if successful
-							status.append("\t"
-									+ processManager.getProcessName() + " ["
-									+ processManager.getProcessNamespace()
-									+ "]");
+							status.append("\t" + processManager.getProcessName() + " ["
+									+ processManager.getProcessNamespace() + "]");
 							processManager.triggerStopProcess();
 							status.append("\n");
 						} catch (Throwable ex) {
 							// Indicate failure in stopping process
-							status.append(" failed: " + ex.getMessage() + " ["
-									+ ex.getClass().getName() + "]\n");
+							status.append(" failed: " + ex.getMessage() + " [" + ex.getClass().getName() + "]\n");
 						}
 					}
 					status.append("\n");
@@ -1347,18 +1202,13 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 							// Destroy the process
 							try {
-								status.append("\t"
-										+ processManager.getProcessName()
-										+ " ["
-										+ processManager.getProcessNamespace()
-										+ "]");
+								status.append("\t" + processManager.getProcessName() + " ["
+										+ processManager.getProcessNamespace() + "]");
 								processManager.destroyProcess();
 								status.append("\n");
 							} catch (Throwable ex) {
 								// Indicate failure in stopping process
-								status.append(" failed: " + ex.getMessage()
-										+ " [" + ex.getClass().getName()
-										+ "]\n");
+								status.append(" failed: " + ex.getMessage() + " [" + ex.getClass().getName() + "]\n");
 							}
 						}
 						status.append("\n");
@@ -1389,14 +1239,12 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 
 					// Determine if time out
 					if ((System.currentTimeMillis() - startTime) > waitTime) {
-						throw new ProcessException(
-								"Timed out waiting to stop OfficeBuilding");
+						throw new ProcessException("Timed out waiting to stop OfficeBuilding");
 					}
 
 					// Attempt to unexport the object again
 					try {
-						isUnexported = UnicastRemoteObject.unexportObject(
-								this.registry, false);
+						isUnexported = UnicastRemoteObject.unexportObject(this.registry, false);
 					} catch (NoSuchObjectException ex) {
 						// Already unexported
 						isUnexported = true;
@@ -1410,8 +1258,7 @@ public class OfficeBuildingManager implements OfficeBuildingManagerMBean {
 				} while (!isUnexported);
 
 				// Unregister the Office Building Manager MBean
-				this.mbeanServer
-						.unregisterMBean(OFFICE_BUILDING_MANAGER_OBJECT_NAME);
+				this.mbeanServer.unregisterMBean(OFFICE_BUILDING_MANAGER_OBJECT_NAME);
 
 				// Notify that stopped (responsive stop spawned OfficeBuilding)
 				this.notifyAll();

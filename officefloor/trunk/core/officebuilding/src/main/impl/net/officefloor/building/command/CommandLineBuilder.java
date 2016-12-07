@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.building.command.parameters.ClassPathOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.UploadArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.JvmOptionOfficeFloorCommandParameter;
-import net.officefloor.building.command.parameters.ArtifactReferencesOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorLocationOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeFloorSourceOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.OfficeNameOfficeFloorCommandParameter;
@@ -32,8 +30,8 @@ import net.officefloor.building.command.parameters.ParameterOfficeFloorCommandPa
 import net.officefloor.building.command.parameters.ProcessNameOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.PropertiesOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.TaskNameOfficeFloorCommandParameter;
+import net.officefloor.building.command.parameters.UploadArtifactsOfficeFloorCommandParameter;
 import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandParameter;
-import net.officefloor.building.manager.ArtifactReference;
 import net.officefloor.building.manager.UploadArtifact;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
@@ -69,18 +67,6 @@ public class CommandLineBuilder {
 		this.addOption(
 				UploadArtifactsOfficeFloorCommandParameter.PARAMETER_UPLOAD_ARTIFACT_LOCATION,
 				artifactLocation);
-	}
-
-	/**
-	 * Adds an {@link ArtifactReference} to the command line.
-	 * 
-	 * @param artifactIdentifier
-	 *            {@link ArtifactReference} identifier.
-	 */
-	public void addArtifactReference(String artifactIdentifier) {
-		this.addOption(
-				ArtifactReferencesOfficeFloorCommandParameter.PARAMETER_ARTIFACT,
-				artifactIdentifier);
 	}
 
 	/**
