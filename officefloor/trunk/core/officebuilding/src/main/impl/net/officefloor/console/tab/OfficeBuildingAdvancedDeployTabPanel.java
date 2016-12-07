@@ -31,7 +31,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
-import net.officefloor.building.manager.ArtifactReference;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.OpenOfficeFloorConfiguration;
@@ -46,8 +45,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeBuildingAdvancedDeployTabPanel extends
-		AbstractOfficeBuildingPanel {
+public class OfficeBuildingAdvancedDeployTabPanel extends AbstractOfficeBuildingPanel {
 
 	/**
 	 * {@link OfficeBuildingManageTabPanel}.
@@ -62,8 +60,7 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 	 * @param manageTab
 	 *            {@link OfficeBuildingManageTabPanel}.
 	 */
-	public OfficeBuildingAdvancedDeployTabPanel(
-			OfficeBuildingManagerMBean officeBuildingManager,
+	public OfficeBuildingAdvancedDeployTabPanel(OfficeBuildingManagerMBean officeBuildingManager,
 			OfficeBuildingManageTabPanel manageTab) {
 		super(officeBuildingManager);
 		this.manageTab = manageTab;
@@ -86,114 +83,69 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 		constraint.gridy = -1; // will increment to first row
 
 		// Obtain default open OfficeFloor configuration
-		OpenOfficeFloorConfiguration configuration = this
-				.createDefaultOpenOfficeFloorConfiguration();
+		OpenOfficeFloorConfiguration configuration = this.createDefaultOpenOfficeFloorConfiguration();
 
 		// OfficeFloor source
 		final JTextField officeFloorSource = new JTextField(30);
-		officeFloorSource
-				.setText(configuration.getOfficeFloorSourceClassName());
-		this.addAdvancedEntry(panelAdvancedStart, "OfficeFloor Source Class",
-				officeFloorSource, constraint);
+		officeFloorSource.setText(configuration.getOfficeFloorSourceClassName());
+		this.addAdvancedEntry(panelAdvancedStart, "OfficeFloor Source Class", officeFloorSource, constraint);
 
 		// OfficeFloor location
 		final JTextField officeFloorLocation = new JTextField(30);
 		officeFloorLocation.setText(configuration.getOfficeFloorLocation());
-		this.addAdvancedEntry(panelAdvancedStart, "OfficeFloor location",
-				officeFloorLocation, constraint);
+		this.addAdvancedEntry(panelAdvancedStart, "OfficeFloor location", officeFloorLocation, constraint);
 
 		// Process name
 		final JTextField processName = new JTextField(30);
 		processName.setText(configuration.getProcessName());
-		this.addAdvancedEntry(panelAdvancedStart, "Process name", processName,
-				constraint);
+		this.addAdvancedEntry(panelAdvancedStart, "Process name", processName, constraint);
 
 		// Upload artifacts
-		final OfficeTablePanel uploadArtifacts = new OfficeTablePanel(true,
-				true, "Upload Artifact");
+		final OfficeTablePanel uploadArtifacts = new OfficeTablePanel(true, true, "Upload Artifact");
 		for (UploadArtifact artifact : configuration.getUploadArtifacts()) {
 			uploadArtifacts.addRow(artifact.getName());
 		}
-		this.addAdvancedEntry(panelAdvancedStart, "Upload artifact",
-				uploadArtifacts, constraint);
+		this.addAdvancedEntry(panelAdvancedStart, "Upload artifact", uploadArtifacts, constraint);
 
 		// Class path entries
-		final OfficeTablePanel classPathEntries = new OfficeTablePanel(
-				"Class path entry");
+		final OfficeTablePanel classPathEntries = new OfficeTablePanel("Class path entry");
 		for (String classPathEntry : configuration.getClassPathEntries()) {
 			classPathEntries.addRow(classPathEntry);
 		}
-		this.addAdvancedEntry(panelAdvancedStart, "Class path",
-				classPathEntries, constraint);
+		this.addAdvancedEntry(panelAdvancedStart, "Class path", classPathEntries, constraint);
 
 		// OfficeFloor properties
-		final OfficeTablePanel officeFloorProperties = new OfficeTablePanel(
-				"Name", "Value");
+		final OfficeTablePanel officeFloorProperties = new OfficeTablePanel("Name", "Value");
 		Properties properties = configuration.getOfficeFloorProperties();
 		for (String propertyName : properties.stringPropertyNames()) {
 			String propertyValue = properties.getProperty(propertyName);
 			officeFloorProperties.addRow(propertyName, propertyValue);
 		}
-		this.addAdvancedEntry(panelAdvancedStart, "OfficeFloor properties",
-				officeFloorProperties, constraint);
-
-		// Artifact references
-		final int GROUP_ID_INDEX = 0;
-		final int ARTIFACT_ID_INDEX = 1;
-		final int TYPE_INDEX = 2;
-		final int VERSION_INDEX = 3;
-		final int CLASSIFIER_INDEX = 4;
-		final OfficeTablePanel artifactReferences = new OfficeTablePanel(
-				"Group ID", "Artifact Id", "Type", "Version", "Classifier");
-		for (ArtifactReference reference : configuration
-				.getArtifactReferences()) {
-			artifactReferences.addRow(reference.getGroupId(),
-					reference.getArtifactId(), reference.getType(),
-					reference.getVersion(), reference.getClassifier());
-		}
-		this.addAdvancedEntry(panelAdvancedStart, "Artifact references",
-				artifactReferences, constraint);
-
-		// Remove repository URLs
-		final OfficeTablePanel remoteRepositoryUrls = new OfficeTablePanel(
-				"Remote repository URL");
-		for (String remoteRepositoryUrl : configuration
-				.getRemoteRepositoryUrls()) {
-			remoteRepositoryUrls.addRow(remoteRepositoryUrl);
-		}
-		this.addAdvancedEntry(panelAdvancedStart, "Remote repository URLs",
-				remoteRepositoryUrls, constraint);
+		this.addAdvancedEntry(panelAdvancedStart, "OfficeFloor properties", officeFloorProperties, constraint);
 
 		// JVM options
 		final OfficeTablePanel jvmOptions = new OfficeTablePanel("JVM option");
 		for (String jvmOption : configuration.getJvmOptions()) {
 			jvmOptions.addRow(jvmOption);
 		}
-		this.addAdvancedEntry(panelAdvancedStart, "JVM options", jvmOptions,
-				constraint);
+		this.addAdvancedEntry(panelAdvancedStart, "JVM options", jvmOptions, constraint);
 
 		// Open task
 		JPanel panelOpenTask = new JPanel();
-		panelOpenTask.setLayout(new BoxLayout(panelOpenTask,
-				BoxLayout.LINE_AXIS));
+		panelOpenTask.setLayout(new BoxLayout(panelOpenTask, BoxLayout.LINE_AXIS));
 		panelOpenTask.add(new Label("Office"));
-		final JTextField openTaskOfficeName = (JTextField) panelOpenTask
-				.add(new JTextField(5));
+		final JTextField openTaskOfficeName = (JTextField) panelOpenTask.add(new JTextField(5));
 		openTaskOfficeName.setText(configuration.getOfficeName());
 		panelOpenTask.add(new Label("Work"));
-		final JTextField openTaskWorkName = (JTextField) panelOpenTask
-				.add(new JTextField(5));
+		final JTextField openTaskWorkName = (JTextField) panelOpenTask.add(new JTextField(5));
 		openTaskWorkName.setText(configuration.getWorkName());
 		panelOpenTask.add(new Label("Task"));
-		final JTextField openTaskTaskName = (JTextField) panelOpenTask
-				.add(new JTextField(5));
+		final JTextField openTaskTaskName = (JTextField) panelOpenTask.add(new JTextField(5));
 		openTaskTaskName.setText(configuration.getTaskName());
 		panelOpenTask.add(new Label("Parameter"));
-		final JTextField openTaskParameter = (JTextField) panelOpenTask
-				.add(new JTextField(5));
+		final JTextField openTaskParameter = (JTextField) panelOpenTask.add(new JTextField(5));
 		openTaskParameter.setText(configuration.getParameter());
-		this.addAdvancedEntry(panelAdvancedStart, "Open Task", panelOpenTask,
-				constraint);
+		this.addAdvancedEntry(panelAdvancedStart, "Open Task", panelOpenTask, constraint);
 
 		// Deploy button
 		JButton deployButton = new JButton(new OfficeAction<String>("deploy") {
@@ -209,8 +161,7 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 				// Load the OfficeFloor Source
 				String officeFloorSourceText = officeFloorSource.getText();
 				if (!CompileUtil.isBlank(officeFloorSourceText)) {
-					configuration
-							.setOfficeFloorSourceClassName(officeFloorSourceText);
+					configuration.setOfficeFloorSourceClassName(officeFloorSourceText);
 				}
 
 				// Load the process name
@@ -227,14 +178,11 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 						// Ensure the upload artifact exists
 						File uploadArtifactFile = new File(uploadArtifact);
 						if (!(uploadArtifactFile.exists())) {
-							throw new ErrorMessageException(
-									"Can not find upload artifact "
-											+ uploadArtifact);
+							throw new ErrorMessageException("Can not find upload artifact " + uploadArtifact);
 						}
 
 						// Add the upload artifact
-						configuration.addUploadArtifact(new UploadArtifact(
-								uploadArtifactFile));
+						configuration.addUploadArtifact(new UploadArtifact(uploadArtifactFile));
 					}
 				}
 
@@ -255,31 +203,6 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 					}
 				}
 
-				// Load artifact references
-				for (String[] row : artifactReferences.getRows()) {
-					String groupId = row[GROUP_ID_INDEX];
-					String artifactId = row[ARTIFACT_ID_INDEX];
-					String type = row[TYPE_INDEX];
-					String version = row[VERSION_INDEX];
-					String classifier = row[CLASSIFIER_INDEX];
-					if ((!CompileUtil.isBlank(artifactId))
-							&& (!CompileUtil.isBlank(version))) {
-						configuration
-								.addArtifactReference(new ArtifactReference(
-										groupId, artifactId, version, type,
-										classifier));
-					}
-				}
-
-				// Load remote repository URLs
-				for (String[] row : remoteRepositoryUrls.getRows()) {
-					String remoteRepositoryUrl = row[0];
-					if (!CompileUtil.isBlank(remoteRepositoryUrl)) {
-						configuration
-								.addRemoteRepositoryUrl(remoteRepositoryUrl);
-					}
-				}
-
 				// Load JVM options
 				for (String[] row : jvmOptions.getRows()) {
 					String jvmOption = row[0];
@@ -293,11 +216,9 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 				String workNameText = openTaskWorkName.getName();
 				String taskNameText = openTaskTaskName.getName();
 				String parameterText = openTaskParameter.getName();
-				if ((!CompileUtil.isBlank(officeNameText))
-						&& (!CompileUtil.isBlank(workNameText))
+				if ((!CompileUtil.isBlank(officeNameText)) && (!CompileUtil.isBlank(workNameText))
 						&& (!CompileUtil.isBlank(taskNameText))) {
-					configuration.setOpenTask(officeNameText, workNameText,
-							taskNameText, parameterText);
+					configuration.setOpenTask(officeNameText, workNameText, taskNameText, parameterText);
 				}
 
 				// Return asynchronous action to open the OfficeFloor
@@ -318,12 +239,10 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 
 						// Provide notification that opened
 						OfficeBuildingAdvancedDeployTabPanel.this
-								.notifyUser("Opened under process name space: "
-										+ result);
+								.notifyUser("Opened under process name space: " + result);
 
 						// Refresh the OfficeFloor processes
-						OfficeBuildingAdvancedDeployTabPanel.this.manageTab
-								.refreshOfficeFloorProcesses();
+						OfficeBuildingAdvancedDeployTabPanel.this.manageTab.refreshOfficeFloorProcesses();
 					}
 				};
 			}
@@ -355,8 +274,8 @@ public class OfficeBuildingAdvancedDeployTabPanel extends
 	 * @param constraint
 	 *            {@link GridBagConstraints}.
 	 */
-	private void addAdvancedEntry(JPanel panelAdvancedStart, String labelText,
-			Component component, GridBagConstraints constraint) {
+	private void addAdvancedEntry(JPanel panelAdvancedStart, String labelText, Component component,
+			GridBagConstraints constraint) {
 
 		// Next row for entry
 		constraint.gridy++;

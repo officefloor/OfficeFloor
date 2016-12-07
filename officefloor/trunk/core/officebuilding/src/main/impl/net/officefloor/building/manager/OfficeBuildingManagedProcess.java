@@ -94,11 +94,6 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	private final boolean isAllowClassPathEntries;
 
 	/**
-	 * Remote repository URLs.
-	 */
-	private final String[] remoteRepositoryUrls;
-
-	/**
 	 * {@link ManagedProcessContext}.
 	 */
 	private ManagedProcessContext context;
@@ -134,28 +129,21 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 	 * @param isAllowClassPathEntries
 	 *            Flag indicating if the {@link OfficeBuilding} will allow
 	 *            configured class path entries.
-	 * @param remoteRepositoryUrls
-	 *            Remote repository URLs.
 	 */
-	public OfficeBuildingManagedProcess(String hostName, int port,
-			File keyStore, String keyStorePassword, String userName,
-			String password, File workspaceLocation,
-			boolean isIsolateProcesses, Properties environment,
-			String[] jvmOptions, boolean isAllowClassPathEntries,
-			String[] remoteRepositoryUrls) {
+	public OfficeBuildingManagedProcess(String hostName, int port, File keyStore, String keyStorePassword,
+			String userName, String password, File workspaceLocation, boolean isIsolateProcesses,
+			Properties environment, String[] jvmOptions, boolean isAllowClassPathEntries) {
 		this.hostName = hostName;
 		this.port = port;
 		this.keyStoreLocation = keyStore.getAbsolutePath();
 		this.keyStorePassword = keyStorePassword;
 		this.userName = userName;
 		this.password = password;
-		this.workspaceLocation = (workspaceLocation == null ? null
-				: workspaceLocation.getAbsolutePath());
+		this.workspaceLocation = (workspaceLocation == null ? null : workspaceLocation.getAbsolutePath());
 		this.isIsolateProcesses = isIsolateProcesses;
 		this.environment = environment;
 		this.jvmOptions = jvmOptions;
 		this.isAllowClassPathEntries = isAllowClassPathEntries;
-		this.remoteRepositoryUrls = remoteRepositoryUrls;
 	}
 
 	/*
@@ -167,24 +155,19 @@ public class OfficeBuildingManagedProcess implements ManagedProcess {
 		this.context = context;
 
 		// Obtain the workspace
-		File workspace = (this.workspaceLocation == null ? null : new File(
-				this.workspaceLocation));
+		File workspace = (this.workspaceLocation == null ? null : new File(this.workspaceLocation));
 
 		// Start the OfficeBuilding
-		this.manager = OfficeBuildingManager.startOfficeBuilding(this.hostName,
-				this.port, new File(this.keyStoreLocation),
-				this.keyStorePassword, this.userName, this.password, workspace,
-				this.isIsolateProcesses, this.environment, null,
-				this.jvmOptions, this.isAllowClassPathEntries,
-				this.remoteRepositoryUrls);
+		this.manager = OfficeBuildingManager.startOfficeBuilding(this.hostName, this.port,
+				new File(this.keyStoreLocation), this.keyStorePassword, this.userName, this.password, workspace,
+				this.isIsolateProcesses, this.environment, null, this.jvmOptions, this.isAllowClassPathEntries);
 	}
 
 	@Override
 	public void main() throws Throwable {
 
 		// Wait until the OfficeBuilding is stopped (or no longer processing)
-		while ((!this.manager.isOfficeBuildingStopped())
-				&& (this.context.continueProcessing())) {
+		while ((!this.manager.isOfficeBuildingStopped()) && (this.context.continueProcessing())) {
 
 			// Wait some time before checking again
 			synchronized (this.manager) {

@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandEnvironment;
 import net.officefloor.building.command.OfficeFloorCommandParameter;
@@ -37,13 +36,7 @@ import net.officefloor.building.process.ProcessConfiguration;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorExecutionUnitFactoryImpl implements
-		OfficeFloorExecutionUnitFactory {
-
-	/**
-	 * {@link ClassPathFactory}.
-	 */
-	private final ClassPathFactory classPathFactory;
+public class OfficeFloorExecutionUnitFactoryImpl implements OfficeFloorExecutionUnitFactory {
 
 	/**
 	 * Environment {@link Properties}.
@@ -58,17 +51,12 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 	/**
 	 * Initiate.
 	 * 
-	 * @param classPathFactory
-	 *            {@link ClassPathFactory}.
 	 * @param environment
 	 *            Environment {@link Properties}.
 	 * @param decorators
 	 *            {@link OfficeFloorDecorator} instances.
 	 */
-	public OfficeFloorExecutionUnitFactoryImpl(
-			ClassPathFactory classPathFactory, Properties environment,
-			OfficeFloorDecorator[] decorators) {
-		this.classPathFactory = classPathFactory;
+	public OfficeFloorExecutionUnitFactoryImpl(Properties environment, OfficeFloorDecorator[] decorators) {
 		this.environment = environment;
 		this.decorators = decorators;
 	}
@@ -78,26 +66,22 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 	 */
 
 	@Override
-	public OfficeFloorExecutionUnit createExecutionUnit(
-			OfficeFloorCommand command)
+	public OfficeFloorExecutionUnit createExecutionUnit(OfficeFloorCommand command)
 			throws OfficeFloorExecutionUnitCreateException {
 
 		// TODO obtain OfficeFloor workspace
 		File workspace = null;
 
 		// Create the command context
-		OfficeFloorCommandContextImpl context = new OfficeFloorCommandContextImpl(
-				this.classPathFactory, workspace, this.decorators);
+		OfficeFloorCommandContextImpl context = new OfficeFloorCommandContextImpl(workspace, this.decorators);
 
 		// Initialise the environment
 		try {
 			command.initialiseEnvironment(context);
 		} catch (ClassPathError ex) {
-			throw new OfficeFloorExecutionUnitCreateException(
-					"Failed to initialise command class path", ex);
+			throw new OfficeFloorExecutionUnitCreateException("Failed to initialise command class path", ex);
 		} catch (Exception ex) {
-			throw new OfficeFloorExecutionUnitCreateException(
-					"Failed to initialise environment", ex);
+			throw new OfficeFloorExecutionUnitCreateException("Failed to initialise environment", ex);
 		}
 
 		// Ensure no warnings
@@ -108,8 +92,7 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 			for (String warning : warnings) {
 				writer.println(warning);
 			}
-			throw new OfficeFloorExecutionUnitCreateException(
-					warningText.toString());
+			throw new OfficeFloorExecutionUnitCreateException(warningText.toString());
 		}
 
 		// Create copy of the environment
@@ -133,16 +116,14 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 		try {
 			managedProcess = command.createManagedProcess(commandEnvironment);
 		} catch (Exception ex) {
-			throw new OfficeFloorExecutionUnitCreateException(
-					"Failed to create Managed Process", ex);
+			throw new OfficeFloorExecutionUnitCreateException("Failed to create Managed Process", ex);
 		}
 
 		// Create the process configuration
 		ProcessConfiguration configuration = new ProcessConfiguration();
 		configuration.setProcessName(commandEnvironment.processName);
 		String additionalClassPath = context.getCommandClassPath();
-		if ((additionalClassPath != null)
-				&& (additionalClassPath.trim().length() > 0)) {
+		if ((additionalClassPath != null) && (additionalClassPath.trim().length() > 0)) {
 			configuration.setAdditionalClassPath(additionalClassPath);
 		}
 		for (String jvmOption : commandEnvironment.jvmOptions) {
@@ -150,15 +131,13 @@ public class OfficeFloorExecutionUnitFactoryImpl implements
 		}
 
 		// Create and return the execution unit
-		return new OfficeFloorExecutionUnitImpl(managedProcess, configuration,
-				commandEnvironment.isSpawnProcess);
+		return new OfficeFloorExecutionUnitImpl(managedProcess, configuration, commandEnvironment.isSpawnProcess);
 	}
 
 	/**
 	 * {@link OfficeFloorCommandEnvironment}.
 	 */
-	private static class CommandEnvironment implements
-			OfficeFloorCommandEnvironment {
+	private static class CommandEnvironment implements OfficeFloorCommandEnvironment {
 
 		/**
 		 * {@link Process} name.

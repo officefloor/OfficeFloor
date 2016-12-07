@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.building.classpath;
+package net.officefloor.maven.classpath;
 
 import java.io.File;
 import java.io.InputStream;
@@ -57,6 +57,7 @@ import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.graph.DependencyNode;
 import org.eclipse.aether.internal.impl.EnhancedLocalRepositoryManagerFactory;
 import org.eclipse.aether.repository.LocalRepository;
+import org.eclipse.aether.repository.RemoteRepository.Builder;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.spi.localrepo.LocalRepositoryManagerFactory;
 import org.eclipse.aether.util.graph.visitor.PreorderNodeListGenerator;
@@ -75,8 +76,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 *            Class path entries.
 	 * @return Class path.
 	 */
-	public static String transformClassPathEntriesToClassPath(
-			String... classPathEntries) {
+	public static String transformClassPathEntriesToClassPath(String... classPathEntries) {
 
 		// Build the class path
 		StringBuilder classPath = new StringBuilder();
@@ -102,8 +102,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 * @throws PlexusContainerException
 	 *             If fails to create the {@link PlexusContainer}.
 	 */
-	public static PlexusContainer createPlexusContainer()
-			throws PlexusContainerException {
+	public static PlexusContainer createPlexusContainer() throws PlexusContainerException {
 		DefaultContainerConfiguration configuration = new DefaultContainerConfiguration();
 		configuration.setClassPathScanning(PlexusConstants.SCANNING_INDEX);
 		return new DefaultPlexusContainer(configuration);
@@ -122,18 +121,15 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		String localRepositoryPath = null;
 
 		// Obtain the settings
-		File settingsFile = new File(
-				org.apache.maven.repository.RepositorySystem.userMavenConfigurationHome,
+		File settingsFile = new File(org.apache.maven.repository.RepositorySystem.userMavenConfigurationHome,
 				"settings.xml");
 		if (settingsFile.exists()) {
 			// Load user settings and obtain local repository
-			SettingsBuilder settingsBuilder = new DefaultSettingsBuilderFactory()
-					.newInstance();
+			SettingsBuilder settingsBuilder = new DefaultSettingsBuilderFactory().newInstance();
 			SettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
 			request.setUserSettingsFile(settingsFile);
 			SettingsBuildingResult result = settingsBuilder.build(request);
-			localRepositoryPath = result.getEffectiveSettings()
-					.getLocalRepository();
+			localRepositoryPath = result.getEffectiveSettings().getLocalRepository();
 		}
 
 		// Use default local repository (if not specified in settings)
@@ -181,9 +177,8 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 * @throws Exception
 	 *             If fails to initiate.
 	 */
-	public ClassPathFactoryImpl(PlexusContainer plexusContainer,
-			RepositorySystem repositorySystem, File localRepository,
-			RemoteRepository[] remoteRepositories) throws Exception {
+	public ClassPathFactoryImpl(PlexusContainer plexusContainer, RepositorySystem repositorySystem,
+			File localRepository, RemoteRepository[] remoteRepositories) throws Exception {
 		this.remoteRepositories = remoteRepositories;
 
 		// Obtain the plexus container
@@ -200,8 +195,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 				: this.plexusContainer.lookup(RepositorySystem.class));
 
 		// Obtain the local repository
-		this.localRepository = (localRepository != null ? localRepository
-				: getUserLocalRepository());
+		this.localRepository = (localRepository != null ? localRepository : getUserLocalRepository());
 	}
 
 	/**
@@ -215,8 +209,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 * @throws Exception
 	 *             If fails to initiate.
 	 */
-	public ClassPathFactoryImpl(File localRepository,
-			RemoteRepository[] remoteRepositories) throws Exception {
+	public ClassPathFactoryImpl(File localRepository, RemoteRepository[] remoteRepositories) throws Exception {
 		this(null, null, localRepository, remoteRepositories);
 	}
 
@@ -235,8 +228,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 		RepositorySystemSession session = this.createRepositorySystemSession();
 
 		// Obtain the Maven Project
-		ProjectBuilder builder = this.plexusContainer
-				.lookup(ProjectBuilder.class);
+		ProjectBuilder builder = this.plexusContainer.lookup(ProjectBuilder.class);
 		ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
 		request.setRepositorySession(session);
 		ProjectBuildingResult result = builder.build(pomFile, request);
@@ -253,15 +245,12 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 * @throws Exception
 	 *             If fails to create {@link RepositorySystemSession}.
 	 */
-	private RepositorySystemSession createRepositorySystemSession()
-			throws Exception {
+	private RepositorySystemSession createRepositorySystemSession() throws Exception {
 
 		// Create the configured repository system session
-		DefaultRepositorySystemSession session = MavenRepositorySystemUtils
-				.newSession();
+		DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
 		LocalRepositoryManagerFactory factory = new EnhancedLocalRepositoryManagerFactory();
-		session.setLocalRepositoryManager(factory.newInstance(session,
-				new LocalRepository(this.localRepository)));
+		session.setLocalRepositoryManager(factory.newInstance(session, new LocalRepository(this.localRepository)));
 
 		// Return the repository system session
 		return session;
@@ -272,8 +261,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	 */
 
 	@Override
-	public String[] createArtifactClassPath(String artifactLocation)
-			throws Exception {
+	public String[] createArtifactClassPath(String artifactLocation) throws Exception {
 
 		// Create the listing of class paths
 		List<String> classPath = new LinkedList<String>();
@@ -303,8 +291,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 				String type = pom.getPackaging();
 
 				// Obtain the class path for the artifact
-				String[] artifactClassPath = this.createArtifactClassPath(
-						groupId, artifactId, version, type, null);
+				String[] artifactClassPath = this.createArtifactClassPath(groupId, artifactId, version, type, null);
 				for (String classPathEntry : artifactClassPath) {
 					if (!classPath.contains(classPathEntry)) {
 						classPath.add(classPathEntry);
@@ -318,8 +305,8 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 	}
 
 	@Override
-	public String[] createArtifactClassPath(String groupId, String artifactId,
-			String version, String type, String classifier) throws Exception {
+	public String[] createArtifactClassPath(String groupId, String artifactId, String version, String type,
+			String classifier) throws Exception {
 
 		// Default type
 		if (type == null) {
@@ -328,8 +315,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 
 		// Resolve the class path
 		ArtifactClassPathResolver resolver = new ArtifactClassPathResolver(
-				new DefaultArtifact(groupId, artifactId, classifier, type,
-						version));
+				new DefaultArtifact(groupId, artifactId, classifier, type, version));
 		new Thread(resolver).start();
 
 		// Return the resolved class path
@@ -357,14 +343,12 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 
 		// Obtain the pom.xml file from within the archive
 		ZipEntry pomEntry = null;
-		for (Enumeration<? extends ZipEntry> iterator = archive.entries(); iterator
-				.hasMoreElements();) {
+		for (Enumeration<? extends ZipEntry> iterator = archive.entries(); iterator.hasMoreElements();) {
 			ZipEntry entry = iterator.nextElement();
 
 			// Ensure pom.xml within the META-INF/maven location
 			String name = entry.getName();
-			if (name.startsWith("META-INF/maven/")
-					&& (name.endsWith("/pom.xml"))) {
+			if (name.startsWith("META-INF/maven/") && (name.endsWith("/pom.xml"))) {
 				// Found the POM
 				pomEntry = entry;
 				break; // entry found
@@ -451,8 +435,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 				// Determine if timed out
 				if (System.currentTimeMillis() > timeoutTime) {
 					throw new Exception(
-							"Timed out waiting for resolution of class path for artifact "
-									+ this.artifact.toString());
+							"Timed out waiting for resolution of class path for artifact " + this.artifact.toString());
 				}
 			}
 		}
@@ -466,8 +449,7 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 			try {
 
 				// Create the repository session
-				RepositorySystemSession session = ClassPathFactoryImpl.this
-						.createRepositorySystemSession();
+				RepositorySystemSession session = ClassPathFactoryImpl.this.createRepositorySystemSession();
 
 				// Create the dependency
 				Dependency dependency = new Dependency(this.artifact, "run");
@@ -489,18 +471,16 @@ public class ClassPathFactoryImpl implements ClassPathFactory {
 					uniqueIds.add(uniqueId);
 
 					// Add the remote repository
-					org.eclipse.aether.repository.RemoteRepository.Builder remoteRepositoryBuilder = new org.eclipse.aether.repository.RemoteRepository.Builder(
-							uniqueId, remoteRepository.getType(),
+					Builder remoteRepositoryBuilder = new Builder(uniqueId, remoteRepository.getType(),
 							remoteRepository.getUrl());
 					request.addRepository(remoteRepositoryBuilder.build());
 				}
 
 				// Collect the results
-				CollectResult result = ClassPathFactoryImpl.this.repositorySystem
-						.collectDependencies(session, request);
+				CollectResult result = ClassPathFactoryImpl.this.repositorySystem.collectDependencies(session, request);
 				DependencyNode node = result.getRoot();
-				ClassPathFactoryImpl.this.repositorySystem.resolveDependencies(
-						session, new DependencyRequest(node, null));
+				ClassPathFactoryImpl.this.repositorySystem.resolveDependencies(session,
+						new DependencyRequest(node, null));
 
 				// Generate the class path
 				PreorderNodeListGenerator generator = new PreorderNodeListGenerator();

@@ -36,10 +36,10 @@ import org.apache.maven.project.MavenProject;
 import com.google.gwt.dev.DevMode;
 
 import net.officefloor.autowire.AutoWireManagement;
-import net.officefloor.building.classpath.ClassPathFactoryImpl;
-import net.officefloor.building.classpath.RemoteRepository;
 import net.officefloor.compile.impl.issues.CompileException;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.maven.ClassPathFactoryImpl;
+import net.officefloor.maven.RemoteRepository;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.woof.WoofOfficeFloorSource;
 

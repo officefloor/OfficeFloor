@@ -53,27 +53,19 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 		File tempFile = File.createTempFile(this.getName(), "txt");
 
 		// Run the OfficeFloor and invoke task
-		String openCommand = "--process_name "
-				+ PROCESS_NAME
-				+ " --office OFFICE"
-				+ " --work SECTION.WORK"
-				+ " --task writeMessage"
-				+ " --parameter "
-				+ tempFile.getAbsolutePath()
+		String openCommand = "--process_name " + PROCESS_NAME + " --office OFFICE" + " --work SECTION.WORK"
+				+ " --task writeMessage" + " --parameter " + tempFile.getAbsolutePath()
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
 				+ " --property team.name=TEAM";
 		this.doMain(openCommand);
-		out.add("Opening OfficeFloor within process name space '"
-				+ PROCESS_NAME
+		out.add("Opening OfficeFloor within process name space '" + PROCESS_NAME
 				+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
 				+ tempFile.getAbsolutePath() + ")");
-		out.add("OfficeFloor within process name space '" + PROCESS_NAME
-				+ "' closed");
+		out.add("OfficeFloor within process name space '" + PROCESS_NAME + "' closed");
 
 		// Ensure message written to file
 		String fileContent = this.getFileContents(tempFile);
-		assertEquals("Message should be written to file", MockWork.MESSAGE,
-				fileContent);
+		assertEquals("Message should be written to file", MockWork.MESSAGE, fileContent);
 
 		// Validate no error and correct output
 		this.assertErr();
@@ -90,14 +82,12 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 
 		// Validate no error and appropriate help message
 		this.assertErr();
-		this.assertOut(
-				"                                                                 ",
+		this.assertOut("                                                                 ",
 				"Opens an OfficeFloor                                             ",
 				"                                                                 ",
 				"usage: script [options]                                          ",
 				"                                                                 ",
 				"Options:                                                         ",
-				" -a,--artifact <arg>              Artifact to include on the class path ",
 				" -cp,--classpath <arg>            Raw entry to include on the class path",
 				" -h,--help                        This help message                     ",
 				" -o,--office <arg>                Name of the Office                    ",

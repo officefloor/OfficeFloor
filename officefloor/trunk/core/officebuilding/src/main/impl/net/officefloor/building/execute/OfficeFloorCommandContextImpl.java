@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.building.classpath.ClassPathFactory;
 import net.officefloor.building.command.OfficeFloorCommand;
 import net.officefloor.building.command.OfficeFloorCommandContext;
 import net.officefloor.building.decorate.OfficeFloorDecorator;
@@ -35,11 +34,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext {
-
-	/**
-	 * {@link ClassPathFactory}.
-	 */
-	private final ClassPathFactory classPathFactory;
 
 	/**
 	 * {@link OfficeFloorDecorator} instances.
@@ -64,16 +58,12 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	/**
 	 * Initiate.
 	 * 
-	 * @param classPathFactory
-	 *            {@link ClassPathFactory}.
 	 * @param workspace
 	 *            Workspace for the {@link OfficeFloor}.
 	 * @param decorators
 	 *            {@link OfficeFloorDecorator} instances.
 	 */
-	public OfficeFloorCommandContextImpl(ClassPathFactory classPathFactory,
-			File workspace, OfficeFloorDecorator[] decorators) {
-		this.classPathFactory = classPathFactory;
+	public OfficeFloorCommandContextImpl(File workspace, OfficeFloorDecorator[] decorators) {
 		this.workspace = workspace;
 		this.decorators = decorators;
 	}
@@ -110,8 +100,7 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	 * @return Warnings.
 	 */
 	public String[] getWarnings() {
-		return this.classPathWarnings.toArray(new String[this.classPathWarnings
-				.size()]);
+		return this.classPathWarnings.toArray(new String[this.classPathWarnings.size()]);
 	}
 
 	/**
@@ -124,8 +113,7 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	 */
 	private void addClassPathWarning(String description, Throwable cause) {
 		String message = cause.getMessage();
-		String causeMessage = ((message == null)
-				|| (message.trim().length() == 0) ? cause.getClass().getName()
+		String causeMessage = ((message == null) || (message.trim().length() == 0) ? cause.getClass().getName()
 				: message + " [" + cause.getClass().getSimpleName() + "]");
 		this.classPathWarnings.add(description + " (" + causeMessage + ")");
 	}
@@ -148,15 +136,13 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 			try {
 				decorator.decorate(context);
 			} catch (Exception ex) {
-				this.addClassPathWarning("Failed decoration by "
-						+ decorator.getClass().getName()
+				this.addClassPathWarning("Failed decoration by " + decorator.getClass().getName()
 						+ " for class path entry " + classPathEntry, ex);
 			}
 		}
 
 		// Return based on whether decorated class path
-		return (context.resolvedClassPathEntries.size() > 0 ? context.resolvedClassPathEntries
-				: null);
+		return (context.resolvedClassPathEntries.size() > 0 ? context.resolvedClassPathEntries : null);
 	}
 
 	/**
@@ -171,8 +157,7 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 	private boolean loadDecoratedClassPath(String classPathEntry) {
 
 		// Obtain the decorated class path
-		List<String> decoratedClassPath = this
-				.getDecoratedClassPath(classPathEntry);
+		List<String> decoratedClassPath = this.getDecoratedClassPath(classPathEntry);
 
 		// Determine if have decorated class path
 		if (decoratedClassPath != null) {
@@ -204,68 +189,6 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 
 			// Not decorated so include class path entry as is
 			this.classPathEntries.add(classPathEntry);
-
-		} catch (Exception ex) {
-			// Propagate failure back to execution unit
-			throw new ClassPathError(ex);
-		}
-	}
-
-	@Override
-	public void includeClassPathArtifact(String artifactLocation) {
-		try {
-
-			// Attempt to load the decorated class path
-			if (this.loadDecoratedClassPath(artifactLocation)) {
-				/*
-				 * As class path was decorated do not undertake artifact
-				 * resolution.
-				 * 
-				 * The example case is a WAR file that will have its decoration
-				 * extract the dependencies for use and therefore should not
-				 * have its dependent artifacts attempted to be resolved as
-				 * would create duplicate entries on the class path.
-				 */
-				return;
-			}
-
-			// Obtain the class path entries
-			String[] classPathEntries = this.classPathFactory
-					.createArtifactClassPath(artifactLocation);
-
-			// Include the class path entries
-			for (String classPathEntry : classPathEntries) {
-				this.includeClassPathEntry(classPathEntry);
-			}
-
-		} catch (Exception ex) {
-			// Propagate failure back to execution unit
-			throw new ClassPathError(ex);
-		}
-	}
-
-	@Override
-	public void includeClassPathArtifact(String groupId, String artifactId,
-			String version, String type, String classifier) {
-		try {
-
-			// Obtain the class path entries
-			String[] classPathEntries = this.classPathFactory
-					.createArtifactClassPath(groupId, artifactId, version,
-							type, classifier);
-
-			// Determine if decorate the artifact (should always be first entry)
-			if (classPathEntries.length > 0) {
-				if (this.loadDecoratedClassPath(classPathEntries[0])) {
-					// Decorated the artifact so do not include its dependencies
-					return;
-				}
-			}
-
-			// Include the resolved class path entries
-			for (String classPathEntry : classPathEntries) {
-				this.includeClassPathEntry(classPathEntry);
-			}
 
 		} catch (Exception ex) {
 			// Propagate failure back to execution unit
@@ -311,15 +234,12 @@ public class OfficeFloorCommandContextImpl implements OfficeFloorCommandContext 
 		public File createWorkspaceFile(String identifier, String extension) {
 			try {
 				// Create and return the temporary file
-				return File.createTempFile(identifier, "." + extension,
-						OfficeFloorCommandContextImpl.this.workspace);
+				return File.createTempFile(identifier, "." + extension, OfficeFloorCommandContextImpl.this.workspace);
 
 			} catch (IOException ex) {
 				// Propagate failure
-				throw new RuntimeException(
-						"Failed to create workspace file for decoration (identifier="
-								+ identifier + ", extension=" + extension + ")",
-						ex);
+				throw new RuntimeException("Failed to create workspace file for decoration (identifier=" + identifier
+						+ ", extension=" + extension + ")", ex);
 			}
 		}
 

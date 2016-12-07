@@ -24,7 +24,6 @@ import java.lang.reflect.UndeclaredThrowableException;
 import javax.management.InstanceNotFoundException;
 
 import net.officefloor.building.command.parameters.OfficeBuildingPortOfficeFloorCommandParameter;
-import net.officefloor.building.manager.ArtifactReference;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.manager.OfficeBuildingManagerMBean;
 import net.officefloor.building.manager.UploadArtifact;
@@ -50,8 +49,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 	 * @return Working directory.
 	 */
 	public static File getWorkingDirectory() {
-		return new File(new File(System.getProperty("java.io.tmpdir"),
-				System.getProperty("user.name")), "officebuilding");
+		return new File(new File(System.getProperty("java.io.tmpdir"), System.getProperty("user.name")),
+				"officebuilding");
 	}
 
 	/**
@@ -74,11 +73,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Obtain the office building start line
 		this.officeBuildingStartLine = "OfficeBuilding started at "
-				+ OfficeBuildingManager
-						.getOfficeBuildingJmxServiceUrl(
-								null,
-								OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT)
-						.toString();
+				+ OfficeBuildingManager.getOfficeBuildingJmxServiceUrl(null,
+						OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT).toString();
 	}
 
 	/**
@@ -91,20 +87,15 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		this.doSecureMain("start");
 
 		// Ensure started by obtaining manager
-		OfficeBuildingManagerMBean manager = OfficeBuildingManager
-				.getOfficeBuildingManager(
-						null,
-						OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
-						OfficeBuildingTestUtil.getTrustStore(),
-						OfficeBuildingTestUtil.getTrustStorePassword(),
-						OfficeBuildingTestUtil.getLoginUsername(),
-						OfficeBuildingTestUtil.getLoginPassword());
+		OfficeBuildingManagerMBean manager = OfficeBuildingManager.getOfficeBuildingManager(null,
+				OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
+				OfficeBuildingTestUtil.getTrustStore(), OfficeBuildingTestUtil.getTrustStorePassword(),
+				OfficeBuildingTestUtil.getLoginUsername(), OfficeBuildingTestUtil.getLoginPassword());
 
 		// Ensure correct start time
 		long afterStartTime = System.currentTimeMillis();
 		long startTime = manager.getStartTime().getTime();
-		assertTrue(
-				"Office Building should be just started",
+		assertTrue("Office Building should be just started",
 				((beforeStartTime <= startTime) && (startTime <= afterStartTime)));
 
 		// Stop the Office Building
@@ -120,8 +111,7 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 			fail("Office Building should be stopped");
 		} catch (IOException ex) {
 			// Ensure cause is IO failure as Office Building stopped
-			assertEquals("Incorrect cause", "no such object in table",
-					ex.getMessage());
+			assertEquals("Incorrect cause", "no such object in table", ex.getMessage());
 		}
 	}
 
@@ -136,11 +126,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		this.doMain("--office_building_host server --office_building_port 13778 url");
 
 		// Validate output URL
-		String expectedUrl = OfficeBuildingManager
-				.getOfficeBuildingJmxServiceUrl(
-						HOST,
-						OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT)
-				.toString();
+		String expectedUrl = OfficeBuildingManager.getOfficeBuildingJmxServiceUrl(HOST,
+				OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT).toString();
 		this.assertOut(expectedUrl);
 		this.assertErr();
 	}
@@ -161,17 +148,14 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		String prefixOutput = this.officeBuildingStartLine;
 
 		// Ensure MockCore.jar is not existing
-		File mockJar = new File(getWorkingDirectory(),
-				"officefloor1/MockCore.jar");
+		File mockJar = new File(getWorkingDirectory(), "officefloor1/MockCore.jar");
 		assertFalse("MockCore.jar should not yet be uploaded", mockJar.exists());
 
 		// Open the OfficeFloor (via an uploaded artifact)
-		this.doSecureMain("--upload_artifact "
-				+ jarFilePath.getAbsolutePath()
+		this.doSecureMain("--upload_artifact " + jarFilePath.getAbsolutePath()
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
 				+ " --property team.name=TEAM" + " open");
-		String startupOutput = "OfficeFloor open under process name space '"
-				+ PROCESS_NAME + "'\n";
+		String startupOutput = "OfficeFloor open under process name space '" + PROCESS_NAME + "'\n";
 
 		// List the processes for the OfficeFloor
 		this.doSecureMain("list");
@@ -197,62 +181,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Validate no error and correct output
 		this.assertErr();
-		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true,
-				prefixOutput, startupOutput, processOutput, suffixOutput);
-	}
-
-	/**
-	 * Ensure able to open the {@link OfficeFloor} from an
-	 * {@link ArtifactReference} and invoke.
-	 */
-	public void testOpenOfficeFloorViaArtifactReferenceAndInvoke()
-			throws Throwable {
-
-		final String PROCESS_NAME = this.getName();
-		final String OFFICE_FLOOR_VERSION = OfficeBuildingTestUtil
-				.getOfficeCompilerArtifactVersion();
-
-		// Start the OfficeBuilding
-		this.doSecureMain("start");
-		String prefixOutput = this.officeBuildingStartLine;
-
-		// Open the OfficeFloor (via an Artifact)
-		String openCommand = "--artifact net.officefloor.core:officecompiler:"
-				+ OFFICE_FLOOR_VERSION
-				+ " --process_name "
-				+ PROCESS_NAME
-				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
-				+ " --property team.name=TEAM" + " open";
-		this.doSecureMain(openCommand);
-		String startupOutput = "OfficeFloor open under process name space '"
-				+ PROCESS_NAME + "'\n";
-
-		// File
-		File tempFile = File.createTempFile(this.getName(), "txt");
-
-		// Run the Task (to ensure OfficeFloor is open by writing to file)
-		this.doSecureMain("--process_name " + PROCESS_NAME + " --office OFFICE"
-				+ " --work SECTION.WORK" + " --task writeMessage"
-				+ " --parameter " + tempFile.getAbsolutePath() + " invoke");
-		String processOutput = "Invoked work SECTION.WORK (task writeMessage) on office OFFICE with parameter "
-				+ tempFile.getAbsolutePath() + "\n";
-
-		// Ensure message written to file (passive team so should be done)
-		String fileContent = this.getFileContents(tempFile);
-		assertEquals("Message should be written to file", MockWork.MESSAGE,
-				fileContent);
-
-		// Stop the OfficeBuilding (ensuring running processes are stopped)
-		this.doSecureMain("stop");
-		String suffixOutput = "Stopping processes:\n";
-		suffixOutput += "\t" + PROCESS_NAME + " [" + PROCESS_NAME + "]\n";
-		suffixOutput += "\n";
-		suffixOutput += "OfficeBuilding stopped\n";
-
-		// Validate no error and correct output
-		this.assertErr();
-		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true,
-				prefixOutput, startupOutput, processOutput, suffixOutput);
+		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true, prefixOutput, startupOutput, processOutput,
+				suffixOutput);
 	}
 
 	/**
@@ -272,45 +202,32 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Open the OfficeFloor (via an Artifact).
 		// Use system property to specify office.
-		String openCommand = "--jvm_option -D"
-				+ MockWork.INCLUDE_SYSTEM_PROPERTY
-				+ "=SYS_PROP_TEST"
-				+ " --process_name "
-				+ PROCESS_NAME
+		String openCommand = "--jvm_option -D" + MockWork.INCLUDE_SYSTEM_PROPERTY + "=SYS_PROP_TEST"
+				+ " --process_name " + PROCESS_NAME
 				+ " --officefloor net/officefloor/building/process/officefloor/TestOfficeFloor.officefloor"
-				+ " --office OFFICE" + " --work SECTION.WORK"
-				+ " --task writeMessage" + " --parameter "
-				+ tempFile.getAbsolutePath() + " --property team.name=TEAM"
-				+ " open";
+				+ " --office OFFICE" + " --work SECTION.WORK" + " --task writeMessage" + " --parameter "
+				+ tempFile.getAbsolutePath() + " --property team.name=TEAM" + " open";
 		this.doSecureMain(openCommand);
-		String startupOutput = "OfficeFloor open under process name space '"
-				+ PROCESS_NAME
+		String startupOutput = "OfficeFloor open under process name space '" + PROCESS_NAME
 				+ "' for work (office=OFFICE, work=SECTION.WORK, task=writeMessage, parameter="
 				+ tempFile.getAbsolutePath() + ")\n";
 
-		// Wait for office floor to complete
+		// Wait for OfficeFloor to complete
 		try {
-			ProcessManagerMBean manager = OfficeBuildingManager
-					.getProcessManager(
-							null,
-							OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT,
-							PROCESS_NAME,
-							OfficeBuildingTestUtil.getTrustStore(),
-							OfficeBuildingTestUtil.getTrustStorePassword(),
-							OfficeBuildingTestUtil.getLoginUsername(),
-							OfficeBuildingTestUtil.getLoginPassword());
+			ProcessManagerMBean manager = OfficeBuildingManager.getProcessManager(null,
+					OfficeBuildingPortOfficeFloorCommandParameter.DEFAULT_OFFICE_BUILDING_PORT, PROCESS_NAME,
+					OfficeBuildingTestUtil.getTrustStore(), OfficeBuildingTestUtil.getTrustStorePassword(),
+					OfficeBuildingTestUtil.getLoginUsername(), OfficeBuildingTestUtil.getLoginPassword());
 			OfficeBuildingTestUtil.waitUntilProcessComplete(manager, this);
 		} catch (UndeclaredThrowableException ex) {
 			// May have already finished and unregistered before check
-			assertTrue(
-					"Check failure should only be because finished and unregistered",
+			assertTrue("Check failure should only be because finished and unregistered",
 					ex.getCause() instanceof InstanceNotFoundException);
 		}
 
 		// Ensure message written to file (task ran)
 		String fileContent = this.getFileContents(tempFile);
-		assertEquals("Message should be written to file", MockWork.MESSAGE
-				+ "SYS_PROP_TEST", fileContent);
+		assertEquals("Message should be written to file", MockWork.MESSAGE + "SYS_PROP_TEST", fileContent);
 
 		// Stop the OfficeBuilding (ensuring running processes are stopped)
 		this.doSecureMain("stop");
@@ -318,8 +235,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Validate no error and correct output
 		this.assertErr();
-		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true,
-				prefixOutput, startupOutput, null, suffixOutput);
+		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true, prefixOutput, startupOutput, null,
+				suffixOutput);
 	}
 
 	/**
@@ -338,19 +255,14 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 		File tempFile = File.createTempFile(this.getName(), "txt");
 
 		// Run the OfficeFloor with alternate OfficeFloorSource
-		String openCommand = "--process_name " + PROCESS_NAME
-				+ " --officefloorsource "
-				+ MockOfficeFloorSource.class.getName() + " --officefloor "
-				+ tempFile.getAbsolutePath() + " --property "
-				+ MockOfficeFloorSource.PROPERTY_MESSAGE + "=" + MESSAGE
-				+ " open";
+		String openCommand = "--process_name " + PROCESS_NAME + " --officefloorsource "
+				+ MockOfficeFloorSource.class.getName() + " --officefloor " + tempFile.getAbsolutePath()
+				+ " --property " + MockOfficeFloorSource.PROPERTY_MESSAGE + "=" + MESSAGE + " open";
 		this.doSecureMain(openCommand);
-		String startupOutput = "OfficeFloor open under process name space '"
-				+ PROCESS_NAME + "'\n";
+		String startupOutput = "OfficeFloor open under process name space '" + PROCESS_NAME + "'\n";
 
 		// Ensure message written to file
-		OfficeBuildingTestUtil.validateFileContent(
-				"Message should be written to file", MESSAGE, tempFile);
+		OfficeBuildingTestUtil.validateFileContent("Message should be written to file", MESSAGE, tempFile);
 
 		// Stop the OfficeBuilding (ensuring running processes are stopped)
 		this.doSecureMain("stop");
@@ -361,8 +273,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Validate no error and correct output
 		this.assertErr();
-		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true,
-				prefixOutput, startupOutput, null, suffixOutput);
+		ProcessManagerTest.assertProcessStartOutput(this.getOut(), true, prefixOutput, startupOutput, null,
+				suffixOutput);
 	}
 
 	/**
@@ -375,24 +287,22 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 
 		// Validate output Help
 		this.assertErr();
-		this.assertOut(
-				"                                                         ",
+		this.assertOut("                                                         ",
 				"usage: script [options] <commands>                       ",
 				"                                                         ",
 				"Commands:                                                ",
 				"                                                         ",
 				"start : Starts the OfficeBuilding                        ",
 				"      Options:                                           ",
-				"       --isolate_processes <arg>            True to isolate the processes",
-				"       --jvm_option <arg>                   JVM option",
-				"       -kp,--key_store_password <arg>       Password to the key store file",
-				"       -ks,--key_store <arg>                Location of the key store file",
-				"       --office_building_host <arg>         OfficeBuilding Host. Default is localhost",
-				"       --office_building_port <arg>         Port for the OfficeBuilding. Default is 13778",
-				"       -p,--password <arg>                  Password",
-				"       -rr,--remote_repository_urls <arg>   Remote repository URL to retrieve Artifacts",
-				"       -u,--username <arg>                  User name",
-				"       --workspace <arg>                    Workspace for the OfficeBuilding",
+				"       --isolate_processes <arg>        True to isolate the processes",
+				"       --jvm_option <arg>               JVM option",
+				"       -kp,--key_store_password <arg>   Password to the key store file",
+				"       -ks,--key_store <arg>            Location of the key store file",
+				"       --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
+				"       --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
+				"       -p,--password <arg>              Password",
+				"       -u,--username <arg>              User name",
+				"       --workspace <arg>                Workspace for the OfficeBuilding",
 				"                                                         ",
 				"url : Obtains the URL for the OfficeBuilding             ",
 				"    Options:                                             ",
@@ -401,24 +311,22 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 				"                                                         ",
 				"open : Opens an OfficeFloor within the OfficeBuilding",
 				"     Options:                                            ",
-				"      -a,--artifact <arg>                  Artifact to include on the class path",
-				"      --jvm_option <arg>                   JVM option       ",
-				"      -kp,--key_store_password <arg>       Password to the key store file",
-				"      -ks,--key_store <arg>                Location of the key store file",
-				"      -o,--office <arg>                    Name of the Office",
-				"      -of,--officefloor <arg>              Location of the OfficeFloor",
-				"      --office_building_host <arg>         OfficeBuilding Host. Default is localhost",
-				"      --office_building_port <arg>         Port for the OfficeBuilding. Default is 13778",
-				"      -ofs,--officefloorsource <arg>       OfficeFloorSource",
-				"      -p,--password <arg>                  Password",
-				"      --parameter <arg>                    Parameter for the Task",
-				"      --process_name <arg>                 Process name space. Default is Process",
-				"      --property <arg>                     Property for the OfficeFloor in the form of name=value",
-				"      -rr,--remote_repository_urls <arg>   Remote repository URL to retrieve Artifacts",
-				"      -t,--task <arg>                      Name of the Task ",
-				"      -u,--username <arg>                  User name",
-				"      --upload_artifact <arg>              Artifact to be uploaded for inclusion on the class path",
-				"      -w,--work <arg>                      Name of the Work ",
+				"      --jvm_option <arg>               JVM option       ",
+				"      -kp,--key_store_password <arg>   Password to the key store file",
+				"      -ks,--key_store <arg>            Location of the key store file",
+				"      -o,--office <arg>                Name of the Office",
+				"      -of,--officefloor <arg>          Location of the OfficeFloor",
+				"      --office_building_host <arg>     OfficeBuilding Host. Default is localhost",
+				"      --office_building_port <arg>     Port for the OfficeBuilding. Default is 13778",
+				"      -ofs,--officefloorsource <arg>   OfficeFloorSource",
+				"      -p,--password <arg>              Password",
+				"      --parameter <arg>                Parameter for the Task",
+				"      --process_name <arg>             Process name space. Default is Process",
+				"      --property <arg>                 Property for the OfficeFloor in the form of name=value",
+				"      -t,--task <arg>                  Name of the Task ",
+				"      -u,--username <arg>              User name",
+				"      --upload_artifact <arg>          Artifact to be uploaded for inclusion on the class path",
+				"      -w,--work <arg>                  Name of the Work ",
 				"                                                         ",
 				"list : Lists details of the OfficeBuilding/OfficeFloor   ",
 				"     Options:                                            ",
