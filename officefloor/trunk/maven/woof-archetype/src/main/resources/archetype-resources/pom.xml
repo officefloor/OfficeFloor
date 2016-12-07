@@ -9,7 +9,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<officefloor-version>${version}</officefloor-version>
-		<gwt-version>2.6.0</gwt-version>
 		<jetty-version>9.2.2.v20140723</jetty-version>
 		<compiler-version>3.6.0</compiler-version>
 		<failsafe-version>2.19.1</failsafe-version>
@@ -22,20 +21,10 @@
 			<version>\${officefloor-version}</version>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.plugin</groupId>
-			<artifactId>officeplugin_gwt</artifactId>
-			<version>\${officefloor-version}</version>
-		</dependency>
-		<dependency>
 			<!-- Remove if running stand alone -->
 			<groupId>net.officefloor.plugin</groupId>
 			<artifactId>officeplugin_woof_servlet</artifactId>
 			<version>\${officefloor-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-user</artifactId>
-			<version>\${gwt-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -55,19 +44,6 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
-			</plugin>
-			<plugin>
-				<!-- Compile GWT Java to JavaScript -->
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>gwt-maven-plugin</artifactId>
-				<version>\${gwt-version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<!-- Test WoOF within Servlet Container -->

@@ -78,10 +78,8 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		try {
 			return KeyStoreOfficeFloorCommandParameter.getDefaultKeyStoreFile();
 		} catch (IOException ex) {
-			throw new MojoFailureException(
-					"Failed making default key store available: "
-							+ ex.getMessage() + " [" + ex.getClass().getName()
-							+ "]");
+			throw new MojoFailureException("Failed making default key store available: " + ex.getMessage() + " ["
+					+ ex.getClass().getName() + "]");
 		}
 	}
 
@@ -117,11 +115,9 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 *            {@link Log}.
 	 * @return {@link StartOfficeBuildingGoal}.
 	 */
-	public static StartOfficeBuildingGoal createStartOfficeBuildingGoal(
-			MavenProject project, List<Artifact> pluginDependencies,
-			ArtifactRepository localRepository,
-			RepositorySystem repositorySystem, PlexusContainer plexusContainer,
-			Log log) {
+	public static StartOfficeBuildingGoal createStartOfficeBuildingGoal(MavenProject project,
+			List<Artifact> pluginDependencies, ArtifactRepository localRepository, RepositorySystem repositorySystem,
+			PlexusContainer plexusContainer, Log log) {
 		StartOfficeBuildingGoal goal = new StartOfficeBuildingGoal();
 		goal.project = project;
 		goal.pluginDependencies = pluginDependencies;
@@ -171,16 +167,14 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	/**
 	 * {@link PluginDependencyInclusion} instances.
 	 */
-	private final List<PluginDependencyInclusion> dependencyInclusions = new ArrayList<PluginDependencyInclusion>(
-			2);
+	private final List<PluginDependencyInclusion> dependencyInclusions = new ArrayList<PluginDependencyInclusion>(2);
 
 	/**
 	 * Initiate.
 	 */
 	public StartOfficeBuildingGoal() {
 		// Always include the OfficeBuilding
-		this.includePluginDependencyToOfficeBuildingClassPath(
-				OfficeBuildingManager.OFFICE_BUILDING_GROUP_ID,
+		this.includePluginDependencyToOfficeBuildingClassPath(OfficeBuildingManager.OFFICE_BUILDING_GROUP_ID,
 				OfficeBuildingManager.OFFICE_BUILDING_ARTIFACT_ID, "jar", null);
 	}
 
@@ -206,10 +200,9 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 	 * @param classifier
 	 *            Classifier. May be <code>null</code>.
 	 */
-	public void includePluginDependencyToOfficeBuildingClassPath(
-			String groupId, String artifactId, String type, String classifier) {
-		this.dependencyInclusions.add(new PluginDependencyInclusion(groupId,
-				artifactId, type, classifier));
+	public void includePluginDependencyToOfficeBuildingClassPath(String groupId, String artifactId, String type,
+			String classifier) {
+		this.dependencyInclusions.add(new PluginDependencyInclusion(groupId, artifactId, type, classifier));
 	}
 
 	/*
@@ -224,9 +217,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		ensureNotNull("Must have plug-in dependencies", this.pluginDependencies);
 		ensureNotNull("Must have local repository", this.localRepository);
 		ensureNotNull("Must have repository system", this.repositorySystem);
-		ensureNotNull(
-				"Port not configured for the "
-						+ OfficeBuilding.class.getSimpleName(), this.port);
+		ensureNotNull("Port not configured for the " + OfficeBuilding.class.getSimpleName(), this.port);
 
 		// Indicate the configuration
 		final Log log = this.getLog();
@@ -240,24 +231,20 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		// Log the properties
 		log.debug("\tProperties:");
 		for (String propertyName : environment.stringPropertyNames()) {
-			log.debug("\t\t" + propertyName + " = "
-					+ environment.getProperty(propertyName));
+			log.debug("\t\t" + propertyName + " = " + environment.getProperty(propertyName));
 		}
 
 		// Obtain the plugin dependency inclusions
-		List<Artifact> artifactInclusions = new ArrayList<Artifact>(
-				this.pluginDependencies.size());
+		List<Artifact> artifactInclusions = new ArrayList<Artifact>(this.pluginDependencies.size());
 		for (PluginDependencyInclusion inclusion : this.dependencyInclusions) {
 
 			// Must match on dependency for inclusion
 			Artifact includedDependency = null;
 			for (Artifact dependency : this.pluginDependencies) {
 				if ((inclusion.groupId.equals(dependency.getGroupId()))
-						&& (inclusion.artifactId.equals(dependency
-								.getArtifactId()))
-						&& (inclusion.type.equals(dependency.getType()))
-						&& ((inclusion.classifier == null) || (inclusion.classifier
-								.equals(dependency.getClassifier())))) {
+						&& (inclusion.artifactId.equals(dependency.getArtifactId()))
+						&& (inclusion.type.equals(dependency.getType())) && ((inclusion.classifier == null)
+								|| (inclusion.classifier.equals(dependency.getClassifier())))) {
 					// Found the dependency to include
 					includedDependency = dependency;
 				}
@@ -265,14 +252,9 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 
 			// Ensure have dependency for inclusion
 			if (includedDependency == null) {
-				throw newMojoExecutionException(
-						"Failed to obtain plug-in dependency "
-								+ inclusion.groupId
-								+ ":"
-								+ inclusion.artifactId
-								+ (inclusion.classifier == null ? "" : ":"
-										+ inclusion.classifier) + ":"
-								+ inclusion.type, null);
+				throw newMojoExecutionException("Failed to obtain plug-in dependency " + inclusion.groupId + ":"
+						+ inclusion.artifactId + (inclusion.classifier == null ? "" : ":" + inclusion.classifier) + ":"
+						+ inclusion.type, null);
 
 			}
 
@@ -282,7 +264,6 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 
 		// Obtain the class path for OfficeBuilding
 		String classPath = null;
-		String[] remoteRepositoryURLs;
 		try {
 
 			// Indicate the remote repositories
@@ -294,24 +275,19 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			for (Object object : this.project.getRemoteArtifactRepositories()) {
 				ArtifactRepository repository = (ArtifactRepository) object;
 				String remoteRepositoryUrl = repository.getUrl();
-				remoteRepositories.add(new RemoteRepository(repository.getId(),
-						repository.getLayout().getId(), remoteRepositoryUrl));
+				remoteRepositories.add(
+						new RemoteRepository(repository.getId(), repository.getLayout().getId(), remoteRepositoryUrl));
 				urls.add(remoteRepositoryUrl);
 
 				// Indicate the remote repository
 				log.debug("\t\t" + remoteRepositoryUrl);
 			}
-			remoteRepositoryURLs = urls.toArray(new String[urls.size()]);
 
 			// Create the class path factory and add remote repositories
-			File localRepositoryDirectory = new File(
-					this.localRepository.getBasedir());
-			ClassPathFactory classPathFactory = new ClassPathFactoryImpl(
-					this.plexusContainer, this.repositorySystem,
+			File localRepositoryDirectory = new File(this.localRepository.getBasedir());
+			ClassPathFactory classPathFactory = new ClassPathFactoryImpl(this.plexusContainer, this.repositorySystem,
 					localRepositoryDirectory,
-					remoteRepositories
-							.toArray(new RemoteRepository[remoteRepositories
-									.size()]));
+					remoteRepositories.toArray(new RemoteRepository[remoteRepositories.size()]));
 
 			// Indicate the class path
 			log.debug("\tClass path:");
@@ -321,9 +297,8 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			for (Artifact dependency : artifactInclusions) {
 
 				// Obtain the class path entries for the dependency
-				String[] entries = classPathFactory.createArtifactClassPath(
-						dependency.getGroupId(), dependency.getArtifactId(),
-						dependency.getVersion(), dependency.getType(),
+				String[] entries = classPathFactory.createArtifactClassPath(dependency.getGroupId(),
+						dependency.getArtifactId(), dependency.getVersion(), dependency.getType(),
 						dependency.getClassifier());
 
 				// Uniquely include the class path entries
@@ -339,14 +314,11 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 			}
 
 			// Obtain the class path
-			classPath = ClassPathFactoryImpl
-					.transformClassPathEntriesToClassPath(classPathEntries
-							.toArray(new String[classPathEntries.size()]));
+			classPath = ClassPathFactoryImpl.transformClassPathEntriesToClassPath(
+					classPathEntries.toArray(new String[classPathEntries.size()]));
 
 		} catch (Exception ex) {
-			throw newMojoExecutionException(
-					"Failed obtaining dependencies for launching OfficeBuilding",
-					ex);
+			throw newMojoExecutionException("Failed obtaining dependencies for launching OfficeBuilding", ex);
 		}
 
 		// Create the process configuration
@@ -354,89 +326,73 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		configuration.setAdditionalClassPath(classPath);
 
 		// Write output to file
-		configuration
-				.setProcessOutputStreamFactory(new ProcessOutputStreamFactory() {
+		configuration.setProcessOutputStreamFactory(new ProcessOutputStreamFactory() {
 
-					@Override
-					public OutputStream createStandardProcessOutputStream(
-							String processNamespace, String[] command)
-							throws IOException {
+			@Override
+			public OutputStream createStandardProcessOutputStream(String processNamespace, String[] command)
+					throws IOException {
 
-						// Log the command
-						StringBuilder commandLine = new StringBuilder();
-						commandLine.append(OfficeBuilding.class.getSimpleName()
-								+ " command line:");
-						for (String commandItem : command) {
-							commandLine.append(" ");
-							commandLine.append(commandItem);
-						}
-						log.debug(commandLine);
+				// Log the command
+				StringBuilder commandLine = new StringBuilder();
+				commandLine.append(OfficeBuilding.class.getSimpleName() + " command line:");
+				for (String commandItem : command) {
+					commandLine.append(" ");
+					commandLine.append(commandItem);
+				}
+				log.debug(commandLine);
 
-						// Return the output stream
-						return this.getOutputStream(processNamespace);
-					}
+				// Return the output stream
+				return this.getOutputStream(processNamespace);
+			}
 
-					@Override
-					public OutputStream createErrorProcessOutputStream(
-							String processNamespace) throws IOException {
-						return this.getOutputStream(processNamespace);
-					}
+			@Override
+			public OutputStream createErrorProcessOutputStream(String processNamespace) throws IOException {
+				return this.getOutputStream(processNamespace);
+			}
 
-					/**
-					 * Lazy instantiated {@link OutputStream}.
-					 */
-					private OutputStream outputStream = null;
+			/**
+			 * Lazy instantiated {@link OutputStream}.
+			 */
+			private OutputStream outputStream = null;
 
-					/**
-					 * Obtains the {@link OutputStream}.
-					 * 
-					 * @param processNamespace
-					 *            Process name space.
-					 * @return {@link OutputStream}.
-					 * @throws IOException
-					 *             If fails to obtain the {@link OutputStream}.
-					 */
-					private synchronized OutputStream getOutputStream(
-							String processNamespace) throws IOException {
+			/**
+			 * Obtains the {@link OutputStream}.
+			 * 
+			 * @param processNamespace
+			 *            Process name space.
+			 * @return {@link OutputStream}.
+			 * @throws IOException
+			 *             If fails to obtain the {@link OutputStream}.
+			 */
+			private synchronized OutputStream getOutputStream(String processNamespace) throws IOException {
 
-						// Lazy instantiate the output stream
-						if (this.outputStream == null) {
+				// Lazy instantiate the output stream
+				if (this.outputStream == null) {
 
-							// Create the output file
-							File file = File.createTempFile(processNamespace,
-									".log");
-							this.outputStream = new FileOutputStream(file);
+					// Create the output file
+					File file = File.createTempFile(processNamespace, ".log");
+					this.outputStream = new FileOutputStream(file);
 
-							// Log that outputting to file
-							log.info("Logging "
-									+ OfficeBuilding.class.getSimpleName()
-									+ " output to file "
-									+ file.getAbsolutePath());
-						}
+					// Log that outputting to file
+					log.info("Logging " + OfficeBuilding.class.getSimpleName() + " output to file "
+							+ file.getAbsolutePath());
+				}
 
-						// Return the output stream
-						return this.outputStream;
-					}
-				});
+				// Return the output stream
+				return this.outputStream;
+			}
+		});
 
 		// Start the OfficeBuilding
 		try {
-			OfficeBuildingManager.spawnOfficeBuilding(null,
-					this.port.intValue(), getKeyStoreFile(),
-					KEY_STORE_PASSWORD, USER_NAME, PASSWORD, null, false,
-					environment, null, true, remoteRepositoryURLs,
-					configuration);
+			OfficeBuildingManager.spawnOfficeBuilding(null, this.port.intValue(), getKeyStoreFile(), KEY_STORE_PASSWORD,
+					USER_NAME, PASSWORD, null, false, environment, null, true, configuration);
 		} catch (Throwable ex) {
 			// Provide details of the failure
-			final String MESSAGE = "Failed starting the "
-					+ OfficeBuilding.class.getSimpleName();
-			this.getLog().error(
-					MESSAGE + ": " + ex.getMessage() + " ["
-							+ ex.getClass().getSimpleName() + "]");
+			final String MESSAGE = "Failed starting the " + OfficeBuilding.class.getSimpleName();
+			this.getLog().error(MESSAGE + ": " + ex.getMessage() + " [" + ex.getClass().getSimpleName() + "]");
 			this.getLog().error("DIAGNOSIS INFORMATION:");
-			this.getLog().error(
-					"   classpath='" + System.getProperty("java.class.path")
-							+ "'");
+			this.getLog().error("   classpath='" + System.getProperty("java.class.path") + "'");
 			this.getLog().error("   additional classpath='" + classPath + "'");
 
 			// Propagate the failure
@@ -444,9 +400,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		}
 
 		// Log started OfficeBuilding
-		this.getLog().info(
-				"Started " + OfficeBuilding.class.getSimpleName() + " on port "
-						+ this.port.intValue());
+		this.getLog().info("Started " + OfficeBuilding.class.getSimpleName() + " on port " + this.port.intValue());
 	}
 
 	/**
@@ -486,8 +440,7 @@ public class StartOfficeBuildingGoal extends AbstractGoal {
 		 * @param classifier
 		 *            Classifier. May be <code>null</code>.
 		 */
-		public PluginDependencyInclusion(String groupId, String artifactId,
-				String type, String classifier) {
+		public PluginDependencyInclusion(String groupId, String artifactId, String type, String classifier) {
 			this.groupId = groupId;
 			this.artifactId = artifactId;
 			this.type = type;

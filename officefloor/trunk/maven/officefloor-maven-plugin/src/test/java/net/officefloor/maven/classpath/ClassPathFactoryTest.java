@@ -18,18 +18,8 @@
 package net.officefloor.maven.classpath;
 
 import java.io.File;
-import java.io.FileReader;
-import java.util.List;
-
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.Repository;
-import org.apache.maven.model.io.ModelReader;
-import org.apache.maven.project.MavenProject;
 
 import junit.framework.TestCase;
-import net.officefloor.building.util.OfficeBuildingTestUtil;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -60,207 +50,6 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	public static final String TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID = "JarWithDependenciesArtifact";
 
 	/**
-	 * Index to obtain a unique local repository for testing.
-	 */
-	private static int localRepositoryTestIndex = 1;
-
-	/**
-	 * Obtains the test local repository for testing.
-	 * 
-	 * @return Test local repository.
-	 */
-	public static File getTestLocalRepository() {
-
-		// Obtain new directory for the test local repository
-		File tempDir = new File(System.getProperty("java.io.tmpdir"));
-		File localRepository;
-		do {
-			localRepository = new File(tempDir, "test-local-repository-" + localRepositoryTestIndex);
-			localRepositoryTestIndex++;
-		} while (localRepository.exists());
-
-		// Ensure the directory exists
-		TestCase.assertTrue("Failed to create local repository", localRepository.mkdirs());
-
-		// Return the local repository
-		return localRepository;
-	}
-
-	/**
-	 * Obtains the local repository of user executing the tests.
-	 * 
-	 * @return Local repository.
-	 */
-	public static File getUserLocalRepository() {
-		try {
-			return ClassPathFactoryImpl.getUserLocalRepository();
-		} catch (Exception ex) {
-			throw OfficeFrameTestCase.fail(ex);
-		}
-	}
-
-	/**
-	 * <p>
-	 * Obtains the version for the {@link OfficeFloor} compiler artifact.
-	 * <p>
-	 * OfficeCompiler should be built before OfficeBuilding so should be
-	 * available within the repository.
-	 * 
-	 * @return Version of the {@link OfficeFloor} artifact.
-	 */
-	public static String getOfficeCompilerArtifactVersion() throws Exception {
-
-		final String ARTIFACT_ID = "officecompiler";
-
-		// Extract the artifact version from the class path
-		String classPath = System.getProperty("java.class.path");
-		String[] classPathEntries = classPath.split(File.pathSeparator);
-		for (String entry : classPathEntries) {
-
-			// Determine if entry
-			String name = new File(entry).getName();
-			if ((name.endsWith("jar")) && (name.startsWith(ARTIFACT_ID))) {
-				// Found the artifact, so extract version
-				String version = name.substring(ARTIFACT_ID.length() + "-".length());
-				version = version.substring(0, version.length() - ".jar".length());
-
-				// Return the version
-				return version;
-			}
-		}
-
-		// Not found, likely running in Eclipse with project import
-		ModelReader reader = ClassPathFactoryImpl.createPlexusContainer().lookup(ModelReader.class);
-		for (String entry : classPathEntries) {
-
-			// Ignore non-directories
-			File directory = new File(entry);
-			if (!directory.isDirectory()) {
-				continue;
-			}
-
-			// Search upwards for the pom.xml file
-			File pomFile = new File(directory, "pom.xml");
-			while ((!pomFile.exists()) && (directory != null)) {
-				// pom.xml not exists, so try parent directory
-				directory = directory.getParentFile();
-				pomFile = new File(directory, "pom.xml");
-			}
-
-			// Ignore if no pom.xml file found
-			if (!pomFile.exists()) {
-				continue;
-			}
-
-			// Read in the pom.xml file for the version
-			Model pom = reader.read(new FileReader(pomFile), null);
-
-			// Ignore if not correct artifact
-			String pomArtifactId = pom.getArtifactId();
-			if (!pomArtifactId.equals(ARTIFACT_ID)) {
-				continue;
-			}
-
-			// Obtain the version
-			String version = pom.getVersion();
-			if (version == null) {
-				version = pom.getParent().getVersion();
-			}
-
-			// Return the version
-			return version;
-		}
-
-		// Not able to obtain the version
-		TestCase.fail("Unable to extract version for artifact '" + ARTIFACT_ID + "' from class path: " + classPath);
-		return null; // fail to throw exception
-	}
-
-	/**
-	 * Obtains the {@link File} to the {@link OfficeFloor} artifact Jar.
-	 * 
-	 * @param artifactId
-	 *            Id of the {@link OfficeFloor} artifact.
-	 * @return {@link File} to the the {@link OfficeFloor} artifact Jar.
-	 */
-	public static File getOfficeCompilerArtifactJar() throws Exception {
-
-		// Obtain version for artifact
-		String version = getOfficeCompilerArtifactVersion();
-
-		// Create the path to the Jar
-		File jarFile = getArtifactFile(getUserLocalRepository(), "net.officefloor.core", "officecompiler", version,
-				"jar");
-
-		// Return Jar file
-		return jarFile;
-	}
-
-	/**
-	 * Obtains the Artifact {@link File}.
-	 * 
-	 * @param repository
-	 *            {@link Repository} root directory.
-	 * @param groupIdPath
-	 *            Group Id.
-	 * @param artifactId
-	 *            Artifact Id.
-	 * @param version
-	 *            Artifact version.
-	 * @param type
-	 *            Artifact type.
-	 * @return {@link File} to the Artifact.
-	 */
-	public static File getArtifactFile(File repository, String groupId, String artifactId, String version,
-			String type) {
-
-		// Obtain the group path
-		String groupPath = groupId.replace('.', File.separatorChar);
-
-		// Create the path to the artifact
-		File artifact = new File(repository, groupPath);
-		artifact = new File(artifact, artifactId);
-		artifact = new File(artifact, version);
-		artifact = new File(artifact, artifactId + "-" + version + "." + type);
-
-		// Return the artifact file
-		return artifact;
-	}
-
-	/**
-	 * Obtains the remote repository.
-	 * 
-	 * @return Remote repository.
-	 */
-	public static File getTestRemoteRepository() {
-		File directory = new File(".", "target/test-classes/remoteRepository");
-		TestCase.assertTrue("Remote repository directory not available: "
-				+ directory.getAbsolutePath(), directory.exists());
-		return directory;
-	}
-
-	/**
-	 * Obtain the path to the test artifact jar.
-	 * 
-	 * @param isLocal
-	 *            Indicates if the artifact is within local repository.
-	 * @param artifactId
-	 *            Test artifact id.
-	 * @return Path to the test artifact jar.
-	 */
-	private File getTestArtifactJar(boolean isLocal, String artifactId)
-			throws Exception {
-
-		// Use appropriate repository
-		File repository = (isLocal ? this.localRepository
-				: getTestRemoteRepository());
-
-		// Return artifact file
-		return OfficeBuildingTestUtil.getArtifactFile(repository,
-				TEST_GROUP_ID, artifactId, TEST_ARTIFACT_VERSION, "jar");
-	}
-
-	/**
 	 * {@link ClassPathFactory} to test.
 	 */
 	private ClassPathFactory classPathFactory;
@@ -274,14 +63,12 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Obtain the local repository
-		this.localRepository = OfficeBuildingTestUtil.getTestLocalRepository();
+		this.localRepository = MavenClassPathUtil.getTestLocalRepository();
 
 		// Create the class path factory to test
-		File remoteRepository = new File(".",
-				"src/test/resources/remoteRepository");
+		File remoteRepository = new File(".", "src/test/resources/remoteRepository");
 		this.classPathFactory = new ClassPathFactoryImpl(this.localRepository,
-				new RemoteRepository[] { new RemoteRepository(remoteRepository
-						.toURI().toURL().toString()) });
+				new RemoteRepository[] { new RemoteRepository(remoteRepository.toURI().toURL().toString()) });
 	}
 
 	/**
@@ -290,12 +77,11 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	public void testTransformToClassPath() {
 
 		// Transform to class path
-		String classPath = ClassPathFactoryImpl
-				.transformClassPathEntriesToClassPath("ONE", "TWO", "THREE");
+		String classPath = ClassPathFactoryImpl.transformClassPathEntriesToClassPath("ONE", "TWO", "THREE");
 
 		// Ensure correct class path
-		assertEquals("Incorrect class path", "ONE" + File.pathSeparator + "TWO"
-				+ File.pathSeparator + "THREE", classPath);
+		assertEquals("Incorrect class path", "ONE" + File.pathSeparator + "TWO" + File.pathSeparator + "THREE",
+				classPath);
 	}
 
 	/**
@@ -304,11 +90,10 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	public void testIncludeJar() throws Exception {
 
 		// Obtain path to jar
-		final File JAR = this.getTestArtifactJar(false, TEST_JAR_ARTIFACT_ID);
+		final File JAR = this.getTestArtifactJar(false, MavenClassPathUtil.TEST_JAR_ARTIFACT_ID);
 
 		// Obtain class path
-		String[] classPath = this.classPathFactory.createArtifactClassPath(JAR
-				.getCanonicalPath());
+		String[] classPath = this.classPathFactory.createArtifactClassPath(JAR.getCanonicalPath());
 
 		// Ensure jar on class path
 		assertClassPath(classPath, JAR);
@@ -320,23 +105,18 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	public void testIncludeJarWithDependencies() throws Exception {
 
 		// Obtain paths to jars
-		final File JAR_WITH_DEPENDENCIES = this.getTestArtifactJar(false,
-				TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
+		final File JAR_WITH_DEPENDENCIES = this.getTestArtifactJar(false, TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
 
 		// Obtain class path
-		String[] classPath = this.classPathFactory
-				.createArtifactClassPath(JAR_WITH_DEPENDENCIES
-						.getCanonicalPath());
+		String[] classPath = this.classPathFactory.createArtifactClassPath(JAR_WITH_DEPENDENCIES.getCanonicalPath());
 
 		// Obtain the expected class path entries
-		final File CLASSPATH_JAR_WITH_DEPENDENCIES = this.getTestArtifactJar(
-				true, TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
-		final File CLASSPATH_JAR = this.getTestArtifactJar(true,
-				TEST_JAR_ARTIFACT_ID);
+		final File CLASSPATH_JAR_WITH_DEPENDENCIES = this.getTestArtifactJar(true,
+				TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
+		final File CLASSPATH_JAR = this.getTestArtifactJar(true, TEST_JAR_ARTIFACT_ID);
 
 		// Ensure jars on class path
-		assertClassPath(classPath, JAR_WITH_DEPENDENCIES,
-				CLASSPATH_JAR_WITH_DEPENDENCIES, CLASSPATH_JAR);
+		assertClassPath(classPath, JAR_WITH_DEPENDENCIES, CLASSPATH_JAR_WITH_DEPENDENCIES, CLASSPATH_JAR);
 	}
 
 	/**
@@ -345,12 +125,10 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	public void testIncludeDir() throws Exception {
 
 		// Obtain path to directory
-		final File DIR = this.findFile(this.getClass(), "DirArtifact/Test.txt")
-				.getParentFile();
+		final File DIR = this.findFile(this.getClass(), "DirArtifact/Test.txt").getParentFile();
 
 		// Obtain class path
-		String[] classPath = this.classPathFactory.createArtifactClassPath(DIR
-				.getCanonicalPath());
+		String[] classPath = this.classPathFactory.createArtifactClassPath(DIR.getCanonicalPath());
 
 		// Ensure directory on class path with no warnings
 		assertClassPath(classPath, DIR);
@@ -362,9 +140,8 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	public void testIncludeArtifact() throws Exception {
 
 		// Obtain class path
-		String[] classPath = this.classPathFactory.createArtifactClassPath(
-				TEST_GROUP_ID, TEST_JAR_ARTIFACT_ID, TEST_ARTIFACT_VERSION,
-				null, null);
+		String[] classPath = this.classPathFactory.createArtifactClassPath(TEST_GROUP_ID, TEST_JAR_ARTIFACT_ID,
+				TEST_ARTIFACT_VERSION, null, null);
 
 		// Obtain path to artifact
 		final File JAR = getTestArtifactJar(true, TEST_JAR_ARTIFACT_ID);
@@ -379,13 +156,11 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	public void testIncludeArtifactWithDependencies() throws Exception {
 
 		// Include artifact
-		String[] classPath = this.classPathFactory.createArtifactClassPath(
-				TEST_GROUP_ID, TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID,
-				TEST_ARTIFACT_VERSION, null, null);
+		String[] classPath = this.classPathFactory.createArtifactClassPath(TEST_GROUP_ID,
+				TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID, TEST_ARTIFACT_VERSION, null, null);
 
 		// Obtain paths to jars
-		final File JAR_WITH_DEPENDENCIES = getTestArtifactJar(true,
-				TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
+		final File JAR_WITH_DEPENDENCIES = getTestArtifactJar(true, TEST_JAR_WITH_DEPENDENCIES_ARTIFACT_ID);
 		final File JAR = getTestArtifactJar(true, TEST_JAR_ARTIFACT_ID);
 
 		// Ensure jars on class path
@@ -393,36 +168,33 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to resolve the {@link Dependency} instances for
-	 * <code>pom.xml</code> {@link File}.
+	 * Obtains the remote repository.
+	 * 
+	 * @return Remote repository.
 	 */
-	public void testGetMavenProject() throws Exception {
+	public static File getTestRemoteRepository() {
+		File directory = new File(".", "target/test-classes/remoteRepository");
+		TestCase.assertTrue("Remote repository directory not available: " + directory.getAbsolutePath(),
+				directory.exists());
+		return directory;
+	}
 
-		// Obtain the pom.xml file
-		File pomFile = this.findFile(this.getClass(), "pom.test.xml");
+	/**
+	 * Obtain the path to the test artifact jar.
+	 * 
+	 * @param isLocal
+	 *            Indicates if the artifact is within local repository.
+	 * @param artifactId
+	 *            Test artifact id.
+	 * @return Path to the test artifact jar.
+	 */
+	private File getTestArtifactJar(boolean isLocal, String artifactId) throws Exception {
 
-		// Obtain the Maven Project (using build local repository)
-		ClassPathFactoryImpl factory = new ClassPathFactoryImpl(null,
-				new RemoteRepository[0]);
-		MavenProject project = factory.getMavenProject(pomFile);
+		// Use appropriate repository
+		File repository = (isLocal ? this.localRepository : getTestRemoteRepository());
 
-		// Ensure contains appropriate dependencies
-		List<Dependency> dependencies = project.getDependencies();
-		assertTrue("Should have dependencies for project",
-				dependencies.size() > 0);
-		Dependency gwtUserDependency = null;
-		for (Dependency dependency : dependencies) {
-			if (("com.google.gwt".equals(dependency.getGroupId()))
-					&& ("gwt-user".equals(dependency.getArtifactId()))) {
-				assertNull("Should only be the one dependency",
-						gwtUserDependency);
-				gwtUserDependency = dependency;
-			}
-		}
-
-		// Ensure able to resolve version
-		assertNotNull("Must be able to resolve version",
-				gwtUserDependency.getVersion());
+		// Return artifact file
+		return MavenClassPathUtil.getArtifactFile(repository, TEST_GROUP_ID, artifactId, TEST_ARTIFACT_VERSION, "jar");
 	}
 
 	/**
@@ -433,12 +205,10 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 	 * @param expectedClassPathEntries
 	 *            Expected class path entries.
 	 */
-	private static void assertClassPath(String[] classPath,
-			File... expectedClassPathEntries) throws Exception {
+	private static void assertClassPath(String[] classPath, File... expectedClassPathEntries) throws Exception {
 
 		// Incorrect number of class path entries
-		assertEquals("Incorrect number of class path entries",
-				expectedClassPathEntries.length, classPath.length);
+		assertEquals("Incorrect number of class path entries", expectedClassPathEntries.length, classPath.length);
 
 		// Validate the class path
 		for (int i = 0; i < expectedClassPathEntries.length; i++) {
@@ -446,8 +216,7 @@ public class ClassPathFactoryTest extends OfficeFrameTestCase {
 			File actualClassPathEntry = new File(classPath[i]);
 
 			// Validate the class path entry
-			assertEquals("Incorrect class path entry " + i,
-					expectedClassPathEntry.getCanonicalPath(),
+			assertEquals("Incorrect class path entry " + i, expectedClassPathEntry.getCanonicalPath(),
 					actualClassPathEntry.getCanonicalPath());
 		}
 	}

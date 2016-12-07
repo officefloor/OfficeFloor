@@ -5,11 +5,15 @@
 			<location>${basedir}/../../pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
 		</file>
-		
 		<!-- Ensure using latest version -->
 		<file>
 			<location>${basedir}/../../pom.xml</location>
 			<contains><![CDATA[<pluginManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</pluginManagement>]]></contains>
 		</file>
+		<file>
+			<!-- Ensure testing with latest version -->
+			<location>${basedir}/src/test/resources/net/officefloor/maven/classpath/pom.test.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>		
 	</files>
 </verifications>
