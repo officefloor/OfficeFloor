@@ -20,7 +20,7 @@ Template.woof.html
 
   The below is the content of the <<<Template.woof.html>>>.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
 
   This is similar HTML to previous tutorials.
 
@@ -29,7 +29,7 @@ TemplateLogic Class
 
   The logic to handle the form submission is the following:
   
-%{code-snippet|brush-autodetect=1|id=class|file=${basedir}/src/main/java/net/officefloor/tutorial/pageflowhttpserver/TemplateLogic.java}
+%{snippet|id=class|file=${basedir}/src/main/java/net/officefloor/tutorial/pageflowhttpserver/TemplateLogic.java}
 
   The aspects to notice are:
   
@@ -47,7 +47,7 @@ Unit Test
 
   The unit test requests the various URL's exposed from the template.
 
-%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/pageflowhttpserver/PageFlowHttpServerTest.java}
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/pageflowhttpserver/PageFlowHttpServerTest.java}
 
 
 

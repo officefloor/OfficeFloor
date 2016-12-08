@@ -24,15 +24,15 @@ Parent
 
   For the parent that does not inherit from a template, it is just a normal template.  It however does specify sections for overriding when inherited from.  The HTML for the parent page is as follows:
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/parent.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/parent.woof.html}
 
   And the logic for the page is as follows:
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/ParentLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/ParentLogic.java}
 
   When rendered, the page results in the following:
   
-%{code-snippet|brush=xml|file=${basedir}/src/test/resources/parent-expected.html}
+%{snippet|file=${basedir}/src/test/resources/parent-expected.html}
 
 
 
@@ -62,7 +62,7 @@ Child
 
   The HTML for the child page is as follows:
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/child.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/child.woof.html}
 
   The sections, have the following effect:
   
@@ -76,11 +76,11 @@ Child
 
   As the <<<introduced>>> section has a $\{property\}, it requires a corresponding data method in the logic class.  The following is the logic class for the child template.  Note that it extends the parent logic class to inherit the required data methods from the parent.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/ChildLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/ChildLogic.java}
 
   When rendered, the page results in the following:
   
-%{code-snippet|brush=xml|file=${basedir}/src/test/resources/child-expected.html}
+%{snippet|file=${basedir}/src/test/resources/child-expected.html}
 
 
 
@@ -90,7 +90,7 @@ Grand Child
 
   The HTML for the grand child page is as follows:
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/grandchild.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/grandchild.woof.html}
 
   The sections, have the following effect:
   
@@ -106,11 +106,11 @@ Grand Child
 
   In the case of this tutorial, the following logic class shows overriding the method by name.  The additional parameter is only to create a different method signature to avoid Java compiler issues of returning a different type.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/GrandChildLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/inherithttpserver/GrandChildLogic.java}
 
   When rendered, the page results in the following:
   
-%{code-snippet|brush=xml|file=${basedir}/src/test/resources/grandchild-expected.html}
+%{snippet|file=${basedir}/src/test/resources/grandchild-expected.html}
 
 
 

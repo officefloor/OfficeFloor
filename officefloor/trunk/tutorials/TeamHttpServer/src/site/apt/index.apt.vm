@@ -40,11 +40,11 @@ Configuration
 
   The <<<DataSource>>> to the database is configured as follows.
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/application.objects}
+%{snippet|file=${basedir}/src/main/resources/application.objects}
 
   With the following properties.
   
-%{code-snippet|brush=plain|file=${basedir}/src/main/resources/datasource.properties}
+%{snippet|file=${basedir}/src/main/resources/datasource.properties}
 
   See the {{{../index.html}other tutorials}} for explanation of the above configuration.
 
@@ -53,7 +53,7 @@ Configuration
   
   The thread injection configuration is contained in the <<<application.teams>>> file at the root of the class path.  For the example application it is as follows.
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/application.teams}
+%{snippet|file=${basedir}/src/main/resources/application.teams}
   
   The leader follower team is a {{{/apidocs/net/officefloor/frame/spi/team/source/TeamSource.html}TeamSource}} implementation that implements the leader follower thread pool pattern to reduce lock contention.
   
@@ -69,23 +69,23 @@ Code
   
   The following is the content of the template.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
 
   The following provides the values for the <<< $\{property\} >>> entries from the template logic.  
 
-%{code-snippet|brush-autodetect=1|id=values|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
+%{snippet|id=values|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
   
   Along with providing the values the class is also annotated so that it is stored within the HTTP session.  This allows the <<<cache>>> field to act as a cache across requests.  See the {{{../index.html}other tutorials}} for further details.
   
   The example application first tries the cache for the encrypted code.
   
-%{code-snippet|brush-autodetect=1|id=cache|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
+%{snippet|id=cache|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
 
   Should the encrypted code be found in the cache it is passed as a parameter to the setter method.  The setter method keeps reference to the encrypted code for rendering the web page response.  See the {{{../index.html}other tutorials}} for explanation of this WoOF functionality.
 
   On not finding the encrypted code in the cache the above method triggers for it to be retrieved from the database.  The following method retrieves the encrypted code from the database.  The returned encrypted code is passed to the setter method for rendering to the web page.
 
-%{code-snippet|brush-autodetect=1|id=database|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
+%{snippet|id=database|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Template.java}
 
   As the method has a <<<DataSource>>> dependency it is executed by the leader follower team.  This is reflected by the web page response showing different threads executing the cache and database methods.
      
@@ -98,15 +98,15 @@ Code
 
 ** Database Setup
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Setup.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/Setup.java}
 
 ** EncryptLetter
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/EncryptLetter.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/EncryptLetter.java}
 
 ** LetterEncryption
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/LetterEncryption.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/teamhttpserver/LetterEncryption.java}
 
 
 
@@ -114,7 +114,7 @@ Unit Test
 
   The following unit test makes requests to encrypt a letter.
 
-%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/teamhttpserver/TeamHttpServerTest.java}
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/teamhttpserver/TeamHttpServerTest.java}
 
   As the same letter is requested, the
   

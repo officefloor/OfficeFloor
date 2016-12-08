@@ -17,7 +17,7 @@ Extending WoOF application for Servlet functionality
   
   This occurs automatically by the inclusion of the following dependencies on the class path:
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/pom.xml}
+%{snippet|id=tutorial|file=${basedir}/pom.xml}
 
   The result is that any unhandled HTTP request by the WoOF functionality is sent to this servicer.  This servicer attempts to service the HTTP request with the <<<web.xml>>> configured Servlet functionality.
   
@@ -29,7 +29,7 @@ Servlet functionality
 
   The following provides the configuration of the <<<web.xml>>> Servlet functionality for this tutorial:
 
-%{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
+%{snippet|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
 
   Servlet functionality supported by the WoOF extension is:
   
@@ -43,7 +43,7 @@ Servlet functionality
 
   The configured Servlet is as follows:
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletmigration/ExampleHttpServlet.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/servletmigration/ExampleHttpServlet.java}
 
   
 
@@ -52,7 +52,7 @@ Unit Test
 
   The unit test highlights the servicing of the HTTP request by the Servlet functionality.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/servletmigration/ExampleHttpServletTest.java}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/servletmigration/ExampleHttpServletTest.java}
 
 
 

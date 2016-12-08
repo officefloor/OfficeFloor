@@ -36,7 +36,7 @@ Template
 
   The page template content is as follows:
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/card.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/card.woof.html}
 
   This is similar HTML to previous tutorials.
 
@@ -46,7 +46,7 @@ Logic Class
 
   The logic for the page is the following:
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/securepagehttpserver/CardLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/securepagehttpserver/CardLogic.java}
 
   Again this is similar to previous tutorials.
 
@@ -56,7 +56,7 @@ Remaining Code
 
   The main page is included for completeness of the tutorial code.
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/main.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/main.woof.html}
 
 
 
@@ -72,7 +72,7 @@ Unit Test
    
   The exception within the page logic ensures rendering the response only occurs over a secure channel (HTTPS).
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/securepagehttpserver/SecurePageTest.java}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/securepagehttpserver/SecurePageTest.java}
 
 
 

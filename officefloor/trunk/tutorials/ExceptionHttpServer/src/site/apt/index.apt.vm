@@ -20,11 +20,11 @@ Template throwing exception
 
   The following is the template:
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
 
   with the logic throwing the exception:
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/TemplateLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/TemplateLogic.java}
 
   Pressing the submit button will trigger the exception to be thrown.  
   
@@ -42,7 +42,7 @@ Exception handling configuration
   
   The exception is linked to the <<<Handler>>>.  The <<<Handler>>> is the following POJO.  It is added as a class section (right click and add section).
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHandler.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHandler.java}
 
   As per the configuration above, the <<<handleSqlException>>> method is invoked to handle the <<<SQLException>>>.
   
@@ -72,7 +72,7 @@ Resource
   
   The remaining configuration indicates that the <<<TechnicalFault>>> should send the following static response.
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Error.html}
+%{snippet|file=${basedir}/src/main/webapp/Error.html}
 
   It is possible to use the details of the exception within a template to generate a response.  For simplicity of this tutorial however a static resource is used (right click and add resource).
   
@@ -89,7 +89,7 @@ Unit Test
 
   The following unit test shows the exception handling by listening in on <<<stderr>>> to ensure the exception message is written to it:
   
-%{code-snippet|brush-autodetect=1|id=handle|file=${basedir}/src/test/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHttpServerTest.java}
+%{snippet|id=handle|file=${basedir}/src/test/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHttpServerTest.java}
 
   
 

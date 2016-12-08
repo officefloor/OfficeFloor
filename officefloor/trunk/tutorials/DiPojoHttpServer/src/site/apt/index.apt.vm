@@ -20,17 +20,17 @@ Template
   
   The following is the content of the template.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
 
   With the template logic.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/TemplateLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/TemplateLogic.java}
 
   WoOF (via its underlying OfficeFloor framework) injects dependencies into methods.  By injecting dependencies into methods, WoOF makes development of applications simpler.  This is because the application logic is written as loosely coupled methods rather than highly coupled objects.
   
   The injected dependency (POJO) will provide the remaining text of the rendered content.  The code of the injected POJO is as follows.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/Pojo.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/Pojo.java}
   
 
 Dependency Injection
@@ -39,7 +39,7 @@ Dependency Injection
       
   The configuration of dependency injecting the POJO is as follows.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/application.objects.xml}
+%{snippet|file=${basedir}/src/main/resources/application.objects.xml}
 
   WoOF auto-wires dependency injection based on type.  Auto-wiring dependencies based on type is adequate (and much easier) for the majority of applications.  WoOF's underlying OfficeFloor framework does provide manual dependency configuration, however this is seldom used as WoOF allows qualifying dependencies for auto-wiring.
   
@@ -52,7 +52,7 @@ Unit Test
 
   The unit test ensures the correct rendered content is received.
 
-%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/dipojohttpserver/DiPojoHttpServerTest.java}
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/dipojohttpserver/DiPojoHttpServerTest.java}
 
 
 

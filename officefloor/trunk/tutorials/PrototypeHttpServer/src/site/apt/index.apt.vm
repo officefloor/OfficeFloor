@@ -31,11 +31,11 @@ HTML pages
 
 *Page with href link  
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/href.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/href.woof.html}
 
 *Page with form link
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/form.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/form.woof.html}
 
 *#\{link\}
 

@@ -15,7 +15,6 @@
 	<modules>
 		<module>AuthenticationHttpServer</module>
 		<module>DatabaseHttpServer</module>
-		<module>DemoApp</module>
 		<module>DiPojoHttpServer</module>
 		<module>DynamicHttpServer</module>
 		<module>ExceptionHttpServer</module>

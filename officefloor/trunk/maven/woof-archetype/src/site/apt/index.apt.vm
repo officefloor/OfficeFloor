@@ -34,7 +34,7 @@ Creating the WoOF project
 
   Select <<<${projectGroupId}:${projectArtifactId}>>> (if not already selected) and provide the Maven configuration parameters.  The tutorial uses the following parameters:
 
-%{code-snippet|brush=text|file=${basedir}/src/test/resources/projects/woof/archetype.properties}
+%{snippet|file=${basedir}/src/test/resources/projects/woof/archetype.properties}
   
   Once complete there should now be a directory created by the name of the artifactId.
   
@@ -158,11 +158,11 @@ HTML templating and Java server logic
 
   The following is the HTML for the form page.
 
-%{code-snippet|brush=xml|file=${basedir}/src/test/resources/projects/woof/reference/src/main/webapp/form.woof.html}
+%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/main/webapp/form.woof.html}
 
   The instrumentation of HTML page is through the <#\{link\}>, <#\{bean ... $\}>, and <$\{property\}> tags that are mapped by name to methods on the following server POJO (plain old java object): 
 
-%{code-snippet|brush-autodetect=1|file=${basedir}/src/test/resources/projects/woof/reference/src/main/java/net/officefloor/test/form/FormLogic.java}
+%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/main/java/net/officefloor/test/form/FormLogic.java}
 
   Beyond a few annotations the logic class is straight forward Java.
   
@@ -174,7 +174,7 @@ Unit testing the WoOF application
 
   The following unit test shows the ease in which to start and stop the application for unit testing.
   
-%{code-snippet|brush-autodetect=1|file=${basedir}/src/test/resources/projects/woof/reference/src/test/java/net/officefloor/test/RunApplicationTest.java}
+%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/test/java/net/officefloor/test/RunApplicationTest.java}
   
   
 

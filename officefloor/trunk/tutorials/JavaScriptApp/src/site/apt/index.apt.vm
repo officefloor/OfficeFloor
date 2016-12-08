@@ -23,7 +23,7 @@ JavaScript
   
   The reason that WoOF may use any JavaScript framework is that it does not interpret the web page contents.  WoOF treats the content of a web page as text, providing only the necessary tag replacements.  In the case below, WoOF provides the URLs for the AJAX calls.  This means any JavaScript code (whether raw or part of a framework) may be included in the WoOF templates.  It even means that WoOF templates can be used for other content types such as XML.  The focus of this tutorial will be on including JavaScript within HTML web pages.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/template.woof.html}
   
   Different payload types (HTTP parameters and JSON) are used for the respective AJAX requests.  This is to demonstrate in the next sections how WoOF handles each payload type.
 
@@ -33,7 +33,7 @@ Including AJAX / JSON template extension
 
   To include the AJAX / JSON template extension functionality, include the plug-in on the class path.  For maven, it would be the following:
 
-%{code-snippet|brush=xml|id=tutorial|file=${basedir}/pom.xml}
+%{snippet|id=tutorial|file=${basedir}/pom.xml}
   
   WoOF will auto detect the extension and include it.
 
@@ -43,7 +43,7 @@ AJAX with HTTP parameters
 
   The handling HTTP parameters in the AJAX request is very similar to handling HTML form submissions.  The difference is that the default behaviour of re-rendering the template's content is to be avoided.  To avoid re-rendering the template's content the below annotation is added to the servicing method to flag to not re-render the template.
 
-%{code-snippet|brush-autodetect=1|id=HttpParameters|file=${basedir}/src/main/java/net/officefloor/tutorial/javascriptapp/TemplateLogic.java}
+%{snippet|id=HttpParameters|file=${basedir}/src/main/java/net/officefloor/tutorial/javascriptapp/TemplateLogic.java}
 
 
 
@@ -57,7 +57,7 @@ AJAX with JSON
    
   Note that there is no annotation on the servicing method to avoid re-rendering the template.  WoOF identifies the method is servicing an AJAX request by the presence of a <<<JsonResponseWriter>>> parameter.  WoOF will therefore not re-render the template and therefore only return the JSON content as the HTTP response entity.
 
-%{code-snippet|brush-autodetect=1|id=HttpJson|file=${basedir}/src/main/java/net/officefloor/tutorial/javascriptapp/TemplateLogic.java}
+%{snippet|id=HttpJson|file=${basedir}/src/main/java/net/officefloor/tutorial/javascriptapp/TemplateLogic.java}
 
   The underlying implementation of JSON to Java Object mapping is via {{{http://wiki.fasterxml.com/JacksonHome}Jackson}}.  Please see their documentation regarding additional annotations available to Java Objects to fine tune mapping of JSON to/from Java Objects.
 
@@ -67,7 +67,7 @@ Unit Test
 
   The following unit tests manually undertake the AJAX calls to the WoOF server and verifying the correct responses.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/javascriptapp/JavaScriptAppTest.java}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/javascriptapp/JavaScriptAppTest.java}
 
 
 
