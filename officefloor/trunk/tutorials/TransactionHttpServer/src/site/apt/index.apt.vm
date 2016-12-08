@@ -35,17 +35,17 @@ Configuration
   
 ** Database Setup
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/Setup.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/Setup.java}
 
 ** application.objects
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/application.objects}
+%{snippet|file=${basedir}/src/main/resources/application.objects}
 
   The team is required for the <<<EntityManager>>> object as a <<<Task>>> is triggered to automatically close the <<<EntityManager>>>.  OfficeFloor enables {{{/apidocs/net/officefloor/frame/spi/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} to clean up themselves so that this code need not be in the POJOs. 
 
 ** datasource.properties
 
-%{code-snippet|brush=plain|file=${basedir}/src/main/resources/datasource.properties}
+%{snippet|file=${basedir}/src/main/resources/datasource.properties}
 
 
 
@@ -59,23 +59,23 @@ Code
 
 * Template
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Users.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/Users.woof.html}
 
 * Template Logic
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/UsersLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/UsersLogic.java}
 
 * Create User Service
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/UserService.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/UserService.java}
 
 * Entities
 
   The example application uses the {{{http://projectlombok.org}Project Lombok}} to simplify the coding of the JPA entities.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/User.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/User.java}
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/Person.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/Person.java}
 
   
 
@@ -83,7 +83,7 @@ Unit Test
 
   The following unit test makes requests to create users.
 
-%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/transactionhttpserver/TransactionHttpServerTest.java}
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/transactionhttpserver/TransactionHttpServerTest.java}
 
   Two users are attempt to be created
   

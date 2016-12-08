@@ -145,8 +145,4 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.wizard.worksource
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: net.officefloor.eclipse.OfficeFloorPlugin
-Bundle-ClassPath: .,
- jconsole.jar,
- junit.jar,
- jdi.jar,
- jdimodel.jar
+Bundle-ClassPath: .

@@ -20,7 +20,7 @@ HTML
 
   The page template content is as follows.  Please note the link in the form action.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/template.woof.html}
 
 
 
@@ -40,7 +40,7 @@ Logic
 
   The logic for the page is the following:
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/securelinkhttpserver/TemplateLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/securelinkhttpserver/TemplateLogic.java}
 
   This tutorial shows sending information over a secure channel (HTTPS) from a non-secure page.
 
@@ -50,7 +50,7 @@ Unit Test
 
   The unit test demonstrates the rendering of the secure link. 
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/securelinkhttpserver/SecureLinkHttpServerTest.java}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/securelinkhttpserver/SecureLinkHttpServerTest.java}
 
 
 

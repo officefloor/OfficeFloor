@@ -36,11 +36,11 @@ Configuring the WoofServlet
 
   To configure the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServlet.html}WoofServlet}} into an application add the following dependency to the project.  The JAR for the dependency contains a <<<web-fragment.xml>>> which will automatically configure the necessary components to run WoOF within the JEE Servlet Container. 
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/pom.xml}
+%{snippet|id=tutorial|file=${basedir}/pom.xml}
 
   The resulting <<<web.xml>>> for the example of this tutorial is therefore:
 
-%{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
+%{snippet|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
 
   However should there be a need to configure the {{{/apidocs/net/officefloor/plugin/woof/servlet/WoofServlet.html}WoofServlet}} manually, please ensure it is configured as a <<<ServletContextListener>>> to allow it to configure itself.  WoOF will only service the requests it is configured to handle and lets the Servlet application handle the rest.
 
@@ -50,7 +50,7 @@ ExampleClass
 
   As per the above configuration, the following class directly handles a web request.
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletwebapplication/ExampleClass.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletwebapplication/ExampleClass.java}
 
   Running within a JEE Servlet container the {{{/apidocs/net/officefloor/plugin/socket/server/http/ServerHttpConnection.html}ServerHttpConnection}} implementation wraps the <<<ServletRequest>>> and <<<ServletResponse>>> so that existing stand-alone WoOF applications can be run.  It is the re-implementing of the base WoOF objects ( {{{/apidocs/net/officefloor/plugin/socket/server/http/ServerHttpConnection.html}ServerHttpConnection}} , {{{/apidocs/net/officefloor/plugin/web/http/session/HttpSession.html}HttpSession}} ) to use the JEE Servlet Container APIs that the JEE Servlet integration is achieved.
 
@@ -64,13 +64,13 @@ Remaining Code
 
   Has the <<< #\{LINK\} >>> for handling by the JSP.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
 
 *Template.jsp
 
   JSP run by Servlet Container.  WoOF navigates to this JSP based on the configuration above.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.jsp}
+%{snippet|file=${basedir}/src/main/webapp/Template.jsp}
 
 
 
@@ -86,7 +86,7 @@ Unit Test
    
    * Request being serviced by a class
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/test/java/net/officefloor/tutorial/woofservletwebapplication/ExampleIT.java}
+%{snippet|id=example|file=${basedir}/src/test/java/net/officefloor/tutorial/woofservletwebapplication/ExampleIT.java}
 
 
 Next

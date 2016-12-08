@@ -24,11 +24,11 @@ Restricted access page
 
   The page being restricted from access is as follows.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/hello.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/hello.woof.html}
 
   With the backing logic class.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/HelloLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/HelloLogic.java}
 
   The dependency on {{{/apidocs/net/officefloor/plugin/web/http/security/HttpSecurity.html}HttpSecurity}} requires the user to be logged in.  Should the user not be authenticated, creation of this dependency will cause a {{{/apidocs/net/officefloor/plugin/web/http/security/HttpAuthenticationRequiredException.html}HttpAuthenticationRequiredException}} to be thrown.  WoOF automatically handles this exception by:
   
@@ -58,7 +58,7 @@ Configuring access
   
   To enable differing credential stores (e.g. database, LDAP, etc), the WoOF supplied authentication depends on a {{{/apidocs/net/officefloor/plugin/web/http/security/store/CredentialStore.html}CredentialStore}} managed object being configured.  The following is the managed object configuration for this tutorial.   
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/resources/application.objects}
+%{snippet|file=${basedir}/src/main/resources/application.objects}
   
   In this case a mock implementation is used that validates the user by ensuring the password matches the username.  This is a simple implementation useful for testing.
   
@@ -70,11 +70,11 @@ Login page
 
   The login page is as follows.
   
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/login.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/login.woof.html}
 
   With the backing logic class.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/LoginLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/authenticationhttpserver/LoginLogic.java}
 
   The {{{/apidocs/net/officefloor/plugin/web/http/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}} requires the credentials to be provided within a {{{/apidocs/net/officefloor/plugin/web/http/security/HttpCredentials.html}HttpCredentials}} as a parameter.
 
@@ -86,11 +86,11 @@ Remaining code
   
 * Logout page
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/logout.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/logout.woof.html}
 
 * Error page
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/error.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/error.woof.html}
 
 
 
@@ -98,7 +98,7 @@ Unit Test
 
   The unit test demonstrates logging in and logging out. 
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/authenticationhttpserver/AuthenticationHttpServerTest.java}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/authenticationhttpserver/AuthenticationHttpServerTest.java}
 
 
 

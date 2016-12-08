@@ -36,12 +36,6 @@
    <extension
          point="net.officefloor.woof.wooftemplateextensionsources">
       <wooftemplateextensionsource
-            class="net.officefloor.eclipse.gwt.GwtWoofTemplateExtensionSourceExtension">
-      </wooftemplateextensionsource>
-   </extension>
-   <extension
-         point="net.officefloor.woof.wooftemplateextensionsources">
-      <wooftemplateextensionsource
             class="net.officefloor.eclipse.json.JsonWoofTemplateExtensionSourceExtension">
       </wooftemplateextensionsource>
    </extension>

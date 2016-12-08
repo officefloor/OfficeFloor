@@ -20,7 +20,7 @@ Template.woof.html
 
   The HTML for the page is as follows:
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/template.woof.html}
 
   The sections are demarcated by the tag: <<< \<!-- \{section\} --\> >>>
 
@@ -36,7 +36,7 @@ TemplateLogic Class
   
   The logic for rendering the template is the following:
   
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/sectionhttpserver/TemplateLogic.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/sectionhttpserver/TemplateLogic.java}
 
   The rendering of each section follows the previous tutorials on dynamic content.
   

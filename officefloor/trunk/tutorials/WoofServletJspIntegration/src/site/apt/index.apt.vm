@@ -34,19 +34,19 @@ Objects
 
   The following bean is registered in the <<<HttpServletRequest>>>.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/RequestBean.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/RequestBean.java}
 
 * SessionBean
 
   The following bean is registered in the <<<HttpSession>>>.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/SessionBean.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/SessionBean.java}
 
 * ApplicationBean
 
   The following bean is registered in the <<<ServletContext>>>.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/ApplicationBean.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/ApplicationBean.java}
 
 
 
@@ -54,17 +54,17 @@ Templates
 
   The following illustrates the necessary JSP to render the three beans' text property to the page:
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.jsp}
+%{snippet|file=${basedir}/src/main/webapp/Template.jsp}
 
   The equivalent WoOF template is as follows:
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
 
   WoOF focuses on minimising the impact to the HTML.  It enables this light instrumentation of the HTML by having a POJO (plain old java object) provide the dynamic logic for the web page rendering.  The {{{./index.html}other tutorials}} contain further details.  
   
   The following is the template logic class for the above WoOF template.
   
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/TemplateLogic.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/TemplateLogic.java}
 
 
   The configuration of WoOF occurs graphically and is as follows.
@@ -91,7 +91,7 @@ Integration
 
   The integration works both ways also.  The <<<ApplicationBean>>> does not have its value set by the WoOF template logic object.  The value is specified by the following <<<ServletContextListener>>> on start-up.
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/SetupListener.java}
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/woofservletjspintegration/SetupListener.java}
 
   As the above <<<ServletContextListener>>> registers the <<<ApplicationBean>>> within the <<<ServletContext>>>, WoOF will obtain this object in rendering the web page and therefore have the <<<text>>> property already specified.
 
@@ -101,7 +101,7 @@ web.xml
 
   For completeness of this tutorial the <<<web.xml>>> is as follows.
 
-%{code-snippet|brush-autodetect=1|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
+%{snippet|file=${basedir}/src/main/webapp/WEB-INF/web.xml}
 
 
 
@@ -113,7 +113,7 @@ Unit Test
   
    * JSP
 
-%{code-snippet|brush-autodetect=1|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/woofservletjspintegration/JspIT.java}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/woofservletjspintegration/JspIT.java}
 
 
 Next

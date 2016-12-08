@@ -20,7 +20,7 @@ Template.woof.html
 
   The HTML for the page is as follows:
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
 
   First thing to notice is that the page/template can be rendered in a web browser.  The reason for this is to ensure that web page content can be created/edited by WYSIWYG web design tools.  This is deliberate to allow web page designers to focus on presentation of the web pages rather than having to understand scripting tags and to an extent programming constructs.  It also means the template can be viewed without having written any code - great for reviewing and tweaking the pages.
 
@@ -38,7 +38,7 @@ TemplateLogic Class
   
   Please note that WoOF integrates with {{{http://projectlombok.org/}Project Lombok}} to reduce the necessary code.  As per below the <<<@Data>>> annotations are used to generate the getters and constructors for the inner class beans.  It is highly recommended by the OfficeFloor team to consider use of {{{http://projectlombok.org/}Project Lombok}} to reduce the overall amount of code to be written. 
   
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamichttpserver/TemplateLogic.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/dynamichttpserver/TemplateLogic.java}
 
   WoOF reflectively invokes the <<<getTemplateData>>> method to obtain the bean containing the properties and further beans for dynamically rendering the page.  The returned object from the method is interrogated for the properties and beans.  In the case of above:
   
@@ -86,7 +86,7 @@ Unit Test
 
   As the template logic is just a POJO, WoOF adheres to OfficeFloor's focus on simplicity in testing.  The following example unit test shows the ease in which the <<<TemplateLogic>>> class can be unit tested.
 
-%{code-snippet|brush-autodetect=1|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/dynamichttpserver/DynamicHttpServerTest.java}
+%{snippet|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/dynamichttpserver/DynamicHttpServerTest.java}
 
 
 

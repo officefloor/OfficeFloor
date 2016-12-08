@@ -30,11 +30,11 @@ application.woof
 
   The first template provides a link to navigate to the other template.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/TemplateOne.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/TemplateOne.woof.html}
 
   The link is handled by the following method.  The annotation indicates the next task within the flow.
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java}
 
   As the next task name is not a name of another method (and not a template section name, see later tutorials) it becomes an output from the template.  From the configuration above the output is configured to navigate to the other template.
   
@@ -46,11 +46,11 @@ application.woof
 
   The second template uses a submit to navigate to the first template.
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/TemplateTwo.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/TemplateTwo.woof.html}
 
   Much like the first template the logic class also navigates to an external flow.  In this case it uses an interface for programmatic control of navigation.
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateTwo.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateTwo.java}
 
   As the interface is dependency injected, WoOF sees the <<<@FlowInterface>>> annotation and will provide an implementation of the interface.  Each method on the interface will be linked by name to one of the following:
   
@@ -72,7 +72,7 @@ Unit Test
 
   The unit test navigates between the templates.
 
-%{code-snippet|brush-autodetect=1|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerTest.java}
+%{snippet|id=test|file=${basedir}/src/test/java/net/officefloor/tutorial/navigatehttpserver/NavigateHttpServerTest.java}
 
 
 

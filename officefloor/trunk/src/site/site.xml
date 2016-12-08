@@ -2,20 +2,22 @@
 <project>
 	<bannerLeft>
 		<name>OfficeFloor</name>
-		<src>http://www.officefloor.net/images/OfficeFloorBannerImage.png</src>
+		<src>http://www.officefloor.net/images/OfficeFloorBannerImage.png
+		</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<poweredBy>
-		<logo name="Drag and drop into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
+		<logo
+			name="Drag and drop into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
 			href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=32712"
 			title="Drag and drop into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
 			img="http://marketplace.eclipse.org/sites/all/modules/custom/marketplace/images/installbutton.png"
 			width="90" />
-		<logo name="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
+		<logo
+			name="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
 			href="http://marketplace.eclipse.org/content/officefloor"
 			title="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
-			img="http://officefloor.net/images/install_instructions.png"
-			width="90" />
+			img="http://officefloor.net/images/install_instructions.png" width="90" />
 		<logo name="Maven" href="http://maven.apache.org/"
 			img="http://maven.apache.org/images/logos/maven-feather.png" />
 		<logo name="Eclipse" href="http://marketplace.eclipse.org/content/officefloor"
@@ -30,9 +32,18 @@
 	<version position="right" />
 	<skin>
 		<groupId>org.apache.maven.skins</groupId>
-    	<artifactId>maven-fluido-skin</artifactId>
-	    <version>1.5</version>
-   	</skin>
+		<artifactId>maven-fluido-skin</artifactId>
+		<version>1.5</version>
+	</skin>
+	<custom>
+		<fluidoSkin>
+			<googleSearch/>
+			<facebookLike />
+			<googlePlusOne />
+			<sourceLineNumbersEnabled>false</sourceLineNumbersEnabled>
+			<copyrightClass>pull-right</copyrightClass>
+		</fluidoSkin>
+	</custom>
 	<body>
 		<head><![CDATA[
 			<!-- shortcut icon -->

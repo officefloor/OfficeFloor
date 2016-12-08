@@ -20,7 +20,7 @@ Template.woof.html
 
   The template for displaying the posts and adding posts is as follows:
 
-%{code-snippet|brush=xml|file=${basedir}/src/main/webapp/Template.woof.html}
+%{snippet|file=${basedir}/src/main/webapp/Template.woof.html}
 
   This is similar HTML as per previous tutorials.
 
@@ -30,7 +30,7 @@ Template.woof.html
 
   Session objects within WoOF are dependency injected.  The following shows the <<<@HttpSessionStateful>>> annotation necessary to identify the dependency as a HTTP session bound object.  Note HTTP session objects must also be serializable.
 
-%{code-snippet|brush-autodetect=1|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/sessionhttpserver/TemplateLogic.java}
+%{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/sessionhttpserver/TemplateLogic.java}
 
   WoOF will do the following:
   
@@ -52,7 +52,7 @@ Unit Test
 
   WoOF again allows easy unit testing by it's dependency injection into methods:
   
-%{code-snippet|brush-autodetect=1|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/sessionhttpserver/SessionHttpServerTest.java}
+%{snippet|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/sessionhttpserver/SessionHttpServerTest.java}
 
 
 
