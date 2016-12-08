@@ -58,7 +58,6 @@
 		<module>eclipse</module>
 		<module>maven</module>
 		<module>tutorials</module>
-		<module>package</module>
 	</modules>
 	<properties>
 		<current.year>2015</current.year>
