@@ -2,14 +2,8 @@
   <templates>
     <template name="form" uri="form" path="form.woof.html" class="net.officefloor.test.form.FormLogic" x="279" y="99">
       <output name="complete" argument-type="">
-        <template name="ria"/>
+        <template name="static"/>
       </output>
-    </template>
-    <template name="ria" uri="ria" path="ria.woof.html" class="net.officefloor.test.ria.RiaLogic" x="449" y="105">
-      <extension class="net.officefloor.plugin.gwt.woof.GwtWoofTemplateExtensionSource">
-        <property name="gwt.entry.point.class.name" value="net.officefloor.test.ria.client.RiaEntryPoint"/>
-        <property name="gwt.async.service.interfaces" value="net.officefloor.test.ria.client.CounterServiceAsync"/>
-      </extension>
     </template>
     <template name="static" uri="static" path="static.woof.html" class="" x="138" y="98">
       <output name="link" argument-type="">

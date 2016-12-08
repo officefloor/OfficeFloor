@@ -17,7 +17,6 @@
 	</properties>
 	<modules>
 		<module>officefloor-maven-plugin</module>
-		<module>officefloor-maven-skin</module>
 		<module>site-aggregate-maven-plugin</module>
 		<module>woof-maven-plugin</module>
 		<module>woof-archetype</module>

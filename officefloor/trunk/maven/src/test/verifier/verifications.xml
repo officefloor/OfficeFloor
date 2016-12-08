@@ -12,10 +12,6 @@
 			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
 		</file>
 		<file>
-			<location>officefloor-maven-skin/pom.xml</location>
-			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
-		</file>
-		<file>
 			<location>site-aggregate-maven-plugin/pom.xml</location>
 			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
 		</file>

@@ -6,13 +6,6 @@
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<poweredBy>
-	<!--  
-		<logo name="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
-			href="http://marketplace.eclipse.org/content/officefloor"
-			title="Drag and drop the Install Icon into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
-			img="http://officefloor.net/images/powerbyspace.png"
-			width="90" height="45" />
-	-->
 		<logo name="Drag and drop into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
 			href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=32712"
 			title="Drag and drop into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
@@ -44,18 +37,6 @@
 		<head><![CDATA[
 			<!-- shortcut icon -->
 			<link rel="shortcut icon" href="/favicon.ico" />
-			<!-- Syntax Highlighter -->
-			<link type="text/css" rel="stylesheet" href="./css/shCore.css" />
-			<link type="text/css" rel="stylesheet" href="./css/shThemeDefault.css" />
-			<script type="text/javascript" src="./scripts/shCore.js"></script>
-			<script type="text/javascript" src="./scripts/shAutoloader.js"></script>
-			<script type="text/javascript" src="./scripts/shBrushJava.js"></script>
-			<script type="text/javascript" src="./scripts/shBrushXml.js"></script>
-			<script type="text/javascript" src="./scripts/shBrushPlain.js"></script>
-			<script type="text/javascript">
-				SyntaxHighlighter.defaults['toolbar'] = false;
-				SyntaxHighlighter.all();
-			</script>
 			<!-- Google Analytics -->
 			<script type="text/javascript">
 				var _gaq = _gaq || [];
@@ -95,9 +76,6 @@
 			<meta property="fb:admins" content="sagenschneider" />
 			<meta property="fb:app_id" content="336336786442645" />
 		]]></head>
-		<footer><![CDATA[
-		TODO replace with facebook comments plugin
-		]]></footer>
 		<menu name="${project.name}">
 			<item name="Welcome" href="./index.html" />
 			<item name="Mission" href="./mission.html" />

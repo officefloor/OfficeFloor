@@ -14,15 +14,11 @@
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
 		<module>AuthenticationHttpServer</module>
-		<module>CometApp</module>
-		<module>CometManualApp</module>
 		<module>DatabaseHttpServer</module>
 		<module>DemoApp</module>
 		<module>DiPojoHttpServer</module>
 		<module>DynamicHttpServer</module>
 		<module>ExceptionHttpServer</module>
-		<module>GwtApp</module>
-		<module>GwtService</module>
 		<module>InheritHttpServer</module>
 		<module>JavaScriptApp</module>
 		<module>InteractiveHttpServer</module>
