@@ -589,15 +589,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.5</version>
-					<!--  
-					<dependencies>
-						<dependency>
-							<groupId>com.anasoft.os</groupId>
-							<artifactId>m2st-doxia-macros</artifactId>
-							<version>2.0</version>
-						</dependency>
-					</dependencies>
-					-->
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1317,10 +1308,10 @@
 						<plugin>
 							<!-- Report on broken links in site. -->
 							<!-- To obtain link check report for stage site: -->
-							<!-- 1) mvn install -->
+							<!-- 1) mvn clean install post-site -->
 							<!-- 2) mvn site:stage -->
-							<!-- 3) Copy target/site/apidocs to staging site -->
-							<!-- 4) mvn site -->
+							<!-- 3) cp -R target/site/apidocs/ target/staging/apidocs/ -->
+							<!-- 4) mvn -N post-site -->
 							<!-- 5) report available at ${basedir}/target/site/linkcheck.html -->
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-linkcheck-plugin</artifactId>
@@ -1536,12 +1527,6 @@
 					<url>http://download.java.net/maven/glassfish/</url>
 				</repository>
 				<repository>
-					<!-- Doxia additional macros (code-snippet) -->
-					<id>com.anasoft.os.repository.releases</id>
-					<name>ANASOFT OpenSource releases</name>
-					<url>http://anasoft-os-repo.googlecode.com/svn/repository/releases</url>
-				</repository>
-				<repository>
 					<!-- Atlassian -->
 					<id>maven2-repository.atlassian.com</id>
 					<name>Atlassian</name>
@@ -1566,12 +1551,6 @@
 					<id>glassfish.dev.java.net</id>
 					<name>Java.net Repository for Maven</name>
 					<url>http://download.java.net/maven/glassfish/</url>
-				</pluginRepository>
-				<pluginRepository>
-					<!-- Doxia additional macros (code-snippet) -->
-					<id>com.anasoft.os.repository.releases</id>
-					<name>ANASOFT OpenSource releases</name>
-					<url>http://anasoft-os-repo.googlecode.com/svn/repository/releases</url>
 				</pluginRepository>
 				<pluginRepository>
 					<!-- Atlassian -->
