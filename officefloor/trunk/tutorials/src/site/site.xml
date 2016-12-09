@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
-	<bannerLeft>
-		<src>./images/OfficeFloorBannerImage.png</src>
-		<href>http://www.officefloor.net/</href>
-	</bannerLeft>
 	<body>
 		<menu name="WoOF (Web on OfficeFloor)">
 			<item name="My First WoOF app" href="../maven/woof-archetype/index.html" />
@@ -20,11 +16,9 @@
 			<item name="Secure Link" href="./SecureLinkHttpServer/index.html" />
 			<item name="Authentication" href="./AuthenticationHttpServer/index.html" />
 			<item name="Test" href="./TestHttpServer/index.html" />
-			<item name="Deploy" href="../package/OfficeFloor/index.html" />
 		</menu>
 		<menu name="WoOF Extensions">
 			<item name="AJAX / JSON" href="./JavaScriptApp/index.html" />
-			<item name="GWT" href="./GwtApp/tutorials.html" />
 		</menu>
 		<menu name="Inversion of Control">
 			<item name="DI (POJO)" href="./DiPojoHttpServer/index.html" />

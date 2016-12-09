@@ -2,8 +2,7 @@
 <project>
 	<bannerLeft>
 		<name>OfficeFloor</name>
-		<src>http://www.officefloor.net/images/OfficeFloorBannerImage.png
-		</src>
+		<src>/images/OfficeFloorBannerImage.png</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
 	<poweredBy>
