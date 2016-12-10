@@ -8,7 +8,7 @@
 	<name>WoofArchetypeResult</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<officefloor-version>2.17.0</officefloor-version>
+		<officefloor-version>2.18.0</officefloor-version>
 		<jetty-version>9.2.2.v20140723</jetty-version>
 		<compiler-version>3.6.0</compiler-version>
 		<failsafe-version>2.19.1</failsafe-version>

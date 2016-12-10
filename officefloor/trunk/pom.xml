@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>officefloor</artifactId>
-	<version>2.17.0</version>
+	<version>2.18.0</version>
 	<packaging>pom</packaging>
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
@@ -270,34 +270,12 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
-				<artifactId>officefloor-maven-skin</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>site-aggregate-maven-plugin</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.maven</groupId>
 				<artifactId>woof-maven-plugin</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>woof-archetype</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<!-- Package -->
-			<dependency>
-				<groupId>net.officefloor.package</groupId>
-				<artifactId>package</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.package</groupId>
-				<artifactId>OfficeFloor</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -559,16 +537,6 @@
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
-					<version>${project.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>officefloor-maven-skin</artifactId>
-					<version>${project.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>site-aggregate-maven-plugin</artifactId>
 					<version>${project.version}</version>
 				</plugin>
 				<plugin>
@@ -1149,76 +1117,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!-- START SNIPPET: pdf -->
-			<plugin>
-				<groupId>net.officefloor.maven</groupId>
-				<artifactId>site-aggregate-maven-plugin</artifactId>
-				<inherited>false</inherited>
-				<configuration>
-					<title>OfficeFloor</title>
-					<author>Daniel Sagenschneider</author>
-					<version>${project.version}</version>
-					<projectLogo>${project.basedir}/maven/officefloor-maven-skin/src/main/resources/images/OfficeFloorBannerImage.png</projectLogo>
-					<baseUrl>http://www.officefloor.net</baseUrl>
-					<order>
-						<order>index</order>
-						<order>download</order>
-						<order>promote-good-design</order>
-						<order>principles</order>
-						<order>performance</order>
-						<order>architecture</order>
-						<order>work-source</order>
-						<order>managed-object-source</order>
-						<order>team-source</order>
-						<order>administrator-source</order>
-						<order>section-source</order>
-						<order>office-source</order>
-						<order>office-floor-source</order>
-						<order>desk-editor</order>
-						<order>section-editor</order>
-						<order>office-editor</order>
-						<order>office-floor-editor</order>
-					</order>
-					<ignores>
-						<ignore>.svn</ignore>
-						<ignore>snippets</ignore>
-						<ignore>update</ignore>
-						<ignore>css-test.apt</ignore>
-						<ignore>demo.xml</ignore>
-					</ignores>
-				</configuration>
-				<executions>
-					<execution>
-						<id>site-aggregate-for-pdf</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>aggregate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pdf-plugin</artifactId>
-				<inherited>false</inherited>
-				<executions>
-					<execution>
-						<id>generate-pdf</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>pdf</goal>
-						</goals>
-						<configuration>
-							<docDescriptor>${project.basedir}/target/site-aggregate/pdf.xml</docDescriptor>
-							<siteDirectory>${project.basedir}/target/site-aggregate</siteDirectory>
-							<outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
-							<includeReports>false</includeReports>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- END SNIPPET: pdf -->
 
 			<plugin>
 				<!-- Run HTTP server for staged site content for linkcheck report -->

@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse OfficeFloor Extras
 Bundle-SymbolicName: net.officefloor.extras;singleton:=true
-Bundle-Version: 2.17.0
+Bundle-Version: 2.18.0
 Bundle-Vendor: OfficeFloor
-Require-Bundle: net.officefloor.core;bundle-version="2.17.0",
- net.officefloor.ui;bundle-version="2.17.0",
- net.officefloor.woof;bundle-version="2.17.0"
+Require-Bundle: net.officefloor.core;bundle-version="2.18.0",
+ net.officefloor.ui;bundle-version="2.18.0",
+ net.officefloor.woof;bundle-version="2.18.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-RegisterBuddy: net.officefloor.core,
  net.officefloor.ui,
@@ -52,8 +52,8 @@ Export-Package: net.officefloor.eclipse.jdbc,
  net.officefloor.plugin.json.woof,
  net.officefloor.plugin.json.write
 Bundle-ClassPath: .,
- officeplugin_jdbc-2.17.0.jar,
- officeplugin_jndi-2.17.0.jar,
- officeplugin_jpa-2.17.0.jar,
- officeplugin_json-2.17.0.jar,
+ officeplugin_jdbc-2.18.0.jar,
+ officeplugin_jndi-2.18.0.jar,
+ officeplugin_jpa-2.18.0.jar,
+ officeplugin_json-2.18.0.jar,
  javax.persistence-2.1.0.jar
