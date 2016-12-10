@@ -80,7 +80,6 @@
 		<menu name="Getting Started">
 			<item name="Install" href="./install.html" />
 			<item name="Tutorials" href="./tutorials/index.html" />
-			<item name="Read offline" href="./OfficeFloor.pdf" />
 		</menu>
 		<menu name="Help">
 			<item name="Getting Help" href="./getting-help.html" />

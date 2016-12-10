@@ -2,7 +2,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="2.17.0" date="In SCM" description="Template content type">
+		<release version="2.19.0" date="in SCM" description="Improved performance of OfficeFrame through reduced locks">
+			<action type="add" dev="sagenschneider">Improved performance of OfficeFrame through reduced locks</action>
+		</release>
+		<release version="2.18.0" date="2016-12-10" description="Improved compiler that types everything">
+			<action type="add" dev="sagenschneider">Improved compiler that types everything</action>
+		</release>
+		<release version="2.17.0" date="2015-10-18" description="Template content type">
 			<action type="add" dev="sagenschneider">Template Content-Type</action>
 		</release>
 		<release version="2.15.0" date="2014-06-02" description="Deploy">
