@@ -2,7 +2,7 @@
 <project>
 	<body>
 		<menu name="${project.name}">
-			<item name="Overview" href="./index.html#Install_OfficeFloor_Eclipse_Plug-in" />
+			<item name="Overview" href="./index.html" />
 			<item name="Graphical Configuration" href="./graphical-configuration.html" />
 		</menu>
 		<menu ref="modules" />

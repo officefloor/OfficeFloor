@@ -2,7 +2,7 @@
 <project>
 	<body>
         <menu name="${project.name}">
-			<item name="Overview" href="./index.html#EJB_Plug-in" />
+			<item name="Overview" href="./index.html" />
 			<item name="EJB Orchestration" href="./ejb-orchestration.html" />
 		</menu>
 		<menu ref="parent" />
