@@ -2,7 +2,7 @@
 <project>
 	<body>
 		<menu name="${project.name}">
-			<item name="Overview" href="./index.html#JSON_Plug-in" />
+			<item name="Overview" href="./index.html" />
 		</menu>
 		<menu ref="parent" />
 	</body>

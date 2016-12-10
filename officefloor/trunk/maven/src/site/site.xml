@@ -2,7 +2,7 @@
 <project>
 	<body>
 		<menu name="${project.name}">
-			<item name="Overview" href="./index.html#OfficeFloor_Maven_Plug-ins" />
+			<item name="Overview" href="./index.html" />
 		</menu>
 		<menu ref="modules" />
 		<menu ref="parent" />

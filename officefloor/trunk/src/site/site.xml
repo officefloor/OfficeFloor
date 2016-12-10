@@ -5,6 +5,7 @@
 		<src>/images/OfficeFloorBannerImage.png</src>
 		<href>http://www.officefloor.net/</href>
 	</bannerLeft>
+	<googleAnalyticsAccountId>UA-23477455-1</googleAnalyticsAccountId>
 	<poweredBy>
 		<logo
 			name="Drag and drop into a running Eclipse workspace to install OfficeFloor (typically to a free space in the tool bar at the top)"
@@ -53,7 +54,6 @@
 				_gaq.push(['_setAccount',
 				'UA-23477455-1']);
 				_gaq.push(['_trackPageview']);
-
 				(function() {
 				var ga
 				= document.createElement('script'); ga.type = 'text/javascript';
@@ -66,28 +66,15 @@
 				s.parentNode.insertBefore(ga, s);
 				})();
 			</script>
-			<!-- Woopra -->
-			<script>
-				var woo_settings = {idle_timeout:'300000',
-				domain:'officefloor.net'};
-				(function(){
-				var wsc =
-				document.createElement('script');
-				wsc.src =
-				document.location.protocol+'//static.woopra.com/js/woopra.js';
-				wsc.type = 'text/javascript';
-				wsc.async = true;
-				var ssc =
-				document.getElementsByTagName('script')[0];
-				ssc.parentNode.insertBefore(wsc, ssc);
-				})();
-			</script>
 			<!-- Facebook administration -->
 			<meta property="fb:admins" content="sagenschneider" />
 			<meta property="fb:app_id" content="336336786442645" />
 		]]></head>
+		<breadcrumbs>
+			<item name="OfficeFloor" href="http://officefloor.net/index.html" />
+		</breadcrumbs>
 		<menu name="${project.name}">
-			<item name="Welcome" href="./index.html#officefloor" />
+			<item name="Welcome" href="./index.html" />
 			<item name="Mission" href="./mission.html" />
 		</menu>
 		<menu name="Getting Started">

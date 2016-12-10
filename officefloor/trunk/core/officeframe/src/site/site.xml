@@ -2,7 +2,7 @@
 <project>
 	<body>
 		<menu name="${project.name}">
-			<item name="Overview" href="./index.html#OfficeFrame" />
+			<item name="Overview" href="./index.html" />
 			<item name="Job Based Architecture" href="./job-based-architecture.html" />
 		</menu>
 		<menu name="Technical">

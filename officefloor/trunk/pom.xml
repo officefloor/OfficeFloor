@@ -1121,7 +1121,7 @@
 						<configuration>
 							<!-- Ignore generated code that have no control over -->
 							<excludePackageNames>net.officefloor.plugin.web.http.template.parse</excludePackageNames>
-							<!-- Include Google Analytics and Woopra -->
+							<!-- Include Google Analytics -->
 							<header>
 							<![CDATA[
 			<!-- Google Analytics -->
@@ -1141,22 +1141,6 @@
 				var s =
 				document.getElementsByTagName('script')[0];
 				s.parentNode.insertBefore(ga, s);
-				})();
-			</script>
-			<!-- Woopra -->
-			<script>
-				var woo_settings = {idle_timeout:'300000',
-				domain:'officefloor.net'};
-				(function(){
-				var wsc =
-				document.createElement('script');
-				wsc.src =
-				document.location.protocol+'//static.woopra.com/js/woopra.js';
-				wsc.type = 'text/javascript';
-				wsc.async = true;
-				var ssc =
-				document.getElementsByTagName('script')[0];
-				ssc.parentNode.insertBefore(wsc, ssc);
 				})();
 			</script>
 							]]>
@@ -1335,10 +1319,8 @@
 									<!-- Common links not to check -->
 									<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
 									<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
-									<!-- Woopra (avoid SSL issues when logged in) -->
-									<excludedLink>http://woopra.com</excludedLink>
-									<!-- TODO remove after 2.17.0 release when images available -->
-									<excludedLink>http://officefloor.net/images/</excludedLink>
+									<!-- Overview anchor for page -->
+									<excludedLink>#</excludedLink>
 								</excludedLinks>
 							</configuration>
 						</plugin>
