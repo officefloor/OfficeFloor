@@ -50,29 +50,24 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link ServletContext}.
 	 */
-	private final ServletContext context = this
-			.createMock(ServletContext.class);
+	private final ServletContext context = this.createMock(ServletContext.class);
 
 	/**
 	 * Mock {@link ServletContextEvent}.
 	 */
-	private final ServletContextEvent event = new ServletContextEvent(
-			this.context);
+	private final ServletContextEvent event = new ServletContextEvent(this.context);
 
 	/**
 	 * Ensure not add {@link WoofServlet} if already registered.
 	 */
 	public void testServletAlreadyRegistered() {
 
-		final ServletRegistration servletRegistrion = this
-				.createMock(ServletRegistration.class);
+		final ServletRegistration servletRegistrion = this.createMock(ServletRegistration.class);
 
 		// Record WoOF servlet already registered
-		this.recordReturn(this.context,
-				this.context.getServletRegistration(WoofServlet.SERVLET_NAME),
+		this.recordReturn(this.context, this.context.getServletRegistration(WoofServlet.SERVLET_NAME),
 				servletRegistrion);
-		this.context.log("Not registering OfficeFloorServlet WoOF ("
-				+ WoofServlet.class.getName()
+		this.context.log("Not registering OfficeFloorServlet WoOF (" + WoofServlet.class.getName()
 				+ ") as Servlet already registered under name");
 
 		// Test
@@ -86,9 +81,8 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 	public void testNoApplicationWoofFile() {
 		this.recordNotAlreadyRegistered();
 		this.recordInitParameter("another/location/file.woof");
-		this.context
-				.log("No WoOF configuration file at location another/location/file.woof."
-						+ " WoOF functionality will not be configured.");
+		this.context.log("No WoOF configuration file at location another/location/file.woof."
+				+ " WoOF functionality will not be configured.");
 		this.doTest();
 	}
 
@@ -107,73 +101,57 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 		this.recordInitParameter(null);
 
 		// Record initialising the WoOF Servlet
-		this.recordReturn(
-				this.context,
-				this.context
-						.getInitParameter(WoofOfficeFloorSource.PROPERTY_OBJECTS_CONFIGURATION_LOCATION),
-				null);
-		this.recordReturn(
-				this.context,
-				this.context
-						.getInitParameter(WoofOfficeFloorSource.PROPERTY_TEAMS_CONFIGURATION_LOCATION),
-				null);
+		this.recordReturn(this.context,
+				this.context.getInitParameter(WoofOfficeFloorSource.PROPERTY_OBJECTS_CONFIGURATION_LOCATION), null);
+		this.recordReturn(this.context,
+				this.context.getInitParameter(WoofOfficeFloorSource.PROPERTY_TEAMS_CONFIGURATION_LOCATION), null);
 
 		// Configure the WoOF Servlet
-		this.recordReturn(this.context, this.context.addServlet(
-				WoofServlet.SERVLET_NAME, WoofServlet.class), servletDynamic);
+		this.recordReturn(this.context, this.context.addServlet(WoofServlet.SERVLET_NAME, WoofServlet.class),
+				servletDynamic);
 		servletDynamic.setAsyncSupported(true);
-		this.recordReturn(servletDynamic, servletDynamic.setInitParameter(
-				"officefloorservlet.application.index", "1"), true);
-		this.recordReturn(servletDynamic, servletDynamic.addMapping(
-				"/gwt/service", "/gwt/comet-subscribe", "/gwt/comet-publish",
-				"*.woof"), new HashSet<String>(), new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				String[] expectedUrls = (String[]) expected[0];
-				String[] actualUrls = (String[]) actual[0];
-				assertEquals("Incorrect number of URLs", expectedUrls.length,
-						actualUrls.length);
-				for (int i = 0; i < expectedUrls.length; i++) {
-					assertEquals("Incorret URL " + i, expectedUrls[i],
-							actualUrls[i]);
-				}
-				return true;
-			}
-		});
+		this.recordReturn(servletDynamic, servletDynamic.setInitParameter("officefloorservlet.application.index", "1"),
+				true);
+		this.recordReturn(servletDynamic, servletDynamic.addMapping("*.woof"), new HashSet<String>(),
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						String[] expectedUrls = (String[]) expected[0];
+						String[] actualUrls = (String[]) actual[0];
+						assertEquals("Incorrect number of URLs", expectedUrls.length, actualUrls.length);
+						for (int i = 0; i < expectedUrls.length; i++) {
+							assertEquals("Incorret URL " + i, expectedUrls[i], actualUrls[i]);
+						}
+						return true;
+					}
+				});
 		servletDynamic.setLoadOnStartup(1);
 
 		// Configure the Filter
-		this.recordReturn(this.context, this.context.addFilter(
-				WoofServlet.SERVLET_NAME, WoofServlet.class), filterDynamic);
+		this.recordReturn(this.context, this.context.addFilter(WoofServlet.SERVLET_NAME, WoofServlet.class),
+				filterDynamic);
 		filterDynamic.setAsyncSupported(true);
-		this.recordReturn(filterDynamic, filterDynamic.setInitParameter(
-				"officefloorservlet.application.index", "1"), true);
-		filterDynamic.addMappingForUrlPatterns(null, false, "/gwt/service",
-				"/gwt/comet-subscribe", "/gwt/comet-publish", "*.woof");
+		this.recordReturn(filterDynamic, filterDynamic.setInitParameter("officefloorservlet.application.index", "1"),
+				true);
+		filterDynamic.addMappingForUrlPatterns(null, false, "*.woof");
 		this.control(filterDynamic).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				assertNull("Should be default dispatching", actual[0]);
-				assertFalse("Should be loaded before other filters",
-						(Boolean) actual[1]);
+				assertFalse("Should be loaded before other filters", (Boolean) actual[1]);
 				String[] expectedUrls = (String[]) expected[2];
 				String[] actualUrls = (String[]) actual[2];
-				assertEquals("Incorrect number of URLs", expectedUrls.length,
-						actualUrls.length);
+				assertEquals("Incorrect number of URLs", expectedUrls.length, actualUrls.length);
 				for (int i = 0; i < expectedUrls.length; i++) {
-					assertEquals("Incorret URL " + i, expectedUrls[i],
-							actualUrls[i]);
+					assertEquals("Incorret URL " + i, expectedUrls[i], actualUrls[i]);
 				}
 				return true;
 			}
 		});
 
 		// Log configuration
-		this.context
-				.log("WoOF Servlet/Filter ("
-						+ WoofServlet.class.getName()
-						+ ") loaded to service "
-						+ "/gwt/service, /gwt/comet-subscribe, /gwt/comet-publish, *.woof");
+		this.context.log("WoOF Servlet/Filter (" + WoofServlet.class.getName() + ") loaded to service "
+				+ "*.woof");
 
 		// Test
 		this.doTest();
@@ -187,9 +165,7 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 	 * Records the {@link WoofServlet} to not already be registered.
 	 */
 	private void recordNotAlreadyRegistered() {
-		this.recordReturn(this.context,
-				this.context.getServletRegistration(WoofServlet.SERVLET_NAME),
-				null);
+		this.recordReturn(this.context, this.context.getServletRegistration(WoofServlet.SERVLET_NAME), null);
 		this.recordReturn(this.context, this.context.getContextPath(), "/");
 	}
 
@@ -203,10 +179,8 @@ public class WoofServletConfigureTest extends OfficeFrameTestCase {
 	private void recordInitParameter(String woofConfigurationLocation) {
 
 		// Record obtaining the location
-		this.recordReturn(
-				this.context,
-				this.context
-						.getInitParameter(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION),
+		this.recordReturn(this.context,
+				this.context.getInitParameter(WoofOfficeFloorSource.PROPERTY_WOOF_CONFIGURATION_LOCATION),
 				woofConfigurationLocation);
 	}
 
