@@ -1,6 +1,0 @@
-<section>
-	<sub-sections>
-		<sub-section name="NEW_NAME" source="net.example.ExampleSectionSource"
-			location="LOCATION" />
-	</sub-sections>
-</section>

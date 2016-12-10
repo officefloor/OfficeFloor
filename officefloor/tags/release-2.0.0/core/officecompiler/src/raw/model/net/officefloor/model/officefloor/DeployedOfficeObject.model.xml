@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="deployed office object name" />
-	<field type="String" name="object type" />
-	<field type="DeployedOfficeObjectToOfficeFloorManagedObjectModel"
-		name="office floor managed object" />
-	<field type="DeployedOfficeObjectToOfficeFloorInputManagedObjectModel"
-		name="office floor input managed object" />
-</model>

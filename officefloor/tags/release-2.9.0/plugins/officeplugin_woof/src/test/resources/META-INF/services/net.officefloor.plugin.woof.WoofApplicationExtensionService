@@ -1,5 +1,0 @@
-# Unknown extension for testing to ensure ignore failed extensions
-woof.application.extension.not.available.Service
-
-# Extension for testing to ensure can extend application functionality
-net.officefloor.plugin.woof.MockWoofApplicationExtensionService

@@ -1,9 +1,0 @@
-                                       ------------------
-				         Comet Plug-in
-				       ------------------
-				      Daniel Sagenschneider
-				       ------------------
-
-  <<Comet Plug-in>>
-  
-  Provides the {{{/apidocs/net/officefloor/plugin/comet/api/OfficeFloorComet.html}net.officefloor.plugin.comet.api.OfficeFloorComet}} which provides the client site GWT API for provide comet functionality along with the necessary server side functionality.

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<list type="ExternalManagedObjectModel" name="external managed object" />
-	<list type="ExternalFlowModel" name="external flow" />
-    <list type="SubSectionModel" name="sub section" />
-</model>

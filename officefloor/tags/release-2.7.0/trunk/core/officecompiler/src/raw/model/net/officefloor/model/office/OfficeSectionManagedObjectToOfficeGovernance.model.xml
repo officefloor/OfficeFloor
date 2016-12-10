@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="office governance name" />
-	<field type="OfficeSectionManagedObjectModel" name="office section managed object"
-		end-list="office governance" />
-	<field type="OfficeGovernanceModel" name="office governance"
-		end-list="office section managed object" />
-</model>

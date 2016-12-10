@@ -1,4 +1,0 @@
-<context>
-    <one name="value">first</one>
-    <two><element attribute="something">another</element></two>
-</context>

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="TaskModel" name="task" end-field="work task" />
-	<field type="WorkTaskModel" name="work task" end-list="task" />
-</model>

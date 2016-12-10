@@ -1,9 +1,0 @@
-<verifications>
-	<files>
-		<!-- Ensure using latest WoOF version (as presented on site documentation) -->
-		<file>
-			<location>./pom.xml</location>
-			<contains><![CDATA[<artifactId>officeplugin_woof</artifactId>(\s)*<version>${project.version}</version>]]></contains>
-		</file>
-	</files>
-</verifications>

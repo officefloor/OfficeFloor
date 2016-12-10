@@ -1,9 +1,0 @@
-<section>
-	<external-flows />
-	<sub-sections>
-		<sub-section name="SUB_SECTION" source="net.example.ExampleSectionSource"
-			location="LOCATION">
-			<output name="OUTPUT" argument-type="java.lang.String" />
-		</sub-section>
-	</sub-sections>
-</section>

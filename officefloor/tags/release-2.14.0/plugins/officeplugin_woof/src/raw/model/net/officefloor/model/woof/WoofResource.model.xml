@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="woof resource name" />
-	<field type="String" name="resource path" />
-	<list type="WoofTemplateOutputToWoofResourceModel" name="woof template output" />
-	<list type="WoofSectionOutputToWoofResourceModel" name="woof section output" />
-	<list type="WoofAccessOutputToWoofResourceModel" name="woof access output" />
-	<list type="WoofExceptionToWoofResourceModel" name="woof exception" />
-</model>

@@ -1,1 +1,0 @@
-<html><body>Linked to JSP</body></html>

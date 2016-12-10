@@ -1,8 +1,0 @@
-<objects>
-
-	<managed-object source="net.officefloor.demo.stocks.StockPriceSimulatorManagedObjectSource" 
-		type="net.officefloor.tutorial.stockwatchapp.StockPriceSimulatorManagedObjectSource">
-		<team name="TEAM" type="java.lang.Object" />
-	</managed-object>
-
-</objects>

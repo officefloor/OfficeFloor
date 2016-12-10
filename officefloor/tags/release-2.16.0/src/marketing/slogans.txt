@@ -1,7 +1,0 @@
-This is a list of sayings that OfficeFloor may use:
-
-  "Real programmers develop with Bricks and Mortar"  (in reference to IoC providing the Software Brick)
-  
-  "OfficeFloor applications are faster, faster, faster"  (3 areas of faster: faster to build, faster to change, and runs faster)
-  
-  "The OfficeFloor is where real programming gets done"

@@ -1,8 +1,0 @@
-<woof>
-    
-    <templates>
-        <template name="TEMPLATE" uri="test" path="woof/Template.ofp"
-         class="net.officefloor.plugin.servlet.WoofServletFilterTest$MockTemplate" />
-    </templates>
-    
-</woof>

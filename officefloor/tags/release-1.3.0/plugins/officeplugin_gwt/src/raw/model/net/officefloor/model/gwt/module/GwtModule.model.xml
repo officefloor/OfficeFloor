@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field name="rename to" type="String" />
-	<field name="entry point class name" type="String" />
-</model>

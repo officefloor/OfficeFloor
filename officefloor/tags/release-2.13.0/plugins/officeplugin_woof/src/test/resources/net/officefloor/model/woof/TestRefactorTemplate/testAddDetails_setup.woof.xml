@@ -1,8 +1,0 @@
-<woof>
-
-	<templates>
-		<template name="template" path="example/Template.html" />
-		<template name="TEMPLATE_PARENT" path="example/Parent.html" />
-	</templates>
-
-</woof>

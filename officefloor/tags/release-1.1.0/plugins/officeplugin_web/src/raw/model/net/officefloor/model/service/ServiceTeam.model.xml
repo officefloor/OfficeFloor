@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="service team name" />
-	<field type="String" name="team source class name" />
-	<list type="PropertyModel" name="property" plural="properties" />
-	<list type="PropertyFileModel" name="property file" />
-</model>

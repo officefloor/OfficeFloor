@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<mirrors>
-	<mirror label="UK (kent.dl.sourceforge.net)"
-		url="http://kent.dl.sourceforge.net/sourceforge/officefloor/" />
-    <mirror label="USA (hivelocity.dl.sourceforge.net)"
-        url="http://hivelocity.dl.sourceforge.net/sourceforge/officefloor/" />
-	<mirror label="Australia (waix.dl.sourceforge.net)"
-		url="http://waix.dl.sourceforge.net/sourceforge/officefloor/" />
-</mirrors>

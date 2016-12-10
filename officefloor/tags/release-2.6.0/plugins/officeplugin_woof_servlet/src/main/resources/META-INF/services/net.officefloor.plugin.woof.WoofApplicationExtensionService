@@ -1,3 +1,0 @@
-
-# Extends WoOF with Servlet functionality via a servicer
-net.officefloor.plugin.woof.servlet.ServletContainerWoofApplicationExtensionService

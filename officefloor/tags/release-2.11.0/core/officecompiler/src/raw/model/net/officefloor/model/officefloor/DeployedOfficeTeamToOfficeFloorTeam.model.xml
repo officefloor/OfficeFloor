@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-    <field type="String" name="office floor team name" />
-    <field type="DeployedOfficeTeamModel" name="deployed office team"
-        end-field="office floor team" />
-    <field type="OfficeFloorTeamModel" name="office floor team"
-        end-list="deployed office team" />
-</model>

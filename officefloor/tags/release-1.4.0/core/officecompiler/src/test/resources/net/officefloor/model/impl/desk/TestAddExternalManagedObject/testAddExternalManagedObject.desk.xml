@@ -1,6 +1,0 @@
-<desk>
-	<external-managed-objects>
-		<external-managed-object name="OBJECT"
-			object-type="java.lang.String" />
-	</external-managed-objects>
-</desk>

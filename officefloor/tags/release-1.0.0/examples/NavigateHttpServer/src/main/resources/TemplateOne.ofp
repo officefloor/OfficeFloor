@@ -1,6 +1,0 @@
-<html>
-	<body>
-		<h1>Page One</h1>
-		<a href="#{navigate}">link</a>
-	</body>
-</html>

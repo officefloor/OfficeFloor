@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-    <field type="String" name="office section responsibility name" />
-    <field type="OfficeSectionResponsibilityToOfficeTeamModel"
-        name="office team" />
-    <list type="OfficeSectionResponsibilityObjectModel" name="office section responsibility object" />
-</model>

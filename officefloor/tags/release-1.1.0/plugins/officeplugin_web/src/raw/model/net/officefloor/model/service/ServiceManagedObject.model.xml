@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="service managed object name" />
-	<field type="String" name="managed object source class name" />
-	<list type="PropertyModel" name="property" plural="properties" />
-	<list type="PropertyFileModel" name="property file" />
-	<list type="ServiceManagedObjectTypeModel" name="object type" />
-</model>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="input name" />
-	<field type="WoofSectionOutputModel" name="woof section output"
-		end-field="woof access input" />
-	<field type="WoofAccessInputModel" name="woof access input"
-		end-list="woof section output" />
-</model>

@@ -1,9 +1,0 @@
-<office-floor>
-	<offices>
-		<office name="NAME" source="net.example.ExampleOfficeSource"
-			location="LOCATION">
-			<input section="CHANGE" input="DETAILS" parameter-type="java.lang.Integer" />
-			<input section="RENAME" input="NEW" parameter-type="java.lang.Object" />
-		</office>
-	</offices>
-</office-floor>

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-    <field type="String" name="managing office name" />
-    <field type="String" name="process bound managed object name" />
-    <field type="OfficeFloorManagedObjectSourceModel" name="office floor managed object source"
-        end-field="managing office" />
-    <field type="DeployedOfficeModel" name="managing office"
-        end-list="office floor managed object source" />
-</model>

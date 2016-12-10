@@ -1,7 +1,0 @@
-<woof>
-    
-    <templates>
-        <template name="notFoundResource" uri="/not/found/resource" path="NonWoof.html" />
-    </templates>
-
-</woof>

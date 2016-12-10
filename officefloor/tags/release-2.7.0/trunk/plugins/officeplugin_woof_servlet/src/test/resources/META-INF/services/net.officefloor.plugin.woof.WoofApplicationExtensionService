@@ -1,3 +1,0 @@
-
-# Extension for testing to ensure can extend application functionality
-net.officefloor.plugin.woof.servlet.container.MockWoofApplicationExtensionService

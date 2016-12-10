@@ -1,7 +1,0 @@
-<woof>
-    
-    <templates>
-        <template name="template" uri="template" path="net/officefloor/plugin/woof/NoLogicTemplate.ofp" />
-    </templates>
-
-</woof>

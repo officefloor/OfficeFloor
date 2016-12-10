@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="office section input name" />
-	<field type="String" name="parameter type" />
-	<list type="OfficeSectionOutputToOfficeSectionInputModel" name="office section output" />
-	<list type="OfficeManagedObjectSourceFlowToOfficeSectionInputModel"
-		name="office managed object source flow" />
-	<list type="OfficeEscalationToOfficeSectionInputModel" name="office escalation" />
-</model>

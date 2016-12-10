@@ -1,8 +1,0 @@
-#!/bin/sh
-
-# Fail immediately
-set -e
-
-# TODO implement to call OfficeFloorConsoleMain with start
-echo "TODO implement to call OfficeFloorConsoleMain with start"
-exit 1

@@ -1,7 +1,0 @@
-<woof>
-	<templates>
-		<template name="TEMPLATE" uri="invalid" path="Template.html"
-			class="Invalid Class causing failure to start">
-		</template>
-	</templates>
-</woof>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="section managed object source name" />
-	<field type="SectionManagedObjectModel" name="section managed object"
-		end-field="section managed object source" />
-	<field type="SectionManagedObjectSourceModel" name="section managed object source"
-		end-list="section managed object" />
-</model>

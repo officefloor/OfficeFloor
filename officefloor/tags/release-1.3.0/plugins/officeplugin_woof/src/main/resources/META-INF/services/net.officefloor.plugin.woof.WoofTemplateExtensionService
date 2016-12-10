@@ -1,2 +1,0 @@
-# GWT extension (included as service as GWT plugin may not always be on class path)
-net.officefloor.plugin.woof.gwt.GwtWoofTemplateExtensionService

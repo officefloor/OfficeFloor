@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="external flow name" />
-	<field type="String" name="argument type" />
-	<list type="TaskFlowToExternalFlowModel" name="task flow" />
-	<list type="TaskToNextExternalFlowModel" name="previous task" />
-    <list type="TaskEscalationToExternalFlowModel" name="task escalation" />
-</model>

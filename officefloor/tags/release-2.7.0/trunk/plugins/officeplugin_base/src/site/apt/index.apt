@@ -1,7 +1,0 @@
-                                               -----------------------
-                                              Plug-in Base Functionality 
-                                               -----------------------
-					        Daniel Sagenschneider
-                                               -----------------------
-
-  Provides shared base functionality so that Project Dependencies and Maven/Eclipse plug-ins do not need to include the full OfficeFloor code base.

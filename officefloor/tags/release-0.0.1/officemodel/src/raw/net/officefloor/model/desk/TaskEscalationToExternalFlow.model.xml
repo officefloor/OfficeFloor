@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="external flow name" />
-	<field type="TaskEscalationModel" name="task escalation" end-field="external flow" />
-	<field type="ExternalFlowModel" name="external flow" end-list="task escalation" />
-</model>

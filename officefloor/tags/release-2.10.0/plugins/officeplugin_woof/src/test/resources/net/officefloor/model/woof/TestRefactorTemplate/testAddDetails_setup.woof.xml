@@ -1,7 +1,0 @@
-<woof>
-
-	<templates>
-		<template name="template" path="example/Template.html" class="net.example.TemplateClass" />
-	</templates>
-
-</woof>

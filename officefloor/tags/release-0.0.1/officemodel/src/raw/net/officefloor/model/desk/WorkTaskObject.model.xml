@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="object name" />
-	<field type="String" name="key" />
-	<field type="String" name="object type" />
-	<field type="boolean" name="is parameter" />
-	<field type="WorkTaskObjectToExternalManagedObjectModel" name="external managed object" />
-</model>

@@ -1,7 +1,0 @@
-                                       ---------------------------
-                                            Eclipse Plug-ins
-                                       ---------------------------
-                                          Daniel Sagenschneider
-                                       ---------------------------
-
-  This module does not provide any functionality.  Its focus is to be a dependency that all Eclipse features can include so that the Eclipse plugins are built before the Eclipse features.

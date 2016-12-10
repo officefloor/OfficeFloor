@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<field type="String" name="woof access input name" />
-	<field type="String" name="parameter type" />
-	<list type="WoofTemplateOutputToWoofAccessInputModel" name="woof template output" />
-	<list type="WoofSectionOutputToWoofAccessInputModel" name="woof section output" />
-</model>

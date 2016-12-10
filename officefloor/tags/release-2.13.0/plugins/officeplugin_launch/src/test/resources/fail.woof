@@ -1,6 +1,0 @@
-<woof>
-	<templates>
-		<template name="TEMPLATE" uri="template" path="Template.html"
-			class="unknown class" />
-	</templates>
-</woof>

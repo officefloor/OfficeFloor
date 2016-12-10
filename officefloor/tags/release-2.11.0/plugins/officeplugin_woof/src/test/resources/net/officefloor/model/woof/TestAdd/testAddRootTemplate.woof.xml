@@ -1,7 +1,0 @@
-<woof>
-
-	<templates>
-		<template name="_root_" uri="/" path="root.ofp" />
-	</templates>
-
-</woof>

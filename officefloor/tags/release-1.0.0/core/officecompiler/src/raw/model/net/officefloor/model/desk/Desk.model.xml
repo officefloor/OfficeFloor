@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-	<list name="external managed object" type="ExternalManagedObjectModel" />
-	<list type="DeskManagedObjectSourceModel" name="desk managed object source" />
-	<list type="DeskManagedObjectModel" name="desk managed object" />
-	<list name="work" type="WorkModel" />
-	<list name="task" type="TaskModel" />
-	<list name="external flow" type="ExternalFlowModel" />
-</model>

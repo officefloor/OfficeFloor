@@ -1,8 +1,0 @@
-<woof>
-
-	<sections>
-		<section name="SECTION" source="net.example.ExampleSectionSource"
-			location="SECTION_LOCATION" />
-	</sections>
-
-</woof>

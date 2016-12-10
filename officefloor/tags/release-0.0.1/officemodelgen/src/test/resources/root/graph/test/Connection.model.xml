@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-    <field type="OneModel" name="one" end-field="two field"/>
-    <field type="TwoModel" name="two" end-list="one list"/>
-</model>

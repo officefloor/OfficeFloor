@@ -1,9 +1,0 @@
-                                               -----------------------
-                                                        Usage 
-                                               -----------------------
-					        Daniel Sagenschneider
-                                               -----------------------
-
-  The following configuration is used to generate the PDF of the OfficeFloor site documentation:
-
-%{code-snippet|brush-autodetect=1|id=pdf|file=${baseDir}/../../pom.xml}

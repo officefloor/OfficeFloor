@@ -1,5 +1,0 @@
-<html>
-<body>
-${root ${node ${leaf bean $} $} $}
-</body>
-</html>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model>
-    <field type="String" name="office floor input managed object name" />
-    <field type="OfficeFloorManagedObjectSourceModel" name="office floor managed object source"
-        end-field="office floor input managed object" />
-    <field type="OfficeFloorInputManagedObjectModel" name="office floor input managed object"
-        end-list="office floor managed object source" />
-</model>
