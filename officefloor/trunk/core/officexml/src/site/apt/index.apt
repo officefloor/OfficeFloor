@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<OfficeXml>>
+OfficeXml
 
   OfficeXml is an OXM (object to XML mapper) and is used by the OfficeCompiler to load and store the configuration of OfficeFloor.  It does not force the use of any class structure and focuses on providing mapping between the XML and the java objects.  It is even possible to map the XML into differing object structures and object structures into differing XML (hence its <mapping> nature).
 

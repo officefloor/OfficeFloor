@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Eclipse Plug-ins Feature>>
+Eclipse Plug-ins Feature
   
   This module packages up optional Eclipse plugins into an Eclipse feature.  
   

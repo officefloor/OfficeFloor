@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Model Generator>>
+Model Generator
 
   This provides code generation to simplify creation of the configuration models by generating the model java classes from simplier XML configuration.
   

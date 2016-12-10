@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Eclipse Plug-in Extensions>>
+Eclipse Plug-in Extensions
   
   This module provides Eclipse Plug-in extensions to simplify the configuration of OfficeFloor plug-ins.
 

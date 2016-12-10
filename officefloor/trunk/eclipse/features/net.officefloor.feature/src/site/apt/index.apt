@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Eclipse Feature>>
+Eclipse Feature
   
   This module packages up the core Eclipse plugins to create the core Eclipse feature for OfficeFloor.
   

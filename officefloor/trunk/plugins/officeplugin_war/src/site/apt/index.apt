@@ -4,6 +4,6 @@
 				      Daniel Sagenschneider
 				       ------------------
 
-  <<WAR Plug-in>>
+WAR Plug-in
   
   This plug-in allows re-using your <<<Servlet>>> implementations within OfficeFloor by being able to run a WAR.

@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Tests for the net.officefloor.ui Eclipse Plug-in>>
+Tests for the net.officefloor.ui Eclipse Plug-in
 
   This module contains the Eclipse Plug-in tests.  It allows keeping the tests separate from the main plug-in code.
 

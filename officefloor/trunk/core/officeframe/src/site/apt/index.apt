@@ -4,7 +4,7 @@
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<OfficeFrame>>
+OfficeFrame
 
   OfficeFrame is the execution environment for the Jobs within the {{{./job-based-architecture.html}Job Based Architecture}} of OfficeFloor.
 

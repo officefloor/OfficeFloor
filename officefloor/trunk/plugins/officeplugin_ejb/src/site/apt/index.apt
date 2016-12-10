@@ -4,7 +4,7 @@
 				      Daniel Sagenschneider
 				       ------------------
 
-  <<EJB Plug-in>>
+EJB Plug-in
   
   Provides the {{{/apidocs/net/officefloor/plugin/ejb/OfficeFloorEjb.html}net.officefloor.plugin.ejb.OfficeFloorEjb}} which wraps an OfficeFloor in an EJB for running within an Application Server.
   

@@ -2,7 +2,7 @@
 <project>
 	<body>
 		<menu name="${project.name}">
-			<item name="Overview" href="./index.html" />
+			<item name="Overview" href="./index.html#site-aggregate-maven-plugin" />
 			<item name="Goals" href="./plugin-info.html" />
 			<item name="Usage" href="./usage.html" />
 		</menu>

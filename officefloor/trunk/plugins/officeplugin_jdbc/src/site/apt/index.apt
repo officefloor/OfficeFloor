@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<JDBC Plug-in>>
+JDBC Plug-in
 
   This module provides ManagedObjectSource implementations to support JDBC.
   
