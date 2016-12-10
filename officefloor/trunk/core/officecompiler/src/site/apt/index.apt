@@ -4,7 +4,7 @@
                                          Daniel Sagenschneider
                                          --------------------
 
-  <<OfficeCompiler>>
+OfficeCompiler
 
   OfficeCompiler compiles the Sources of OfficeFloor for execution by the OfficeFrame.
 

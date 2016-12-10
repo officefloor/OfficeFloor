@@ -4,7 +4,7 @@
 				      Daniel Sagenschneider
 				       ------------------
                
-  <<OfficeFloor Tutorials>>
+OfficeFloor Tutorials
   
   Once you have installed the {{{../install.html}OfficeFloor Eclipse plug-ins}} (by dragging the bottom left install icon to your Eclipse IDE) you have the tools ready for the below tutorials.
   
@@ -48,8 +48,6 @@ WoOF
 | {{{./AuthenticationHttpServer/index.html}Authentication}}    | Easy means to provide authentication                       | Authentication
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit/System/Integration testing
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{../package/OfficeFloor/index.html}Deploy}}                | Deploy the application                                     | Deploy
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 * WoOF Template Extensions

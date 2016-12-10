@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<WoOF Plug-in>>
+WoOF Plug-in
 
   This module (and its dependencies) provide all the functionality necessary for running a Web on OfficeFloor (WoOF) application.
   

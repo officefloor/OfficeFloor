@@ -87,7 +87,7 @@
 			<meta property="fb:app_id" content="336336786442645" />
 		]]></head>
 		<menu name="${project.name}">
-			<item name="Welcome" href="./index.html" />
+			<item name="Welcome" href="./index.html#officefloor" />
 			<item name="Mission" href="./mission.html" />
 		</menu>
 		<menu name="Getting Started">

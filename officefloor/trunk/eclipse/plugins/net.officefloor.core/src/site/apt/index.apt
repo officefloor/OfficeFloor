@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Eclipse Core>>
+Eclipse Core
   
   This module packages the core jars of OfficeFloor into an Eclipse plug-in.
   

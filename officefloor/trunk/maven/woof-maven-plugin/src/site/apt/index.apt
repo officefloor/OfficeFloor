@@ -4,7 +4,7 @@
 					        Daniel Sagenschneider
                                                -----------------------
 
-  <<woof-maven-plugin>>
+woof-maven-plugin
 
   WoOF (Web on OfficeFloor) is built with Maven and to assist you using WoOF, this module provides Maven plug-ins for working with WoOF.
   

@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<JPA Plug-in>>
+JPA Plug-in
 
   This module provides ManagedObjectSource and GovernanceSource implementations to support JPA.
   

@@ -4,7 +4,7 @@
 				      Daniel Sagenschneider
 				       ------------------
 
-  <<Servlet Plug-in>>
+Servlet Plug-in
   
   This plug-in allows re-using your <<<Servlet>>> implementations within OfficeFloor.
   

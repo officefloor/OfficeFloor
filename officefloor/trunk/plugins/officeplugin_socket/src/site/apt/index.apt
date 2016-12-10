@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Socket Plug-in>>
+Socket Plug-in
 
   This module provides both ManagedObjectSources and WorkSources for working with sockets (and HTTP over sockets).
 

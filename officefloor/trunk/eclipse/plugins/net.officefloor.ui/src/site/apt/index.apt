@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Eclipse UI>>
+Eclipse UI
   
   Eclipse UI provides graphical editors to configure OfficeFloor.  The graphical editors are built for Eclipse and rely on the GEF plugin.  As the core OfficeFloor functionality is packaged into another Eclipse plugin, this Eclipse plugin contains the UI components (and other Eclipse specific functionality) required for working with OfficeFloor in Eclipse.
 

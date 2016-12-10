@@ -4,7 +4,7 @@
                                           Daniel Sagenschneider
                                        ---------------------------
 
-  <<Web Plug-in>>
+Web Plug-in
 
   This module provides both ManagedObjectSources and WorkSources for building web applications.
 
