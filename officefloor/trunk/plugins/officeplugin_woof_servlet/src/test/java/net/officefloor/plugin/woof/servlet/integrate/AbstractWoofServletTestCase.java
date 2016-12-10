@@ -21,26 +21,17 @@ import java.io.ByteArrayOutputStream;
 
 import javax.servlet.ServletContext;
 
-import net.officefloor.autowire.AutoWire;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.gwt.comet.internal.CometEvent;
-import net.officefloor.plugin.gwt.comet.internal.CometInterest;
-import net.officefloor.plugin.gwt.comet.internal.CometRequest;
-import net.officefloor.plugin.gwt.comet.internal.CometResponse;
-import net.officefloor.plugin.gwt.comet.internal.CometSubscriptionService;
-import net.officefloor.plugin.socket.server.http.HttpTestUtil;
-import net.officefloor.plugin.woof.WoofApplicationExtensionService;
-import net.officefloor.plugin.woof.servlet.MockDependency;
-import net.officefloor.plugin.woof.servlet.MockLogic.CometTrigger;
-import net.officefloor.plugin.woof.servlet.WoofServlet;
-import net.officefloor.plugin.woof.servlet.client.MockGwtService;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.eclipse.jetty.server.Server;
 
-import com.gdevelop.gwt.syncrpc.SyncProxy;
+import net.officefloor.autowire.AutoWire;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.socket.server.http.HttpTestUtil;
+import net.officefloor.plugin.woof.WoofApplicationExtensionService;
+import net.officefloor.plugin.woof.servlet.MockDependency;
+import net.officefloor.plugin.woof.servlet.WoofServlet;
 
 /**
  * <p>
@@ -104,97 +95,8 @@ public abstract class AbstractWoofServletTestCase extends OfficeFrameTestCase {
 
 		// Validate appropriate response from HTTP template
 		String responseText = this.doGetEntity(contextPath, "/test.woof");
-		assertEquals(
-				"Incorrect template content",
-				"TEMPLATE TEST OnePersonTeam_"
-						+ new AutoWire(MockDependency.class).getQualifiedType(),
-				responseText);
-	}
-
-	/**
-	 * Ensure can invoke GWT AJAX service.
-	 */
-	public void testServiceGwtAjax() throws Exception {
-		this.doServiceGwtAjaxTest("");
-	}
-
-	/**
-	 * Ensure can invoke GWT AJAX service respecting the {@link ServletContext}.
-	 */
-	public void testServiceGwtAjaxWithinContext() throws Exception {
-		this.doServiceGwtAjaxTest("/path");
-	}
-
-	/**
-	 * Undertakes testing the servicing of GWT AJAX servicing.
-	 * 
-	 * @param contextPath
-	 *            Context path.
-	 */
-	private void doServiceGwtAjaxTest(String contextPath) throws Exception {
-
-		// Start Server
-		this.port = this.startServer(contextPath);
-
-		// Create the proxy for GWT
-		MockGwtService service = (MockGwtService) SyncProxy.newProxyInstance(
-				MockGwtService.class, "http://localhost:" + this.port
-						+ contextPath + "/gwt/", "service");
-
-		// Invoke the GWT service
-		String result = service.gwtService("TEST");
-		assertEquals("Incorrect response", "AJAX-TEST", result);
-	}
-
-	/**
-	 * Ensure can invoke Comet service.
-	 */
-	public void testServiceComet() throws Exception {
-		this.doServiceCometTest("");
-	}
-
-	/**
-	 * Ensure can invoke Comet service respecting the {@link ServletContext}.
-	 */
-	public void testServiceCometWithinContext() throws Exception {
-		this.doServiceCometTest("/path");
-	}
-
-	/**
-	 * Undertakes testing the servicing of a comet request.
-	 * 
-	 * @param contextPath
-	 *            Context path.
-	 */
-	private void doServiceCometTest(String contextPath) throws Exception {
-
-		final String eventData = "TEST";
-
-		// Start Server
-		this.port = this.startServer(contextPath);
-
-		// Create the proxy for GWT and trigger comet event
-		MockGwtService service = (MockGwtService) SyncProxy.newProxyInstance(
-				MockGwtService.class, "http://localhost:" + this.port
-						+ contextPath + "/gwt/", "service");
-		service.cometTrigger(eventData); // event will be waiting
-
-		// Create the proxy for Comet and subscribe to event
-		CometSubscriptionService caller = (CometSubscriptionService) SyncProxy
-				.newProxyInstance(
-						CometSubscriptionService.class,
-						"http://localhost:" + this.port + contextPath + "/gwt/",
-						"comet-subscribe");
-		CometResponse response = caller.subscribe(new CometRequest(
-				CometRequest.FIRST_REQUEST_SEQUENCE_NUMBER, new CometInterest(
-						CometTrigger.class.getName(), null)));
-		CometEvent[] events = response.getEvents();
-		assertEquals("Incorrect number of events", 1, events.length);
-		CometEvent event = events[0];
-
-		// Ensure correct event
-		String data = (String) event.getData();
-		assertEquals("Incorrect event", eventData, data);
+		assertEquals("Incorrect template content",
+				"TEMPLATE TEST OnePersonTeam_" + new AutoWire(MockDependency.class).getQualifiedType(), responseText);
 	}
 
 	/**
@@ -208,9 +110,7 @@ public abstract class AbstractWoofServletTestCase extends OfficeFrameTestCase {
 
 		// Ensure not load WoOF Application Extensions for Filter
 		String responseText = this.doGetEntity("", "/chain.html");
-		assertEquals(
-				"Should obtain resource and not be serviced by chain servicer",
-				"NOT CHAINED", responseText);
+		assertEquals("Should obtain resource and not be serviced by chain servicer", "NOT CHAINED", responseText);
 	}
 
 	/*
@@ -229,11 +129,9 @@ public abstract class AbstractWoofServletTestCase extends OfficeFrameTestCase {
 	private String doGetEntity(String contextPath, String uri) throws Exception {
 
 		// Ensure serviced by HTTP template from WoOF configuration
-		HttpGet request = new HttpGet("http://localhost:" + this.port
-				+ contextPath + uri);
+		HttpGet request = new HttpGet("http://localhost:" + this.port + contextPath + uri);
 		HttpResponse response = this.client.execute(request);
-		assertEquals("Must be successful", 200, response.getStatusLine()
-				.getStatusCode());
+		assertEquals("Must be successful", 200, response.getStatusLine().getStatusCode());
 
 		// Obtain the response entity as text
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
