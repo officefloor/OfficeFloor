@@ -19,19 +19,19 @@
 		</license>
 	</licenses>
 	<issueManagement>
-		<system>SourceForge</system>
-		<url>http://sourceforge.net/p/officefloor/support-requests</url>
+		<system>GitHub</system>
+		<url>https://github.com/sagenschneider/OfficeFloor/issues</url>
 	</issueManagement>
 	<scm>
-		<connection>scm:svn:http://svn.code.sf.net/p/officefloor/code/officefloor/trunk</connection>
-		<developerConnection>scm:svn:https://svn.code.sf.net/p/officefloor/code/officefloor/trunk</developerConnection>
-		<url>http://svn.code.sf.net/p/officefloor/code/officefloor/trunk</url>
+		<connection>scm:git:https://github.com/sagenschneider/OfficeFloor.git</connection>
+		<developerConnection>scm:git:git@github.com:sagenschneider/OfficeFloor.git</developerConnection>
+		<url>https://github.com/sagenschneider/OfficeFloor</url>
 	</scm>
 	<developers>
 		<developer>
 			<id>sagenschneider</id>
 			<name>Daniel Sagenschneider</name>
-			<email>sagenschneider@users.sourceforge.net</email>
+			<email>daniel@officefloor.net</email>
 			<roles>
 				<role>Founder</role>
 				<role>Administrator</role>
@@ -867,7 +867,8 @@
 			</plugin>
 
 			<plugin>
-				<!-- Allow SVN tagging via command: -->
+				<!-- Allow GIT tagging via command: -->
+				<!-- Note: need to have deployment key configured for ssh access. -->
 				<!-- -->
 				<!-- mvn scm:tag -->
 				<groupId>org.apache.maven.plugins</groupId>
@@ -875,9 +876,6 @@
 				<configuration>
 					<connectionType>developerConnection</connectionType>
 					<tag>release-${project.version}</tag>
-					<!-- Provide following in your settings.xml -->
-					<username>${developer.svn.username}</username>
-					<password>${developer.svn.password}</password>
 				</configuration>
 			</plugin>
 
