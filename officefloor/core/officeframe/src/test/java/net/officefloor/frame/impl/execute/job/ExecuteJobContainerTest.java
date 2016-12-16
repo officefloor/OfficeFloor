@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.MockTeamSource;
 

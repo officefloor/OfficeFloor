@@ -52,18 +52,16 @@ public interface ProcessState {
 	ProcessMetaData getProcessMetaData();
 
 	/**
+	 * <p>
 	 * Obtains the main {@link ThreadState} for this {@link ProcessState}.
+	 * <p>
+	 * The main {@link ThreadState} is used for any {@link ProcessState}
+	 * mutations. This avoids the possibility of data corruption, as only one
+	 * {@link ThreadState} may alter the {@link ProcessState}.
 	 * 
 	 * @return Main {@link ThreadState} for this {@link ProcessState}.
 	 */
 	ThreadState getMainThreadState();
-
-	/**
-	 * Obtains the {@link CleanupSequence} for this {@link ProcessState}.
-	 * 
-	 * @return {@link CleanupSequence} for this {@link ProcessState}.
-	 */
-	CleanupSequence getCleanupSequence();
 
 	/**
 	 * Obtains the {@link TaskMetaData} for the {@link Work} and {@link Task}
@@ -83,11 +81,7 @@ public interface ProcessState {
 			throws UnknownWorkException, UnknownTaskException;
 
 	/**
-	 * <p>
-	 * Creates a {@link Flow} for the new {@link ThreadState} contained in this
-	 * {@link ProcessState}.
-	 * <p>
-	 * The new {@link ThreadState} is available from the returned {@link Flow}.
+	 * Creates a new {@link ThreadState} contained in this {@link ProcessState}.
 	 * 
 	 * @param assetManager
 	 *            {@link AssetManager} for the {@link ThreadState}.
@@ -95,19 +89,21 @@ public interface ProcessState {
 	 *            Optional {@link FlowCallbackJobNodeFactory} to create a
 	 *            {@link JobNode} to be instigating on completion of the created
 	 *            {@link ThreadState}.
-	 * @return {@link Flow} for the new {@link ThreadState} contained in this
-	 *         {@link ProcessState}.
+	 * @return New {@link ThreadState} contained in this {@link ProcessState}.
 	 */
-	Flow createThread(AssetManager assetManager, FlowCallbackJobNodeFactory callbackFactory);
+	ThreadState createThread(AssetManager assetManager, FlowCallbackJobNodeFactory callbackFactory);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.
 	 * 
 	 * @param thread
 	 *            {@link ThreadState} that has completed.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue once the {@link ThreadState} is
+	 *            completed.
 	 * @return Optional {@link JobNode} to complete the {@link ThreadState}.
 	 */
-	JobNode threadComplete(ThreadState thread);
+	JobNode threadComplete(ThreadState thread, JobNode continueJobNode);
 
 	/**
 	 * Obtains the {@link ManagedObjectContainer} for the input index.
@@ -149,5 +145,12 @@ public interface ProcessState {
 	 * @return Catch all {@link EscalationFlow} for the {@link OfficeFloor}.
 	 */
 	EscalationFlow getOfficeFloorEscalation();
+
+	/**
+	 * Obtains the {@link CleanupSequence} for this {@link ProcessState}.
+	 * 
+	 * @return {@link CleanupSequence} for this {@link ProcessState}.
+	 */
+	CleanupSequence getCleanupSequence();
 
 }

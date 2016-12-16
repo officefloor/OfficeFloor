@@ -15,23 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.execute;
-
-import net.officefloor.frame.internal.structure.Flow;
+package net.officefloor.frame.internal.structure;
 
 /**
- * Future token to indicate a {@link Flow} has completed.
- * 
+ * Managed {@link JobNode}.
+ *
  * @author Daniel Sagenschneider
  */
-@Deprecated // use callback to handle (avoids thread synchronising)
-public interface FlowFuture {
+public interface ManagedJobNode extends JobNode, LinkedListSetEntry<ManagedJobNode, Flow> {
 
 	/**
-	 * Indicates whether the {@link Flow} has completed.
+	 * Enables specify the next sequential {@link ManagedJobNode}.
 	 * 
-	 * @return <code>true</code> if the {@link Flow} has completed.
+	 * @param nextJobNode
+	 *            Next sequential {@link ManagedJobNode}.
 	 */
-	boolean isComplete();
+	void setNextManagedJobNode(ManagedJobNode nextJobNode);
 
 }

@@ -17,9 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
 
@@ -31,65 +29,17 @@ import net.officefloor.frame.spi.team.JobContext;
 public interface ManagedObjectContainer {
 
 	/**
-	 * Triggers loading the {@link ManagedObject}.
+	 * Loads the {@link ManagedObject}.
 	 * 
 	 * @param jobContext
 	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode} requesting the {@link ManagedObject} to be
-	 *            loaded.
-	 * @return <code>true</code> indicating the {@link ManagedObject} was
-	 *         loaded. <code>false</code> indicates must wait asynchronously for
-	 *         the {@link ManagedObject} to be loaded.
+	 * @return Optional {@link JobNode} to load the {@link ManagedObject}.
 	 */
-	boolean loadManagedObject(JobContext jobContext, JobNode jobNode);
-
-	/**
-	 * Sets up the {@link ManagedObject} for use.
-	 * 
-	 * @param workContainer
-	 *            {@link WorkContainer}.
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param flow
-	 *            {@link Flow} containing the {@link JobNode}.
-	 * @param jobNode
-	 *            {@link JobNode} requesting the {@link ManagedObject} to be
-	 *            setup.
-	 * @return Optional {@link JobNode} to setup the {@link ManagedObject}.
-	 */
-	JobNode setupManagedObject(WorkContainer<?> workContainer, JobContext jobContext, Flow flow, JobNode jobNode);
-
-	/**
-	 * Indicates if the {@link ManagedObject} is ready. This is to ensure the
-	 * {@link ManagedObject} is not currently involved within an asynchronous
-	 * operation (in other words the {@link AsynchronousManagedObject} completed
-	 * execution and ready for another operation).
-	 *
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workContainer
-	 *            {@link WorkContainer} to source the other
-	 *            {@link ManagedObject} instances. This may be required should
-	 *            coordination be necessary to make the {@link ManagedObject}
-	 *            ready.
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode} requiring the {@link ManagedObject} to be
-	 *            ready.
-	 * @return Optional {@link JobNode} to undertake to ready the
-	 *         {@link ManagedObject}. Returning <code>null</code> indicates the
-	 *         {@link ManagedObject} is ready.
-	 */
-	<W extends Work> JobNode isManagedObjectReady(WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode);
+	JobNode loadManagedObject(JobContext jobContext);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
 	 * 
-	 * @param threadState
-	 *            {@link ThreadState} of thread requiring the object.
 	 * @return Object being managed by the {@link ManagedObject}.
 	 */
 	Object getObject(ThreadState threadState);
@@ -120,11 +70,8 @@ public interface ManagedObjectContainer {
 	/**
 	 * Unloads the {@link ManagedObject}.
 	 * 
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue unloading of the
-	 *            {@link ManagedObject}.
 	 * @return Optional {@link JobNode} to unload the {@link ManagedObject}.
 	 */
-	JobNode unloadManagedObject(JobNode continueJobNode);
+	JobNode unloadManagedObject();
 
 }

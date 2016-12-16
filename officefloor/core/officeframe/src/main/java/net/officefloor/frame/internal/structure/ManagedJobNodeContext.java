@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.FlowCallback;
 
 /**
  * Context to execute a {@link JobNode} that is managed.
@@ -27,34 +27,15 @@ import net.officefloor.frame.api.execute.FlowFuture;
 public interface ManagedJobNodeContext {
 
 	/**
-	 * Specifies whether the job is complete.
-	 * 
-	 * @param isComplete
-	 *            <code>true</code> if complete.
-	 */
-	void setJobComplete(boolean isComplete);
-
-	/**
-	 * Joins on the {@link Flow} for the {@link FlowFuture}.
-	 * 
-	 * @param flowFuture
-	 *            {@link FlowFuture} of the {@link Flow} to join.
-	 * @param timeout
-	 *            Timeout in milliseconds for the {@link Flow} join.
-	 * @param token
-	 *            {@link Flow} join token.
-	 */
-	void joinFlow(FlowFuture flowFuture, long timeout, Object token);
-
-	/**
 	 * Invokes the {@link Flow} for the input {@link FlowMetaData}.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
 	 *            Parameter for the {@link Flow}.
-	 * @return {@link FlowFuture} of the {@link Flow}.
+	 * @param callback
+	 *            Optional {@link FlowCallback}.
 	 */
-	FlowFuture doFlow(FlowMetaData<?> flowMetaData, Object parameter);
+	void doFlow(FlowMetaData<?> flowMetaData, Object parameter, FlowCallback callback);
 
 }

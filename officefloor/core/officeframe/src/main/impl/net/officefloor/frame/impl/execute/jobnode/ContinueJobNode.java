@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.job;
+package net.officefloor.frame.impl.execute.jobnode;
 
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -23,11 +23,25 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.JobContext;
 
 /**
- * {@link JobNode} that indicates to wait.
+ * {@link JobNode} that enables a {@link JobNode} to continue once all
+ * {@link JobNode} instances of the a {@link JobNode} is complete.
  *
  * @author Daniel Sagenschneider
  */
-public class WaitJobNode implements JobNode {
+public class ContinueJobNode implements JobNode {
+
+	/**
+	 * Convenience method to enable continue.
+	 * 
+	 * @param delegateJobNode
+	 *            Delegate {@link JobNode}.
+	 * @param continueJobNode
+	 *            Continue {@link JobNode}. May be <code>null</code>.
+	 * @return Next {@link JobNode}.
+	 */
+	public static JobNode continueWith(JobNode delegateJobNode, JobNode continueJobNode) {
+		return (continueJobNode == null) ? delegateJobNode : new ContinueJobNode(delegateJobNode, continueJobNode);
+	}
 
 	/**
 	 * Delegate {@link JobNode}.
@@ -35,23 +49,31 @@ public class WaitJobNode implements JobNode {
 	private final JobNode delegate;
 
 	/**
+	 * Continue {@link JobNode}.
+	 */
+	private final JobNode continueJobNode;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param delegate
-	 *            Delegate {@link JobNode} to use to wait within its
-	 *            {@link ThreadState}.
+	 *            Delegate {@link JobNode} to complete it and all produced
+	 *            {@link JobNode} instances before continuing.
+	 * @param continueJobNode
+	 *            Continue {@link JobNode}.
 	 */
-	public WaitJobNode(JobNode delegate) {
+	public ContinueJobNode(JobNode delegate, JobNode continueJobNode) {
 		this.delegate = delegate;
+		this.continueJobNode = continueJobNode;
 	}
 
 	/*
-	 * ======================= JobNode ================================
+	 * =================== JobNode ==============================
 	 */
 
 	@Override
 	public JobNode doJob(JobContext context) {
-		return null; // no further jobs, so goes into wait
+		return continueWith(this.delegate.doJob(context), this.continueJobNode);
 	}
 
 	@Override
@@ -61,7 +83,7 @@ public class WaitJobNode implements JobNode {
 
 	@Override
 	public ThreadState getThreadState() {
-		return this.delegate.getThreadState();
+		return this.getThreadState();
 	}
 
 }

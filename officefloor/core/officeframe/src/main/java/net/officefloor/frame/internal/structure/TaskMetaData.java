@@ -30,8 +30,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		extends JobMetaData {
+public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<F>> extends JobMetaData {
 
 	/**
 	 * Obtains the name of this {@link Task}.
@@ -92,7 +91,8 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 * @return {@link ManagedObjectIndex} identifying the {@link ManagedObject}
 	 *         for the {@link Task} index.
 	 */
-	@Deprecated // work scope to become task scope (state managed within managed objects)
+	@Deprecated // work scope to become task scope (state managed within managed
+				// objects)
 	ManagedObjectIndex translateManagedObjectIndexForWork(int taskMoIndex);
 
 	/**
@@ -130,7 +130,7 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	TaskDutyAssociation<?>[] getPostAdministrationMetaData();
 
 	/**
-	 * Creates the {@link JobNode} for the {@link Task}.
+	 * Creates the {@link ManagedJobNode} for the {@link Task}.
 	 * 
 	 * @param flow
 	 *            {@link Flow} containing the {@link Task}.
@@ -138,15 +138,14 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            {@link WorkContainer} for the {@link Work} for the
 	 *            {@link Task}.
 	 * @param parallelJobNodeOwner
-	 *            Parallel {@link JobNode} owner.
+	 *            Parallel {@link ManagedJobNode} owner.
 	 * @param parameter
 	 *            Parameter.
 	 * @param governanceDeactivationStrategy
 	 *            {@link GovernanceDeactivationStrategy}.
 	 * @return {@link JobNode}.
 	 */
-	JobNode createTaskNode(Flow flow, WorkContainer<W> workContainer,
-			JobNode parallelJobNodeOwner, Object parameter,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy);
+	ManagedJobNode createTaskNode(Flow flow, WorkContainer<W> workContainer, ManagedJobNode parallelJobNodeOwner,
+			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy);
 
 }

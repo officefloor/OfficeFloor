@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.duty;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.job.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;

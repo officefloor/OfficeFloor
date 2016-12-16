@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 

@@ -20,24 +20,14 @@ package net.officefloor.frame.impl.execute.job;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
- * {@link Job} implementation.
+ * {@link Thread} safe {@link Job} implementation.
  *
  * @author Daniel Sagenschneider
  */
-public class JobImpl implements Job {
-
-	/**
-	 * Initial {@link JobNode}.
-	 */
-	private final JobNode initialJobNode;
-
-	/**
-	 * Next {@link Job} that is managed by the {@link Team}.
-	 */
-	private Job nextJob = null;
+public class SafeJobImpl extends UnsafeJobImpl {
 
 	/**
 	 * Instantiate.
@@ -45,32 +35,26 @@ public class JobImpl implements Job {
 	 * @param initialJobNode
 	 *            Initial {@link JobNode}.
 	 */
-	public JobImpl(JobNode initialJobNode) {
-		this.initialJobNode = initialJobNode;
+	public SafeJobImpl(JobNode initialJobNode) {
+		super(initialJobNode);
 	}
 
 	/*
-	 * ========================= Job ========================================
+	 * ====================== UnsafeJobImpl ======================
 	 */
 
 	@Override
-	public void doJob(JobContext context) {
-		this.initialJobNode.getThreadState().doJobNodeLoop(this.initialJobNode, context);
+	protected JobNode doThreadStateJobNodeLoop(JobNode head, JobContext context) {
+		// Must now synchronise on thread state for thread safety
+		synchronized (head.getThreadState()) {
+			return super.doThreadStateJobNodeLoop(head, context);
+		}
 	}
 
 	@Override
-	public Object getProcessIdentifier() {
-		return this.initialJobNode.getThreadState().getProcessState().getProcessIdentifier();
-	}
-
-	@Override
-	public void setNextJob(Job job) {
-		this.nextJob = job;
-	}
-
-	@Override
-	public Job getNextJob() {
-		return this.nextJob;
+	protected void assignJob(JobNode jobNode, TeamIdentifier currentTeam) {
+		// No need to synchronise on assigning jobs, as loop is thread safe
+		jobNode.getResponsibleTeam().getTeam().assignJob(new SafeJobImpl(jobNode), currentTeam);
 	}
 
 }

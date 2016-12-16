@@ -32,7 +32,6 @@ import net.officefloor.frame.spi.team.Team;
 public interface JobNode {
 
 	/**
-	 * <p>
 	 * Undertakes the {@link JobNode}.
 	 * 
 	 * @param context

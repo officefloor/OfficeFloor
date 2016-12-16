@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.governance;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.job.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;

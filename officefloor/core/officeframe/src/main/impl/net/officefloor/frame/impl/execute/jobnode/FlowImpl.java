@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.job;
+package net.officefloor.frame.impl.execute.jobnode;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.execute.duty.DutyJob;
@@ -24,37 +24,33 @@ import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.work.WorkContainerProxy;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.LinkedListSet;
+import net.officefloor.frame.internal.structure.ManagedJobNode;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Implementation of the {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JobSequenceImpl extends
-		AbstractLinkedListSetEntry<Flow, ThreadState> implements
-		Flow {
+public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> implements Flow {
 
 	/**
 	 * Activate {@link JobNode} instances for this {@link Flow}.
 	 */
-	private final LinkedListSet<JobNode, Flow> activeJobNodes = new StrictLinkedListSet<JobNode, Flow>() {
+	private final LinkedListSet<ManagedJobNode, Flow> activeJobNodes = new StrictLinkedListSet<ManagedJobNode, Flow>() {
 		@Override
 		protected Flow getOwner() {
-			return JobSequenceImpl.this;
+			return FlowImpl.this;
 		}
 	};
 
@@ -64,17 +60,12 @@ public class JobSequenceImpl extends
 	private final ThreadState threadState;
 
 	/**
-	 * Completion flag indicating if this {@link Flow} is complete.
-	 */
-	private volatile boolean isFlowComplete = false;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param threadState
 	 *            {@link ThreadState} containing this {@link Flow}.
 	 */
-	public JobSequenceImpl(ThreadState threadState) {
+	public FlowImpl(ThreadState threadState) {
 		this.threadState = threadState;
 	}
 
@@ -88,40 +79,23 @@ public class JobSequenceImpl extends
 	}
 
 	/*
-	 * ======================= JobSequence ===================================
+	 * ======================= Flow ===================================
 	 */
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public JobNode createTaskNode(TaskMetaData<?, ?, ?> taskMetaData,
-			JobNode parallelNodeOwner, Object parameter,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
+	public ManagedJobNode createManagedJobNode(TaskMetaData<?, ?, ?> taskMetaData, ManagedJobNode parallelNodeOwner,
+			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 
 		// Obtain the work meta-data
 		WorkMetaData workMetaData = taskMetaData.getWorkMetaData();
 
 		// Create the work container for a new work
-		/*
-		 * TODO provide scopes for Work (task, thread, process).
-		 * 
-		 * DETAILS: Currently a new Work is created for each Task and the Work
-		 * is not shared between Tasks. The focus of the Work was to allow
-		 * sharing of state between Tasks. Bounding the Work to a scope and
-		 * re-using at that scope will allow this sharing.
-		 * 
-		 * CONCERN: ManagedObjects provide state management and having Work do
-		 * this may become confusing. Also attempting to debug problems may also
-		 * be more difficult. It is therefore necessary to base this
-		 * functionality on "real world" scenarios.
-		 */
-		WorkContainer workContainer = workMetaData
-				.createWorkContainer(this.threadState.getProcessState());
+		WorkContainer workContainer = workMetaData.createWorkContainer(this.threadState.getProcessState());
 
 		// Obtain the administration meta-data to determine if require proxy
-		TaskDutyAssociation[] preTaskDuties = taskMetaData
-				.getPreAdministrationMetaData();
-		TaskDutyAssociation[] postTaskDuties = taskMetaData
-				.getPostAdministrationMetaData();
+		TaskDutyAssociation[] preTaskDuties = taskMetaData.getPreAdministrationMetaData();
+		TaskDutyAssociation[] postTaskDuties = taskMetaData.getPostAdministrationMetaData();
 
 		// Create the work container proxy (if required)
 		WorkContainerProxy proxyWorkContainer = null;
@@ -130,29 +104,27 @@ public class JobSequenceImpl extends
 		}
 
 		// First and last job
-		JobNode[] firstLastJobs = new JobNode[2];
+		ManagedJobNode[] firstLastJobs = new ManagedJobNode[2];
 
 		// Load the pre-task administrator duty jobs.
 		// Never use actual work container for pre duties.
-		this.loadDutyJobs(firstLastJobs, preTaskDuties, workMetaData, null,
-				proxyWorkContainer, parallelNodeOwner, taskMetaData);
+		this.loadDutyJobs(firstLastJobs, preTaskDuties, workMetaData, null, proxyWorkContainer, parallelNodeOwner,
+				taskMetaData);
 
 		// If no post duties then task is last job
-		WorkContainer taskWorkContainer = (postTaskDuties.length == 0 ? workContainer
-				: proxyWorkContainer);
+		WorkContainer taskWorkContainer = (postTaskDuties.length == 0 ? workContainer : proxyWorkContainer);
 
 		// Create and register the active task job
-		JobNode taskJob = taskMetaData.createTaskNode(this, taskWorkContainer,
-				parallelNodeOwner, parameter, governanceDeactivationStrategy);
+		ManagedJobNode taskJob = taskMetaData.createTaskNode(this, taskWorkContainer, parallelNodeOwner, parameter,
+				governanceDeactivationStrategy);
 		this.activeJobNodes.addEntry(taskJob);
 
 		// Load the task job
 		this.loadJob(firstLastJobs, taskJob);
 
 		// Load the post-task administrator duty jobs
-		this.loadDutyJobs(firstLastJobs, postTaskDuties, workMetaData,
-				workContainer, proxyWorkContainer, parallelNodeOwner,
-				taskMetaData);
+		this.loadDutyJobs(firstLastJobs, postTaskDuties, workMetaData, workContainer, proxyWorkContainer,
+				parallelNodeOwner, taskMetaData);
 
 		// Return the starting job
 		return firstLastJobs[0];
@@ -160,15 +132,13 @@ public class JobSequenceImpl extends
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public JobNode createGovernanceNode(
-			GovernanceActivity<?, ?> governanceActivity,
-			JobNode parallelNodeOwner) {
+	public ManagedJobNode createGovernanceNode(GovernanceActivity<?, ?> governanceActivity,
+			ManagedJobNode parallelNodeOwner) {
 
 		// Create and register the governance job
-		GovernanceMetaData governanceMetaData = governanceActivity
-				.getGovernanceMetaData();
-		JobNode governanceJob = governanceMetaData.createGovernanceJob(this,
-				governanceActivity, parallelNodeOwner);
+		GovernanceMetaData governanceMetaData = governanceActivity.getGovernanceMetaData();
+		ManagedJobNode governanceJob = governanceMetaData.createGovernanceJobNode(this, governanceActivity,
+				parallelNodeOwner);
 		this.activeJobNodes.addEntry(governanceJob);
 
 		// Return the governance job
@@ -179,7 +149,7 @@ public class JobSequenceImpl extends
 	 * Loads the {@link DutyJob} instances.
 	 * 
 	 * @param firstLastJobs
-	 *            First and last {@link JobNode} instances.
+	 *            First and last {@link ManagedJobNode} instances.
 	 * @param taskDutyAssociations
 	 *            {@link TaskDutyAssociation} instances for the {@link DutyJob}
 	 *            instances.
@@ -190,15 +160,13 @@ public class JobSequenceImpl extends
 	 * @param proxyWorkContainer
 	 *            {@link WorkContainerProxy}.
 	 * @param parallelNodeOwner
-	 *            Parallel owning {@link JobNode}.
+	 *            Parallel owning {@link ManagedJobNode}.
 	 * @param administeringTaskMetaData
 	 *            {@link TaskMetaData} of the {@link Task} being administered.
 	 */
-	private void loadDutyJobs(JobNode[] firstLastJobs,
-			TaskDutyAssociation<?>[] taskDutyAssociations,
+	private void loadDutyJobs(ManagedJobNode[] firstLastJobs, TaskDutyAssociation<?>[] taskDutyAssociations,
 			WorkMetaData<?> workMetaData, WorkContainer<?> actualWorkContainer,
-			WorkContainerProxy<?> proxyWorkContainer,
-			JobNode parallelNodeOwner,
+			WorkContainerProxy<?> proxyWorkContainer, ManagedJobNode parallelNodeOwner,
 			TaskMetaData<?, ?, ?> administeringTaskMetaData) {
 
 		// Load the duty jobs
@@ -207,24 +175,21 @@ public class JobSequenceImpl extends
 
 			// Obtain the associated administrator meta-data
 			AdministratorMetaData<?, ?> adminMetaData;
-			AdministratorIndex adminIndex = taskDutyAssociation
-					.getAdministratorIndex();
+			AdministratorIndex adminIndex = taskDutyAssociation.getAdministratorIndex();
 			int indexInScope = adminIndex.getIndexOfAdministratorWithinScope();
 			switch (adminIndex.getAdministratorScope()) {
 			case WORK:
 				adminMetaData = workMetaData.getAdministratorMetaData()[indexInScope];
 				break;
 			case THREAD:
-				adminMetaData = this.threadState.getThreadMetaData()
-						.getAdministratorMetaData()[indexInScope];
+				adminMetaData = this.threadState.getThreadMetaData().getAdministratorMetaData()[indexInScope];
 				break;
 			case PROCESS:
-				adminMetaData = this.threadState.getProcessState()
-						.getProcessMetaData().getAdministratorMetaData()[indexInScope];
+				adminMetaData = this.threadState.getProcessState().getProcessMetaData()
+						.getAdministratorMetaData()[indexInScope];
 				break;
 			default:
-				throw new IllegalStateException("Unknown administrator scope "
-						+ adminIndex.getAdministratorScope());
+				throw new IllegalStateException("Unknown administrator scope " + adminIndex.getAdministratorScope());
 			}
 
 			// Determine the work container to use
@@ -234,13 +199,11 @@ public class JobSequenceImpl extends
 				workContainer = proxyWorkContainer;
 			} else {
 				// Only use actual on last duty
-				workContainer = (i == (taskDutyAssociations.length - 1)) ? actualWorkContainer
-						: proxyWorkContainer;
+				workContainer = (i == (taskDutyAssociations.length - 1)) ? actualWorkContainer : proxyWorkContainer;
 			}
 
 			// Create and register the active duty job
-			JobNode dutyJob = adminMetaData.createDutyNode(
-					administeringTaskMetaData, workContainer, this,
+			ManagedJobNode dutyJob = adminMetaData.createDutyNode(administeringTaskMetaData, workContainer, this,
 					taskDutyAssociation, parallelNodeOwner);
 			this.activeJobNodes.addEntry(dutyJob);
 
@@ -250,62 +213,42 @@ public class JobSequenceImpl extends
 	}
 
 	/**
-	 * Loads the {@link Job} to the listing of {@link Job} instances.
+	 * Loads the {@link ManagedJobNode} to the listing of {@link ManagedJobNode}
+	 * instances.
 	 * 
 	 * @param firstLastJobs
-	 *            Array containing two elements, first and last {@link Job}
-	 *            instances.
+	 *            Array containing two elements, first and last
+	 *            {@link ManagedJobNode} instances.
 	 * @param newJob
-	 *            New {@link JobNode}.
+	 *            New {@link ManagedJobNode}.
 	 */
-	private void loadJob(JobNode[] firstLastJobs, JobNode newJob) {
+	private void loadJob(ManagedJobNode[] firstLastJobs, ManagedJobNode newJob) {
 		if (firstLastJobs[0] == null) {
 			// First job
 			firstLastJobs[0] = newJob;
 			firstLastJobs[1] = newJob;
 		} else {
 			// Another job (append for sequential execution)
-			firstLastJobs[1].setNextNode(newJob);
+			firstLastJobs[1].setNextManagedJobNode(newJob);
 			firstLastJobs[1] = newJob;
 		}
 	}
 
 	@Override
-	public void jobNodeComplete(JobNode jobNode,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam) {
+	public JobNode managedJobNodeComplete(ManagedJobNode jobNode, JobNode continueJobNode) {
 		// Remove JobNode from active JobNode listing
 		if (this.activeJobNodes.removeEntry(jobNode)) {
 			// Last active JobNode so flow is now complete
-			this.isFlowComplete = true;
-			this.threadState
-					.jobSequenceComplete(this, activateSet, currentTeam);
+			return this.threadState.flowComplete(this, continueJobNode);
 		}
+
+		// Flow still active
+		return null;
 	}
 
 	@Override
 	public ThreadState getThreadState() {
 		return this.threadState;
-	}
-
-	/*
-	 * ===================== FlowFuture ===================================
-	 */
-
-	@Override
-	public boolean isComplete() {
-		return this.isFlowComplete;
-	}
-
-	/*
-	 * ===================== FlowAsset ========================================
-	 */
-
-	@Override
-	public boolean waitOnFlow(JobNode jobNode, long timeout, Object token,
-			JobNodeActivateSet activateSet) {
-		// Delegate to the thread
-		return this.threadState
-				.waitOnFlow(jobNode, timeout, token, activateSet);
 	}
 
 }

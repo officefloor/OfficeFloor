@@ -29,7 +29,7 @@ import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
-import net.officefloor.frame.impl.execute.job.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;

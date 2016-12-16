@@ -15,24 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.job;
+package net.officefloor.frame.impl.execute.jobnode;
 
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeRunnable;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.JobContext;
 
 /**
- * {@link ProcessState} critical section {@link JobNode}.
+ * {@link JobNode} to execute a {@link Runnable}.
  *
  * @author Daniel Sagenschneider
  */
-public class ProcessCriticalSectionJobNode implements JobNode {
+public class RunnableJobNode implements JobNode {
 
 	/**
-	 * {@link JobNodeRunnable}.
+	 * {@link Runnable}.
 	 */
 	private final JobNodeRunnable runnable;
 
@@ -42,15 +41,9 @@ public class ProcessCriticalSectionJobNode implements JobNode {
 	private final TeamManagement responsibleTeam;
 
 	/**
-	 * {@link ProcessState}.
+	 * {@link ThreadState}.
 	 */
-	private final ProcessState processState;
-
-	/**
-	 * {@link JobNode} to continue once the {@link ProcessState} critical
-	 * section is complete.
-	 */
-	private final JobNode continueJobNode;
+	private ThreadState threadState;
 
 	/**
 	 * Instantiate.
@@ -59,27 +52,22 @@ public class ProcessCriticalSectionJobNode implements JobNode {
 	 *            {@link JobNodeRunnable}.
 	 * @param responsibleTeam
 	 *            Responsible {@link TeamManagement}.
-	 * @param processState
-	 *            {@link ProcessState}.
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue once the {@link ProcessState}
-	 *            critical section is complete.
+	 * @param threadState
+	 *            {@link ThreadState}.
 	 */
-	public ProcessCriticalSectionJobNode(JobNodeRunnable runnable, TeamManagement responsibleTeam,
-			ProcessState processState, JobNode continueJobNode) {
+	public RunnableJobNode(JobNodeRunnable runnable, TeamManagement responsibleTeam, ThreadState threadState) {
 		this.runnable = runnable;
 		this.responsibleTeam = responsibleTeam;
-		this.processState = processState;
-		this.continueJobNode = continueJobNode;
+		this.threadState = threadState;
 	}
 
 	/*
-	 * ========================= JobNode =================================
+	 * ==================== JobNode ===========================
 	 */
 
 	@Override
 	public JobNode doJob(JobContext context) {
-		return ContinueJobNode.continueWith(this.runnable.run(), this.continueJobNode);
+		return this.runnable.run();
 	}
 
 	@Override
@@ -89,7 +77,7 @@ public class ProcessCriticalSectionJobNode implements JobNode {
 
 	@Override
 	public ThreadState getThreadState() {
-		return this.processState.getMainThreadState();
+		return this.threadState;
 	}
 
 }

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.job.WaitJobNode;
+import net.officefloor.frame.impl.execute.jobnode.WaitJobNode;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorIndex;

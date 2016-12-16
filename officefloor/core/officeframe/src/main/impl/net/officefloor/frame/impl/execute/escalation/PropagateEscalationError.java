@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.escalation;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.impl.execute.job.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**

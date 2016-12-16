@@ -52,8 +52,7 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	 *            Index of {@link Governance} within the {@link ThreadState}.
 	 * @return {@link GovernanceContainer}.
 	 */
-	GovernanceContainer<I, F> createGovernanceContainer(
-			ThreadState threadState, int threadRegisteredIndex);
+	GovernanceContainer<I, F> createGovernanceContainer(ThreadState threadState, int threadRegisteredIndex);
 
 	/**
 	 * Creates the {@link ActiveGovernance}.
@@ -76,11 +75,9 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	 *            {@link ManagedObjectContainer} for unregistering.
 	 * @return {@link ActiveGovernanceManager}.
 	 */
-	ActiveGovernanceManager<I, F> createActiveGovernance(
-			GovernanceContainer<I, F> governanceContainer,
+	ActiveGovernanceManager<I, F> createActiveGovernance(GovernanceContainer<I, F> governanceContainer,
 			GovernanceControl<I, F> governanceControl, I extensionInterface,
-			ManagedObjectContainer managedobjectContainer,
-			WorkContainer<?> workContainer,
+			ManagedObjectContainer managedobjectContainer, WorkContainer<?> workContainer,
 			int managedObjectContainerRegisteredIndex);
 
 	/**
@@ -90,8 +87,7 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	 *            {@link GovernanceControl}.
 	 * @return {@link GovernanceActivity} to activate the {@link Governance}.
 	 */
-	GovernanceActivity<I, F> createActivateActivity(
-			GovernanceControl<I, F> governanceControl);
+	GovernanceActivity<I, F> createActivateActivity(GovernanceControl<I, F> governanceControl);
 
 	/**
 	 * Creates a {@link GovernanceActivity} to provide {@link Governance} to the
@@ -102,8 +98,7 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	 * @return {@link GovernanceActivity} to provide {@link Governance} to the
 	 *         {@link ManagedObject}.
 	 */
-	GovernanceActivity<I, F> createGovernActivity(
-			ActiveGovernanceControl<F> activeGovernanceControl);
+	GovernanceActivity<I, F> createGovernActivity(ActiveGovernanceControl<F> activeGovernanceControl);
 
 	/**
 	 * Creates the {@link GovernanceActivity} to enforce the {@link Governance}.
@@ -112,8 +107,7 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	 *            {@link GovernanceControl}.
 	 * @return {@link GovernanceActivity} to enforce the {@link Governance}.
 	 */
-	GovernanceActivity<I, F> createEnforceActivity(
-			GovernanceControl<I, F> governanceControl);
+	GovernanceActivity<I, F> createEnforceActivity(GovernanceControl<I, F> governanceControl);
 
 	/**
 	 * Creates the {@link GovernanceActivity} to disregard the
@@ -123,8 +117,7 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	 *            {@link GovernanceContext}.
 	 * @return {@link GovernanceActivity} to disregard the {@link Governance}.
 	 */
-	GovernanceActivity<I, F> createDisregardActivity(
-			GovernanceControl<I, F> governanceControl);
+	GovernanceActivity<I, F> createDisregardActivity(GovernanceControl<I, F> governanceControl);
 
 	/**
 	 * Obtains the {@link FlowMetaData} for the specified index.
@@ -136,19 +129,17 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	FlowMetaData<?> getFlow(int flowIndex);
 
 	/**
-	 * Creates the {@link JobNode} for the {@link GovernanceActivity}.
+	 * Creates the {@link ManagedJobNode} for the {@link GovernanceActivity}.
 	 * 
 	 * @param flow
-	 *            {@link Flow} for containing this
-	 *            {@link GovernanceActivity}.
+	 *            {@link Flow} for containing this {@link GovernanceActivity}.
 	 * @param governanceActivity
 	 *            {@link GovernanceActivity}.
 	 * @param parallelJobNodeOwner
-	 *            Parallel {@link JobNode} owner.
-	 * @return {@link JobNode} for the {@link GovernanceActivity}.
+	 *            Parallel {@link ManagedJobNode} owner.
+	 * @return {@link ManagedJobNode} for the {@link GovernanceActivity}.
 	 */
-	JobNode createGovernanceJob(Flow flow,
-			GovernanceActivity<I, F> governanceActivity,
-			JobNode parallelJobNodeOwner);
+	ManagedJobNode createGovernanceJobNode(Flow flow, GovernanceActivity<I, F> governanceActivity,
+			ManagedJobNode parallelJobNodeOwner);
 
 }

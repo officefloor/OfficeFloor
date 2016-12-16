@@ -23,7 +23,7 @@ import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
-import net.officefloor.frame.impl.execute.job.WaitJobNode;
+import net.officefloor.frame.impl.execute.jobnode.WaitJobNode;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetMonitor;

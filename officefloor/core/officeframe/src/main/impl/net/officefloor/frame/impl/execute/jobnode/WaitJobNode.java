@@ -15,69 +15,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.job;
+package net.officefloor.frame.impl.execute.jobnode;
 
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeRunnable;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.JobContext;
 
 /**
- * {@link JobNode} to execute a {@link Runnable}.
+ * {@link JobNode} that indicates to wait.
  *
  * @author Daniel Sagenschneider
  */
-public class RunnableJobNode implements JobNode {
+public class WaitJobNode implements JobNode {
 
 	/**
-	 * {@link Runnable}.
+	 * Delegate {@link JobNode}.
 	 */
-	private final JobNodeRunnable runnable;
-
-	/**
-	 * Responsible {@link TeamManagement}.
-	 */
-	private final TeamManagement responsibleTeam;
-
-	/**
-	 * {@link ThreadState}.
-	 */
-	private ThreadState threadState;
+	private final JobNode delegate;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param runnable
-	 *            {@link JobNodeRunnable}.
-	 * @param responsibleTeam
-	 *            Responsible {@link TeamManagement}.
-	 * @param threadState
+	 * @param delegate
+	 *            Delegate {@link JobNode} to use to wait within its
 	 *            {@link ThreadState}.
 	 */
-	public RunnableJobNode(JobNodeRunnable runnable, TeamManagement responsibleTeam, ThreadState threadState) {
-		this.runnable = runnable;
-		this.responsibleTeam = responsibleTeam;
-		this.threadState = threadState;
+	public WaitJobNode(JobNode delegate) {
+		this.delegate = delegate;
 	}
 
 	/*
-	 * ==================== JobNode ===========================
+	 * ======================= JobNode ================================
 	 */
 
 	@Override
 	public JobNode doJob(JobContext context) {
-		return this.runnable.run();
+		return null; // no further jobs, so goes into wait
 	}
 
 	@Override
 	public TeamManagement getResponsibleTeam() {
-		return this.responsibleTeam;
+		return this.delegate.getResponsibleTeam();
 	}
 
 	@Override
 	public ThreadState getThreadState() {
-		return this.threadState;
+		return this.delegate.getThreadState();
 	}
 
 }

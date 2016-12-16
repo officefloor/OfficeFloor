@@ -15,12 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.job;
+package net.officefloor.frame.impl.execute.jobnode;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -31,6 +32,7 @@ import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.FlowAsset;
+import net.officefloor.frame.internal.structure.FlowCallbackJobNodeFactory;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
@@ -39,6 +41,7 @@ import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.LinkedListSetEntry;
+import net.officefloor.frame.internal.structure.ManagedJobNode;
 import net.officefloor.frame.internal.structure.ManagedJobNodeContext;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -61,33 +64,12 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends JobMetaData>
-		implements JobNode, ManagedJobNodeContext {
+		implements ManagedJobNode, ManagedJobNodeContext {
 
 	/**
 	 * {@link Logger}.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(OfficeFrame.class.getName());
-
-	/**
-	 * <p>
-	 * Listing {@link FlowAsset} instances for this {@link JobNode} to join on
-	 * at the end of each <code>doJob</code> run.
-	 * <p>
-	 * It will only hold the unique set of {@link FlowAsset} instances to join
-	 * on.
-	 */
-	private final LinkedListSet<JoinFlowAsset, JobNode> joinFlowAssets = new ComparatorLinkedListSet<JoinFlowAsset, JobNode>() {
-		@Override
-		protected JobNode getOwner() {
-			return AbstractManagedJobNodeContainer.this;
-		}
-
-		@Override
-		protected boolean isEqual(JoinFlowAsset entryA, JoinFlowAsset entryB) {
-			// Equal if same flow asset (to maintain unique set to join on)
-			return (entryA.flowAsset == entryB.flowAsset);
-		}
-	};
 
 	/**
 	 * {@link Flow}.
@@ -183,14 +165,14 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 	private Object nextJobParameter;
 
 	/**
-	 * Flag indicating if the {@link JobNode} requires execution.
-	 */
-	private boolean isRequireExecution = true;
-
-	/**
 	 * Flag indicating if a sequential {@link JobNode} was invoked.
 	 */
 	private boolean isSequentialJobInvoked = false;
+
+	/**
+	 * Spawn {@link ThreadState} {@link JobNode}.
+	 */
+	private SpawnThreadStateJobNode spawnThreadStateJobNode = null;
 
 	/**
 	 * Initiate.
@@ -436,9 +418,6 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 			switch (this.jobState) {
 			case EXECUTE_JOB:
 
-				// That now executing the job node
-				this.isRequireExecution = false;
-
 				// Log execution of the Job
 				if (LOGGER.isLoggable(Level.FINER)) {
 					StringBuilder msg = new StringBuilder();
@@ -454,56 +433,20 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 					LOGGER.log(Level.FINER, msg.toString());
 				}
 
-				// TODO separate out join on flow asset
+				// Execute the job
+				this.nextJobParameter = this.executeJobNode(this, jobContext);
 
-				// Join should return the next job
-				JoinFlowAsset headJoinOnFlowAsset = null;
-				try {
-					// Execute the job
-					this.nextJobParameter = this.executeJobNode(this, jobContext);
-				} finally {
-					// Ensure always purge join flow assets
-					headJoinOnFlowAsset = this.joinFlowAssets.purgeEntries();
+				// Job executed, so now to activate the next job
+				this.jobState = JobState.ACTIVATE_NEXT_JOB_NODE;
+
+				// Spawn any threads
+				if (this.spawnThreadStateJobNode != null) {
+					JobNode spawn = this.spawnThreadStateJobNode;
+					this.spawnThreadStateJobNode = null;
+					return spawn;
 				}
 
-				// Now to handle if job is complete
-				this.jobState = JobState.HANDLE_JOB_COMPLETION;
-
-				// Join to any required flow assets
-				while (headJoinOnFlowAsset != null) {
-					//
-					// TODO determine how to handle joins
-					//
-					// if (!(headJoinOnFlowAsset.flowAsset.waitOnFlow(this,
-					// headJoinOnFlowAsset.timeout,
-					// headJoinOnFlowAsset.token, activateSet))) {
-					// // Activate as not waiting on flow
-					// activateSet.addJobNode(this);
-					// }
-					// headJoinOnFlowAsset = headJoinOnFlowAsset.getNext();
-				}
-
-			case HANDLE_JOB_COMPLETION:
-				// Handle only if job requires re-execution
-				if (this.isRequireExecution) {
-					// Execute the job again
-					this.jobState = JobState.EXECUTE_JOB;
-
-					// Determine if parallel task to execute
-					JobNode parallelJob = this.getParallelJobNodeToExecute();
-					if (parallelJob != null) {
-						// Execute the parallel job before this one
-						return parallelJob;
-					} else {
-						// Job logic not complete (must execute again)
-						return this;
-					}
-				}
-
-				// No re-execution, so activate the next job
-				this.jobState = JobState.ACTIVATE_NEXT_JOB_IN_FLOW;
-
-			case ACTIVATE_NEXT_JOB_IN_FLOW:
+			case ACTIVATE_NEXT_JOB_NODE:
 
 				// Load next job if no sequential job invoked
 				if (!this.isSequentialJobInvoked) {
@@ -524,7 +467,7 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 				}
 
 				// Complete this job (flags state complete)
-				JobNode completeJob = this.completeJobNode();
+				JobNode completeJob = this.completeJobNode(this);
 				if (completeJob != null) {
 					return completeJob;
 				}
@@ -605,7 +548,7 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 			threadState.escalationStart(this);
 			try {
 				// Escalation from this node, so nothing further
-				JobNode clearJobNode = this.clearNodes();
+				JobNode clearJobNode = this.clearNodes(this);
 				if (clearJobNode != null) {
 					return clearJobNode;
 				}
@@ -618,7 +561,7 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 							.getEscalation(escalationCause);
 					if (escalation == null) {
 						// Clear node as not handles escalation
-						JobNode parentClearJobNode = node.clearNodes();
+						JobNode parentClearJobNode = node.clearNodes(this);
 						if (parentClearJobNode != null) {
 							return parentClearJobNode;
 						}
@@ -701,7 +644,7 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 		}
 
 		// Now complete
-		return this.completeJobNode();
+		return this.completeJobNode(this);
 	}
 
 	/**
@@ -766,38 +709,12 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 	 */
 
 	@Override
-	public final void setJobComplete(boolean isComplete) {
-		this.isRequireExecution = !isComplete;
-	}
-
-	@Override
-	public final void joinFlow(FlowFuture flowFuture, long timeout, Object token) {
-
-		// Flow future must be a FlowFutureToken
-		if (!(flowFuture instanceof FlowFutureToken)) {
-			throw new IllegalArgumentException(
-					"Invalid " + FlowFuture.class.getSimpleName() + " (future=" + flowFuture + ", future type="
-							+ flowFuture.getClass().getName() + ", required type=" + FlowFuture.class.getName() + ")");
-		}
-
-		// Obtain the flow future token
-		FlowFutureToken flowFurtureToken = (FlowFutureToken) flowFuture;
-
-		// Transform actual flow future to its flow asset
-		FlowAsset flowAsset = (FlowAsset) flowFurtureToken.flowFuture;
-
-		// Add flow asset to be joined on at completion of this job
-		this.joinFlowAssets.addEntry(new JoinFlowAsset(this, flowAsset, timeout, token));
-	}
-
-	@Override
-	public final FlowFuture doFlow(FlowMetaData<?> flowMetaData, Object parameter) {
+	public final void doFlow(FlowMetaData<?> flowMetaData, Object parameter, FlowCallback callback) {
 
 		// Obtain the task meta-data for instigating the flow
 		TaskMetaData<?, ?, ?> initTaskMetaData = flowMetaData.getInitialTaskMetaData();
 
 		// Instigate the flow
-		FlowFuture flowFuture;
 		switch (flowMetaData.getInstigationStrategy()) {
 
 		case SEQUENTIAL:
@@ -811,12 +728,11 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 
 			// Load the sequential node
 			this.loadSequentialJobNode(sequentialJobNode);
-			flowFuture = this.flow;
 			break;
 
 		case PARALLEL:
 			// Create a new flow for execution
-			Flow parallelFlow = this.flow.getThreadState().createJobSequence();
+			Flow parallelFlow = this.flow.getThreadState().createFlow();
 
 			// Create the job node
 			AbstractManagedJobNodeContainer<?, ?> parallelJobNode = (AbstractManagedJobNodeContainer<?, ?>) parallelFlow
@@ -824,20 +740,26 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 
 			// Load the parallel node
 			this.loadParallelJobNode(parallelJobNode);
-			flowFuture = parallelFlow;
 			break;
 
 		case ASYNCHRONOUS:
-			flowFuture = this.flow.getThreadState().spawnThreadState(flowMetaData, parameter);
+			JobNode continueJobNode = (this.spawnThreadStateJobNode != null) ? this.spawnThreadStateJobNode : this;
+			this.spawnThreadStateJobNode = new SpawnThreadStateJobNode(this.flow.getThreadState().getProcessState(),
+					flowMetaData, parameter, new FlowCallbackJobNodeFactory() {
+						@Override
+						public JobNode createJobNode(Throwable exception) {
+							// TODO implement Type1481920593530.createJobNode
+							throw new UnsupportedOperationException("TODO implement Type1481920593530.createJobNode");
+
+						}
+					}, continueJobNode);
+			// TODO register spawn thread job node for execution
 			break;
 
 		default:
 			// Unknown instigation strategy
 			throw new IllegalStateException("Unknown instigation strategy");
 		}
-
-		// Return the flow future token for joining on
-		return new FlowFutureToken(flowFuture);
 	}
 
 	/**
@@ -892,11 +814,11 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 	 * @return {@link JobNode}.
 	 */
 	private final JobNode createEscalationJobNode(TaskMetaData<?, ?, ?> taskMetaData, Object parameter,
-			JobNode parallelOwner) {
+			ManagedJobNode parallelOwner) {
 
 		// Create a new flow for execution
 		ThreadState threadState = this.flow.getThreadState();
-		Flow parallelFlow = threadState.createJobSequence();
+		Flow parallelFlow = threadState.createFlow();
 
 		// Create the job node
 		JobNode escalationJobNode = parallelFlow.createManagedJobNode(taskMetaData, parallelOwner, parameter,
@@ -908,18 +830,21 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 
 	/**
 	 * Clears this {@link JobNode}.
+	 * 
+	 * @param continueJobNode
+	 *            Continue {@link JobNode}.
 	 */
-	private final JobNode clearNodes() {
+	private final JobNode clearNodes(JobNode continueJobNode) {
 
 		// Complete this job
-		JobNode completeJobNode = this.completeJobNode();
+		JobNode completeJobNode = this.completeJobNode(continueJobNode);
 		if (completeJobNode != null) {
 			return completeJobNode;
 		}
 
 		// Clear all the parallel jobs from this node
 		if (this.parallelNode != null) {
-			JobNode parallelJobNode = this.parallelNode.clearNodes();
+			JobNode parallelJobNode = this.parallelNode.clearNodes(continueJobNode);
 			if (parallelJobNode != null) {
 				return parallelJobNode;
 			}
@@ -928,7 +853,7 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 
 		// Clear all the sequential jobs from this node
 		if (this.nextTaskNode != null) {
-			JobNode sequentialJobNode = this.nextTaskNode.clearNodes();
+			JobNode sequentialJobNode = this.nextTaskNode.clearNodes(continueJobNode);
 			if (sequentialJobNode != null) {
 				return sequentialJobNode;
 			}
@@ -941,8 +866,11 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 
 	/**
 	 * Completes this {@link JobNode}.
+	 * 
+	 * @param continueJobNode
+	 *            Continue {@link JobNode}.
 	 */
-	private JobNode completeJobNode() {
+	private JobNode completeJobNode(JobNode continueJobNode) {
 
 		// Do nothing if already complete
 		if (this.jobState == JobState.COMPLETED) {
@@ -956,7 +884,7 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 		}
 
 		// Clean up job node
-		JobNode flowJob = this.flow.jobNodeComplete(this);
+		JobNode flowJob = this.flow.managedJobNodeComplete(this, continueJobNode);
 		if (flowJob != null) {
 			return flowJob;
 		}
@@ -978,30 +906,14 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 		LOAD_MANAGED_OBJECTS,
 
 		/**
-		 * Indicates the {@link ManagedObject} instances require
-		 * {@link Governance}.
-		 */
-		GOVERN_MANAGED_OBJECTS,
-
-		/**
-		 * Indicates the {@link ManagedObject} instances require coordinating.
-		 */
-		COORDINATE_MANAGED_OBJECTS,
-
-		/**
 		 * Indicates the {@link Job} is to be executed.
 		 */
 		EXECUTE_JOB,
 
 		/**
-		 * Handles if the {@link Job} is completed.
+		 * Indicates to activate the next {@link ManagedJobNode}.
 		 */
-		HANDLE_JOB_COMPLETION,
-
-		/**
-		 * Indicates to activate the next {@link Task} in the {@link Flow}.
-		 */
-		ACTIVATE_NEXT_JOB_IN_FLOW,
+		ACTIVATE_NEXT_JOB_NODE,
 
 		/**
 		 * Failure in executing.
@@ -1009,101 +921,9 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 		FAILED,
 
 		/**
-		 * {@link TaskContainer} has completed.
+		 * Completed.
 		 */
-		COMPLETED,
-
-	}
-
-	/**
-	 * {@link LinkedListSetEntry} to contain a {@link FlowAsset} that this
-	 * {@link JobNode} is to join on.
-	 */
-	private static final class JoinFlowAsset extends AbstractLinkedListSetEntry<JoinFlowAsset, JobNode> {
-
-		/**
-		 * {@link LinkedListSetEntry} {@link JobNode} owner.
-		 */
-		private final JobNode listOwnerJobNode;
-
-		/**
-		 * {@link FlowAsset} that this {@link JobNode} is to join on.
-		 */
-		public final FlowAsset flowAsset;
-
-		/**
-		 * Timeout in milliseconds for the {@link Flow} join.
-		 */
-		public final long timeout;
-
-		/**
-		 * {@link Flow} join token.
-		 */
-		public final Object token;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param listOwnerJobNode
-		 *            {@link LinkedListSetEntry} {@link JobNode} owner.
-		 * @param flowAsset
-		 *            {@link FlowAsset} that this {@link JobNode} is to join on.
-		 * @param timeout
-		 *            Timeout in milliseconds for the {@link Flow} join.
-		 * @param token
-		 *            {@link Flow} join token.
-		 */
-		public JoinFlowAsset(JobNode listOwnerJobNode, FlowAsset flowAsset, long timeout, Object token) {
-			this.listOwnerJobNode = listOwnerJobNode;
-			this.flowAsset = flowAsset;
-			this.timeout = timeout;
-			this.token = token;
-		}
-
-		/*
-		 * ==================== LinkedListSetEntry ===========================
-		 */
-
-		@Override
-		public JobNode getLinkedListSetOwner() {
-			return this.listOwnerJobNode;
-		}
-	}
-
-	/**
-	 * <p>
-	 * Token class returned from <code>doFlow</code> that is the only input to
-	 * <code>joinFlow</code>.
-	 * <p>
-	 * As application code will be provided a {@link FlowFuture} this wraps the
-	 * actual internal framework {@link FlowFuture} to prevent access to
-	 * internals of the framework.
-	 */
-	private static final class FlowFutureToken implements FlowFuture {
-
-		/**
-		 * Actual {@link FlowFuture}.
-		 */
-		private final FlowFuture flowFuture;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param flowFuture
-		 *            Actual {@link FlowFuture}.
-		 */
-		public FlowFutureToken(FlowFuture flowFuture) {
-			this.flowFuture = flowFuture;
-		}
-
-		/*
-		 * ==================== FlowFuture ==================================
-		 */
-
-		@Override
-		public boolean isComplete() {
-			return this.flowFuture.isComplete();
-		}
+		COMPLETED
 	}
 
 }

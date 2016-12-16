@@ -17,58 +17,62 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.Task;
 
 /**
- * Represents a sub-graph of the {@link JobNode} graph making up the
- * {@link ThreadState}. This enables the {@link FlowFuture} to know when a
- * parallel {@link Flow} is complete.
+ * Represents a sub-graph of the {@link ManagedJobNode} graph making up the
+ * {@link ThreadState}. This enables knowing when to undertake the
+ * {@link FlowCallback} on completion of all {@link ManagedJobNode} instances of
+ * the {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Flow extends FlowAsset, FlowFuture, LinkedListSetEntry<Flow, ThreadState> {
+public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 
 	/**
-	 * Creates a new managed {@link JobNode} contained in this {@link Flow} for
-	 * the {@link Task}.
+	 * Creates a new managed {@link ManagedJobNode} contained in this
+	 * {@link Flow} for the {@link Task}.
 	 * 
-	 * @param jobMetaData
-	 *            {@link JobMetaData} for the new {@link JobNode}.
+	 * @param taskMetaData
+	 *            {@link TaskMetaData} for the new {@link ManagedJobNode}.
 	 * @param parallelNodeOwner
-	 *            {@link JobNode} that is the parallel owner of the new
-	 *            {@link JobNode}.
+	 *            {@link ManagedJobNode} that is the parallel owner of the new
+	 *            {@link ManagedJobNode}.
 	 * @param parameter
-	 *            Parameter for the {@link JobNode}.
+	 *            Parameter for the {@link ManagedJobNode}.
 	 * @param governanceDeactivationStrategy
 	 *            {@link GovernanceDeactivationStrategy}.
-	 * @return New {@link JobNode}.
+	 * @return New {@link ManagedJobNode}.
 	 */
-	JobNode createManagedJobNode(JobMetaData jobMetaData, JobNode parallelNodeOwner, Object parameter,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy);
+	ManagedJobNode createManagedJobNode(TaskMetaData<?, ?, ?> taskMetaData, ManagedJobNode parallelNodeOwner,
+			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy);
 
 	/**
-	 * Creates a new {@link JobNode} contained in this {@link Flow} for the
-	 * {@link GovernanceActivity}.
+	 * Creates a new {@link ManagedJobNode} contained in this {@link Flow} for
+	 * the {@link GovernanceActivity}.
 	 * 
 	 * @param governanceActivity
 	 *            {@link GovernanceActivity}.
 	 * @param parallelNodeOwner
-	 *            {@link JobNode} that is the parallel owner of the new
-	 *            {@link JobNode}.
-	 * @return New {@link JobNode}.
+	 *            {@link ManagedJobNode} that is the parallel owner of the new
+	 *            {@link ManagedJobNode}.
+	 * @return New {@link ManagedJobNode}.
 	 */
-	JobNode createGovernanceNode(GovernanceActivity<?, ?> governanceActivity, JobNode parallelNodeOwner);
+	ManagedJobNode createGovernanceNode(GovernanceActivity<?, ?> governanceActivity, ManagedJobNode parallelNodeOwner);
 
 	/**
-	 * Flags that the input {@link JobNode} has completed.
+	 * Flags that the input {@link ManagedJobNode} has completed.
 	 * 
 	 * @param jobNode
-	 *            {@link JobNode} that has completed.
+	 *            {@link ManagedJobNode} that has completed.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue once the {@link ManagedJobNode} is
+	 *            completed.
 	 * @return Optional {@link JobNode} to handle completion of the
-	 *         {@link JobNode}.
+	 *         {@link ManagedJobNode}.
 	 */
-	JobNode jobNodeComplete(JobNode jobNode);
+	JobNode managedJobNodeComplete(ManagedJobNode jobNode, JobNode continueJobNode);
 
 	/**
 	 * Obtains the {@link ThreadState} containing this {@link Flow}.
