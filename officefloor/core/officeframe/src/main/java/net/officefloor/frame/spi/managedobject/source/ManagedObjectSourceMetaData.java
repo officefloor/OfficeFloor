@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.spi.managedobject.source;
 
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -75,9 +75,9 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, F extends Enum<F
 
 	/**
 	 * Obtains the list of {@link ManagedObjectFlowMetaData} instances should
-	 * this {@link ManagedObjectSource} require instigating a {@link JobSequence}.
+	 * this {@link ManagedObjectSource} require instigating a {@link Flow}.
 	 * 
-	 * @return Meta-data of {@link JobSequence} instances instigated by this
+	 * @return Meta-data of {@link Flow} instances instigated by this
 	 *         {@link ManagedObjectSource}.
 	 */
 	ManagedObjectFlowMetaData<F>[] getFlowMetaData();

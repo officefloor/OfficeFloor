@@ -18,14 +18,14 @@
 package net.officefloor.frame.impl.execute.governance;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
-import net.officefloor.frame.impl.execute.job.JobExecuteContext;
+import net.officefloor.frame.impl.execute.job.AbstractManagedJobNodeContainer;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedJobNodeContext;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
@@ -41,7 +41,7 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * @author Daniel Sagenschneider
  */
 public class GovernanceJob<I, F extends Enum<F>, W extends Work> extends
-		AbstractJobContainer<W, GovernanceMetaData<I, F>> {
+		AbstractManagedJobNodeContainer<W, GovernanceMetaData<I, F>> {
 
 	/**
 	 * No {@link ManagedObject} instances required for {@link Governance}.
@@ -62,7 +62,7 @@ public class GovernanceJob<I, F extends Enum<F>, W extends Work> extends
 	 * Initiate.
 	 * 
 	 * @param flow
-	 *            {@link JobSequence}.
+	 *            {@link Flow}.
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param nodeMetaData
@@ -72,7 +72,7 @@ public class GovernanceJob<I, F extends Enum<F>, W extends Work> extends
 	 * @param governanceActivity
 	 *            {@link GovernanceActivity}.
 	 */
-	public GovernanceJob(JobSequence flow, WorkContainer<W> workContainer,
+	public GovernanceJob(Flow flow, WorkContainer<W> workContainer,
 			GovernanceMetaData<I, F> nodeMetaData, JobNode parallelOwner,
 			GovernanceActivity<I, F> governanceActivity) {
 		super(flow, workContainer, nodeMetaData, parallelOwner,
@@ -92,7 +92,7 @@ public class GovernanceJob<I, F extends Enum<F>, W extends Work> extends
 	}
 
 	@Override
-	protected Object executeJob(JobExecuteContext context,
+	protected Object executeJob(ManagedJobNodeContext context,
 			JobContext jobContext, JobNodeActivateSet activateSet)
 			throws Throwable {
 

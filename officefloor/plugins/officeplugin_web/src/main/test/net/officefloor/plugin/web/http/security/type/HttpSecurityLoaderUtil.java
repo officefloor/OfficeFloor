@@ -26,7 +26,7 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 import net.officefloor.plugin.web.http.security.HttpSecuritySourceSpecification;
 
@@ -48,7 +48,7 @@ public class HttpSecurityLoaderUtil {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param <HS>
 	 *            {@link HttpSecuritySource} type.
 	 * @param httpSecuritySourceClass
@@ -105,7 +105,7 @@ public class HttpSecurityLoaderUtil {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param <HS>
 	 *            {@link HttpSecuritySource} type.
 	 * @param expectedHttpSecurityType
@@ -164,7 +164,7 @@ public class HttpSecurityLoaderUtil {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param <HS>
 	 *            {@link HttpSecuritySource} type.
 	 * @param httpSecuritySourceClass
@@ -197,7 +197,7 @@ public class HttpSecurityLoaderUtil {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param <HS>
 	 *            {@link HttpSecuritySource} type.
 	 * @param httpSecuritySourceClass
@@ -231,7 +231,7 @@ public class HttpSecurityLoaderUtil {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource}.
 	 * @param propertyNameValues

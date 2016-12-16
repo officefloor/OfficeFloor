@@ -20,11 +20,11 @@ package net.officefloor.compile.managedobject;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * <code>Type definition</code> of a {@link JobSequence} instigated by the
+ * <code>Type definition</code> of a {@link Flow} instigated by the
  * {@link ManagedObjectSource} or one of its {@link Task} instances.
  * 
  * @author Daniel Sagenschneider
@@ -32,19 +32,19 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface ManagedObjectFlowType<F extends Enum<F>> {
 
 	/**
-	 * Obtains the name of the {@link JobSequence}.
+	 * Obtains the name of the {@link Flow}.
 	 * 
-	 * @return Name of the {@link JobSequence}.
+	 * @return Name of the {@link Flow}.
 	 */
 	String getFlowName();
 
 	/**
-	 * Obtains the name of the {@link Work} instigating the {@link JobSequence}.
-	 * Should the {@link JobSequence} be instigated by the
+	 * Obtains the name of the {@link Work} instigating the {@link Flow}.
+	 * Should the {@link Flow} be instigated by the
 	 * {@link ManagedObjectSource} directly (rather than a {@link Task} it
 	 * added) this will return <code>null</code>.
 	 * 
-	 * @return {@link Work} name instigating {@link JobSequence} or
+	 * @return {@link Work} name instigating {@link Flow} or
 	 *         <code>null</code> if instigated directly by
 	 *         {@link ManagedObjectSource}.
 	 * 
@@ -54,43 +54,43 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Obtains the name of the {@link Task} instigating the {@link JobSequence}.
-	 * Should the {@link JobSequence} be instigated by the
+	 * Obtains the name of the {@link Task} instigating the {@link Flow}.
+	 * Should the {@link Flow} be instigated by the
 	 * {@link ManagedObjectSource} directly (rather than a {@link Task} it
 	 * added) this will return <code>null</code>.
 	 * <p>
 	 * For clarity, this is not the name of the {@link Task} to be invoked by
-	 * the {@link JobSequence} but rather the {@link Task} triggering the
-	 * {@link JobSequence}. In other words, it is a {@link JobSequence}
+	 * the {@link Flow} but rather the {@link Task} triggering the
+	 * {@link Flow}. In other words, it is a {@link Flow}
 	 * invocation that requires to be defined for the
 	 * {@link ManagedObjectSource} as it is triggered from a {@link Task} added
 	 * by the {@link ManagedObjectSource} and handled by some {@link Office}
 	 * {@link Task}.
 	 * 
-	 * @return {@link Task} name instigating {@link JobSequence} or
+	 * @return {@link Task} name instigating {@link Flow} or
 	 *         <code>null</code> if instigated directly by
 	 *         {@link ManagedObjectSource}.
 	 */
 	String getTaskName();
 
 	/**
-	 * Obtains the key identifying the {@link JobSequence}.
+	 * Obtains the key identifying the {@link Flow}.
 	 * 
-	 * @return Key identifying the {@link JobSequence}.
+	 * @return Key identifying the {@link Flow}.
 	 */
 	F getKey();
 
 	/**
-	 * Obtains the index identifying the {@link JobSequence}.
+	 * Obtains the index identifying the {@link Flow}.
 	 * 
-	 * @return Index identifying the {@link JobSequence}.
+	 * @return Index identifying the {@link Flow}.
 	 */
 	int getIndex();
 
 	/**
-	 * Obtains the type of the argument passed to the {@link JobSequence}.
+	 * Obtains the type of the argument passed to the {@link Flow}.
 	 * 
-	 * @return Type of argument passed to the {@link JobSequence}. May be
+	 * @return Type of argument passed to the {@link Flow}. May be
 	 *         <code>null</code> to indicate no argument.
 	 */
 	Class<?> getArgumentType();

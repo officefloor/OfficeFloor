@@ -20,8 +20,6 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Sequence of {@link JobNode} instances to undertake clean-up.
@@ -48,10 +46,8 @@ public interface CleanupSequence {
 	 *            (typically because there may be dependencies between
 	 *            {@link JobNode} instances that must be respected in sequential
 	 *            clean up).
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier} of the current {@link Team} executing.
 	 */
-	void registerCleanUpJob(JobNode cleanupJob, TeamIdentifier teamIdentifier);
+	void registerCleanUpJob(JobNode cleanupJob);
 
 	/**
 	 * Obtains the registered {@link CleanupEscalation} instances.

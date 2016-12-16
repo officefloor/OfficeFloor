@@ -19,7 +19,6 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
@@ -48,22 +47,14 @@ public interface GovernanceActivity<I, F extends Enum<F>> {
 	 *            {@link JobContext}.
 	 * @param jobNode
 	 *            {@link JobNode}.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
 	 * @param currentTeam
 	 *            {@link TeamIdentifier} of the current {@link Team} undertaking
 	 *            the activity.
-	 * @param containerContext
-	 *            {@link ContainerContext}.
-	 * @return <code>true</code> should activity be successfully trigger. In
-	 *         other words, does not need re-executing as waiting on
-	 *         {@link ManagedObject}.
+	 * @return Optional {@link JobNode} to undertake {@link Governance}.
 	 * @throws Throwable
 	 *             If activity fails.
 	 */
-	boolean doActivity(GovernanceContext<F> governanceContext,
-			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
-			ContainerContext containerContext) throws Throwable;
+	JobNode doActivity(GovernanceContext<F> governanceContext, JobContext jobContext, JobNode jobNode,
+			TeamIdentifier currentTeam) throws Throwable;
 
 }

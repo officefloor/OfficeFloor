@@ -22,6 +22,7 @@ package net.officefloor.frame.api.execute;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // use managed object for state
 public interface Work {
 
 }

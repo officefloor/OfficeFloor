@@ -18,10 +18,10 @@
 package net.officefloor.compile.governance;
 
 import net.officefloor.frame.internal.structure.GovernanceActivity;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * <code>Type definition</code> of a {@link JobSequence} possibly instigated by
+ * <code>Type definition</code> of a {@link Flow} possibly instigated by
  * a {@link GovernanceActivity}.
  * 
  * @author Daniel Sagenschneider
@@ -48,9 +48,9 @@ public interface GovernanceFlowType<F extends Enum<F>> {
 
 	/**
 	 * Obtains the type of the argument passed by the {@link GovernanceActivity}
-	 * to the {@link JobSequence}.
+	 * to the {@link Flow}.
 	 * 
-	 * @return Type of argument passed to {@link JobSequence}. May be
+	 * @return Type of argument passed to {@link Flow}. May be
 	 *         <code>null</code> to indicate no argument.
 	 */
 	Class<?> getArgumentType();

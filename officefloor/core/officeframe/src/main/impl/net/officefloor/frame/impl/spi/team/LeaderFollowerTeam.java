@@ -68,8 +68,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	 * @param waitTime
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
-	public LeaderFollowerTeam(String teamName, TeamIdentifier teamIdentifier,
-			int teamMemberCount, long waitTime) {
+	public LeaderFollowerTeam(String teamName, TeamIdentifier teamIdentifier, int teamMemberCount, long waitTime) {
 		super(teamName);
 		this.teamIdentifier = teamIdentifier;
 
@@ -80,8 +79,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 		this.teamMembers = new TeamMember[teamMemberCount];
 		for (int i = 0; i < this.teamMembers.length; i++) {
 			// Create the Team Member
-			this.teamMembers[i] = new TeamMember(this.teamMemberStack,
-					this.taskQueue, waitTime);
+			this.teamMembers[i] = new TeamMember(this.teamMemberStack, this.taskQueue, waitTime);
 		}
 	}
 
@@ -97,8 +95,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 
 		// Start the team members working
 		for (int i = 0; i < this.teamMembers.length; i++) {
-			String threadName = this.getClass().getSimpleName() + "_"
-					+ this.getName() + "_" + String.valueOf(i);
+			String threadName = this.getClass().getSimpleName() + "_" + this.getName() + "_" + String.valueOf(i);
 			Thread thread = new Thread(this, this.teamMembers[i], threadName);
 			thread.setDaemon(true);
 			thread.start();
@@ -139,8 +136,8 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
 		// Indicate failure
-		System.out.println(t.getName() + "[" + t.getId() + "]: "
-				+ e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
+		System.out.println(
+				t.getName() + "[" + t.getId() + "]: " + e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
 		e.printStackTrace();
 	}
 
@@ -195,8 +192,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 		 * @param waitTime
 		 *            Time to wait in milliseconds for a {@link Job}.
 		 */
-		public TeamMember(TeamMemberStack teamMemberStack, JobQueue taskQueue,
-				long waitTime) {
+		public TeamMember(TeamMemberStack teamMemberStack, JobQueue taskQueue, long waitTime) {
 			this.teamMemberStack = teamMemberStack;
 			this.taskQueue = taskQueue;
 			this.waitTime = waitTime;
@@ -230,10 +226,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 						this.time = UNKNOWN_TIME;
 
 						// Run the job
-						if (!job.doJob(this)) {
-							// Job needs to be re-run
-							this.taskQueue.enqueue(job);
-						}
+						job.doJob(this);
 					}
 				}
 			} finally {

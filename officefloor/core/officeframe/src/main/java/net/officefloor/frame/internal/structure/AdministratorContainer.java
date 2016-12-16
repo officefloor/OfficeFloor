@@ -23,6 +23,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Job;
 
 /**
  * Container for an {@link Administrator}.
@@ -43,8 +44,7 @@ public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
 	 *         {@link ManagedObject} extension interfaces to provide to the
 	 *         {@link Duty}.
 	 */
-	ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData(
-			AdministratorContext context);
+	ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData(AdministratorContext context);
 
 	/**
 	 * Executes the {@link Duty}.
@@ -57,13 +57,11 @@ public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
 	 * @param context
 	 *            {@link AdministratorContext} for the {@link Duty} be executed
 	 *            within.
-	 * @param containerContext
-	 *            {@link ContainerContext}.
+	 * @return Optional {@link Job} to undertake the {@link Duty}.
 	 * @throws Throwable
 	 *             If {@link Duty} fails.
 	 */
-	void doDuty(TaskDutyAssociation<A> taskDutyAssociation,
-			List<I> extensionInterfaces, AdministratorContext context,
-			ContainerContext containerContext) throws Throwable;
+	JobNode doDuty(TaskDutyAssociation<A> taskDutyAssociation, List<I> extensionInterfaces,
+			AdministratorContext context) throws Throwable;
 
 }

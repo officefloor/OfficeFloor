@@ -24,7 +24,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.impl.execute.managedobject.CleanupSequenceImpl;
 import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
@@ -221,10 +221,10 @@ public class CleanupSequenceTest extends OfficeFrameTestCase {
 				.createMock(JobNode.class);
 
 		/**
-		 * Mock {@link JobSequence}.
+		 * Mock {@link Flow}.
 		 */
-		public final JobSequence jobSequence = CleanupSequenceTest.this
-				.createMock(JobSequence.class);
+		public final Flow jobSequence = CleanupSequenceTest.this
+				.createMock(Flow.class);
 
 		/**
 		 * Mock {@link ThreadState}.

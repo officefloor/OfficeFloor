@@ -27,8 +27,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AssetMonitor extends
-		LinkedListSetEntry<AssetMonitor, AssetManager> {
+public interface AssetMonitor extends LinkedListSetEntry<AssetMonitor, AssetManager> {
 
 	/**
 	 * Obtains the {@link Asset} for this {@link AssetMonitor}.
@@ -49,27 +48,13 @@ public interface AssetMonitor extends
 	 * @param jobNode
 	 *            {@link JobNode} to be activated when {@link Asset} processing
 	 *            is complete.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} that the {@link JobNode} is added
-	 *            to if the {@link Asset} has permanently activated this
-	 *            {@link AssetMonitor}. This may be <code>null</code> to
-	 *            activate via the {@link OfficeManager} however it is much more
-	 *            efficient to provide a {@link JobNodeActivateSet}.
-	 * @return <code>true</code> if the {@link JobNode} is waiting on the
-	 *         {@link Asset}.
+	 * @return Optional {@link JobNode} to execute to wait on the {@link Asset}.
 	 */
-	boolean waitOnAsset(JobNode jobNode, JobNodeActivateSet activateSet);
+	JobNode waitOnAsset(JobNode jobNode);
 
 	/**
-	 * Adds all the {@link JobNode} instances waiting on the {@link Asset} to
-	 * the input {@link JobNodeActivateSet} to be activated.
+	 * Activates the {@link JobNode} instances waiting on the {@link Asset}.
 	 * 
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} that will later activate the
-	 *            {@link JobNode} instances waiting on the {@link Asset}. This
-	 *            may be <code>null</code> to activate via the
-	 *            {@link OfficeManager} however it is much more efficient to
-	 *            provide a {@link JobNodeActivateSet}.
 	 * @param isPermanent
 	 *            <code>true</code> indicates that all {@link JobNode} instances
 	 *            added to the {@link AssetMonitor} from now on are activated
@@ -77,19 +62,11 @@ public interface AssetMonitor extends
 	 *            this state when the {@link Asset} is no longer being used to
 	 *            stop a {@link JobNode} from waiting forever.
 	 */
-	void activateJobNodes(JobNodeActivateSet activateSet, boolean isPermanent);
+	void activateJobNodes(boolean isPermanent);
 
 	/**
-	 * Adds all the {@link JobNode} instances waiting on this {@link Asset} to
-	 * the input {@link JobNodeActivateSet} to be activated with the
-	 * {@link ThreadState} receiving the input failure.
+	 * Fails the {@link JobNode} instances waiting on this {@link Asset}.
 	 * 
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} that will later activate the
-	 *            {@link JobNode} instances waiting on the {@link Asset}. This
-	 *            may be <code>null</code> to activate via the
-	 *            {@link OfficeManager} however it is much more efficient to
-	 *            provide a {@link JobNodeActivateSet}.
 	 * @param failure
 	 *            Failure to propagate to the {@link ThreadState} of the
 	 *            {@link JobNode} instances waiting on the {@link Asset}.
@@ -100,7 +77,6 @@ public interface AssetMonitor extends
 	 *            {@link AssetMonitor} in this state when the {@link Asset} is
 	 *            in a failed state that can not be recovered from.
 	 */
-	void failJobNodes(JobNodeActivateSet activateSet, Throwable failure,
-			boolean isPermanent);
+	void failJobNodes(Throwable failure, boolean isPermanent);
 
 }

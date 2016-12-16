@@ -139,7 +139,7 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	 * Creates the {@link JobNode} for the {@link GovernanceActivity}.
 	 * 
 	 * @param flow
-	 *            {@link JobSequence} for containing this
+	 *            {@link Flow} for containing this
 	 *            {@link GovernanceActivity}.
 	 * @param governanceActivity
 	 *            {@link GovernanceActivity}.
@@ -147,7 +147,7 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	 *            Parallel {@link JobNode} owner.
 	 * @return {@link JobNode} for the {@link GovernanceActivity}.
 	 */
-	JobNode createGovernanceJob(JobSequence flow,
+	JobNode createGovernanceJob(Flow flow,
 			GovernanceActivity<I, F> governanceActivity,
 			JobNode parallelJobNodeOwner);
 

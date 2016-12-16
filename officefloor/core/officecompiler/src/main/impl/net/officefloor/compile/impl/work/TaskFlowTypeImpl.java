@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.work;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * {@link TaskFlowType} implementation.
@@ -41,7 +41,7 @@ public class TaskFlowTypeImpl<F extends Enum<F>> implements TaskFlowType<F>,
 	private String label = null;
 
 	/**
-	 * {@link JobSequence} key.
+	 * {@link Flow} key.
 	 */
 	private F key = null;
 

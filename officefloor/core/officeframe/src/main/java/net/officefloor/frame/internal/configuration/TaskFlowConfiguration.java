@@ -18,48 +18,48 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
- * Configuration for a {@link JobSequence}.
+ * Configuration for a {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface TaskFlowConfiguration<F extends Enum<F>> {
 
 	/**
-	 * Obtains the name of this {@link JobSequence}.
+	 * Obtains the name of this {@link Flow}.
 	 * 
-	 * @return Name of this {@link JobSequence}.
+	 * @return Name of this {@link Flow}.
 	 */
 	String getFlowName();
 
 	/**
-	 * Obtains the strategy to instigate this {@link JobSequence}.
+	 * Obtains the strategy to instigate this {@link Flow}.
 	 * 
-	 * @return Strategy to instigate this {@link JobSequence}.
+	 * @return Strategy to instigate this {@link Flow}.
 	 */
 	FlowInstigationStrategyEnum getInstigationStrategy();
 
 	/**
-	 * Obtains the reference to the initial {@link Task} of this {@link JobSequence}.
+	 * Obtains the reference to the initial {@link Task} of this {@link Flow}.
 	 * 
-	 * @return Reference to the initial {@link Task} of this {@link JobSequence}.
+	 * @return Reference to the initial {@link Task} of this {@link Flow}.
 	 */
 	TaskNodeReference getInitialTask();
 
 	/**
-	 * Obtains the index identifying this {@link JobSequence}.
+	 * Obtains the index identifying this {@link Flow}.
 	 * 
-	 * @return Index identifying this {@link JobSequence}.
+	 * @return Index identifying this {@link Flow}.
 	 */
 	int getIndex();
 
 	/**
-	 * Obtains the key identifying this {@link JobSequence}.
+	 * Obtains the key identifying this {@link Flow}.
 	 * 
-	 * @return Key identifying this {@link JobSequence}. <code>null</code> if indexed.
+	 * @return Key identifying this {@link Flow}. <code>null</code> if indexed.
 	 */
 	F getKey();
 

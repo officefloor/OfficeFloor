@@ -43,7 +43,7 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
@@ -567,7 +567,7 @@ public class WorkLoaderImpl implements WorkLoader {
 
 	/**
 	 * Determines that the {@link TaskFlowType} instances are valid given an
-	 * {@link Enum} providing the instigated {@link JobSequence} keys.
+	 * {@link Enum} providing the instigated {@link Flow} keys.
 	 * 
 	 * @param taskType
 	 *            {@link TaskType}.

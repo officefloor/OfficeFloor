@@ -62,8 +62,7 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	 * @param teamIdentifier
 	 *            {@link TeamIdentifier} of this {@link Team}.
 	 */
-	public WorkerPerTaskTeam(String teamName, TeamIdentifier teamIdentifier,
-			int threadPriority) {
+	public WorkerPerTaskTeam(String teamName, TeamIdentifier teamIdentifier, int threadPriority) {
 		super(teamName);
 		this.teamIdentifier = teamIdentifier;
 		this.threadPriority = threadPriority;
@@ -94,8 +93,7 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	public void assignJob(Job task, TeamIdentifier assignerTeam) {
 		// Hire worker to execute the task
 		long threadIndex = this.threadIndex.getAndIncrement();
-		String threadName = this.getClass().getSimpleName() + "_"
-				+ this.getName() + "_" + String.valueOf(threadIndex);
+		String threadName = this.getClass().getSimpleName() + "_" + this.getName() + "_" + String.valueOf(threadIndex);
 		Thread thread = new Thread(this, new DedicatedWorker(task), threadName);
 		if (thread.getPriority() != this.threadPriority) {
 			thread.setPriority(this.threadPriority);
@@ -148,19 +146,11 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 
 		@Override
 		public void run() {
-			// Loop until task is complete or stop executing
-			do {
+			// Reset to no time
+			this.time = NO_TIME;
 
-				// Reset to no time
-				this.time = NO_TIME;
-
-				// Attempt to complete task
-				if (this.taskContainer.doJob(this)) {
-					// Task complete
-					return;
-				}
-
-			} while (WorkerPerTaskTeam.this.continueWorking);
+			// Undertake the job
+			this.taskContainer.doJob(this);
 		}
 
 		/*

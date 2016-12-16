@@ -39,6 +39,7 @@ public interface JobContext {
 	 * 
 	 * @return Time measured in milliseconds.
 	 */
+	@Deprecated
 	long getTime();
 
 	/**
@@ -58,6 +59,7 @@ public interface JobContext {
 	 *         <code>false</code> if execution has stopped and the {@link Job}
 	 *         should stop.
 	 */
+	@Deprecated // needs to complete before shut-down
 	boolean continueExecution();
 
 }

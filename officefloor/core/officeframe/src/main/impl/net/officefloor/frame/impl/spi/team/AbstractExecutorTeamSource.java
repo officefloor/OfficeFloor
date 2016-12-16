@@ -282,15 +282,7 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 
 		@Override
 		public void run() {
-			do {
-
-				// Attempt to complete the Job.
-				if (this.job.doJob(this)) {
-					// Job complete
-					return;
-				}
-
-			} while (this.team.isContinueWorking);
+			this.job.doJob(this);
 		}
 
 		/*

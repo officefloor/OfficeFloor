@@ -27,7 +27,7 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -40,31 +40,31 @@ import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
- * Implementation of the {@link JobSequence}.
+ * Implementation of the {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
 public class JobSequenceImpl extends
-		AbstractLinkedListSetEntry<JobSequence, ThreadState> implements
-		JobSequence {
+		AbstractLinkedListSetEntry<Flow, ThreadState> implements
+		Flow {
 
 	/**
-	 * Activate {@link JobNode} instances for this {@link JobSequence}.
+	 * Activate {@link JobNode} instances for this {@link Flow}.
 	 */
-	private final LinkedListSet<JobNode, JobSequence> activeJobNodes = new StrictLinkedListSet<JobNode, JobSequence>() {
+	private final LinkedListSet<JobNode, Flow> activeJobNodes = new StrictLinkedListSet<JobNode, Flow>() {
 		@Override
-		protected JobSequence getOwner() {
+		protected Flow getOwner() {
 			return JobSequenceImpl.this;
 		}
 	};
 
 	/**
-	 * {@link ThreadState} that this {@link JobSequence} is bound.
+	 * {@link ThreadState} that this {@link Flow} is bound.
 	 */
 	private final ThreadState threadState;
 
 	/**
-	 * Completion flag indicating if this {@link JobSequence} is complete.
+	 * Completion flag indicating if this {@link Flow} is complete.
 	 */
 	private volatile boolean isFlowComplete = false;
 
@@ -72,7 +72,7 @@ public class JobSequenceImpl extends
 	 * Initiate.
 	 * 
 	 * @param threadState
-	 *            {@link ThreadState} containing this {@link JobSequence}.
+	 *            {@link ThreadState} containing this {@link Flow}.
 	 */
 	public JobSequenceImpl(ThreadState threadState) {
 		this.threadState = threadState;

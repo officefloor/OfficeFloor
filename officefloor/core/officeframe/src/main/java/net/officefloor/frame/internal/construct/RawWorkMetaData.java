@@ -21,7 +21,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -79,7 +79,7 @@ public interface RawWorkMetaData<W extends Work> {
 			String scopeAdministratorName);
 
 	/**
-	 * Links the {@link TaskMetaData} instances to enable {@link JobSequence} of
+	 * Links the {@link TaskMetaData} instances to enable {@link Flow} of
 	 * execution. Also links the {@link Governance} for any possible associated
 	 * {@link Duty}.
 	 * 

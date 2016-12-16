@@ -26,7 +26,7 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -94,11 +94,11 @@ public interface ManagedObjectTypeBuilder {
 	 * @param key
 	 *            Key identifying the {@link ManagedObjectFlow}.
 	 * @param workName
-	 *            Name of {@link Work} instigating the {@link JobSequence} or
+	 *            Name of {@link Work} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 * @param taskName
-	 *            Name of {@link Task} instigating the {@link JobSequence} or
+	 *            Name of {@link Task} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 */
@@ -118,11 +118,11 @@ public interface ManagedObjectTypeBuilder {
 	 * @param argumentType
 	 *            Type of argument passed from the {@link ManagedObjectFlow}.
 	 * @param workName
-	 *            Name of {@link Work} instigating the {@link JobSequence} or
+	 *            Name of {@link Work} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 * @param taskName
-	 *            Name of {@link Task} instigating the {@link JobSequence} or
+	 *            Name of {@link Task} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 */

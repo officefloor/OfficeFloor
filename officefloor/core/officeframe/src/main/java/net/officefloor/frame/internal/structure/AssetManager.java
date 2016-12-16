@@ -26,8 +26,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AssetManager extends
-		LinkedListSetEntry<AssetManager, OfficeManager> {
+public interface AssetManager extends LinkedListSetEntry<AssetManager, OfficeManager> {
 
 	/**
 	 * Obtains the {@link OfficeManager} managing this {@link AssetManager}.
@@ -55,14 +54,8 @@ public interface AssetManager extends
 	/**
 	 * Does a single check on the {@link Asset} instances of the registered
 	 * {@link AssetMonitor} instances for management.
-	 * 
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add all {@link JobNode}
-	 *            instances requiring activation from the check. A
-	 *            {@link AssetManager} should not activate {@link JobNode}
-	 *            instances itself.
 	 */
-	void checkOnAssets(JobNodeActivateSet activateSet);
+	void checkOnAssets();
 
 	/**
 	 * Registers a {@link AssetMonitor} to be managed by this

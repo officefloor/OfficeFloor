@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -55,7 +55,7 @@ public interface RawGovernanceMetaData<I, F extends Enum<F>> {
 	int getGovernanceIndex();
 
 	/**
-	 * Links the {@link TaskMetaData} instances to enable {@link JobSequence} of
+	 * Links the {@link TaskMetaData} instances to enable {@link Flow} of
 	 * execution.
 	 * 
 	 * @param taskLocator

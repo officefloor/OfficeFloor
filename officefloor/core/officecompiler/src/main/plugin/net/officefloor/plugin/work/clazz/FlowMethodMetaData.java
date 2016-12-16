@@ -20,7 +20,7 @@ package net.officefloor.plugin.work.clazz;
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Meta-data of a {@link Method} on a {@link FlowInterface}.
@@ -40,12 +40,12 @@ public class FlowMethodMetaData {
 	private final Method method;
 
 	/**
-	 * Index of the {@link JobSequence} to invoke for this {@link Method}.
+	 * Index of the {@link Flow} to invoke for this {@link Method}.
 	 */
 	private final int flowIndex;
 
 	/**
-	 * Flag indicating if there is a parameter for the {@link JobSequence}.
+	 * Flag indicating if there is a parameter for the {@link Flow}.
 	 */
 	private final boolean isParameter;
 
@@ -62,9 +62,9 @@ public class FlowMethodMetaData {
 	 * @param method
 	 *            {@link Method}.
 	 * @param flowIndex
-	 *            Index of the {@link JobSequence} to invoke for this {@link Method}.
+	 *            Index of the {@link Flow} to invoke for this {@link Method}.
 	 * @param isParameter
-	 *            <code>true</code> if a parameter for the {@link JobSequence}.
+	 *            <code>true</code> if a parameter for the {@link Flow}.
 	 * @param isReturnFlowFuture
 	 *            <code>true</code> if to return the {@link FlowFuture}.
 	 */
@@ -96,18 +96,18 @@ public class FlowMethodMetaData {
 	}
 
 	/**
-	 * Obtains the index of the {@link JobSequence} to invoke for this {@link Method}.
+	 * Obtains the index of the {@link Flow} to invoke for this {@link Method}.
 	 * 
-	 * @return Index of the {@link JobSequence} to invoke for this {@link Method}.
+	 * @return Index of the {@link Flow} to invoke for this {@link Method}.
 	 */
 	public int getFlowIndex() {
 		return this.flowIndex;
 	}
 
 	/**
-	 * Flags if a parameter for the {@link JobSequence}.
+	 * Flags if a parameter for the {@link Flow}.
 	 * 
-	 * @return <code>true</code> if a parameter for the {@link JobSequence}.
+	 * @return <code>true</code> if a parameter for the {@link Flow}.
 	 */
 	public boolean isParameter() {
 		return this.isParameter;

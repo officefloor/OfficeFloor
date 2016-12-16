@@ -17,9 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-
 /**
  * Listener for the completion of a {@link ProcessState}.
  * 
@@ -29,11 +26,7 @@ public interface ProcessCompletionListener {
 
 	/**
 	 * Flags that the {@link ProcessState} has completed.
-	 * 
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} undertaking
-	 *            the {@link ProcessState} completion.
 	 */
-	void processComplete(TeamIdentifier currentTeam);
+	void processComplete();
 
 }

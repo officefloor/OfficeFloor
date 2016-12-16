@@ -64,8 +64,7 @@ public class OnePersonTeam implements Team {
 	 * @param waitTime
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
-	public OnePersonTeam(String teamName, TeamIdentifier teamIdentifier,
-			long waitTime) {
+	public OnePersonTeam(String teamName, TeamIdentifier teamIdentifier, long waitTime) {
 		this.teamName = teamName;
 		this.teamIdentifier = teamIdentifier;
 		this.waitTime = waitTime;
@@ -78,16 +77,14 @@ public class OnePersonTeam implements Team {
 	@Override
 	public synchronized void startWorking() {
 		if (this.person != null) {
-			throw new IllegalStateException("Team " + this.getClass().getName()
-					+ " has already started working");
+			throw new IllegalStateException("Team " + this.getClass().getName() + " has already started working");
 		}
 
 		// Hire the person for the team
 		this.person = new OnePerson(this.taskQueue, this.waitTime);
 
 		// Start the person working
-		String threadName = this.getClass().getSimpleName() + "_"
-				+ this.teamName;
+		String threadName = this.getClass().getSimpleName() + "_" + this.teamName;
 		Thread thread = new Thread(this.person, threadName);
 		thread.setDaemon(true);
 		thread.start();
@@ -184,10 +181,7 @@ public class OnePersonTeam implements Team {
 					Job job = this.taskQueue.dequeue(this.waitTime);
 					if (job != null) {
 						// Have job therefore execute it
-						if (!job.doJob(this)) {
-							// Task needs to be re-executed
-							this.taskQueue.enqueue(job);
-						}
+						job.doJob(this);
 					}
 				}
 			} finally {

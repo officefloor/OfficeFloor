@@ -18,10 +18,10 @@
 package net.officefloor.compile.work;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * <code>Type definition</code> of a {@link JobSequence} possibly instigated by a
+ * <code>Type definition</code> of a {@link Flow} possibly instigated by a
  * {@link Task}.
  * 
  * @author Daniel Sagenschneider
@@ -48,9 +48,9 @@ public interface TaskFlowType<F extends Enum<F>> {
 
 	/**
 	 * Obtains the type of the argument passed by the {@link Task} to the
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 * 
-	 * @return Type of argument passed to {@link JobSequence}. May be <code>null</code>
+	 * @return Type of argument passed to {@link Flow}. May be <code>null</code>
 	 *         to indicate no argument.
 	 */
 	Class<?> getArgumentType();

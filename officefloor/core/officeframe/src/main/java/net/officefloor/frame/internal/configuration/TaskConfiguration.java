@@ -21,7 +21,7 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
@@ -64,18 +64,18 @@ public interface TaskConfiguration<W extends Work, D extends Enum<D>, F extends 
 
 	/**
 	 * Obtains the reference to the next {@link Task} within the
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 * 
-	 * @return Reference to the next {@link Task} within the {@link JobSequence}
+	 * @return Reference to the next {@link Task} within the {@link Flow}
 	 *         .
 	 */
 	TaskNodeReference getNextTaskInFlow();
 
 	/**
-	 * Obtains the configuration of the {@link JobSequence} instances for this
+	 * Obtains the configuration of the {@link Flow} instances for this
 	 * {@link Task}.
 	 * 
-	 * @return Configuration of {@link JobSequence} instances for this
+	 * @return Configuration of {@link Flow} instances for this
 	 *         {@link Task}.
 	 */
 	TaskFlowConfiguration<F>[] getFlowConfiguration();

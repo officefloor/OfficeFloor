@@ -77,8 +77,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *            within.
 	 * @return New {@link ManagedObjectContainer}.
 	 */
-	ManagedObjectContainer createManagedObjectContainer(
-			ProcessState processState);
+	ManagedObjectContainer createManagedObjectContainer(ProcessState processState);
 
 	/**
 	 * Obtains the {@link AssetManager} that manages the sourcing of the
@@ -171,17 +170,11 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link JobContext}.
 	 * @param jobNode
 	 *            {@link JobNode}.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
-	 * @param context
-	 *            {@link ContainerContext}.
 	 * @return <code>true</code> if all dependency {@link ManagedObject}
 	 *         instances are ready.
 	 */
-	<W extends Work> boolean isDependenciesReady(
-			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context);
+	<W extends Work> boolean isDependenciesReady(WorkContainer<W> workContainer, JobContext jobContext,
+			JobNode jobNode);
 
 	/**
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.
@@ -196,8 +189,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link ProcessState} bound {@link ManagedObject} instances.
 	 * @return {@link ObjectRegistry}.
 	 */
-	<W extends Work> ObjectRegistry<D> createObjectRegistry(
-			WorkContainer<W> workContainer, ThreadState threadState);
+	<W extends Work> ObjectRegistry<D> createObjectRegistry(WorkContainer<W> workContainer, ThreadState threadState);
 
 	/**
 	 * Creates the {@link JobNode} for the recycling of the
@@ -212,7 +204,6 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *         <code>null</code> if no recycling is required for this
 	 *         {@link ManagedObject}.
 	 */
-	JobNode createRecycleJobNode(ManagedObject managedObject,
-			CleanupSequence cleanupSequence);
+	JobNode createRecycleJobNode(ManagedObject managedObject, CleanupSequence cleanupSequence);
 
 }

@@ -32,7 +32,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -309,7 +309,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 		// Create the Flow
 		AssetManager flowAssetManager = flowMetaData.getFlowManager();
-		JobSequence flow = processState.createThread(flowAssetManager);
+		Flow flow = processState.createThread(flowAssetManager);
 
 		// Obtain the task meta-data
 		TaskMetaData<W, ?, ?> taskMetaData = flowMetaData

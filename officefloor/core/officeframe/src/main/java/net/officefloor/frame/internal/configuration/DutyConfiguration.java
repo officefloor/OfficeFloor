@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.governance.Governance;
@@ -38,11 +38,11 @@ public interface DutyConfiguration<A extends Enum<A>> {
 	String getDutyName();
 
 	/**
-	 * Obtains the configuration for the {@link JobSequence} instances invoked by the
+	 * Obtains the configuration for the {@link Flow} instances invoked by the
 	 * {@link Duty}.
 	 * 
 	 * @return {@link TaskNodeReference} specifying the first {@link Task} of
-	 *         the linked {@link JobSequence}.
+	 *         the linked {@link Flow}.
 	 */
 	TaskNodeReference[] getLinkedProcessConfiguration();
 

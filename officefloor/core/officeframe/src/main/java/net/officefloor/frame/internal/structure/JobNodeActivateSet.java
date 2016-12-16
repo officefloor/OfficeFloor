@@ -26,6 +26,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // using job loop
 public interface JobNodeActivateSet {
 
 	/**

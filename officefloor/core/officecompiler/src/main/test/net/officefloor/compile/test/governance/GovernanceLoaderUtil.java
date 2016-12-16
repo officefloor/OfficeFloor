@@ -34,7 +34,7 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Utility class for testing the {@link GovernanceSource}.
@@ -50,7 +50,7 @@ public class GovernanceLoaderUtil {
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <F>
-	 *            {@link JobSequence} type keys.
+	 *            {@link Flow} type keys.
 	 * @param <S>
 	 *            {@link GovernanceSource} type.
 	 * @param governanceSourceClass
@@ -94,7 +94,7 @@ public class GovernanceLoaderUtil {
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <F>
-	 *            {@link JobSequence} type keys.
+	 *            {@link Flow} type keys.
 	 * @param <S>
 	 *            {@link GovernanceSource} type.
 	 * @param expectedGovernanceType
@@ -170,7 +170,7 @@ public class GovernanceLoaderUtil {
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <F>
-	 *            {@link JobSequence} type keys.
+	 *            {@link Flow} type keys.
 	 * @param <S>
 	 *            {@link GovernanceSource} type.
 	 * @param governanceSourceClass
@@ -288,22 +288,22 @@ public class GovernanceLoaderUtil {
 			GovernanceFlowType<F> {
 
 		/**
-		 * Name of the {@link JobSequence}.
+		 * Name of the {@link Flow}.
 		 */
 		private final String flowName;
 
 		/**
-		 * Argument type to the {@link JobSequence}.
+		 * Argument type to the {@link Flow}.
 		 */
 		private final Class<?> argumentType;
 
 		/**
-		 * Index identifying the {@link JobSequence}.
+		 * Index identifying the {@link Flow}.
 		 */
 		private final int index;
 
 		/**
-		 * Key identifying the {@link JobSequence}.
+		 * Key identifying the {@link Flow}.
 		 */
 		private final F key;
 
@@ -311,13 +311,13 @@ public class GovernanceLoaderUtil {
 		 * Initiate.
 		 * 
 		 * @param flowName
-		 *            Name of the {@link JobSequence}.
+		 *            Name of the {@link Flow}.
 		 * @param argumentType
-		 *            Argument type to the {@link JobSequence}.
+		 *            Argument type to the {@link Flow}.
 		 * @param index
-		 *            Index identifying the {@link JobSequence}.
+		 *            Index identifying the {@link Flow}.
 		 * @param key
-		 *            Key identifying the {@link JobSequence}.
+		 *            Key identifying the {@link Flow}.
 		 */
 		public GovernanceFlowTypeImpl(String flowName, Class<?> argumentType,
 				int index, F key) {

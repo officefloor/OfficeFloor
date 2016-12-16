@@ -22,7 +22,7 @@ import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.MockTeamSource;
 
 /**
- * Tests the {@link AbstractJobContainer} executing a {@link Job}.
+ * Tests the {@link AbstractManagedJobNodeContainer} executing a {@link Job}.
  * 
  * @author Daniel Sagenschneider
  */

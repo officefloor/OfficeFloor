@@ -32,7 +32,7 @@ import net.officefloor.frame.internal.configuration.InputManagedObjectConfigurat
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -95,12 +95,12 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 	}
 
 	/**
-	 * Links in a {@link JobSequence}.
+	 * Links in a {@link Flow}.
 	 *
 	 * @param index
-	 *            Index for the {@link JobSequence}.
+	 *            Index for the {@link Flow}.
 	 * @param key
-	 *            Key identifying the {@link JobSequence}. May be <code>null</code>.
+	 *            Key identifying the {@link Flow}. May be <code>null</code>.
 	 * @param workName
 	 *            Name of {@link Work}.
 	 * @param taskName

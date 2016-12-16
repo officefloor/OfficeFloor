@@ -35,7 +35,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -57,7 +57,7 @@ public class ManagedObjectLoaderUtil {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param <S>
 	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
@@ -102,7 +102,7 @@ public class ManagedObjectLoaderUtil {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param <S>
 	 *            {@link ManagedObjectSource} type.
 	 * @param expectedManagedObjectType
@@ -214,7 +214,7 @@ public class ManagedObjectLoaderUtil {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param <S>
 	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
@@ -240,7 +240,7 @@ public class ManagedObjectLoaderUtil {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param <S>
 	 *            {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass
@@ -313,7 +313,7 @@ public class ManagedObjectLoaderUtil {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param dependenciesEnum
 	 *            Dependency {@link Enum}.
 	 * @param flowsEnum

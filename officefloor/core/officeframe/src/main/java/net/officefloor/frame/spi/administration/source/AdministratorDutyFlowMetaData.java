@@ -17,12 +17,12 @@
  */
 package net.officefloor.frame.spi.administration.source;
 
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
- * Describes a {@link JobSequence} required by a {@link Duty} of the
+ * Describes a {@link Flow} required by a {@link Duty} of the
  * {@link Administrator}.
  * 
  * @author Daniel Sagenschneider
@@ -30,11 +30,11 @@ import net.officefloor.frame.spi.administration.Duty;
 public interface AdministratorDutyFlowMetaData<F extends Enum<F>> {
 
 	/**
-	 * Obtains the {@link Enum} key identifying this {@link JobSequence}. If
-	 * <code>null</code> then {@link JobSequence} will be referenced by this instance's
+	 * Obtains the {@link Enum} key identifying this {@link Flow}. If
+	 * <code>null</code> then {@link Flow} will be referenced by this instance's
 	 * index in the array returned from {@link AdministratorDutyMetaData}.
 	 * 
-	 * @return {@link Enum} key identifying the {@link JobSequence} or
+	 * @return {@link Enum} key identifying the {@link Flow} or
 	 *         <code>null</code> indicating identified by an index.
 	 */
 	F getKey();
@@ -42,19 +42,19 @@ public interface AdministratorDutyFlowMetaData<F extends Enum<F>> {
 	/**
 	 * <p>
 	 * Obtains the {@link Class} of the argument that is passed to the
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 * <p>
 	 * This may be <code>null</code> to indicate no argument is passed.
 	 * 
-	 * @return Type of the argument that is passed to the {@link JobSequence}.
+	 * @return Type of the argument that is passed to the {@link Flow}.
 	 */
 	Class<?> getArgumentType();
 
 	/**
-	 * Provides a descriptive name for this {@link JobSequence}. This is useful to
-	 * better describe the {@link JobSequence}.
+	 * Provides a descriptive name for this {@link Flow}. This is useful to
+	 * better describe the {@link Flow}.
 	 * 
-	 * @return Descriptive name for this {@link JobSequence}.
+	 * @return Descriptive name for this {@link Flow}.
 	 */
 	String getLabel();
 

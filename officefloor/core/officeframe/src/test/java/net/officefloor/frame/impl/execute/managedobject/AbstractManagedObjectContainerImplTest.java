@@ -40,7 +40,7 @@ import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -320,9 +320,9 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			.createMock(WorkContainer.class);
 
 	/**
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 */
-	private final JobSequence jobSequence = this.createMock(JobSequence.class);
+	private final Flow jobSequence = this.createMock(Flow.class);
 
 	/**
 	 * {@link ThreadState}.

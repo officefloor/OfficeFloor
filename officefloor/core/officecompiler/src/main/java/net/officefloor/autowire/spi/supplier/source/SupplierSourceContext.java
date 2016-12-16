@@ -20,7 +20,7 @@ package net.officefloor.autowire.spi.supplier.source;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.SourceContext;
 
@@ -37,7 +37,7 @@ public interface SupplierSourceContext extends SourceContext {
 	 * @param <D>
 	 *            Dependency type keys.
 	 * @param <F>
-	 *            {@link JobSequence} type keys.
+	 *            {@link Flow} type keys.
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource}.
 	 * @param wirer

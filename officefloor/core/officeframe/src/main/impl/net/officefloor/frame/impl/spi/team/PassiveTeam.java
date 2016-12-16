@@ -50,17 +50,7 @@ public class PassiveTeam implements Team {
 
 	@Override
 	public void assignJob(Job task, TeamIdentifier assignerTeam) {
-		// Loop executing the Job until it is complete or stop working
-		do {
-
-			// Attempt to complete the Job.
-			// (mimic assigner team as re-using its thread)
-			if (task.doJob(new PassiveJobContext(assignerTeam))) {
-				// Task complete
-				return;
-			}
-
-		} while (this.continueWorking);
+		task.doJob(new PassiveJobContext(assignerTeam));
 	}
 
 	@Override

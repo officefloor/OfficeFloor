@@ -17,20 +17,20 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests the {@link AbstractJobContainer} invoking sequential
- * {@link JobSequence} instances.
+ * Tests the {@link AbstractManagedJobNodeContainer} invoking sequential
+ * {@link Flow} instances.
  * 
  * @author Daniel Sagenschneider
  */
 public class SequentialJobContainerTest extends AbstractJobContainerTest {
 
 	/**
-	 * Ensures execution of a {@link Job} with a sequential {@link JobSequence}
+	 * Ensures execution of a {@link Job} with a sequential {@link Flow}
 	 * invoked.
 	 */
 	public void testExecuteJobWithSequentialFlow() {

@@ -53,7 +53,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -619,7 +619,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param <D>
 	 *            Dependency type keys.
 	 * @param <F>
-	 *            {@link JobSequence} type keys.
+	 *            {@link Flow} type keys.
 	 * @param <S>
 	 *            {@link ManagedObjectSource} type.
 	 * @param alias
@@ -699,7 +699,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <F>
-	 *            {@link JobSequence} type keys.
+	 *            {@link Flow} type keys.
 	 * @param <S>
 	 *            {@link GovernanceSource} type.
 	 * @param alias

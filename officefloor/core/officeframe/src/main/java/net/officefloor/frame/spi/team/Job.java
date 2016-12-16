@@ -29,27 +29,12 @@ import net.officefloor.frame.spi.team.source.ProcessContextListener;
 public interface Job {
 
 	/**
-	 * <p>
 	 * Executes the {@link Job}.
-	 * <p>
-	 * The return indicates if the {@link Job} has been completed and may be
-	 * released. Returning <code>false</code> indicates this method must be
-	 * executed again (and possibly again and again) until it returns
-	 * <code>true</code>.
 	 * 
 	 * @param executionContext
 	 *            Context for execution.
-	 * @return <code>true</code> if the {@link Job} has completed.
 	 */
-	boolean doJob(JobContext executionContext);
-
-	/**
-	 * Triggers to cancel the {@link Job}.
-	 * 
-	 * @param cause
-	 *            Cause providing reason for cancelling the {@link Job}.s
-	 */
-	void cancelJob(Exception cause);
+	void doJob(JobContext executionContext);
 
 	/**
 	 * <p>
@@ -62,7 +47,7 @@ public interface Job {
 	 * An example use would be embedding {@link OfficeFloor} within an
 	 * Application Server and using this identifier and a
 	 * {@link ProcessContextListener} to know the invoking {@link Thread} for
-	 * interaction with JNDI.
+	 * interaction with {@link ThreadLocal} instances of the Application Server.
 	 * 
 	 * @return Identifier for the {@link ProcessState} containing this
 	 *         {@link Job}

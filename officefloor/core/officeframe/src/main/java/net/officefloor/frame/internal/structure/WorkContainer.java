@@ -20,15 +20,17 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
- * Container managing the {@link Work}.
+ * Container managing the state for a {@link Job}.
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // to be merged into AbstractJobContainer
 public interface WorkContainer<W extends Work> {
 
 	/**
@@ -38,6 +40,7 @@ public interface WorkContainer<W extends Work> {
 	 *            {@link ThreadState} requiring the {@link Work}.
 	 * @return {@link Work} being managed.
 	 */
+	@Deprecated // use managed object for state
 	W getWork(ThreadState threadState);
 
 	/**
@@ -51,19 +54,30 @@ public interface WorkContainer<W extends Work> {
 	 * @param jobNode
 	 *            {@link JobNode} requesting the {@link ManagedObject} instances
 	 *            to be loaded.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} loading the
-	 *            {@link ManagedObject} instances.
-	 * @param context
-	 *            {@link ContainerContext}.
+	 * @return {@link JobNode} for next {@link Job}. May be <code>null</code> to
+	 *         indicate no further {@link JobNode} instances are required to
+	 *         load {@link ManagedObject} instances.
 	 */
-	void loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
-			ContainerContext context);
+	JobNode loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext, JobNode jobNode);
+
+	/**
+	 * Sets up the {@link ManagedObject} instances.
+	 * 
+	 * @param managedObjectIndexes
+	 *            {@link ManagedObjectIndex} instances identifying the
+	 *            {@link ManagedObject} instances to be loaded.
+	 * @param jobContext
+	 *            Context for executing the {@link JobNode}.
+	 * @param flow
+	 *            {@link Flow}.
+	 * @param jobNode
+	 *            {@link JobNode} requesting the {@link ManagedObject} instances
+	 *            to be loaded.
+	 * @return Optional {@link JobNode} to setup the {@link ManagedObject}
+	 *         instances.
+	 */
+	JobNode setupManagedObjects(ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext, Flow flow,
+			JobNode jobNode);
 
 	/**
 	 * Governs the {@link ManagedObject} instances.
@@ -76,15 +90,12 @@ public interface WorkContainer<W extends Work> {
 	 * @param jobNode
 	 *            {@link JobNode} requesting the {@link ManagedObject} instances
 	 *            for {@link Governance}.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param context
-	 *            {@link ContainerContext}.
+	 * @return {@link JobNode} for next {@link Job}. May be <code>null</code> to
+	 *         indicate no further {@link JobNode} instances are required to
+	 *         govern the {@link ManagedObject} instances.
 	 */
-	void governManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context);
+	@Deprecated
+	JobNode governManagedObjects(ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext, JobNode jobNode);
 
 	/**
 	 * Coordinates the {@link ManagedObject} instances.
@@ -97,15 +108,12 @@ public interface WorkContainer<W extends Work> {
 	 * @param jobNode
 	 *            {@link JobNode} requesting the {@link ManagedObject} instances
 	 *            to be coordinated.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param context
-	 *            {@link ContainerContext}.
+	 * @return {@link JobNode} for next {@link Job}. May be <code>null</code> to
+	 *         indicate no further {@link JobNode} instances are required to
+	 *         co-ordinate the {@link ManagedObject} instances.
 	 */
-	void coordinateManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context);
+	@Deprecated
+	JobNode coordinateManagedObjects(ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext, JobNode jobNode);
 
 	/**
 	 * Indicates if the particular {@link ManagedObject} is ready for use. In
@@ -120,18 +128,12 @@ public interface WorkContainer<W extends Work> {
 	 * @param jobNode
 	 *            {@link JobNode} requiring the {@link ManagedObject} to be
 	 *            ready.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param context
-	 *            {@link ContainerContext}.
 	 * @return <code>true</code> if the {@link ManagedObject} is ready for use,
 	 *         otherwise <code>false</code> indicating that waiting on the
 	 *         {@link ManagedObject}.
 	 */
-	boolean isManagedObjectsReady(ManagedObjectIndex[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context);
+	@Deprecated
+	boolean isManagedObjectsReady(ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext, JobNode jobNode);
 
 	/**
 	 * Administers the {@link ManagedObject} instances as per the input
@@ -142,14 +144,13 @@ public interface WorkContainer<W extends Work> {
 	 *            be undertaken.
 	 * @param adminContext
 	 *            {@link AdministratorContext}.
-	 * @param containerContext
-	 *            {@link ContainerContext}.
 	 * @throws Throwable
 	 *             If fails to administer the {@link ManagedObject} instances.
+	 * @return {@link JobNode} for next {@link Job}. May be <code>null</code> to
+	 *         indicate no further {@link JobNode} instances are required to
+	 *         load {@link ManagedObject} instances.
 	 */
-	void administerManagedObjects(TaskDutyAssociation<?> duty,
-			AdministratorContext adminContext, ContainerContext containerContext)
-			throws Throwable;
+	JobNode administerManagedObjects(TaskDutyAssociation<?> duty, AdministratorContext adminContext) throws Throwable;
 
 	/**
 	 * Obtains the Object of the particular {@link ManagedObject}.
@@ -161,19 +162,17 @@ public interface WorkContainer<W extends Work> {
 	 *            {@link ThreadState}.
 	 * @return Object of the particular {@link ManagedObject}.
 	 */
-	Object getObject(ManagedObjectIndex managedObjectIndex,
-			ThreadState threadState);
+	Object getObject(ManagedObjectIndex managedObjectIndex, ThreadState threadState);
 
 	/**
 	 * Unloads the {@link Work}.
 	 * 
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} unloading
-	 *            the {@link Work}.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue once {@link Work} is unloaded.
+	 * @return {@link JobNode} for next {@link Job}. May be <code>null</code> to
+	 *         indicate no further {@link JobNode} instances are required to
+	 *         unload the {@link ManagedObject} instances.
 	 */
-	void unloadWork(JobNodeActivateSet activateSet, TeamIdentifier currentTeam);
+	JobNode unloadWork(JobNode continueJobNode);
 
 }

@@ -35,11 +35,11 @@ public interface CheckAssetContext {
 	 * 
 	 * @return Time of check.
 	 */
+	@Deprecated
 	long getTime();
 
 	/**
 	 * Activates all {@link JobNode} instances waiting on the {@link Asset}.
-	 * 
 	 * 
 	 * @param isPermanent
 	 *            <code>true</code> indicates that all {@link JobNode} instances

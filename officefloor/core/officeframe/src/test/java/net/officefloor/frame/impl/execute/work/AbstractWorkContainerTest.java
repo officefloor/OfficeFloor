@@ -35,7 +35,7 @@ import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -273,9 +273,9 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			.createMock(ContainerContext.class);
 
 	/**
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 */
-	private final JobSequence jobSequence = this.createMock(JobSequence.class);
+	private final Flow jobSequence = this.createMock(Flow.class);
 
 	/**
 	 * {@link ThreadState}.

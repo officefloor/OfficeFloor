@@ -20,7 +20,7 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -47,11 +47,11 @@ public interface ManagingOfficeBuilder<F extends Enum<F>> {
 			String inputManagedObjectName);
 
 	/**
-	 * Links the {@link JobSequence} for the {@link ManagedObjectSource} to a
+	 * Links the {@link Flow} for the {@link ManagedObjectSource} to a
 	 * {@link Task} within the managing {@link Office}.
 	 *
 	 * @param key
-	 *            Key identifying the {@link JobSequence} instigated by the
+	 *            Key identifying the {@link Flow} instigated by the
 	 *            {@link ManagedObjectSource}.
 	 * @param workName
 	 *            Name of the {@link Work}.
@@ -61,11 +61,11 @@ public interface ManagingOfficeBuilder<F extends Enum<F>> {
 	void linkProcess(F key, String workName, String taskName);
 
 	/**
-	 * Links the {@link JobSequence} for the {@link ManagedObjectSource} to a
+	 * Links the {@link Flow} for the {@link ManagedObjectSource} to a
 	 * {@link Task} within the managing {@link Office}.
 	 *
 	 * @param flowIndex
-	 *            Index identifying the {@link JobSequence} instigated by the
+	 *            Index identifying the {@link Flow} instigated by the
 	 *            {@link ManagedObjectSource}.
 	 * @param workName
 	 *            Name of the {@link Work}.

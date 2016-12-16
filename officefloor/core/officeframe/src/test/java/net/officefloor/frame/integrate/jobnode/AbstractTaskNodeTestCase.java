@@ -29,7 +29,7 @@ import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
-import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
+import net.officefloor.frame.impl.execute.job.AbstractManagedJobNodeContainer;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
@@ -44,7 +44,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -66,7 +66,7 @@ import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Abstract functionality to test execution of {@link AbstractJobContainer}.
+ * Abstract functionality to test execution of {@link AbstractManagedJobNodeContainer}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -329,7 +329,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	}
 
 	/**
-	 * Binds an {@link ExecutionNode} to instigated as a {@link JobSequence}.
+	 * Binds an {@link ExecutionNode} to instigated as a {@link Flow}.
 	 * 
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum}.
@@ -423,7 +423,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
 		FlowMetaData<?> flowMetaData = workMetaData.getInitialFlowMetaData();
 		AssetManager flowAssetManager = flowMetaData.getFlowManager();
-		JobSequence flow = processState.createThread(flowAssetManager);
+		Flow flow = processState.createThread(flowAssetManager);
 
 		// Create the initial job node to execute
 		JobNode initialJobNode = flow.createTaskNode(this.getInitialNode(),

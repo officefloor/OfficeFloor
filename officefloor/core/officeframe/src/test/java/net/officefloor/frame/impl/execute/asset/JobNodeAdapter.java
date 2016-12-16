@@ -20,7 +20,7 @@ package net.officefloor.frame.impl.execute.asset;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.spi.team.TeamIdentifier;
@@ -31,20 +31,20 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * @author Daniel Sagenschneider
  */
 public class JobNodeAdapter extends
-		AbstractLinkedListSetEntry<JobNode, JobSequence> implements JobNode {
+		AbstractLinkedListSetEntry<JobNode, Flow> implements JobNode {
 
 	/**
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 */
-	private final JobSequence flow;
+	private final Flow flow;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param flow
-	 *            {@link JobSequence} is always required.
+	 *            {@link Flow} is always required.
 	 */
-	public JobNodeAdapter(JobSequence flow) {
+	public JobNodeAdapter(Flow flow) {
 		this.flow = flow;
 	}
 
@@ -53,7 +53,7 @@ public class JobNodeAdapter extends
 	 */
 
 	@Override
-	public JobSequence getLinkedListSetOwner() {
+	public Flow getLinkedListSetOwner() {
 		return this.flow;
 	}
 
@@ -79,7 +79,7 @@ public class JobNodeAdapter extends
 	}
 
 	@Override
-	public JobSequence getJobSequence() {
+	public Flow getJobSequence() {
 		return this.flow;
 	}
 

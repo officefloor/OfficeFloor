@@ -23,7 +23,7 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * <code>Type definition</code> of a {@link Task}.
@@ -82,20 +82,20 @@ public interface TaskType<W extends Work, M extends Enum<M>, F extends Enum<F>> 
 	TaskObjectType<M>[] getObjectTypes();
 
 	/**
-	 * Obtains the {@link Enum} providing the keys for the {@link JobSequence}
+	 * Obtains the {@link Enum} providing the keys for the {@link Flow}
 	 * instances instigated by the {@link Task}.
 	 * 
-	 * @return {@link Enum} providing instigated {@link JobSequence} keys or
+	 * @return {@link Enum} providing instigated {@link Flow} keys or
 	 *         <code>null</code> if {@link Indexed} or no instigated
-	 *         {@link JobSequence} instances.
+	 *         {@link Flow} instances.
 	 */
 	Class<F> getFlowKeyClass();
 
 	/**
 	 * Obtains the {@link TaskFlowType} definitions for the possible
-	 * {@link JobSequence} instances instigated by the {@link Task}.
+	 * {@link Flow} instances instigated by the {@link Task}.
 	 * 
-	 * @return {@link TaskFlowType} definitions for the possible {@link JobSequence}
+	 * @return {@link TaskFlowType} definitions for the possible {@link Flow}
 	 *         instances instigated by the {@link Task}.
 	 */
 	TaskFlowType<F>[] getFlowTypes();

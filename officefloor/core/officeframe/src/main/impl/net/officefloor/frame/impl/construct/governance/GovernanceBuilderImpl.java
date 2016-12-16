@@ -32,7 +32,7 @@ import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
@@ -66,7 +66,7 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	private String teamName;
 
 	/**
-	 * {@link JobSequence} instances to be linked to this {@link Governance}.
+	 * {@link Flow} instances to be linked to this {@link Governance}.
 	 */
 	private final Map<Integer, GovernanceFlowConfigurationImpl<F>> flows = new HashMap<Integer, GovernanceFlowConfigurationImpl<F>>();
 
@@ -117,12 +117,12 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	}
 
 	/**
-	 * Links in a {@link JobSequence}.
+	 * Links in a {@link Flow}.
 	 * 
 	 * @param flowIndex
-	 *            Index of the {@link JobSequence}.
+	 *            Index of the {@link Flow}.
 	 * @param flowKey
-	 *            Key of the {@link JobSequence}. Should be <code>null</code> if
+	 *            Key of the {@link Flow}. Should be <code>null</code> if
 	 *            indexed.
 	 * @param workName
 	 *            Name of the {@link Work}.
@@ -131,7 +131,7 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link JobSequence}.
+	 *            Type of argument passed to the instigated {@link Flow}.
 	 */
 	private void linkFlow(int flowIndex, F flowKey, String workName,
 			String taskName, FlowInstigationStrategyEnum strategy,

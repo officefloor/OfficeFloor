@@ -18,7 +18,7 @@
 package net.officefloor.frame.integrate.managedobject.flow;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -34,7 +34,7 @@ public class InputManagedObjectSource extends
 		AbstractManagedObjectSource<None, InputManagedObjectSource.Flows> {
 
 	/**
-	 * Keys of {@link JobSequence} instances instigated.
+	 * Keys of {@link Flow} instances instigated.
 	 */
 	public enum Flows {
 		INPUT

@@ -19,7 +19,7 @@ package net.officefloor.frame.api.escalate;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.administration.Duty;
  * and {@link Duty} instances.
  * <p>
  * They are not &quot;thrown&quot; in the sense of a java {@link Throwable}
- * though act similar by the execution path looking upwards in the {@link JobSequence}
+ * though act similar by the execution path looking upwards in the {@link Flow}
  * for an {@link EscalationFlow}/{@link EscalationHandler} to handle it.
  * <p>
  * Typically they are escalated on timing out of processing.

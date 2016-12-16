@@ -22,7 +22,7 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Provides means for the {@link WorkSource} to provide a
@@ -72,12 +72,12 @@ public interface TaskTypeBuilder<D extends Enum<D>, F extends Enum<F>> {
 	 * Adds a {@link TaskFlowTypeBuilder} to the {@link TaskTypeBuilder}
 	 * definition.
 	 * <p>
-	 * Should the {@link JobSequence} instigation be {@link Indexed}, the order
+	 * Should the {@link Flow} instigation be {@link Indexed}, the order
 	 * they are added is the order of indexing (starting at 0).
 	 * 
 	 * @return {@link TaskFlowTypeBuilder} to provide the
 	 *         <code>type definition</code> of the possible instigated
-	 *         {@link JobSequence} by the {@link Task}.
+	 *         {@link Flow} by the {@link Task}.
 	 */
 	TaskFlowTypeBuilder<F> addFlow();
 

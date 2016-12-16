@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.execute;
 
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Task of the {@link Work}.
@@ -32,7 +32,7 @@ public interface Task<W extends Work, D extends Enum<D>, F extends Enum<F>> {
 	 * @param context
 	 *            {@link TaskContext} for the {@link Task}.
 	 * @return Parameter for the next {@link Task}. This allows stringing
-	 *         {@link Task} instances together into a {@link JobSequence}.
+	 *         {@link Task} instances together into a {@link Flow}.
 	 * @throws Throwable
 	 *             Indicating failure of the {@link Task}.
 	 */

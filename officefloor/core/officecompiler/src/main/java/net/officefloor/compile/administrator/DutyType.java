@@ -18,7 +18,7 @@
 package net.officefloor.compile.administrator;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
@@ -43,21 +43,21 @@ public interface DutyType<A extends Enum<A>, F extends Enum<F>> {
 	A getDutyKey();
 
 	/**
-	 * Obtains the {@link Enum} providing the keys for the {@link JobSequence}
+	 * Obtains the {@link Enum} providing the keys for the {@link Flow}
 	 * instances instigated by the {@link Duty}.
 	 * 
-	 * @return {@link Enum} providing instigated {@link JobSequence} keys or
+	 * @return {@link Enum} providing instigated {@link Flow} keys or
 	 *         <code>null</code> if {@link Indexed} or no instigated
-	 *         {@link JobSequence} instances.
+	 *         {@link Flow} instances.
 	 */
 	Class<F> getFlowKeyClass();
 
 	/**
 	 * Obtains the {@link DutyFlowType} definitions for the possible
-	 * {@link JobSequence} instances instigated by the {@link Duty}.
+	 * {@link Flow} instances instigated by the {@link Duty}.
 	 * 
 	 * @return {@link DutyFlowType} definitions for the possible
-	 *         {@link JobSequence} instances instigated by the {@link Duty}.
+	 *         {@link Flow} instances instigated by the {@link Duty}.
 	 */
 	DutyFlowType<F>[] getFlowTypes();
 

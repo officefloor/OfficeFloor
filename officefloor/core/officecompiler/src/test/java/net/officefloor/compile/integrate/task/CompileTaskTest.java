@@ -45,7 +45,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.work.clazz.ClassTaskFactory;
 import net.officefloor.plugin.work.clazz.ClassWork;
@@ -181,7 +181,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link JobSequence} to another
+	 * Tests compiling a {@link Task} linking a {@link Flow} to another
 	 * {@link Task} on the same {@link Work}.
 	 */
 	public void testLinkFlowToTaskOnSameWork() {
@@ -207,7 +207,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link JobSequence} to different
+	 * Tests compiling a {@link Task} linking a {@link Flow} to different
 	 * {@link Work} in the same {@link OfficeSection}.
 	 */
 	public void testLinkFlowToTaskOnDifferentWorkInSameSection() {
@@ -234,7 +234,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link JobSequence} to a
+	 * Tests compiling a {@link Task} linking a {@link Flow} to a
 	 * {@link Task} in a different {@link SubSection}.
 	 */
 	public void testLinkFlowToTaskInDifferentSubSection() {
@@ -261,7 +261,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link JobSequence} to a
+	 * Tests compiling a {@link Task} linking a {@link Flow} to a
 	 * {@link Task} in a different {@link OfficeSection}.
 	 */
 	public void testLinkFlowToTaskInDifferentOfficeSection() {
@@ -742,7 +742,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link JobSequence} to a
+	 * Tests compiling a {@link Task} linking a {@link Flow} to a
 	 * {@link Task} in a different {@link OfficeSection}.
 	 */
 	public void testLinkStartToOfficeSectionInput() {

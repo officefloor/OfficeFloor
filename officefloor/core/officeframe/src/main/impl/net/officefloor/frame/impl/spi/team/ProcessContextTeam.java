@@ -28,7 +28,7 @@ import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -91,14 +91,11 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
-	public static void doWork(final WorkManager workManager,
-			final Object parameter) throws NoInitialTaskException,
-			InvalidParameterTypeException, InterruptedException {
+	public static void doWork(final WorkManager workManager, final Object parameter)
+			throws NoInitialTaskException, InvalidParameterTypeException, InterruptedException {
 		doProcess(new InvokeProcessState() {
 			@Override
-			public ProcessFuture invokeProcessState()
-					throws NoInitialTaskException,
-					InvalidParameterTypeException {
+			public ProcessFuture invokeProcessState() throws NoInitialTaskException, InvalidParameterTypeException {
 				return workManager.invokeWork(parameter);
 			}
 		});
@@ -122,20 +119,17 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
-	public static void doTask(final TaskManager taskManager,
-			final Object parameter) throws InvalidParameterTypeException,
-			InterruptedException {
+	public static void doTask(final TaskManager taskManager, final Object parameter)
+			throws InvalidParameterTypeException, InterruptedException {
 		try {
 			doProcess(new InvokeProcessState() {
 				@Override
-				public ProcessFuture invokeProcessState()
-						throws InvalidParameterTypeException {
+				public ProcessFuture invokeProcessState() throws InvalidParameterTypeException {
 					return taskManager.invokeTask(parameter);
 				}
 			});
 		} catch (NoInitialTaskException ex) {
-			throw new IllegalStateException(
-					"Should not be able to throw this exception", ex);
+			throw new IllegalStateException("Should not be able to throw this exception", ex);
 		}
 	}
 
@@ -153,7 +147,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 * @param flowKey
-	 *            {@link JobSequence} key.
+	 *            {@link Flow} key.
 	 * @param parameter
 	 *            Parameter for the initial {@link Task}.
 	 * @param managedObject
@@ -163,12 +157,10 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
-	public static <F extends Enum<F>> void doProcess(
-			ManagedObjectExecuteContext<F> executeContext, F flowKey,
-			Object parameter, ManagedObject managedObject,
-			EscalationHandler escalationHandler) throws InterruptedException {
-		doProcess(executeContext, flowKey.ordinal(), parameter, managedObject,
-				escalationHandler);
+	public static <F extends Enum<F>> void doProcess(ManagedObjectExecuteContext<F> executeContext, F flowKey,
+			Object parameter, ManagedObject managedObject, EscalationHandler escalationHandler)
+			throws InterruptedException {
+		doProcess(executeContext, flowKey.ordinal(), parameter, managedObject, escalationHandler);
 	}
 
 	/**
@@ -183,7 +175,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
 	 * @param flowIndex
-	 *            {@link JobSequence} index.
+	 *            {@link Flow} index.
 	 * @param parameter
 	 *            Parameter for the initial {@link Task}.
 	 * @param managedObject
@@ -193,26 +185,20 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
-	public static void doProcess(
-			final ManagedObjectExecuteContext<?> executeContext,
-			final int flowIndex, final Object parameter,
-			final ManagedObject managedObject,
-			final EscalationHandler escalationHandler)
+	public static void doProcess(final ManagedObjectExecuteContext<?> executeContext, final int flowIndex,
+			final Object parameter, final ManagedObject managedObject, final EscalationHandler escalationHandler)
 			throws InterruptedException {
 		try {
 			doProcess(new InvokeProcessState() {
 				@Override
 				public ProcessFuture invokeProcessState() {
-					return executeContext.invokeProcess(flowIndex, parameter,
-							managedObject, 0, escalationHandler);
+					return executeContext.invokeProcess(flowIndex, parameter, managedObject, 0, escalationHandler);
 				}
 			});
 		} catch (NoInitialTaskException ex) {
-			throw new IllegalStateException(
-					"Should not be able to throw this exception", ex);
+			throw new IllegalStateException("Should not be able to throw this exception", ex);
 		} catch (InvalidParameterTypeException ex) {
-			throw new IllegalStateException(
-					"Should not be able to throw this exception", ex);
+			throw new IllegalStateException("Should not be able to throw this exception", ex);
 		}
 	}
 
@@ -231,8 +217,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		 * @throws InvalidParameterTypeException
 		 *             Should the parameter type be invalid for {@link Task}.
 		 */
-		ProcessFuture invokeProcessState() throws NoInitialTaskException,
-				InvalidParameterTypeException;
+		ProcessFuture invokeProcessState() throws NoInitialTaskException, InvalidParameterTypeException;
 	}
 
 	/**
@@ -254,8 +239,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 *             Should this blocking call be interrupted.
 	 */
 	private static void doProcess(InvokeProcessState invoker)
-			throws NoInitialTaskException, InvalidParameterTypeException,
-			InterruptedException {
+			throws NoInitialTaskException, InvalidParameterTypeException, InterruptedException {
 
 		// Obtain the current Thread
 		Thread currentThread = Thread.currentThread();
@@ -288,8 +272,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 				Job job = executor.jobQueue.dequeue();
 				if (job != null) {
 					// Complete execution of existing Jobs
-					JobExecutor completionExecutor = new JobExecutor(
-							executor.instance);
+					JobExecutor completionExecutor = new JobExecutor(executor.instance);
 					while (job != null) {
 
 						// Complete the Job
@@ -498,8 +481,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 				// Create queue and load existing Jobs
 				JobQueue queue = new JobQueue(future);
-				for (Job job = this.jobQueue.dequeue(); job != null; job = this.jobQueue
-						.dequeue()) {
+				for (Job job = this.jobQueue.dequeue(); job != null; job = this.jobQueue.dequeue()) {
 					queue.enqueue(job);
 				}
 
@@ -561,17 +543,11 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		 *            {@link Job} to be executed.
 		 */
 		public void doJob(Job job) {
+			// Reset time
+			this.time = -1;
 
-			// Execute the Job until it flags complete
-			boolean isComplete = false;
-			while (!isComplete) {
-
-				// Reset time
-				this.time = -1;
-
-				// Execute the job
-				isComplete = job.doJob(this);
-			}
+			// Execute the job
+			job.doJob(this);
 		}
 
 		/*

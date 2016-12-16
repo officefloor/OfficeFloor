@@ -21,32 +21,32 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * Meta-data of a {@link JobSequence}.
+ * Meta-data of a {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface FlowMetaData<W extends Work> {
 
 	/**
-	 * Obtains the {@link FlowInstigationStrategyEnum} for the {@link JobSequence}.
+	 * Obtains the {@link FlowInstigationStrategyEnum} for the {@link Flow}.
 	 * 
-	 * @return {@link FlowInstigationStrategyEnum} for the {@link JobSequence}.
+	 * @return {@link FlowInstigationStrategyEnum} for the {@link Flow}.
 	 */
 	FlowInstigationStrategyEnum getInstigationStrategy();
 
 	/**
 	 * Obtains the {@link TaskMetaData} of the initial {@link Task} within the
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 * 
 	 * @return {@link TaskMetaData} of the initial {@link Task} within the
-	 *         {@link JobSequence}.
+	 *         {@link Flow}.
 	 */
 	TaskMetaData<W, ?, ?> getInitialTaskMetaData();
 
 	/**
-	 * Obtains the {@link AssetManager} to managed this {@link JobSequence}.
+	 * Obtains the {@link AssetManager} to managed this {@link Flow}.
 	 * 
-	 * @return {@link AssetManager} to managed this {@link JobSequence}.
+	 * @return {@link AssetManager} to managed this {@link Flow}.
 	 */
 	AssetManager getFlowManager();
 

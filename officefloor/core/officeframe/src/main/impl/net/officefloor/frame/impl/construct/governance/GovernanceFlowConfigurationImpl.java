@@ -21,7 +21,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * {@link GovernanceFlowConfiguration} implementation.
@@ -32,7 +32,7 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements
 		GovernanceFlowConfiguration<F> {
 
 	/**
-	 * Name of the {@link JobSequence}.
+	 * Name of the {@link Flow}.
 	 */
 	private final String flowName;
 
@@ -42,17 +42,17 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements
 	private final FlowInstigationStrategyEnum strategy;
 
 	/**
-	 * Reference to the initial {@link Task} of this {@link JobSequence}.
+	 * Reference to the initial {@link Task} of this {@link Flow}.
 	 */
 	private final TaskNodeReference taskNodeRef;
 
 	/**
-	 * Index of the {@link JobSequence}.
+	 * Index of the {@link Flow}.
 	 */
 	private final int index;
 
 	/**
-	 * Key of the {@link JobSequence}.
+	 * Key of the {@link Flow}.
 	 */
 	private final F key;
 
@@ -60,16 +60,16 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements
 	 * Initiate.
 	 * 
 	 * @param flowName
-	 *            Name of this {@link JobSequence}.
+	 *            Name of this {@link Flow}.
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param taskNodeRef
 	 *            Reference to the initial {@link Task} of this
-	 *            {@link JobSequence}.
+	 *            {@link Flow}.
 	 * @param index
-	 *            Index of this {@link JobSequence}.
+	 *            Index of this {@link Flow}.
 	 * @param key
-	 *            Key of the {@link JobSequence}.
+	 *            Key of the {@link Flow}.
 	 */
 	public GovernanceFlowConfigurationImpl(String flowName,
 			FlowInstigationStrategyEnum strategy,

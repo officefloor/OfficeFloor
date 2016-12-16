@@ -24,13 +24,13 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
-import net.officefloor.frame.impl.execute.job.JobExecuteContext;
+import net.officefloor.frame.impl.execute.job.AbstractManagedJobNodeContainer;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedJobNodeContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -40,6 +40,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.CriticalSection;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 
@@ -49,7 +50,7 @@ import net.officefloor.frame.spi.team.JobContext;
  * @author Daniel Sagenschneider
  */
 public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		extends AbstractJobContainer<W, TaskMetaData<W, D, F>> {
+		extends AbstractManagedJobNodeContainer<W, TaskMetaData<W, D, F>> {
 
 	/**
 	 * <p>
@@ -86,7 +87,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 * Initiate.
 	 * 
 	 * @param flow
-	 *            {@link JobSequence}.
+	 *            {@link Flow}.
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param taskMetaData
@@ -98,18 +99,14 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 * @param parameter
 	 *            Parameter for the {@link Task}.
 	 */
-	public TaskJob(JobSequence flow, WorkContainer<W> workContainer,
-			TaskMetaData<W, D, F> taskMetaData,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy,
-			JobNode parallelOwner, Object parameter) {
-		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData
-				.getRequiredManagedObjects(), taskMetaData
-				.getRequiredGovernance(), governanceDeactivationStrategy);
+	public TaskJob(Flow flow, WorkContainer<W> workContainer, TaskMetaData<W, D, F> taskMetaData,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy, JobNode parallelOwner, Object parameter) {
+		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData.getRequiredManagedObjects(),
+				taskMetaData.getRequiredGovernance(), governanceDeactivationStrategy);
 		this.parameter = parameter;
 
 		// Create the task
-		this.task = this.nodeMetaData.getTaskFactory().createTask(
-				this.workContainer.getWork(flow.getThreadState()));
+		this.task = this.nodeMetaData.getTaskFactory().createTask(this.workContainer.getWork(flow.getThreadState()));
 	}
 
 	/*
@@ -128,8 +125,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	}
 
 	@Override
-	protected Object executeJob(JobExecuteContext context,
-			JobContext jobContext, JobNodeActivateSet activateSet)
+	protected Object executeJob(ManagedJobNodeContext context, JobContext jobContext, JobNodeActivateSet activateSet)
 			throws Throwable {
 		// Execute the task
 		return this.task.doTask(this.taskContextToken);
@@ -151,8 +147,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 
 		@Override
 		public W getWork() {
-			return TaskJob.this.workContainer.getWork(TaskJob.this.flow
-					.getThreadState());
+			return TaskJob.this.workContainer.getWork(TaskJob.this.flow.getThreadState());
 		}
 
 		@Override
@@ -164,8 +159,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		public Object getObject(int managedObjectIndex) {
 
 			// Obtain the work managed object index
-			ManagedObjectIndex index = TaskJob.this.nodeMetaData
-					.translateManagedObjectIndexForWork(managedObjectIndex);
+			ManagedObjectIndex index = TaskJob.this.nodeMetaData.translateManagedObjectIndexForWork(managedObjectIndex);
 
 			// Determine if a parameter
 			if (index.getIndexOfManagedObjectWithinScope() == PARAMETER_INDEX) {
@@ -174,8 +168,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 			}
 
 			// Return the Object
-			return TaskJob.this.workContainer.getObject(index,
-					TaskJob.this.flow.getThreadState());
+			return TaskJob.this.workContainer.getObject(index, TaskJob.this.flow.getThreadState());
 		}
 
 		@Override
@@ -186,24 +179,20 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		@Override
 		public FlowFuture doFlow(int flowIndex, Object parameter) {
 			// Obtain the Flow meta-data and do the flow
-			FlowMetaData<?> flowMetaData = TaskJob.this.nodeMetaData
-					.getFlow(flowIndex);
+			FlowMetaData<?> flowMetaData = TaskJob.this.nodeMetaData.getFlow(flowIndex);
 			return TaskJob.this.doFlow(flowMetaData, parameter);
 		}
 
 		@Override
 		@SuppressWarnings("rawtypes")
 		public void doFlow(String workName, String taskName, Object parameter)
-				throws UnknownWorkException, UnknownTaskException,
-				InvalidParameterTypeException {
+				throws UnknownWorkException, UnknownTaskException, InvalidParameterTypeException {
 
 			// Obtain the Process State
-			ProcessState processState = TaskJob.this.flow.getThreadState()
-					.getProcessState();
+			ProcessState processState = TaskJob.this.flow.getThreadState().getProcessState();
 
 			// Obtain the Task meta-data
-			final TaskMetaData<?, ?, ?> taskMetaData = processState
-					.getTaskMetaData(workName, taskName);
+			final TaskMetaData<?, ?, ?> taskMetaData = processState.getTaskMetaData(workName, taskName);
 
 			// Invoke the Flow
 			TaskJob.this.doFlow(new FlowMetaData() {
@@ -232,16 +221,9 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		}
 
 		@Override
-		public Object getProcessLock() {
-			return TaskJob.this.flow.getThreadState().getProcessState()
-					.getProcessLock();
-		}
-
-		@Override
 		public void setComplete(boolean isComplete) {
 			TaskJob.this.setJobComplete(isComplete);
 		}
-
 	}
 
 }

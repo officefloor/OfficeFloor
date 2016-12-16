@@ -21,7 +21,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 
 /**
- * {@link JobSequence} to handle an {@link Escalation} from a {@link JobNode}.
+ * {@link Flow} to handle an {@link Escalation} from a {@link JobNode}.
  * 
  * @author Daniel Sagenschneider
  */

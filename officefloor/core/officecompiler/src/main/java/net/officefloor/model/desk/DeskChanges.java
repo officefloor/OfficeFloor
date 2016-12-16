@@ -30,7 +30,7 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -177,7 +177,7 @@ public interface DeskChanges {
 	 * @param <D>
 	 *            Dependency type keys.
 	 * @param <F>
-	 *            {@link JobSequence} type keys.
+	 *            {@link Flow} type keys.
 	 * @param workModel
 	 *            {@link WorkModel} to have the {@link TaskType} added.
 	 * @param taskType
@@ -209,7 +209,7 @@ public interface DeskChanges {
 	 * @param <D>
 	 *            Dependency type keys.
 	 * @param <F>
-	 *            {@link JobSequence} type keys.
+	 *            {@link Flow} type keys.
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @param workTaskModel

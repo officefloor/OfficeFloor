@@ -23,7 +23,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
@@ -125,7 +125,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 
 	/**
 	 * <p>
-	 * Meta-data of the available {@link JobSequence} instances from this
+	 * Meta-data of the available {@link Flow} instances from this
 	 * {@link Task}.
 	 * <p>
 	 * Acts as <code>final</code> but specified after constructor.
@@ -135,7 +135,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	/**
 	 * <p>
 	 * {@link TaskMetaData} of the next {@link Task} within the
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 * <p>
 	 * Acts as <code>final</code> but specified after constructor.
 	 */
@@ -212,11 +212,11 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 * @param workMetaData
 	 *            {@link WorkMetaData} for this {@link Task}.
 	 * @param flowMetaData
-	 *            Meta-data of the available {@link JobSequence} instances from
+	 *            Meta-data of the available {@link Flow} instances from
 	 *            this {@link Task}.
 	 * @param nextTaskInFlow
 	 *            {@link TaskMetaData} of the next {@link Task} within the
-	 *            {@link JobSequence}.
+	 *            {@link Flow}.
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure} for exceptions of the {@link Task}
 	 *            of this {@link TaskMetaData}.
@@ -321,7 +321,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	}
 
 	@Override
-	public JobNode createTaskNode(JobSequence flow,
+	public JobNode createTaskNode(Flow flow,
 			WorkContainer<W> workContainer, JobNode parallelJobNodeOwner,
 			Object parameter,
 			GovernanceDeactivationStrategy governanceDeactivationStrategy) {

@@ -29,7 +29,7 @@ import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -185,7 +185,7 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JobNode createDutyNode(
 			TaskMetaData<?, ?, ?> administeringTaskMetaData,
-			WorkContainer<?> administeringWorkContainer, JobSequence flow,
+			WorkContainer<?> administeringWorkContainer, Flow flow,
 			TaskDutyAssociation<?> taskDutyAssociation,
 			JobNode parallelJobNodeOwner) {
 		return new DutyJob(flow, administeringWorkContainer, this,

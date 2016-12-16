@@ -18,7 +18,7 @@
 package net.officefloor.autowire.supplier;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -53,7 +53,7 @@ public interface SupplyOrder {
 	 * @param <D>
 	 *            Dependency type keys.
 	 * @param <F>
-	 *            {@link JobSequence} type keys.
+	 *            {@link Flow} type keys.
 	 * @param suppliedManagedObject
 	 *            {@link SuppliedManagedObject}.
 	 */

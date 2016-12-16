@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests the {@link AbstractJobContainer} with {@link ManagedObject} instances.
+ * Tests the {@link AbstractManagedJobNodeContainer} with {@link ManagedObject} instances.
  * 
  * @author Daniel Sagenschneider
  */

@@ -40,6 +40,7 @@ public interface JobMetaData {
 	 * 
 	 * @return {@link JobNodeActivatableSet}.
 	 */
+	@Deprecated // part of job loop
 	JobNodeActivatableSet createJobActivableSet();
 
 	/**
@@ -58,14 +59,15 @@ public interface JobMetaData {
 	 * @return {@link Team} to continue execution to complete the next
 	 *         {@link Job}.
 	 */
+	@Deprecated // handled by job loop
 	Team getContinueTeam();
 
 	/**
 	 * Obtains the {@link TaskMetaData} of the next {@link Task} within
-	 * {@link JobSequence} that this {@link Task} is involved within.
+	 * {@link Flow} that this {@link Task} is involved within.
 	 * 
 	 * @return {@link TaskMetaData} of the first {@link Task} within the
-	 *         specified {@link JobSequence}.
+	 *         specified {@link Flow}.
 	 */
 	TaskMetaData<?, ?, ?> getNextTaskInFlow();
 

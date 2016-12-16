@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests {@link AbstractJobContainer} handling escalations.
+ * Tests {@link AbstractManagedJobNodeContainer} handling escalations.
  * 
  * @author Daniel Sagenschneider
  */

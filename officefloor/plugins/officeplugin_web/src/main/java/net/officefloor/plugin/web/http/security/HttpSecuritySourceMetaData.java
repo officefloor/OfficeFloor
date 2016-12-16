@@ -18,7 +18,7 @@
 package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Meta-data of the {@link HttpSecuritySource}.
@@ -64,7 +64,7 @@ public interface HttpSecuritySourceMetaData<S, C, D extends Enum<D>, F extends E
 	 * Obtains the list of {@link HttpSecurityFlowMetaData} instances should
 	 * this {@link HttpSecuritySource} require application specific behaviour.
 	 * 
-	 * @return Meta-data of application {@link JobSequence} instances instigated
+	 * @return Meta-data of application {@link Flow} instances instigated
 	 *         by this {@link HttpSecuritySource}.
 	 */
 	HttpSecurityFlowMetaData<F>[] getFlowMetaData();

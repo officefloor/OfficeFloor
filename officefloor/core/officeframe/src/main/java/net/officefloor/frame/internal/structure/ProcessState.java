@@ -22,12 +22,8 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * <p>
@@ -49,29 +45,18 @@ public interface ProcessState {
 	Object getProcessIdentifier();
 
 	/**
-	 * Obtains the {@link ProcessFuture} for this {@link ProcessState}.
-	 * 
-	 * @return {@link ProcessFuture} for this {@link ProcessState}.
-	 */
-	ProcessFuture getProcessFuture();
-
-	/**
-	 * <p>
-	 * Obtains the lock for this {@link ProcessState}.
-	 * <p>
-	 * This is the internal lock to the {@link OfficeFloor} engine and should
-	 * not be used outside of the {@link OfficeFloor} engine.
-	 * 
-	 * @return Lock of this {@link ProcessState}.
-	 */
-	Object getProcessLock();
-
-	/**
 	 * Obtains the {@link ProcessMetaData} for this {@link ProcessState}.
 	 * 
 	 * @return {@link ProcessMetaData} for this {@link ProcessState}.
 	 */
 	ProcessMetaData getProcessMetaData();
+
+	/**
+	 * Obtains the main {@link ThreadState} for this {@link ProcessState}.
+	 * 
+	 * @return Main {@link ThreadState} for this {@link ProcessState}.
+	 */
+	ThreadState getMainThreadState();
 
 	/**
 	 * Obtains the {@link CleanupSequence} for this {@link ProcessState}.
@@ -99,38 +84,30 @@ public interface ProcessState {
 
 	/**
 	 * <p>
-	 * Creates a {@link JobSequence} for the new {@link ThreadState} contained
-	 * in this {@link ProcessState}.
+	 * Creates a {@link Flow} for the new {@link ThreadState} contained in this
+	 * {@link ProcessState}.
 	 * <p>
-	 * The new {@link ThreadState} is available from the returned
-	 * {@link JobSequence}.
+	 * The new {@link ThreadState} is available from the returned {@link Flow}.
 	 * 
 	 * @param assetManager
 	 *            {@link AssetManager} for the {@link ThreadState}.
-	 * @return {@link JobSequence} for the new {@link ThreadState} contained in
-	 *         this {@link ProcessState}.
+	 * @param callbackFactory
+	 *            Optional {@link FlowCallbackJobNodeFactory} to create a
+	 *            {@link JobNode} to be instigating on completion of the created
+	 *            {@link ThreadState}.
+	 * @return {@link Flow} for the new {@link ThreadState} contained in this
+	 *         {@link ProcessState}.
 	 */
-	JobSequence createThread(AssetManager assetManager);
+	Flow createThread(AssetManager assetManager, FlowCallbackJobNodeFactory callbackFactory);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.
 	 * 
 	 * @param thread
 	 *            {@link ThreadState} that has completed.
-	 * @param activeSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
-	 *            waiting on this {@link ProcessState} if all
-	 *            {@link ThreadState} instances of this {@link ProcessState} are
-	 *            complete. This is unlikely to be used but is available for
-	 *            {@link ManagedObject} instances bound to this
-	 *            {@link ProcessState} requiring unloading (rather than relying
-	 *            on the {@link OfficeManager}).
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} completing
-	 *            the {@link ThreadState}.
+	 * @return Optional {@link JobNode} to complete the {@link ThreadState}.
 	 */
-	void threadComplete(ThreadState thread, JobNodeActivateSet activeSet,
-			TeamIdentifier currentTeam);
+	JobNode threadComplete(ThreadState thread);
 
 	/**
 	 * Obtains the {@link ManagedObjectContainer} for the input index.
@@ -172,14 +149,5 @@ public interface ProcessState {
 	 * @return Catch all {@link EscalationFlow} for the {@link OfficeFloor}.
 	 */
 	EscalationFlow getOfficeFloorEscalation();
-
-	/**
-	 * Registers a {@link ProcessCompletionListener} with this
-	 * {@link ProcessState}.
-	 * 
-	 * @param listener
-	 *            {@link ProcessCompletionListener}.
-	 */
-	void registerProcessCompletionListener(ProcessCompletionListener listener);
 
 }

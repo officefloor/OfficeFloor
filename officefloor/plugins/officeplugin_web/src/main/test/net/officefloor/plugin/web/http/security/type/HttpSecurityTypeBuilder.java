@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.security.type;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.web.http.security.HttpSecuritySource;
 
 /**
@@ -96,11 +96,11 @@ public interface HttpSecurityTypeBuilder {
 	 * @param key
 	 *            Key identifying the {@link HttpSecurityFlowType}.
 	 * @param workName
-	 *            Name of {@link Work} instigating the {@link JobSequence} or
+	 *            Name of {@link Work} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link HttpSecuritySource}.
 	 * @param taskName
-	 *            Name of {@link Task} instigating the {@link JobSequence} or
+	 *            Name of {@link Task} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link HttpSecuritySource}.
 	 */
@@ -120,11 +120,11 @@ public interface HttpSecurityTypeBuilder {
 	 * @param argumentType
 	 *            Type of argument passed to the {@link HttpSecurityFlowType}.
 	 * @param workName
-	 *            Name of {@link Work} instigating the {@link JobSequence} or
+	 *            Name of {@link Work} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link HttpSecuritySource}.
 	 * @param taskName
-	 *            Name of {@link Task} instigating the {@link JobSequence} or
+	 *            Name of {@link Task} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link HttpSecuritySource}.
 	 */

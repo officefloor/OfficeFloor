@@ -33,7 +33,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -343,7 +343,7 @@ public class ReflectiveWorkBuilder implements Work,
 		 * @param strategy
 		 *            {@link FlowInstigationStrategyEnum}.
 		 * @param argumentType
-		 *            Type of argument passed to the {@link JobSequence}.
+		 *            Type of argument passed to the {@link Flow}.
 		 */
 		public void buildFlow(String taskName,
 				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
@@ -360,7 +360,7 @@ public class ReflectiveWorkBuilder implements Work,
 		 * @param strategy
 		 *            {@link FlowInstigationStrategyEnum}.
 		 * @param argumentType
-		 *            Type of argument passed to the {@link JobSequence}.
+		 *            Type of argument passed to the {@link Flow}.
 		 */
 		public void buildFlow(String workName, String taskName,
 				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {

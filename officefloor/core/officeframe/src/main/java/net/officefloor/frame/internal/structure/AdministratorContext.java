@@ -39,7 +39,7 @@ public interface AdministratorContext {
 	 * Instigates a flow to be run.
 	 * 
 	 * @param flowMetaData
-	 *            {@link FlowMetaData} of the {@link JobSequence} to instigate.
+	 *            {@link FlowMetaData} of the {@link Flow} to instigate.
 	 * @param parameter
 	 *            Parameter that will be available from the
 	 *            {@link TaskContext#getObject(int)} of the first {@link Task}

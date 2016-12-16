@@ -49,7 +49,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -240,7 +240,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures able to handle simple {@link Governance} without
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testSimpleGovernance() {

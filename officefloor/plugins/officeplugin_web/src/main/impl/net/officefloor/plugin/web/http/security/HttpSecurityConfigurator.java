@@ -22,7 +22,7 @@ import java.util.Map;
 
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
@@ -55,7 +55,7 @@ public class HttpSecurityConfigurator {
 	 * @param <D>
 	 *            Dependency keys type.
 	 * @param <F>
-	 *            {@link JobSequence} keys type.
+	 *            {@link Flow} keys type.
 	 * @param httpSecuritySource
 	 *            {@link HttpSecuritySource}.
 	 * @param httpSecurityType

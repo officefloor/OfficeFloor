@@ -22,8 +22,6 @@ import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Container managing a {@link ManagedObject}.
@@ -40,74 +38,27 @@ public interface ManagedObjectContainer {
 	 * @param jobNode
 	 *            {@link JobNode} requesting the {@link ManagedObject} to be
 	 *            loaded.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} loading the
-	 *            {@link ManagedObject}.
-	 * @param context
-	 *            {@link ContainerContext}.
+	 * @return <code>true</code> indicating the {@link ManagedObject} was
+	 *         loaded. <code>false</code> indicates must wait asynchronously for
+	 *         the {@link ManagedObject} to be loaded.
 	 */
-	void loadManagedObject(JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
-			ContainerContext context);
+	boolean loadManagedObject(JobContext jobContext, JobNode jobNode);
 
 	/**
-	 * Provides any active {@link Governance} over the {@link ManagedObject}.
+	 * Sets up the {@link ManagedObject} for use.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
 	 * @param workContainer
-	 *            {@link WorkContainer} to possibly source the
-	 *            {@link Governance}.
+	 *            {@link WorkContainer}.
 	 * @param jobContext
 	 *            {@link JobContext}.
+	 * @param flow
+	 *            {@link Flow} containing the {@link JobNode}.
 	 * @param jobNode
-	 *            {@link JobNode} requesting {@link Governance} for the
-	 *            {@link ManagedObject}.
-	 * @param activateSet
-	 *            {@link JobNodeActivatableSet} to add {@link JobNode} instances
-	 *            to activate.
-	 * @param context
-	 *            {@link ContainerContext}.
-	 * @return <code>true</code> if {@link Governance} is in place for the
-	 *         {@link ManagedObject} and may move onto the next
-	 *         {@link ManagedObject}.
+	 *            {@link JobNode} requesting the {@link ManagedObject} to be
+	 *            setup.
+	 * @return Optional {@link JobNode} to setup the {@link ManagedObject}.
 	 */
-	<W extends Work> boolean governManagedObject(
-			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context);
-
-	/**
-	 * Allows this {@link ManagedObject} to coordinate with the other
-	 * {@link ManagedObject} instances. Also handles completion of loading the
-	 * {@link ManagedObject} and obtaining the {@link Object}.
-	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workContainer
-	 *            {@link WorkContainer} to source the other
-	 *            {@link ManagedObject} instances.
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode} requesting the {@link ManagedObject} to
-	 *            coordinate.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param context
-	 *            {@link ContainerContext}.
-	 * @return <code>true</code> if coordination is in place for the
-	 *         {@link ManagedObject} and may move onto the next
-	 *         {@link ManagedObject}.
-	 */
-	<W extends Work> boolean coordinateManagedObject(
-			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context);
+	JobNode setupManagedObject(WorkContainer<?> workContainer, JobContext jobContext, Flow flow, JobNode jobNode);
 
 	/**
 	 * Indicates if the {@link ManagedObject} is ready. This is to ensure the
@@ -127,19 +78,12 @@ public interface ManagedObjectContainer {
 	 * @param jobNode
 	 *            {@link JobNode} requiring the {@link ManagedObject} to be
 	 *            ready.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param context
-	 *            {@link ContainerContext}.
-	 * @return <code>true</code> if the {@link ManagedObject} is ready,
-	 *         otherwise <code>false</code> indicating that waiting on a
-	 *         {@link ManagedObject}.
+	 * @return Optional {@link JobNode} to undertake to ready the
+	 *         {@link ManagedObject}. Returning <code>null</code> indicates the
+	 *         {@link ManagedObject} is ready.
 	 */
-	<W extends Work> boolean isManagedObjectReady(
-			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context);
+	<W extends Work> JobNode isManagedObjectReady(WorkContainer<W> workContainer, JobContext jobContext,
+			JobNode jobNode);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
@@ -161,36 +105,26 @@ public interface ManagedObjectContainer {
 	 *            interface from the {@link ManagedObject}.
 	 * @return Extracted extension interface.
 	 */
-	<I extends Object> I extractExtensionInterface(
-			ExtensionInterfaceExtractor<I> extractor);
+	<I extends Object> I extractExtensionInterface(ExtensionInterfaceExtractor<I> extractor);
 
 	/**
 	 * Unregisters this {@link ManagedObject} from {@link Governance}.
 	 * 
 	 * @param governance
 	 *            {@link ActiveGovernance}.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team}
-	 *            unregistering the {@link ManagedObject} from
-	 *            {@link Governance}.
+	 * @return Optional {@link JobNode} to unregister the {@link ManagedObject}
+	 *         from {@link Governance}.
 	 */
-	void unregisterManagedObjectFromGovernance(
-			ActiveGovernance<?, ?> governance, JobNodeActivateSet activateSet,
-			TeamIdentifier currentTeam);
+	JobNode unregisterManagedObjectFromGovernance(ActiveGovernance<?, ?> governance);
 
 	/**
 	 * Unloads the {@link ManagedObject}.
 	 * 
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
-	 *            activate.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} unloading
-	 *            the {@link ManagedObject}.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue unloading of the
+	 *            {@link ManagedObject}.
+	 * @return Optional {@link JobNode} to unload the {@link ManagedObject}.
 	 */
-	void unloadManagedObject(JobNodeActivateSet activateSet,
-			TeamIdentifier currentTeam);
+	JobNode unloadManagedObject(JobNode continueJobNode);
 
 }

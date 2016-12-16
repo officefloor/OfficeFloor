@@ -23,7 +23,7 @@ import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests {@link Governance} within the {@link AbstractJobContainer}.
+ * Tests {@link Governance} within the {@link AbstractManagedJobNodeContainer}.
  * 
  * @author Daniel Sagenschneider
  */

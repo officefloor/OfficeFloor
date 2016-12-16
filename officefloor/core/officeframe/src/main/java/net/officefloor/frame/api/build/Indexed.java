@@ -17,14 +17,14 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link Enum} indicating the:
  * <ol>
  * <li> {@link ManagedObject} instances</li>
- * <li>{@link JobSequence} instances</li>
+ * <li>{@link Flow} instances</li>
  * </ol>
  * will be specified by an index rather than an {@link Enum}.
  * 

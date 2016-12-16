@@ -21,7 +21,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -38,13 +38,13 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements
 	private final String name;
 
 	/**
-	 * Name of {@link Work} instigating the {@link JobSequence} or <code>null</code> if
+	 * Name of {@link Work} instigating the {@link Flow} or <code>null</code> if
 	 * done directly by {@link ManagedObjectSource}.
 	 */
 	private final String workName;
 
 	/**
-	 * Name of {@link Task} instigating the {@link JobSequence} or <code>null</code> if
+	 * Name of {@link Task} instigating the {@link Flow} or <code>null</code> if
 	 * done directly by {@link ManagedObjectSource}.
 	 */
 	private final String taskName;
@@ -69,11 +69,11 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements
 	 * added by the {@link ManagedObjectSource}.
 	 * 
 	 * @param workName
-	 *            Name of {@link Work} instigating the {@link JobSequence} or
+	 *            Name of {@link Work} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 * @param taskName
-	 *            Name of {@link Task} instigating the {@link JobSequence} or
+	 *            Name of {@link Task} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 * @param index

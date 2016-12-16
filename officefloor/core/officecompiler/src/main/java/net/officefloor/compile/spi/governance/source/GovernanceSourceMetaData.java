@@ -19,7 +19,7 @@ package net.officefloor.compile.spi.governance.source;
 
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -47,9 +47,9 @@ public interface GovernanceSourceMetaData<I, F extends Enum<F>> {
 
 	/**
 	 * Obtains the list of {@link GovernanceFlowMetaData} instances should this
-	 * {@link GovernanceSource} require instigating a {@link JobSequence}.
+	 * {@link GovernanceSource} require instigating a {@link Flow}.
 	 * 
-	 * @return Meta-data of {@link JobSequence} instances instigated by this
+	 * @return Meta-data of {@link Flow} instances instigated by this
 	 *         {@link GovernanceSource}.
 	 */
 	GovernanceFlowMetaData<F>[] getFlowMetaData();

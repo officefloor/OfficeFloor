@@ -19,7 +19,7 @@ package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -31,7 +31,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * <li>linking in the {@link Task} instances created by the
  * {@link ManagedObjectSource} to other {@link Task} instances within the
  * {@link Office}</li>
- * <li>linking the {@link JobSequence} instances instigated by the
+ * <li>linking the {@link Flow} instances instigated by the
  * {@link ManagedObjectSource} to a {@link Task} within the {@link Office}</li>
  * </ol>
  * 

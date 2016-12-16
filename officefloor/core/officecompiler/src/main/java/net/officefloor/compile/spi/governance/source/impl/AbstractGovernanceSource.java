@@ -29,7 +29,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecificati
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Abstract {@link GovernanceSource}.
@@ -157,7 +157,7 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 			throws Exception;
 
 	/**
-	 * Provides the ability to label the {@link JobSequence}.
+	 * Provides the ability to label the {@link Flow}.
 	 */
 	public static interface Labeller {
 
@@ -171,9 +171,9 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 		Labeller setLabel(String label);
 
 		/**
-		 * Obtains the index of the {@link JobSequence}.
+		 * Obtains the index of the {@link Flow}.
 		 * 
-		 * @return Index of the {@link JobSequence}.
+		 * @return Index of the {@link Flow}.
 		 */
 		int getIndex();
 	}
@@ -208,23 +208,23 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 		void setExtensionInterface(Class<I> extensionInterface);
 
 		/**
-		 * Adds a required {@link JobSequence} identified by the key.
+		 * Adds a required {@link Flow} identified by the key.
 		 * 
 		 * @param key
-		 *            {@link Enum} to identify the {@link JobSequence}.
+		 *            {@link Enum} to identify the {@link Flow}.
 		 * @param argumentType
-		 *            Type of argument passed to the {@link JobSequence}.
-		 * @return {@link Labeller} to possibly label the {@link JobSequence}.
+		 *            Type of argument passed to the {@link Flow}.
+		 * @return {@link Labeller} to possibly label the {@link Flow}.
 		 */
 		Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link JobSequence} identified by an index into the
-		 * order the {@link JobSequence} was added.
+		 * Adds a required {@link Flow} identified by an index into the
+		 * order the {@link Flow} was added.
 		 * 
 		 * @param argumentType
-		 *            Type of argument passed to the {@link JobSequence}.
-		 * @return {@link Labeller} to possibly label the {@link JobSequence}.
+		 *            Type of argument passed to the {@link Flow}.
+		 * @return {@link Labeller} to possibly label the {@link Flow}.
 		 */
 		Labeller addFlow(Class<?> argumentType);
 
@@ -354,22 +354,22 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 			GovernanceFlowMetaData<F> {
 
 		/**
-		 * Key identifying this {@link JobSequence}.
+		 * Key identifying this {@link Flow}.
 		 */
 		private final F key;
 
 		/**
-		 * Argument type to the {@link JobSequence}.
+		 * Argument type to the {@link Flow}.
 		 */
 		private final Class<?> argumentType;
 
 		/**
-		 * Index of this {@link JobSequence}.
+		 * Index of this {@link Flow}.
 		 */
 		private final int index;
 
 		/**
-		 * Label for this {@link JobSequence}.
+		 * Label for this {@link Flow}.
 		 */
 		private String label;
 
@@ -377,11 +377,11 @@ public abstract class AbstractGovernanceSource<I, F extends Enum<F>> implements
 		 * Initiate.
 		 * 
 		 * @param key
-		 *            Key identifying this {@link JobSequence}.
+		 *            Key identifying this {@link Flow}.
 		 * @param argumentType
-		 *            Argument type to the {@link JobSequence}.
+		 *            Argument type to the {@link Flow}.
 		 * @param index
-		 *            Index of this {@link JobSequence}.
+		 *            Index of this {@link Flow}.
 		 */
 		public FlowMetaData(F key, Class<?> argumentType, int index) {
 			this.key = key;

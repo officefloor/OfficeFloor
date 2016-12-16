@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.spi.administration.source;
 
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 
@@ -48,9 +48,9 @@ public interface AdministratorDutyMetaData<A extends Enum<A>, F extends Enum<F>>
 
 	/**
 	 * Obtains the list of {@link AdministratorDutyFlowMetaData} instances
-	 * should this {@link Duty} require instigating a {@link JobSequence}.
+	 * should this {@link Duty} require instigating a {@link Flow}.
 	 * 
-	 * @return Meta-data of {@link JobSequence} instances instigated by this
+	 * @return Meta-data of {@link Flow} instances instigated by this
 	 *         {@link Duty}.
 	 */
 	AdministratorDutyFlowMetaData<F>[] getFlowMetaData();

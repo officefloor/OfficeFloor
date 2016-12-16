@@ -70,6 +70,7 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 * 
 	 * @return Listing of {@link ManagedObjectIndex} instances.
 	 */
+	@Deprecated // move to JobMetaData
 	ManagedObjectIndex[] getRequiredManagedObjects();
 
 	/**
@@ -79,6 +80,7 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 * 
 	 * @return Activation flags for the {@link Governance}.
 	 */
+	@Deprecated // move to JobMetaData
 	boolean[] getRequiredGovernance();
 
 	/**
@@ -90,14 +92,15 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 * @return {@link ManagedObjectIndex} identifying the {@link ManagedObject}
 	 *         for the {@link Task} index.
 	 */
+	@Deprecated // work scope to become task scope (state managed within managed objects)
 	ManagedObjectIndex translateManagedObjectIndexForWork(int taskMoIndex);
 
 	/**
-	 * Obtains the {@link FlowMetaData} of the specified {@link JobSequence}.
+	 * Obtains the {@link FlowMetaData} of the specified {@link Flow}.
 	 * 
 	 * @param flowIndex
-	 *            Index of the {@link JobSequence}.
-	 * @return {@link FlowMetaData} of the specified {@link JobSequence}.
+	 *            Index of the {@link Flow}.
+	 * @return {@link FlowMetaData} of the specified {@link Flow}.
 	 */
 	FlowMetaData<?> getFlow(int flowIndex);
 
@@ -130,7 +133,7 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 * Creates the {@link JobNode} for the {@link Task}.
 	 * 
 	 * @param flow
-	 *            {@link JobSequence} containing the {@link Task}.
+	 *            {@link Flow} containing the {@link Task}.
 	 * @param workContainer
 	 *            {@link WorkContainer} for the {@link Work} for the
 	 *            {@link Task}.
@@ -142,7 +145,7 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            {@link GovernanceDeactivationStrategy}.
 	 * @return {@link JobNode}.
 	 */
-	JobNode createTaskNode(JobSequence flow, WorkContainer<W> workContainer,
+	JobNode createTaskNode(Flow flow, WorkContainer<W> workContainer,
 			JobNode parallelJobNodeOwner, Object parameter,
 			GovernanceDeactivationStrategy governanceDeactivationStrategy);
 

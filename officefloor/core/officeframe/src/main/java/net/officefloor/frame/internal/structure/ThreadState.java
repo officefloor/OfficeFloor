@@ -17,9 +17,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
@@ -32,15 +33,7 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ThreadState extends FlowAsset, FlowFuture,
-		LinkedListSetEntry<ThreadState, ProcessState> {
-
-	/**
-	 * Obtains the lock for this {@link ThreadState}.
-	 * 
-	 * @return Lock for this {@link ThreadState}.
-	 */
-	Object getThreadLock();
+public interface ThreadState extends FlowAsset, LinkedListSetEntry<ThreadState, ProcessState> {
 
 	/**
 	 * Obtains the {@link ThreadMetaData} for this {@link ThreadState}.
@@ -48,6 +41,71 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	 * @return {@link ThreadMetaData} for this {@link ThreadState}.
 	 */
 	ThreadMetaData getThreadMetaData();
+
+	/**
+	 * Undertakes executing the {@link JobNode} loop.
+	 * 
+	 * @param job
+	 *            Head {@link JobNode} to execute.
+	 * @param context
+	 *            {@link JobContext}.
+	 */
+	void doJobNodeLoop(JobNode head, JobContext context);
+
+	/**
+	 * Indicates if the current {@link Thread} is the {@link Thread} executing
+	 * the {@link JobNode} loop for this {@link ThreadState}.
+	 * 
+	 * @return <code>true</cod> if current {@link Thread} is the {@link Thread}
+	 *         executing the {@link JobNode} loop for this {@link ThreadState}.
+	 */
+	boolean isJobNodeLoopThread();
+
+	/**
+	 * Registers the {@link JobNodeRunnable} to be executed by this
+	 * {@link ThreadState}.
+	 * 
+	 * @param runnable
+	 *            {@link JobNodeRunnable}.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} responsible for undertaking the
+	 *            {@link JobNodeRunnable}. May be <code>null</code> to use
+	 *            default {@link TeamManagement}.
+	 */
+	void run(JobNodeRunnable runnable, TeamManagement responsibleTeam);
+
+	/**
+	 * Spawns a new {@link ThreadState}.
+	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData} for the {@link ThreadState}.
+	 * @param parameter
+	 *            Parameter for the first {@link Task} of the
+	 *            {@link ThreadState}.
+	 * @param instigatingJobNode
+	 *            {@link JobNode} spawning the {@link ThreadState}.
+	 * @param callback
+	 *            Optional {@link FlowCallbackJobNodeFactory} to create a
+	 *            {@link JobNode} be invoked on completion of the spawned
+	 *            {@link ThreadState}.
+	 */
+	void spawnThreadState(FlowMetaData<?> flowMetaData, Object parameter, JobNode instigatingJobNode,
+			FlowCallbackJobNodeFactory flowCallbackFactory);
+
+	/**
+	 * Undertakes a critical section for the {@link ProcessState}.
+	 * 
+	 * @param section
+	 *            {@link JobNodeRunnable} containing the critical section logic.
+	 * @param responsibleTeam
+	 *            Responsible {@link TeamManagement} for the
+	 *            {@link JobNodeRunnable}.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue with once the
+	 *            {@link JobNodeRunnable} is complete.
+	 */
+	void runProcessCriticalSection(JobNodeRunnable criticalSection, TeamManagement responsibleTeam,
+			JobNode continueJobNode);
 
 	/**
 	 * Returning a {@link Throwable} indicates that the thread has failed.
@@ -66,27 +124,27 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	void setFailure(Throwable cause);
 
 	/**
-	 * Creates a {@link JobSequence} contained in this {@link ThreadState}.
+	 * Creates a {@link Flow} contained in this {@link ThreadState}.
 	 * 
-	 * @return New {@link JobSequence}.
+	 * @return New {@link Flow}.
 	 */
-	JobSequence createJobSequence();
+	@Deprecated // change to createFlow
+	Flow createJobSequence();
 
 	/**
-	 * Flags that the input {@link JobSequence} has completed.
+	 * Flags that the input {@link Flow} has completed.
 	 * 
 	 * @param jobSequence
-	 *            {@link JobSequence} that has completed.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
-	 *            waiting on this {@link ThreadState} if all {@link JobSequence}
-	 *            instances of this {@link ThreadState} are complete.
+	 *            {@link Flow} that has completed.
 	 * @param currentTeam
 	 *            {@link TeamIdentifier} of the current {@link Team} completing
-	 *            the {@link JobSequence}.
+	 *            the {@link Flow}.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue in completing the {@link Flow}.
+	 * @return Optional {@link JobNode} to complete the {@link Flow}.
 	 */
-	void jobSequenceComplete(JobSequence jobSequence,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam);
+	@Deprecated // change to flowComplete
+	JobNode jobSequenceComplete(Flow jobSequence, TeamIdentifier currentTeam, JobNode continueJobNode);
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this
@@ -153,26 +211,21 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	 * Flags that escalation is about to happen on this {@link ThreadState}.
 	 * <p>
 	 * This allows the {@link ThreadState} to know not to clean up should all
-	 * its {@link JobSequence} instances be closed and a new one will be created
-	 * for the {@link EscalationFlow}.
+	 * its {@link Flow} instances be closed and a new one will be created for
+	 * the {@link EscalationFlow}.
 	 * 
 	 * @param currentJobNode
 	 *            Current {@link JobNode} being executed.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
 	 */
-	void escalationStart(JobNode currentJobNode, JobNodeActivateSet activateSet);
+	void escalationStart(JobNode currentJobNode);
 
 	/**
 	 * Flags that escalation has complete on this {@link ThreadState}.
 	 * 
 	 * @param currentJobNode
 	 *            Current {@link JobNode} being executed.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
 	 */
-	void escalationComplete(JobNode currentJobNode,
-			JobNodeActivateSet activateSet);
+	void escalationComplete(JobNode currentJobNode);
 
 	/**
 	 * Obtains the {@link EscalationLevel} of this {@link ThreadState}.

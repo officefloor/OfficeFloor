@@ -46,10 +46,12 @@ public interface GovernanceContainer<I, F extends Enum<F>> {
 	/**
 	 * Activates the {@link Governance}.
 	 * 
-	 * @param context
-	 *            {@link ContainerContext}.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue once {@link Governance} is
+	 *            activated.
+	 * @return {@link JobNode} to activate the {@link Governance}.
 	 */
-	void activateGovernance(ContainerContext context);
+	JobNode activateGovernance(JobNode continuteJobNode);
 
 	/**
 	 * Creates the {@link ActiveGovernance} to enable activation of
@@ -60,36 +62,29 @@ public interface GovernanceContainer<I, F extends Enum<F>> {
 	 *            to allow {@link Governance} over it.
 	 * @param managedobjectContainer
 	 *            {@link ManagedObjectContainer} of the {@link ManagedObject}.
-	 * @param managedObjectContainerRegisteredIndex
-	 *            Registered index of the {@link ActiveGovernance} within the
-	 *            {@link ManagedObjectContainer}. This is to enable easier
-	 *            identification of the {@link ActiveGovernance} within the
-	 *            {@link ManagedObjectContainer} for unregistering.
-	 * @param workContainer
-	 *            {@link WorkContainer} of the {@link ManagedObject}. Necessary
-	 *            as require checking {@link ManagedObject} is ready which may
-	 *            trigger coordination which requires the {@link WorkContainer}.
-	 * @return {@link ActiveGovernance}.
+	 * @return {@link ActiveGovernance} for the {@link ManagedObject} of the
+	 *         {@link ManagedObjectContainer}.
 	 */
-	ActiveGovernance<I, F> createActiveGovernance(I extensionInterface,
-			ManagedObjectContainer managedobjectContainer,
-			int managedObjectContainerRegisteredIndex,
-			WorkContainer<?> workContainer);
+	ActiveGovernance<I, F> createActiveGovernance(I extensionInterface, ManagedObjectContainer managedobjectContainer);
 
 	/**
 	 * Enforces the {@link Governance}.
 	 * 
-	 * @param context
-	 *            {@link ContainerContext}.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue once {@link Governance} is
+	 *            enforced.
+	 * @return {@link JobNode} to enforce the {@link Governance}.
 	 */
-	void enforceGovernance(ContainerContext context);
+	JobNode enforceGovernance(JobNode continueJobNode);
 
 	/**
 	 * Disregards the {@link Governance}.
 	 * 
-	 * @param context
-	 *            {@link ContainerContext}.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue once {@link Governance} is
+	 *            disregarded.
+	 * @return {@link JobNode} to disregard the {@link Governance}.
 	 */
-	void disregardGovernance(ContainerContext context);
+	JobNode disregardGovernance(JobNode continueJobNode);
 
 }

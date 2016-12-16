@@ -26,7 +26,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.TestSource;
@@ -375,7 +375,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		public static Class<? extends ManagedObject> managedObjectClass = ManagedObject.class;
 
 		/**
-		 * Flag indicating to link the {@link JobSequence}.
+		 * Flag indicating to link the {@link Flow}.
 		 */
 		public static boolean isLoadFlow = true;
 
@@ -466,7 +466,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * {@link JobSequence} keys.
+	 * {@link Flow} keys.
 	 */
 	public enum Flows {
 		FLOW

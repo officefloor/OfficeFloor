@@ -20,7 +20,7 @@ package net.officefloor.compile.test.administrator;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
@@ -55,13 +55,13 @@ public interface AdministratorTypeBuilder {
 	 * Adds a {@link DutyType}.
 	 * 
 	 * @param <F>
-	 *            {@link JobSequence} type keys.
+	 *            {@link Flow} type keys.
 	 * @param dutyName
 	 *            Name of the {@link Duty}.
 	 * @param dutyKey
 	 *            Key of the {@link Duty}.
 	 * @param flowKeyClass
-	 *            {@link JobSequence} key class.
+	 *            {@link Flow} key class.
 	 * @return {@link DutyTypeBuilder}.
 	 */
 	<F extends Enum<F>> DutyTypeBuilder<F> addDuty(String dutyName,

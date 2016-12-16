@@ -55,7 +55,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
@@ -1117,7 +1117,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link JobSequence} {@link TaskNodeReference}.
+	 * Ensure issue if no {@link Flow} {@link TaskNodeReference}.
 	 */
 	public void testNoFlowTaskNodeReference() {
 
@@ -1146,7 +1146,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link JobSequence} {@link Task} name.
+	 * Ensure issue if no {@link Flow} {@link Task} name.
 	 */
 	public void testNoFlowTaskName() {
 
@@ -1181,7 +1181,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if unknown {@link Work} containing the {@link JobSequence}
+	 * Ensure issue if unknown {@link Work} containing the {@link Flow}
 	 * {@link Task}.
 	 */
 	public void testUnknownFlowWork() {
@@ -1219,7 +1219,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if unknown {@link JobSequence} {@link Task}.
+	 * Ensure issue if unknown {@link Flow} {@link Task}.
 	 */
 	public void testUnknownFlowTask() {
 
@@ -1260,7 +1260,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if argument to {@link JobSequence} is not compatible.
+	 * Ensure issue if argument to {@link Flow} is not compatible.
 	 */
 	public void testIncompatibleFlowArgument() {
 
@@ -1353,28 +1353,28 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure able to construct an asynchronous {@link JobSequence}.
+	 * Ensure able to construct an asynchronous {@link Flow}.
 	 */
 	public void testConstructAsynchronousFlow() {
 		this.doConstructFlowTest(FlowInstigationStrategyEnum.ASYNCHRONOUS);
 	}
 
 	/**
-	 * Ensure able to construct a parallel {@link JobSequence}.
+	 * Ensure able to construct a parallel {@link Flow}.
 	 */
 	public void testConstructParallelFlow() {
 		this.doConstructFlowTest(FlowInstigationStrategyEnum.PARALLEL);
 	}
 
 	/**
-	 * Ensure able to construct a sequential {@link JobSequence}.
+	 * Ensure able to construct a sequential {@link Flow}.
 	 */
 	public void testConstructSequentialFlow() {
 		this.doConstructFlowTest(FlowInstigationStrategyEnum.SEQUENTIAL);
 	}
 
 	/**
-	 * Ensure able to construct {@link JobSequence}.
+	 * Ensure able to construct {@link Flow}.
 	 */
 	public void doConstructFlowTest(
 			FlowInstigationStrategyEnum instigationStrategy) {
@@ -2168,7 +2168,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Records no {@link JobSequence}.
+	 * Records no {@link Flow}.
 	 */
 	private void record_NoFlows() {
 		this.recordReturn(this.configuration,

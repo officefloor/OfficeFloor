@@ -17,13 +17,9 @@
  */
 package net.officefloor.frame.impl.execute.process;
 
-import java.util.List;
-
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.UnknownTaskException;
@@ -38,8 +34,9 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowCallbackJobNodeFactory;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -55,7 +52,6 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
@@ -69,26 +65,6 @@ public class ProcessStateImpl implements ProcessState {
 	 * Identifier for this {@link ProcessState}.
 	 */
 	private final Object processIdentifier = new Object();
-
-	/**
-	 * {@link ProcessFuture} for this {@link ProcessState}.
-	 */
-	private final ProcessFuture processFuture = new ProcessFuture() {
-		@Override
-		public boolean isComplete() {
-			return ProcessStateImpl.this.isComplete;
-		}
-	};
-
-	/**
-	 * <p>
-	 * Lock {@link Object} for the {@link ProcessState} to lock on.
-	 * <p>
-	 * As the {@link TaskContext} provides this to {@link Task} instances
-	 * (application code) it is a simple {@link Object} to prevent being used to
-	 * access internals of the framework.
-	 */
-	private final Object processLock = new Object();
 
 	/**
 	 * Active {@link ThreadState} instances for this {@link ProcessState}.
@@ -114,6 +90,16 @@ public class ProcessStateImpl implements ProcessState {
 	 * {@link ProcessContextListener} instances.
 	 */
 	private final ProcessContextListener[] processContextListeners;
+
+	/**
+	 * {@link ProcessCompletionListener} instances.
+	 */
+	private final ProcessCompletionListener[] completionListeners;
+
+	/**
+	 * Main {@link ThreadState} for this {@link ProcessState}.
+	 */
+	private final ThreadState mainThreadState;
 
 	/**
 	 * {@link OfficeMetaData}.
@@ -148,19 +134,6 @@ public class ProcessStateImpl implements ProcessState {
 	private final ProcessProfiler processProfiler;
 
 	/**
-	 * Listing of {@link ProcessCompletionListener} instances.
-	 */
-	private final List<ProcessCompletionListener> completionListeners = new java.util.LinkedList<ProcessCompletionListener>();
-
-	/**
-	 * <p>
-	 * Completion flag indicating when this {@link FlowFuture} is complete.
-	 * <p>
-	 * <code>volatile</code> to enable inter-thread visibility.
-	 */
-	private volatile boolean isComplete = false;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param processMetaData
@@ -184,20 +157,17 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link Team} to continue on to handle {@link Escalation}.
 	 * @param escalationHandlerRequiredGovernance
 	 *            {@link EscalationHandler} required {@link Governance}.
+	 * @param completionListeners
+	 *            {@link ProcessCompletionListener} instances.
 	 */
-	public ProcessStateImpl(ProcessMetaData processMetaData,
-			ProcessContextListener[] processContextListeners,
-			OfficeMetaData officeMetaData,
-			EscalationFlow officeFloorEscalation,
-			ProcessProfiler processProfiler,
-			EscalationHandler invocationEscalationHandler,
-			TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam,
-			boolean[] escalationHandlerRequiredGovernance) {
-		this(processMetaData, processContextListeners, officeMetaData,
-				officeFloorEscalation, processProfiler, null, null, -1,
-				invocationEscalationHandler, escalationResponsibleTeam,
-				escalationContinueTeam, escalationHandlerRequiredGovernance);
+	public ProcessStateImpl(ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
+			OfficeMetaData officeMetaData, EscalationFlow officeFloorEscalation, ProcessProfiler processProfiler,
+			EscalationHandler invocationEscalationHandler, TeamManagement escalationResponsibleTeam,
+			Team escalationContinueTeam, boolean[] escalationHandlerRequiredGovernance,
+			ProcessCompletionListener[] completionListeners) {
+		this(processMetaData, processContextListeners, officeMetaData, officeFloorEscalation, processProfiler, null,
+				null, -1, invocationEscalationHandler, escalationResponsibleTeam, escalationContinueTeam,
+				escalationHandlerRequiredGovernance, completionListeners);
 	}
 
 	/**
@@ -234,45 +204,45 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link Team} to continue on to handle {@link Escalation}.
 	 * @param escalationHandlerRequiredGovernance
 	 *            {@link EscalationHandler} required {@link Governance}.
+	 * @param completionListeners
+	 *            {@link ProcessCompletionListener} listeners.
 	 */
-	public ProcessStateImpl(ProcessMetaData processMetaData,
-			ProcessContextListener[] processContextListeners,
-			OfficeMetaData officeMetaData,
-			EscalationFlow officeFloorEscalation,
-			ProcessProfiler processProfiler, ManagedObject inputManagedObject,
-			ManagedObjectMetaData<?> inputManagedObjectMetaData,
-			int inputManagedObjectIndex,
-			EscalationHandler invocationEscalationHandler,
-			TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam,
-			boolean[] escalationHandlerRequiredGovernance) {
+	public ProcessStateImpl(ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
+			OfficeMetaData officeMetaData, EscalationFlow officeFloorEscalation, ProcessProfiler processProfiler,
+			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
+			int inputManagedObjectIndex, EscalationHandler invocationEscalationHandler,
+			TeamManagement escalationResponsibleTeam, Team escalationContinueTeam,
+			boolean[] escalationHandlerRequiredGovernance, ProcessCompletionListener[] completionListeners) {
 		this.processMetaData = processMetaData;
 		this.processContextListeners = processContextListeners;
 		this.officeMetaData = officeMetaData;
 		this.officeFloorEscalation = officeFloorEscalation;
 		this.processProfiler = processProfiler;
+		this.processContextListeners = processContextListeners;
+
+		// Create the main thread state
+		AssetManager mainThreadAssetManager = this.processMetaData.getMainThreadAssetManager();
+		this.mainThreadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), this,
+				mainThreadAssetManager, this.processProfiler, null);
 
 		// Create array to reference the managed objects
-		ManagedObjectMetaData<?>[] managedObjectMetaData = this.processMetaData
-				.getManagedObjectMetaData();
+		ManagedObjectMetaData<?>[] managedObjectMetaData = this.processMetaData.getManagedObjectMetaData();
 		this.managedObjectContainers = new ManagedObjectContainer[managedObjectMetaData.length];
 
 		// Load the Container for the Input Managed Object if provided
 		if (inputManagedObject != null) {
-			this.managedObjectContainers[inputManagedObjectIndex] = new ManagedObjectContainerImpl(
-					inputManagedObject, inputManagedObjectMetaData, this);
+			this.managedObjectContainers[inputManagedObjectIndex] = new ManagedObjectContainerImpl(inputManagedObject,
+					inputManagedObjectMetaData, this);
 		}
 
 		// Create array to reference the administrators
-		AdministratorMetaData<?, ?>[] administratorMetaData = this.processMetaData
-				.getAdministratorMetaData();
+		AdministratorMetaData<?, ?>[] administratorMetaData = this.processMetaData.getAdministratorMetaData();
 		this.administratorContainers = new AdministratorContainer[administratorMetaData.length];
 
 		// Escalation handled by invocation of this process
 		this.invocationEscalation = (invocationEscalationHandler == null ? null
-				: new EscalationHandlerEscalation(invocationEscalationHandler,
-						escalationResponsibleTeam, escalationContinueTeam,
-						escalationHandlerRequiredGovernance));
+				: new EscalationHandlerEscalation(invocationEscalationHandler, escalationResponsibleTeam,
+						escalationContinueTeam, escalationHandlerRequiredGovernance));
 	}
 
 	/*
@@ -285,18 +255,13 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public ProcessFuture getProcessFuture() {
-		return this.processFuture;
-	}
-
-	@Override
-	public Object getProcessLock() {
-		return this.processLock;
-	}
-
-	@Override
 	public ProcessMetaData getProcessMetaData() {
 		return this.processMetaData;
+	}
+
+	@Override
+	public ThreadState getMainThreadState() {
+		return this.mainThreadState;
 	}
 
 	@Override
@@ -305,8 +270,8 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getTaskMetaData(String workName,
-			String taskName) throws UnknownWorkException, UnknownTaskException {
+	public TaskMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
+			throws UnknownWorkException, UnknownTaskException {
 
 		// Look for work
 		for (WorkMetaData<?> work : this.officeMetaData.getWorkMetaData()) {
@@ -330,68 +295,54 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public JobSequence createThread(AssetManager assetManager) {
+	public Flow createThread(AssetManager assetManager, FlowCallbackJobNodeFactory callbackFactory) {
 
 		// Create the thread
-		ThreadState threadState = new ThreadStateImpl(
-				this.processMetaData.getThreadMetaData(), this, assetManager,
-				this.processProfiler);
+		ThreadState threadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), this, assetManager,
+				this.processProfiler, null);
 
 		// Register as active thread
-		synchronized (this.getProcessLock()) {
-			this.activeThreads.addEntry(threadState);
-		}
+		this.activeThreads.addEntry(threadState);
 
-		// Return the Job Sequence for the new thread
+		// Return the Flow for the new thread
 		return threadState.createJobSequence();
 	}
 
 	@Override
-	public void threadComplete(ThreadState thread,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam) {
+	public JobNode threadComplete(ThreadState thread) {
 
-		// Removing completed thread so must obtain process lock
-		boolean isProcessComplete = false;
-		synchronized (this.getProcessLock()) {
+		// Remove thread from active thread listing
+		if (this.activeThreads.removeEntry(thread)) {
 
-			// Remove thread from active thread listing
-			if (this.activeThreads.removeEntry(thread)) {
+			// Notify process complete
+			for (ProcessCompletionListener listener : this.completionListeners) {
+				listener.processComplete();
+			}
 
-				// Notify process complete
-				for (ProcessCompletionListener listener : this.completionListeners) {
-					listener.processComplete(currentTeam);
-				}
-
-				// Unload managed objects (some may not have been used)
-				for (int i = 0; i < this.managedObjectContainers.length; i++) {
-					ManagedObjectContainer container = this.managedObjectContainers[i];
-					if (container != null) {
-						container.unloadManagedObject(activateSet, currentTeam);
+			// Unload managed objects (some may not have been used)
+			for (int i = 0; i < this.managedObjectContainers.length; i++) {
+				ManagedObjectContainer container = this.managedObjectContainers[i];
+				if (container != null) {
+					JobNode unloadJobNode = container.unloadManagedObject(null);
+					if (unloadJobNode == null) {
+						return unloadJobNode;
 					}
 				}
+			}
 
-				// Notify process context complete
-				for (ProcessContextListener listener : this.processContextListeners) {
-					listener.processCompleted(this.processIdentifier);
-				}
+			// Notify process context complete
+			for (ProcessContextListener listener : this.processContextListeners) {
+				listener.processCompleted(this.processIdentifier);
+			}
 
-				// Flag to profile that process complete
-				if (this.processProfiler != null) {
-					this.processProfiler.processCompleted();
-				}
-
-				// Flag the process now complete
-				this.isComplete = true;
-				isProcessComplete = true;
+			// Flag to profile that process complete
+			if (this.processProfiler != null) {
+				this.processProfiler.processCompleted();
 			}
 		}
 
-		// Notify if process is complete
-		if (isProcessComplete) {
-			synchronized (this.processFuture) {
-				this.processFuture.notifyAll();
-			}
-		}
+		// No further processing to complete thread
+		return null;
 	}
 
 	@Override
@@ -401,8 +352,7 @@ public class ProcessStateImpl implements ProcessState {
 		// Process lock of the Thread before the Job uses it).
 		ManagedObjectContainer container = this.managedObjectContainers[index];
 		if (container == null) {
-			container = this.processMetaData.getManagedObjectMetaData()[index]
-					.createManagedObjectContainer(this);
+			container = this.processMetaData.getManagedObjectMetaData()[index].createManagedObjectContainer(this);
 			this.managedObjectContainers[index] = container;
 		}
 		return container;
@@ -415,8 +365,7 @@ public class ProcessStateImpl implements ProcessState {
 		// Process lock by the WorkContainer)
 		AdministratorContainer<?, ?> container = this.administratorContainers[index];
 		if (container == null) {
-			container = this.processMetaData.getAdministratorMetaData()[index]
-					.createAdministratorContainer();
+			container = this.processMetaData.getAdministratorMetaData()[index].createAdministratorContainer();
 			this.administratorContainers[index] = container;
 		}
 		return container;
@@ -435,14 +384,6 @@ public class ProcessStateImpl implements ProcessState {
 	@Override
 	public EscalationFlow getOfficeFloorEscalation() {
 		return this.officeFloorEscalation;
-	}
-
-	@Override
-	public void registerProcessCompletionListener(
-			ProcessCompletionListener listener) {
-		synchronized (this.getProcessLock()) {
-			this.completionListeners.add(listener);
-		}
 	}
 
 }

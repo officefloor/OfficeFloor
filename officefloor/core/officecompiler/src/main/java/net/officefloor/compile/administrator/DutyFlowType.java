@@ -17,33 +17,33 @@
  */
 package net.officefloor.compile.administrator;
 
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
- * <code>Type definition</code> of a {@link JobSequence} instigated by a {@link Duty}.
+ * <code>Type definition</code> of a {@link Flow} instigated by a {@link Duty}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface DutyFlowType<F extends Enum<F>> {
 
 	/**
-	 * Obtains the name of the {@link JobSequence}.
+	 * Obtains the name of the {@link Flow}.
 	 * 
-	 * @return Name of the {@link JobSequence}.
+	 * @return Name of the {@link Flow}.
 	 */
 	String getFlowName();
 
 	/**
-	 * Obtains the index identifying the {@link JobSequence}.
+	 * Obtains the index identifying the {@link Flow}.
 	 * 
-	 * @return Index identifying the {@link JobSequence}.
+	 * @return Index identifying the {@link Flow}.
 	 */
 	int getIndex();
 
 	/**
 	 * Obtains the type of the argument passed by the {@link Duty} to the
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 * 
 	 * @return Type of argument passed by the {@link Duty}. May be
 	 *         <code>null</code> to indicate no argument.
@@ -51,9 +51,9 @@ public interface DutyFlowType<F extends Enum<F>> {
 	Class<?> getArgumentType();
 
 	/**
-	 * Obtains the key identifying the {@link JobSequence}.
+	 * Obtains the key identifying the {@link Flow}.
 	 * 
-	 * @return Key identifying the {@link JobSequence}.
+	 * @return Key identifying the {@link Flow}.
 	 */
 	F getKey();
 

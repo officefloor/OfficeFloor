@@ -38,7 +38,8 @@ import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedJobNodeContext;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -56,7 +57,7 @@ import org.easymock.AbstractMatcher;
 import org.easymock.internal.AlwaysMatcher;
 
 /**
- * Contains functionality for testing the {@link AbstractJobContainer}.
+ * Contains functionality for testing the {@link AbstractManagedJobNodeContainer}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -93,9 +94,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(WorkContainer.class);
 
 	/**
-	 * {@link JobSequence}.
+	 * {@link Flow}.
 	 */
-	private final JobSequence flow = this.createMock(JobSequence.class);
+	private final Flow flow = this.createMock(Flow.class);
 
 	/**
 	 * {@link JobMetaData}.
@@ -155,9 +156,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(TaskMetaData.class);
 
 	/**
-	 * Parallel {@link JobSequence}.
+	 * Parallel {@link Flow}.
 	 */
-	private final JobSequence parallelFlow = this.createMock(JobSequence.class);
+	private final Flow parallelFlow = this.createMock(Flow.class);
 
 	/**
 	 * Parallel {@link Job}.
@@ -183,10 +184,10 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(TaskMetaData.class);
 
 	/**
-	 * Asynchronous {@link JobSequence}.
+	 * Asynchronous {@link Flow}.
 	 */
-	private final JobSequence asynchronousFlow = this
-			.createMock(JobSequence.class);
+	private final Flow asynchronousFlow = this
+			.createMock(Flow.class);
 
 	/**
 	 * Asynchronous {@link JobNode}.
@@ -206,10 +207,10 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(TaskMetaData.class);
 
 	/**
-	 * {@link EscalationFlow} {@link JobSequence}.
+	 * {@link EscalationFlow} {@link Flow}.
 	 */
-	private final JobSequence escalationFlow = this
-			.createMock(JobSequence.class);
+	private final Flow escalationFlow = this
+			.createMock(Flow.class);
 
 	/**
 	 * {@link EscalationFlow} {@link Job}.
@@ -230,7 +231,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * </ol>
 	 * <p>
 	 * This is always the first steps of executing a
-	 * {@link AbstractJobContainer}.
+	 * {@link AbstractManagedJobNodeContainer}.
 	 * 
 	 * @param job
 	 *            {@link Job}.
@@ -492,16 +493,16 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records doing a sequential {@link JobSequence}.
+	 * Records doing a sequential {@link Flow}.
 	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
 	 * @param sequentialFlowParameter
-	 *            Sequential {@link JobSequence} parameter.
+	 *            Sequential {@link Flow} parameter.
 	 * @param isActivateFlow
 	 *            Flag indicating if required to activate the first
 	 *            {@link JobNode} of the instigated sequential
-	 *            {@link JobSequence}.
+	 *            {@link Flow}.
 	 */
 	protected void record_doSequentialFlow(Job currentJob,
 			Object sequentialFlowParameter, boolean isActivateFlow) {
@@ -524,7 +525,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records doing a parallel {@link JobSequence}.
+	 * Records doing a parallel {@link Flow}.
 	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
@@ -613,7 +614,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records doing an asynchronous {@link JobSequence}.
+	 * Records doing an asynchronous {@link Flow}.
 	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
@@ -644,7 +645,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 						GovernanceDeactivationStrategy.ENFORCE),
 				this.asynchronousJob);
 		this.asynchronousJob
-				.activateJob(AbstractJobContainer.ASYNCHRONOUS_FLOW_TEAM_IDENTIFIER);
+				.activateJob(AbstractManagedJobNodeContainer.ASYNCHRONOUS_FLOW_TEAM_IDENTIFIER);
 		this.recordReturn(this.asynchronousFlow,
 				this.asynchronousFlow.getThreadState(),
 				this.asynchronousThreadState);
@@ -785,17 +786,17 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records waiting on a joined {@link JobSequence}.
+	 * Records waiting on a joined {@link Flow}.
 	 * 
 	 * @param currentJob
 	 *            Current {@link Job}.
 	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum} of the {@link JobSequence}
+	 *            {@link FlowInstigationStrategyEnum} of the {@link Flow}
 	 *            being joined on.
 	 * @param timeout
-	 *            Timeout in milliseconds for the {@link JobSequence} join.
+	 *            Timeout in milliseconds for the {@link Flow} join.
 	 * @param token
-	 *            {@link JobSequence} join token.
+	 *            {@link Flow} join token.
 	 */
 	protected void record_JobContainer_waitOnFlow(Job currentJob,
 			FlowInstigationStrategyEnum instigationStrategy, long timeout,
@@ -890,7 +891,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			TaskMetaData<?, ?, ?> taskMetaData, Object parameter) {
 		FunctionalityJob functionalityJob = (FunctionalityJob) job;
 
-		final JobSequence setupJobSequence = this.createMock(JobSequence.class);
+		final Flow setupJobSequence = this.createMock(Flow.class);
 
 		this.recordReturn(this.flow, this.flow.getThreadState(),
 				this.threadState);
@@ -914,7 +915,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			GovernanceActivity<?, ?> activity) {
 		FunctionalityJob functionalityJob = (FunctionalityJob) job;
 
-		final JobSequence setupJobSequence = this.createMock(JobSequence.class);
+		final Flow setupJobSequence = this.createMock(Flow.class);
 
 		this.recordReturn(this.flow, this.flow.getThreadState(),
 				this.threadState);
@@ -1040,7 +1041,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * functionality.
 	 */
 	protected class FunctionalityJob extends
-			AbstractJobContainer<Work, JobMetaData> implements
+			AbstractManagedJobNodeContainer<Work, JobMetaData> implements
 			JobFunctionalityContext {
 
 		/**
@@ -1115,7 +1116,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected Object executeJob(JobExecuteContext context,
+		protected Object executeJob(ManagedJobNodeContext context,
 				JobContext jobContext, JobNodeActivateSet activateSet)
 				throws Throwable {
 			// Indicate the job is executed
@@ -1230,16 +1231,16 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		Object getObject(ManagedObjectIndex managedObjectIndex);
 
 		/**
-		 * Invokes a {@link JobSequence}.
+		 * Invokes a {@link Flow}.
 		 * 
 		 * @param flowIndex
-		 *            Index of the {@link JobSequence} to invoke.
+		 *            Index of the {@link Flow} to invoke.
 		 * @param instigationStrategy
 		 *            {@link FlowInstigationStrategyEnum}.
 		 * @param parameter
 		 *            Parameter for the first {@link Job} of the invoked
-		 *            {@link JobSequence}.
-		 * @return {@link FlowFuture} for the invoked {@link JobSequence}.
+		 *            {@link Flow}.
+		 * @return {@link FlowFuture} for the invoked {@link Flow}.
 		 */
 		FlowFuture doFlow(int flowIndex,
 				FlowInstigationStrategyEnum instigationStrategy,
@@ -1252,9 +1253,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 *            {@link FlowFuture}.
 		 * @param timeout
 		 *            The maximum time to wait in milliseconds for the
-		 *            {@link JobSequence} to complete.
+		 *            {@link Flow} to complete.
 		 * @param token
-		 *            A token identifying which {@link JobSequence} join timed
+		 *            A token identifying which {@link Flow} join timed
 		 *            out. May be <code>null</code>.
 		 */
 		void join(FlowFuture flowFuture, long timeout, Object token);

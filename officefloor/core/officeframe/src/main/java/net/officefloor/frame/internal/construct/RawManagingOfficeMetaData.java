@@ -22,7 +22,7 @@ import java.util.Map;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
-import net.officefloor.frame.internal.structure.JobSequence;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -49,13 +49,13 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	/**
 	 * <p>
 	 * Indicates if the {@link ManagedObjectSource} requires instigating
-	 * {@link JobSequence} instances.
+	 * {@link Flow} instances.
 	 * <p>
 	 * If <code>true</code> it means the {@link ManagedObjectSource} must be
 	 * bound to the {@link ProcessState} of the {@link Office}.
 	 * 
 	 * @return <code>true</code> if the {@link ManagedObjectSource} requires
-	 *         instigating {@link JobSequence} instances.
+	 *         instigating {@link Flow} instances.
 	 */
 	boolean isRequireFlows();
 
@@ -65,7 +65,7 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * of the {@link ManagedObject} within the {@link ProcessState} of the
 	 * {@link Office}.
 	 * <p>
-	 * Should the {@link ManagedObjectSource} instigate a {@link JobSequence}, a
+	 * Should the {@link ManagedObjectSource} instigate a {@link Flow}, a
 	 * {@link ManagedObject} from the {@link ManagedObjectSource} is to be made
 	 * available to the {@link ProcessState}. Whether the {@link Office} wants
 	 * to make use of the {@link ManagedObject} is its choice but is available

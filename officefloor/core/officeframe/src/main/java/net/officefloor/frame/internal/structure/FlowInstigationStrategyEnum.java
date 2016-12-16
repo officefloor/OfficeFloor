@@ -20,7 +20,7 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Instigation strategies of a {@link JobSequence}.
+ * Instigation strategies of a {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */

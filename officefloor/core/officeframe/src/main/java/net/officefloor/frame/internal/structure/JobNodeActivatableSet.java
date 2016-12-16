@@ -26,6 +26,7 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // using job loop
 public interface JobNodeActivatableSet extends JobNodeActivateSet {
 
 	/**
