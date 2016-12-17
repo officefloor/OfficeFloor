@@ -115,7 +115,7 @@ public class AssetManagerImpl implements AssetManager {
 		}
 
 		// Undertake checks for each of the latches
-		return new LinkedListSetJobNode<>(head);
+		return LinkedListSetJobNode.createCastJobNode(head);
 	}
 
 	@Override

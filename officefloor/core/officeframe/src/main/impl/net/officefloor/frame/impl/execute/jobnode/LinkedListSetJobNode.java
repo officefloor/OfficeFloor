@@ -34,6 +34,30 @@ import net.officefloor.frame.spi.team.JobContext;
 public class LinkedListSetJobNode<E> implements JobNode {
 
 	/**
+	 * Convenience constructor to create a {@link LinkedListSetJobNode} that
+	 * casts the {@link LinkedListSetItem} to a {@link JobNode}.
+	 * 
+	 * @param head
+	 *            {@link LinkedListSetItem} head of list.
+	 * @return {@link LinkedListSetJobNode}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <J extends JobNode> LinkedListSetJobNode<J> createCastJobNode(LinkedListSetItem<J> head) {
+		return new LinkedListSetJobNode<>(null, head, (JobNode) head, CAST_JOB_NODE_FACTORY);
+	}
+
+	/**
+	 * {@link Function} to cast {@link LinkedListSetItem} to a {@link JobNode}.
+	 */
+	@SuppressWarnings({ "rawtypes" })
+	private static final Function CAST_JOB_NODE_FACTORY = new Function() {
+		@Override
+		public Object apply(Object item) {
+			return ((LinkedListSetItem) item).getEntry();
+		}
+	};
+
+	/**
 	 * Previous {@link JobNode} chain to complete before executing the next
 	 * {@link LinkedListSetItem} in the list.
 	 */
@@ -107,11 +131,10 @@ public class LinkedListSetJobNode<E> implements JobNode {
 		}
 
 		// Undertake the head job
-		JobNode headJobNode = this.jobNodeFactory.apply(this.head);
-		JobNode nextPreviousJobNode = headJobNode.doJob(context);
+		JobNode nextPreviousJobNode = this.headJobNode.doJob(context);
 		LinkedListSetItem<E> nextHead = this.head.getNext();
 		if (nextHead == null) {
-			// Nothing further in list, so complete last chain of jobs
+			// Nothing further in list, so complete last chain of job nodes
 			return nextPreviousJobNode;
 		} else {
 			// Continue on for next item in the list
