@@ -17,41 +17,41 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.execute.jobnode.LinkedListSetJobNode;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.AssetMonitor;
-import net.officefloor.frame.internal.structure.CheckAssetContext;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.LinkedListSetItem;
-import net.officefloor.frame.internal.structure.OfficeManager;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.team.JobContext;
 
 /**
- * Implementation of the {@link AssetManager}.
+ * {@link AssetManager} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class AssetManagerImpl extends
-		AbstractLinkedListSetEntry<AssetManager, OfficeManager> implements
-		AssetManager, CheckAssetContext {
+public class AssetManagerImpl implements AssetManager {
 
 	/**
-	 * Indicates no current time has been specified.
+	 * {@link ProcessState} that is managing the {@link Office}.
 	 */
-	private static final long NO_TIME = 0;
+	private final ProcessState officeManagerProcess;
 
 	/**
-	 * {@link OfficeManager} for this {@link AssetManager}.
+	 * {@link TeamManagement} responsible for the {@link Asset} instances.
 	 */
-	private final OfficeManager officeManager;
+	private final TeamManagement responsibleTeam;
 
 	/**
-	 * {@link LinkedListSet} of {@link AssetMonitor} instances requiring
-	 * managing.
+	 * {@link LinkedListSet} of {@link AssetLatch} instances requiring managing.
 	 */
-	private final LinkedListSet<AssetMonitor, AssetManager> monitors = new StrictLinkedListSet<AssetMonitor, AssetManager>() {
+	private final LinkedListSet<AssetLatchImpl, AssetManager> latches = new StrictLinkedListSet<AssetLatchImpl, AssetManager>() {
 		@Override
 		protected AssetManager getOwner() {
 			return AssetManagerImpl.this;
@@ -59,38 +59,37 @@ public class AssetManagerImpl extends
 	};
 
 	/**
-	 * Time for the {@link CheckAssetContext}.
-	 */
-	private long time = NO_TIME;
-
-	/**
-	 * {@link JobNodeActivateSet} to use to check the current
-	 * {@link AssetMonitor} instances.
-	 */
-	private JobNodeActivateSet activateSet = null;
-
-	/**
-	 * {@link AssetMonitor} currently being checked.
-	 */
-	private AssetMonitor assetMonitor = null;
-
-	/**
 	 * Initiate.
 	 * 
-	 * @param officeManager
-	 *            {@link OfficeManager} for this {@link AssetManager}.
+	 * @param officeManagerProcess
+	 *            {@link ProcessState} that is managing the {@link Office}.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} responsible for the {@link Asset}
+	 *            instances.
 	 */
-	public AssetManagerImpl(OfficeManager officeManager) {
-		this.officeManager = officeManager;
+	public AssetManagerImpl(ProcessState officeManagerProcess, TeamManagement responsibleTeam) {
+		this.officeManagerProcess = officeManagerProcess;
+		this.responsibleTeam = responsibleTeam;
 	}
 
-	/*
-	 * ==================== LinkedListSetEntry ============================
+	/**
+	 * Registers the {@link AssetLatch}.
+	 * 
+	 * @param latch
+	 *            {@link AssetLatch} to register.
 	 */
+	void registerAssetLatch(AssetLatchImpl latch) {
+		this.latches.addEntry(latch);
+	}
 
-	@Override
-	public OfficeManager getLinkedListSetOwner() {
-		return this.officeManager;
+	/**
+	 * Unregisters the {@link AssetLatch}.
+	 * 
+	 * @param latch
+	 *            {@link AssetLatch} to unregister.
+	 */
+	void unregisterAssetLatch(AssetLatchImpl latch) {
+		this.latches.removeEntry(latch);
 	}
 
 	/*
@@ -98,98 +97,35 @@ public class AssetManagerImpl extends
 	 */
 
 	@Override
-	public OfficeManager getOfficeManager() {
-		return this.officeManager;
-	}
-
-	@Override
-	public AssetMonitor createAssetMonitor(Asset asset) {
-		return new AssetMonitorImpl(asset, this);
-	}
-
-	@Override
-	public void registerAssetMonitor(AssetMonitor monitor) {
-		synchronized (this.monitors) {
-			this.monitors.addEntry(monitor);
-		}
-	}
-
-	@Override
-	public void unregisterAssetMonitor(AssetMonitor monitor) {
-		synchronized (this.monitors) {
-			this.monitors.removeEntry(monitor);
-		}
-	}
-
-	@Override
-	public void checkOnAssets(JobNodeActivateSet activateSet) {
-
-		// Access Point: Office Manager
-		// Locks: None
-
-		// Obtain the list of monitors to check on
-		LinkedListSetItem<AssetMonitor> item;
-		synchronized (this.monitors) {
-			item = this.monitors.copyEntries();
-		}
-
-		try {
-			// Set up for checking on the assets
-			this.time = NO_TIME;
-			this.activateSet = activateSet;
-
-			// Iterate over the monitors managing them
-			while (item != null) {
-
-				// Specify the monitor about to be checked
-				this.assetMonitor = item.getEntry();
-
-				try {
-					// Check on the Asset for the monitor
-					this.assetMonitor.getAsset().checkOnAsset(this);
-
-				} catch (Throwable ex) {
-					// Fail jobs based on check failure
-					this.assetMonitor.failJobNodes(activateSet, ex, false);
-				}
-
-				// Next monitor
-				item = item.getNext();
-			}
-		} finally {
-			// Ensure release references for current check
-			this.activateSet = null;
-			this.assetMonitor = null;
-		}
+	public AssetLatch createAssetLatch(Asset asset) {
+		return new AssetLatchImpl(asset, this);
 	}
 
 	/*
-	 * ================== CheckAssetContext ==================================
-	 * 
-	 * No synchronising necessary as will be invoked by the same thread invoking
-	 * the checkOnAsset method.
+	 * =================== JobNode ======================================
 	 */
 
 	@Override
-	public long getTime() {
+	public JobNode doJob(JobContext context) {
 
-		// Ensure have time
-		if (this.time == NO_TIME) {
-			this.time = System.currentTimeMillis();
+		// Copy the list of latches
+		LinkedListSetItem<AssetLatchImpl> head = this.latches.copyEntries();
+		if (head == null) {
+			return null; // no latches to check
 		}
 
-		// Return the time
-		return this.time;
+		// Undertake checks for each of the latches
+		return new LinkedListSetJobNode<>(head);
 	}
 
 	@Override
-	public void activateJobNodes(boolean isPermanent) {
-		this.assetMonitor.activateJobNodes(this.activateSet, isPermanent);
+	public TeamManagement getResponsibleTeam() {
+		return this.responsibleTeam;
 	}
 
 	@Override
-	public void failJobNodes(Throwable failure, boolean isPermanent) {
-		this.assetMonitor.failJobNodes(this.activateSet, failure, isPermanent);
+	public ThreadState getThreadState() {
+		return this.officeManagerProcess.getMainThreadState();
 	}
 
 }

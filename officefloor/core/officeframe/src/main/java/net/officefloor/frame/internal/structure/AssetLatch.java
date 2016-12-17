@@ -19,20 +19,20 @@ package net.officefloor.frame.internal.structure;
 
 /**
  * <p>
- * Monitor for to allow {@link ThreadState} instances to wait until an
- * {@link Asset} is completed processing.
+ * Latch on an {@link Asset} to only allow the {@link ThreadState} instances
+ * proceed when {@link Asset} is ready.
  * <p>
- * May be used as a {@link LinkedListSetEntry} in a list of {@link AssetMonitor}
+ * May be used as a {@link LinkedListSetEntry} in a list of {@link AssetLatch}
  * instances for an {@link AssetManager}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AssetMonitor extends LinkedListSetEntry<AssetMonitor, AssetManager> {
+public interface AssetLatch {
 
 	/**
-	 * Obtains the {@link Asset} for this {@link AssetMonitor}.
+	 * Obtains the {@link Asset} for this {@link AssetLatch}.
 	 * 
-	 * @return {@link Asset} for this {@link AssetMonitor}.
+	 * @return {@link Asset} for this {@link AssetLatch}.
 	 */
 	Asset getAsset();
 
@@ -40,14 +40,14 @@ public interface AssetMonitor extends LinkedListSetEntry<AssetMonitor, AssetMana
 	 * <p>
 	 * Flags for the {@link JobNode} (and more specifically the
 	 * {@link ThreadState} of the {@link JobNode}) to wait until the
-	 * {@link Asset} activates it.
+	 * {@link Asset} is ready.
 	 * <p>
 	 * This is typically because the {@link Asset} is doing some processing that
 	 * the {@link JobNode} requires completed before proceeding.
 	 * 
 	 * @param jobNode
-	 *            {@link JobNode} to be activated when {@link Asset} processing
-	 *            is complete.
+	 *            {@link JobNode} to be activated when the {@link Asset} is
+	 *            ready.
 	 * @return Optional {@link JobNode} to execute to wait on the {@link Asset}.
 	 */
 	JobNode waitOnAsset(JobNode jobNode);
@@ -57,12 +57,12 @@ public interface AssetMonitor extends LinkedListSetEntry<AssetMonitor, AssetMana
 	 * 
 	 * @param isPermanent
 	 *            <code>true</code> indicates that all {@link JobNode} instances
-	 *            added to the {@link AssetMonitor} from now on are activated
-	 *            immediately. It is useful to flag an {@link AssetMonitor} in
+	 *            added to the {@link AssetLatch} from now on are activated
+	 *            immediately. It is useful to flag an {@link AssetLatch} in
 	 *            this state when the {@link Asset} is no longer being used to
 	 *            stop a {@link JobNode} from waiting forever.
 	 */
-	void activateJobNodes(boolean isPermanent);
+	void proceedWithJobNodes(boolean isPermanent);
 
 	/**
 	 * Fails the {@link JobNode} instances waiting on this {@link Asset}.
@@ -72,10 +72,10 @@ public interface AssetMonitor extends LinkedListSetEntry<AssetMonitor, AssetMana
 	 *            {@link JobNode} instances waiting on the {@link Asset}.
 	 * @param isPermanent
 	 *            <code>true</code> indicates that all {@link JobNode} instances
-	 *            added to the {@link AssetMonitor} from now on are activated
+	 *            added to the {@link AssetLatch} from now on are activated
 	 *            immediately with the input failure. It is useful to flag an
-	 *            {@link AssetMonitor} in this state when the {@link Asset} is
-	 *            in a failed state that can not be recovered from.
+	 *            {@link AssetLatch} in this state when the {@link Asset} is in
+	 *            a failed state that can not be recovered from.
 	 */
 	void failJobNodes(Throwable failure, boolean isPermanent);
 

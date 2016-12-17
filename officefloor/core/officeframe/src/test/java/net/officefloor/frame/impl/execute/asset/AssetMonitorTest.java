@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -30,7 +30,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import org.easymock.AbstractMatcher;
 
 /**
- * Tests the {@link AssetMonitor}.
+ * Tests the {@link AssetLatch}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -54,9 +54,9 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 			.createMock(OfficeManager.class);
 
 	/**
-	 * {@link AssetMonitor} being tested.
+	 * {@link AssetLatch} being tested.
 	 */
-	private final AssetMonitor assetMonitor = new AssetMonitorImpl(this.asset,
+	private final AssetLatch assetMonitor = new AssetLatchImpl(this.asset,
 			this.assetManager);
 
 	/**
@@ -126,13 +126,13 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to reuse the {@link AssetMonitor}.
+	 * Ensure able to reuse the {@link AssetLatch}.
 	 */
 	public void testActivateJobAgain() {
 
 		final JobNode jobOne = this.createMock(JobNode.class);
 		final JobNode jobTwo = this.createMock(JobNode.class);
-		final AssetMonitor markPosition = this.createMock(AssetMonitor.class);
+		final AssetLatch markPosition = this.createMock(AssetLatch.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);

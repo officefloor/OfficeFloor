@@ -75,8 +75,11 @@ public interface LinkedListSet<E extends LinkedListSetEntry<E, O>, O> {
 	E purgeEntries();
 
 	/**
+	 * <p>
 	 * Creates a copy of this {@link LinkedListSet} returning the head of the
 	 * copy.
+	 * <p>
+	 * The returned copy is {@link Thread} safe to iterate.
 	 * 
 	 * @return Head {@link LinkedListSetItem} of the copy.
 	 */

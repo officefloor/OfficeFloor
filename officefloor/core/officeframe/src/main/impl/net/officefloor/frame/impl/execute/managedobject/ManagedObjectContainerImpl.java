@@ -26,7 +26,7 @@ import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.impl.execute.jobnode.WaitJobNode;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.ContainerContext;
@@ -81,16 +81,16 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private final CleanupSequence cleanupSequence;
 
 	/**
-	 * {@link AssetMonitor} for waiting to source the {@link ManagedObject}
+	 * {@link AssetLatch} for waiting to source the {@link ManagedObject}
 	 * instance (the {@link Asset}).
 	 */
-	private final AssetMonitor sourcingMonitor;
+	private final AssetLatch sourcingMonitor;
 
 	/**
-	 * {@link AssetMonitor} for waiting on operations on the
+	 * {@link AssetLatch} for waiting on operations on the
 	 * {@link ManagedObject} instance.
 	 */
-	private final AssetMonitor operationsMonitor;
+	private final AssetLatch operationsMonitor;
 
 	/**
 	 * Listing of potential {@link ActiveGovernance}.
@@ -556,17 +556,17 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private static class AsynchronousListenerImpl implements AsynchronousListener {
 
 		/**
-		 * {@link AssetMonitor} for operations.
+		 * {@link AssetLatch} for operations.
 		 */
-		private final AssetMonitor operationsMonitor;
+		private final AssetLatch operationsMonitor;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param operationsMonitor
-		 *            {@link AssetMonitor} for operations.
+		 *            {@link AssetLatch} for operations.
 		 */
-		public AsynchronousListenerImpl(AssetMonitor operationsMonitor) {
+		public AsynchronousListenerImpl(AssetLatch operationsMonitor) {
 			this.operationsMonitor = operationsMonitor;
 		}
 
@@ -862,7 +862,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 	/**
 	 * Sets the {@link ManagedObjectContainer} into a failed state and makes the
-	 * {@link AssetMonitor} instances aware.
+	 * {@link AssetLatch} instances aware.
 	 * 
 	 * @param failure
 	 *            Failure.

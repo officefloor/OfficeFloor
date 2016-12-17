@@ -31,7 +31,7 @@ import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
@@ -245,10 +245,10 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			.createMock(AssetManager.class);
 
 	/**
-	 * Sourcing {@link AssetMonitor}.
+	 * Sourcing {@link AssetLatch}.
 	 */
-	private final AssetMonitor sourcingAssetMonitor = this
-			.createMock(AssetMonitor.class);
+	private final AssetLatch sourcingAssetMonitor = this
+			.createMock(AssetLatch.class);
 
 	/**
 	 * Operations {@link AssetManager}.
@@ -257,10 +257,10 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			.createMock(AssetManager.class);
 
 	/**
-	 * Operations {@link AssetMonitor}.
+	 * Operations {@link AssetLatch}.
 	 */
-	private final AssetMonitor operationsAssetMonitor = this
-			.createMock(AssetMonitor.class);
+	private final AssetLatch operationsAssetMonitor = this
+			.createMock(AssetLatch.class);
 
 	/**
 	 * {@link JobContext}.

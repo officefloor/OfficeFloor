@@ -18,50 +18,58 @@
 package net.officefloor.frame.impl.execute.jobnode;
 
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.JobContext;
 
 /**
- * {@link JobNode} that indicates to wait.
+ * {@link JobNode} to synchronise the {@link ProcessState} with the current
+ * {@link ThreadState}.
  *
  * @author Daniel Sagenschneider
  */
-public class WaitJobNode implements JobNode {
+public class SynchroniseProcessStateJobNode implements JobNode {
 
 	/**
-	 * Delegate {@link JobNode}.
+	 * {@link JobNode} to continue after synchronising the {@link ProcessState}.
 	 */
-	private final JobNode delegate;
+	private final JobNode continueJobNode;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param delegate
-	 *            Delegate {@link JobNode} to use to wait within its
-	 *            {@link ThreadState}.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue after synchronising the
+	 *            {@link ProcessState}.
 	 */
-	public WaitJobNode(JobNode delegate) {
-		this.delegate = delegate;
+	public SynchroniseProcessStateJobNode(JobNode continueJobNode) {
+		this.continueJobNode = continueJobNode;
 	}
 
 	/*
-	 * ======================= JobNode ================================
+	 * ======================== JobNode =================================
 	 */
 
 	@Override
 	public JobNode doJob(JobContext context) {
-		return null; // no further jobs, so goes into wait
+
+		// Synchronise the process state (always undertaken on main thread)
+		synchronized (this.continueJobNode.getThreadState().getProcessState().getMainThreadState()) {
+		}
+
+		// Continue executing with synchronised process state
+		return this.continueJobNode;
 	}
 
 	@Override
 	public TeamManagement getResponsibleTeam() {
-		return this.delegate.getResponsibleTeam();
+		return this.continueJobNode.getResponsibleTeam();
 	}
 
 	@Override
 	public ThreadState getThreadState() {
-		return this.delegate.getThreadState();
+		return this.continueJobNode.getThreadState();
 	}
 
 }

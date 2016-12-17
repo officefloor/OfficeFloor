@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationLevel;
@@ -418,7 +418,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 
 		// Record not waiting on a completed thread
 		this.record_ThreadState_init();
-		AssetMonitor monitor = this.record_FlowAsset_waitOnFlow(jobNode);
+		AssetLatch monitor = this.record_FlowAsset_waitOnFlow(jobNode);
 		monitor.activateJobNodes(this.activateSet, true);
 		this.record_ProcessState_threadComplete();
 
@@ -505,7 +505,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		// Record check timing out the join
 		this.record_ThreadState_init();
 		this.record_FlowAsset_waitOnFlow(timedOutJobNode);
-		AssetMonitor activatedJobNodeMonitor = this
+		AssetLatch activatedJobNodeMonitor = this
 				.record_FlowAsset_waitOnFlow(activatedJobNode);
 		this.recordReturn(context, context.getTime(), TIME_OUT_TIME);
 		context.failJobNodes(null, true);
@@ -654,14 +654,14 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 * 
 	 * @param jobNode
 	 *            {@link JobNode}.
-	 * @return {@link AssetMonitor} monitoring the join.
+	 * @return {@link AssetLatch} monitoring the join.
 	 */
-	private AssetMonitor record_FlowAsset_waitOnFlow(JobNode jobNode) {
+	private AssetLatch record_FlowAsset_waitOnFlow(JobNode jobNode) {
 
 		final Flow flow = this.createMock(Flow.class);
 		final ThreadState anotherThreadState = this
 				.createMock(ThreadState.class);
-		final AssetMonitor assetMonitor = this.createMock(AssetMonitor.class);
+		final AssetLatch assetMonitor = this.createMock(AssetLatch.class);
 
 		// Record job node joining on ThreadState
 		this.recordReturn(jobNode, jobNode.getJobSequence(), flow);

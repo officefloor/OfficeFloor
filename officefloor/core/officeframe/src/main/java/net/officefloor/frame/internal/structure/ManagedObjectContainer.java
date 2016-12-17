@@ -33,9 +33,12 @@ public interface ManagedObjectContainer {
 	 * 
 	 * @param jobContext
 	 *            {@link JobContext}.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue once {@link ManagedObject} is
+	 *            loaded.s
 	 * @return Optional {@link JobNode} to load the {@link ManagedObject}.
 	 */
-	JobNode loadManagedObject(JobContext jobContext);
+	JobNode loadManagedObject(JobContext jobContext, JobNode continueJobNode);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
@@ -62,16 +65,22 @@ public interface ManagedObjectContainer {
 	 * 
 	 * @param governance
 	 *            {@link ActiveGovernance}.
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue after unregistering
+	 *            {@link Governance}.
 	 * @return Optional {@link JobNode} to unregister the {@link ManagedObject}
 	 *         from {@link Governance}.
 	 */
-	JobNode unregisterManagedObjectFromGovernance(ActiveGovernance<?, ?> governance);
+	JobNode unregisterManagedObjectFromGovernance(ActiveGovernance<?, ?> governance, JobNode continueJobNode);
 
 	/**
 	 * Unloads the {@link ManagedObject}.
 	 * 
+	 * @param continueJobNode
+	 *            {@link JobNode} to continue after unloading the
+	 *            {@link ManagedObject}.
 	 * @return Optional {@link JobNode} to unload the {@link ManagedObject}.
 	 */
-	JobNode unloadManagedObject();
+	JobNode unloadManagedObject(JobNode continueJobNode);
 
 }

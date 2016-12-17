@@ -20,7 +20,7 @@ package net.officefloor.frame.impl.execute.asset;
 import junit.framework.TestCase;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
@@ -54,9 +54,9 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	private final Asset asset = this.createMock(Asset.class);
 
 	/**
-	 * {@link AssetMonitor}.
+	 * {@link AssetLatch}.
 	 */
-	private AssetMonitor monitor = this.createMock(AssetMonitor.class);
+	private AssetLatch monitor = this.createMock(AssetLatch.class);
 
 	/**
 	 * {@link JobNodeActivateSet}.
@@ -94,7 +94,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Tests the {@link AssetMonitor} being registered and unregistered before a
+	 * Tests the {@link AssetLatch} being registered and unregistered before a
 	 * check on the {@link Asset}.
 	 */
 	public void testRegisterAndUnregisterBeforeCheckOnAsset() {
@@ -125,10 +125,10 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	 */
 	public void testHandleCheckOnAssetThrowingException() {
 
-		final AssetMonitor failingMonitor = this.createMock(AssetMonitor.class);
+		final AssetLatch failingMonitor = this.createMock(AssetLatch.class);
 		final Asset failingAsset = this.createMock(Asset.class);
 		final RuntimeException failure = new RuntimeException("Fail check");
-		final AssetMonitor secondMonitor = this.createMock(AssetMonitor.class);
+		final AssetLatch secondMonitor = this.createMock(AssetLatch.class);
 		final Asset secondAsset = this.createMock(Asset.class);
 
 		// Record registering both assets
@@ -263,7 +263,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records registering the {@link AssetMonitor}.
+	 * Records registering the {@link AssetLatch}.
 	 */
 	private void record_registerAssetMonitor_copyLinkedList() {
 		this.recordReturn(this.monitor, this.monitor.getLinkedListSetOwner(),
