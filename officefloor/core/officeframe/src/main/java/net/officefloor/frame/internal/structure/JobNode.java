@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -32,23 +31,32 @@ import net.officefloor.frame.spi.team.Team;
 public interface JobNode {
 
 	/**
-	 * Undertakes the {@link JobNode}.
+	 * Enable {@link Promise} like functionality.
 	 * 
-	 * @param context
-	 *            {@link JobContext}.
-	 * @return Next {@link JobNode} to be executed. May be <code>null</code> to
-	 *         indicate no further {@link JobNode} instances to execute.
+	 * @param thenJobNode
+	 *            {@link JobNode} to execute after this {@link JobNode} chain is
+	 *            complete.
+	 * @return {@link JobNode} to execute the current {@link JobNode} then the
+	 *         input {@link JobNode}.
 	 */
-	JobNode doJob(JobContext context);
+	default JobNode then(JobNode thenJobNode) {
+		return Promise.then(this, thenJobNode);
+	}
 
 	/**
+	 * <p>
 	 * Obtains the {@link TeamManagement} responsible for this {@link JobNode}.
+	 * <p>
+	 * By default, {@link JobNode} may be executed by any
+	 * {@link TeamManagement}.
 	 * 
 	 * @return {@link TeamManagement} responsible for this {@link JobNode}. May
 	 *         be <code>null</code> to indicate any {@link Team} may execute the
 	 *         {@link JobNode}.
 	 */
-	TeamManagement getResponsibleTeam();
+	default TeamManagement getResponsibleTeam() {
+		return null;
+	}
 
 	/**
 	 * Obtains the {@link ThreadState} for this {@link JobNode}.
@@ -56,5 +64,23 @@ public interface JobNode {
 	 * @return {@link ThreadState} for this {@link JobNode}.
 	 */
 	ThreadState getThreadState();
+
+	/**
+	 * Indicates if the {@link JobNode} requires {@link ThreadState} safety.
+	 * 
+	 * @return <code>true</code> should {@link JobNode} require
+	 *         {@link ThreadState} safety.
+	 */
+	default boolean isRequireThreadStateSafety() {
+		return false;
+	}
+
+	/**
+	 * Undertakes the {@link JobNode}.
+	 * 
+	 * @return Next {@link JobNode} to be executed. May be <code>null</code> to
+	 *         indicate no further {@link JobNode} instances to execute.
+	 */
+	JobNode doJob();
 
 }

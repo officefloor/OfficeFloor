@@ -24,6 +24,7 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeLoop;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.LinkedListSetItem;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -49,6 +50,11 @@ public class AssetManagerImpl implements AssetManager {
 	private final TeamManagement responsibleTeam;
 
 	/**
+	 * {@link JobNodeLoop}.
+	 */
+	private final JobNodeLoop delegator;
+
+	/**
 	 * {@link LinkedListSet} of {@link AssetLatch} instances requiring managing.
 	 */
 	private final LinkedListSet<AssetLatchImpl, AssetManager> latches = new StrictLinkedListSet<AssetLatchImpl, AssetManager>() {
@@ -66,10 +72,23 @@ public class AssetManagerImpl implements AssetManager {
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} responsible for the {@link Asset}
 	 *            instances.
+	 * @param delegator
+	 *            {@link JobNodeLoop}.
 	 */
-	public AssetManagerImpl(ProcessState officeManagerProcess, TeamManagement responsibleTeam) {
+	public AssetManagerImpl(ProcessState officeManagerProcess, TeamManagement responsibleTeam,
+			JobNodeLoop delegator) {
 		this.officeManagerProcess = officeManagerProcess;
 		this.responsibleTeam = responsibleTeam;
+		this.delegator = delegator;
+	}
+
+	/**
+	 * Obtains the {@link JobNodeLoop}.
+	 * 
+	 * @return {@link JobNodeLoop}.
+	 */
+	JobNodeLoop getJobNodeDelegator() {
+		return this.delegator;
 	}
 
 	/**

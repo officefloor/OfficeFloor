@@ -22,11 +22,12 @@ import java.util.TimerTask;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeLoop;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -41,8 +42,7 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
-		ManagedObjectExecuteContext<F> {
+public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements ManagedObjectExecuteContext<F> {
 
 	/**
 	 * {@link TeamIdentifier} for invoking a {@link ProcessState}.
@@ -77,10 +77,9 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	private final TeamManagement escalationResponsibleTeam;
 
 	/**
-	 * {@link Team} to let the worker ({@link Thread}) continue on to execute
-	 * the {@link ManagedObjectSource} {@link EscalationHandler}.
+	 * {@link JobNodeLoop}.
 	 */
-	private final Team escalationContinueTeam;
+	private final JobNodeLoop jobNodeLoop;
 
 	/**
 	 * {@link ProcessTicker}.
@@ -118,18 +117,15 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	 * @param timer
 	 *            {@link Timer}.
 	 */
-	public ManagedObjectExecuteContextImpl(
-			ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
-			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData,
-			TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam, ProcessTicker processTicker,
-			Timer timer) {
+	public ManagedObjectExecuteContextImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
+			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData, TeamManagement escalationResponsibleTeam,
+			JobNodeLoop jobNodeLoop, ProcessTicker processTicker, Timer timer) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
 		this.officeMetaData = officeMetaData;
 		this.escalationResponsibleTeam = escalationResponsibleTeam;
-		this.escalationContinueTeam = escalationContinueTeam;
+		this.jobNodeLoop = jobNodeLoop;
 		this.processTicker = processTicker;
 		this.timer = timer;
 	}
@@ -139,51 +135,41 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 	 */
 
 	@Override
-	public ProcessFuture invokeProcess(F key, Object parameter,
-			ManagedObject managedObject, long delay) {
-		return this.invokeProcess(key.ordinal(), parameter, managedObject,
-				delay, null);
+	public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
+			ProcessCompletionListener completionListener) {
+		this.invokeProcess(key.ordinal(), parameter, managedObject, delay, null, completionListener);
 	}
 
 	@Override
-	public ProcessFuture invokeProcess(int processIndex, Object parameter,
-			ManagedObject managedObject, long delay) {
-		return this.invokeProcess(processIndex, parameter, managedObject,
-				delay, null);
+	public void invokeProcess(int processIndex, Object parameter, ManagedObject managedObject, long delay,
+			ProcessCompletionListener completionListener) {
+		this.invokeProcess(processIndex, parameter, managedObject, delay, null, completionListener);
 	}
 
 	@Override
-	public ProcessFuture invokeProcess(F key, Object parameter,
-			ManagedObject managedObject, long delay,
-			EscalationHandler escalationHandler) {
-		return this.invokeProcess(key.ordinal(), parameter, managedObject,
-				delay, escalationHandler);
+	public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
+			EscalationHandler escalationHandler, ProcessCompletionListener completionListener) {
+		this.invokeProcess(key.ordinal(), parameter, managedObject, delay, escalationHandler, completionListener);
 	}
 
 	@Override
-	public ProcessFuture invokeProcess(int processIndex, Object parameter,
-			ManagedObject managedObject, long delay,
-			EscalationHandler escalationHandler) {
+	public void invokeProcess(int processIndex, Object parameter, ManagedObject managedObject, long delay,
+			EscalationHandler escalationHandler, ProcessCompletionListener completionListener) {
 
 		// Obtain the flow meta-data
 		if ((processIndex < 0) || (processIndex >= this.processLinks.length)) {
 			String validIndexes = (this.processLinks.length == 0 ? " [no processes linked]"
-					: " [valid only 0 to " + (this.processLinks.length - 1)
-							+ "]");
-			throw new IllegalArgumentException("Invalid process index "
-					+ processIndex + validIndexes);
+					: " [valid only 0 to " + (this.processLinks.length - 1) + "]");
+			throw new IllegalArgumentException("Invalid process index " + processIndex + validIndexes);
 		}
 		FlowMetaData<?> flowMetaData = this.processLinks[processIndex];
 
 		// Create the job in a new process
-		final JobNode jobNode = this.officeMetaData.createProcess(flowMetaData,
-				parameter, escalationHandler, this.escalationResponsibleTeam,
-				this.escalationContinueTeam, managedObject,
-				this.managedObjectMetaData, this.processMoIndex);
+		final JobNode jobNode = this.officeMetaData.createProcess(flowMetaData, parameter, escalationHandler,
+				this.escalationResponsibleTeam, managedObject, this.managedObjectMetaData, this.processMoIndex);
 
 		// Obtain the process state
-		ProcessState processState = jobNode.getJobSequence().getThreadState()
-				.getProcessState();
+		ProcessState processState = jobNode.getThreadState().getProcessState();
 
 		// Indicate process started and register to be notified of completion
 		if (this.processTicker != null) {
@@ -191,23 +177,20 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements
 			processState.registerProcessCompletionListener(this.processTicker);
 		}
 
-		// Activate the Job
-		// Must register before activating job to have trigger on completion.
+		// Trigger the process
 		if (delay > 0) {
-			// Delay activation of Job
+			// Delay execution of the process
 			this.timer.schedule(new TimerTask() {
 				@Override
 				public void run() {
-					jobNode.activateJob(INVOKE_PROCESS_TEAM);
+					ManagedObjectExecuteContextImpl.this.jobNodeLoop.delegateJobNode(jobNode);
 				}
 			}, delay);
 
 		} else {
-			// Activate Job immediately
-			jobNode.activateJob(INVOKE_PROCESS_TEAM);
+			// Execute the process immediately
+			this.jobNodeLoop.runJobNode(jobNode);
 		}
-
-		// Return the Process Future
-		return processState.getProcessFuture();
 	}
+
 }

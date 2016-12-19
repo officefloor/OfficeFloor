@@ -23,7 +23,6 @@ import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedListSetItem;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * {@link JobNode} to execute a {@link JobNode} for each
@@ -119,11 +118,11 @@ public class LinkedListSetJobNode<E> implements JobNode {
 	 */
 
 	@Override
-	public JobNode doJob(JobContext context) {
+	public JobNode doJob() {
 
 		// Determine if previous chain of job nodes to complete
 		if (this.previousJobNode != null) {
-			JobNode nextJobNode = this.previousJobNode.doJob(context);
+			JobNode nextJobNode = this.previousJobNode.doJob();
 			if (nextJobNode != null) {
 				// Need to complete previous job nodes before next item in list
 				return new LinkedListSetJobNode<E>(nextJobNode, this.head, this.headJobNode, this.jobNodeFactory);
@@ -131,7 +130,7 @@ public class LinkedListSetJobNode<E> implements JobNode {
 		}
 
 		// Undertake the head job
-		JobNode nextPreviousJobNode = this.headJobNode.doJob(context);
+		JobNode nextPreviousJobNode = this.headJobNode.doJob();
 		LinkedListSetItem<E> nextHead = this.head.getNext();
 		if (nextHead == null) {
 			// Nothing further in list, so complete last chain of job nodes

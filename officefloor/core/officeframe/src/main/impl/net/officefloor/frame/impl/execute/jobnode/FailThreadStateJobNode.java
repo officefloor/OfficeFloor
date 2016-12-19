@@ -18,9 +18,7 @@
 package net.officefloor.frame.impl.execute.jobnode;
 
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * {@link JobNode} to fail the {@link ThreadState}.
@@ -35,21 +33,21 @@ public class FailThreadStateJobNode implements JobNode {
 	private final Throwable failure;
 
 	/**
-	 * Continue {@link JobNode}.
+	 * {@link ThreadState} to fail.
 	 */
-	private final JobNode continueJobNode;
+	private final ThreadState threadState;
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param failure
 	 *            Failure for the {@link ThreadState}.
-	 * @param continueJobNode
-	 *            Continue {@link JobNode}.
+	 * @param threadState
+	 *            {@link ThreadState} to fail.
 	 */
-	public FailThreadStateJobNode(Throwable failure, JobNode continueJobNode) {
+	public FailThreadStateJobNode(Throwable failure, ThreadState threadState) {
 		this.failure = failure;
-		this.continueJobNode = continueJobNode;
+		this.threadState = threadState;
 	}
 
 	/*
@@ -57,23 +55,18 @@ public class FailThreadStateJobNode implements JobNode {
 	 */
 
 	@Override
-	public JobNode doJob(JobContext context) {
+	public ThreadState getThreadState() {
+		return this.threadState;
+	}
+
+	@Override
+	public JobNode doJob() {
 
 		// Flag thread state as failed
-		this.continueJobNode.getThreadState().setFailure(this.failure);
+		this.threadState.setFailure(this.failure);
 
-		// Continue on to fail the thread
-		return this.continueJobNode;
-	}
-
-	@Override
-	public TeamManagement getResponsibleTeam() {
-		return this.continueJobNode.getResponsibleTeam();
-	}
-
-	@Override
-	public ThreadState getThreadState() {
-		return this.continueJobNode.getThreadState();
+		// Nothing further to flag the thread state in failure
+		return null;
 	}
 
 }

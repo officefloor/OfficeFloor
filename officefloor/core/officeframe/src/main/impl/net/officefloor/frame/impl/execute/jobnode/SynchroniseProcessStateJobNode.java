@@ -19,9 +19,7 @@ package net.officefloor.frame.impl.execute.jobnode;
 
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * {@link JobNode} to synchronise the {@link ProcessState} with the current
@@ -32,19 +30,19 @@ import net.officefloor.frame.spi.team.JobContext;
 public class SynchroniseProcessStateJobNode implements JobNode {
 
 	/**
-	 * {@link JobNode} to continue after synchronising the {@link ProcessState}.
+	 * Current {@link ThreadState}.
 	 */
-	private final JobNode continueJobNode;
+	private ThreadState currentThreadState;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue after synchronising the
-	 *            {@link ProcessState}.
+	 * @param currentThreadState
+	 *            Current {@link ThreadState} to have the {@link ProcessState}
+	 *            synchronised into it.
 	 */
-	public SynchroniseProcessStateJobNode(JobNode continueJobNode) {
-		this.continueJobNode = continueJobNode;
+	public SynchroniseProcessStateJobNode(ThreadState currentThreadState) {
+		this.currentThreadState = currentThreadState;
 	}
 
 	/*
@@ -52,24 +50,25 @@ public class SynchroniseProcessStateJobNode implements JobNode {
 	 */
 
 	@Override
-	public JobNode doJob(JobContext context) {
+	public ThreadState getThreadState() {
+		return this.currentThreadState;
+	}
 
-		// Synchronise the process state (always undertaken on main thread)
-		synchronized (this.continueJobNode.getThreadState().getProcessState().getMainThreadState()) {
+	@Override
+	public boolean isRequireThreadStateSafety() {
+		// Ensure have thread state safety, to synchronise process state
+		return true;
+	}
+
+	@Override
+	public JobNode doJob() {
+
+		// Synchronise process state (always undertaken via main thread state)
+		synchronized (this.currentThreadState.getProcessState().getMainThreadState()) {
 		}
 
-		// Continue executing with synchronised process state
-		return this.continueJobNode;
-	}
-
-	@Override
-	public TeamManagement getResponsibleTeam() {
-		return this.continueJobNode.getResponsibleTeam();
-	}
-
-	@Override
-	public ThreadState getThreadState() {
-		return this.continueJobNode.getThreadState();
+		// Synchronized
+		return null;
 	}
 
 }

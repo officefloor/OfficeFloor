@@ -235,11 +235,12 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	@Override
-	public JobNode managedJobNodeComplete(ManagedJobNode jobNode, JobNode continueJobNode) {
+	public JobNode managedJobNodeComplete(ManagedJobNode jobNode) {
+		
 		// Remove JobNode from active JobNode listing
 		if (this.activeJobNodes.removeEntry(jobNode)) {
 			// Last active JobNode so flow is now complete
-			return this.threadState.flowComplete(this, continueJobNode);
+			return this.threadState.flowComplete(this);
 		}
 
 		// Flow still active

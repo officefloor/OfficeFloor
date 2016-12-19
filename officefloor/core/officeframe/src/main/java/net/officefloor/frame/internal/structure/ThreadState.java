@@ -40,13 +40,12 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 
 	/**
 	 * Attaches this {@link ThreadState} to the current {@link Thread}.
+	 * 
+	 * @param isThreadStateSafe
+	 *            Flag indicating if changes to the {@link ThreadState} are safe
+	 *            on the current {@link Thread}.
 	 */
-	void attachThreadStateToThread();
-
-	/**
-	 * Detaches this {@link ThreadState} from the current {@link Thread}.
-	 */
-	void detachThreadStateFromThread();
+	void attachThreadStateToThread(boolean isThreadStateSafe);
 
 	/**
 	 * Indicates if this {@link ThreadState} is attached to the current
@@ -58,18 +57,38 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	boolean isAttachedToThread();
 
 	/**
-	 * Returning a {@link Throwable} indicates that the thread has failed.
+	 * Indicates if changes to the {@link ThreadState} are safe on the current
+	 * {@link Thread}.
 	 * 
-	 * @return {@link Throwable} indicating the thread has failed or
-	 *         <code>null</code> indicating thread still going fine.
+	 * @return <code>true</code> should changes to the {@link ThreadState} be
+	 *         safe on the current {@link Thread}.
+	 */
+	boolean isThreadStateSafe();
+
+	/**
+	 * Detaches this {@link ThreadState} from the current {@link Thread}.
+	 */
+	void detachThreadStateFromThread();
+
+	/**
+	 * <p>
+	 * Returns a {@link Throwable} indicating that there has been a failure for
+	 * {@link ThreadState}.
+	 * <p>
+	 * Note that this is similar in concept to the C <code>errno</code>.
+	 * 
+	 * @return {@link Throwable} indicating that there has been a failure for
+	 *         {@link ThreadState}. <code>null</code> indicating
+	 *         {@link ThreadState} still going fine.
 	 */
 	Throwable getFailure();
 
 	/**
-	 * Sets the {@link Throwable} cause to indicate that the thread has failed.
+	 * Sets the {@link Throwable} cause to indicate failure in the
+	 * {@link ThreadState}.
 	 * 
 	 * @param cause
-	 *            Cause of the thread's failure.
+	 *            {@link ThreadState} failure.
 	 */
 	void setFailure(Throwable cause);
 
@@ -85,11 +104,9 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * 
 	 * @param flow
 	 *            {@link Flow} that has completed.
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue in completing the {@link Flow}.
 	 * @return Optional {@link JobNode} to complete the {@link Flow}.
 	 */
-	JobNode flowComplete(Flow flow, JobNode continueJobNode);
+	JobNode flowComplete(Flow flow);
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this

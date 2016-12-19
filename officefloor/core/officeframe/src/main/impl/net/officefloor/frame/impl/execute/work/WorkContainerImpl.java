@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.jobnode.WaitJobNode;
+import net.officefloor.frame.impl.execute.jobnode.LoadManagedObjectJobNode;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
@@ -32,16 +32,12 @@ import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.CriticalSection;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Container of a {@link Work} instance.
@@ -75,19 +71,25 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	private final AdministratorContainer<?, ?>[] administrators;
 
 	/**
+	 * {@link ThreadState} owning this {@link WorkContainer}.
+	 */
+	private final ThreadState threadState;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param work
 	 *            {@link Work} to be managed.
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
-	 * @param processState
-	 *            {@link ProcessState}.
+	 * @param threadState
+	 *            {@link ThreadState}.
 	 */
 	@SuppressWarnings("rawtypes")
-	public WorkContainerImpl(W work, WorkMetaData<W> workMetaData, ProcessState processState) {
+	public WorkContainerImpl(W work, WorkMetaData<W> workMetaData, ThreadState threadState) {
 		this.work = work;
 		this.workMetaData = workMetaData;
+		this.threadState = threadState;
 
 		// Create array to reference the managed objects
 		ManagedObjectMetaData moMetaDatas[] = workMetaData.getManagedObjectMetaData();
@@ -108,18 +110,9 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public JobNode loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode) {
-
-		// Access Point: Job
-		// Locks: ThreadState -> ProcessState
-
-		// Obtain the states
-		ThreadState threadState = jobNode.getThreadState();
-		ProcessState processState = threadState.getProcessState();
+	public JobNode loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, JobNode thenJobNode) {
 
 		// Load the managed objects
-		boolean isRequireWaiting = false;
 		for (int i = 0; i < managedObjectIndexes.length; i++) {
 			ManagedObjectIndex index = managedObjectIndexes[i];
 
@@ -134,19 +127,19 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 				container = this.managedObjects[scopeIndex];
 				if (container == null) {
 					container = this.workMetaData.getManagedObjectMetaData()[scopeIndex]
-							.createManagedObjectContainer(processState);
+							.createManagedObjectContainer(this.threadState);
 					this.managedObjects[scopeIndex] = container;
 				}
 				break;
 
 			case THREAD:
 				// Obtain the container from the thread state
-				container = threadState.getManagedObjectContainer(scopeIndex);
+				container = this.threadState.getManagedObjectContainer(scopeIndex);
 				break;
 
 			case PROCESS:
 				// Obtain the container from the process state
-				container = processState.getManagedObjectContainer(scopeIndex);
+				container = this.threadState.getProcessState().getManagedObjectContainer(scopeIndex);
 				break;
 
 			default:
@@ -154,13 +147,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			}
 
 			// Trigger loading the managed object
-			isRequireWaiting |= container.loadManagedObject(jobContext, jobNode);
-		}
-
-		// Determine if must wait for loading
-		if (isRequireWaiting) {
-			// Wait to be loaded
-			return new WaitJobNode(jobNode);
+			return new LoadManagedObjectJobNode(container).then(thenJobNode);
 		}
 
 		// Managed Objects are loaded
@@ -168,305 +155,85 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public JobNode governManagedObjects(ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode) {
-
-		// Access Point: Job
-		// Locks: ThreadState -> ProcessState
-
-		// Obtain the states
-		ThreadState threadState = jobNode.getThreadState();
-		ProcessState processState = threadState.getProcessState();
-
-		// Govern the managed objects
-		for (ManagedObjectIndex index : managedObjectIndexes) {
-
-			// Obtain the index of managed object within scope
-			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
-
-			// Obtain the managed object container
-			ManagedObjectContainer container;
-			switch (index.getManagedObjectScope()) {
-			case WORK:
-				// Always available by loadManagedObjects
-				container = this.managedObjects[scopeIndex];
-				break;
-
-			case THREAD:
-				container = threadState.getManagedObjectContainer(scopeIndex);
-				break;
-
-			case PROCESS:
-				container = processState.getManagedObjectContainer(scopeIndex);
-				break;
-
-			default:
-				throw new IllegalStateException("Unknown managed object scope " + index.getManagedObjectScope());
-			}
-
-			// Govern the managed object
-			JobNode governJobNode = container.governManagedObject(this, jobContext, jobNode);
-			if (governJobNode != null) {
-				return governJobNode;
-			}
-		}
-
-		// Managed objects are governed
-		return null;
-	}
-
-	@Override
-	public JobNode coordinateManagedObjects(ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode) {
-
-		// Access Point: Job
-		// Locks: ThreadState -> ProcessState
-
-		// Obtain the states
-		ThreadState threadState = jobNode.getThreadState();
-		ProcessState processState = threadState.getProcessState();
-
-		// Coordinate the managed objects
-		for (ManagedObjectIndex index : managedObjectIndexes) {
-
-			// Obtain the index of managed object within scope
-			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
-
-			// Obtain the managed object container
-			ManagedObjectContainer container;
-			switch (index.getManagedObjectScope()) {
-			case WORK:
-				// Always available by loadManagedObjects
-				container = this.managedObjects[scopeIndex];
-				break;
-
-			case THREAD:
-				container = threadState.getManagedObjectContainer(scopeIndex);
-				break;
-
-			case PROCESS:
-				container = processState.getManagedObjectContainer(scopeIndex);
-				break;
-
-			default:
-				throw new IllegalStateException("Unknown managed object scope " + index.getManagedObjectScope());
-			}
-
-			// Do not continue onto next unless coordinated
-			JobNode coordinateJobNode = container.coordinateManagedObject(this, jobContext, jobNode);
-			if (coordinateJobNode != null) {
-				return coordinateJobNode;
-			}
-		}
-
-		// Managed objects are co-ordinated
-		return null;
-	}
-
-	@Override
-	public boolean isManagedObjectsReady(ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode) {
-
-		// Access Point: Job
-		// Locks: ThreadState -> ProcessState
-
-		// Obtain the states
-		ThreadState threadState = jobNode.getThreadState();
-		ProcessState processState = threadState.getProcessState();
-
-		// Coordinate the managed objects
-		for (ManagedObjectIndex index : managedObjectIndexes) {
-
-			// Obtain the index of managed object within scope
-			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
-
-			// Obtain the managed object container
-			ManagedObjectContainer container;
-			switch (index.getManagedObjectScope()) {
-			case WORK:
-				// Always available by loadManagedObjects
-				container = this.managedObjects[scopeIndex];
-				break;
-
-			case THREAD:
-				container = threadState.getManagedObjectContainer(scopeIndex);
-				break;
-
-			case PROCESS:
-				container = processState.getManagedObjectContainer(scopeIndex);
-				break;
-
-			default:
-				throw new IllegalStateException("Unknown managed object scope " + index.getManagedObjectScope());
-			}
-
-			// Indicate not ready on first managed object not ready
-			if (!container.isManagedObjectReady(this, jobContext, jobNode)) {
-				return false;
-			}
-		}
-
-		// As here, all managed objects are ready
-		return true;
-	}
-
-	/**
-	 * State for {@link CriticalSection} to administer the {@link ManagedObject}
-	 * instances.
-	 */
-	private static class AdministerManagedObjectsState {
-
-		/**
-		 * {@link TaskDutyAssociation}.
-		 */
-		private final TaskDutyAssociation<?> duty;
-
-		/**
-		 * {@link AdministratorContext}.
-		 */
-		private final AdministratorContext adminContext;
-
-		/**
-		 * {@link WorkContainerImpl}.
-		 */
-		private final WorkContainerImpl<?> workContainer;
-
-		/**
-		 * {@link AdministratorContainer}.
-		 */
-		private AdministratorContainer adminContainer;
-
-		/**
-		 * Extension interfaces.
-		 */
-		private List extensionInterfaces;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param duty
-		 *            {@link TaskDutyAssociation}.
-		 * @param adminContext
-		 *            {@link AdministratorContext}.
-		 * @param workContainer
-		 *            {@link WorkContainer}.
-		 */
-		public AdministerManagedObjectsState(TaskDutyAssociation<?> duty, AdministratorContext adminContext,
-				WorkContainerImpl<?> workContainer) {
-			this.duty = duty;
-			this.adminContext = adminContext;
-			this.workContainer = workContainer;
-		}
-	}
-
-	/**
-	 * {@link CriticalSection} to administer the {@link ManagedObject}
-	 * instances.
-	 */
-	private static final CriticalSection<AdministerManagedObjectsState, AdministerManagedObjectsState, Throwable> administerManagedObjectsCriticalSection = new CriticalSection<AdministerManagedObjectsState, WorkContainerImpl.AdministerManagedObjectsState, Throwable>() {
-		@Override
-		public AdministerManagedObjectsState doCriticalSection(AdministerManagedObjectsState state) throws Throwable {
-
-			// Obtain the states
-			ThreadState threadState = state.adminContext.getThreadState();
-			ProcessState processState = threadState.getProcessState();
-
-			// Obtain the index identifying the administrator
-			AdministratorIndex adminIndex = state.duty.getAdministratorIndex();
-			AdministratorScope adminScope = adminIndex.getAdministratorScope();
-			int adminScopeIndex = adminIndex.getIndexOfAdministratorWithinScope();
-
-			// Obtain the administrator container
-			switch (adminScope) {
-			case WORK:
-				// Lazy create the administrator container. This is safe to lazy
-				// create as work containers are not shared between threads and
-				// this operates within the thread and process lock.
-				state.adminContainer = state.workContainer.administrators[adminScopeIndex];
-				if (state.adminContainer == null) {
-					state.adminContainer = state.workContainer.workMetaData.getAdministratorMetaData()[adminScopeIndex]
-							.createAdministratorContainer();
-					state.workContainer.administrators[adminScopeIndex] = state.adminContainer;
-				}
-				break;
-
-			case THREAD:
-				state.adminContainer = threadState.getAdministratorContainer(adminScopeIndex);
-				break;
-
-			case PROCESS:
-				state.adminContainer = processState.getAdministratorContainer(adminScopeIndex);
-				break;
-
-			default:
-				throw new IllegalStateException("Unknown administrator scope " + adminIndex.getAdministratorScope());
-			}
-
-			// Obtain the extension interfaces to be managed
-			ExtensionInterfaceMetaData<?>[] eiMetaDatas = state.adminContainer
-					.getExtensionInterfaceMetaData(state.adminContext);
-			state.extensionInterfaces = new ArrayList(eiMetaDatas.length);
-			for (int i = 0; i < eiMetaDatas.length; i++) {
-				ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
-
-				// Obtain the index of managed object to administer
-				ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
-
-				// Obtain the managed object container
-				ManagedObjectContainer container;
-				int moScopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
-				switch (moIndex.getManagedObjectScope()) {
-				case WORK:
-					container = state.workContainer.managedObjects[moScopeIndex];
-					break;
-
-				case THREAD:
-					container = threadState.getManagedObjectContainer(moScopeIndex);
-					break;
-
-				case PROCESS:
-					container = processState.getManagedObjectContainer(moScopeIndex);
-					break;
-
-				default:
-					throw new IllegalStateException("Unknown managed object scope " + moIndex.getManagedObjectScope());
-				}
-
-				// Extract the extension interface
-				Object extensionInterface = container
-						.extractExtensionInterface(eiMetaData.getExtensionInterfaceExtractor());
-
-				// Load the extension interface for administration
-				state.extensionInterfaces.add(extensionInterface);
-			}
-
-			// Return the state
-			return state;
-		}
-	};
-
-	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JobNode administerManagedObjects(TaskDutyAssociation<?> duty, AdministratorContext adminContext)
 			throws Throwable {
 
-		// Access Point: Job
-		// Locks: ThreadState
+		// Obtain the index identifying the administrator
+		AdministratorIndex adminIndex = duty.getAdministratorIndex();
+		AdministratorScope adminScope = adminIndex.getAdministratorScope();
+		int adminScopeIndex = adminIndex.getIndexOfAdministratorWithinScope();
+
+		// Obtain the administrator container
+		AdministratorContainer adminContainer;
+		switch (adminScope) {
+		case WORK:
+			// Lazy create the administrator container. This is safe to lazy
+			// create as work containers are not shared between threads and
+			// this operates within the thread and process lock.
+			adminContainer = this.administrators[adminScopeIndex];
+			if (adminContainer == null) {
+				adminContainer = this.workMetaData.getAdministratorMetaData()[adminScopeIndex]
+						.createAdministratorContainer();
+				this.administrators[adminScopeIndex] = adminContainer;
+			}
+			break;
+
+		case THREAD:
+			adminContainer = this.threadState.getAdministratorContainer(adminScopeIndex);
+			break;
+
+		case PROCESS:
+			adminContainer = this.threadState.getProcessState().getAdministratorContainer(adminScopeIndex);
+			break;
+
+		default:
+			throw new IllegalStateException("Unknown administrator scope " + adminIndex.getAdministratorScope());
+		}
+
+		// Obtain the extension interfaces to be managed
+		ExtensionInterfaceMetaData<?>[] eiMetaDatas = adminContainer.getExtensionInterfaceMetaData(adminContext);
+		List extensionInterfaces = new ArrayList(eiMetaDatas.length);
+		for (int i = 0; i < eiMetaDatas.length; i++) {
+			ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
+
+			// Obtain the index of managed object to administer
+			ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
+
+			// Obtain the managed object container
+			ManagedObjectContainer container;
+			int moScopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
+			switch (moIndex.getManagedObjectScope()) {
+			case WORK:
+				container = this.managedObjects[moScopeIndex];
+				break;
+
+			case THREAD:
+				container = this.threadState.getManagedObjectContainer(moScopeIndex);
+				break;
+
+			case PROCESS:
+				container = this.threadState.getProcessState().getManagedObjectContainer(moScopeIndex);
+				break;
+
+			default:
+				throw new IllegalStateException("Unknown managed object scope " + moIndex.getManagedObjectScope());
+			}
+
+			// Extract the extension interface
+			Object extensionInterface = container
+					.extractExtensionInterface(eiMetaData.getExtensionInterfaceExtractor());
+
+			// Load the extension interface for administration
+			extensionInterfaces.add(extensionInterface);
+		}
 
 		// Administer the managed objects
-		AdministerManagedObjectsState state = adminContext.getThreadState().doProcessCriticalSection(
-				new AdministerManagedObjectsState(duty, adminContext, this), administerManagedObjectsCriticalSection);
-		return state.adminContainer.doDuty(duty, state.extensionInterfaces, adminContext);
+		return adminContainer.doDuty(duty, extensionInterfaces, adminContext);
 	}
 
 	@Override
-	public Object getObject(ManagedObjectIndex index, ThreadState threadState) {
-
-		// Access Point: Job
-		// Locks: ThreadState
-
-		// Obtain the states
-		ProcessState processState = threadState.getProcessState();
+	public Object getObject(ManagedObjectIndex index) {
 
 		// Obtain the index of managed object within scope
 		int scopeIndex = index.getIndexOfManagedObjectWithinScope();
@@ -480,11 +247,11 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			break;
 
 		case THREAD:
-			container = threadState.getManagedObjectContainer(scopeIndex);
+			container = this.threadState.getManagedObjectContainer(scopeIndex);
 			break;
 
 		case PROCESS:
-			container = processState.getManagedObjectContainer(scopeIndex);
+			container = this.threadState.getProcessState().getManagedObjectContainer(scopeIndex);
 			break;
 
 		default:
@@ -492,19 +259,16 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		}
 
 		// Return the object of the managed object
-		return container.getObject(threadState);
+		return container.getObject();
 	}
 
 	@Override
-	public JobNode unloadWork(JobNode continueJobNode) {
-
-		// Access Point: Job
-		// Locks: ThreadState -> ProcessState
+	public JobNode unloadWork() {
 
 		// Unload the work bound managed objects
 		for (ManagedObjectContainer container : this.managedObjects) {
 			if (container != null) {
-				JobNode unloadJobNode = container.unloadManagedObject(continueJobNode);
+				JobNode unloadJobNode = container.unloadManagedObject();
 				if (unloadJobNode != null) {
 					return unloadJobNode;
 				}

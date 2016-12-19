@@ -26,6 +26,7 @@ import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.JobNodeLoop;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -56,8 +57,7 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
-		ManagedObjectMetaData<D> {
+public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObjectMetaData<D> {
 
 	/**
 	 * Name of the {@link ManagedObject} bound within the
@@ -154,12 +154,6 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private TeamManagement recycleEscalationResponsibleTeam;
 
 	/**
-	 * Continue {@link Team} for handling escalation of recycling the
-	 * {@link ManagedObject}.
-	 */
-	private Team recycleEscalationContinueTeam;
-
-	/**
 	 * Initiate with meta-data of the {@link ManagedObject} to source specific
 	 * to the {@link Work}.
 	 * 
@@ -200,14 +194,10 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            {@link ManagedObjectGovernanceMetaData} instances applicable
 	 *            to this {@link ManagedObject}.
 	 */
-	public ManagedObjectMetaDataImpl(String boundManagedObjectName,
-			Class<?> objectType, int instanceIndex,
-			ManagedObjectSource<?, ?> source, ManagedObjectPool pool,
-			boolean isNameAwareManagedObject, AssetManager sourcingManager,
-			boolean isManagedObjectAsynchronous,
-			AssetManager operationsManager,
-			boolean isCoordinatingManagedObject,
-			ManagedObjectIndex[] dependencyMapping, long timeout,
+	public ManagedObjectMetaDataImpl(String boundManagedObjectName, Class<?> objectType, int instanceIndex,
+			ManagedObjectSource<?, ?> source, ManagedObjectPool pool, boolean isNameAwareManagedObject,
+			AssetManager sourcingManager, boolean isManagedObjectAsynchronous, AssetManager operationsManager,
+			boolean isCoordinatingManagedObject, ManagedObjectIndex[] dependencyMapping, long timeout,
 			ManagedObjectGovernanceMetaData<?>[] governanceMetaData) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.objectType = objectType;
@@ -240,14 +230,11 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            Continue {@link Team} for handling escalation of recycling the
 	 *            {@link ManagedObject}.
 	 */
-	public void loadRemainingState(OfficeMetaData officeMetaData,
-			FlowMetaData<?> recycleFlowMetaData,
-			TeamManagement recycleEscalationResponsibleTeam,
-			Team recycleEscalationContinueTeam) {
+	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData<?> recycleFlowMetaData,
+			TeamManagement recycleEscalationResponsibleTeam, Team recycleEscalationContinueTeam) {
 		this.officeMetaData = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
 		this.recycleEscalationResponsibleTeam = recycleEscalationResponsibleTeam;
-		this.recycleEscalationContinueTeam = recycleEscalationContinueTeam;
 	}
 
 	/*
@@ -270,9 +257,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public ManagedObjectContainer createManagedObjectContainer(
-			ProcessState processState) {
-		return new ManagedObjectContainerImpl(this, processState);
+	public ManagedObjectContainer createManagedObjectContainer(ThreadState threadState) {
+		return new ManagedObjectContainerImpl(this, threadState);
 	}
 
 	@Override
@@ -316,19 +302,14 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public <W extends Work> boolean isDependenciesReady(
-			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context) {
-		return workContainer.isManagedObjectsReady(this.dependencyMapping,
-				jobContext, jobNode, activateSet, context);
+	public <W extends Work> boolean isDependenciesReady(WorkContainer<W> workContainer, JobNode jobNode) {
+		return workContainer.isManagedObjectsReady(this.dependencyMapping, jobNode);
 	}
 
 	@Override
-	public <W extends Work> ObjectRegistry<D> createObjectRegistry(
-			WorkContainer<W> workContainer, ThreadState threadState) {
-		return new ObjectRegistryImpl<D>(workContainer, this.dependencyMapping,
-				threadState);
+	public <W extends Work> ObjectRegistry<D> createObjectRegistry(WorkContainer<W> workContainer,
+			ThreadState threadState) {
+		return new ObjectRegistryImpl<D>(workContainer, this.dependencyMapping, threadState);
 	}
 
 	@Override
@@ -337,25 +318,23 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public JobNode createRecycleJobNode(ManagedObject managedObject,
-			CleanupSequence cleanupSequence) {
+	public JobNode createRecycleJobNode(ManagedObject managedObject, CleanupSequence cleanupSequence) {
+
 		if (this.recycleFlowMetaData == null) {
 			// No recycling for managed objects
 			return null;
+
 		} else {
 			// Create the recycle managed object parameter
 			RecycleManagedObjectParameterImpl<ManagedObject> parameter = new RecycleManagedObjectParameterImpl<ManagedObject>(
 					managedObject, cleanupSequence);
 
 			// Create the recycle job node
-			JobNode recycleJobNode = this.officeMetaData.createProcess(
-					this.recycleFlowMetaData, parameter, parameter,
-					this.recycleEscalationResponsibleTeam,
-					this.recycleEscalationContinueTeam);
+			JobNode recycleJobNode = this.officeMetaData.createProcess(this.recycleFlowMetaData, parameter, parameter,
+					this.recycleEscalationResponsibleTeam);
 
 			// Listen to process completion (handle not being recycled)
-			recycleJobNode.getJobSequence().getThreadState().getProcessState()
-					.registerProcessCompletionListener(parameter);
+			recycleJobNode.getThreadState().getProcessState().registerProcessCompletionListener(parameter);
 
 			// Return the recycle job node
 			return recycleJobNode;
@@ -366,8 +345,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * Implementation of {@link RecycleManagedObjectParameter}.
 	 */
 	private class RecycleManagedObjectParameterImpl<MO extends ManagedObject>
-			implements RecycleManagedObjectParameter<MO>, EscalationHandler,
-			ProcessCompletionListener {
+			implements RecycleManagedObjectParameter<MO>, EscalationHandler, ProcessCompletionListener {
 
 		/**
 		 * {@link ManagedObject} being recycled.
@@ -392,8 +370,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		 * @param cleanupSequence
 		 *            {@link CleanupSequence}.
 		 */
-		RecycleManagedObjectParameterImpl(MO managedObject,
-				CleanupSequence cleanupSequence) {
+		RecycleManagedObjectParameterImpl(MO managedObject, CleanupSequence cleanupSequence) {
 			this.managedObject = managedObject;
 			this.cleanupSequence = cleanupSequence;
 		}
@@ -411,8 +388,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		public void reuseManagedObject(MO managedObject) {
 			// Return to pool
 			if (ManagedObjectMetaDataImpl.this.pool != null) {
-				ManagedObjectMetaDataImpl.this.pool
-						.returnManagedObject(managedObject);
+				ManagedObjectMetaDataImpl.this.pool.returnManagedObject(managedObject);
 			}
 
 			// Flag recycled
@@ -431,8 +407,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		@Override
 		public void handleEscalation(Throwable escalation) throws Throwable {
 			// Register the failure of recycling
-			this.cleanupSequence.registerCleanupEscalation(
-					ManagedObjectMetaDataImpl.this.objectType, escalation);
+			this.cleanupSequence.registerCleanupEscalation(ManagedObjectMetaDataImpl.this.objectType, escalation);
 		}
 
 		/*
@@ -440,12 +415,10 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		 */
 
 		@Override
-		public void processComplete(TeamIdentifier currentTeam) {
-			if ((!this.isRecycled)
-					&& (ManagedObjectMetaDataImpl.this.pool != null)) {
+		public void processComplete() {
+			if ((!this.isRecycled) && (ManagedObjectMetaDataImpl.this.pool != null)) {
 				// Not recycled, therefore lost to pool
-				ManagedObjectMetaDataImpl.this.pool
-						.lostManagedObject(this.managedObject);
+				ManagedObjectMetaDataImpl.this.pool.lostManagedObject(this.managedObject);
 			}
 		}
 	}

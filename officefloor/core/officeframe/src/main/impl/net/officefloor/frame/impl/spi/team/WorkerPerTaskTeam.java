@@ -20,9 +20,7 @@ package net.officefloor.frame.impl.spi.team;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link Team} that uses a specific new worker dedicated to each new
@@ -33,19 +31,9 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
 public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 
 	/**
-	 * {@link TeamIdentifier} of this {@link Team}.
-	 */
-	private final TeamIdentifier teamIdentifier;
-
-	/**
 	 * Priority for the worker {@link Thread} instances.
 	 */
 	private final int threadPriority;
-
-	/**
-	 * Indicates to continue working.
-	 */
-	private volatile boolean continueWorking = true;
 
 	/**
 	 * Count of the {@link Thread} instances created to obtain next index.
@@ -59,12 +47,9 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	 *            Name of this team.
 	 * @param threadPriority
 	 *            Priority for the worker {@link Thread} instances.
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier} of this {@link Team}.
 	 */
-	public WorkerPerTaskTeam(String teamName, TeamIdentifier teamIdentifier, int threadPriority) {
+	public WorkerPerTaskTeam(String teamName, int threadPriority) {
 		super(teamName);
-		this.teamIdentifier = teamIdentifier;
 		this.threadPriority = threadPriority;
 	}
 
@@ -73,11 +58,9 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	 * 
 	 * @param teamName
 	 *            Name of this team.
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier} of this {@link Team}.
 	 */
-	public WorkerPerTaskTeam(String teamName, TeamIdentifier teamIdentifier) {
-		this(teamName, teamIdentifier, Thread.NORM_PRIORITY);
+	public WorkerPerTaskTeam(String teamName) {
+		this(teamName, Thread.NORM_PRIORITY);
 	}
 
 	/*
@@ -90,11 +73,14 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	}
 
 	@Override
-	public void assignJob(Job task, TeamIdentifier assignerTeam) {
-		// Hire worker to execute the task
+	public void assignJob(Job job) {
+
+		// Create name for the worker
 		long threadIndex = this.threadIndex.getAndIncrement();
 		String threadName = this.getClass().getSimpleName() + "_" + this.getName() + "_" + String.valueOf(threadIndex);
-		Thread thread = new Thread(this, new DedicatedWorker(task), threadName);
+
+		// Hire worker to execute the job
+		Thread thread = new Thread(this, job, threadName);
 		if (thread.getPriority() != this.threadPriority) {
 			thread.setPriority(this.threadPriority);
 		}
@@ -106,78 +92,6 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 
 	@Override
 	public void stopWorking() {
-		// Flag to workers to stop working
-		this.continueWorking = false;
-	}
-
-	/**
-	 * Worker dedicated to executing a {@link Job}.
-	 */
-	private class DedicatedWorker implements Runnable, JobContext {
-
-		/**
-		 * Indicates not obtained time.
-		 */
-		private static final long NO_TIME = 0;
-
-		/**
-		 * {@link Job} to execute.
-		 */
-		private final Job taskContainer;
-
-		/**
-		 * Current time for execution.
-		 */
-		private long time = NO_TIME;
-
-		/**
-		 * Initiate worker.
-		 * 
-		 * @param taskContainer
-		 *            {@link Job} to execute.
-		 */
-		public DedicatedWorker(Job taskContainer) {
-			this.taskContainer = taskContainer;
-		}
-
-		/*
-		 * ======================= Runnable =============================
-		 */
-
-		@Override
-		public void run() {
-			// Reset to no time
-			this.time = NO_TIME;
-
-			// Undertake the job
-			this.taskContainer.doJob(this);
-		}
-
-		/*
-		 * ================ ExecutionContext ===============================
-		 */
-
-		@Override
-		public long getTime() {
-
-			// Ensure have the time
-			if (this.time == NO_TIME) {
-				this.time = System.currentTimeMillis();
-			}
-
-			// Return the time
-			return this.time;
-		}
-
-		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return WorkerPerTaskTeam.this.teamIdentifier;
-		}
-
-		@Override
-		public boolean continueExecution() {
-			return WorkerPerTaskTeam.this.continueWorking;
-		}
 	}
 
 }

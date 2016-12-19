@@ -25,6 +25,13 @@ package net.officefloor.frame.internal.structure;
 public interface ManagedJobNode extends JobNode, LinkedListSetEntry<ManagedJobNode, Flow> {
 
 	/**
+	 * Obtains the {@link Flow} that this {@link ManagedJobNode} is within.
+	 * 
+	 * @return {@link Flow} that this {@link ManagedJobNode} is within.
+	 */
+	Flow getFlow();
+
+	/**
 	 * Enables specify the next sequential {@link ManagedJobNode}.
 	 * 
 	 * @param nextJobNode

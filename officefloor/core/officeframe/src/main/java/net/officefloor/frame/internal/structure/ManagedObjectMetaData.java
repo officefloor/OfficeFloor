@@ -27,7 +27,6 @@ import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Meta-data of a {@link ManagedObject}.
@@ -72,12 +71,28 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * Creates a new {@link ManagedObjectContainer}.
 	 * 
-	 * @param processState
-	 *            {@link ProcessState} that the {@link ManagedObject} is bound
-	 *            within.
+	 * @param threadState
+	 *            {@link ThreadState} responsible for managing this
+	 *            {@link ManagedObjectContainer}.
 	 * @return New {@link ManagedObjectContainer}.
 	 */
-	ManagedObjectContainer createManagedObjectContainer(ProcessState processState);
+	ManagedObjectContainer createManagedObjectContainer(ThreadState threadState);
+
+	/**
+	 * Obtains the optional {@link TeamManagement} responsible for this
+	 * {@link ManagedObject}.
+	 * 
+	 * @return Optional {@link TeamManagement} responsible for this
+	 *         {@link ManagedObject}. May be <code>null</code>.
+	 */
+	TeamManagement getResponsibleTeam();
+
+	/**
+	 * Obtains the {@link JobNodeLoop} for the {@link ManagedObject}.
+	 * 
+	 * @return {@link JobNodeLoop} for the {@link ManagedObject}.
+	 */
+	JobNodeLoop getJobNodeLoop();
 
 	/**
 	 * Obtains the {@link AssetManager} that manages the sourcing of the
@@ -166,15 +181,12 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link Work} type.
 	 * @param workContainer
 	 *            {@link WorkContainer}.
-	 * @param jobContext
-	 *            {@link JobContext}.
 	 * @param jobNode
 	 *            {@link JobNode}.
 	 * @return <code>true</code> if all dependency {@link ManagedObject}
 	 *         instances are ready.
 	 */
-	<W extends Work> boolean isDependenciesReady(WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode);
+	<W extends Work> boolean isDependenciesReady(WorkContainer<W> workContainer, JobNode jobNode);
 
 	/**
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.

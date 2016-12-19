@@ -325,7 +325,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 			WorkContainer<W> workContainer, JobNode parallelJobNodeOwner,
 			Object parameter,
 			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
-		return new TaskJob<W, D, F>(flow, workContainer, this,
+		return new TaskJobNode<W, D, F>(flow, workContainer, this,
 				governanceDeactivationStrategy, parallelJobNodeOwner, parameter);
 	}
 

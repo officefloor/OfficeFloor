@@ -22,25 +22,19 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
-import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
-import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
-import net.officefloor.frame.internal.structure.FlowAsset;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCallbackJobNodeFactory;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.LinkedListSet;
-import net.officefloor.frame.internal.structure.LinkedListSetEntry;
 import net.officefloor.frame.internal.structure.ManagedJobNode;
 import net.officefloor.frame.internal.structure.ManagedJobNodeContext;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -51,11 +45,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.CriticalSection;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Abstract implementation of the {@link Job} that provides the additional
@@ -224,13 +214,11 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 	 * 
 	 * @param context
 	 *            {@link ManagedJobNodeContext}.
-	 * @param jobContext
-	 *            {@link JobContext}.
 	 * @return Parameter for the next {@link JobNode}.
 	 * @throws Throwable
 	 *             If failure in executing the {@link JobNode}.
 	 */
-	protected abstract Object executeJobNode(ManagedJobNodeContext context, JobContext jobContext) throws Throwable;
+	protected abstract Object executeJobNode(ManagedJobNodeContext context) throws Throwable;
 
 	/*
 	 * ======================== JobNode =======================================
@@ -241,98 +229,14 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 		return this.nodeMetaData.getResponsibleTeam();
 	}
 
-	/**
-	 * State for {@link CriticalSection} of undertaking the {@link Job}.
-	 */
-	private static class DoJobCriticalSectionState {
-
-		/**
-		 * {@link AbstractManagedJobNodeContainer}.
-		 */
-		private final AbstractManagedJobNodeContainer<?, ?> job;
-
-		/**
-		 * {@link JobContext}.
-		 */
-		private final JobContext jobContext;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param job
-		 *            {@link AbstractManagedJobNodeContainer}.
-		 * @param jobContext
-		 *            {@link JobContext}.
-		 * @param currentTeam
-		 *            Current {@link TeamIdentifier}.
-		 */
-		public DoJobCriticalSectionState(AbstractManagedJobNodeContainer<?, ?> job, JobContext jobContext) {
-			this.job = job;
-			this.jobContext = jobContext;
-		}
+	@Override
+	public ThreadState getThreadState() {
+		return this.flow.getThreadState();
 	}
 
-	/**
-	 * {@link CriticalSection} to do the {@link ProcessState} critical aspects
-	 * of the {@link Job}.
-	 */
-	private static final CriticalSection<JobNode, DoJobCriticalSectionState, Throwable> doJobProcessCriticalSection = new CriticalSection<JobNode, DoJobCriticalSectionState, Throwable>() {
-		@Override
-		public JobNode doCriticalSection(DoJobCriticalSectionState state) throws Exception {
-
-			JobNode jobNode = null;
-			switch (state.job.jobState) {
-			case LOAD_MANAGED_OBJECTS:
-				// Load the managed objects
-				jobNode = state.job.workContainer.loadManagedObjects(state.job.requiredManagedObjects, state.jobContext,
-						state.job);
-				if (jobNode != null) {
-					return jobNode;
-				}
-
-				// Flag Managed Objects now to be governed
-				state.job.jobState = JobState.GOVERN_MANAGED_OBJECTS;
-
-			case GOVERN_MANAGED_OBJECTS:
-				// Govern the managed objects.
-				// (Handles managed objects not ready)
-				jobNode = state.job.workContainer.governManagedObjects(state.job.requiredManagedObjects,
-						state.jobContext, state.job);
-				if (jobNode != null) {
-					return jobNode;
-				}
-
-				// Flag Managed Objects are governed
-				state.job.jobState = JobState.COORDINATE_MANAGED_OBJECTS;
-
-			case COORDINATE_MANAGED_OBJECTS:
-				// Coordinate the managed objects.
-				// (Handles managed objects not ready)
-				jobNode = state.job.workContainer.coordinateManagedObjects(state.job.requiredManagedObjects,
-						state.jobContext, state.job);
-				if (jobNode != null) {
-					return jobNode;
-				}
-
-				// Flag Managed Objects are coordinated
-				state.job.jobState = JobState.EXECUTE_JOB;
-
-			default:
-				// No managed object operation for state
-			}
-
-			// As here, managed objects are ready
-			return null;
-		}
-	};
-
 	@Override
-	public final JobNode doJob(JobContext jobContext) {
+	public final JobNode doJob() {
 
-		// Access Point: Job Loop
-		// Locks: Thread (if required)
-
-		// Only one job per thread at a time
 		// Obtain the thread and process state (as used throughout method)
 		ThreadState threadState = this.flow.getThreadState();
 		ProcessState processState = threadState.getProcessState();
@@ -372,16 +276,16 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 							// Incorrect state, so correct
 							if (isGovernanceRequired) {
 								// Activate the governance
-								return governance.activateGovernance(this);
+								return governance.activateGovernance().then(this);
 
 							} else {
 								// De-activate the governance
 								switch (this.governanceDeactivationStrategy) {
 								case ENFORCE:
-									return governance.enforceGovernance(this);
+									return governance.enforceGovernance().then(this);
 
 								case DISREGARD:
-									return governance.disregardGovernance(this);
+									return governance.disregardGovernance().then(this);
 
 								default:
 									// Unknown de-activation strategy
@@ -398,21 +302,17 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 				}
 			}
 
-			// Only take lock if have required managed objects
-			if (this.requiredManagedObjects.length == 0) {
-				// Only jump forward if initial state
-				if (this.jobState == JobState.LOAD_MANAGED_OBJECTS) {
-					// No managed objects required, so execute job
-					this.jobState = JobState.EXECUTE_JOB;
-				}
+			// Load the managed objects
+			JobNode loadJobNode = this.workContainer.loadManagedObjects(this.requiredManagedObjects, this);
+			if (loadJobNode != null) {
+				// Execute the job once managed objects loaded
+				this.jobState = JobState.EXECUTE_JOB;
+				return loadJobNode;
+			}
 
-			} else {
-				// Within process lock, ensure managed objects loaded
-				DoJobCriticalSectionState state = new DoJobCriticalSectionState(this, jobContext);
-				JobNode managedObjectJobNode = threadState.doProcessCriticalSection(state, doJobProcessCriticalSection);
-				if (managedObjectJobNode != null) {
-					return managedObjectJobNode;
-				}
+			// Synchronise process state to this thread (if required)
+			if (threadState != processState.getMainThreadState()) {
+				return new SynchroniseProcessStateJobNode(threadState).then(this);
 			}
 
 			switch (this.jobState) {
@@ -434,7 +334,7 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 				}
 
 				// Execute the job
-				this.nextJobParameter = this.executeJobNode(this, jobContext);
+				this.nextJobParameter = this.executeJobNode(this);
 
 				// Job executed, so now to activate the next job
 				this.jobState = JobState.ACTIVATE_NEXT_JOB_NODE;
@@ -467,15 +367,15 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 				}
 
 				// Complete this job (flags state complete)
-				JobNode completeJob = this.completeJobNode(this);
+				JobNode completeJob = this.completeJobNode();
 				if (completeJob != null) {
-					return completeJob;
+					return completeJob.then(this);
 				}
 
 				// Obtain next job to execute
 				JobNode nextJob = this.getNextJobNodeToExecute();
 				if (nextJob != null) {
-					return null;
+					return nextJob;
 				}
 
 			case COMPLETED:
@@ -548,9 +448,9 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 			threadState.escalationStart(this);
 			try {
 				// Escalation from this node, so nothing further
-				JobNode clearJobNode = this.clearNodes(this);
+				JobNode clearJobNode = this.clearNodes();
 				if (clearJobNode != null) {
-					return clearJobNode;
+					return clearJobNode.then(this);
 				}
 
 				// Search upwards for an escalation handler
@@ -561,9 +461,9 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 							.getEscalation(escalationCause);
 					if (escalation == null) {
 						// Clear node as not handles escalation
-						JobNode parentClearJobNode = node.clearNodes(this);
+						JobNode parentClearJobNode = node.clearNodes();
 						if (parentClearJobNode != null) {
-							return parentClearJobNode;
+							return parentClearJobNode.then(this);
 						}
 
 					} else {
@@ -644,7 +544,13 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 		}
 
 		// Now complete
-		return this.completeJobNode(this);
+		JobNode completeJobNode = this.completeJobNode();
+		if (completeJobNode != null) {
+			return completeJobNode.then(this);
+		}
+
+		// Nothing further
+		return null;
 	}
 
 	/**
@@ -752,8 +658,7 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 							throw new UnsupportedOperationException("TODO implement Type1481920593530.createJobNode");
 
 						}
-					}, continueJobNode);
-			// TODO register spawn thread job node for execution
+					}, this.nodeMetaData.getJobNodeDelegator(), continueJobNode);
 			break;
 
 		default:
@@ -830,32 +735,29 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 
 	/**
 	 * Clears this {@link JobNode}.
-	 * 
-	 * @param continueJobNode
-	 *            Continue {@link JobNode}.
 	 */
-	private final JobNode clearNodes(JobNode continueJobNode) {
+	private final JobNode clearNodes() {
 
 		// Complete this job
-		JobNode completeJobNode = this.completeJobNode(continueJobNode);
+		JobNode completeJobNode = this.completeJobNode();
 		if (completeJobNode != null) {
-			return completeJobNode;
+			return completeJobNode.then(this);
 		}
 
 		// Clear all the parallel jobs from this node
 		if (this.parallelNode != null) {
-			JobNode parallelJobNode = this.parallelNode.clearNodes(continueJobNode);
+			JobNode parallelJobNode = this.parallelNode.clearNodes();
 			if (parallelJobNode != null) {
-				return parallelJobNode;
+				return parallelJobNode.then(this);
 			}
 			this.parallelNode = null;
 		}
 
 		// Clear all the sequential jobs from this node
 		if (this.nextTaskNode != null) {
-			JobNode sequentialJobNode = this.nextTaskNode.clearNodes(continueJobNode);
+			JobNode sequentialJobNode = this.nextTaskNode.clearNodes();
 			if (sequentialJobNode != null) {
-				return sequentialJobNode;
+				return sequentialJobNode.then(this);
 			}
 			this.nextTaskNode = null;
 		}
@@ -866,11 +768,8 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 
 	/**
 	 * Completes this {@link JobNode}.
-	 * 
-	 * @param continueJobNode
-	 *            Continue {@link JobNode}.
 	 */
-	private JobNode completeJobNode(JobNode continueJobNode) {
+	private JobNode completeJobNode() {
 
 		// Do nothing if already complete
 		if (this.jobState == JobState.COMPLETED) {
@@ -878,15 +777,15 @@ public abstract class AbstractManagedJobNodeContainer<W extends Work, N extends 
 		}
 
 		// Clean up work container
-		JobNode unloadJob = this.workContainer.unloadWork(this);
+		JobNode unloadJob = this.workContainer.unloadWork();
 		if (unloadJob != null) {
-			return unloadJob;
+			return unloadJob.then(this);
 		}
 
 		// Clean up job node
-		JobNode flowJob = this.flow.managedJobNodeComplete(this, continueJobNode);
+		JobNode flowJob = this.flow.managedJobNodeComplete(this);
 		if (flowJob != null) {
-			return flowJob;
+			return flowJob.then(this);
 		}
 
 		// Complete the job

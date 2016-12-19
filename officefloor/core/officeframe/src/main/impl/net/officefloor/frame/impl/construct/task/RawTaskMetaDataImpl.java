@@ -39,7 +39,7 @@ import net.officefloor.frame.impl.execute.duty.TaskDutyAssociationImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.impl.execute.task.TaskJob;
+import net.officefloor.frame.impl.execute.task.TaskJobNode;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
@@ -222,7 +222,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			if (objectConfiguration.isParameter()) {
 				// Parameter so use parameter index (note has no scope)
 				taskToWorkMoTranslations[i] = new ManagedObjectIndexImpl(null,
-						TaskJob.PARAMETER_INDEX);
+						TaskJobNode.PARAMETER_INDEX);
 
 				// Specify the parameter type
 				if (parameterType == null) {

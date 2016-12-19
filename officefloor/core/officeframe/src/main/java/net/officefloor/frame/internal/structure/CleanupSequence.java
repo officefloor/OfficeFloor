@@ -33,21 +33,12 @@ public interface CleanupSequence {
 	 * Registers the {@link JobNode} that undertakes clean-up.
 	 * <p>
 	 * {@link JobNode} instances are executed in the order they are registered.
-	 * <p>
 	 * 
 	 * @param cleanupJob
-	 *            Clean up {@link JobNode}. Each {@link JobNode} is to be
-	 *            created within its own {@link ProcessState}. This is necessary
-	 *            as {@link ProcessCompletionListener} are registered to
-	 *            undertake the next clean up {@link JobNode}. Note:
-	 *            {@link JobNode} instances may invoke other {@link JobNode}
-	 *            instances for clean up, so the whole {@link ProcessState} must
-	 *            complete before the next {@link JobNode} may be started
-	 *            (typically because there may be dependencies between
-	 *            {@link JobNode} instances that must be respected in sequential
-	 *            clean up).
+	 *            Clean up {@link JobNode}.
+	 * @return Optional {@link JobNode} to register the clean {@link JobNode}.
 	 */
-	void registerCleanUpJob(JobNode cleanupJob);
+	JobNode registerCleanUpJob(JobNode cleanupJob);
 
 	/**
 	 * Obtains the registered {@link CleanupEscalation} instances.

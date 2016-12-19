@@ -26,7 +26,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
-import net.officefloor.frame.impl.execute.task.TaskJob;
+import net.officefloor.frame.impl.execute.task.TaskJobNode;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
@@ -102,7 +102,7 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	 */
 	static {
 		// Specify dependency on parameter for escalation to handle
-		MANGED_OBJECT_DEPENDENCIES[EscalationKey.EXCEPTION.ordinal()] = TaskJob.PARAMETER_MANAGED_OBJECT_INDEX;
+		MANGED_OBJECT_DEPENDENCIES[EscalationKey.EXCEPTION.ordinal()] = TaskJobNode.PARAMETER_MANAGED_OBJECT_INDEX;
 	}
 
 	/**
@@ -314,7 +314,7 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 					this.getContinueTeam(), requiredGovernance);
 
 			// Create and return the job node
-			return new TaskJob<EscalationHandlerTask, EscalationKey, None>(
+			return new TaskJobNode<EscalationHandlerTask, EscalationKey, None>(
 					flow, workContainer, taskMetaData,
 					governanceDeactivationStrategy, parallelJobNodeOwner,
 					parameter);

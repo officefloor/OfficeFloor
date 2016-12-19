@@ -17,18 +17,16 @@
  */
 package net.officefloor.frame.impl.execute.jobnode;
 
-import net.officefloor.frame.impl.execute.job.UnsafeJobImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCallbackJobNodeFactory;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeLoop;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * {@link JobNode} to spawn a {@link ThreadState}.
@@ -58,6 +56,11 @@ public class SpawnThreadStateJobNode implements JobNode {
 	private final FlowCallbackJobNodeFactory callbackFactory;
 
 	/**
+	 * {@link JobNodeLoop}.
+	 */
+	private final JobNodeLoop jobNodeDelegator;
+
+	/**
 	 * {@link JobNode} to continue once the {@link ThreadState} has been
 	 * spawned.
 	 */
@@ -74,16 +77,19 @@ public class SpawnThreadStateJobNode implements JobNode {
 	 *            Parameter for the initial {@link JobNode} of the {@link Flow}.
 	 * @param callbackFactory
 	 *            Optional {@link FlowCallbackJobNodeFactory}.
+	 * @param jobNodeDelegator
+	 *            {@link JobNodeLoop}.
 	 * @param continueJobNode
 	 *            {@link JobNode} to continue once the {@link ThreadState} has
 	 *            been spawned.
 	 */
 	public SpawnThreadStateJobNode(ProcessState processState, FlowMetaData<?> flowMetaData, Object parameter,
-			FlowCallbackJobNodeFactory callbackFactory, JobNode continueJobNode) {
+			FlowCallbackJobNodeFactory callbackFactory, JobNodeLoop jobNodeDelegator, JobNode continueJobNode) {
 		this.processState = processState;
 		this.flowMetaData = flowMetaData;
 		this.parameter = parameter;
 		this.callbackFactory = callbackFactory;
+		this.jobNodeDelegator = jobNodeDelegator;
 		this.continueJobNode = continueJobNode;
 	}
 
@@ -92,7 +98,17 @@ public class SpawnThreadStateJobNode implements JobNode {
 	 */
 
 	@Override
-	public JobNode doJob(JobContext context) {
+	public ThreadState getThreadState() {
+		return this.processState.getMainThreadState();
+	}
+
+	@Override
+	public boolean isRequireThreadStateSafety() {
+		return true; // must synchronise on thread state to spawn thread state
+	}
+
+	@Override
+	public JobNode doJob() {
 
 		// Obtain the task meta-data for instigating the flow
 		TaskMetaData<?, ?, ?> initTaskMetaData = this.flowMetaData.getInitialTaskMetaData();
@@ -106,22 +122,11 @@ public class SpawnThreadStateJobNode implements JobNode {
 		JobNode jobNode = flow.createManagedJobNode(initTaskMetaData, null, this.parameter,
 				GovernanceDeactivationStrategy.ENFORCE);
 
-		// Trigger the thread to process
-		TeamManagement responsibleTeam = this.getResponsibleTeam();
-		responsibleTeam.getTeam().assignJob(new UnsafeJobImpl(jobNode), responsibleTeam.getIdentifier());
+		// Delegate the new thead to be executed
+		this.jobNodeDelegator.delegateJobNode(jobNode);
 
 		// Continue on with current thread tasks
 		return this.continueJobNode;
-	}
-
-	@Override
-	public TeamManagement getResponsibleTeam() {
-		return this.flowMetaData.getInitialTaskMetaData().getResponsibleTeam();
-	}
-
-	@Override
-	public ThreadState getThreadState() {
-		return this.processState.getMainThreadState();
 	}
 
 }

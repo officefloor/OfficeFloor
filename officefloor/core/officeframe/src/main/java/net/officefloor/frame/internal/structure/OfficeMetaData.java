@@ -64,8 +64,8 @@ public interface OfficeMetaData {
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for this {@link Office}. This is
-	 * used when the {@link EscalationProcedure} instances on the
-	 * {@link Flow} does not handle the escalation.
+	 * used when the {@link EscalationProcedure} instances on the {@link Flow}
+	 * does not handle the escalation.
 	 * 
 	 * @return {@link EscalationProcedure} for this {@link Office}.
 	 */
@@ -95,15 +95,10 @@ public interface OfficeMetaData {
 	 * @param escalationResponsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link Escalation} handling.
-	 * @param escalationContinueTeam
-	 *            {@link Team} to let the worker ({@link Thread}) continue on to
-	 *            execute the {@link EscalationHandler}.
 	 * @return {@link JobNode} to start processing the {@link ProcessState}.
 	 */
-	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
-			Object parameter, EscalationHandler invocationEscalationHandler,
-			TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam);
+	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData, Object parameter,
+			EscalationHandler invocationEscalationHandler, TeamManagement escalationResponsibleTeam);
 
 	/**
 	 * Creates a new {@link ProcessState} triggered by a
@@ -124,9 +119,6 @@ public interface OfficeMetaData {
 	 * @param escalationResponsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link Escalation} handling.
-	 * @param escalationContinueTeam
-	 *            {@link Team} to let the worker ({@link Thread}) continue on to
-	 *            execute the {@link EscalationHandler}.
 	 * @param inputManagedObject
 	 *            {@link ManagedObject} that possibly invoked the new
 	 *            {@link ProcessState}. This may be <code>null</code> and if so
@@ -142,11 +134,9 @@ public interface OfficeMetaData {
 	 *            in is <code>null</code>.
 	 * @return {@link JobNode} to start processing the {@link ProcessState}.
 	 */
-	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
-			Object parameter, EscalationHandler invocationEscalationHandler,
-			TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam, ManagedObject inputManagedObject,
-			ManagedObjectMetaData<?> inputManagedObjectMetaData,
+	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData, Object parameter,
+			EscalationHandler invocationEscalationHandler, TeamManagement escalationResponsibleTeam,
+			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
 			int processBoundIndexForInputManagedObject);
 
 }

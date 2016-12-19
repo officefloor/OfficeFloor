@@ -26,15 +26,7 @@ import net.officefloor.frame.spi.team.source.ProcessContextListener;
  * 
  * @author Daniel Sagenschneider
  */
-public interface Job {
-
-	/**
-	 * Executes the {@link Job}.
-	 * 
-	 * @param executionContext
-	 *            Context for execution.
-	 */
-	void doJob(JobContext executionContext);
+public interface Job extends Runnable {
 
 	/**
 	 * <p>
@@ -55,30 +47,5 @@ public interface Job {
 	 * @see ProcessContextListener
 	 */
 	Object getProcessIdentifier();
-
-	/**
-	 * <p>
-	 * Specifies the next {@link Job}. This provides ability to create a linked
-	 * list of {@link Job} instances.
-	 * <p>
-	 * Note there is no thread-safety guaranteed on this method.
-	 * 
-	 * @param job
-	 *            {@link Job} that is next in the list to this {@link Job}.
-	 * @see #getNextJob()
-	 */
-	void setNextJob(Job job);
-
-	/**
-	 * <p>
-	 * Obtains the next {@link Job}. This provides ability to create a linked
-	 * list of {@link Job} instances.
-	 * <p>
-	 * Note there is no thread-safety guaranteed on this method.
-	 * 
-	 * @return Next {@link Job} after this in the list.
-	 * @see #setNextJob(Job)
-	 */
-	Job getNextJob();
 
 }

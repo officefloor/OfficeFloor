@@ -46,12 +46,9 @@ public interface GovernanceContainer<I, F extends Enum<F>> {
 	/**
 	 * Activates the {@link Governance}.
 	 * 
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue once {@link Governance} is
-	 *            activated.
 	 * @return {@link JobNode} to activate the {@link Governance}.
 	 */
-	JobNode activateGovernance(JobNode continuteJobNode);
+	JobNode activateGovernance();
 
 	/**
 	 * Creates the {@link ActiveGovernance} to enable activation of
@@ -70,21 +67,15 @@ public interface GovernanceContainer<I, F extends Enum<F>> {
 	/**
 	 * Enforces the {@link Governance}.
 	 * 
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue once {@link Governance} is
-	 *            enforced.
 	 * @return {@link JobNode} to enforce the {@link Governance}.
 	 */
-	JobNode enforceGovernance(JobNode continueJobNode);
+	JobNode enforceGovernance();
 
 	/**
 	 * Disregards the {@link Governance}.
 	 * 
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue once {@link Governance} is
-	 *            disregarded.
 	 * @return {@link JobNode} to disregard the {@link Governance}.
 	 */
-	JobNode disregardGovernance(JobNode continueJobNode);
+	JobNode disregardGovernance();
 
 }

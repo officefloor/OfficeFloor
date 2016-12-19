@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
@@ -54,10 +55,8 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData}.
 	 */
-	public ProcessMetaDataImpl(
-			ManagedObjectMetaData<?>[] managedObjectMetaData,
-			AdministratorMetaData<?, ?>[] administratorMetaData,
-			ThreadMetaData threadMetaData) {
+	public ProcessMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
+			AdministratorMetaData<?, ?>[] administratorMetaData, ThreadMetaData threadMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.administratorMetaData = administratorMetaData;
 		this.threadMetaData = threadMetaData;

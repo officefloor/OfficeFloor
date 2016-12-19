@@ -46,14 +46,14 @@ public interface AssetLatch {
 	 * the {@link JobNode} requires completed before proceeding.
 	 * 
 	 * @param jobNode
-	 *            {@link JobNode} to be activated when the {@link Asset} is
+	 *            {@link JobNode} to be released when the {@link Asset} is
 	 *            ready.
 	 * @return Optional {@link JobNode} to execute to wait on the {@link Asset}.
 	 */
-	JobNode waitOnAsset(JobNode jobNode);
+	JobNode awaitOnAsset(JobNode jobNode);
 
 	/**
-	 * Activates the {@link JobNode} instances waiting on the {@link Asset}.
+	 * Releases the {@link JobNode} instances waiting on the {@link Asset}.
 	 * 
 	 * @param isPermanent
 	 *            <code>true</code> indicates that all {@link JobNode} instances
@@ -62,7 +62,7 @@ public interface AssetLatch {
 	 *            this state when the {@link Asset} is no longer being used to
 	 *            stop a {@link JobNode} from waiting forever.
 	 */
-	void proceedWithJobNodes(boolean isPermanent);
+	void releaseJobNodes(boolean isPermanent);
 
 	/**
 	 * Fails the {@link JobNode} instances waiting on this {@link Asset}.

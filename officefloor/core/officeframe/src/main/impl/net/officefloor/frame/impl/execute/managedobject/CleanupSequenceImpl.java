@@ -23,7 +23,10 @@ import java.util.List;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeLoop;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.spi.team.TeamIdentifier;
@@ -33,13 +36,17 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  *
  * @author Daniel Sagenschneider
  */
-public class CleanupSequenceImpl implements CleanupSequence,
-		ProcessCompletionListener {
+public class CleanupSequenceImpl implements CleanupSequence, ProcessCompletionListener {
 
 	/**
-	 * Active {@link JobNode}.
+	 * {@link ProcessState} to be cleaned up.
 	 */
-	private JobNode activeCleanup = null;
+	private final ProcessState processState;
+
+	/**
+	 * {@link JobNodeLoop}.
+	 */
+	private final JobNodeLoop jobNodeLoop;
 
 	/**
 	 * First {@link JobNode} in the sequence.
@@ -57,33 +64,42 @@ public class CleanupSequenceImpl implements CleanupSequence,
 	private List<CleanupEscalation> cleanupEscalations = null;
 
 	/**
-	 * Cached {@link CleanupEscalation} instances to avoid recreating the array.
+	 * Instantiate.
+	 * 
+	 * @param processState
+	 *            {@link ProcessState} to be cleaned up.
+	 * @param jobNodeLoop
+	 *            {@link JobNode}.
 	 */
-	private CleanupEscalation[] cachedCleanupEscalations = null;
+	public CleanupSequenceImpl(ProcessState processState, JobNodeLoop jobNodeLoop) {
+		this.processState = processState;
+		this.jobNodeLoop = jobNodeLoop;
+	}
 
 	/*
 	 * ==================== CleanupSequence ============================
 	 */
 
 	@Override
-	public synchronized void registerCleanUpJob(JobNode cleanupJob,
-			TeamIdentifier teamIdentifier) {
+	public JobNode registerCleanUpJob(JobNode cleanupJob) {
+		return new CleanupOperation() {
+			@Override
+			public JobNode doJob() {
+				// Easy access to sequence
+				CleanupSequenceImpl sequence = CleanupSequenceImpl.this;
 
-		// Attempt the job
-		if (this.attempJob(cleanupJob, teamIdentifier)) {
-			return; // job activated
-		}
-
-		// Queue job for when current jobs complete
-		if (this.head == null) {
-			// No jobs queued, so add to head
-			this.head = cleanupJob;
-			this.tail = cleanupJob;
-		} else {
-			// Queue at end of list
-			this.tail.setNext(cleanupJob);
-			this.tail = cleanupJob;
-		}
+				// Queue job for when current jobs complete
+				if (sequence.head == null) {
+					// No jobs queued, so add to head
+					sequence.head = cleanupJob;
+					sequence.tail = cleanupJob;
+				} else {
+					// Queue at end of list
+					sequence.tail.setNext(cleanupJob);
+					sequence.tail = cleanupJob;
+				}
+			}
+		};
 	}
 
 	@Override
@@ -93,9 +109,7 @@ public class CleanupSequenceImpl implements CleanupSequence,
 		CleanupEscalation[] escalations = this.cachedCleanupEscalations;
 		if (escalations == null) {
 			escalations = (this.cleanupEscalations == null ? new CleanupEscalation[0]
-					: this.cleanupEscalations
-							.toArray(new CleanupEscalation[this.cleanupEscalations
-									.size()]));
+					: this.cleanupEscalations.toArray(new CleanupEscalation[this.cleanupEscalations.size()]));
 
 			// Cache to avoid recreation
 			this.cachedCleanupEscalations = escalations;
@@ -106,8 +120,7 @@ public class CleanupSequenceImpl implements CleanupSequence,
 	}
 
 	@Override
-	public synchronized void registerCleanupEscalation(Class<?> objectType,
-			Throwable escalation) {
+	public synchronized void registerCleanupEscalation(Class<?> objectType, Throwable escalation) {
 
 		// Ensure have cleanup escalation list
 		if (this.cleanupEscalations == null) {
@@ -115,40 +128,10 @@ public class CleanupSequenceImpl implements CleanupSequence,
 		}
 
 		// Add the cleanup escalation
-		this.cleanupEscalations.add(new CleanupEscalationImpl(objectType,
-				escalation));
+		this.cleanupEscalations.add(new CleanupEscalationImpl(objectType, escalation));
 
 		// Clear caching of cleanup escalations
 		this.cachedCleanupEscalations = null;
-	}
-
-	/**
-	 * <p>
-	 * Attempts to activate the {@link JobNode}.
-	 * <p>
-	 * Only one {@link JobNode} may be active at one time.
-	 * 
-	 * @param cleanupJob
-	 *            Clean up {@link JobNode}.
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier}.
-	 * @return <code>true</code> if the {@link JobNode} was activated.
-	 */
-	private boolean attempJob(JobNode cleanupJob, TeamIdentifier teamIdentifier) {
-
-		// Determine if current activate clean up job
-		if (this.activeCleanup != null) {
-			return false; // Job already active
-		}
-
-		// No job active, so activate the job
-		this.activeCleanup = cleanupJob;
-		cleanupJob.getJobSequence().getThreadState().getProcessState()
-				.registerProcessCompletionListener(this);
-		cleanupJob.activateJob(teamIdentifier);
-
-		// Job activated
-		return true;
 	}
 
 	/*
@@ -156,7 +139,7 @@ public class CleanupSequenceImpl implements CleanupSequence,
 	 */
 
 	@Override
-	public synchronized void processComplete(TeamIdentifier currentTeam) {
+	public void processComplete() {
 
 		// No further active job
 		this.activeCleanup = null;
@@ -173,6 +156,17 @@ public class CleanupSequenceImpl implements CleanupSequence,
 
 		// Activate the job
 		this.attempJob(cleanupJob, currentTeam);
+	}
+
+	/**
+	 * Clean up operation.
+	 */
+	private abstract class CleanupOperation implements JobNode {
+
+		@Override
+		public ThreadState getThreadState() {
+			return CleanupSequenceImpl.this.processState.getMainThreadState();
+		}
 	}
 
 	/**
@@ -196,8 +190,7 @@ public class CleanupSequenceImpl implements CleanupSequence,
 		 * @param objectType
 		 *            Object type of the {@link ManagedObject}.
 		 * @param escalation
-		 *            {@link Escalation} on cleanup of the {@link ManagedObject}
-		 *            .
+		 *            {@link Escalation} cleanup of the {@link ManagedObject}.
 		 */
 		public CleanupEscalationImpl(Class<?> objectType, Throwable escalation) {
 			this.objectType = objectType;

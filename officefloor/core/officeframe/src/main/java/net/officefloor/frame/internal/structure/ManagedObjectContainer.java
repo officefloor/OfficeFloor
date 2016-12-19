@@ -19,7 +19,6 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Container managing a {@link ManagedObject}.
@@ -29,23 +28,42 @@ import net.officefloor.frame.spi.team.JobContext;
 public interface ManagedObjectContainer {
 
 	/**
+	 * Obtains the {@link ThreadState} responsible for changes to this
+	 * {@link ManagedObjectContainer}.
+	 * 
+	 * @return {@link ThreadState} responsible for changes to this
+	 *         {@link ManagedObjectContainer}.
+	 */
+	ThreadState getResponsibleThreadState();
+
+	/**
+	 * Obtains an optional {@link TeamManagement} responsible for changes to
+	 * this {@link ManagedObjectContainer}.
+	 * 
+	 * @return Optional {@link TeamManagement} responsible for changes to this
+	 *         {@link ManagedObjectContainer}. May be <code>null</code>.
+	 */
+	TeamManagement getResponsibleTeam();
+
+	/**
 	 * Loads the {@link ManagedObject}.
 	 * 
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue once {@link ManagedObject} is
-	 *            loaded.s
+	 * @param managedJobNode
+	 *            {@link ManagedJobNode} requiring the {@link ManagedObject}.
 	 * @return Optional {@link JobNode} to load the {@link ManagedObject}.
+	 *         Should this return </code>null</code>, the {@link ManagedJobNode}
+	 *         should not then be executed, as it is expecting to wait. This
+	 *         will return the {@link ManagedJobNode} when the
+	 *         {@link ManagedObject} is loaded.
 	 */
-	JobNode loadManagedObject(JobContext jobContext, JobNode continueJobNode);
+	JobNode loadManagedObject(ManagedJobNode managedJobNode, WorkContainer<?> workContainer);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
 	 * 
 	 * @return Object being managed by the {@link ManagedObject}.
 	 */
-	Object getObject(ThreadState threadState);
+	Object getObject();
 
 	/**
 	 * Extracts the extension interface from the {@link ManagedObject} within
@@ -65,22 +83,16 @@ public interface ManagedObjectContainer {
 	 * 
 	 * @param governance
 	 *            {@link ActiveGovernance}.
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue after unregistering
-	 *            {@link Governance}.
 	 * @return Optional {@link JobNode} to unregister the {@link ManagedObject}
 	 *         from {@link Governance}.
 	 */
-	JobNode unregisterManagedObjectFromGovernance(ActiveGovernance<?, ?> governance, JobNode continueJobNode);
+	JobNode unregisterManagedObjectFromGovernance(ActiveGovernance<?, ?> governance);
 
 	/**
 	 * Unloads the {@link ManagedObject}.
 	 * 
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue after unloading the
-	 *            {@link ManagedObject}.
 	 * @return Optional {@link JobNode} to unload the {@link ManagedObject}.
 	 */
-	JobNode unloadManagedObject(JobNode continueJobNode);
+	JobNode unloadManagedObject();
 
 }

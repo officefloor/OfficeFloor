@@ -32,7 +32,7 @@ import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.impl.execute.task.TaskJob;
+import net.officefloor.frame.impl.execute.task.TaskJobNode;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -382,7 +382,7 @@ public class ExecutionNode<W extends Work> implements
 			WorkContainer<W> workContainer, JobNode parallelJobNodeOwner,
 			Object parameter,
 			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
-		return new TaskJob<W, Indexed, Indexed>(flow, workContainer, this,
+		return new TaskJobNode<W, Indexed, Indexed>(flow, workContainer, this,
 				governanceDeactivationStrategy, parallelJobNodeOwner, parameter);
 	}
 

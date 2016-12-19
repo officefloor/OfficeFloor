@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
@@ -54,15 +53,13 @@ public class WorkerPerTaskTeamSource extends AbstractTeamSource {
 
 		// Obtain the team name and identifier
 		String teamName = context.getTeamName();
-		TeamIdentifier teamIdentifier = context.getTeamIdentifier();
 
 		// Obtain the thread priority
-		int priority = Integer.valueOf(context.getProperty(
-				PROPERTY_THREAD_PRIORITY,
-				String.valueOf(DEFAULT_THREAD_PRIORITY)));
+		int priority = Integer
+				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(DEFAULT_THREAD_PRIORITY)));
 
 		// Create and return the team
-		return new WorkerPerTaskTeam(teamName, teamIdentifier, priority);
+		return new WorkerPerTaskTeam(teamName, priority);
 	}
 
 }

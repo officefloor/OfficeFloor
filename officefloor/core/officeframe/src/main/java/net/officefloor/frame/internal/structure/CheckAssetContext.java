@@ -31,15 +31,16 @@ public interface CheckAssetContext {
 	 * As many {@link Asset} instances may be checked at the same time (or
 	 * nanoseconds from each other) this provides optimisation to obtain the
 	 * current time in milliseconds (equivalent to
-	 * {@link System#currentTimeMillis()}).
+	 * {@link System#currentTimeMillis()} for purpose of checking {@link Asset}
+	 * timeouts).
 	 * 
-	 * @return Time of check.
+	 * @return {@link System#currentTimeMillis()} equivalent for checking
+	 *         {@link Asset} timeouts.
 	 */
-	@Deprecated
 	long getTime();
 
 	/**
-	 * Activates the {@link JobNode} instances waiting on the {@link Asset}.
+	 * Releases the {@link JobNode} instances waiting on the {@link Asset}.
 	 * 
 	 * @param isPermanent
 	 *            <code>true</code> indicates that all {@link JobNode} instances
@@ -48,7 +49,7 @@ public interface CheckAssetContext {
 	 *            this state when the {@link Asset} is no longer being used to
 	 *            stop a {@link JobNode} from waiting forever.
 	 */
-	void proceedWithJobNodes(boolean isPermanent);
+	void releaseJobNodes(boolean isPermanent);
 
 	/**
 	 * Fails the {@link JobNode} instances waiting on this {@link Asset}.

@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.task;
 
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -49,7 +50,7 @@ import net.officefloor.frame.spi.team.JobContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
+public class TaskJobNode<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		extends AbstractManagedJobNodeContainer<W, TaskMetaData<W, D, F>> {
 
 	/**
@@ -99,7 +100,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 * @param parameter
 	 *            Parameter for the {@link Task}.
 	 */
-	public TaskJob(Flow flow, WorkContainer<W> workContainer, TaskMetaData<W, D, F> taskMetaData,
+	public TaskJobNode(Flow flow, WorkContainer<W> workContainer, TaskMetaData<W, D, F> taskMetaData,
 			GovernanceDeactivationStrategy governanceDeactivationStrategy, JobNode parallelOwner, Object parameter) {
 		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData.getRequiredManagedObjects(),
 				taskMetaData.getRequiredGovernance(), governanceDeactivationStrategy);
@@ -125,9 +126,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	}
 
 	@Override
-	protected Object executeJob(ManagedJobNodeContext context, JobContext jobContext, JobNodeActivateSet activateSet)
-			throws Throwable {
-		// Execute the task
+	protected Object executeJobNode(ManagedJobNodeContext context) throws Throwable {
 		return this.task.doTask(this.taskContextToken);
 	}
 
@@ -147,7 +146,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 
 		@Override
 		public W getWork() {
-			return TaskJob.this.workContainer.getWork(TaskJob.this.flow.getThreadState());
+			return TaskJobNode.this.workContainer.getWork(TaskJobNode.this.flow.getThreadState());
 		}
 
 		@Override
@@ -159,43 +158,44 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		public Object getObject(int managedObjectIndex) {
 
 			// Obtain the work managed object index
-			ManagedObjectIndex index = TaskJob.this.nodeMetaData.translateManagedObjectIndexForWork(managedObjectIndex);
+			ManagedObjectIndex index = TaskJobNode.this.nodeMetaData
+					.translateManagedObjectIndexForWork(managedObjectIndex);
 
 			// Determine if a parameter
 			if (index.getIndexOfManagedObjectWithinScope() == PARAMETER_INDEX) {
-				return TaskJob.this.parameter; // parameter, so return the
+				return TaskJobNode.this.parameter; // parameter, so return the
 				// parameter
 			}
 
 			// Return the Object
-			return TaskJob.this.workContainer.getObject(index, TaskJob.this.flow.getThreadState());
+			return TaskJobNode.this.workContainer.getObject(index, TaskJobNode.this.flow.getThreadState());
 		}
 
 		@Override
-		public FlowFuture doFlow(F key, Object parameter) {
-			return this.doFlow(key.ordinal(), parameter);
+		public void doFlow(F key, Object parameter, FlowCallback callback) {
+			this.doFlow(key.ordinal(), parameter, callback);
 		}
 
 		@Override
-		public FlowFuture doFlow(int flowIndex, Object parameter) {
+		public void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
 			// Obtain the Flow meta-data and do the flow
-			FlowMetaData<?> flowMetaData = TaskJob.this.nodeMetaData.getFlow(flowIndex);
-			return TaskJob.this.doFlow(flowMetaData, parameter);
+			FlowMetaData<?> flowMetaData = TaskJobNode.this.nodeMetaData.getFlow(flowIndex);
+			TaskJobNode.this.doFlow(flowMetaData, parameter, callback);
 		}
 
 		@Override
 		@SuppressWarnings("rawtypes")
-		public void doFlow(String workName, String taskName, Object parameter)
+		public void doFlow(String workName, String taskName, Object parameter, FlowCallback callback)
 				throws UnknownWorkException, UnknownTaskException, InvalidParameterTypeException {
 
 			// Obtain the Process State
-			ProcessState processState = TaskJob.this.flow.getThreadState().getProcessState();
+			ProcessState processState = TaskJobNode.this.flow.getThreadState().getProcessState();
 
 			// Obtain the Task meta-data
 			final TaskMetaData<?, ?, ?> taskMetaData = processState.getTaskMetaData(workName, taskName);
 
 			// Invoke the Flow
-			TaskJob.this.doFlow(new FlowMetaData() {
+			TaskJobNode.this.doFlow(new FlowMetaData() {
 				@Override
 				public TaskMetaData<?, ?, ?> getInitialTaskMetaData() {
 					return taskMetaData;
@@ -212,17 +212,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 					// Asset Manager not required
 					return null;
 				}
-			}, parameter);
-		}
-
-		@Override
-		public void join(FlowFuture flowFuture, long timeout, Object token) {
-			TaskJob.this.joinFlow(flowFuture, timeout, token);
-		}
-
-		@Override
-		public void setComplete(boolean isComplete) {
-			TaskJob.this.setJobComplete(isComplete);
+			}, parameter, callback);
 		}
 	}
 

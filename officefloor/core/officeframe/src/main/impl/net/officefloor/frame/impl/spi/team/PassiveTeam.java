@@ -17,10 +17,8 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * <p>
@@ -34,11 +32,6 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  */
 public class PassiveTeam implements Team {
 
-	/**
-	 * Indicates if should continue working.
-	 */
-	private volatile boolean continueWorking = true;
-
 	/*
 	 * ==================== Team =====================================
 	 */
@@ -49,71 +42,12 @@ public class PassiveTeam implements Team {
 	}
 
 	@Override
-	public void assignJob(Job task, TeamIdentifier assignerTeam) {
-		task.doJob(new PassiveJobContext(assignerTeam));
+	public void assignJob(Job job) {
+		job.run();
 	}
 
 	@Override
 	public void stopWorking() {
-		// Flag to stop working
-		this.continueWorking = false;
-	}
-
-	/**
-	 * Passive {@link JobContext}.
-	 */
-	protected class PassiveJobContext implements JobContext {
-
-		/**
-		 * Value indicating the time is not specified.
-		 */
-		private static final long TIME_NOT_SET = -1;
-
-		/**
-		 * {@link TeamIdentifier}.
-		 */
-		private final TeamIdentifier teamIdentifier;
-
-		/**
-		 * Current time for execution.
-		 */
-		private long time = TIME_NOT_SET;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param teamIdentifier
-		 *            {@link TeamIdentifier}.
-		 */
-		public PassiveJobContext(TeamIdentifier teamIdentifier) {
-			this.teamIdentifier = teamIdentifier;
-		}
-
-		/*
-		 * ================= JobContext ====================
-		 */
-
-		@Override
-		public long getTime() {
-
-			// Ensure the time is specified
-			if (this.time == TIME_NOT_SET) {
-				this.time = System.currentTimeMillis();
-			}
-
-			// Return the time
-			return this.time;
-		}
-
-		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return this.teamIdentifier;
-		}
-
-		@Override
-		public boolean continueExecution() {
-			return PassiveTeam.this.continueWorking;
-		}
 	}
 
 }

@@ -62,8 +62,8 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 	 *            {@link ManagedObject}. This is used to access the
 	 *            {@link ProcessState} bound {@link ManagedObject} instances.
 	 */
-	public ObjectRegistryImpl(WorkContainer<?> workContainer,
-			ManagedObjectIndex[] dependencies, ThreadState threadState) {
+	public ObjectRegistryImpl(WorkContainer<?> workContainer, ManagedObjectIndex[] dependencies,
+			ThreadState threadState) {
 		this.workContainer = workContainer;
 		this.dependencies = dependencies;
 		this.threadState = threadState;
@@ -85,8 +85,7 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 		ManagedObjectIndex moIndex = this.dependencies[index];
 
 		// Obtain the dependency
-		Object dependency = this.workContainer.getObject(moIndex,
-				this.threadState);
+		Object dependency = this.workContainer.getObject(moIndex);
 
 		// Return the dependency
 		return dependency;

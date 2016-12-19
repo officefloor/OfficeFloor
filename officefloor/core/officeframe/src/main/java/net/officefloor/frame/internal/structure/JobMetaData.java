@@ -48,19 +48,17 @@ public interface JobMetaData {
 	 * {@link Job}.
 	 * 
 	 * @return {@link TeamManagement} responsible for completion of the
-	 *         {@link Job}.
+	 *         {@link Job}. May be <code>null</code> to enable any {@link Team}
+	 *         to execute the {@link JobNode}.
 	 */
 	TeamManagement getResponsibleTeam();
 
 	/**
-	 * Obtains the {@link Team} to enable the worker ({@link Thread}) of the
-	 * responsible {@link Team} to continue on to execute the next {@link Job}.
+	 * Obtains the {@link JobNodeLoop}.
 	 * 
-	 * @return {@link Team} to continue execution to complete the next
-	 *         {@link Job}.
+	 * @return {@link JobNodeLoop}.
 	 */
-	@Deprecated // handled by job loop
-	Team getContinueTeam();
+	JobNodeLoop getJobNodeDelegator();
 
 	/**
 	 * Obtains the {@link TaskMetaData} of the next {@link Task} within

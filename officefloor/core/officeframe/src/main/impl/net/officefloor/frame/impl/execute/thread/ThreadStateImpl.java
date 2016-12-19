@@ -23,6 +23,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.Flow;
@@ -49,9 +50,51 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, ProcessState> implements ThreadState {
 
 	/**
-	 * Active {@link ThreadState} for the executing {@link Thread}.
+	 * {@link ActiveThreadState} for the executing {@link Thread}.
 	 */
-	private static final ThreadLocal<ThreadStateImpl> activeThreadState = new ThreadLocal<>();
+	private static final ThreadLocal<ActiveThreadState> activeThreadState = new ThreadLocal<>();
+
+	/**
+	 * Active {@link ThreadState}.
+	 */
+	public static class ActiveThreadState {
+
+		/**
+		 * {@link ThreadState}.
+		 */
+		public final ThreadState threadState;
+
+		/**
+		 * Flag indicating if the {@link ThreadState} is safe on the current
+		 * {@link Thread}.
+		 */
+		public final boolean isThreadStateSafe;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param threadState
+		 *            Active {@link ThreadState}.
+		 * @param isThreadStateSafe
+		 *            Flag indicating if the {@link ThreadState} is safe on the
+		 *            current {@link Thread}.
+		 */
+		public ActiveThreadState(ThreadState threadState, boolean isThreadStateSafe) {
+			this.threadState = threadState;
+			this.isThreadStateSafe = isThreadStateSafe;
+		}
+	}
+
+	/**
+	 * Obtains the active {@link ThreadState} on the current {@link Thread}.
+	 * 
+	 * @return Active {@link ThreadState} on the current {@link Thread}. May be
+	 *         <code>null</code> if no active {@link ThreadState} on
+	 *         {@link Thread}.
+	 */
+	public static ActiveThreadState getActiveThreadState() {
+		return activeThreadState.get();
+	}
 
 	/**
 	 * Active {@link Flow} instances for this {@link ThreadState}.
@@ -89,14 +132,19 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private final ProcessState processState;
 
 	/**
-	 * {@link ThreadProfiler}.
+	 * {@link AssetManager} for this {@link ThreadState}.
 	 */
-	private final ThreadProfiler profiler;
+	private final AssetManager assetManager;
 
 	/**
 	 * {@link FlowCallbackJobNodeFactory}.
 	 */
 	private final FlowCallbackJobNodeFactory callbackFactory;
+
+	/**
+	 * {@link ThreadProfiler}.
+	 */
+	private final ThreadProfiler profiler;
 
 	/**
 	 * Flag indicating that looking for {@link EscalationFlow}.
@@ -118,19 +166,22 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * 
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData} for this {@link ThreadState}.
+	 * @param assetManager
+	 *            {@link AssetManager} for this {@link ThreadState}.
+	 * @param callbackFactory
+	 *            {@link FlowCallbackJobNodeFactory} to create the
+	 *            {@link FlowCallback} on completion of this
+	 *            {@link ThreadState}. May be <code>null</code>.
 	 * @param processState
 	 *            {@link ProcessState} for this {@link ThreadState}.
 	 * @param processProfiler
 	 *            {@link ProcessProfiler}. May be <code>null</code>.
-	 * @param callbackFactory
-	 *            {@link FlowCallbackJobNodeFactory} to create the
-	 *            {@link FlowCallback} on completion of this
-	 *            {@link ThreadState}. May be <code>null<code>.
 	 */
-	public ThreadStateImpl(ThreadMetaData threadMetaData, ProcessState processState, ProcessProfiler processProfiler,
-			FlowCallbackJobNodeFactory callbackFactory) {
+	public ThreadStateImpl(ThreadMetaData threadMetaData, AssetManager assetManager,
+			FlowCallbackJobNodeFactory callbackFactory, ProcessState processState, ProcessProfiler processProfiler) {
 		this.threadMetaData = threadMetaData;
 		this.processState = processState;
+		this.assetManager = assetManager;
 		this.callbackFactory = callbackFactory;
 
 		// Create array to reference the managed objects
@@ -163,19 +214,25 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 */
 
 	@Override
-	public void attachThreadStateToThread() {
-		activeThreadState.set(this);
+	public void attachThreadStateToThread(boolean isThreadStateSafe) {
+		activeThreadState.set(new ActiveThreadState(this, isThreadStateSafe));
+	}
+
+	@Override
+	public boolean isAttachedToThread() {
+		ActiveThreadState active = activeThreadState.get();
+		return (active != null) && (active.threadState == this);
+	}
+
+	@Override
+	public boolean isThreadStateSafe() {
+		ActiveThreadState active = activeThreadState.get();
+		return (active != null) ? active.isThreadStateSafe : false;
 	}
 
 	@Override
 	public void detachThreadStateFromThread() {
 		activeThreadState.set(null);
-	}
-
-	@Override
-	public boolean isAttachedToThread() {
-		ThreadState active = activeThreadState.get();
-		return (this == active);
 	}
 
 	@Override
@@ -205,7 +262,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public JobNode flowComplete(Flow flow, JobNode continueJobNode) {
+	public JobNode flowComplete(Flow flow) {
 
 		// Remove Job Sequence from active Job Sequence listing
 		if (this.activeFlows.removeEntry(flow)) {
@@ -224,7 +281,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				for (int i = 0; i < this.governanceContainers.length; i++) {
 					GovernanceContainer<?, ?> container = this.governanceContainers[i];
 					if (container != null) {
-						JobNode enforceJobNode = container.enforceGovernance(continueJobNode);
+						JobNode enforceJobNode = container.enforceGovernance();
 						if (enforceJobNode != null) {
 							return enforceJobNode;
 						}
@@ -237,7 +294,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				for (int i = 0; i < this.governanceContainers.length; i++) {
 					GovernanceContainer<?, ?> container = this.governanceContainers[i];
 					if (container != null) {
-						JobNode disregardJobNode = container.disregardGovernance(continueJobNode);
+						JobNode disregardJobNode = container.disregardGovernance();
 						if (disregardJobNode != null) {
 							return disregardJobNode;
 						}
@@ -267,7 +324,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			}
 
 			// Thread complete
-			return this.processState.threadComplete(this, continueJobNode);
+			return this.processState.threadComplete(this);
 		}
 
 		// Thread complete
@@ -282,12 +339,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
 		// Lazy load the Managed Object Container
-		// (This should be thread safe as should always be called within the
-		// Process lock of the Thread before the Job uses it).
 		ManagedObjectContainer container = this.managedObjectContainers[index];
 		if (container == null) {
-			container = this.threadMetaData.getManagedObjectMetaData()[index]
-					.createManagedObjectContainer(this.processState);
+			container = this.threadMetaData.getManagedObjectMetaData()[index].createManagedObjectContainer(this);
 			this.managedObjectContainers[index] = container;
 		}
 		return container;
@@ -296,8 +350,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	@Override
 	public boolean isGovernanceActive(int index) {
 		// Determine if container is active (not created is not active).
-		// (This should be thread safe as should always be called within the
-		// Thread lock of the Thread before the Job uses it).
 		GovernanceContainer<?, ?> container = this.governanceContainers[index];
 		return (container != null) && (container.isActive());
 	}
@@ -305,8 +357,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	@Override
 	public GovernanceContainer<?, ?> getGovernanceContainer(int index) {
 		// Lazy load the Governance Container
-		// (This should be thread safe as should always be called within the
-		// Thread lock of the Thread before the Job uses it).
 		GovernanceContainer<?, ?> container = this.governanceContainers[index];
 		if (container == null) {
 			container = this.threadMetaData.getGovernanceMetaData()[index].createGovernanceContainer(this, index);
@@ -325,8 +375,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	@Override
 	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
 		// Lazy load the Administrator Container
-		// (This should be thread safe as should always called within the
-		// Process lock by the WorkContainer)
 		AdministratorContainer<?, ?> container = this.administratorContainers[index];
 		if (container == null) {
 			container = this.threadMetaData.getAdministratorMetaData()[index].createAdministratorContainer();

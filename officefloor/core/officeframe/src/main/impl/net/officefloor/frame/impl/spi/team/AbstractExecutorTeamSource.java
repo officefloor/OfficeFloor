@@ -23,7 +23,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -54,9 +53,8 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	 * @throws Exception
 	 *             If fails to create the {@link ExecutorServiceFactory}.
 	 */
-	protected abstract ExecutorServiceFactory createExecutorServiceFactory(
-			TeamSourceContext context, ThreadFactory threadFactory)
-			throws Exception;
+	protected abstract ExecutorServiceFactory createExecutorServiceFactory(TeamSourceContext context,
+			ThreadFactory threadFactory) throws Exception;
 
 	/**
 	 * Factory to create the {@link ExecutorService}.
@@ -81,12 +79,9 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	 *            {@link TeamIdentifier}.
 	 * @return {@link Team}.
 	 */
-	protected static Team createTeam(
-			ExecutorServiceFactory executorServiceFactory,
-			TeamIdentifier teamIdentifier) {
-
+	protected static Team createTeam(ExecutorServiceFactory executorServiceFactory, TeamIdentifier teamIdentifier) {
 		// Create and return the executor team
-		return new ExecutorTeam(executorServiceFactory, teamIdentifier);
+		return new ExecutorTeam(executorServiceFactory);
 	}
 
 	/*
@@ -103,15 +98,12 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 
 		// Obtain the details of the team
 		String teamName = context.getTeamName();
-		TeamIdentifier teamIdentifier = context.getTeamIdentifier();
 		final int threadPriority = Integer
-				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY,
-						String.valueOf(Thread.NORM_PRIORITY)));
+				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(Thread.NORM_PRIORITY)));
 
 		// Create and return the executor team
-		return new ExecutorTeam(this.createExecutorServiceFactory(context,
-				new TeamThreadFactory(teamName, threadPriority)),
-				teamIdentifier);
+		return new ExecutorTeam(
+				this.createExecutorServiceFactory(context, new TeamThreadFactory(teamName, threadPriority)));
 	}
 
 	/**
@@ -149,8 +141,7 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		 */
 		protected TeamThreadFactory(String teamName, int threadPriority) {
 			SecurityManager s = System.getSecurityManager();
-			this.group = (s != null) ? s.getThreadGroup() : Thread
-					.currentThread().getThreadGroup();
+			this.group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
 			this.threadNamePrefix = teamName + "-";
 			this.threadPriority = threadPriority;
 		}
@@ -163,8 +154,8 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		public Thread newThread(Runnable r) {
 
 			// Create and configure the thread
-			Thread thread = new Thread(this.group, r, this.threadNamePrefix
-					+ this.nextThreadIndex.getAndIncrement(), 0);
+			Thread thread = new Thread(this.group, r, this.threadNamePrefix + this.nextThreadIndex.getAndIncrement(),
+					0);
 			if (thread.isDaemon()) {
 				thread.setDaemon(false);
 			}
@@ -188,32 +179,18 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		private final ExecutorServiceFactory factory;
 
 		/**
-		 * {@link TeamIdentifier} of this {@link Team}.
-		 */
-		private final TeamIdentifier teamIdentifier;
-
-		/**
 		 * {@link ExecutorService}.
 		 */
 		private ExecutorService servicer;
-
-		/**
-		 * Indicates if to continue working.
-		 */
-		private volatile boolean isContinueWorking = true;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param factory
 		 *            {@link ExecutorServiceFactory}.
-		 * @param teamIdentifier
-		 *            Identifier of the {@link Team}.
 		 */
-		public ExecutorTeam(ExecutorServiceFactory factory,
-				TeamIdentifier teamIdentifier) {
+		public ExecutorTeam(ExecutorServiceFactory factory) {
 			this.factory = factory;
-			this.teamIdentifier = teamIdentifier;
 		}
 
 		/*
@@ -226,86 +203,15 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		}
 
 		@Override
-		public void assignJob(Job job, TeamIdentifier assignerTeam) {
-			this.servicer.execute(new JobRunnable(job, this));
+		public void assignJob(Job job) {
+			this.servicer.execute(job);
 		}
 
 		@Override
 		public synchronized void stopWorking() {
-
-			// Flag to stop working
-			this.isContinueWorking = false;
-
 			// Shutdown servicer
 			this.servicer.shutdown();
 			this.servicer = null;
-		}
-	}
-
-	/**
-	 * {@link Runnable} {@link JobContext}.
-	 */
-	private static class JobRunnable implements Runnable, JobContext {
-
-		/**
-		 * {@link Job} to execute.
-		 */
-		private final Job job;
-
-		/**
-		 * {@link ExecutorTeam} responsible for the {@link Job} completion.
-		 */
-		private final ExecutorTeam team;
-
-		/**
-		 * Time optimisation.
-		 */
-		private long time = -1;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param job
-		 *            {@link Job} to execute.
-		 * @param team
-		 *            {@link ExecutorTeam} responsible for the {@link Job}
-		 *            completion.
-		 */
-		public JobRunnable(Job job, ExecutorTeam team) {
-			this.job = job;
-			this.team = team;
-		}
-
-		/*
-		 * ================= Runnable ======================
-		 */
-
-		@Override
-		public void run() {
-			this.job.doJob(this);
-		}
-
-		/*
-		 * ================= JobContext ===================
-		 */
-
-		@Override
-		public long getTime() {
-			if (time < 0) {
-				time = System.currentTimeMillis();
-			}
-			return time;
-		}
-
-		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return this.team.teamIdentifier;
-		}
-
-		@Override
-		public boolean continueExecution() {
-			// Always continue execution
-			return true;
 		}
 	}
 

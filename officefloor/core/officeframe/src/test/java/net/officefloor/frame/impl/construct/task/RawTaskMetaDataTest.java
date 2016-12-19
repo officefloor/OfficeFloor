@@ -31,7 +31,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.impl.execute.task.TaskJob;
+import net.officefloor.frame.impl.execute.task.TaskJobNode;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
@@ -404,7 +404,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		ManagedObjectIndex parameterIndex = metaData
 				.translateManagedObjectIndexForWork(0);
 		assertEquals("Incorrect translation to parameter",
-				TaskJob.PARAMETER_INDEX,
+				TaskJobNode.PARAMETER_INDEX,
 				parameterIndex.getIndexOfManagedObjectWithinScope());
 		assertNull("Should not have scope for parameter index",
 				parameterIndex.getManagedObjectScope());
@@ -455,11 +455,11 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Ensure can translate to parameters
 		assertEquals("Incorrect translation to parameter one",
-				TaskJob.PARAMETER_INDEX, metaData
+				TaskJobNode.PARAMETER_INDEX, metaData
 						.translateManagedObjectIndexForWork(0)
 						.getIndexOfManagedObjectWithinScope());
 		assertEquals("Incorrect translation to parameter two",
-				TaskJob.PARAMETER_INDEX, metaData
+				TaskJobNode.PARAMETER_INDEX, metaData
 						.translateManagedObjectIndexForWork(1)
 						.getIndexOfManagedObjectWithinScope());
 	}

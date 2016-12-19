@@ -19,9 +19,7 @@ package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
@@ -34,7 +32,6 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCallbackJobNodeFactory;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -79,7 +76,7 @@ public class ProcessStateImpl implements ProcessState {
 	/**
 	 * {@link CleanupSequence}.
 	 */
-	private final CleanupSequence cleanupSequence = new CleanupSequenceImpl();
+	private final CleanupSequence cleanupSequence;
 
 	/**
 	 * {@link ProcessMetaData}.
@@ -218,31 +215,41 @@ public class ProcessStateImpl implements ProcessState {
 		this.officeMetaData = officeMetaData;
 		this.officeFloorEscalation = officeFloorEscalation;
 		this.processProfiler = processProfiler;
-		this.processContextListeners = processContextListeners;
+		this.completionListeners = completionListeners;
 
 		// Create the main thread state
 		AssetManager mainThreadAssetManager = this.processMetaData.getMainThreadAssetManager();
-		this.mainThreadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), this,
-				mainThreadAssetManager, this.processProfiler, null);
+		this.mainThreadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), mainThreadAssetManager,
+				null, this, this.processProfiler);
 
-		// Create array to reference the managed objects
+		// Create all managed object containers (final for thread safety)
 		ManagedObjectMetaData<?>[] managedObjectMetaData = this.processMetaData.getManagedObjectMetaData();
-		this.managedObjectContainers = new ManagedObjectContainer[managedObjectMetaData.length];
-
-		// Load the Container for the Input Managed Object if provided
-		if (inputManagedObject != null) {
-			this.managedObjectContainers[inputManagedObjectIndex] = new ManagedObjectContainerImpl(inputManagedObject,
-					inputManagedObjectMetaData, this);
+		ManagedObjectContainer[] managedObjectContainers = new ManagedObjectContainer[managedObjectMetaData.length];
+		for (int i = 0; i < managedObjectContainers.length; i++) {
+			managedObjectContainers[i] = managedObjectMetaData[i].createManagedObjectContainer(this.mainThreadState);
 		}
+		if (inputManagedObject != null) {
+			// Overwrite the Container for the Input Managed Object
+			managedObjectContainers[inputManagedObjectIndex] = new ManagedObjectContainerImpl(inputManagedObject,
+					inputManagedObjectMetaData, this.mainThreadState);
+		}
+		this.managedObjectContainers = managedObjectContainers;
 
-		// Create array to reference the administrators
+		// Create all admin containers (final for thread safety)
 		AdministratorMetaData<?, ?>[] administratorMetaData = this.processMetaData.getAdministratorMetaData();
-		this.administratorContainers = new AdministratorContainer[administratorMetaData.length];
+		AdministratorContainer[] administratorContainers = new AdministratorContainer[administratorMetaData.length];
+		for (int i = 0; i < administratorContainers.length; i++) {
+			administratorContainers[i] = administratorMetaData[i].createAdministratorContainer();
+		}
+		this.administratorContainers = administratorContainers;
 
 		// Escalation handled by invocation of this process
 		this.invocationEscalation = (invocationEscalationHandler == null ? null
 				: new EscalationHandlerEscalation(invocationEscalationHandler, escalationResponsibleTeam,
 						escalationContinueTeam, escalationHandlerRequiredGovernance));
+
+		// Create the clean up sequence
+		this.cleanupSequence = new CleanupSequenceImpl(this);
 	}
 
 	/*
@@ -295,17 +302,17 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public Flow createThread(AssetManager assetManager, FlowCallbackJobNodeFactory callbackFactory) {
+	public ThreadState createThread(AssetManager assetManager, FlowCallbackJobNodeFactory callbackFactory) {
 
 		// Create the thread
-		ThreadState threadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), this, assetManager,
-				this.processProfiler, null);
+		ThreadState threadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), assetManager,
+				callbackFactory, this, this.processProfiler);
 
 		// Register as active thread
 		this.activeThreads.addEntry(threadState);
 
-		// Return the Flow for the new thread
-		return threadState.createJobSequence();
+		// Return the new thread state
+		return threadState;
 	}
 
 	@Override
@@ -313,6 +320,8 @@ public class ProcessStateImpl implements ProcessState {
 
 		// Remove thread from active thread listing
 		if (this.activeThreads.removeEntry(thread)) {
+
+			// TODO run clean ups
 
 			// Notify process complete
 			for (ProcessCompletionListener listener : this.completionListeners) {
@@ -323,7 +332,7 @@ public class ProcessStateImpl implements ProcessState {
 			for (int i = 0; i < this.managedObjectContainers.length; i++) {
 				ManagedObjectContainer container = this.managedObjectContainers[i];
 				if (container != null) {
-					JobNode unloadJobNode = container.unloadManagedObject(null);
+					JobNode unloadJobNode = container.unloadManagedObject();
 					if (unloadJobNode == null) {
 						return unloadJobNode;
 					}
@@ -347,28 +356,12 @@ public class ProcessStateImpl implements ProcessState {
 
 	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
-		// Lazy load the Managed Object Container
-		// (This should be thread safe as should always be called within the
-		// Process lock of the Thread before the Job uses it).
-		ManagedObjectContainer container = this.managedObjectContainers[index];
-		if (container == null) {
-			container = this.processMetaData.getManagedObjectMetaData()[index].createManagedObjectContainer(this);
-			this.managedObjectContainers[index] = container;
-		}
-		return container;
+		return this.managedObjectContainers[index];
 	}
 
 	@Override
 	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
-		// Lazy load the Administrator Container
-		// (This should be thread safe as should always called within the
-		// Process lock by the WorkContainer)
-		AdministratorContainer<?, ?> container = this.administratorContainers[index];
-		if (container == null) {
-			container = this.processMetaData.getAdministratorMetaData()[index].createAdministratorContainer();
-			this.administratorContainers[index] = container;
-		}
-		return container;
+		return this.administratorContainers[index];
 	}
 
 	@Override

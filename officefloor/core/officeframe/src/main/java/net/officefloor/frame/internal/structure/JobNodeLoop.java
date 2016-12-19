@@ -17,18 +17,29 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.spi.team.Team;
+
 /**
- * Runnable to be executed inside a {@link JobNode}.
+ * Executes the {@link JobNode} instances.
  *
  * @author Daniel Sagenschneider
  */
-public interface JobNodeRunnable {
+public interface JobNodeLoop {
 
 	/**
-	 * Runnable logic.
+	 * Runs the {@link JobNode} with the current {@link Thread}.
 	 * 
-	 * @return Optional {@link JobNode} to be executed next.
+	 * @param jobNode
+	 *            {@link JobNode} to execute.
 	 */
-	JobNode run();
+	void runJobNode(JobNode jobNode);
+
+	/**
+	 * Delegates the {@link JobNode} to a {@link Team} to execute.
+	 * 
+	 * @param jobNode
+	 *            {@link JobNode} to delegate to a {@link Team}.
+	 */
+	void delegateJobNode(JobNode jobNode);
 
 }

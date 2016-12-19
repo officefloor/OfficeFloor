@@ -98,12 +98,9 @@ public interface ProcessState {
 	 * 
 	 * @param thread
 	 *            {@link ThreadState} that has completed.
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue once the {@link ThreadState} is
-	 *            completed.
 	 * @return Optional {@link JobNode} to complete the {@link ThreadState}.
 	 */
-	JobNode threadComplete(ThreadState thread, JobNode continueJobNode);
+	JobNode threadComplete(ThreadState thread);
 
 	/**
 	 * Obtains the {@link ManagedObjectContainer} for the input index.

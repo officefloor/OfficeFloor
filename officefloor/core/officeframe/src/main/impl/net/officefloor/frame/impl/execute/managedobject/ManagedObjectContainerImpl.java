@@ -21,26 +21,24 @@ import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
-import net.officefloor.frame.impl.execute.jobnode.WaitJobNode;
+import net.officefloor.frame.impl.execute.jobnode.FailThreadStateJobNode;
 import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
-import net.officefloor.frame.internal.structure.CleanupSequence;
-import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.JobNodeRunnable;
+import net.officefloor.frame.internal.structure.JobNodeLoop;
+import net.officefloor.frame.internal.structure.ManagedJobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
@@ -51,11 +49,8 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.CriticalSection;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Container of a {@link ManagedObject}.
@@ -76,21 +71,22 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private final ManagedObjectMetaData<?> metaData;
 
 	/**
-	 * {@link CleanupSequence}.
+	 * {@link ThreadState} responsible for making changes to this
+	 * {@link ManagedObjectContainer}.
 	 */
-	private final CleanupSequence cleanupSequence;
+	private final ThreadState responsibleThreadState;
 
 	/**
 	 * {@link AssetLatch} for waiting to source the {@link ManagedObject}
 	 * instance (the {@link Asset}).
 	 */
-	private final AssetLatch sourcingMonitor;
+	private final AssetLatch sourcingLatch;
 
 	/**
-	 * {@link AssetLatch} for waiting on operations on the
-	 * {@link ManagedObject} instance.
+	 * {@link AssetLatch} for waiting on operations on the {@link ManagedObject}
+	 * instance.
 	 */
-	private final AssetLatch operationsMonitor;
+	private final AssetLatch operationsLatch;
 
 	/**
 	 * Listing of potential {@link ActiveGovernance}.
@@ -113,10 +109,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private Object object = null;
 
 	/**
-	 * {@link PropagateEscalationError} containing the cause of failure to
-	 * obtain the {@link ManagedObject}.
+	 * Failure of the {@link ManagedObject}.
 	 */
-	private PropagateEscalationError failure = null;
+	private Throwable failure = null;
 
 	/**
 	 * Time that an asynchronous operation was started by the
@@ -125,37 +120,31 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private long asynchronousStartTime = NO_ASYNC_OPERATION;
 
 	/**
-	 * {@link JobNode} to recycle the {@link ManagedObject}. This is created up
-	 * front to ensure available to recycle the {@link ManagedObject}.
-	 */
-	private JobNode recycleJobNode;
-
-	/**
 	 * Initiate the container.
 	 * 
 	 * @param <D>
 	 *            Dependency key type.
 	 * @param metaData
 	 *            Meta-data of the {@link ManagedObject}.
-	 * @param threadState
-	 *            Initial {@link ThreadState} requiring the
-	 *            {@link ManagedObject}.
+	 * @param responsibleThreadState
+	 *            {@link ThreadState} responsible for making changes to this
+	 *            {@link ManagedObjectContainer}.
 	 */
-	public <D extends Enum<D>> ManagedObjectContainerImpl(ManagedObjectMetaData<D> metaData, ThreadState threadState) {
+	public <D extends Enum<D>> ManagedObjectContainerImpl(ManagedObjectMetaData<D> metaData,
+			ThreadState responsibleThreadState) {
 		this.metaData = metaData;
-		this.cleanupSequence = threadState.getProcessState().getCleanupSequence();
+		this.responsibleThreadState = responsibleThreadState;
 
-		// Create the monitor to source the managed object
-		this.sourcingMonitor = this.metaData.getSourcingManager().createAssetMonitor(this);
+		// Create the latch to source the managed object
+		this.sourcingLatch = this.metaData.getSourcingManager().createAssetLatch(this);
 
 		// Create the monitor for asynchronous operations (if needed)
 		if (this.metaData.isManagedObjectAsynchronous()) {
 			// Requires operations managing
-			threadState.requireProcessCoordination();
-			this.operationsMonitor = this.metaData.getOperationsManager().createAssetMonitor(this);
+			this.operationsLatch = this.metaData.getOperationsManager().createAssetLatch(this);
 		} else {
 			// No operations managing required
-			this.operationsMonitor = null;
+			this.operationsLatch = null;
 		}
 
 		// Create the active governances
@@ -171,13 +160,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	 *            {@link ManagedObject} triggering the {@link ProcessState}.
 	 * @param metaData
 	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}.
-	 * @param threadState
-	 *            Initial {@link ThreadState} requiring the
-	 *            {@link ManagedObject}.
+	 * @param responsibleThreadState
+	 *            {@link ThreadState} responsible for making changes to this
+	 *            {@link ManagedObjectContainer}.
 	 */
 	public <D extends Enum<D>> ManagedObjectContainerImpl(ManagedObject managedObject,
-			ManagedObjectMetaData<D> metaData, ThreadState threadState) {
-		this(metaData, threadState);
+			ManagedObjectMetaData<D> metaData, ThreadState responsibleThreadState) {
+		this(metaData, responsibleThreadState);
 
 		// Flag managed object loaded
 		this.managedObject = managedObject;
@@ -193,15 +182,29 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			// Provide listener if asynchronous managed object
 			if (this.metaData.isManagedObjectAsynchronous()) {
 				((AsynchronousManagedObject) this.managedObject)
-						.registerAsynchronousCompletionListener(new AsynchronousListenerImpl(this.operationsMonitor));
+						.registerAsynchronousCompletionListener(new AsynchronousListenerImpl());
 			}
 		} catch (Throwable ex) {
 			// Flag failure to handle later when Job attempts to use it
-			this.setFailedState(new FailedToSourceManagedObjectEscalation(this.metaData.getObjectType(), ex));
+			this.failure = new FailedToSourceManagedObjectEscalation(this.metaData.getObjectType(), ex);
 		}
+	}
 
-		// Create the recycle job node
-		this.recycleJobNode = this.metaData.createRecycleJobNode(this.managedObject, this.cleanupSequence);
+	/**
+	 * Undertakes the {@link ManagedObjectOperation}.
+	 * 
+	 * @param operation
+	 *            {@link ManagedObjectOperation} to undertake.
+	 */
+	private void doOperation(ManagedObjectOperation operation) {
+		JobNodeLoop loop = this.metaData.getJobNodeLoop();
+		if (this.responsibleThreadState.isAttachedToThread()) {
+			// Current Thread, so execute immediately
+			loop.runJobNode(operation);
+		} else {
+			// Delegate to be undertaken
+			loop.delegateJobNode(operation);
+		}
 	}
 
 	/**
@@ -222,7 +225,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		// Job unload action
 		if (recycleJob != null) {
 			// Recycle the managed object
-			this.cleanupSequence.registerCleanUpJob(recycleJob);
+			this.responsibleThreadState.getProcessState().getCleanupSequence().registerCleanUpJob(recycleJob);
 
 		} else {
 			// Return directly to pool (if pooled)
@@ -238,242 +241,303 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	 */
 
 	@Override
-	public boolean loadManagedObject(JobContext executionContext, JobNode jobNode) {
-
-		// Always propagate any failure to the Job container to handle.
-		// May have had failure immediately in loading to process state.
-		if (this.failure != null) {
-			throw this.failure;
-		}
-
-		// Handle based on state
-		switch (this.containerState) {
-		case NOT_LOADED:
-			// Flag now loading the managed object
-			this.containerState = ManagedObjectContainerState.LOADING;
-
-			try {
-				// Not loaded therefore source the managed object
-				ManagedObjectPool pool = this.metaData.getManagedObjectPool();
-				if (pool != null) {
-					// Source from pool
-					pool.sourceManagedObject(new ManagedObjectUserImpl());
-				} else {
-					// Source directly
-					ManagedObjectSource<?, ?> managedObjectSource = this.metaData.getManagedObjectSource();
-					managedObjectSource.sourceManagedObject(new ManagedObjectUserImpl());
-				}
-
-			} catch (Throwable ex) {
-				// Flag failed to source Managed Object
-				this.setFailedState(new FailedToSourceManagedObjectEscalation(this.metaData.getObjectType(), ex));
-			}
-
-			// Propagate any failure in loading to the JobContainer
-			if (this.failure != null) {
-				throw this.failure;
-			}
-
-			// Determine if loaded managed object
-			if (this.managedObject == null) {
-				// Asynchronously obtaining managed object, so must coordinate
-				jobNode.getThreadState().requireProcessCoordination();
-
-				// Record time that attempted to source the managed object
-				this.asynchronousStartTime = executionContext.getTime();
-
-				// Register for sourcing monitoring
-				this.sourcingMonitor.waitOnAsset(jobNode);
-
-				// Wait to be loaded
-				return false;
-			}
-
-		case LOADING:
-			// Wait for loaded
-			return false;
-
-		case LOADED:
-		case GOVERNING:
-		case GOVERNED:
-		case COORDINATING:
-		case OBJECT_AVAILABLE:
-			// Managed Object loaded
-			return true;
-
-		case UNLOAD_WAITING_GOVERNANCE:
-		case UNLOADING:
-			// Should never be called in this state
-			// (only unloaded when no interest in this managed object)
-			throw new IllegalStateException("Can not load an unloaded ManagedObject");
-
-		default:
-			throw new IllegalStateException("Unknown container state " + this.containerState);
-		}
+	public TeamManagement getResponsibleTeam() {
+		return this.metaData.getResponsibleTeam();
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
-	public JobNode isManagedObjectReady(WorkContainer workContainer, JobContext jobContext, JobNode jobNode) {
-
-		// Always propagate any failure to the Job container to handle.
-		if (this.failure != null) {
-			throw this.failure;
-		}
-
-		// Check if asynchronous operation or still to source
-		if (this.asynchronousStartTime != NO_ASYNC_OPERATION) {
-
-			// Determine if timed out
-			long idleTime = jobContext.getTime() - this.asynchronousStartTime;
-			if (idleTime > this.metaData.getTimeout()) {
-
-				// Obtain the timeout failure
-				Throwable timeoutFailure;
-				if (this.managedObject == null) {
-					// Source the managed object timed out
-					timeoutFailure = new SourceManagedObjectTimedOutEscalation(this.metaData.getObjectType());
-				} else {
-					// Asynchronous operation timed out
-					timeoutFailure = new ManagedObjectOperationTimedOutEscalation(this.metaData.getObjectType());
-				}
-
-				// Flag failed state and propagate to JobContainer
-				this.setFailedState(timeoutFailure);
-				throw this.failure;
-			}
-
-			// Wait for asynchronous operation to complete
-			return new WaitJobNode(jobNode);
-		}
+	public ThreadState getResponsibleThreadState() {
+		return this.responsibleThreadState;
 	}
 
 	@Override
-	public JobNode setupManagedObject(WorkContainer<?> workContainer, JobContext jobContext, Flow flow,
-			JobNode jobNode) {
+	public JobNode loadManagedObject(ManagedJobNode managedJobNode, WorkContainer<?> workContainer) {
 
-		// Determine if managed object is ready
-		JobNode readyJobNode = this.isManagedObjectReady(workContainer, jobContext, jobNode);
-		if (readyJobNode != null) {
-			return readyJobNode;
+		// Propagate failure to thread requiring managed object
+		if (this.failure != null) {
+			return new FailThreadStateJobNode(this.failure, managedJobNode.getThreadState()).then(managedJobNode);
 		}
 
-		// Ensure the dependencies are ready
-		if (!this.metaData.isDependenciesReady(workContainer, jobContext, jobNode)) {
-			// Dependencies must be ready before setup
-			return new WaitJobNode(jobNode);
+		// Load the managed object
+		return new LoadManagedObjectJobNode(managedJobNode, workContainer);
+	}
+
+	/**
+	 * Loads the {@link ManagedObject}.
+	 */
+	private class LoadManagedObjectJobNode extends ManagedObjectOperation {
+
+		/**
+		 * Requesting {@link ManagedJobNode}.
+		 */
+		private final ManagedJobNode managedJobNode;
+
+		private final WorkContainer<?> workContainer;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param requestingThreadState
+		 *            {@link ThreadState} requesting the {@link ManagedObject}.
+		 * @param workContainer
+		 *            {@link WorkContainer}.
+		 */
+		public LoadManagedObjectJobNode(ManagedJobNode managedJobNode, WorkContainer<?> workContainer) {
+			this.managedJobNode = managedJobNode;
+			this.workContainer = workContainer;
 		}
 
-		// Handle based on state
-		switch (this.containerState) {
-		case NOT_LOADED:
-			// Should never be called before loadManagedObject
-			throw new IllegalStateException("loadManagedObject must be called before governManagedObject");
+		@Override
+		public TeamManagement getResponsibleTeam() {
+			// Undertake by possible responsible team
+			return ManagedObjectContainerImpl.this.metaData.getResponsibleTeam();
+		}
 
-		case LOADING:
-			// Still loading managed object so wait until loaded
-			return new WaitJobNode(jobNode);
+		@Override
+		public JobNode doJob() {
 
-		case LOADED:
+			// Easy access to container
+			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
-			// Determine if require coordinating Managed Object
-			if (this.metaData.isCoordinatingManagedObject()) {
+			// Check if asynchronous operation or still to source
+			if (container.asynchronousStartTime != NO_ASYNC_OPERATION) {
 
-				// Obtain the thread state
-				ThreadState threadState = jobNode.getThreadState();
+				// Determine if timed out
+				long idleTime = OfficeManagerImpl.currentTimeMillis() - container.asynchronousStartTime;
+				if (idleTime > container.metaData.getTimeout()) {
 
-				// Create the object registry for the managed object
-				ObjectRegistry<?> objectRegistry = this.metaData.createObjectRegistry(workContainer, threadState);
-
-				try {
-					// Coordinate the managed objects
-					CoordinatingManagedObject cmo = (CoordinatingManagedObject) this.managedObject;
-					cmo.loadObjects(objectRegistry);
-				} catch (Throwable ex) {
-					// Flag failure and propagate to the JobContainer
-					this.setFailedState(new FailedToSourceManagedObjectEscalation(this.metaData.getObjectType(), ex));
-					throw this.failure;
-				}
-			}
-
-			// Flag now attempting to govern
-			this.containerState = ManagedObjectContainerState.GOVERNING;
-
-		case GOVERNING:
-			// Identify the applicable governance for this managed object
-			ManagedObjectGovernanceMetaData<?>[] governanceMetaDatas = this.metaData.getGovernanceMetaData();
-
-			// Iterate over governance and govern by active governance
-			ThreadState thread = jobNode.getThreadState();
-			NEXT_GOVERNANCE: for (int i = 0; i < governanceMetaDatas.length; i++) {
-				ManagedObjectGovernanceMetaData<?> governanceMetaData = governanceMetaDatas[i];
-
-				// Determine if already under active governance
-				ActiveGovernance activeGovernance = this.activeGovernances[i];
-				if (activeGovernance != null) {
-
-					// Ensure still active
-					if (activeGovernance.isActive()) {
-						continue NEXT_GOVERNANCE; // already active
+					// Obtain the timeout failure
+					Throwable timeoutFailure;
+					if (container.managedObject == null) {
+						// Source the managed object timed out
+						timeoutFailure = new SourceManagedObjectTimedOutEscalation(container.metaData.getObjectType());
+					} else {
+						// Asynchronous operation timed out
+						timeoutFailure = new ManagedObjectOperationTimedOutEscalation(
+								container.metaData.getObjectType());
 					}
 
-					// No longer active
-					this.activeGovernances[i] = null;
+					// Flag failed and propagate to managed job node
+					return new FailManagedObjectJobNode(timeoutFailure, this.managedJobNode);
 				}
 
-				// Determine if the governance is active
-				int governanceIndex = governanceMetaData.getGovernanceIndex();
-				if (!thread.isGovernanceActive(governanceIndex)) {
-					continue NEXT_GOVERNANCE; // not active, so not govern
+				// Wait for asynchronous operation to complete
+				if (container.managedObject == null) {
+					return container.sourcingLatch.awaitOnAsset(this);
+				} else {
+					return container.operationsLatch.awaitOnAsset(this);
+				}
+			}
+
+			// Handle based on state
+			switch (container.containerState) {
+			case NOT_LOADED:
+
+				// TODO check whether managed objects are ready
+				boolean isDependenciesReady = container.metaData.isDependenciesReady(this.workContainer, this);
+
+				// Flag now loading the managed object
+				container.containerState = ManagedObjectContainerState.LOADING;
+
+				try {
+					// Not loaded therefore source the managed object
+					ManagedObjectPool pool = container.metaData.getManagedObjectPool();
+					if (pool != null) {
+						// Source from pool
+						pool.sourceManagedObject(new ManagedObjectUserImpl());
+					} else {
+						// Source directly
+						ManagedObjectSource<?, ?> managedObjectSource = container.metaData.getManagedObjectSource();
+						managedObjectSource.sourceManagedObject(new ManagedObjectUserImpl());
+					}
+
+				} catch (Throwable ex) {
+					// Flag failed to source Managed Object
+					return new FailManagedObjectJobNode(ex, this.managedJobNode);
 				}
 
-				// Obtain the governance
-				GovernanceContainer governance = thread.getGovernanceContainer(governanceIndex);
+				// Determine if loaded managed object
+				if (container.managedObject == null) {
 
-				// Obtain the extension interface
-				ExtensionInterfaceExtractor<?> extractor = governanceMetaData.getExtensionInterfaceExtractor();
-				Object extensionInterface = this.extractExtensionInterface(extractor);
+					// Record time that attempted to source the managed object
+					container.asynchronousStartTime = OfficeManagerImpl.currentTimeMillis();
 
-				// Create and register the governance for the managed object
-				activeGovernance = governance.createActiveGovernance(extensionInterface, this);
-				this.activeGovernances[i] = activeGovernance;
+					// Register on sourcing latch to proceed
+					return container.sourcingLatch.awaitOnAsset(this);
+				}
 
-				// Add the governance for activation
-				GovernanceActivity<?, ?> activity = activeGovernance.createGovernActivity();
-				return flow.createGovernanceNode(activity, jobNode);
+			case LOADING:
+				if (container.managedObject == null) {
+					// Wait for loaded
+					return container.sourcingLatch.awaitOnAsset(this);
+				}
+
+				// Flag loaded and no longer waiting to source
+				container.managedObject = managedObject;
+				container.containerState = ManagedObjectContainerState.LOADED;
+				container.asynchronousStartTime = NO_ASYNC_OPERATION;
+
+				try {
+					// Provide bound name if name aware
+					if (container.metaData.isNameAwareManagedObject()) {
+						((NameAwareManagedObject) container.managedObject)
+								.setBoundManagedObjectName(container.metaData.getBoundManagedObjectName());
+					}
+
+					// Provide listener if asynchronous managed object
+					if (container.metaData.isManagedObjectAsynchronous()) {
+						((AsynchronousManagedObject) container.managedObject)
+								.registerAsynchronousCompletionListener(new AsynchronousListenerImpl());
+					}
+				} catch (Throwable ex) {
+					// Flag failed to source Managed Object
+					return new FailManagedObjectJobNode(ex, this.managedJobNode);
+				}
+
+			case COORDINATING:
+				// Determine if require coordinating Managed Object
+				if (container.metaData.isCoordinatingManagedObject()) {
+
+					// Create the object registry for the managed object
+					ObjectRegistry<?> objectRegistry = container.metaData.createObjectRegistry(this.workContainer,
+							container.responsibleThreadState);
+
+					try {
+						// Coordinate the managed objects
+						CoordinatingManagedObject cmo = (CoordinatingManagedObject) container.managedObject;
+						cmo.loadObjects(objectRegistry);
+					} catch (Throwable ex) {
+						// Flag failure and propagate to the JobContainer
+						return new FailManagedObjectJobNode(ex, this.managedJobNode);
+					}
+				}
+
+				// Flag now attempting to govern
+				container.containerState = ManagedObjectContainerState.GOVERNING;
+
+			case GOVERNING:
+				// Identify the applicable governance for this managed object
+				ManagedObjectGovernanceMetaData<?>[] governanceMetaDatas = container.metaData.getGovernanceMetaData();
+
+				// Iterate over governance and govern by active governance
+				ThreadState managedJobNodeThreadState = this.managedJobNode.getThreadState();
+				NEXT_GOVERNANCE: for (int i = 0; i < governanceMetaDatas.length; i++) {
+					ManagedObjectGovernanceMetaData<?> governanceMetaData = governanceMetaDatas[i];
+
+					// Determine if already under active governance
+					ActiveGovernance activeGovernance = container.activeGovernances[i];
+					if (activeGovernance != null) {
+
+						// Ensure still active
+						if (activeGovernance.isActive()) {
+							continue NEXT_GOVERNANCE; // already active
+						}
+
+						// No longer active
+						container.activeGovernances[i] = null;
+					}
+
+					// Determine if the governance is active
+					int governanceIndex = governanceMetaData.getGovernanceIndex();
+					if (!managedJobNodeThreadState.isGovernanceActive(governanceIndex)) {
+						continue NEXT_GOVERNANCE; // not active, so not govern
+					}
+
+					// TODO following to be in managed job's thread state?
+
+					// Obtain the governance
+					GovernanceContainer governance = managedJobNodeThreadState.getGovernanceContainer(governanceIndex);
+
+					// Obtain the extension interface
+					ExtensionInterfaceExtractor<?> extractor = governanceMetaData.getExtensionInterfaceExtractor();
+					Object extensionInterface = container.extractExtensionInterface(extractor);
+
+					// Create and register the governance for the managed object
+					activeGovernance = governance.createActiveGovernance(extensionInterface, container);
+					container.activeGovernances[i] = activeGovernance;
+
+					// Add the governance for activation
+					GovernanceActivity<?, ?> activity = activeGovernance.createGovernActivity();
+					return this.managedJobNode.getFlow().createGovernanceNode(activity, this.managedJobNode);
+				}
+
+				// Now governed as always need to check governance
+				container.containerState = ManagedObjectContainerState.GOVERNED;
+
+			case GOVERNED:
+				try {
+					// Obtain the object
+					container.object = container.managedObject.getObject();
+				} catch (Throwable ex) {
+					// Flag in failed state
+					return new FailManagedObjectJobNode(ex, this.managedJobNode);
+				}
+
+			case OBJECT_AVAILABLE:
+				// Managed Object loaded, so carry on with managed job
+				return this.managedJobNode;
+
+			case UNLOAD_WAITING_GOVERNANCE:
+			case UNLOADING:
+				// Should never be called in this state
+				// (only unloaded when no interest in this managed object)
+				throw new IllegalStateException("Can not load an unloaded ManagedObject");
+
+			default:
+				throw new IllegalStateException("Unknown container state " + container.containerState);
 			}
+		}
+	}
 
-			// Now governed as always need to check governance
-			this.containerState = ManagedObjectContainerState.GOVERNED;
+	/**
+	 * {@link ManagedObjectUser} implementation.
+	 */
+	private class ManagedObjectUserImpl implements ManagedObjectUser {
 
-		case GOVERNED:
-			try {
-				// Obtain the object
-				this.object = this.managedObject.getObject();
-			} catch (Throwable ex) {
-				// Flag in failed state
-				this.setFailedState(new FailedToSourceManagedObjectEscalation(this.metaData.getObjectType(), ex));
-				throw this.failure;
-			}
+		@Override
+		public void setManagedObject(final ManagedObject managedObject) {
+			ManagedObjectContainerImpl.this.doOperation(new ManagedObjectOperation() {
+				@Override
+				public JobNode doJob() {
 
-		case OBJECT_AVAILABLE:
-			// Successfully now governed, or governance ready
-			return null;
+					// Easy access to the container
+					ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
-		case UNLOAD_WAITING_GOVERNANCE:
-		case UNLOADING:
-			// Should never be called in this state
-			// (only unloaded when no interest in this managed object)
-			throw new IllegalStateException("Can not coordinate an unloaded ManagedObject");
+					// Load the managed object
+					container.managedObject = managedObject;
 
-		default:
-			throw new IllegalStateException("Unknown container state " + this.containerState);
+					// Wake up any waiting jobs
+					container.sourcingLatch.releaseJobNodes(true);
+
+					// Nothing further to set the managed object
+					return null;
+				}
+			});
 		}
 
+		@Override
+		public void setFailure(final Throwable cause) {
+			ManagedObjectContainerImpl.this.doOperation(new ManagedObjectOperation() {
+				@Override
+				public JobNode doJob() {
+					// Easy access to the container
+					ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+					// Flag failure of managed object
+					container.failure = cause;
+
+					// Wake up any waiting jobs
+					container.sourcingLatch.failJobNodes(cause, true);
+
+					// Nothing further to fail the managed object
+					return null;
+				}
+			});
+		}
 	}
 
 	@Override
-	public Object getObject(ThreadState threadState) {
+	public Object getObject() {
 
 		// Only return Object if in valid state
 		if (this.containerState == ManagedObjectContainerState.OBJECT_AVAILABLE) {
@@ -510,268 +574,143 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		// Determine if managed object waiting on governance to unload
 		if (this.containerState == ManagedObjectContainerState.UNLOAD_WAITING_GOVERNANCE) {
 			// Attempt to unload the managed object
-			this.unloadManagedObject();
+			return this.unloadManagedObject();
 		}
+
+		// Nothing further to unregister
+		return null;
 	}
 
 	@Override
-	public JobNode unloadManagedObject(JobNode continueJobNode) {
+	public JobNode unloadManagedObject() {
+		return new UnloadManagedObjectOperation();
+	}
 
-		// TODO Handle based on state
-		switch (this.containerState) {
-		case NOT_LOADED:
-			break;
+	/**
+	 * Unloads the {@link ManagedObject}.
+	 */
+	private class UnloadManagedObjectOperation extends ManagedObjectOperation {
+		@Override
+		public JobNode doJob() {
 
-		}
+			// Easy access to the container
+			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
-		// Flag that possibly waiting on governance to unload
-		this.containerState = ManagedObjectContainerState.UNLOAD_WAITING_GOVERNANCE;
+			switch (container.containerState) {
+			case NOT_LOADED:
+			case LOADING:
+			case LOADED:
+			case GOVERNING:
+			case GOVERNED:
+			case COORDINATING:
+			case OBJECT_AVAILABLE:
 
-		// Ensure no active governance
-		for (int i = 0; i < this.activeGovernances.length; i++) {
-			if (this.activeGovernances[i] != null) {
-				isActiveGovernance = true;
+				// Ensure no active governance
+				boolean isActiveGovernance = false;
+				for (int i = 0; i < container.activeGovernances.length; i++) {
+					if (container.activeGovernances[i] != null) {
+						isActiveGovernance = true;
+					}
+				}
+
+				// Flag that unloading governance
+				container.containerState = ManagedObjectContainerState.UNLOAD_WAITING_GOVERNANCE;
+
+			case UNLOAD_WAITING_GOVERNANCE:
+			case UNLOADING:
+
+				// Ensure have managed object to unload
+				if (container.managedObject == null) {
+					return null;
+				}
+
+				// Create the recycle job node
+				JobNode recycleJobNode = container.metaData.createRecycleJobNode(container.managedObject,
+						container.responsibleThreadState.getProcessState().getCleanupSequence());
+
+				// Job unload action
+				if (recycleJobNode != null) {
+					// Recycle the managed object
+					container.responsibleThreadState.getProcessState().getCleanupSequence()
+							.registerCleanUpJob(recycleJobNode);
+
+				} else {
+					// Return directly to pool (if pooled)
+					ManagedObjectPool pool = container.metaData.getManagedObjectPool();
+					if (pool != null) {
+						pool.returnManagedObject(managedObject);
+					}
+				}
+
+				// Release permanently as managed object no longer being used
+				container.sourcingLatch.releaseJobNodes(true);
+				if (container.operationsLatch != null) {
+					container.operationsLatch.releaseJobNodes(true);
+				}
+
+				// Release reference to managed object to not unload again
+				container.managedObject = null;
 			}
+
+			// Managed object unloaded
+			return null;
 		}
-
-		// Flag that unloading
-		this.containerState = ManagedObjectContainerState.UNLOADING;
-
-		// Activate jobs permanently as Asset no longer being used
-		this.sourcingMonitor.activateJobNodes(true);
-		if (this.operationsMonitor != null) {
-			this.operationsMonitor.activateJobNodes(true);
-		}
-
-		// Unload the managed object
-		this.unloadManagedObject(this.managedObject, this.recycleJobNode);
-
-		// Release reference to managed object to not unload again
-		this.managedObject = null;
 	}
 
 	/**
 	 * {@link AsynchronousListener} implementation.
 	 */
-	private static class AsynchronousListenerImpl implements AsynchronousListener {
-
-		/**
-		 * {@link AssetLatch} for operations.
-		 */
-		private final AssetLatch operationsMonitor;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param operationsMonitor
-		 *            {@link AssetLatch} for operations.
-		 */
-		public AsynchronousListenerImpl(AssetLatch operationsMonitor) {
-			this.operationsMonitor = operationsMonitor;
-		}
-
-		/*
-		 * =============== AsynchronousListener =======================
-		 */
+	private class AsynchronousListenerImpl implements AsynchronousListener {
 
 		@Override
 		public void notifyStarted() {
+			ManagedObjectContainerImpl.this.doOperation(new ManagedObjectOperation() {
+				@Override
+				public JobNode doJob() {
 
-			// Ignore starting operation if in failed state
-			if (state.failure != null) {
-				return;
-			}
+					// Easy access to the container
+					ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
-			// Ensure asynchronous operation not already started
-			if (state.asynchronousStartTime != NO_ASYNC_OPERATION) {
-				return;
-			}
+					// Ignore starting operation if in failed state
+					if (container.failure != null) {
+						return null;
+					}
 
-			// Flag start of asynchronous operation
-			state.asynchronousStartTime = System.currentTimeMillis();
-			return;
+					// Ensure asynchronous operation not already started
+					if (container.asynchronousStartTime != NO_ASYNC_OPERATION) {
+						return null;
+					}
+
+					// Flag start of asynchronous operation
+					container.asynchronousStartTime = OfficeManagerImpl.currentTimeMillis();
+					return null;
+
+				}
+			});
 		}
 
 		@Override
 		public void notifyComplete() {
+			ManagedObjectContainerImpl.this.doOperation(new ManagedObjectOperation() {
+				@Override
+				public JobNode doJob() {
 
-			// Ignore completing operation if in failed state
-			if (state.failure != null) {
-				return;
-			}
+					// Easy access to the container
+					ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
-			// Flag no asynchronous operation occurring
-			state.asynchronousStartTime = NO_ASYNC_OPERATION;
+					// Ignore completing operation if in failed state
+					if (container.failure != null) {
+						return null;
+					}
 
-			// Activate any jobs waiting on the asynchronous operation
-			this.operationsMonitor.activateJobNodes(false);
-		}
-	}
+					// Flag no asynchronous operation occurring
+					container.asynchronousStartTime = NO_ASYNC_OPERATION;
 
-	/**
-	 * {@link ManagedObjectUser} implementation.
-	 */
-	private class ManagedObjectUserImpl implements ManagedObjectUser {
-
-		/**
-		 * {@link JobNode} requiring the {@link ManagedObject}.
-		 */
-		private final JobNode jobNode;
-
-		/**
-		 * Loads the {@link ManagedObject}.
-		 * 
-		 * @param managedObject
-		 *            {@link ManagedObject}.
-		 */
-		private void loadManagedObject(ManagedObject managedObject) {
-
-			// Easy reference to container
-			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
-
-			// Determine if container in failed state
-			if (container.failure != null) {
-				// Discard the managed object and no further processing
-				container.unloadManagedObject(managedObject,
-						container.metaData.createRecycleJobNode(managedObject, container.cleanupSequence));
-				return;
-			}
-
-			// Handle based on state
-			switch (container.containerState) {
-			case NOT_LOADED:
-				// Discard the managed object
-				container.unloadManagedObject(managedObject,
-						container.metaData.createRecycleJobNode(managedObject, container.cleanupSequence));
-
-				// Should never be called before loadManagedObject
-				throw new IllegalStateException("loadManagedObject must be called before setManagedObject");
-
-			case LOADING:
-				// Determine if already loaded
-				if (container.managedObject != null) {
-					// Discard managed object as already loaded
-					container.unloadManagedObject(managedObject,
-							container.metaData.createRecycleJobNode(managedObject, container.cleanupSequence));
-					return; // discarded and nothing further
+					// Release any jobs waiting on the asynchronous operation
+					container.operationsLatch.releaseJobNodes(false);
+					return null;
 				}
-
-				// Ensure have the managed object
-				if (managedObject == null) {
-					// Flag no managed object provided
-					container.setFailedState(new FailedToSourceManagedObjectEscalation(
-							container.metaData.getObjectType(), new NullPointerException("No ManagedObject provided")));
-					return;
-				}
-
-				// Flag loaded and no longer waiting to source
-				container.managedObject = managedObject;
-				container.containerState = ManagedObjectContainerState.LOADED;
-				container.asynchronousStartTime = NO_ASYNC_OPERATION;
-
-				try {
-					// Provide bound name if name aware
-					if (container.metaData.isNameAwareManagedObject()) {
-						((NameAwareManagedObject) container.managedObject)
-								.setBoundManagedObjectName(container.metaData.getBoundManagedObjectName());
-					}
-
-					// Provide listener if asynchronous managed object
-					if (container.metaData.isManagedObjectAsynchronous()) {
-						((AsynchronousManagedObject) container.managedObject).registerAsynchronousCompletionListener(
-								new AsynchronousListenerImpl(ManagedObjectContainerImpl.this.operationsMonitor));
-					}
-				} catch (Throwable ex) {
-					// Flag in failed state
-					container.setFailedState(
-							new FailedToSourceManagedObjectEscalation(container.metaData.getObjectType(), ex));
-					return;
-				}
-
-				// Create the recycle job node for the managed object
-				container.recycleJobNode = container.metaData.createRecycleJobNode(container.managedObject,
-						container.cleanupSequence);
-				break;
-
-			case LOADED:
-			case COORDINATING:
-			case OBJECT_AVAILABLE:
-				// Discard the managed object as already have a Managed Object
-				container.unloadManagedObject(managedObject,
-						container.metaData.createRecycleJobNode(managedObject, container.cleanupSequence));
-				break;
-
-			case UNLOAD_WAITING_GOVERNANCE:
-			case UNLOADING:
-				// Discard as managed object already flagged for unloading
-				// (if unloading nothing should be waiting on it)
-				container.unloadManagedObject(managedObject,
-						container.metaData.createRecycleJobNode(managedObject, container.cleanupSequence));
-				break;
-
-			default:
-				throw new IllegalStateException("Unknown container state " + container.containerState);
-			}
-		}
-
-		/**
-		 * Loads the failure.
-		 * 
-		 * @param cause
-		 *            {@link Throwable} failure.
-		 */
-		private void loadFailure(Throwable cause) {
-
-			// Easy reference to container
-			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
-
-			// Load the failure
-			container.setFailedState(
-					new FailedToSourceManagedObjectEscalation(container.metaData.getObjectType(), cause));
-		}
-
-		/*
-		 * ================ ManagedObjectUser ====================
-		 */
-
-		@Override
-		public void setManagedObject(final ManagedObject managedObject) {
-
-			// Determine if invoked on load Thread
-			if (this.jobNode.getThreadState().isJobNodeLoopThread()) {
-				// Same thread, so load the managed object
-				this.loadManagedObject(managedObject);
-
-			} else {
-				// Different thread, so must load via job loop
-				this.jobNode.getThreadState().run(new JobNodeRunnable() {
-					@Override
-					public JobNode run() {
-						ManagedObjectUserImpl.this.loadManagedObject(managedObject);
-						return ManagedObjectUserImpl.this.jobNode;
-					}
-				}, this.jobNode.getResponsibleTeam());
-			}
-		}
-
-		@Override
-		public void setFailure(final Throwable cause) {
-
-			// Determine if invoked on load Thread
-			if (this.jobNode.getThreadState().isJobNodeLoopThread()) {
-				// Same thread, so load the failure
-				this.loadFailure(cause);
-
-			} else {
-				// Different thread, so must load via job loop
-				this.jobNode.getThreadState().run(new JobNodeRunnable() {
-					@Override
-					public JobNode run() {
-						ManagedObjectUserImpl.this.loadFailure(cause);
-						return ManagedObjectUserImpl.this.jobNode;
-					}
-				}, this.jobNode.getResponsibleTeam());
-			}
+			});
 		}
 	}
 
@@ -779,104 +718,123 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	 * ================== Asset ==========================================
 	 */
 
-	/**
-	 * State for the {@link CriticalSection} to check on the {@link Asset}.
-	 */
-	private static final class CheckOnAssetState {
-
-		/**
-		 * {@link ManagedObjectContainerImpl}.
-		 */
-		private final ManagedObjectContainerImpl container;
-
-		/**
-		 * {@link CheckAssetContext}.
-		 */
-		private final CheckAssetContext context;
-
-		/**
-		 * Initialise.
-		 * 
-		 * @param container
-		 *            {@link ManagedObjectContainerImpl}.
-		 * @param context
-		 *            {@link CheckAssetContext}.
-		 */
-		public CheckOnAssetState(ManagedObjectContainerImpl container, CheckAssetContext context) {
-			this.container = container;
-			this.context = context;
-		}
+	@Override
+	public ThreadState getOwningThreadState() {
+		return this.responsibleThreadState;
 	}
-
-	/**
-	 * {@link CriticalSection} to check on the {@link Asset}.
-	 */
-	private static final CriticalSection<Object, CheckOnAssetState> checkOnAssetCriticalSection = new CriticalSection<Object, ManagedObjectContainerImpl.CheckOnAssetState>() {
-		@Override
-		public Object doCriticalSection(CheckOnAssetState state) throws Exception {
-
-			// Determine if failure
-			if (state.container.failure != null) {
-				// Fail jobs waiting on this managed object permanently
-				state.context.failJobNodes(state.container.failure.getCause(), true);
-
-				// No further checking necessary
-				return null;
-			}
-
-			// Not ready if undertaking an asynchronous operation
-			if (state.container.asynchronousStartTime != NO_ASYNC_OPERATION) {
-
-				// Determine if asynchronous operation has timed out
-				long idleTime = state.context.getTime() - state.container.asynchronousStartTime;
-				if (idleTime > state.container.metaData.getTimeout()) {
-
-					// Obtain the time out failure
-					Throwable timeoutFailure;
-					if (state.container.managedObject == null) {
-						// Source managed object timed out
-						timeoutFailure = new SourceManagedObjectTimedOutEscalation(
-								state.container.metaData.getObjectType());
-					} else {
-						// Asynchronous operation timed out
-						timeoutFailure = new ManagedObjectOperationTimedOutEscalation(
-								state.container.metaData.getObjectType());
-					}
-
-					// Fail job nodes waiting on this
-					state.context.failJobNodes(timeoutFailure, true);
-
-					// Flag in failed state (use OfficeManager to fail)
-					state.container.setFailedState(timeoutFailure, null);
-				}
-			}
-
-			return null;
-		}
-	};
 
 	@Override
 	public void checkOnAsset(CheckAssetContext context) {
-		this.lockState.doProcessCriticalSection(new CheckOnAssetState(this, context), checkOnAssetCriticalSection);
+
+		// Determine if failure
+		if (this.failure != null) {
+			// Fail jobs waiting on this managed object permanently
+			context.failJobNodes(this.failure, true);
+
+			// No further checking necessary
+			return;
+		}
+
+		// Not ready if undertaking an asynchronous operation
+		if (this.asynchronousStartTime != NO_ASYNC_OPERATION) {
+
+			// Determine if asynchronous operation has timed out
+			long idleTime = OfficeManagerImpl.currentTimeMillis() - this.asynchronousStartTime;
+			if (idleTime > this.metaData.getTimeout()) {
+
+				// Obtain the time out failure
+				Throwable timeoutFailure;
+				if (this.managedObject == null) {
+					// Source managed object timed out
+					timeoutFailure = new SourceManagedObjectTimedOutEscalation(this.metaData.getObjectType());
+				} else {
+					// Asynchronous operation timed out
+					timeoutFailure = new ManagedObjectOperationTimedOutEscalation(this.metaData.getObjectType());
+				}
+
+				// Fail job nodes waiting on this
+				this.sourcingLatch.failJobNodes(timeoutFailure, true);
+				if (this.operationsLatch != null) {
+					this.operationsLatch.failJobNodes(timeoutFailure, true);
+				}
+			}
+		}
 	}
 
 	/**
-	 * Sets the {@link ManagedObjectContainer} into a failed state and makes the
-	 * {@link AssetLatch} instances aware.
-	 * 
-	 * @param failure
-	 *            Failure.
+	 * Operation to be undertaken to change the {@link ManagedObjectContainer}.
 	 */
-	private void setFailedState(Throwable failure) {
+	private abstract class ManagedObjectOperation implements JobNode {
 
-		// Flag failure (puts container into failed state)
-		this.failure = new PropagateEscalationError(failure);
+		@Override
+		public ThreadState getThreadState() {
+			return ManagedObjectContainerImpl.this.responsibleThreadState;
+		}
+	}
 
-		// Permanently fail job nodes
-		this.sourcingMonitor.failJobNodes(failure, true);
-		if (this.operationsMonitor != null) {
-			// Asynchronous so include permanently failing operations
-			this.operationsMonitor.failJobNodes(failure, true);
+	/**
+	 * {@link JobNode} to place the {@link ManagedObjectContainer} in a failed
+	 * state.
+	 */
+	private class FailManagedObjectJobNode extends ManagedObjectOperation {
+
+		/**
+		 * Cause of the failure.
+		 */
+		private final Throwable failure;
+
+		/**
+		 * Optional {@link ManagedJobNode} requiring the {@link ManagedObject}.
+		 */
+		private final ManagedJobNode managedJobNode;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param failure
+		 *            Cause of the failure.
+		 */
+		public FailManagedObjectJobNode(Throwable failure) {
+			this(failure, null);
+		}
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param failure
+		 *            Cause of the failure.
+		 * @param managedJobNode
+		 *            {@link ManagedJobNode} requring the {@link ManagedObject}.
+		 */
+		public FailManagedObjectJobNode(Throwable failure, ManagedJobNode managedJobNode) {
+			this.failure = failure;
+			this.managedJobNode = managedJobNode;
+		}
+
+		@Override
+		public JobNode doJob() {
+
+			// Flag failure (puts container into failed state)
+			ManagedObjectContainerImpl.this.failure = this.failure;
+
+			// Provide propagate failure to job nodes
+			PropagateEscalationError error = new PropagateEscalationError(this.failure);
+
+			// Permanently fail job nodes
+			ManagedObjectContainerImpl.this.sourcingLatch.failJobNodes(error, true);
+			if (ManagedObjectContainerImpl.this.operationsLatch != null) {
+				// Asynchronous so include permanently failing operations
+				ManagedObjectContainerImpl.this.operationsLatch.failJobNodes(error, true);
+			}
+
+			// Propagate failure to managed job node
+			if (this.managedJobNode != null) {
+				return new FailThreadStateJobNode(error, this.managedJobNode.getThreadState())
+						.then(this.managedJobNode);
+			}
+
+			// Nothing further to fail this container
+			return null;
 		}
 	}
 

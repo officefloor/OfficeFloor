@@ -66,13 +66,10 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 	 * 
 	 * @param jobNode
 	 *            {@link ManagedJobNode} that has completed.
-	 * @param continueJobNode
-	 *            {@link JobNode} to continue once the {@link ManagedJobNode} is
-	 *            completed.
 	 * @return Optional {@link JobNode} to handle completion of the
 	 *         {@link ManagedJobNode}.
 	 */
-	JobNode managedJobNodeComplete(ManagedJobNode jobNode, JobNode continueJobNode);
+	JobNode managedJobNodeComplete(ManagedJobNode jobNode);
 
 	/**
 	 * Obtains the {@link ThreadState} containing this {@link Flow}.
