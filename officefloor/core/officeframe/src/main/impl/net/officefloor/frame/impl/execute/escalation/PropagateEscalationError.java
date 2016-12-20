@@ -18,12 +18,12 @@
 package net.officefloor.frame.impl.execute.escalation;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * <p>
- * Propagates the {@link Escalation} to allow the {@link AbstractManagedJobNodeContainer}
+ * Propagates the {@link Escalation} to allow the {@link AbstractManagedFunctionContainer}
  * to catch and handle it.
  * <p>
  * The {@link Escalation} (/{@link Throwable}) may be obtained from
@@ -38,7 +38,7 @@ public class PropagateEscalationError extends Error {
 	 * 
 	 * @param escalation
 	 *            {@link Throwable} to be propagated to the
-	 *            {@link AbstractManagedJobNodeContainer} to be handled. Is
+	 *            {@link AbstractManagedFunctionContainer} to be handled. Is
 	 *            {@link Throwable} as may be failures from a
 	 *            {@link ManagedObjectSource} that requires to be handled.
 	 */

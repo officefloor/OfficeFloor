@@ -17,10 +17,8 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Team having only one {@link Thread}.
@@ -33,11 +31,6 @@ public class OnePersonTeam implements Team {
 	 * Name of this {@link Team}.
 	 */
 	private final String teamName;
-
-	/**
-	 * {@link TeamIdentifier} of the {@link Team}.
-	 */
-	private final TeamIdentifier teamIdentifier;
 
 	/**
 	 * Time to wait in milliseconds for a {@link Job}.
@@ -59,14 +52,11 @@ public class OnePersonTeam implements Team {
 	 * 
 	 * @param teamName
 	 *            Name of this {@link Team}.
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier} of this {@link Team}.
 	 * @param waitTime
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
-	public OnePersonTeam(String teamName, TeamIdentifier teamIdentifier, long waitTime) {
+	public OnePersonTeam(String teamName, long waitTime) {
 		this.teamName = teamName;
-		this.teamIdentifier = teamIdentifier;
 		this.waitTime = waitTime;
 	}
 
@@ -91,7 +81,7 @@ public class OnePersonTeam implements Team {
 	}
 
 	@Override
-	public void assignJob(Job job, TeamIdentifier assignerTeam) {
+	public void assignJob(Job job) {
 		this.taskQueue.enqueue(job);
 	}
 
@@ -120,12 +110,7 @@ public class OnePersonTeam implements Team {
 	/**
 	 * The individual comprising the {@link Team}.
 	 */
-	public class OnePerson implements Runnable, JobContext {
-
-		/**
-		 * Indicates no time is set.
-		 */
-		private static final long NO_TIME = 0;
+	public class OnePerson implements Runnable {
 
 		/**
 		 * {@link JobQueue}.
@@ -146,11 +131,6 @@ public class OnePersonTeam implements Team {
 		 * Flag to indicate finished.
 		 */
 		protected volatile boolean finished = false;
-
-		/**
-		 * Time.
-		 */
-		private long time = NO_TIME;
 
 		/**
 		 * Initiate.
@@ -174,46 +154,17 @@ public class OnePersonTeam implements Team {
 			try {
 				while (this.continueWorking) {
 
-					// Reset to no time
-					this.time = NO_TIME;
-
 					// Obtain the next job
 					Job job = this.taskQueue.dequeue(this.waitTime);
 					if (job != null) {
 						// Have job therefore execute it
-						job.doJob(this);
+						job.run();
 					}
 				}
 			} finally {
 				// Flag finished
 				this.finished = true;
 			}
-		}
-
-		/*
-		 * ==================== ExecutionContext ===========================
-		 */
-
-		@Override
-		public long getTime() {
-
-			// Ensure time is set
-			if (this.time == NO_TIME) {
-				this.time = System.currentTimeMillis();
-			}
-
-			// Return the time
-			return this.time;
-		}
-
-		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return OnePersonTeam.this.teamIdentifier;
-		}
-
-		@Override
-		public boolean continueExecution() {
-			return this.continueWorking;
 		}
 	}
 

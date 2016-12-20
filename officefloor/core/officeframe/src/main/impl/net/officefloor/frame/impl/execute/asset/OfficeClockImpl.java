@@ -15,37 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.structure;
+package net.officefloor.frame.impl.execute.asset;
+
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.OfficeClock;
 
 /**
- * <p>
- * Set of {@link JobNode} instances that are to be activated.
- * <p>
- * The {@link JobNode} instances added will be activated at a later time when
- * locks are released to avoid dead-lock.
- * 
+ * {@link OfficeClock} implementation.
+ *
  * @author Daniel Sagenschneider
  */
-@Deprecated // using job loop
-public interface JobNodeActivateSet {
+public class OfficeClockImpl implements OfficeClock {
 
 	/**
-	 * Adds a {@link JobNode} to be activated.
-	 * 
-	 * @param jobNode
-	 *            {@link JobNode} to be activated.
+	 * Keeps approximate time for the {@link Office}.
 	 */
-	void addJobNode(JobNode jobNode);
+	private volatile long currentTime = System.currentTimeMillis();
 
 	/**
-	 * Adds an {@link JobNode} to be activated with the failure set on the
-	 * {@link ThreadState} of the {@link JobNode}.
-	 * 
-	 * @param jobNode
-	 *            {@link JobNode} to be activated.
-	 * @param failure
-	 *            Failure for the {@link JobNode} to handle.
+	 * Updates the current time.
 	 */
-	void addJobNode(JobNode jobNode, Throwable failure);
+	public void updateTime() {
+		this.currentTime = System.currentTimeMillis();
+	}
+
+	/*
+	 * ======================== OfficeClock =====================
+	 */
+
+	@Override
+	public long currentTimeMillis() {
+		return this.currentTime;
+	}
 
 }

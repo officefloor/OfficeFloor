@@ -17,26 +17,30 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.spi.team.Team;
+
 /**
- * Managed {@link JobNode}.
+ * Executes the {@link FunctionState} instances.
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedJobNode extends JobNode, LinkedListSetEntry<ManagedJobNode, Flow> {
+public interface FunctionLoop {
 
 	/**
-	 * Obtains the {@link Flow} that this {@link ManagedJobNode} is within.
+	 * Executes the {@link FunctionState} within the current {@link Thread}.
 	 * 
-	 * @return {@link Flow} that this {@link ManagedJobNode} is within.
+	 * @param function
+	 *            {@link FunctionState} to execute.
 	 */
-	Flow getFlow();
+	void executeFunction(FunctionState function);
 
 	/**
-	 * Enables specify the next sequential {@link ManagedJobNode}.
+	 * Delegates the {@link FunctionState} to the appropriate {@link Team} to
+	 * execute.
 	 * 
-	 * @param nextJobNode
-	 *            Next sequential {@link ManagedJobNode}.
+	 * @param function
+	 *            {@link FunctionState} to delegate to a {@link Team}.
 	 */
-	void setNextManagedJobNode(ManagedJobNode nextJobNode);
+	void delegateFunction(FunctionState function);
 
 }

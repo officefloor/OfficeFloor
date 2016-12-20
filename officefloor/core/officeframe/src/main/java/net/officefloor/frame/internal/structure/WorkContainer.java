@@ -45,14 +45,25 @@ public interface WorkContainer<W extends Work> {
 	 * @param managedObjectIndexes
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances to be loaded.
-	 * @param thenJobNode
-	 *            {@link JobNode} to continue once the {@link ManagedObject} is
-	 *            loaded.
-	 * @return {@link JobNode} for next {@link Job}. May be <code>null</code> to
-	 *         indicate no further {@link JobNode} instances are required to
+	 * @param managedJobNode
+	 *            {@link ManagedFunction} requiring the {@link ManagedObject}.
+	 * @return {@link FunctionState} for next {@link Job}. May be <code>null</code> to
+	 *         indicate no further {@link FunctionState} instances are required to
 	 *         load {@link ManagedObject} instances.
 	 */
-	JobNode loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, JobNode thenJobNode);
+	FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunction managedJobNode);
+
+	/**
+	 * Obtains the {@link ManagedObjectContainer} for the
+	 * {@link ManagedObjectIndex}.
+	 * 
+	 * @param managedObjectIndex
+	 *            {@link ManagedObjectIndex} identify the
+	 *            {@link ManagedObjectContainer}.
+	 * @return {@link ManagedObjectContainer} for the
+	 *         {@link ManagedObjectIndex}.
+	 */
+	ManagedObjectContainer getManagedObjectContainer(ManagedObjectIndex managedObjectIndex);
 
 	/**
 	 * Administers the {@link ManagedObject} instances as per the input
@@ -65,11 +76,11 @@ public interface WorkContainer<W extends Work> {
 	 *            {@link AdministratorContext}.
 	 * @throws Throwable
 	 *             If fails to administer the {@link ManagedObject} instances.
-	 * @return {@link JobNode} for next {@link Job}. May be <code>null</code> to
-	 *         indicate no further {@link JobNode} instances are required to
+	 * @return {@link FunctionState} for next {@link Job}. May be <code>null</code> to
+	 *         indicate no further {@link FunctionState} instances are required to
 	 *         load {@link ManagedObject} instances.
 	 */
-	JobNode administerManagedObjects(TaskDutyAssociation<?> duty, AdministratorContext adminContext) throws Throwable;
+	FunctionState administerManagedObjects(TaskDutyAssociation<?> duty, AdministratorContext adminContext) throws Throwable;
 
 	/**
 	 * Obtains the Object of the particular {@link ManagedObject}.
@@ -84,8 +95,8 @@ public interface WorkContainer<W extends Work> {
 	/**
 	 * Unloads the {@link Work}.
 	 * 
-	 * @return Optional {@link JobNode} to unload the {@link Work}.
+	 * @return Optional {@link FunctionState} to unload the {@link Work}.
 	 */
-	JobNode unloadWork();
+	FunctionState unloadWork();
 
 }

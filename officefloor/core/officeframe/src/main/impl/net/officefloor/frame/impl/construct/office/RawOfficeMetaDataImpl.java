@@ -288,9 +288,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			return null; // can not continue
 		}
 
-		// Create the office manager and asset manager factory
-		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName,
-				monitorOfficeInterval);
+		// Create the asset manager factory
 		AssetManagerFactoryImpl officeAssetManagerFactory = new AssetManagerFactoryImpl(
 				officeManager);
 
@@ -611,6 +609,10 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 		// Obtain the profiler
 		Profiler profiler = configuration.getProfiler();
+
+		// Create the office manager
+		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName,
+				monitorOfficeInterval);
 
 		// Create the office meta-data
 		rawOfficeMetaData.officeMetaData = new OfficeMetaDataImpl(officeName,

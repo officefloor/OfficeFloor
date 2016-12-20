@@ -38,45 +38,49 @@ public interface AssetLatch {
 
 	/**
 	 * <p>
-	 * Flags for the {@link JobNode} (and more specifically the
-	 * {@link ThreadState} of the {@link JobNode}) to wait until the
+	 * Flags for the {@link FunctionState} (and more specifically the
+	 * {@link ThreadState} of the {@link FunctionState}) to wait until the
 	 * {@link Asset} is ready.
 	 * <p>
 	 * This is typically because the {@link Asset} is doing some processing that
-	 * the {@link JobNode} requires completed before proceeding.
+	 * the {@link FunctionState} requires completed before proceeding.
 	 * 
-	 * @param jobNode
-	 *            {@link JobNode} to be released when the {@link Asset} is
+	 * @param function
+	 *            {@link FunctionState} to be released when the {@link Asset} is
 	 *            ready.
-	 * @return Optional {@link JobNode} to execute to wait on the {@link Asset}.
+	 * @return Optional {@link FunctionState} to execute to wait on the
+	 *         {@link Asset}.
 	 */
-	JobNode awaitOnAsset(JobNode jobNode);
+	FunctionState awaitOnAsset(FunctionState function);
 
 	/**
-	 * Releases the {@link JobNode} instances waiting on the {@link Asset}.
+	 * Releases the {@link FunctionState} instances waiting on the
+	 * {@link Asset}.
 	 * 
 	 * @param isPermanent
-	 *            <code>true</code> indicates that all {@link JobNode} instances
-	 *            added to the {@link AssetLatch} from now on are activated
-	 *            immediately. It is useful to flag an {@link AssetLatch} in
-	 *            this state when the {@link Asset} is no longer being used to
-	 *            stop a {@link JobNode} from waiting forever.
+	 *            <code>true</code> indicates that all {@link FunctionState}
+	 *            instances added to the {@link AssetLatch} from now on are
+	 *            activated immediately. It is useful to flag an
+	 *            {@link AssetLatch} in this state when the {@link Asset} is no
+	 *            longer being used to stop a {@link FunctionState} from waiting
+	 *            forever.
 	 */
-	void releaseJobNodes(boolean isPermanent);
+	void releaseFunctions(boolean isPermanent);
 
 	/**
-	 * Fails the {@link JobNode} instances waiting on this {@link Asset}.
+	 * Fails the {@link FunctionState} instances waiting on this {@link Asset}.
 	 * 
 	 * @param failure
 	 *            Failure to propagate to the {@link ThreadState} of the
-	 *            {@link JobNode} instances waiting on the {@link Asset}.
+	 *            {@link FunctionState} instances waiting on the {@link Asset}.
 	 * @param isPermanent
-	 *            <code>true</code> indicates that all {@link JobNode} instances
-	 *            added to the {@link AssetLatch} from now on are activated
-	 *            immediately with the input failure. It is useful to flag an
-	 *            {@link AssetLatch} in this state when the {@link Asset} is in
-	 *            a failed state that can not be recovered from.
+	 *            <code>true</code> indicates that all {@link FunctionState}
+	 *            instances added to the {@link AssetLatch} from now on are
+	 *            activated immediately with the input failure. It is useful to
+	 *            flag an {@link AssetLatch} in this state when the
+	 *            {@link Asset} is in a failed state that can not be recovered
+	 *            from.
 	 */
-	void failJobNodes(Throwable failure, boolean isPermanent);
+	void failFunctions(Throwable failure, boolean isPermanent);
 
 }

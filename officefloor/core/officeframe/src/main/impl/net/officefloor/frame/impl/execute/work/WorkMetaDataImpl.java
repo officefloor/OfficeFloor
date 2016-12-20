@@ -26,6 +26,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -61,8 +62,7 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	private final AdministratorMetaData<?, ?>[] administratorMetaData;
 
 	/**
-	 * {@link FlowMetaData} for the initial {@link Flow} of the
-	 * {@link Work} .
+	 * {@link FlowMetaData} for the initial {@link Flow} of the {@link Work} .
 	 */
 	private final FlowMetaData<W> initialFlowMetaData;
 
@@ -85,16 +85,14 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 *            {@link AdministratorMetaData} of the {@link Administrator}
 	 *            instances bound to this {@link Work}.
 	 * @param initialFlowMetaData
-	 *            {@link FlowMetaData} for the initial {@link Flow} of
-	 *            the {@link Work}.
+	 *            {@link FlowMetaData} for the initial {@link Flow} of the
+	 *            {@link Work}.
 	 * @param taskMetaData
 	 *            {@link TaskMetaData} of the {@link Task} instances of this
 	 *            {@link Work}.
 	 */
-	public WorkMetaDataImpl(String workName, WorkFactory<W> workFactory,
-			ManagedObjectMetaData<?>[] moMetaData,
-			AdministratorMetaData<?, ?>[] adminMetaData,
-			FlowMetaData<W> initialFlowMetaData,
+	public WorkMetaDataImpl(String workName, WorkFactory<W> workFactory, ManagedObjectMetaData<?>[] moMetaData,
+			AdministratorMetaData<?, ?>[] adminMetaData, FlowMetaData<W> initialFlowMetaData,
 			TaskMetaData<W, ?, ?>[] taskMetaData) {
 		this.workName = workName;
 		this.workFactory = workFactory;
@@ -114,9 +112,9 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	}
 
 	@Override
-	public WorkContainer<W> createWorkContainer(ProcessState processState) {
+	public WorkContainer<W> createWorkContainer(ThreadState threadState) {
 		W work = this.workFactory.createWork();
-		return new WorkContainerImpl<W>(work, this, processState);
+		return new WorkContainerImpl<W>(work, this, threadState);
 	}
 
 	@Override

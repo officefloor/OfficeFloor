@@ -20,9 +20,9 @@ package net.officefloor.frame.impl.execute.asset;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.spi.team.TeamIdentifier;
@@ -119,7 +119,7 @@ public class OfficeManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures the {@link OfficeManager} activates the {@link JobNode} instances
+	 * Ensures the {@link OfficeManager} activates the {@link FunctionState} instances
 	 * in its own {@link Thread}.
 	 */
 	public void testActivateJobNodes() throws Exception {
@@ -162,7 +162,7 @@ public class OfficeManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link JobNode} for testing.
+	 * {@link FunctionState} for testing.
 	 */
 	private class MockJobNode extends JobNodeAdapter {
 

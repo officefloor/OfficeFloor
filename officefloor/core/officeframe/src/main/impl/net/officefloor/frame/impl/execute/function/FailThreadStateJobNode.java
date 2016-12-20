@@ -15,17 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.jobnode;
+package net.officefloor.frame.impl.execute.function;
 
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * {@link JobNode} to fail the {@link ThreadState}.
+ * {@link FunctionState} to fail the {@link ThreadState}.
  *
  * @author Daniel Sagenschneider
  */
-public class FailThreadStateJobNode implements JobNode {
+public class FailThreadStateJobNode implements FunctionState {
 
 	/**
 	 * Failure for the {@link ThreadState}.
@@ -60,7 +60,7 @@ public class FailThreadStateJobNode implements JobNode {
 	}
 
 	@Override
-	public JobNode doJob() {
+	public FunctionState execute() {
 
 		// Flag thread state as failed
 		this.threadState.setFailure(this.failure);

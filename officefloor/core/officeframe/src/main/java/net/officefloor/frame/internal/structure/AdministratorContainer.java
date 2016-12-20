@@ -61,7 +61,7 @@ public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
 	 * @throws Throwable
 	 *             If {@link Duty} fails.
 	 */
-	JobNode doDuty(TaskDutyAssociation<A> taskDutyAssociation, List<I> extensionInterfaces,
+	FunctionState doDuty(TaskDutyAssociation<A> taskDutyAssociation, List<I> extensionInterfaces,
 			AdministratorContext context) throws Throwable;
 
 }

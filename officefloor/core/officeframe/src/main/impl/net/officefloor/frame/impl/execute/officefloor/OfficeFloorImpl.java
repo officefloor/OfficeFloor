@@ -32,7 +32,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -192,7 +192,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 
 				// Create and activate the startup task
-				JobNode startupTask = officeMetaData.createProcess(
+				FunctionState startupTask = officeMetaData.createProcess(
 						officeStartupTask.getFlowMetaData(),
 						officeStartupTask.getParameter(), null, null, null);
 				startupTask.activateJob(STARTUP_TEAM);

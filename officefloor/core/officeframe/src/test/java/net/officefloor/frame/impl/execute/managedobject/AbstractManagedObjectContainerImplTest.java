@@ -32,14 +32,14 @@ import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetLatch;
-import net.officefloor.frame.internal.structure.CleanupSequence;
+import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
@@ -193,7 +193,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		 * @param isPooled
 		 *            Is using a {@link ManagedObjectPool}.
 		 * @param isRecycled
-		 *            Is using a recycle {@link JobNode}.
+		 *            Is using a recycle {@link FunctionState}.
 		 * @return <code>true</code> to filter out scenario.
 		 */
 		boolean isFilter(boolean isNameAware, boolean isAsynchronous,
@@ -226,10 +226,10 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	private boolean isRecycled = false;
 
 	/**
-	 * {@link CleanupSequence}.
+	 * {@link ManagedObjectCleanup}.
 	 */
-	private final CleanupSequence cleanupSequence = this
-			.createMock(CleanupSequence.class);
+	private final ManagedObjectCleanup cleanupSequence = this
+			.createMock(ManagedObjectCleanup.class);
 
 	/**
 	 * {@link ManagedObjectMetaData}.
@@ -268,9 +268,9 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	private final JobContext jobContext = this.createMock(JobContext.class);
 
 	/**
-	 * {@link JobNode}.
+	 * {@link FunctionState}.
 	 */
-	private final JobNode jobNode = this.createMock(JobNode.class);
+	private final FunctionState jobNode = this.createMock(FunctionState.class);
 
 	/**
 	 * {@link JobNodeActivateSet}.
@@ -309,9 +309,9 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			.createMock(MockManagedObject.class);
 
 	/**
-	 * Recycle {@link JobNode}.
+	 * Recycle {@link FunctionState}.
 	 */
-	private final JobNode recycleJobNode = this.createMock(JobNode.class);
+	private final FunctionState recycleJobNode = this.createMock(FunctionState.class);
 
 	/**
 	 * {@link WorkContainer}.
@@ -411,7 +411,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	}
 
 	/**
-	 * Flags has a recycle {@link JobNode}.
+	 * Flags has a recycle {@link FunctionState}.
 	 */
 	protected void setRecycled() {
 		this.checkNotInitialised();

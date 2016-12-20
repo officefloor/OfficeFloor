@@ -33,7 +33,7 @@ public interface LinkedListSetEntry<E extends LinkedListSetEntry<E, O>, O> {
 	 * {@link LinkedListSet} they were intended for and can not be shared
 	 * between {@link LinkedListSet} instances. This constraint:
 	 * <ol>
-	 * <li>ensures the integrity of the {@link JobNode}, {@link Flow},
+	 * <li>ensures the integrity of the {@link FunctionState}, {@link Flow},
 	 * {@link ThreadState}, {@link ProcessState} structure, and</li>
 	 * <li>improves uniqueness performance as {@link #getNext()} and
 	 * {@link #getPrev()} both returning <code>null</code> indicates not added</li>

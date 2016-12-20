@@ -38,9 +38,9 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -88,7 +88,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 				.createMock(AdministratorContainer.class);
 		final ThreadProfiler threadProfiler = this
 				.createMock(ThreadProfiler.class);
-		final JobMetaData jobMetaData = this.createMock(JobMetaData.class);
+		final ManagedFunctionMetaData jobMetaData = this.createMock(ManagedFunctionMetaData.class);
 
 		// Record creating the ThreadState
 		this.recordReturn(this.threadMetaData,
@@ -190,7 +190,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	public void testNotProfile() {
 
-		final JobMetaData jobMetaData = this.createMock(JobMetaData.class);
+		final ManagedFunctionMetaData jobMetaData = this.createMock(ManagedFunctionMetaData.class);
 
 		// Record creating and completing the ThreadState
 		this.record_ThreadState_init();
@@ -323,7 +323,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	public void testEscalating() {
 
-		final JobNode jobNode = this.createMock(JobNode.class);
+		final FunctionState jobNode = this.createMock(FunctionState.class);
 
 		// Record creating and completing the ThreadState
 		this.record_ThreadState_init();
@@ -349,12 +349,12 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures a {@link JobNode} does not wait on the {@link ThreadState} when
+	 * Ensures a {@link FunctionState} does not wait on the {@link ThreadState} when
 	 * the {@link ThreadState} is complete.
 	 */
 	public void testNotWaitOnThreadWhenComplete() {
 
-		final JobNode jobNode = this.createMock(JobNode.class);
+		final FunctionState jobNode = this.createMock(FunctionState.class);
 
 		// Record not waiting on a completed thread
 		this.record_ThreadState_init();
@@ -371,14 +371,14 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures a {@link JobNode} does not wait on its {@link ThreadState}.
+	 * Ensures a {@link FunctionState} does not wait on its {@link ThreadState}.
 	 */
 	@SuppressWarnings("rawtypes")
 	public void testJobNodeNotWaitOnItsOwnThread() {
 
 		final Work work = this.createMock(Work.class);
 		final Task<?, ?, ?> task = this.createMock(Task.class);
-		final JobNode[] jobNode = new JobNode[1];
+		final FunctionState[] jobNode = new FunctionState[1];
 
 		final WorkMetaData<Work> workMetaData = MetaDataTestInstanceFactory
 				.createWorkMetaData(work);
@@ -409,12 +409,12 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures that the joined {@link JobNode} instances are activated on
+	 * Ensures that the joined {@link FunctionState} instances are activated on
 	 * {@link ThreadState} completion.
 	 */
 	public void testActivateJoinedJobNodesOnThreadCompletion() {
 
-		final JobNode jobNode = this.createMock(JobNode.class);
+		final FunctionState jobNode = this.createMock(FunctionState.class);
 
 		// Record not waiting on a completed thread
 		this.record_ThreadState_init();
@@ -432,12 +432,12 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures does nothing on a joined {@link JobNode} if the join is not timed
+	 * Ensures does nothing on a joined {@link FunctionState} if the join is not timed
 	 * out on a check.
 	 */
 	public void testCheckOnAssetWithNotTimedOutJoin() {
 
-		final JobNode jobNode = this.createMock(JobNode.class);
+		final FunctionState jobNode = this.createMock(FunctionState.class);
 		final CheckAssetContext context = this
 				.createMock(CheckAssetContext.class);
 
@@ -456,11 +456,11 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures can time out the {@link JobNode} join on a check.
+	 * Ensures can time out the {@link FunctionState} join on a check.
 	 */
 	public void testTimeOutJoinForCheckOnAsset() {
 
-		final JobNode jobNode = this.createMock(JobNode.class);
+		final FunctionState jobNode = this.createMock(FunctionState.class);
 		final CheckAssetContext context = this
 				.createMock(CheckAssetContext.class);
 		final String token = "TOKEN";
@@ -469,7 +469,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.record_ThreadState_init();
 		this.record_FlowAsset_waitOnFlow(jobNode);
 		this.recordReturn(context, context.getTime(), TIME_OUT_TIME);
-		context.failJobNodes(null, true);
+		context.failFunctions(null, true);
 		this.control(context).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
@@ -490,14 +490,14 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures can time out the {@link JobNode} join and activate another
-	 * {@link JobNode} join on {@link ThreadState} completion.
+	 * Ensures can time out the {@link FunctionState} join and activate another
+	 * {@link FunctionState} join on {@link ThreadState} completion.
 	 */
 	public void testTimeOutOneJoinAndCompleteOtherJoin() {
 
-		final JobNode timedOutJobNode = this.createMock(JobNode.class);
+		final FunctionState timedOutJobNode = this.createMock(FunctionState.class);
 		final Object timedOutToken = "TOKEN";
-		final JobNode activatedJobNode = this.createMock(JobNode.class);
+		final FunctionState activatedJobNode = this.createMock(FunctionState.class);
 		final Object activatedToken = new Integer(1);
 		final CheckAssetContext context = this
 				.createMock(CheckAssetContext.class);
@@ -508,7 +508,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		AssetLatch activatedJobNodeMonitor = this
 				.record_FlowAsset_waitOnFlow(activatedJobNode);
 		this.recordReturn(context, context.getTime(), TIME_OUT_TIME);
-		context.failJobNodes(null, true);
+		context.failFunctions(null, true);
 		this.control(context).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
@@ -650,13 +650,13 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	private List<Asset> joinedAssets = new LinkedList<Asset>();
 
 	/**
-	 * Records the {@link JobNode} joining on the {@link ThreadState}.
+	 * Records the {@link FunctionState} joining on the {@link ThreadState}.
 	 * 
 	 * @param jobNode
-	 *            {@link JobNode}.
+	 *            {@link FunctionState}.
 	 * @return {@link AssetLatch} monitoring the join.
 	 */
-	private AssetLatch record_FlowAsset_waitOnFlow(JobNode jobNode) {
+	private AssetLatch record_FlowAsset_waitOnFlow(FunctionState jobNode) {
 
 		final Flow flow = this.createMock(Flow.class);
 		final ThreadState anotherThreadState = this

@@ -28,8 +28,8 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -224,9 +224,9 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public JobNode createGovernanceJob(Flow flow,
+	public FunctionState createGovernanceJob(Flow flow,
 			GovernanceActivity<I, F> governanceActivity,
-			JobNode parallelJobNodeOwner) {
+			FunctionState parallelJobNodeOwner) {
 
 		// Obtain the process state
 		ProcessState processState = flow.getThreadState().getProcessState();

@@ -22,7 +22,7 @@ import java.util.List;
 
 import net.officefloor.frame.api.profile.ProfiledJob;
 import net.officefloor.frame.api.profile.ProfiledThread;
-import net.officefloor.frame.internal.structure.JobMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ThreadProfiler;
 import net.officefloor.frame.spi.team.Job;
 
@@ -58,7 +58,7 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThread {
 	 */
 
 	@Override
-	public void profileJob(JobMetaData jobMetaData) {
+	public void profileJob(ManagedFunctionMetaData jobMetaData) {
 
 		// Obtain the start time stamp
 		long startTimestamp = System.nanoTime();

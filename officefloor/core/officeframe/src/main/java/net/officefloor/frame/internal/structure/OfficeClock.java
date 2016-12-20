@@ -17,23 +17,24 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.manage.Office;
 
 /**
- * Factory to create the {@link FlowCallback} {@link JobNode}.
+ * Clock for the {@link Office}.
  *
  * @author Daniel Sagenschneider
  */
-public interface FlowCallbackJobNodeFactory {
+public interface OfficeClock {
 
 	/**
-	 * Creates the {@link FlowCallback} {@link JobNode}.
+	 * <p>
+	 * Obtains the approximate current time.
+	 * <p>
+	 * This is more efficient means to obtain {@link System#currentTimeMillis()}
+	 * as complete millisecond accuracy is not required.
 	 * 
-	 * @param exception
-	 *            Possible {@link Throwable} from the {@link Flow}. May be
-	 *            <code>null</code>.
-	 * @return {@link FlowCallback} {@link JobNode}.
+	 * @return Approximate {@link System#currentTimeMillis()}.
 	 */
-	JobNode createJobNode(Throwable exception);
+	long currentTimeMillis();
 
 }

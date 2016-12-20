@@ -23,8 +23,8 @@ import java.util.TimerTask;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
@@ -77,9 +77,9 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	private final TeamManagement escalationResponsibleTeam;
 
 	/**
-	 * {@link JobNodeLoop}.
+	 * {@link FunctionLoop}.
 	 */
-	private final JobNodeLoop jobNodeLoop;
+	private final FunctionLoop jobNodeLoop;
 
 	/**
 	 * {@link ProcessTicker}.
@@ -119,7 +119,7 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	 */
 	public ManagedObjectExecuteContextImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
 			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData, TeamManagement escalationResponsibleTeam,
-			JobNodeLoop jobNodeLoop, ProcessTicker processTicker, Timer timer) {
+			FunctionLoop jobNodeLoop, ProcessTicker processTicker, Timer timer) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
@@ -165,7 +165,7 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 		FlowMetaData<?> flowMetaData = this.processLinks[processIndex];
 
 		// Create the job in a new process
-		final JobNode jobNode = this.officeMetaData.createProcess(flowMetaData, parameter, escalationHandler,
+		final FunctionState jobNode = this.officeMetaData.createProcess(flowMetaData, parameter, escalationHandler,
 				this.escalationResponsibleTeam, managedObject, this.managedObjectMetaData, this.processMoIndex);
 
 		// Obtain the process state
@@ -183,13 +183,13 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 			this.timer.schedule(new TimerTask() {
 				@Override
 				public void run() {
-					ManagedObjectExecuteContextImpl.this.jobNodeLoop.delegateJobNode(jobNode);
+					ManagedObjectExecuteContextImpl.this.jobNodeLoop.delegateFunction(jobNode);
 				}
 			}, delay);
 
 		} else {
 			// Execute the process immediately
-			this.jobNodeLoop.runJobNode(jobNode);
+			this.jobNodeLoop.executeFunction(jobNode);
 		}
 	}
 

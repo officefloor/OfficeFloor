@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<F>> extends JobMetaData {
+public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<F>> extends ManagedFunctionMetaData {
 
 	/**
 	 * Obtains the name of this {@link Task}.
@@ -130,7 +130,7 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	TaskDutyAssociation<?>[] getPostAdministrationMetaData();
 
 	/**
-	 * Creates the {@link ManagedJobNode} for the {@link Task}.
+	 * Creates the {@link ManagedFunction} for the {@link Task}.
 	 * 
 	 * @param flow
 	 *            {@link Flow} containing the {@link Task}.
@@ -138,14 +138,14 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            {@link WorkContainer} for the {@link Work} for the
 	 *            {@link Task}.
 	 * @param parallelJobNodeOwner
-	 *            Parallel {@link ManagedJobNode} owner.
+	 *            Parallel {@link ManagedFunction} owner.
 	 * @param parameter
 	 *            Parameter.
 	 * @param governanceDeactivationStrategy
 	 *            {@link GovernanceDeactivationStrategy}.
-	 * @return {@link JobNode}.
+	 * @return {@link FunctionState}.
 	 */
-	ManagedJobNode createTaskNode(Flow flow, WorkContainer<W> workContainer, ManagedJobNode parallelJobNodeOwner,
+	ManagedFunction createTaskNode(Flow flow, WorkContainer<W> workContainer, ManagedFunction parallelJobNodeOwner,
 			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy);
 
 }

@@ -28,10 +28,10 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -103,23 +103,18 @@ public class ManagedObjectSourceStandAlone {
 		MS moSource = managedObjectSourceClass.newInstance();
 
 		// Create necessary builders
-		OfficeFloorBuilder officeFloorBuilder = OfficeFrame
-				.createOfficeFloorBuilder();
+		OfficeFloorBuilder officeFloorBuilder = OfficeFrame.createOfficeFloorBuilder();
 		ManagingOfficeBuilder<F> managingOfficeBuilder = officeFloorBuilder
-				.addManagedObject(STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME,
-						managedObjectSourceClass).setManagingOffice(
-						"STAND ALONE");
-		OfficeBuilder officeBuilder = officeFloorBuilder
-				.addOffice(STAND_ALONE_MANAGING_OFFICE_NAME);
+				.addManagedObject(STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, managedObjectSourceClass)
+				.setManagingOffice("STAND ALONE");
+		OfficeBuilder officeBuilder = officeFloorBuilder.addOffice(STAND_ALONE_MANAGING_OFFICE_NAME);
 
 		// Create the delegate source context
-		SourceContext context = new SourceContextImpl(false, Thread
-				.currentThread().getContextClassLoader());
+		SourceContext context = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
 
 		// Initialise the managed object source
-		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(
-				false, STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, this.properties,
-				context, managingOfficeBuilder, officeBuilder);
+		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(false,
+				STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, this.properties, context, managingOfficeBuilder, officeBuilder);
 		moSource.init(sourceContext);
 
 		// Return the initialised managed object source
@@ -187,8 +182,7 @@ public class ManagedObjectSourceStandAlone {
 	 *            the {@link TaskContext} to validate functionality for the
 	 *            {@link Task}.
 	 */
-	public void registerInvokeProcessTask(Enum<?> processKey,
-			Task<?, ?, ?> task, TaskContext<?, ?, ?> taskContext) {
+	public void registerInvokeProcessTask(Enum<?> processKey, Task<?, ?, ?> task, TaskContext<?, ?, ?> taskContext) {
 		this.registerInvokeProcessTask(processKey.ordinal(), task, taskContext);
 	}
 
@@ -204,10 +198,8 @@ public class ManagedObjectSourceStandAlone {
 	 *            the {@link TaskContext} to validate functionality for the
 	 *            {@link Task}.
 	 */
-	public void registerInvokeProcessTask(int processIndex, Task<?, ?, ?> task,
-			TaskContext<?, ?, ?> taskContext) {
-		this.registerInvokeProcessServicer(processIndex,
-				new TaskInvokedProcessServicer(task, taskContext));
+	public void registerInvokeProcessTask(int processIndex, Task<?, ?, ?> task, TaskContext<?, ?, ?> taskContext) {
+		this.registerInvokeProcessServicer(processIndex, new TaskInvokedProcessServicer(task, taskContext));
 	}
 
 	/**
@@ -219,8 +211,7 @@ public class ManagedObjectSourceStandAlone {
 	 * @param servicer
 	 *            {@link InvokedProcessServicer}.
 	 */
-	public void registerInvokeProcessServicer(Enum<?> processKey,
-			InvokedProcessServicer servicer) {
+	public void registerInvokeProcessServicer(Enum<?> processKey, InvokedProcessServicer servicer) {
 		this.registerInvokeProcessServicer(processKey.ordinal(), servicer);
 	}
 
@@ -233,8 +224,7 @@ public class ManagedObjectSourceStandAlone {
 	 * @param servicer
 	 *            {@link InvokedProcessServicer}.
 	 */
-	public void registerInvokeProcessServicer(int processIndex,
-			InvokedProcessServicer servicer) {
+	public void registerInvokeProcessServicer(int processIndex, InvokedProcessServicer servicer) {
 		this.processes.put(new Integer(processIndex), servicer);
 	}
 
@@ -262,8 +252,7 @@ public class ManagedObjectSourceStandAlone {
 		 * @param taskContext
 		 *            {@link TaskContext}.
 		 */
-		public TaskInvokedProcessServicer(Task<?, ?, ?> task,
-				TaskContext<?, ?, ?> taskContext) {
+		public TaskInvokedProcessServicer(Task<?, ?, ?> task, TaskContext<?, ?, ?> taskContext) {
 			this.task = task;
 			this.taskContext = taskContext;
 		}
@@ -274,8 +263,7 @@ public class ManagedObjectSourceStandAlone {
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void service(int processIndex, Object parameter,
-				ManagedObject managedObject) throws Throwable {
+		public void service(int processIndex, Object parameter, ManagedObject managedObject) throws Throwable {
 			this.task.doTask((TaskContext) this.taskContext);
 		}
 	}
@@ -283,8 +271,7 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
-	private class LoadExecuteContext<F extends Enum<F>> implements
-			ManagedObjectExecuteContext<F>, ProcessFuture {
+	private class LoadExecuteContext<F extends Enum<F>> implements ManagedObjectExecuteContext<F> {
 
 		/**
 		 * Processes the {@link Task} for the invoked {@link ProcessState}.
@@ -300,10 +287,11 @@ public class ManagedObjectSourceStandAlone {
 		 *            {@link ProcessState}.
 		 * @param managedObject
 		 *            {@link ManagedObject} for the {@link ProcessState}.
+		 * @param completionListener
+		 *            {@link ProcessCompletionListener}.
 		 */
-		private ProcessFuture process(int processIndex,
-				EscalationHandler escalationHandler, long delay,
-				Object parameter, ManagedObject managedObject) {
+		private void process(int processIndex, EscalationHandler escalationHandler, long delay, Object parameter,
+				ManagedObject managedObject, ProcessCompletionListener completionListener) {
 
 			// Ignore delay and execute immediately
 
@@ -312,14 +300,18 @@ public class ManagedObjectSourceStandAlone {
 					.get(new Integer(processIndex));
 			if (servicer == null) {
 				throw new UnsupportedOperationException(
-						"No task configured for process invocation index "
-								+ processIndex);
+						"No task configured for process invocation index " + processIndex);
 			}
 
 			try {
 				try {
 					// Service the invoked process
 					servicer.service(processIndex, parameter, managedObject);
+
+					// Complete possible completion listener
+					if (completionListener != null) {
+						completionListener.processComplete();
+					}
 
 				} catch (Throwable ex) {
 					// Determine if handle
@@ -340,9 +332,6 @@ public class ManagedObjectSourceStandAlone {
 					throw new Error(ex);
 				}
 			}
-
-			// Return this as the process future
-			return this;
 		}
 
 		/*
@@ -350,43 +339,27 @@ public class ManagedObjectSourceStandAlone {
 		 */
 
 		@Override
-		public ProcessFuture invokeProcess(F key, Object parameter,
-				ManagedObject managedObject, long delay) {
-			return this.process(key.ordinal(), null, delay, parameter,
-					managedObject);
+		public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
+				ProcessCompletionListener completionListener) {
+			this.process(key.ordinal(), null, delay, parameter, managedObject, completionListener);
 		}
 
 		@Override
-		public ProcessFuture invokeProcess(int flowIndex, Object parameter,
-				ManagedObject managedObject, long delay) {
-			return this.process(flowIndex, null, delay, parameter,
-					managedObject);
+		public void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
+				ProcessCompletionListener completionListener) {
+			this.process(flowIndex, null, delay, parameter, managedObject, completionListener);
 		}
 
 		@Override
-		public ProcessFuture invokeProcess(F key, Object parameter,
-				ManagedObject managedObject, long delay,
-				EscalationHandler escalationHandler) {
-			return this.process(key.ordinal(), escalationHandler, delay,
-					parameter, managedObject);
+		public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
+				EscalationHandler escalationHandler, ProcessCompletionListener completionListener) {
+			this.process(key.ordinal(), escalationHandler, delay, parameter, managedObject, completionListener);
 		}
 
 		@Override
-		public ProcessFuture invokeProcess(int flowIndex, Object parameter,
-				ManagedObject managedObject, long delay,
-				EscalationHandler escalationHandler) {
-			return this.process(flowIndex, escalationHandler, delay, parameter,
-					managedObject);
-		}
-
-		/*
-		 * ==================== ProcessFuture =============================
-		 */
-
-		@Override
-		public boolean isComplete() {
-			// Always complete
-			return true;
+		public void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
+				EscalationHandler escalationHandler, ProcessCompletionListener completionListener) {
+			this.process(flowIndex, escalationHandler, delay, parameter, managedObject, completionListener);
 		}
 	}
 

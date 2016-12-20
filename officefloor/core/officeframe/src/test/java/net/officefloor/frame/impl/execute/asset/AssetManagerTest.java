@@ -22,8 +22,8 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -206,7 +206,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures can activate {@link JobNode} instances from the
+	 * Ensures can activate {@link FunctionState} instances from the
 	 * {@link CheckAssetContext}.
 	 */
 	public void testActivateJobNodesFromCheckAssetContext() {
@@ -234,7 +234,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures can fail {@link JobNode} instances from the
+	 * Ensures can fail {@link FunctionState} instances from the
 	 * {@link CheckAssetContext}.
 	 */
 	public void testFailJobNodesFromCheckAssetContext() {
@@ -249,7 +249,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				CheckAssetContext context = (CheckAssetContext) actual[0];
-				context.failJobNodes(failure, isPermanent);
+				context.failFunctions(failure, isPermanent);
 				return true;
 			}
 		});

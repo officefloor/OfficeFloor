@@ -23,8 +23,8 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -81,9 +81,9 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 	private final JobContext jobContext = this.createMock(JobContext.class);
 
 	/**
-	 * Mock {@link JobNode}.
+	 * Mock {@link FunctionState}.
 	 */
-	private final JobNode jobNode = this.createMock(JobNode.class);
+	private final FunctionState jobNode = this.createMock(FunctionState.class);
 
 	/**
 	 * {@link ContainerContext}.

@@ -17,14 +17,14 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests {@link Governance} within the {@link AbstractManagedJobNodeContainer}.
+ * Tests {@link Governance} within the {@link AbstractManagedFunctionContainer}.
  * 
  * @author Daniel Sagenschneider
  */

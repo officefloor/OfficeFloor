@@ -18,12 +18,12 @@
 package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.MockTeamSource;
 
 /**
- * Tests the {@link AbstractManagedJobNodeContainer} executing a {@link Job}.
+ * Tests the {@link AbstractManagedFunctionContainer} executing a {@link Job}.
  * 
  * @author Daniel Sagenschneider
  */

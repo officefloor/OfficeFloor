@@ -40,30 +40,30 @@ public interface CheckAssetContext {
 	long getTime();
 
 	/**
-	 * Releases the {@link JobNode} instances waiting on the {@link Asset}.
+	 * Releases the {@link FunctionState} instances waiting on the {@link Asset}.
 	 * 
 	 * @param isPermanent
-	 *            <code>true</code> indicates that all {@link JobNode} instances
+	 *            <code>true</code> indicates that all {@link FunctionState} instances
 	 *            added to the {@link AssetLatch} from now on are activated
 	 *            immediately. It is useful to flag an {@link AssetLatch} in
 	 *            this state when the {@link Asset} is no longer being used to
-	 *            stop a {@link JobNode} from waiting forever.
+	 *            stop a {@link FunctionState} from waiting forever.
 	 */
-	void releaseJobNodes(boolean isPermanent);
+	void releaseFunctions(boolean isPermanent);
 
 	/**
-	 * Fails the {@link JobNode} instances waiting on this {@link Asset}.
+	 * Fails the {@link FunctionState} instances waiting on this {@link Asset}.
 	 * 
 	 * @param failure
 	 *            Failure to propagate to the {@link ThreadState} of the
-	 *            {@link JobNode} instances waiting on the {@link Asset}.
+	 *            {@link FunctionState} instances waiting on the {@link Asset}.
 	 * @param isPermanent
-	 *            <code>true</code> indicates that all {@link JobNode} instances
+	 *            <code>true</code> indicates that all {@link FunctionState} instances
 	 *            added to the {@link AssetLatch} from now on are activated
 	 *            immediately with the input failure. It is useful to flag an
 	 *            {@link AssetLatch} in this state when the {@link Asset} is in
 	 *            a failed state that can not be recovered from.
 	 */
-	void failJobNodes(Throwable failure, boolean isPermanent);
+	void failFunctions(Throwable failure, boolean isPermanent);
 
 }

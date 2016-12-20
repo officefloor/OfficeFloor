@@ -17,31 +17,30 @@
  */
 package net.officefloor.frame.impl.execute.duty;
 
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.ManagedJobNodeContext;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * {@link Duty} implementation for a {@link Job}.
  * 
  * @author Daniel Sagenschneider
  */
-public class DutyJob<W extends Work, I, A extends Enum<A>> extends
-		AbstractManagedJobNodeContainer<W, AdministratorMetaData<I, A>> {
+public class DutyJob<W extends Work, I, A extends Enum<A>>
+		extends AbstractManagedFunctionContainer<W, AdministratorMetaData<I, A>> {
 
 	/**
 	 * {@link TaskDutyAssociation}.
@@ -65,17 +64,15 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 * @param taskDutyAssociation
 	 *            {@link TaskDutyAssociation}.
 	 * @param parallelOwner
-	 *            Parallel owning {@link JobNode}.
+	 *            Parallel owning {@link ManagedFunction}.
 	 * @param administeringTaskMetaData
 	 *            {@link TaskMetaData} of the {@link Task} being administered.
 	 */
-	public DutyJob(Flow flow, WorkContainer<W> workContainer,
-			AdministratorMetaData<I, A> adminMetaData,
-			TaskDutyAssociation<A> taskDutyAssociation, JobNode parallelOwner,
+	public DutyJob(Flow flow, WorkContainer<W> workContainer, AdministratorMetaData<I, A> adminMetaData,
+			TaskDutyAssociation<A> taskDutyAssociation, ManagedFunction parallelOwner,
 			TaskMetaData<?, ?, ?> administeringTaskMetaData) {
-		super(flow, workContainer, adminMetaData, parallelOwner,
-				administeringTaskMetaData.getRequiredManagedObjects(), null,
-				null);
+		super(flow, workContainer, adminMetaData, parallelOwner, administeringTaskMetaData.getRequiredManagedObjects(),
+				null, null);
 		this.taskDutyAssociation = taskDutyAssociation;
 	}
 
@@ -89,13 +86,10 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	}
 
 	@Override
-	protected Object executeJob(ManagedJobNodeContext context,
-			JobContext jobContext, JobNodeActivateSet activateSet)
-			throws Throwable {
+	protected Object executeFunction(ManagedFunctionContext context) throws Throwable {
 
 		// Administer the duty
-		this.workContainer.administerManagedObjects(this.taskDutyAssociation,
-				this.administratorContext, this);
+		this.workContainer.administerManagedObjects(this.taskDutyAssociation, this.administratorContext);
 
 		// Administration duties do not pass on parameters
 		return null;
@@ -116,8 +110,8 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 		}
 
 		@Override
-		public void doFlow(FlowMetaData<?> flowMetaData, Object parameter) {
-			DutyJob.this.doFlow(flowMetaData, parameter);
+		public void doFlow(FlowMetaData<?> flowMetaData, Object parameter, FlowCallback callback) {
+			DutyJob.this.doFlow(flowMetaData, parameter, callback);
 		}
 	}
 

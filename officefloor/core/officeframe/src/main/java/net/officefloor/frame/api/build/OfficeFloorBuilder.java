@@ -20,7 +20,7 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -87,7 +87,7 @@ public interface OfficeFloorBuilder {
 			ManagedObjectSource<D, F> managedObjectSource);
 
 	/**
-	 * Adds a {@link Team} which will execute {@link JobNode} instances within
+	 * Adds a {@link Team} which will execute {@link FunctionState} instances within
 	 * this {@link OfficeFloor}.
 	 * 
 	 * @param <TS>

@@ -20,7 +20,6 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * Provides control over the {@link ActiveGovernance}.
@@ -34,22 +33,13 @@ public interface ActiveGovernanceControl<F extends Enum<F>> {
 	 *
 	 * @param governanceContext
 	 *            {@link GovernanceContext}.
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode}.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
-	 * @param context
-	 *            {@link ContainerContext}.
+	 * @param function
+	 *            {@link FunctionState}.
 	 * @return <code>true</code> if complete.
 	 * @throws Throwable
 	 *             If fails to provide {@link Governance} over the
 	 *             {@link ManagedObject}.
 	 */
-	boolean governManagedObject(GovernanceContext<F> governanceContext,
-			JobContext jobContext, JobNode jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context)
-			throws Throwable;
+	boolean governManagedObject(GovernanceContext<F> governanceContext, FunctionState function) throws Throwable;
 
 }

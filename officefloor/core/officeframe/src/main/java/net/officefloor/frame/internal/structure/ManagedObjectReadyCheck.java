@@ -15,34 +15,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.execute;
+package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * <p>
- * Callback for completion of a {@link Flow}.
- * <p>
- * The return state of the {@link Flow} is available from the
- * {@link ManagedObject} instances manipulated by the {@link Flow} (hence there
- * is no returned value to the {@link FlowCallback}).
+ * Check that the {@link ManagedObject} is ready.
  *
  * @author Daniel Sagenschneider
  */
-public interface FlowCallback {
+public interface ManagedObjectReadyCheck {
 
 	/**
-	 * Invoked on completion of the {@link Flow}.
+	 * Obtains the {@link ManagedFunction} requiring the check on the
+	 * {@link ManagedFunction}.
 	 * 
-	 * @param exception
-	 *            Possible {@link Throwable} from the {@link Flow}.
-	 *            <code>null</code> indicates all {@link Escalation} instances
-	 *            handled within {@link Flow}.
-	 * @throws Throwable
-	 *             Enable failure within the callback logic.
+	 * @return {@link ManagedFunction} requiring the check on the
+	 *         {@link ManagedObject}.
 	 */
-	void run(Throwable exception) throws Throwable;
+	ManagedFunction getManagedJobNode();
+
+	/**
+	 * Flags that a {@link ManagedObject} or one of its dependency
+	 * {@link ManagedObject} instances is not ready.
+	 * 
+	 * @return {@link FunctionState} to flag the {@link ManagedObject} as not ready.
+	 */
+	FunctionState setNotReady();
 
 }

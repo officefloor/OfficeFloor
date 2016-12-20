@@ -29,7 +29,7 @@ import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
-import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
@@ -43,7 +43,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -66,7 +66,7 @@ import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Abstract functionality to test execution of {@link AbstractManagedJobNodeContainer}.
+ * Abstract functionality to test execution of {@link AbstractManagedFunctionContainer}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -426,7 +426,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		Flow flow = processState.createThread(flowAssetManager);
 
 		// Create the initial job node to execute
-		JobNode initialJobNode = flow.createTaskNode(this.getInitialNode(),
+		FunctionState initialJobNode = flow.createTaskNode(this.getInitialNode(),
 				null, null, GovernanceDeactivationStrategy.ENFORCE);
 		Job initialJob = (Job) initialJobNode;
 

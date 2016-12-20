@@ -19,10 +19,10 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 
 /**
- * Reference to a {@link JobNode}.
+ * Reference to a {@link FunctionState}.
  * 
  * @author Daniel Sagenschneider
  */

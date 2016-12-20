@@ -40,12 +40,12 @@ public interface WorkMetaData<W extends Work> {
 	/**
 	 * Creates a {@link WorkContainer} from this {@link WorkMetaData}.
 	 * 
-	 * @param processState
-	 *            {@link ProcessState} that the {@link WorkContainer} is being
+	 * @param threadState
+	 *            {@link ThreadState} that the {@link WorkContainer} is being
 	 *            created within.
 	 * @return {@link WorkContainer}.
 	 */
-	WorkContainer<W> createWorkContainer(ProcessState processState);
+	WorkContainer<W> createWorkContainer(ThreadState threadState);
 
 	/**
 	 * Obtain the {@link WorkFactory}.
@@ -55,12 +55,12 @@ public interface WorkMetaData<W extends Work> {
 	WorkFactory<W> getWorkFactory();
 
 	/**
-	 * Obtain the {@link FlowMetaData} for the initial {@link Flow} of
-	 * the {@link Work}.
+	 * Obtain the {@link FlowMetaData} for the initial {@link Flow} of the
+	 * {@link Work}.
 	 * 
 	 * @return {@link FlowMetaData} for the initial {@link Flow} of the
-	 *         {@link Work} or <code>null</code> if no initial
-	 *         {@link Flow} for the {@link Work}.
+	 *         {@link Work} or <code>null</code> if no initial {@link Flow} for
+	 *         the {@link Work}.
 	 */
 	FlowMetaData<W> getInitialFlowMetaData();
 

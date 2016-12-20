@@ -34,7 +34,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -295,9 +295,9 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 		 */
 
 		@Override
-		public JobNode createTaskNode(Flow flow,
+		public FunctionState createTaskNode(Flow flow,
 				WorkContainer<EscalationHandlerTask> workContainer,
-				JobNode parallelJobNodeOwner, Object parameter,
+				FunctionState parallelJobNodeOwner, Object parameter,
 				GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 
 			// Create required Governance to deactivate all governance

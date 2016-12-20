@@ -20,13 +20,12 @@ package net.officefloor.frame.impl.execute.task;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
+import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -44,8 +43,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		implements TaskMetaData<W, D, F> {
+public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<F>> implements TaskMetaData<W, D, F> {
 
 	/**
 	 * Name of this {@link Job}.
@@ -80,12 +78,6 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	private final TeamManagement responsibleTeam;
 
 	/**
-	 * {@link Team} to enable the worker ({@link Thread}) of the responsible
-	 * {@link Team} to continue on to execute the next {@link Job}.
-	 */
-	private final Team continueTeam;
-
-	/**
 	 * {@link ManagedObjectIndex} instances identifying the
 	 * {@link ManagedObject} instances that must be loaded before the
 	 * {@link Task} may be executed.
@@ -116,6 +108,11 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	private final TaskDutyAssociation<?>[] postTaskDuties;
 
 	/**
+	 * {@link FunctionLoop}.
+	 */
+	private final FunctionLoop jobNodeLoop;
+
+	/**
 	 * <p>
 	 * {@link WorkMetaData} for this {@link Task}.
 	 * <p>
@@ -125,8 +122,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 
 	/**
 	 * <p>
-	 * Meta-data of the available {@link Flow} instances from this
-	 * {@link Task}.
+	 * Meta-data of the available {@link Flow} instances from this {@link Task}.
 	 * <p>
 	 * Acts as <code>final</code> but specified after constructor.
 	 */
@@ -134,8 +130,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 
 	/**
 	 * <p>
-	 * {@link TaskMetaData} of the next {@link Task} within the
-	 * {@link Flow}.
+	 * {@link TaskMetaData} of the next {@link Task} within the {@link Flow}.
 	 * <p>
 	 * Acts as <code>final</code> but specified after constructor.
 	 */
@@ -163,7 +158,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            Parameter type of this {@link Task}.
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of the {@link Team} responsible for
-	 *            executing this {@link Task}.
+	 *            executing this {@link Task}. May be <code>null</code>.
 	 * @param continueTeam
 	 *            {@link Team} to enable the worker ({@link Thread}) of the
 	 *            responsible {@link Team} to continue on to execute the next
@@ -183,27 +178,25 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 * @param postTaskDuties
 	 *            {@link TaskDutyAssociation} specifying the {@link Duty}
 	 *            instances to be completed after executing the {@link Task}.
+	 * @param jobNodeLoop
+	 *            {@link FunctionLoop}.
 	 */
-	public TaskMetaDataImpl(String jobName, String taskName,
-			TaskFactory<W, D, F> taskFactory, Object differentiator,
-			Class<?> parameterType, TeamManagement responsibleTeam,
-			Team continueTeam, ManagedObjectIndex[] requiredManagedObjects,
-			ManagedObjectIndex[] taskToWorkMoTranslations,
-			boolean[] requiredGovernance,
-			TaskDutyAssociation<?>[] preTaskDuties,
-			TaskDutyAssociation<?>[] postTaskDuties) {
+	public TaskMetaDataImpl(String jobName, String taskName, TaskFactory<W, D, F> taskFactory, Object differentiator,
+			Class<?> parameterType, TeamManagement responsibleTeam, ManagedObjectIndex[] requiredManagedObjects,
+			ManagedObjectIndex[] taskToWorkMoTranslations, boolean[] requiredGovernance,
+			TaskDutyAssociation<?>[] preTaskDuties, TaskDutyAssociation<?>[] postTaskDuties, FunctionLoop jobNodeLoop) {
 		this.jobName = jobName;
 		this.taskName = taskName;
 		this.taskFactory = taskFactory;
 		this.differentiator = differentiator;
 		this.parameterType = parameterType;
 		this.responsibleTeam = responsibleTeam;
-		this.continueTeam = continueTeam;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.taskToWorkMoTranslations = taskToWorkMoTranslations;
 		this.requiredGovernance = requiredGovernance;
 		this.preTaskDuties = preTaskDuties;
 		this.postTaskDuties = postTaskDuties;
+		this.jobNodeLoop = jobNodeLoop;
 	}
 
 	/**
@@ -212,8 +205,8 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 * @param workMetaData
 	 *            {@link WorkMetaData} for this {@link Task}.
 	 * @param flowMetaData
-	 *            Meta-data of the available {@link Flow} instances from
-	 *            this {@link Task}.
+	 *            Meta-data of the available {@link Flow} instances from this
+	 *            {@link Task}.
 	 * @param nextTaskInFlow
 	 *            {@link TaskMetaData} of the next {@link Task} within the
 	 *            {@link Flow}.
@@ -221,10 +214,8 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            {@link EscalationProcedure} for exceptions of the {@link Task}
 	 *            of this {@link TaskMetaData}.
 	 */
-	public void loadRemainingState(WorkMetaData<W> workMetaData,
-			FlowMetaData<?>[] flowMetaData,
-			TaskMetaData<?, ?, ?> nextTaskInFlow,
-			EscalationProcedure escalationProcedure) {
+	public void loadRemainingState(WorkMetaData<W> workMetaData, FlowMetaData<?>[] flowMetaData,
+			TaskMetaData<?, ?, ?> nextTaskInFlow, EscalationProcedure escalationProcedure) {
 		this.workMetaData = workMetaData;
 		this.flowMetaData = flowMetaData;
 		this.nextTaskInFlow = nextTaskInFlow;
@@ -261,18 +252,8 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	}
 
 	@Override
-	public JobNodeActivatableSet createJobActivableSet() {
-		return new JobNodeActivatableSetImpl();
-	}
-
-	@Override
 	public TeamManagement getResponsibleTeam() {
 		return this.responsibleTeam;
-	}
-
-	@Override
-	public Team getContinueTeam() {
-		return this.continueTeam;
 	}
 
 	@Override
@@ -321,12 +302,15 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	}
 
 	@Override
-	public JobNode createTaskNode(Flow flow,
-			WorkContainer<W> workContainer, JobNode parallelJobNodeOwner,
-			Object parameter,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
-		return new TaskJobNode<W, D, F>(flow, workContainer, this,
-				governanceDeactivationStrategy, parallelJobNodeOwner, parameter);
+	public FunctionLoop getJobNodeLoop() {
+		return this.jobNodeLoop;
+	}
+
+	@Override
+	public ManagedFunction createTaskNode(Flow flow, WorkContainer<W> workContainer, ManagedFunction parallelJobNodeOwner,
+			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy) {
+		return new TaskJobNode<W, D, F>(flow, workContainer, this, governanceDeactivationStrategy, parallelJobNodeOwner,
+				parameter);
 	}
 
 }

@@ -19,9 +19,6 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Activity regarding the {@link Governance}.
@@ -43,18 +40,12 @@ public interface GovernanceActivity<I, F extends Enum<F>> {
 	 * 
 	 * @param governanceContext
 	 *            {@link GovernanceContext}
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link JobNode}.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} undertaking
-	 *            the activity.
-	 * @return Optional {@link JobNode} to undertake {@link Governance}.
+	 * @param function
+	 *            {@link FunctionState}.
+	 * @return Optional {@link FunctionState} to undertake {@link Governance}.
 	 * @throws Throwable
 	 *             If activity fails.
 	 */
-	JobNode doActivity(GovernanceContext<F> governanceContext, JobContext jobContext, JobNode jobNode,
-			TeamIdentifier currentTeam) throws Throwable;
+	FunctionState doActivity(GovernanceContext<F> governanceContext, FunctionState function) throws Throwable;
 
 }

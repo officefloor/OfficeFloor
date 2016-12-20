@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministratorMetaData<I extends Object, A extends Enum<A>> extends JobMetaData {
+public interface AdministratorMetaData<I extends Object, A extends Enum<A>> extends ManagedFunctionMetaData {
 
 	/**
 	 * Creates a new {@link AdministratorContainer} from this
@@ -67,7 +67,7 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> exte
 	DutyMetaData getDutyMetaData(DutyKey<A> dutyKey);
 
 	/**
-	 * Creates the {@link ManagedJobNode} for the {@link Duty}.
+	 * Creates the {@link ManagedFunction} for the {@link Duty}.
 	 * 
 	 * @param administeringTaskMetaData
 	 *            {@link TaskMetaData} of the administered {@link Task}.
@@ -78,11 +78,11 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> exte
 	 * @param taskDutyAssociation
 	 *            {@link TaskDutyAssociation}.
 	 * @param parallelJobNodeOwner
-	 *            Paralllel {@link ManagedJobNode} owner.
-	 * @return {@link ManagedJobNode} for the {@link Duty}.
+	 *            Paralllel {@link ManagedFunction} owner.
+	 * @return {@link ManagedFunction} for the {@link Duty}.
 	 */
-	ManagedJobNode createDutyNode(TaskMetaData<?, ?, ?> administeringTaskMetaData,
+	ManagedFunction createDutyNode(TaskMetaData<?, ?, ?> administeringTaskMetaData,
 			WorkContainer<?> administeringWorkContainer, Flow flow, TaskDutyAssociation<?> taskDutyAssociation,
-			ManagedJobNode parallelJobNodeOwner);
+			ManagedFunction parallelJobNodeOwner);
 
 }

@@ -23,7 +23,7 @@ import java.util.List;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -35,12 +35,12 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.JobMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.ManagedJobNodeContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -58,7 +58,7 @@ import org.easymock.AbstractMatcher;
 import org.easymock.internal.AlwaysMatcher;
 
 /**
- * Contains functionality for testing the {@link AbstractManagedJobNodeContainer}.
+ * Contains functionality for testing the {@link AbstractManagedFunctionContainer}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -100,9 +100,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	private final Flow flow = this.createMock(Flow.class);
 
 	/**
-	 * {@link JobMetaData}.
+	 * {@link ManagedFunctionMetaData}.
 	 */
-	private final JobMetaData jobMetaData = this.createMock(JobMetaData.class);
+	private final ManagedFunctionMetaData jobMetaData = this.createMock(ManagedFunctionMetaData.class);
 
 	/**
 	 * {@link ParallelOwnerJob}.
@@ -191,9 +191,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(Flow.class);
 
 	/**
-	 * Asynchronous {@link JobNode}.
+	 * Asynchronous {@link FunctionState}.
 	 */
-	private final JobNode asynchronousJob = this.createMock(JobNode.class);
+	private final FunctionState asynchronousJob = this.createMock(FunctionState.class);
 
 	/**
 	 * Asynchronous {@link ThreadState}.
@@ -232,7 +232,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * </ol>
 	 * <p>
 	 * This is always the first steps of executing a
-	 * {@link AbstractManagedJobNodeContainer}.
+	 * {@link AbstractManagedFunctionContainer}.
 	 * 
 	 * @param job
 	 *            {@link Job}.
@@ -502,7 +502,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 *            Sequential {@link Flow} parameter.
 	 * @param isActivateFlow
 	 *            Flag indicating if required to activate the first
-	 *            {@link JobNode} of the instigated sequential
+	 *            {@link FunctionState} of the instigated sequential
 	 *            {@link Flow}.
 	 */
 	protected void record_doSequentialFlow(Job currentJob,
@@ -569,13 +569,13 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the parallel {@link JobNode} from the parallel
+	 * Records obtaining the parallel {@link FunctionState} from the parallel
 	 * {@link Job}.
 	 * 
 	 * @param parallelNode
-	 *            Parallel's {@link Job} parallel {@link JobNode}.
+	 *            Parallel's {@link Job} parallel {@link FunctionState}.
 	 */
-	protected void record_parallelJob_getParallelNode(JobNode parallelNode) {
+	protected void record_parallelJob_getParallelNode(FunctionState parallelNode) {
 		this.recordReturn(this.parallelJob, this.parallelJob.getParallelNode(),
 				parallelNode);
 	}
@@ -646,7 +646,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 						GovernanceDeactivationStrategy.ENFORCE),
 				this.asynchronousJob);
 		this.asynchronousJob
-				.activateJob(AbstractManagedJobNodeContainer.ASYNCHRONOUS_FLOW_TEAM_IDENTIFIER);
+				.activateJob(AbstractManagedFunctionContainer.ASYNCHRONOUS_FLOW_TEAM_IDENTIFIER);
 		this.recordReturn(this.asynchronousFlow,
 				this.asynchronousFlow.getThreadState(),
 				this.asynchronousThreadState);
@@ -765,15 +765,15 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records the creation of the {@link EscalationFlow} {@link JobNode}.
+	 * Records the creation of the {@link EscalationFlow} {@link FunctionState}.
 	 * 
 	 * @param failure
 	 *            {@link Throwable} causing escalation.
 	 * @param parallelOwner
-	 *            Parallel owner of {@link EscalationFlow} {@link JobNode}.
+	 *            Parallel owner of {@link EscalationFlow} {@link FunctionState}.
 	 */
 	private void record_JobContainer_createEscalationJob(Throwable failure,
-			JobNode parallelOwner) {
+			FunctionState parallelOwner) {
 		this.recordReturn(this.escalation, this.escalation.getTaskMetaData(),
 				this.escalationTaskMetaData);
 		this.recordReturn(this.flow, this.flow.getThreadState(),
@@ -837,7 +837,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records not activating the {@link JobNode} when attempted.
+	 * Records not activating the {@link FunctionState} when attempted.
 	 */
 	protected void record_JobContainer_notActivateJob() {
 		// Record not activating the job node
@@ -871,7 +871,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records setting the parallel {@link JobNode} for the Parallel Owner.
+	 * Records setting the parallel {@link FunctionState} for the Parallel Owner.
 	 */
 	protected void record_ParallelOwner_unlinkAndActivate() {
 		this.parallelOwnerJob.setParallelNode(null);
@@ -953,7 +953,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * Creates the {@link Job} for the {@link JobFunctionality}.
 	 * 
 	 * @param hasParallelOwnerJob
-	 *            Flag indicating if to have a parallel owner {@link JobNode}.
+	 *            Flag indicating if to have a parallel owner {@link FunctionState}.
 	 * @param jobFunctionality
 	 *            {@link JobFunctionality} instances.
 	 * @return {@link Job}.
@@ -968,7 +968,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * Creates the {@link Job} for the {@link JobFunctionality}.
 	 * 
 	 * @param hasParallelOwnerJob
-	 *            Flag indicating if to have a parallel owner {@link JobNode}.
+	 *            Flag indicating if to have a parallel owner {@link FunctionState}.
 	 * @param requiredManagedObjects
 	 *            Required {@link ManagedObjectIndex} instances.
 	 * @param requiredGovernance
@@ -1042,7 +1042,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * functionality.
 	 */
 	protected class FunctionalityJob extends
-			AbstractManagedJobNodeContainer<Work, JobMetaData> implements
+			AbstractManagedFunctionContainer<Work, ManagedFunctionMetaData> implements
 			JobFunctionalityContext {
 
 		/**
@@ -1053,7 +1053,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		/**
 		 * {@link ParallelOwnerJob} for this {@link Job}.
 		 */
-		public final JobNode parallelOwnerJob;
+		public final FunctionState parallelOwnerJob;
 
 		/**
 		 * Requires {@link ManagedObjectIndex} instances.
@@ -1079,7 +1079,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 * Initiate.
 		 * 
 		 * @param parallelOwnerJob
-		 *            Parallel Owner {@link JobNode}.
+		 *            Parallel Owner {@link FunctionState}.
 		 * @param requiredManagedObjectIndexes
 		 *            Required {@link ManagedObjectIndex} instances.
 		 * @param requiredGovernance
@@ -1089,7 +1089,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 * @param jobFunctionality
 		 *            {@link JobFunctionality}.
 		 */
-		public FunctionalityJob(JobNode parallelOwnerJob,
+		public FunctionalityJob(FunctionState parallelOwnerJob,
 				ManagedObjectIndex[] requiredManagedObjectIndexes,
 				boolean[] requiredGovernance,
 				GovernanceDeactivationStrategy deactivationStrategy,
@@ -1117,7 +1117,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected Object executeJob(ManagedJobNodeContext context,
+		protected Object executeJob(ManagedFunctionContext context,
 				JobContext jobContext, JobNodeActivateSet activateSet)
 				throws Throwable {
 			// Indicate the job is executed
@@ -1273,30 +1273,30 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Parallel owner {@link Job}.
 	 */
-	private static interface ParallelOwnerJob extends Job, JobNode {
+	private static interface ParallelOwnerJob extends Job, FunctionState {
 	}
 
 	/**
 	 * Next {@link Job}.
 	 */
-	private static interface NextJob extends Job, JobNode {
+	private static interface NextJob extends Job, FunctionState {
 	}
 
 	/**
 	 * Sequential {@link Job}.
 	 */
-	private static interface SequentialJob extends Job, JobNode {
+	private static interface SequentialJob extends Job, FunctionState {
 	}
 
 	/**
 	 * Parallel {@link Job}.
 	 */
-	private static interface ParallelJob extends Job, JobNode {
+	private static interface ParallelJob extends Job, FunctionState {
 	}
 
 	/**
 	 * {@link EscalationFlow} {@link Job}.
 	 */
-	private static interface EscalationJob extends Job, JobNode {
+	private static interface EscalationJob extends Job, FunctionState {
 	}
 }

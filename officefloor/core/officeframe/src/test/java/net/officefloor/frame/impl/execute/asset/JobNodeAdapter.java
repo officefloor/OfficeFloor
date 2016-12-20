@@ -21,17 +21,17 @@ import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
- * Provides default methods for the {@link JobNode}.
+ * Provides default methods for the {@link FunctionState}.
  * 
  * @author Daniel Sagenschneider
  */
 public class JobNodeAdapter extends
-		AbstractLinkedListSetEntry<JobNode, Flow> implements JobNode {
+		AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
 
 	/**
 	 * {@link Flow}.
@@ -89,47 +89,47 @@ public class JobNodeAdapter extends
 	}
 
 	/**
-	 * Next {@link JobNode}.
+	 * Next {@link FunctionState}.
 	 */
-	private JobNode nextNode = null;
+	private FunctionState nextNode = null;
 
 	@Override
-	public void setNextNode(JobNode jobNode) {
+	public void setNextNode(FunctionState jobNode) {
 		this.nextNode = jobNode;
 	}
 
 	@Override
-	public JobNode getNextNode() {
+	public FunctionState getNextNode() {
 		return this.nextNode;
 	}
 
 	/**
-	 * Parallel {@link JobNode}.
+	 * Parallel {@link FunctionState}.
 	 */
-	private JobNode parallelNode = null;
+	private FunctionState parallelNode = null;
 
 	@Override
-	public void setParallelNode(JobNode jobNode) {
+	public void setParallelNode(FunctionState jobNode) {
 		this.parallelNode = jobNode;
 	}
 
 	@Override
-	public JobNode getParallelNode() {
+	public FunctionState getParallelNode() {
 		return this.parallelNode;
 	}
 
 	/**
 	 * Parallel owner.
 	 */
-	private JobNode parallelOwner = null;
+	private FunctionState parallelOwner = null;
 
 	@Override
-	public void setParallelOwner(JobNode jobNode) {
+	public void setParallelOwner(FunctionState jobNode) {
 		this.parallelOwner = jobNode;
 	}
 
 	@Override
-	public JobNode getParallelOwner() {
+	public FunctionState getParallelOwner() {
 		return this.parallelOwner;
 	}
 

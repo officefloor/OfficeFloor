@@ -86,21 +86,21 @@ public interface ProcessState {
 	 * @param assetManager
 	 *            {@link AssetManager} for the {@link ThreadState}.
 	 * @param callbackFactory
-	 *            Optional {@link FlowCallbackJobNodeFactory} to create a
-	 *            {@link JobNode} to be instigating on completion of the created
+	 *            Optional {@link FlowCallbackFactory} to create a
+	 *            {@link FunctionState} to be instigating on completion of the created
 	 *            {@link ThreadState}.
 	 * @return New {@link ThreadState} contained in this {@link ProcessState}.
 	 */
-	ThreadState createThread(AssetManager assetManager, FlowCallbackJobNodeFactory callbackFactory);
+	ThreadState createThread(AssetManager assetManager, FlowCallbackFactory callbackFactory);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.
 	 * 
 	 * @param thread
 	 *            {@link ThreadState} that has completed.
-	 * @return Optional {@link JobNode} to complete the {@link ThreadState}.
+	 * @return Optional {@link FunctionState} to complete the {@link ThreadState}.
 	 */
-	JobNode threadComplete(ThreadState thread);
+	FunctionState threadComplete(ThreadState thread);
 
 	/**
 	 * Obtains the {@link ManagedObjectContainer} for the input index.
@@ -144,10 +144,10 @@ public interface ProcessState {
 	EscalationFlow getOfficeFloorEscalation();
 
 	/**
-	 * Obtains the {@link CleanupSequence} for this {@link ProcessState}.
+	 * Obtains the {@link ManagedObjectCleanup} for this {@link ProcessState}.
 	 * 
-	 * @return {@link CleanupSequence} for this {@link ProcessState}.
+	 * @return {@link ManagedObjectCleanup} for this {@link ProcessState}.
 	 */
-	CleanupSequence getCleanupSequence();
+	ManagedObjectCleanup getManagedObjectCleanup();
 
 }

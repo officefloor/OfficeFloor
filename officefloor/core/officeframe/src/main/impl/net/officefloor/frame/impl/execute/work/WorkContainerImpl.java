@@ -21,17 +21,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.jobnode.LoadManagedObjectJobNode;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.Promise;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
@@ -76,6 +77,11 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	private final ThreadState threadState;
 
 	/**
+	 * Index of next {@link ManagedObject} to load.
+	 */
+	private int loadIndex = 0;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param work
@@ -110,44 +116,17 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public JobNode loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, JobNode thenJobNode) {
+	public FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunction managedJobNode) {
 
 		// Load the managed objects
-		for (int i = 0; i < managedObjectIndexes.length; i++) {
-			ManagedObjectIndex index = managedObjectIndexes[i];
-
-			// Obtain the index of managed object within scope
-			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
+		if (this.loadIndex < managedObjectIndexes.length) {
+			ManagedObjectIndex index = managedObjectIndexes[this.loadIndex++];
 
 			// Obtain the managed object container
-			ManagedObjectContainer container;
-			switch (index.getManagedObjectScope()) {
-			case WORK:
-				// Lazy load the container
-				container = this.managedObjects[scopeIndex];
-				if (container == null) {
-					container = this.workMetaData.getManagedObjectMetaData()[scopeIndex]
-							.createManagedObjectContainer(this.threadState);
-					this.managedObjects[scopeIndex] = container;
-				}
-				break;
-
-			case THREAD:
-				// Obtain the container from the thread state
-				container = this.threadState.getManagedObjectContainer(scopeIndex);
-				break;
-
-			case PROCESS:
-				// Obtain the container from the process state
-				container = this.threadState.getProcessState().getManagedObjectContainer(scopeIndex);
-				break;
-
-			default:
-				throw new IllegalStateException("Unknown managed object scope " + index.getManagedObjectScope());
-			}
+			ManagedObjectContainer container = this.getManagedObjectContainer(index);
 
 			// Trigger loading the managed object
-			return new LoadManagedObjectJobNode(container).then(thenJobNode);
+			return container.loadManagedObject(managedJobNode, this);
 		}
 
 		// Managed Objects are loaded
@@ -155,8 +134,46 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
+	public ManagedObjectContainer getManagedObjectContainer(ManagedObjectIndex managedObjectIndex) {
+
+		// Obtain the index of managed object within scope
+		int scopeIndex = managedObjectIndex.getIndexOfManagedObjectWithinScope();
+
+		// Obtain the managed object container
+		ManagedObjectContainer container;
+		switch (managedObjectIndex.getManagedObjectScope()) {
+		case WORK:
+			// Lazy load the container
+			container = this.managedObjects[scopeIndex];
+			if (container == null) {
+				container = this.workMetaData.getManagedObjectMetaData()[scopeIndex]
+						.createManagedObjectContainer(this.threadState);
+				this.managedObjects[scopeIndex] = container;
+			}
+			break;
+
+		case THREAD:
+			// Obtain the container from the thread state
+			container = this.threadState.getManagedObjectContainer(scopeIndex);
+			break;
+
+		case PROCESS:
+			// Obtain the container from the process state
+			container = this.threadState.getProcessState().getManagedObjectContainer(scopeIndex);
+			break;
+
+		default:
+			throw new IllegalStateException(
+					"Unknown managed object scope " + managedObjectIndex.getManagedObjectScope());
+		}
+
+		// Return the container
+		return container;
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public JobNode administerManagedObjects(TaskDutyAssociation<?> duty, AdministratorContext adminContext)
+	public FunctionState administerManagedObjects(TaskDutyAssociation<?> duty, AdministratorContext adminContext)
 			throws Throwable {
 
 		// Obtain the index identifying the administrator
@@ -235,48 +252,22 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	@Override
 	public Object getObject(ManagedObjectIndex index) {
 
-		// Obtain the index of managed object within scope
-		int scopeIndex = index.getIndexOfManagedObjectWithinScope();
-
 		// Obtain the managed object container
-		ManagedObjectContainer container;
-		switch (index.getManagedObjectScope()) {
-		case WORK:
-			// Always available by loadManagedObjects
-			container = this.managedObjects[scopeIndex];
-			break;
-
-		case THREAD:
-			container = this.threadState.getManagedObjectContainer(scopeIndex);
-			break;
-
-		case PROCESS:
-			container = this.threadState.getProcessState().getManagedObjectContainer(scopeIndex);
-			break;
-
-		default:
-			throw new IllegalStateException("Unknown managed object scope " + index.getManagedObjectScope());
-		}
+		ManagedObjectContainer container = this.getManagedObjectContainer(index);
 
 		// Return the object of the managed object
 		return container.getObject();
 	}
 
 	@Override
-	public JobNode unloadWork() {
+	public FunctionState unloadWork() {
 
 		// Unload the work bound managed objects
-		for (ManagedObjectContainer container : this.managedObjects) {
-			if (container != null) {
-				JobNode unloadJobNode = container.unloadManagedObject();
-				if (unloadJobNode != null) {
-					return unloadJobNode;
-				}
-			}
+		FunctionState unloadJobNode = null;
+		for (int i = this.managedObjects.length - 1; i >= 0; i--) {
+			unloadJobNode = Promise.then(this.managedObjects[i].unloadManagedObject(), unloadJobNode);
 		}
-
-		// Work unloaded
-		return null;
+		return unloadJobNode;
 	}
 
 }

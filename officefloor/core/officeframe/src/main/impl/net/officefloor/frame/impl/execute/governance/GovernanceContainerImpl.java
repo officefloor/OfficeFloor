@@ -28,8 +28,8 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -194,7 +194,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 	@Override
 	public boolean activateGovernance(GovernanceContext<F> governanceContext,
-			JobContext jobContext, JobNode jobNode,
+			JobContext jobContext, FunctionState jobNode,
 			JobNodeActivateSet activateSet, ContainerContext context)
 			throws Throwable {
 
@@ -219,7 +219,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	public boolean governManagedObject(I extension,
 			ActiveGovernanceManager<I, F> governanceManager,
 			GovernanceContext<F> governanceContext, JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
+			FunctionState jobNode, JobNodeActivateSet activateSet,
 			ContainerContext context) throws Throwable {
 
 		// Access Point: Job
@@ -245,7 +245,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 	@Override
 	public boolean enforceGovernance(GovernanceContext<F> governanceContext,
-			JobContext jobContext, JobNode jobNode,
+			JobContext jobContext, FunctionState jobNode,
 			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
 			ContainerContext context) throws Throwable {
 
@@ -286,7 +286,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 
 	@Override
 	public boolean disregardGovernance(GovernanceContext<F> governanceContext,
-			JobContext jobContext, JobNode jobNode,
+			JobContext jobContext, FunctionState jobNode,
 			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
 			ContainerContext context) throws Throwable {
 
@@ -331,7 +331,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	 * @param jobContext
 	 *            {@link JobContext}.
 	 * @param jobNode
-	 *            {@link JobNode}.
+	 *            {@link FunctionState}.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet}.
 	 * @param context
@@ -339,7 +339,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	 * @return <code>true</code> if {@link ManagedObject} instances are ready.
 	 */
 	private boolean isManagedObjectsReady(JobContext jobContext,
-			JobNode jobNode, JobNodeActivateSet activateSet,
+			FunctionState jobNode, JobNodeActivateSet activateSet,
 			ContainerContext context) {
 
 		// Ensure managed objects are ready

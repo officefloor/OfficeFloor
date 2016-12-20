@@ -15,19 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.jobnode;
+package net.officefloor.frame.impl.execute.function;
 
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * {@link JobNode} to synchronise the {@link ProcessState} with the current
+ * {@link FunctionState} to synchronise the {@link ProcessState} with the current
  * {@link ThreadState}.
  *
  * @author Daniel Sagenschneider
  */
-public class SynchroniseProcessStateJobNode implements JobNode {
+public class SynchroniseProcessStateJobNode implements FunctionState {
 
 	/**
 	 * Current {@link ThreadState}.
@@ -61,7 +61,7 @@ public class SynchroniseProcessStateJobNode implements JobNode {
 	}
 
 	@Override
-	public JobNode doJob() {
+	public FunctionState execute() {
 
 		// Synchronise process state (always undertaken via main thread state)
 		synchronized (this.currentThreadState.getProcessState().getMainThreadState()) {

@@ -17,29 +17,25 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.execute.FlowCallback;
 
 /**
- * Executes the {@link JobNode} instances.
- *
+ * Context to execute a {@link FunctionState} that is managed.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface JobNodeLoop {
+public interface ManagedFunctionContext {
 
 	/**
-	 * Runs the {@link JobNode} with the current {@link Thread}.
+	 * Invokes the {@link Flow} for the input {@link FlowMetaData}.
 	 * 
-	 * @param jobNode
-	 *            {@link JobNode} to execute.
+	 * @param flowMetaData
+	 *            {@link FlowMetaData}.
+	 * @param parameter
+	 *            Parameter for the {@link Flow}.
+	 * @param callback
+	 *            Optional {@link FlowCallback}.
 	 */
-	void runJobNode(JobNode jobNode);
-
-	/**
-	 * Delegates the {@link JobNode} to a {@link Team} to execute.
-	 * 
-	 * @param jobNode
-	 *            {@link JobNode} to delegate to a {@link Team}.
-	 */
-	void delegateJobNode(JobNode jobNode);
+	void doFlow(FlowMetaData<?> flowMetaData, Object parameter, FlowCallback callback);
 
 }

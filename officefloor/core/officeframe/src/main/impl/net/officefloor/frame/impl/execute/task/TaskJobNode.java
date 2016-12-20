@@ -18,32 +18,28 @@
 package net.officefloor.frame.impl.execute.task;
 
 import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.ManagedJobNodeContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
+import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.CriticalSection;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * {@link Task} implementation of a {@link Job}.
@@ -51,7 +47,7 @@ import net.officefloor.frame.spi.team.JobContext;
  * @author Daniel Sagenschneider
  */
 public class TaskJobNode<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		extends AbstractManagedJobNodeContainer<W, TaskMetaData<W, D, F>> {
+		extends AbstractManagedFunctionContainer<W, TaskMetaData<W, D, F>> {
 
 	/**
 	 * <p>
@@ -96,12 +92,13 @@ public class TaskJobNode<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 * @param governanceDeactivationStrategy
 	 *            {@link GovernanceDeactivationStrategy}.
 	 * @param parallelOwner
-	 *            Parallel owning {@link JobNode}.
+	 *            Parallel owning {@link ManagedFunction}.
 	 * @param parameter
 	 *            Parameter for the {@link Task}.
 	 */
 	public TaskJobNode(Flow flow, WorkContainer<W> workContainer, TaskMetaData<W, D, F> taskMetaData,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy, JobNode parallelOwner, Object parameter) {
+			GovernanceDeactivationStrategy governanceDeactivationStrategy, ManagedFunction parallelOwner,
+			Object parameter) {
 		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData.getRequiredManagedObjects(),
 				taskMetaData.getRequiredGovernance(), governanceDeactivationStrategy);
 		this.parameter = parameter;
@@ -126,7 +123,7 @@ public class TaskJobNode<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	}
 
 	@Override
-	protected Object executeJobNode(ManagedJobNodeContext context) throws Throwable {
+	protected Object executeFunction(ManagedFunctionContext context) throws Throwable {
 		return this.task.doTask(this.taskContextToken);
 	}
 
@@ -168,7 +165,7 @@ public class TaskJobNode<W extends Work, D extends Enum<D>, F extends Enum<F>>
 			}
 
 			// Return the Object
-			return TaskJobNode.this.workContainer.getObject(index, TaskJobNode.this.flow.getThreadState());
+			return TaskJobNode.this.workContainer.getObject(index);
 		}
 
 		@Override

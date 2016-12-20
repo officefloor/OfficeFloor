@@ -17,26 +17,23 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
+import net.officefloor.frame.api.execute.FlowCallback;
 
 /**
- * {@link JobNodeActivateSet} that allows activating the {@link JobNode}
- * instances.
- * 
+ * Factory to create the {@link FlowCallback} {@link FunctionState}.
+ *
  * @author Daniel Sagenschneider
  */
-@Deprecated // using job loop
-public interface JobNodeActivatableSet extends JobNodeActivateSet {
+public interface FlowCallbackFactory {
 
 	/**
-	 * Activates the {@link JobNode} instances within this
-	 * {@link JobNodeActivateSet}.
+	 * Creates the {@link FlowCallback} {@link FunctionState}.
 	 * 
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team} activating
-	 *            the {@link JobNode} instances.
+	 * @param exception
+	 *            Possible {@link Throwable} from the {@link Flow}. May be
+	 *            <code>null</code>.
+	 * @return {@link FlowCallback} {@link FunctionState}.
 	 */
-	void activateJobNodes(TeamIdentifier currentTeam);
+	FunctionState createFunction(Throwable exception);
 
 }

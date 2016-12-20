@@ -37,26 +37,32 @@ public interface ManagedObjectContainer {
 	ThreadState getResponsibleThreadState();
 
 	/**
-	 * Obtains an optional {@link TeamManagement} responsible for changes to
-	 * this {@link ManagedObjectContainer}.
-	 * 
-	 * @return Optional {@link TeamManagement} responsible for changes to this
-	 *         {@link ManagedObjectContainer}. May be <code>null</code>.
-	 */
-	TeamManagement getResponsibleTeam();
-
-	/**
 	 * Loads the {@link ManagedObject}.
 	 * 
 	 * @param managedJobNode
-	 *            {@link ManagedJobNode} requiring the {@link ManagedObject}.
-	 * @return Optional {@link JobNode} to load the {@link ManagedObject}.
-	 *         Should this return </code>null</code>, the {@link ManagedJobNode}
+	 *            {@link ManagedFunction} requiring the {@link ManagedObject}.
+	 * @return Optional {@link FunctionState} to load the {@link ManagedObject}.
+	 *         Should this return </code>null</code>, the {@link ManagedFunction}
 	 *         should not then be executed, as it is expecting to wait. This
-	 *         will return the {@link ManagedJobNode} when the
+	 *         will return the {@link ManagedFunction} when the
 	 *         {@link ManagedObject} is loaded.
 	 */
-	JobNode loadManagedObject(ManagedJobNode managedJobNode, WorkContainer<?> workContainer);
+	FunctionState loadManagedObject(ManagedFunction managedJobNode, WorkContainer<?> workContainer);
+
+	/**
+	 * <p>
+	 * Creates a {@link FunctionState} to check if the {@link ManagedObject} contained
+	 * within this {@link ManagedObjectContainer} is ready.
+	 * <p>
+	 * Should the {@link ManagedObject} not be ready, then will latch the
+	 * {@link ManagedFunction} to wait for the {@link ManagedObject} to be ready.
+	 * 
+	 * @param check
+	 *            {@link ManagedObjectReadyCheck}.
+	 * @return {@link FunctionState} to check if the {@link ManagedObject} contained
+	 *         within this {@link ManagedObjectContainer} is ready.
+	 */
+	FunctionState createCheckReadyJobNode(ManagedObjectReadyCheck check);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
@@ -83,16 +89,16 @@ public interface ManagedObjectContainer {
 	 * 
 	 * @param governance
 	 *            {@link ActiveGovernance}.
-	 * @return Optional {@link JobNode} to unregister the {@link ManagedObject}
+	 * @return Optional {@link FunctionState} to unregister the {@link ManagedObject}
 	 *         from {@link Governance}.
 	 */
-	JobNode unregisterManagedObjectFromGovernance(ActiveGovernance<?, ?> governance);
+	FunctionState unregisterManagedObjectFromGovernance(ActiveGovernance<?, ?> governance);
 
 	/**
 	 * Unloads the {@link ManagedObject}.
 	 * 
-	 * @return Optional {@link JobNode} to unload the {@link ManagedObject}.
+	 * @return Optional {@link FunctionState} to unload the {@link ManagedObject}.
 	 */
-	JobNode unloadManagedObject();
+	FunctionState unloadManagedObject();
 
 }

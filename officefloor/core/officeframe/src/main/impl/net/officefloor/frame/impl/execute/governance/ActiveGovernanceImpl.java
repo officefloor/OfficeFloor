@@ -25,8 +25,8 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.GovernanceContext;
@@ -118,7 +118,7 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 		return this;
 	}
 
-	public boolean isManagedObjectReady(JobContext jobContext, JobNode jobNode,
+	public boolean isManagedObjectReady(JobContext jobContext, FunctionState jobNode,
 			JobNodeActivateSet activateSet, ContainerContext context) {
 		return this.managedObject.isManagedObjectReady(this.workContainer,
 				jobContext, jobNode, activateSet, context);
@@ -156,7 +156,7 @@ public class ActiveGovernanceImpl<I, F extends Enum<F>> implements
 
 	@Override
 	public boolean governManagedObject(GovernanceContext<F> governanceContext,
-			JobContext jobContext, JobNode jobNode,
+			JobContext jobContext, FunctionState jobNode,
 			JobNodeActivateSet activateSet, ContainerContext context)
 			throws Throwable {
 		return this.governanceControl.governManagedObject(

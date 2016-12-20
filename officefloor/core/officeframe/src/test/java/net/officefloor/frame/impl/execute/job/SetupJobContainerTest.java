@@ -20,21 +20,21 @@ package net.officefloor.frame.impl.execute.job;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Ensure able to provide setup {@link JobNode} instances.
+ * Ensure able to provide setup {@link FunctionState} instances.
  * 
  * @author Daniel Sagenschneider
  */
 public class SetupJobContainerTest extends AbstractJobContainerTest {
 
 	/**
-	 * Ensures execution of setup {@link JobNode} requested before {@link Task}
+	 * Ensures execution of setup {@link FunctionState} requested before {@link Task}
 	 * execution.
 	 */
 	public void testPreExecuteSetupTask() {
@@ -82,7 +82,7 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of setup {@link JobNode} requested during {@link Task}
+	 * Ensures execution of setup {@link FunctionState} requested during {@link Task}
 	 * execution.
 	 */
 	public void testPostExecuteSetupTask() {
@@ -130,7 +130,7 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of setup {@link JobNode} requested before {@link Task}
+	 * Ensures execution of setup {@link FunctionState} requested before {@link Task}
 	 * execution.
 	 */
 	public void testPreExecuteGovernanceActivity() {
@@ -178,7 +178,7 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of setup {@link JobNode} requested during {@link Task}
+	 * Ensures execution of setup {@link FunctionState} requested during {@link Task}
 	 * execution.
 	 */
 	public void testPostExecuteGovernanceActivity() {

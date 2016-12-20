@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 
@@ -29,11 +28,6 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * @author Daniel Sagenschneider
  */
 public class LeaderFollowerTeam extends ThreadGroup implements Team {
-
-	/**
-	 * {@link TeamIdentifier} of this {@link Team}.
-	 */
-	private final TeamIdentifier teamIdentifier;
 
 	/**
 	 * {@link TeamMember} instances.
@@ -60,8 +54,6 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	 * 
 	 * @param teamName
 	 *            Name of team.
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier} of this {@link Team}.
 	 * @param teamMemberCount
 	 *            Number of {@link TeamMember} instances within this
 	 *            {@link LeaderFollowerTeam}.
@@ -70,7 +62,6 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	 */
 	public LeaderFollowerTeam(String teamName, TeamIdentifier teamIdentifier, int teamMemberCount, long waitTime) {
 		super(teamName);
-		this.teamIdentifier = teamIdentifier;
 
 		// Create the Team Member stack (indicating number of Team Members)
 		this.teamMemberStack = new TeamMemberStack(teamMemberCount);
@@ -103,7 +94,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	}
 
 	@Override
-	public void assignJob(Job job, TeamIdentifier assignerTeam) {
+	public void assignJob(Job job) {
 		this.taskQueue.enqueue(job);
 	}
 
@@ -144,12 +135,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	/**
 	 * Team member of the {@link LeaderFollowerTeam}.
 	 */
-	protected class TeamMember implements Runnable, JobContext {
-
-		/**
-		 * Indicates unknown time.
-		 */
-		private static final int UNKNOWN_TIME = 0;
+	protected class TeamMember implements Runnable {
 
 		/**
 		 * Stack of the {@link TeamMember} instances.
@@ -175,11 +161,6 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 		 * Flag to indicate finished.
 		 */
 		protected volatile boolean finished = false;
-
-		/**
-		 * Time for the {@link Job}.
-		 */
-		private long time;
 
 		/**
 		 * Initiate the {@link TeamMember}.
@@ -222,43 +203,14 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 						// Have job so promote leader for possible next job
 						this.teamMemberStack.promoteLeader(this);
 
-						// Reset for running the job
-						this.time = UNKNOWN_TIME;
-
 						// Run the job
-						job.doJob(this);
+						job.run();
 					}
 				}
 			} finally {
 				// Flag finished
 				this.finished = true;
 			}
-		}
-
-		/*
-		 * =================== ExecutionContext ===============================
-		 */
-
-		@Override
-		public long getTime() {
-
-			// Ensure have the time
-			if (this.time == UNKNOWN_TIME) {
-				this.time = System.currentTimeMillis();
-			}
-
-			// Return the time
-			return this.time;
-		}
-
-		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return LeaderFollowerTeam.this.teamIdentifier;
-		}
-
-		@Override
-		public boolean continueExecution() {
-			return LeaderFollowerTeam.this.continueWorking;
 		}
 	}
 

@@ -22,8 +22,8 @@ import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -57,7 +57,7 @@ public class GovernGovernanceActivity<I, F extends Enum<F>> extends
 
 	@Override
 	public boolean doActivity(GovernanceContext<F> governanceContext,
-			JobContext jobContext, JobNode jobNode,
+			JobContext jobContext, FunctionState jobNode,
 			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
 			ContainerContext containerContext) throws Throwable {
 

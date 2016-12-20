@@ -38,8 +38,8 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -378,8 +378,8 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public JobNode createTaskNode(Flow flow,
-			WorkContainer<W> workContainer, JobNode parallelJobNodeOwner,
+	public FunctionState createTaskNode(Flow flow,
+			WorkContainer<W> workContainer, FunctionState parallelJobNodeOwner,
 			Object parameter,
 			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 		return new TaskJobNode<W, Indexed, Indexed>(flow, workContainer, this,

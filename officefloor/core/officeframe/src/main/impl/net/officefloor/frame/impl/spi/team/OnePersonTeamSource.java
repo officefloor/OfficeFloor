@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
@@ -48,17 +47,13 @@ public class OnePersonTeamSource extends AbstractTeamSource {
 	public Team createTeam(TeamSourceContext context) throws Exception {
 
 		// Obtain the wait time
-		long waitTime = Long.parseLong(context.getProperty(
-				MAX_WAIT_TIME_PROPERTY_NAME, "100"));
+		long waitTime = Long.parseLong(context.getProperty(MAX_WAIT_TIME_PROPERTY_NAME, "100"));
 
 		// Obtain the team name
 		String teamName = context.getTeamName();
 
-		// Obtain the team identifier
-		TeamIdentifier teamIdentifier = context.getTeamIdentifier();
-
 		// Return the one person team
-		return new OnePersonTeam(teamName, teamIdentifier, waitTime);
+		return new OnePersonTeam(teamName, waitTime);
 	}
 
 }

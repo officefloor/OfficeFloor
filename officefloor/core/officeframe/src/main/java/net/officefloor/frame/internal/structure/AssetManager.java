@@ -22,7 +22,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AssetManager extends JobNode {
+public interface AssetManager extends FunctionState {
 
 	/**
 	 * <p>
@@ -34,7 +34,7 @@ public interface AssetManager extends JobNode {
 	 * of {@link AssetLatch} instances requiring management to be managed.
 	 * 
 	 * @param asset
-	 *            {@link Asset} that {@link JobNode} instances will wait on.
+	 *            {@link Asset} that {@link FunctionState} instances will wait on.
 	 * @return {@link AssetLatch} for the {@link Asset}.
 	 */
 	AssetLatch createAssetLatch(Asset asset);

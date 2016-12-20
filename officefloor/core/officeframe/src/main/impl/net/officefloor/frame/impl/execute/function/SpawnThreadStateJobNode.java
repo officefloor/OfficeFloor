@@ -15,25 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.jobnode;
+package net.officefloor.frame.impl.execute.function;
 
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowCallbackJobNodeFactory;
+import net.officefloor.frame.internal.structure.FlowCallbackFactory;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * {@link JobNode} to spawn a {@link ThreadState}.
+ * {@link FunctionState} to spawn a {@link ThreadState}.
  *
  * @author Daniel Sagenschneider
  */
-public class SpawnThreadStateJobNode implements JobNode {
+public class SpawnThreadStateJobNode implements FunctionState {
 
 	/**
 	 * {@link ProcessState}.
@@ -46,25 +46,25 @@ public class SpawnThreadStateJobNode implements JobNode {
 	private final FlowMetaData<?> flowMetaData;
 
 	/**
-	 * Parameter for the initial {@link JobNode} of the {@link Flow}.
+	 * Parameter for the initial {@link FunctionState} of the {@link Flow}.
 	 */
 	private final Object parameter;
 
 	/**
-	 * {@link FlowCallbackJobNodeFactory}.
+	 * {@link FlowCallbackFactory}.
 	 */
-	private final FlowCallbackJobNodeFactory callbackFactory;
+	private final FlowCallbackFactory callbackFactory;
 
 	/**
-	 * {@link JobNodeLoop}.
+	 * {@link FunctionLoop}.
 	 */
-	private final JobNodeLoop jobNodeDelegator;
+	private final FunctionLoop jobNodeDelegator;
 
 	/**
-	 * {@link JobNode} to continue once the {@link ThreadState} has been
+	 * {@link FunctionState} to continue once the {@link ThreadState} has been
 	 * spawned.
 	 */
-	private final JobNode continueJobNode;
+	private final FunctionState continueJobNode;
 
 	/**
 	 * Instantiate.
@@ -74,17 +74,17 @@ public class SpawnThreadStateJobNode implements JobNode {
 	 * @param flowMetaData
 	 *            {@link FlowMetaData}.
 	 * @param parameter
-	 *            Parameter for the initial {@link JobNode} of the {@link Flow}.
+	 *            Parameter for the initial {@link FunctionState} of the {@link Flow}.
 	 * @param callbackFactory
-	 *            Optional {@link FlowCallbackJobNodeFactory}.
+	 *            Optional {@link FlowCallbackFactory}.
 	 * @param jobNodeDelegator
-	 *            {@link JobNodeLoop}.
+	 *            {@link FunctionLoop}.
 	 * @param continueJobNode
-	 *            {@link JobNode} to continue once the {@link ThreadState} has
+	 *            {@link FunctionState} to continue once the {@link ThreadState} has
 	 *            been spawned.
 	 */
 	public SpawnThreadStateJobNode(ProcessState processState, FlowMetaData<?> flowMetaData, Object parameter,
-			FlowCallbackJobNodeFactory callbackFactory, JobNodeLoop jobNodeDelegator, JobNode continueJobNode) {
+			FlowCallbackFactory callbackFactory, FunctionLoop jobNodeDelegator, FunctionState continueJobNode) {
 		this.processState = processState;
 		this.flowMetaData = flowMetaData;
 		this.parameter = parameter;
@@ -108,7 +108,7 @@ public class SpawnThreadStateJobNode implements JobNode {
 	}
 
 	@Override
-	public JobNode doJob() {
+	public FunctionState execute() {
 
 		// Obtain the task meta-data for instigating the flow
 		TaskMetaData<?, ?, ?> initTaskMetaData = this.flowMetaData.getInitialTaskMetaData();
@@ -119,11 +119,11 @@ public class SpawnThreadStateJobNode implements JobNode {
 
 		// Create job node for execution
 		Flow flow = spawnedThreadState.createFlow();
-		JobNode jobNode = flow.createManagedJobNode(initTaskMetaData, null, this.parameter,
+		FunctionState jobNode = flow.createManagedJobNode(initTaskMetaData, null, this.parameter,
 				GovernanceDeactivationStrategy.ENFORCE);
 
 		// Delegate the new thead to be executed
-		this.jobNodeDelegator.delegateJobNode(jobNode);
+		this.jobNodeDelegator.delegateFunction(jobNode);
 
 		// Continue on with current thread tasks
 		return this.continueJobNode;

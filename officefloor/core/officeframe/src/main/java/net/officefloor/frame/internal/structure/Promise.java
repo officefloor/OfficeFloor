@@ -18,24 +18,23 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
- * Provides promise like functionality for {@link JobNode} instances.
+ * Provides promise like functionality for {@link FunctionState} instances.
  *
  * @author Daniel Sagenschneider
  */
 public class Promise {
 
 	/**
-	 * Continue with an array of {@link JobNode} instances.
+	 * Continue with an array of {@link FunctionState} instances.
 	 * 
 	 * @param jobNodes
-	 *            Listing of {@link JobNode} instances to continue with.
-	 * @return Next {@link JobNode} to undertake all the {@link JobNode}
-	 *         instances.
+	 *            Listing of {@link FunctionState} instances to continue with.
+	 * @return Next {@link FunctionState} to undertake all the
+	 *         {@link FunctionState} instances.
 	 */
-	public static JobNode all(JobNode... jobNodes) {
+	public static FunctionState all(FunctionState... jobNodes) {
 
 		// Ensure have job nodes
 		if ((jobNodes == null) || (jobNodes.length == 0)) {
@@ -44,7 +43,7 @@ public class Promise {
 
 		// Create the listing of continue job nodes
 		// (load in reverse order to execute in order)
-		JobNode returnJobNode = null;
+		FunctionState returnJobNode = null;
 		for (int i = jobNodes.length - 1; i >= 0; i--) {
 			returnJobNode = then(jobNodes[i], null);
 		}
@@ -55,28 +54,28 @@ public class Promise {
 
 	/**
 	 * <p>
-	 * Execute the {@link JobNode} then the {@link JobNode}.
+	 * Execute the {@link FunctionState} then the {@link FunctionState}.
 	 * <p>
-	 * State is passed between {@link JobNode} instances via
+	 * State is passed between {@link FunctionState} instances via
 	 * {@link ManagedObject} instances, so no parameter is provided.
 	 * 
 	 * @param jobNode
-	 *            {@link JobNode} to execute it and its sequence of
-	 *            {@link JobNode} instances.
+	 *            {@link FunctionState} to execute it and its sequence of
+	 *            {@link FunctionState} instances.
 	 * @param thenJobNode
-	 *            {@link JobNode} to then continue after the first input
-	 *            {@link JobNode} sequence completes.
-	 * @return Next {@link JobNode} to undertake the {@link JobNode} sequence
-	 *         and then continue {@link JobNode} sequence.
+	 *            {@link FunctionState} to then continue after the first input
+	 *            {@link FunctionState} sequence completes.
+	 * @return Next {@link FunctionState} to undertake the {@link FunctionState}
+	 *         sequence and then continue {@link FunctionState} sequence.
 	 */
-	public static JobNode then(JobNode jobNode, JobNode thenJobNode) {
+	public static FunctionState then(FunctionState jobNode, FunctionState thenJobNode) {
 		if (jobNode == null) {
 			// No initial job node, so just continue
 			return thenJobNode;
 
 		} else if (thenJobNode != null) {
 			// Create continue link
-			return new ThenJobNode(jobNode, thenJobNode);
+			return new ThenFunction(jobNode, thenJobNode);
 		}
 
 		// Only the initial job node
@@ -90,32 +89,33 @@ public class Promise {
 	}
 
 	/**
-	 * Then {@link JobNode}.
+	 * Then {@link FunctionState}.
 	 */
-	private static class ThenJobNode implements JobNode {
+	private static class ThenFunction implements FunctionState {
 
 		/**
-		 * Delegate {@link JobNode}.
+		 * Delegate {@link FunctionState}.
 		 */
-		private final JobNode delegate;
+		private final FunctionState delegate;
 
 		/**
-		 * Continue {@link JobNode}.
+		 * Continue {@link FunctionState}.
 		 */
-		private final JobNode continueJobNode;
+		private final FunctionState continueFunction;
 
 		/**
 		 * Creation by static methods.
 		 * 
 		 * @param delegate
-		 *            Delegate {@link JobNode} to complete it and all produced
-		 *            {@link JobNode} instances before continuing.
+		 *            Delegate {@link FunctionState} to complete it and all
+		 *            produced {@link FunctionState} instances before
+		 *            continuing.
 		 * @param continueJobNode
-		 *            Continue {@link JobNode}.
+		 *            Continue {@link FunctionState}.
 		 */
-		private ThenJobNode(JobNode delegate, JobNode continueJobNode) {
+		private ThenFunction(FunctionState delegate, FunctionState continueFunction) {
 			this.delegate = delegate;
-			this.continueJobNode = continueJobNode;
+			this.continueFunction = continueFunction;
 		}
 
 		/*
@@ -123,8 +123,8 @@ public class Promise {
 		 */
 
 		@Override
-		public JobNode doJob(JobContext context) {
-			return Promise.then(this.delegate.doJob(context), this.continueJobNode);
+		public FunctionState execute() {
+			return Promise.then(this.delegate.execute(), this.continueFunction);
 		}
 
 		@Override

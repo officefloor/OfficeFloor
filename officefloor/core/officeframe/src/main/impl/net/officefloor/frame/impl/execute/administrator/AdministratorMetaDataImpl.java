@@ -27,8 +27,8 @@ import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -183,11 +183,11 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public JobNode createDutyNode(
+	public FunctionState createDutyNode(
 			TaskMetaData<?, ?, ?> administeringTaskMetaData,
 			WorkContainer<?> administeringWorkContainer, Flow flow,
 			TaskDutyAssociation<?> taskDutyAssociation,
-			JobNode parallelJobNodeOwner) {
+			FunctionState parallelJobNodeOwner) {
 		return new DutyJob(flow, administeringWorkContainer, this,
 				taskDutyAssociation, parallelJobNodeOwner,
 				administeringTaskMetaData);

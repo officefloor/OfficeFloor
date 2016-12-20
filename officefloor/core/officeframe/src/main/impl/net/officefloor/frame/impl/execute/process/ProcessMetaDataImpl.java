@@ -22,6 +22,7 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link ProcessMetaData} implementation.
@@ -46,6 +47,11 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	private final ThreadMetaData threadMetaData;
 
 	/**
+	 * {@link AssetManager} for the main {@link ThreadState}.
+	 */
+	private final AssetManager mainThreadAssetManager;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectMetaData
@@ -54,12 +60,16 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	 *            {@link AdministratorMetaData} instances.
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData}.
+	 * @param mainThreadAssetManager
+	 *            {@link AssetManager} for the main {@link ThreadState}.
 	 */
 	public ProcessMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
-			AdministratorMetaData<?, ?>[] administratorMetaData, ThreadMetaData threadMetaData) {
+			AdministratorMetaData<?, ?>[] administratorMetaData, ThreadMetaData threadMetaData,
+			AssetManager mainThreadAssetManager) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.administratorMetaData = administratorMetaData;
 		this.threadMetaData = threadMetaData;
+		this.mainThreadAssetManager = mainThreadAssetManager;
 	}
 
 	/*
@@ -74,6 +84,11 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	@Override
 	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
 		return this.administratorMetaData;
+	}
+
+	@Override
+	public AssetManager getMainThreadAssetManager() {
+		return this.mainThreadAssetManager;
 	}
 
 	@Override

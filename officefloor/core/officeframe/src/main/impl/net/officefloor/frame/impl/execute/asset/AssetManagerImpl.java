@@ -18,19 +18,18 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.execute.jobnode.LinkedListSetJobNode;
+import net.officefloor.frame.impl.execute.function.LinkedListSetJobNode;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeLoop;
+import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.LinkedListSetItem;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.team.JobContext;
 
 /**
  * {@link AssetManager} implementation.
@@ -45,14 +44,14 @@ public class AssetManagerImpl implements AssetManager {
 	private final ProcessState officeManagerProcess;
 
 	/**
-	 * {@link TeamManagement} responsible for the {@link Asset} instances.
+	 * {@link OfficeClock}.
 	 */
-	private final TeamManagement responsibleTeam;
+	private final OfficeClock clock;
 
 	/**
-	 * {@link JobNodeLoop}.
+	 * {@link FunctionLoop}.
 	 */
-	private final JobNodeLoop delegator;
+	private final FunctionLoop loop;
 
 	/**
 	 * {@link LinkedListSet} of {@link AssetLatch} instances requiring managing.
@@ -69,26 +68,24 @@ public class AssetManagerImpl implements AssetManager {
 	 * 
 	 * @param officeManagerProcess
 	 *            {@link ProcessState} that is managing the {@link Office}.
-	 * @param responsibleTeam
-	 *            {@link TeamManagement} responsible for the {@link Asset}
-	 *            instances.
-	 * @param delegator
-	 *            {@link JobNodeLoop}.
+	 * @param clock
+	 *            {@link OfficeClock}.
+	 * @param loop
+	 *            {@link FunctionLoop}.
 	 */
-	public AssetManagerImpl(ProcessState officeManagerProcess, TeamManagement responsibleTeam,
-			JobNodeLoop delegator) {
+	public AssetManagerImpl(ProcessState officeManagerProcess, OfficeClock clock, FunctionLoop loop) {
 		this.officeManagerProcess = officeManagerProcess;
-		this.responsibleTeam = responsibleTeam;
-		this.delegator = delegator;
+		this.clock = clock;
+		this.loop = loop;
 	}
 
 	/**
-	 * Obtains the {@link JobNodeLoop}.
+	 * Obtains the {@link FunctionLoop}.
 	 * 
-	 * @return {@link JobNodeLoop}.
+	 * @return {@link FunctionLoop}.
 	 */
-	JobNodeLoop getJobNodeDelegator() {
-		return this.delegator;
+	FunctionLoop getJobNodeLoop() {
+		return this.loop;
 	}
 
 	/**
@@ -117,15 +114,20 @@ public class AssetManagerImpl implements AssetManager {
 
 	@Override
 	public AssetLatch createAssetLatch(Asset asset) {
-		return new AssetLatchImpl(asset, this);
+		return new AssetLatchImpl(asset, this, this.clock);
 	}
 
 	/*
-	 * =================== JobNode ======================================
+	 * ================ FunctionState =====================================
 	 */
 
 	@Override
-	public JobNode doJob(JobContext context) {
+	public ThreadState getThreadState() {
+		return this.officeManagerProcess.getMainThreadState();
+	}
+
+	@Override
+	public FunctionState execute() {
 
 		// Copy the list of latches
 		LinkedListSetItem<AssetLatchImpl> head = this.latches.copyEntries();
@@ -135,16 +137,6 @@ public class AssetManagerImpl implements AssetManager {
 
 		// Undertake checks for each of the latches
 		return LinkedListSetJobNode.createCastJobNode(head);
-	}
-
-	@Override
-	public TeamManagement getResponsibleTeam() {
-		return this.responsibleTeam;
-	}
-
-	@Override
-	public ThreadState getThreadState() {
-		return this.officeManagerProcess.getMainThreadState();
 	}
 
 }

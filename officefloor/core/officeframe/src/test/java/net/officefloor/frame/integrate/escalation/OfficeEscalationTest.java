@@ -20,7 +20,7 @@ package net.officefloor.frame.integrate.escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
@@ -77,7 +77,7 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * <p>
-	 * Ensures a parallel owner {@link JobNode} has opportunity to handle the
+	 * Ensures a parallel owner {@link FunctionState} has opportunity to handle the
 	 * escalation.
 	 * <p>
 	 * This is represents a method call allowing the caller to handle exceptions

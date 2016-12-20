@@ -39,11 +39,11 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.CleanupSequence;
+import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -262,8 +262,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
-		final CleanupSequence cleanupSequence = this
-				.createMock(CleanupSequence.class);
+		final ManagedObjectCleanup cleanupSequence = this
+				.createMock(ManagedObjectCleanup.class);
 
 		// Record manage office
 		this.record_managedObjectSourceName();
@@ -283,7 +283,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_getFlowConfigurations();
 
 		// Record instigating the recycle flow
-		final JobNode recycleJobNode = this.record_createRecycleJobNode(
+		final FunctionState recycleJobNode = this.record_createRecycleJobNode(
 				flowMetaData, managedObject);
 
 		// Manage by office
@@ -298,7 +298,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		rawOffice.manageByOffice(null, this.metaDataLocator, this.officeTeams,
 				this.continueTeamManagement, this.assetManagerFactory,
 				this.issues);
-		JobNode jobNode = moMetaData.createRecycleJobNode(managedObject,
+		FunctionState jobNode = moMetaData.createRecycleJobNode(managedObject,
 				cleanupSequence);
 		this.verifyMockObjects();
 
@@ -322,8 +322,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
-		final CleanupSequence cleanupSequence = this
-				.createMock(CleanupSequence.class);
+		final ManagedObjectCleanup cleanupSequence = this
+				.createMock(ManagedObjectCleanup.class);
 
 		// Record managed office
 		this.record_managedObjectSourceName();
@@ -342,7 +342,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_getFlowConfigurations();
 
 		// Record instigating the recycle flow
-		final JobNode recycleJobNode = this.record_createRecycleJobNode(
+		final FunctionState recycleJobNode = this.record_createRecycleJobNode(
 				flowMetaData, managedObject);
 
 		// Manage by office
@@ -356,7 +356,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Have managed after managed by office.
 		// This would the be case when used by another office.
 		rawOffice.manageManagedObject(moMetaData);
-		JobNode jobNode = moMetaData.createRecycleJobNode(managedObject,
+		FunctionState jobNode = moMetaData.createRecycleJobNode(managedObject,
 				cleanupSequence);
 		this.verifyMockObjects();
 
@@ -372,8 +372,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
-		final CleanupSequence cleanupSequence = this
-				.createMock(CleanupSequence.class);
+		final ManagedObjectCleanup cleanupSequence = this
+				.createMock(ManagedObjectCleanup.class);
 
 		// Record no recycle task
 		this.record_managedObjectSourceName();
@@ -387,7 +387,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Ensure not obtain recycle job
 		rawOffice.manageManagedObject(moMetaData);
-		JobNode jobNode = moMetaData.createRecycleJobNode(managedObject,
+		FunctionState jobNode = moMetaData.createRecycleJobNode(managedObject,
 				cleanupSequence);
 		this.verifyMockObjects();
 
@@ -711,7 +711,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final String parameter = "PARAMETER";
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
-		final JobNode jobNode = this.createMock(JobNode.class);
+		final FunctionState jobNode = this.createMock(FunctionState.class);
 		final Flow jobSequence = this.createMock(Flow.class);
 		final ThreadState thread = this.createMock(ThreadState.class);
 		final ProcessState process = this.createMock(ProcessState.class);
@@ -834,7 +834,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final String parameter = "PARAMETER";
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
-		final JobNode jobNode = this.createMock(JobNode.class);
+		final FunctionState jobNode = this.createMock(FunctionState.class);
 		final ProcessTicker processTicker = this
 				.createMock(ProcessTicker.class);
 		final Flow jobSequence = this.createMock(Flow.class);
@@ -969,19 +969,19 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records creating the recycle {@link JobNode}.
+	 * Records creating the recycle {@link FunctionState}.
 	 * 
 	 * @param recycleFlowMetaData
-	 *            {@link FlowMetaData} for the recycle {@link JobNode}.
+	 *            {@link FlowMetaData} for the recycle {@link FunctionState}.
 	 * @param managedObject
 	 *            {@link ManagedObject} to be recycled.
-	 * @return Recycle {@link JobNode} created.
+	 * @return Recycle {@link FunctionState} created.
 	 */
-	private JobNode record_createRecycleJobNode(
+	private FunctionState record_createRecycleJobNode(
 			final FlowMetaData<?> recycleFlowMetaData,
 			final ManagedObject managedObject) {
 
-		final JobNode recycleJob = this.createMock(JobNode.class);
+		final FunctionState recycleJob = this.createMock(FunctionState.class);
 		final Flow jobSequence = this.createMock(Flow.class);
 		final ThreadState threadState = this.createMock(ThreadState.class);
 		final ProcessState processState = this.createMock(ProcessState.class);

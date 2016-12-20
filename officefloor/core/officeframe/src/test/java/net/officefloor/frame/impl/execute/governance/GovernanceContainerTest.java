@@ -25,8 +25,8 @@ import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -107,9 +107,9 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	private final JobContext jobContext = this.createMock(JobContext.class);
 
 	/**
-	 * {@link JobNode}.
+	 * {@link FunctionState}.
 	 */
-	private final JobNode jobNode = this.createMock(JobNode.class);
+	private final FunctionState jobNode = this.createMock(FunctionState.class);
 
 	/**
 	 * {@link JobNodeActivateSet}.

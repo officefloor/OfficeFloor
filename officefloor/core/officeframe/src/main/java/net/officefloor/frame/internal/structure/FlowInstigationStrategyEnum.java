@@ -24,6 +24,9 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // determine instigation strategy of sequential/parallel with input
+			// of FlowCallback. This just leaves isSpawn to indicate whether to
+			// spawn a thread state.
 public enum FlowInstigationStrategyEnum {
 
 	/**

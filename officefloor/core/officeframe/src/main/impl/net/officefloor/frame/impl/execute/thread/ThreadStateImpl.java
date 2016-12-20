@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.impl.execute.jobnode.FlowImpl;
+import net.officefloor.frame.impl.execute.function.FlowImpl;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
@@ -27,12 +27,12 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowCallbackJobNodeFactory;
+import net.officefloor.frame.internal.structure.FlowCallbackFactory;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -137,9 +137,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private final AssetManager assetManager;
 
 	/**
-	 * {@link FlowCallbackJobNodeFactory}.
+	 * {@link FlowCallbackFactory}.
 	 */
-	private final FlowCallbackJobNodeFactory callbackFactory;
+	private final FlowCallbackFactory callbackFactory;
 
 	/**
 	 * {@link ThreadProfiler}.
@@ -169,7 +169,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * @param assetManager
 	 *            {@link AssetManager} for this {@link ThreadState}.
 	 * @param callbackFactory
-	 *            {@link FlowCallbackJobNodeFactory} to create the
+	 *            {@link FlowCallbackFactory} to create the
 	 *            {@link FlowCallback} on completion of this
 	 *            {@link ThreadState}. May be <code>null</code>.
 	 * @param processState
@@ -178,7 +178,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 *            {@link ProcessProfiler}. May be <code>null</code>.
 	 */
 	public ThreadStateImpl(ThreadMetaData threadMetaData, AssetManager assetManager,
-			FlowCallbackJobNodeFactory callbackFactory, ProcessState processState, ProcessProfiler processProfiler) {
+			FlowCallbackFactory callbackFactory, ProcessState processState, ProcessProfiler processProfiler) {
 		this.threadMetaData = threadMetaData;
 		this.processState = processState;
 		this.assetManager = assetManager;
@@ -262,7 +262,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public JobNode flowComplete(Flow flow) {
+	public FunctionState flowComplete(Flow flow) {
 
 		// Remove Job Sequence from active Job Sequence listing
 		if (this.activeFlows.removeEntry(flow)) {
@@ -281,7 +281,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				for (int i = 0; i < this.governanceContainers.length; i++) {
 					GovernanceContainer<?, ?> container = this.governanceContainers[i];
 					if (container != null) {
-						JobNode enforceJobNode = container.enforceGovernance();
+						FunctionState enforceJobNode = container.enforceGovernance();
 						if (enforceJobNode != null) {
 							return enforceJobNode;
 						}
@@ -294,7 +294,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				for (int i = 0; i < this.governanceContainers.length; i++) {
 					GovernanceContainer<?, ?> container = this.governanceContainers[i];
 					if (container != null) {
-						JobNode disregardJobNode = container.disregardGovernance();
+						FunctionState disregardJobNode = container.disregardGovernance();
 						if (disregardJobNode != null) {
 							return disregardJobNode;
 						}
@@ -311,7 +311,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			for (int i = 0; i < this.managedObjectContainers.length; i++) {
 				ManagedObjectContainer container = this.managedObjectContainers[i];
 				if (container != null) {
-					JobNode unloadJobNode = container.unloadManagedObject();
+					FunctionState unloadJobNode = container.unloadManagedObject();
 					if (unloadJobNode != null) {
 						return unloadJobNode;
 					}
@@ -320,7 +320,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 			// Activate all jobs waiting on this thread permanently
 			if (this.callbackFactory != null) {
-				return this.callbackFactory.createJobNode(null);
+				return this.callbackFactory.createFunction(null);
 			}
 
 			// Thread complete
@@ -384,12 +384,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public void escalationStart(JobNode currentTaskNode) {
+	public void escalationStart(FunctionState currentTaskNode) {
 		this.isEscalating = true;
 	}
 
 	@Override
-	public void escalationComplete(JobNode currentTaskNode) {
+	public void escalationComplete(FunctionState currentTaskNode) {
 		this.isEscalating = false;
 	}
 
@@ -404,7 +404,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public void profile(JobMetaData jobMetaData) {
+	public void profile(ManagedFunctionMetaData jobMetaData) {
 
 		// Only profile if have profiler
 		if (this.profiler == null) {

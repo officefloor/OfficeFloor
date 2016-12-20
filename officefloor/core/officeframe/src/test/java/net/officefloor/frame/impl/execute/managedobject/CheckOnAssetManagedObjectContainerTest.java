@@ -55,7 +55,7 @@ public class CheckOnAssetManagedObjectContainerTest extends
 		this.record_MoUser_setFailure(false, failure);
 
 		// Should fail immediately and not check
-		this.check.failJobNodes(null, true);
+		this.check.failFunctions(null, true);
 		this.control(this.check).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
@@ -132,7 +132,7 @@ public class CheckOnAssetManagedObjectContainerTest extends
 		this.recordReturn(this.check, this.check.getTime(), this
 				.getFutureTime(10000));
 		this.record_Asset_checkOnAsset(10);
-		this.check.failJobNodes(null, true);
+		this.check.failFunctions(null, true);
 		this.control(this.check).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {

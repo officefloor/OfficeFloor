@@ -21,12 +21,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.execute.job.SafeJobImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Implementation of the {@link OfficeManager}.
@@ -34,30 +32,6 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * @author Daniel Sagenschneider
  */
 public class OfficeManagerImpl extends TimerTask implements OfficeManager {
-
-	/**
-	 * {@link OfficeManager} {@link TeamIdentifier}.
-	 */
-	private static final TeamIdentifier OFFICE_MANAGEMENT = new TeamIdentifier() {
-	};
-
-	/**
-	 * Approximate current time.
-	 */
-	private static volatile long currentTime = System.currentTimeMillis();
-
-	/**
-	 * <p>
-	 * Obtains the approximate current time.
-	 * <p>
-	 * This is more efficient means to obtain {@link System#currentTimeMillis()}
-	 * as complete millisecond accuracy is not required.
-	 * 
-	 * @return Approximate {@link System#currentTimeMillis()}.
-	 */
-	public static long currentTimeMillis() {
-		return currentTime;
-	}
 
 	/**
 	 * Interval in milliseconds between each check of the {@link Office}.
@@ -70,9 +44,19 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	private final AssetManager[] assetManagers;
 
 	/**
+	 * {@link FunctionLoop}.
+	 */
+	private final FunctionLoop functionLoop;
+
+	/**
 	 * {@link Timer} to monitor the {@link Office}.
 	 */
 	private final Timer timer = new Timer(true);
+
+	/**
+	 * {@link OfficeClockImpl}.
+	 */
+	private final OfficeClockImpl officeClock;
 
 	/**
 	 * Initiate.
@@ -86,11 +70,17 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	 *            responsiveness of the {@link Office}.
 	 * @param assetManagers
 	 *            {@link AssetManager} instances to manage.
+	 * @param officeClock
+	 *            {@link OfficeClock} for the {@link Office}.
+	 * @param functionLoop
+	 *            {@link FunctionLoop} for the {@link Office}.
 	 */
 	public OfficeManagerImpl(String officeName, long monitorInterval, AssetManager[] assetManagers,
-			ProcessState officeManagerProcess, TeamManagement responsibleTeam) {
+			OfficeClockImpl officeClock, FunctionLoop functionLoop) {
 		this.monitorInterval = monitorInterval;
 		this.assetManagers = assetManagers;
+		this.officeClock = officeClock;
+		this.functionLoop = functionLoop;
 	}
 
 	/*
@@ -115,12 +105,12 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	public void run() {
 
 		// Update the approximate time for the office
-		currentTime = System.currentTimeMillis();
+		this.officeClock.updateTime();
 
 		// Trigger the monitoring of the office
 		for (int i = 0; i < this.assetManagers.length; i++) {
 			AssetManager assetManager = this.assetManagers[i];
-			assetManager.getResponsibleTeam().getTeam().assignJob(new SafeJobImpl(assetManager), OFFICE_MANAGEMENT);
+			this.functionLoop.delegateFunction(assetManager);
 		}
 	}
 

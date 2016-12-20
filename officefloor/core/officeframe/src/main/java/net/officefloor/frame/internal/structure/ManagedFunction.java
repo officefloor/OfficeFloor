@@ -17,25 +17,26 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.FlowCallback;
-
 /**
- * Context to execute a {@link JobNode} that is managed.
- * 
+ * Managed {@link FunctionState}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface ManagedJobNodeContext {
+public interface ManagedFunction extends FunctionState, LinkedListSetEntry<ManagedFunction, Flow> {
 
 	/**
-	 * Invokes the {@link Flow} for the input {@link FlowMetaData}.
+	 * Obtains the {@link Flow} that this {@link ManagedFunction} is within.
 	 * 
-	 * @param flowMetaData
-	 *            {@link FlowMetaData}.
-	 * @param parameter
-	 *            Parameter for the {@link Flow}.
-	 * @param callback
-	 *            Optional {@link FlowCallback}.
+	 * @return {@link Flow} that this {@link ManagedFunction} is within.
 	 */
-	void doFlow(FlowMetaData<?> flowMetaData, Object parameter, FlowCallback callback);
+	Flow getFlow();
+
+	/**
+	 * Enables specify the next sequential {@link ManagedFunction}.
+	 * 
+	 * @param nextFunction
+	 *            Next sequential {@link ManagedFunction}.
+	 */
+	void setNextManagedFunction(ManagedFunction nextFunction);
 
 }

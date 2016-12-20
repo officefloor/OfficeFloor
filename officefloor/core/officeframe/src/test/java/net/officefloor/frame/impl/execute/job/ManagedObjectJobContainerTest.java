@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.impl.execute.jobnode.AbstractManagedJobNodeContainer;
+import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests the {@link AbstractManagedJobNodeContainer} with {@link ManagedObject} instances.
+ * Tests the {@link AbstractManagedFunctionContainer} with {@link ManagedObject} instances.
  * 
  * @author Daniel Sagenschneider
  */

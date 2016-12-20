@@ -104,9 +104,9 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * 
 	 * @param flow
 	 *            {@link Flow} that has completed.
-	 * @return Optional {@link JobNode} to complete the {@link Flow}.
+	 * @return Optional {@link FunctionState} to complete the {@link Flow}.
 	 */
-	JobNode flowComplete(Flow flow);
+	FunctionState flowComplete(Flow flow);
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this
@@ -177,17 +177,17 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * the {@link EscalationFlow}.
 	 * 
 	 * @param currentJobNode
-	 *            Current {@link JobNode} being executed.
+	 *            Current {@link FunctionState} being executed.
 	 */
-	void escalationStart(JobNode currentJobNode);
+	void escalationStart(FunctionState currentJobNode);
 
 	/**
 	 * Flags that escalation has complete on this {@link ThreadState}.
 	 * 
 	 * @param currentJobNode
-	 *            Current {@link JobNode} being executed.
+	 *            Current {@link FunctionState} being executed.
 	 */
-	void escalationComplete(JobNode currentJobNode);
+	void escalationComplete(FunctionState currentJobNode);
 
 	/**
 	 * Obtains the {@link EscalationLevel} of this {@link ThreadState}.
@@ -208,8 +208,8 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * Profiles that {@link Job} is being executed.
 	 * 
 	 * @param jobMetaData
-	 *            {@link JobMetaData} of the {@link Job} being executed.
+	 *            {@link ManagedFunctionMetaData} of the {@link Job} being executed.
 	 */
-	void profile(JobMetaData jobMetaData);
+	void profile(ManagedFunctionMetaData jobMetaData);
 
 }

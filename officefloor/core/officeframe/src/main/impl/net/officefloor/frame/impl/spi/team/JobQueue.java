@@ -32,14 +32,14 @@ public class JobQueue {
 	protected final Object lock;
 
 	/**
-	 * Head {@link Job} of the queue.
+	 * Head {@link JobEntry} of the queue.
 	 */
-	protected Job head = null;
+	protected JobEntry head = null;
 
 	/**
-	 * Tail {@link Job} of the queue.
+	 * Tail {@link JobEntry} of the queue.
 	 */
-	protected Job tail = null;
+	protected JobEntry tail = null;
 
 	/**
 	 * Initiate with private lock.
@@ -79,20 +79,17 @@ public class JobQueue {
 		synchronized (this.lock) {
 			if (this.head == null) {
 				// Empty list, therefore make first
-				this.head = job;
-				this.tail = job;
+				this.head = new JobEntry(job);
+				this.tail = this.head;
 
 				// Item just added to list thus notify the dequeuer
 				this.lock.notify();
 
 			} else {
 				// Non-empty list, therefore make last
-				this.tail.setNextJob(job);
-				this.tail = job;
+				this.tail.next = new JobEntry(job);
+				this.tail = this.tail.next;
 			}
-
-			// Last job so ensure not point to another job
-			job.setNextJob(null);
 		}
 	}
 
@@ -176,7 +173,7 @@ public class JobQueue {
 		}
 
 		// Obtain job to return
-		Job returnJob = this.head;
+		JobEntry returnJobEntry = this.head;
 
 		// Check if only job
 		if (this.head == this.tail) {
@@ -186,14 +183,45 @@ public class JobQueue {
 
 		} else {
 			// Further jobs
-			this.head = this.head.getNextJob();
+			this.head = this.head.next;
 		}
 
 		// Clear next job as about to be executed
-		returnJob.setNextJob(null);
+		returnJobEntry.next = null;
 
 		// Return the return job
-		return returnJob;
+		return returnJobEntry.job;
+	}
+
+	/**
+	 * {@link Job} entry within this {@link JobQueue}.
+	 */
+	private static class JobEntry {
+
+		/**
+		 * {@link Job}.
+		 */
+		private final Job job;
+
+		/**
+		 * Previous {@link JobEntry}.
+		 */
+		private JobEntry prev = null;
+
+		/**
+		 * Next {@link JobEntry}.
+		 */
+		private JobEntry next = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param job
+		 *            {@link Job}.
+		 */
+		public JobEntry(Job job) {
+			this.job = job;
+		}
 	}
 
 }

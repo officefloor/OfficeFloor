@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
+public interface GovernanceMetaData<I, F extends Enum<F>> extends ManagedFunctionMetaData {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -129,17 +129,17 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends JobMetaData {
 	FlowMetaData<?> getFlow(int flowIndex);
 
 	/**
-	 * Creates the {@link ManagedJobNode} for the {@link GovernanceActivity}.
+	 * Creates the {@link ManagedFunction} for the {@link GovernanceActivity}.
 	 * 
 	 * @param flow
 	 *            {@link Flow} for containing this {@link GovernanceActivity}.
 	 * @param governanceActivity
 	 *            {@link GovernanceActivity}.
 	 * @param parallelJobNodeOwner
-	 *            Parallel {@link ManagedJobNode} owner.
-	 * @return {@link ManagedJobNode} for the {@link GovernanceActivity}.
+	 *            Parallel {@link ManagedFunction} owner.
+	 * @return {@link ManagedFunction} for the {@link GovernanceActivity}.
 	 */
-	ManagedJobNode createGovernanceJobNode(Flow flow, GovernanceActivity<I, F> governanceActivity,
-			ManagedJobNode parallelJobNodeOwner);
+	ManagedFunction createGovernanceJobNode(Flow flow, GovernanceActivity<I, F> governanceActivity,
+			ManagedFunction parallelJobNodeOwner);
 
 }

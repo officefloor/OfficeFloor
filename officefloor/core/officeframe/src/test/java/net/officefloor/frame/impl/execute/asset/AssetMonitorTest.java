@@ -20,9 +20,9 @@ package net.officefloor.frame.impl.execute.asset;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetLatch;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -88,8 +88,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	public void testActivateJobs() {
 
 		// Only first job should cause registering with AssetManager
-		final JobNode jobOne = this.createMock(JobNode.class);
-		final JobNode jobTwo = this.createMock(JobNode.class);
+		final FunctionState jobOne = this.createMock(FunctionState.class);
+		final FunctionState jobTwo = this.createMock(FunctionState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
@@ -106,11 +106,11 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure {@link JobNode} only added once on waiting.
+	 * Ensure {@link FunctionState} only added once on waiting.
 	 */
 	public void testWaitOnJobTwice() {
 
-		final JobNode job = this.createMock(JobNode.class);
+		final FunctionState job = this.createMock(FunctionState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
@@ -130,8 +130,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testActivateJobAgain() {
 
-		final JobNode jobOne = this.createMock(JobNode.class);
-		final JobNode jobTwo = this.createMock(JobNode.class);
+		final FunctionState jobOne = this.createMock(FunctionState.class);
+		final FunctionState jobTwo = this.createMock(FunctionState.class);
 		final AssetLatch markPosition = this.createMock(AssetLatch.class);
 
 		// Record
@@ -154,11 +154,11 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure activate {@link JobNode} and then on activate again do nothing.
+	 * Ensure activate {@link FunctionState} and then on activate again do nothing.
 	 */
 	public void testActivateJobThenActivateNothing() {
 
-		final JobNode jobOne = this.createMock(JobNode.class);
+		final FunctionState jobOne = this.createMock(FunctionState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
@@ -178,8 +178,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testActivatePermanently() {
 
-		final JobNode jobOne = this.createMock(JobNode.class);
-		final JobNode jobTwo = this.createMock(JobNode.class);
+		final FunctionState jobOne = this.createMock(FunctionState.class);
+		final FunctionState jobTwo = this.createMock(FunctionState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
@@ -200,8 +200,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testOncePermanentAlwaysPermanent() {
 
-		final JobNode jobOne = this.createMock(JobNode.class);
-		final JobNode jobTwo = this.createMock(JobNode.class);
+		final FunctionState jobOne = this.createMock(FunctionState.class);
+		final FunctionState jobTwo = this.createMock(FunctionState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
@@ -224,8 +224,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	public void testFailJobs() {
 
 		Throwable failure = new Exception();
-		final JobNode jobOne = this.createMock(JobNode.class);
-		final JobNode jobTwo = this.createMock(JobNode.class);
+		final FunctionState jobOne = this.createMock(FunctionState.class);
+		final FunctionState jobTwo = this.createMock(FunctionState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
@@ -247,8 +247,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	public void testFailPermanently() {
 
 		Throwable failure = new Exception();
-		final JobNode jobOne = this.createMock(JobNode.class);
-		final JobNode jobTwo = this.createMock(JobNode.class);
+		final FunctionState jobOne = this.createMock(FunctionState.class);
+		final FunctionState jobTwo = this.createMock(FunctionState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
@@ -270,8 +270,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	public void testOncePermanentFailureAlwaysFailure() {
 
 		Throwable failure = new Exception();
-		final JobNode jobOne = this.createMock(JobNode.class);
-		final JobNode jobTwo = this.createMock(JobNode.class);
+		final FunctionState jobOne = this.createMock(FunctionState.class);
+		final FunctionState jobTwo = this.createMock(FunctionState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
@@ -290,11 +290,11 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure on <code>null</code> {@link JobNodeActivateSet} that uses
-	 * {@link OfficeManager} to activate {@link JobNode} instances.
+	 * {@link OfficeManager} to activate {@link FunctionState} instances.
 	 */
 	public void testActivateByOfficeManager() {
 
-		final JobNode job = this.createMock(JobNode.class);
+		final FunctionState job = this.createMock(FunctionState.class);
 
 		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
@@ -324,7 +324,7 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 
 	/**
 	 * To keep the {@link OfficeManager} contention down only use
-	 * {@link OfficeManager} if have {@link JobNode} instances to activate.
+	 * {@link OfficeManager} if have {@link FunctionState} instances to activate.
 	 */
 	public void testUseOfficeManagerOnlyIfJobToActivate() {
 

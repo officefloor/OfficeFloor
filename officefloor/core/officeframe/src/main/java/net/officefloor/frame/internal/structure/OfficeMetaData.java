@@ -47,6 +47,20 @@ public interface OfficeMetaData {
 	OfficeManager getOfficeManager();
 
 	/**
+	 * Obtains the {@link OfficeClock} for the {@link Office}.
+	 * 
+	 * @return {@link OfficeClock} for the {@link Office}.
+	 */
+	OfficeClock getOfficeClock();
+
+	/**
+	 * Obtains the {@link FunctionLoop} for the {@link Office}.
+	 * 
+	 * @return {@link FunctionLoop} for the {@link Office}.
+	 */
+	FunctionLoop getJobNodeLoop();
+
+	/**
 	 * Obtains the {@link ProcessMetaData} for processes within this
 	 * {@link Office}.
 	 * 
@@ -84,10 +98,10 @@ public interface OfficeMetaData {
 	 * @param <W>
 	 *            {@link Work} type.
 	 * @param flowMetaData
-	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
+	 *            {@link FlowMetaData} of the starting {@link FunctionState} for the
 	 *            {@link ProcessState}.
 	 * @param parameter
-	 *            Parameter to the starting {@link JobNode}.
+	 *            Parameter to the starting {@link FunctionState}.
 	 * @param invocationEscalationHandler
 	 *            Potential {@link EscalationHandler} provided by the invoker.
 	 *            May be <code>null</code> to just use the default
@@ -95,23 +109,23 @@ public interface OfficeMetaData {
 	 * @param escalationResponsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link Escalation} handling.
-	 * @return {@link JobNode} to start processing the {@link ProcessState}.
+	 * @return {@link FunctionState} to start processing the {@link ProcessState}.
 	 */
-	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData, Object parameter,
+	<W extends Work> FunctionState createProcess(FlowMetaData<W> flowMetaData, Object parameter,
 			EscalationHandler invocationEscalationHandler, TeamManagement escalationResponsibleTeam);
 
 	/**
 	 * Creates a new {@link ProcessState} triggered by a
 	 * {@link ManagedObjectSource} within the {@link Office} returning the
-	 * starting {@link JobNode} to be executed.
+	 * starting {@link FunctionState} to be executed.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 * @param flowMetaData
-	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
+	 *            {@link FlowMetaData} of the starting {@link FunctionState} for the
 	 *            {@link ProcessState}.
 	 * @param parameter
-	 *            Parameter to the starting {@link JobNode}.
+	 *            Parameter to the starting {@link FunctionState}.
 	 * @param invocationEscalationHandler
 	 *            Potential {@link EscalationHandler} provided by the invoker.
 	 *            May be <code>null</code> to just use the default
@@ -132,9 +146,9 @@ public interface OfficeMetaData {
 	 *            Index of the {@link ManagedObject} within the
 	 *            {@link ProcessState}. Ignored if {@link ManagedObject} passed
 	 *            in is <code>null</code>.
-	 * @return {@link JobNode} to start processing the {@link ProcessState}.
+	 * @return {@link FunctionState} to start processing the {@link ProcessState}.
 	 */
-	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData, Object parameter,
+	<W extends Work> FunctionState createProcess(FlowMetaData<W> flowMetaData, Object parameter,
 			EscalationHandler invocationEscalationHandler, TeamManagement escalationResponsibleTeam,
 			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
 			int processBoundIndexForInputManagedObject);

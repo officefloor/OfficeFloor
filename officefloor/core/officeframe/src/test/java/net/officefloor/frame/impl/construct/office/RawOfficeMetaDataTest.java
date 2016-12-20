@@ -68,7 +68,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -1548,7 +1548,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		RawOfficeMetaData rawOfficeMetaData = this
 				.constructRawOfficeMetaData(true);
 		OfficeMetaData officeMetaData = rawOfficeMetaData.getOfficeMetaData();
-		JobNode node = officeMetaData.createProcess(flowMetaData, null, null,
+		FunctionState node = officeMetaData.createProcess(flowMetaData, null, null,
 				null, null);
 		this.verifyMockObjects();
 
@@ -1611,7 +1611,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		RawOfficeMetaData metaData = this.constructRawOfficeMetaData(true);
 
 		// Verify registered Process Context Listener by creating Process
-		JobNode node = metaData.getOfficeMetaData().createProcess(flowMetaData,
+		FunctionState node = metaData.getOfficeMetaData().createProcess(flowMetaData,
 				null, null, null, null);
 
 		// Verify functionality

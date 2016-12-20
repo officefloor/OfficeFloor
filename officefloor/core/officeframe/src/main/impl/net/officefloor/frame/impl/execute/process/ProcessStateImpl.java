@@ -23,18 +23,18 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
-import net.officefloor.frame.impl.execute.managedobject.CleanupSequenceImpl;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectCleanupImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.CleanupSequence;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FlowCallbackJobNodeFactory;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FlowCallbackFactory;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
+import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -74,9 +74,9 @@ public class ProcessStateImpl implements ProcessState {
 	};
 
 	/**
-	 * {@link CleanupSequence}.
+	 * {@link ManagedObjectCleanup}.
 	 */
-	private final CleanupSequence cleanupSequence;
+	private final ManagedObjectCleanup cleanup;
 
 	/**
 	 * {@link ProcessMetaData}.
@@ -248,8 +248,8 @@ public class ProcessStateImpl implements ProcessState {
 				: new EscalationHandlerEscalation(invocationEscalationHandler, escalationResponsibleTeam,
 						escalationContinueTeam, escalationHandlerRequiredGovernance));
 
-		// Create the clean up sequence
-		this.cleanupSequence = new CleanupSequenceImpl(this);
+		// Create the clean up
+		this.cleanup = new ManagedObjectCleanupImpl(this, this.officeMetaData);
 	}
 
 	/*
@@ -272,8 +272,8 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public CleanupSequence getCleanupSequence() {
-		return this.cleanupSequence;
+	public ManagedObjectCleanup getManagedObjectCleanup() {
+		return this.cleanup;
 	}
 
 	@Override
@@ -302,7 +302,7 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public ThreadState createThread(AssetManager assetManager, FlowCallbackJobNodeFactory callbackFactory) {
+	public ThreadState createThread(AssetManager assetManager, FlowCallbackFactory callbackFactory) {
 
 		// Create the thread
 		ThreadState threadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), assetManager,
@@ -316,7 +316,7 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public JobNode threadComplete(ThreadState thread) {
+	public FunctionState threadComplete(ThreadState thread) {
 
 		// Remove thread from active thread listing
 		if (this.activeThreads.removeEntry(thread)) {
@@ -332,7 +332,7 @@ public class ProcessStateImpl implements ProcessState {
 			for (int i = 0; i < this.managedObjectContainers.length; i++) {
 				ManagedObjectContainer container = this.managedObjectContainers[i];
 				if (container != null) {
-					JobNode unloadJobNode = container.unloadManagedObject();
+					FunctionState unloadJobNode = container.unloadManagedObject();
 					if (unloadJobNode == null) {
 						return unloadJobNode;
 					}

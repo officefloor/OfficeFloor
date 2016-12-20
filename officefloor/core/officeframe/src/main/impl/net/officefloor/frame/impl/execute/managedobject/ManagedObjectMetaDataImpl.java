@@ -17,24 +17,23 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.CleanupSequence;
-import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.JobNodeLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessCompletionListener;
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.Promise;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
@@ -44,13 +43,9 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
-import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Meta-data of the {@link ManagedObject}.
@@ -302,8 +297,159 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	}
 
 	@Override
-	public <W extends Work> boolean isDependenciesReady(WorkContainer<W> workContainer, JobNode jobNode) {
-		return workContainer.isManagedObjectsReady(this.dependencyMapping, jobNode);
+	public FunctionLoop getJobNodeLoop() {
+		return this.officeMetaData.getJobNodeLoop();
+	}
+
+	@Override
+	public OfficeClock getOfficeClock() {
+		return this.officeMetaData.getOfficeClock();
+	}
+
+	@Override
+	public FunctionState createReadyCheckJobNode(ManagedObjectReadyCheck check, WorkContainer<?> workContainer,
+			ManagedObjectContainer currentContainer) {
+
+		// Ensure there are dependencies
+		if ((this.dependencyMapping.length == 0) && (currentContainer == null)) {
+			return null; // nothing to check
+		}
+
+		// Create the managed object ready check wrapper
+		ManagedObjectReadyCheckWrapper wrapper = new ManagedObjectReadyCheckWrapper(check);
+
+		// Create the array of check job nodes
+		FunctionState[] checkJobNodes = new FunctionState[this.dependencyMapping.length + ((currentContainer != null) ? 1 : 0)];
+		for (int i = 0; i < this.dependencyMapping.length; i++) {
+			checkJobNodes[i] = workContainer.getManagedObjectContainer(this.dependencyMapping[i])
+					.createCheckReadyJobNode(wrapper);
+		}
+		if (currentContainer != null) {
+			checkJobNodes[checkJobNodes.length - 1] = currentContainer.createCheckReadyJobNode(wrapper);
+		}
+
+		// Return job to check all managed objects are ready
+		return new CheckReadyJobNode(wrapper, checkJobNodes, 0);
+	}
+
+	/**
+	 * Wrapper around {@link ManagedObjectReadyCheck} to determine if
+	 * {@link ManagedObject} was not ready.
+	 */
+	private static class ManagedObjectReadyCheckWrapper implements ManagedObjectReadyCheck {
+
+		/**
+		 * Delegate {@link ManagedObjectReadyCheck}.
+		 */
+		private final ManagedObjectReadyCheck delegate;
+
+		/**
+		 * Indicates if ready.
+		 */
+		private boolean isReady = true;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param delegate
+		 *            Delegate {@link ManagedObjectReadyCheck}.
+		 */
+		public ManagedObjectReadyCheckWrapper(ManagedObjectReadyCheck delegate) {
+			this.delegate = delegate;
+		}
+
+		/*
+		 * ====================== ManagedObjectReadyCheck ====================
+		 */
+
+		@Override
+		public ManagedFunction getManagedJobNode() {
+			return this.delegate.getManagedJobNode();
+		}
+
+		@Override
+		public FunctionState setNotReady() {
+
+			// Flag not ready
+			this.isReady = false;
+
+			// Return not ready job node
+			return this.delegate.setNotReady();
+		}
+	}
+
+	/**
+	 * {@link FunctionState} to check {@link ManagedObject} is ready.
+	 */
+	private static class CheckReadyJobNode implements FunctionState {
+
+		/**
+		 * {@link ManagedObjectReadyCheckWrapper}.
+		 */
+		private final ManagedObjectReadyCheckWrapper readyCheck;
+
+		/**
+		 * {@link FunctionState} instances to check the necessary
+		 * {@link ManagedObject} instances are ready.
+		 */
+		private final FunctionState[] checkJobNodes;
+
+		/**
+		 * Index of the {@link FunctionState} to use for checking.
+		 */
+		private final int currentJobNodeIndex;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param readyCheck
+		 *            {@link ManagedObjectReadyCheckWrapper}.
+		 * @param checkJobNodes
+		 *            {@link FunctionState} instances to check the necessary
+		 *            {@link ManagedObject} instances are ready.
+		 * @param currentJobNodeIndex
+		 *            Index of the {@link FunctionState} to use for checking.
+		 */
+		public CheckReadyJobNode(ManagedObjectReadyCheckWrapper readyCheck, FunctionState[] checkJobNodes,
+				int currentJobNodeIndex) {
+			this.readyCheck = readyCheck;
+			this.checkJobNodes = checkJobNodes;
+			this.currentJobNodeIndex = currentJobNodeIndex;
+		}
+
+		/*
+		 * ====================== JobNode ====================
+		 */
+
+		@Override
+		public ThreadState getThreadState() {
+			return this.checkJobNodes[this.currentJobNodeIndex].getThreadState();
+		}
+
+		@Override
+		public FunctionState execute() {
+
+			// Undertake check for current job node
+			FunctionState currentJobNode = this.checkJobNodes[this.currentJobNodeIndex];
+			FunctionState nextJobNode = currentJobNode.execute();
+
+			// Determine if not ready (only single job checking)
+			if (!this.readyCheck.isReady) {
+				// Not ready, so no further checking necessary
+				return nextJobNode;
+			}
+
+			// Determine if last check
+			int nextJobNodeIndex = this.currentJobNodeIndex + 1;
+			if (nextJobNodeIndex >= this.checkJobNodes.length) {
+				// No further checks
+				return nextJobNode;
+			}
+
+			// Continue with check of next managed object
+			return Promise.then(nextJobNode,
+					new CheckReadyJobNode(this.readyCheck, this.checkJobNodes, nextJobNodeIndex));
+		}
 	}
 
 	@Override
@@ -318,109 +464,9 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	}
 
 	@Override
-	public JobNode createRecycleJobNode(ManagedObject managedObject, CleanupSequence cleanupSequence) {
-
-		if (this.recycleFlowMetaData == null) {
-			// No recycling for managed objects
-			return null;
-
-		} else {
-			// Create the recycle managed object parameter
-			RecycleManagedObjectParameterImpl<ManagedObject> parameter = new RecycleManagedObjectParameterImpl<ManagedObject>(
-					managedObject, cleanupSequence);
-
-			// Create the recycle job node
-			JobNode recycleJobNode = this.officeMetaData.createProcess(this.recycleFlowMetaData, parameter, parameter,
-					this.recycleEscalationResponsibleTeam);
-
-			// Listen to process completion (handle not being recycled)
-			recycleJobNode.getThreadState().getProcessState().registerProcessCompletionListener(parameter);
-
-			// Return the recycle job node
-			return recycleJobNode;
-		}
-	}
-
-	/**
-	 * Implementation of {@link RecycleManagedObjectParameter}.
-	 */
-	private class RecycleManagedObjectParameterImpl<MO extends ManagedObject>
-			implements RecycleManagedObjectParameter<MO>, EscalationHandler, ProcessCompletionListener {
-
-		/**
-		 * {@link ManagedObject} being recycled.
-		 */
-		private final MO managedObject;
-
-		/**
-		 * {@link CleanupSequence}.
-		 */
-		private final CleanupSequence cleanupSequence;
-
-		/**
-		 * Flag indicating if has been recycled.
-		 */
-		private volatile boolean isRecycled = false;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param managedObject
-		 *            {@link ManagedObject} to recycle.
-		 * @param cleanupSequence
-		 *            {@link CleanupSequence}.
-		 */
-		RecycleManagedObjectParameterImpl(MO managedObject, CleanupSequence cleanupSequence) {
-			this.managedObject = managedObject;
-			this.cleanupSequence = cleanupSequence;
-		}
-
-		/*
-		 * ============= RecycleManagedObjectParameter =======================
-		 */
-
-		@Override
-		public MO getManagedObject() {
-			return this.managedObject;
-		}
-
-		@Override
-		public void reuseManagedObject(MO managedObject) {
-			// Return to pool
-			if (ManagedObjectMetaDataImpl.this.pool != null) {
-				ManagedObjectMetaDataImpl.this.pool.returnManagedObject(managedObject);
-			}
-
-			// Flag recycled
-			this.isRecycled = true;
-		}
-
-		@Override
-		public CleanupEscalation[] getCleanupEscalations() {
-			return this.cleanupSequence.getCleanupEscalations();
-		}
-
-		/*
-		 * ================== EscalationHandler ===============================
-		 */
-
-		@Override
-		public void handleEscalation(Throwable escalation) throws Throwable {
-			// Register the failure of recycling
-			this.cleanupSequence.registerCleanupEscalation(ManagedObjectMetaDataImpl.this.objectType, escalation);
-		}
-
-		/*
-		 * ============= ProcessCompletionListener ============================
-		 */
-
-		@Override
-		public void processComplete() {
-			if ((!this.isRecycled) && (ManagedObjectMetaDataImpl.this.pool != null)) {
-				// Not recycled, therefore lost to pool
-				ManagedObjectMetaDataImpl.this.pool.lostManagedObject(this.managedObject);
-			}
-		}
+	public FunctionState createRecycleJobNode(ManagedObject managedObject, ManagedObjectCleanup cleanup) {
+		return cleanup.createCleanUpJobNode(this.recycleFlowMetaData, this.recycleEscalationResponsibleTeam,
+				this.objectType, managedObject, this.pool);
 	}
 
 }

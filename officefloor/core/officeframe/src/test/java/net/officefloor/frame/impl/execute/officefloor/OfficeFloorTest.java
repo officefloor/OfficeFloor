@@ -24,7 +24,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
@@ -163,7 +163,7 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
 		final Object parameter = new Object();
-		final JobNode jobNode = this.createMock(JobNode.class);
+		final FunctionState jobNode = this.createMock(FunctionState.class);
 
 		// Record opening the OfficeFloor
 		this.recordReturn(this.officeFloorMetaData,

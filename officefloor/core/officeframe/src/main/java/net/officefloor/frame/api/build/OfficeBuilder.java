@@ -24,7 +24,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -53,7 +53,7 @@ public interface OfficeBuilder {
 	void setMonitorOfficeInterval(long monitorOfficeInterval);
 
 	/**
-	 * Registers a {@link Team} which will execute {@link JobNode} instances
+	 * Registers a {@link Team} which will execute {@link FunctionState} instances
 	 * within this {@link Office}.
 	 * 
 	 * @param officeTeamName

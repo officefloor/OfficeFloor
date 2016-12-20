@@ -22,8 +22,8 @@ import java.sql.SQLException;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.impl.execute.managedobject.CleanupSequenceImpl;
-import net.officefloor.frame.internal.structure.CleanupSequence;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -32,19 +32,19 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link CleanupSequence}.
+ * Tests the {@link ManagedObjectCleanup}.
  *
  * @author Daniel Sagenschneider
  */
 public class CleanupSequenceTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link CleanupSequence} to test.
+	 * {@link ManagedObjectCleanup} to test.
 	 */
 	private final CleanupSequenceImpl cleanupSequence = new CleanupSequenceImpl();
 
 	/**
-	 * Ensure can register a cleanup {@link JobNode}.
+	 * Ensure can register a cleanup {@link FunctionState}.
 	 */
 	public void testRegisterCleanupJob() {
 
@@ -59,7 +59,7 @@ public class CleanupSequenceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can register a cleanup {@link JobNode}.
+	 * Ensure can register a cleanup {@link FunctionState}.
 	 */
 	public void testCompleteCleanupJob() {
 
@@ -75,9 +75,9 @@ public class CleanupSequenceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can register multiple cleanup {@link JobNode} instances. Also
+	 * Ensure can register multiple cleanup {@link FunctionState} instances. Also
 	 * ensures each is activated on the completion of the previous
-	 * {@link JobNode}.
+	 * {@link FunctionState}.
 	 */
 	public void testRegisterMultipleCleanupJobs() {
 
@@ -106,8 +106,8 @@ public class CleanupSequenceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure that on completion of the first cleanup {@link JobNode}, that the
-	 * next clean up {@link JobNode} is activated.
+	 * Ensure that on completion of the first cleanup {@link FunctionState}, that the
+	 * next clean up {@link FunctionState} is activated.
 	 */
 	public void testActivateNextCleanupJob() {
 
@@ -215,10 +215,10 @@ public class CleanupSequenceTest extends OfficeFrameTestCase {
 	private class CleanupStruct {
 
 		/**
-		 * Mock {@link JobNode}.
+		 * Mock {@link FunctionState}.
 		 */
-		public final JobNode jobNode = CleanupSequenceTest.this
-				.createMock(JobNode.class);
+		public final FunctionState jobNode = CleanupSequenceTest.this
+				.createMock(FunctionState.class);
 
 		/**
 		 * Mock {@link Flow}.
@@ -245,7 +245,7 @@ public class CleanupSequenceTest extends OfficeFrameTestCase {
 				.createMock(TeamIdentifier.class);
 
 		/**
-		 * Records activating the cleanup {@link JobNode}.
+		 * Records activating the cleanup {@link FunctionState}.
 		 */
 		public void recordActivateJobNode() {
 			CleanupSequenceTest.this.recordReturn(this.jobNode,

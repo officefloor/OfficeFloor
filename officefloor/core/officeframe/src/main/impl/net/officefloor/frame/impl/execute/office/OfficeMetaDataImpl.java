@@ -34,7 +34,7 @@ import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -105,7 +105,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		}
 
 		// Create the job node within a new process
-		JobNode jobNode = officeMetaData.createProcess(flowMetaData, parameter,
+		FunctionState jobNode = officeMetaData.createProcess(flowMetaData, parameter,
 				null, null, null);
 
 		// Obtain the ProcessState
@@ -263,7 +263,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
-	public <W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
+	public <W extends Work> FunctionState createProcess(FlowMetaData<W> flowMetaData,
 			Object parameter, EscalationHandler invocationEscalationHandler,
 			TeamManagement escalationResponsibleTeam,
 			Team escalationContinueTeam) {
@@ -273,7 +273,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
-	public <W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
+	public <W extends Work> FunctionState createProcess(FlowMetaData<W> flowMetaData,
 			Object parameter, EscalationHandler invocationEscalationHandler,
 			TeamManagement escalationResponsibleTeam,
 			Team escalationContinueTeam, ManagedObject inputManagedObject,
@@ -316,7 +316,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 				.getInitialTaskMetaData();
 
 		// Create the Job Node for the initial job
-		JobNode jobNode = flow.createTaskNode(taskMetaData, null, parameter,
+		FunctionState jobNode = flow.createTaskNode(taskMetaData, null, parameter,
 				GovernanceDeactivationStrategy.ENFORCE);
 
 		// Notify of created process context

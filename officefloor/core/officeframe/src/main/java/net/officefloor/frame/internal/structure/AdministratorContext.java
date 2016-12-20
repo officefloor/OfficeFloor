@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -44,7 +45,10 @@ public interface AdministratorContext {
 	 *            Parameter that will be available from the
 	 *            {@link TaskContext#getObject(int)} of the first {@link Task}
 	 *            of the flow to be run.
+	 * @param callback
+	 *            {@link FlowCallback} to be invoked once the {@link Flow}
+	 *            completes.
 	 */
-	void doFlow(FlowMetaData<?> flowMetaData, Object parameter);
+	void doFlow(FlowMetaData<?> flowMetaData, Object parameter, FlowCallback callback);
 
 }

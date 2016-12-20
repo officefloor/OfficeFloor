@@ -38,7 +38,7 @@ import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -88,7 +88,7 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	private String teamName;
 
 	/**
-	 * Next {@link JobNode} within the {@link Flow}.
+	 * Next {@link FunctionState} within the {@link Flow}.
 	 */
 	private TaskNodeReference nextTaskInFlow;
 

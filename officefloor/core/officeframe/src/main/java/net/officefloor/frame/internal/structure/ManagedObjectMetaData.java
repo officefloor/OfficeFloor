@@ -79,20 +79,11 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	ManagedObjectContainer createManagedObjectContainer(ThreadState threadState);
 
 	/**
-	 * Obtains the optional {@link TeamManagement} responsible for this
-	 * {@link ManagedObject}.
+	 * Obtains the {@link FunctionLoop} for the {@link ManagedObject}.
 	 * 
-	 * @return Optional {@link TeamManagement} responsible for this
-	 *         {@link ManagedObject}. May be <code>null</code>.
+	 * @return {@link FunctionLoop} for the {@link ManagedObject}.
 	 */
-	TeamManagement getResponsibleTeam();
-
-	/**
-	 * Obtains the {@link JobNodeLoop} for the {@link ManagedObject}.
-	 * 
-	 * @return {@link JobNodeLoop} for the {@link ManagedObject}.
-	 */
-	JobNodeLoop getJobNodeLoop();
+	FunctionLoop getJobNodeLoop();
 
 	/**
 	 * Obtains the {@link AssetManager} that manages the sourcing of the
@@ -116,6 +107,13 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * @return {@link ManagedObjectPool} for the {@link ManagedObject}.
 	 */
 	ManagedObjectPool getManagedObjectPool();
+
+	/**
+	 * Obtains the {@link OfficeClock}.
+	 * 
+	 * @return {@link OfficeClock}.
+	 */
+	OfficeClock getOfficeClock();
 
 	/**
 	 * Obtains the time out in milliseconds for the asynchronous operation to
@@ -175,18 +173,25 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	boolean isCoordinatingManagedObject();
 
 	/**
-	 * Indicates if dependency {@link ManagedObject} instances are ready.
+	 * <p>
+	 * Creates a {@link FunctionState} to check if the dependencies of this
+	 * {@link ManagedObject} are ready.
+	 * <p>
+	 * Should a {@link ManagedObject} not be ready, then will latch the
+	 * {@link ManagedFunction} to wait for the {@link ManagedObject} to be ready.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workContainer
-	 *            {@link WorkContainer}.
-	 * @param jobNode
-	 *            {@link JobNode}.
-	 * @return <code>true</code> if all dependency {@link ManagedObject}
-	 *         instances are ready.
+	 * @param check
+	 *            {@link ManagedObjectReadyCheck}.
+	 * @param currentContainer
+	 *            Optional able to include the current
+	 *            {@link ManagedObjectContainer} for this
+	 *            {@link ManagedObjectMetaData} in ready check. May be
+	 *            <code>null</code> to not include.
+	 * @return {@link FunctionState} instances to check if the dependencies of this
+	 *         {@link ManagedObject} are ready.
 	 */
-	<W extends Work> boolean isDependenciesReady(WorkContainer<W> workContainer, JobNode jobNode);
+	FunctionState createReadyCheckJobNode(ManagedObjectReadyCheck check, WorkContainer<?> workContainer,
+			ManagedObjectContainer currentContainer);
 
 	/**
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.
@@ -204,18 +209,18 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	<W extends Work> ObjectRegistry<D> createObjectRegistry(WorkContainer<W> workContainer, ThreadState threadState);
 
 	/**
-	 * Creates the {@link JobNode} for the recycling of the
+	 * Creates the {@link FunctionState} for the recycling of the
 	 * {@link ManagedObject}.
 	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} to be recycled. Obtained by the
 	 *            {@link RecycleManagedObjectParameter#getManagedObject()}.
 	 * @param cleanupSequence
-	 *            {@link CleanupSequence}.
-	 * @return {@link JobNode} for the recycling this {@link ManagedObject} or
+	 *            {@link ManagedObjectCleanup}.
+	 * @return {@link FunctionState} for the recycling this {@link ManagedObject} or
 	 *         <code>null</code> if no recycling is required for this
 	 *         {@link ManagedObject}.
 	 */
-	JobNode createRecycleJobNode(ManagedObject managedObject, CleanupSequence cleanupSequence);
+	FunctionState createRecycleJobNode(ManagedObject managedObject, ManagedObjectCleanup cleanupSequence);
 
 }

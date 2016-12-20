@@ -18,47 +18,38 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Meta-data for a {@link Job}.
+ * Meta-data for a {@link FunctionState}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface JobMetaData {
+public interface ManagedFunctionMetaData {
 
 	/**
-	 * Obtains the name of the {@link Job}.
+	 * Obtains the name of the {@link FunctionState}.
 	 * 
-	 * @return Name of the {@link Job}.
+	 * @return Name of the {@link FunctionState}.
 	 */
 	String getJobName();
 
 	/**
-	 * Creates the {@link JobNodeActivatableSet} for executing the {@link Job}.
-	 * 
-	 * @return {@link JobNodeActivatableSet}.
-	 */
-	@Deprecated // part of job loop
-	JobNodeActivatableSet createJobActivableSet();
-
-	/**
 	 * Obtains the {@link TeamManagement} responsible for completion of the
-	 * {@link Job}.
+	 * {@link FunctionState}.
 	 * 
 	 * @return {@link TeamManagement} responsible for completion of the
-	 *         {@link Job}. May be <code>null</code> to enable any {@link Team}
-	 *         to execute the {@link JobNode}.
+	 *         {@link FunctionState}. May be <code>null</code> to enable any
+	 *         {@link Team} to execute the {@link FunctionState}.
 	 */
 	TeamManagement getResponsibleTeam();
 
 	/**
-	 * Obtains the {@link JobNodeLoop}.
+	 * Obtains the {@link FunctionLoop}.
 	 * 
-	 * @return {@link JobNodeLoop}.
+	 * @return {@link FunctionLoop}.
 	 */
-	JobNodeLoop getJobNodeDelegator();
+	FunctionLoop getJobNodeLoop();
 
 	/**
 	 * Obtains the {@link TaskMetaData} of the next {@link Task} within
@@ -70,8 +61,8 @@ public interface JobMetaData {
 	TaskMetaData<?, ?, ?> getNextTaskInFlow();
 
 	/**
-	 * Obtains the {@link EscalationProcedure} for the {@link Job} of this
-	 * {@link JobMetaData}.
+	 * Obtains the {@link EscalationProcedure} for the {@link FunctionState} of this
+	 * {@link ManagedFunctionMetaData}.
 	 * 
 	 * @return {@link EscalationProcedure}.
 	 */

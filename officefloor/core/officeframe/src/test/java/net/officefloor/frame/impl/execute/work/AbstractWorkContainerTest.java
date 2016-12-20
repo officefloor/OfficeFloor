@@ -36,8 +36,8 @@ import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -262,9 +262,9 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	private final JobContext jobContext = this.createMock(JobContext.class);
 
 	/**
-	 * {@link JobNode}.
+	 * {@link FunctionState}.
 	 */
-	private final JobNode jobNode = this.createMock(JobNode.class);
+	private final FunctionState jobNode = this.createMock(FunctionState.class);
 
 	/**
 	 * {@link ContainerContext}.
@@ -405,7 +405,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 				// Only set the matcher once
 				this.control(managedObjectContainer).setMatcher(
 						new TypeMatcher(WorkContainer.class, JobContext.class,
-								JobNode.class, JobNodeActivateSet.class,
+								FunctionState.class, JobNodeActivateSet.class,
 								ContainerContext.class));
 				this.coordinatedMangedObjectContainers
 						.add(managedObjectContainer);
