@@ -31,7 +31,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -92,12 +92,12 @@ public class TaskJobNode<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 * @param governanceDeactivationStrategy
 	 *            {@link GovernanceDeactivationStrategy}.
 	 * @param parallelOwner
-	 *            Parallel owning {@link ManagedFunction}.
+	 *            Parallel owning {@link ManagedFunctionContainer}.
 	 * @param parameter
 	 *            Parameter for the {@link Task}.
 	 */
 	public TaskJobNode(Flow flow, WorkContainer<W> workContainer, TaskMetaData<W, D, F> taskMetaData,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy, ManagedFunction parallelOwner,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy, ManagedFunctionContainer parallelOwner,
 			Object parameter) {
 		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData.getRequiredManagedObjects(),
 				taskMetaData.getRequiredGovernance(), governanceDeactivationStrategy);

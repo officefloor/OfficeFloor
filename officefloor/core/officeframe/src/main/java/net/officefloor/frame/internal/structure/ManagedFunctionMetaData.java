@@ -32,7 +32,7 @@ public interface ManagedFunctionMetaData {
 	 * 
 	 * @return Name of the {@link FunctionState}.
 	 */
-	String getJobName();
+	String getFunctionName();
 
 	/**
 	 * Obtains the {@link TeamManagement} responsible for completion of the
@@ -49,7 +49,7 @@ public interface ManagedFunctionMetaData {
 	 * 
 	 * @return {@link FunctionLoop}.
 	 */
-	FunctionLoop getJobNodeLoop();
+	FunctionLoop getFunctionLoop();
 
 	/**
 	 * Obtains the {@link TaskMetaData} of the next {@link Task} within
@@ -61,8 +61,8 @@ public interface ManagedFunctionMetaData {
 	TaskMetaData<?, ?, ?> getNextTaskInFlow();
 
 	/**
-	 * Obtains the {@link EscalationProcedure} for the {@link FunctionState} of this
-	 * {@link ManagedFunctionMetaData}.
+	 * Obtains the {@link EscalationProcedure} for the {@link FunctionState} of
+	 * this {@link ManagedFunctionMetaData}.
 	 * 
 	 * @return {@link EscalationProcedure}.
 	 */

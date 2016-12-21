@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.construct;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
+import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.spi.source.SourceContext;
 
 /**
@@ -50,14 +51,14 @@ public interface RawWorkMetaDataFactory {
 	 *            {@link RawBoundAdministratorMetaDataFactory}.
 	 * @param rawTaskFactory
 	 *            {@link RawTaskMetaDataFactory}.
+	 * @param functionLoop
+	 *            {@link FunctionLoop}.
 	 * @return {@link RawWorkMetaData}.
 	 */
-	<W extends Work> RawWorkMetaData<W> constructRawWorkMetaData(
-			WorkConfiguration<W> configuration, SourceContext sourceContext,
-			OfficeFloorIssues issues, RawOfficeMetaData rawOfficeMetaData,
-			AssetManagerFactory assetManagerFactory,
-			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
-			RawTaskMetaDataFactory rawTaskFactory);
+	<W extends Work> RawWorkMetaData<W> constructRawWorkMetaData(WorkConfiguration<W> configuration,
+			SourceContext sourceContext, OfficeFloorIssues issues, RawOfficeMetaData rawOfficeMetaData,
+			AssetManagerFactory assetManagerFactory, RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
+			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory, RawTaskMetaDataFactory rawTaskFactory,
+			FunctionLoop functionLoop);
 
 }

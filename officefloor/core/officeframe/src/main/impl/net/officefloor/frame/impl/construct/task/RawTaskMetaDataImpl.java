@@ -63,6 +63,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -71,7 +72,6 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for a {@link Task}.
@@ -84,8 +84,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger
-			.getLogger(RawTaskMetaDataImpl.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(RawTaskMetaDataImpl.class.getName());
 
 	/**
 	 * Obtains the {@link RawTaskMetaDataFactory}.
@@ -129,10 +128,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 * @param rawWorkMetaData
 	 *            {@link RawWorkMetaData}.
 	 */
-	private RawTaskMetaDataImpl(String taskName,
-			TaskConfiguration<W, D, F> configuration,
-			TaskMetaDataImpl<W, D, F> taskMetaData,
-			RawWorkMetaData<W> rawWorkMetaData) {
+	private RawTaskMetaDataImpl(String taskName, TaskConfiguration<W, D, F> configuration,
+			TaskMetaDataImpl<W, D, F> taskMetaData, RawWorkMetaData<W> rawWorkMetaData) {
 		this.taskName = taskName;
 		this.configuration = configuration;
 		this.taskMetaData = taskMetaData;
@@ -145,15 +142,13 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <w extends Work> RawTaskMetaData<w, ?, ?> constructRawTaskMetaData(
-			TaskConfiguration<w, ?, ?> configuration, OfficeFloorIssues issues,
-			final RawWorkMetaData<w> rawWorkMetaData) {
+	public <w extends Work> RawTaskMetaData<w, ?, ?> constructRawTaskMetaData(TaskConfiguration<w, ?, ?> configuration,
+			OfficeFloorIssues issues, final RawWorkMetaData<w> rawWorkMetaData, FunctionLoop functionLoop) {
 
 		// Obtain the task name
 		String taskName = configuration.getTaskName();
 		if (ConstructUtil.isBlank(taskName)) {
-			issues.addIssue(AssetType.WORK, rawWorkMetaData.getWorkName(),
-					"Task added without name");
+			issues.addIssue(AssetType.WORK, rawWorkMetaData.getWorkName(), "Task added without name");
 			return null; // no task name
 		}
 
@@ -163,8 +158,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		// Obtain the task factory
 		TaskFactory<w, ?, ?> taskFactory = configuration.getTaskFactory();
 		if (taskFactory == null) {
-			issues.addIssue(AssetType.TASK, taskName,
-					"No " + TaskFactory.class.getSimpleName() + " provided");
+			issues.addIssue(AssetType.TASK, taskName, "No " + TaskFactory.class.getSimpleName() + " provided");
 			return null; // no task factory
 		}
 
@@ -174,30 +168,22 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		// Obtain the team responsible for the task
 		String officeTeamName = configuration.getOfficeTeamName();
 		if (ConstructUtil.isBlank(officeTeamName)) {
-			issues.addIssue(AssetType.TASK, taskName,
-					"No team name provided for task");
+			issues.addIssue(AssetType.TASK, taskName, "No team name provided for task");
 			return null; // no team name
 		}
-		RawOfficeMetaData rawOfficeMetaData = rawWorkMetaData
-				.getRawOfficeMetaData();
-		TeamManagement responsibleTeam = rawOfficeMetaData.getTeams().get(
-				officeTeamName);
+		RawOfficeMetaData rawOfficeMetaData = rawWorkMetaData.getRawOfficeMetaData();
+		TeamManagement responsibleTeam = rawOfficeMetaData.getTeams().get(officeTeamName);
 		if (responsibleTeam == null) {
-			issues.addIssue(AssetType.TASK, taskName, "Unknown team '"
-					+ officeTeamName + "' responsible for task");
+			issues.addIssue(AssetType.TASK, taskName, "Unknown team '" + officeTeamName + "' responsible for task");
 			return null; // no team
 		}
-
-		// Obtain the continue team
-		Team continueTeam = rawOfficeMetaData.getContinueTeam();
 
 		// Keep track of all the required managed objects
 		final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData>();
 
 		// Obtain the managed objects used directly by this task.
 		// Also obtain the parameter type for the task if specified.
-		TaskObjectConfiguration<?>[] objectConfigurations = configuration
-				.getObjectConfiguration();
+		TaskObjectConfiguration<?>[] objectConfigurations = configuration.getObjectConfiguration();
 		ManagedObjectIndex[] taskToWorkMoTranslations = new ManagedObjectIndex[objectConfigurations.length];
 		Class<?> parameterType = null;
 		NEXT_OBJECT: for (int i = 0; i < objectConfigurations.length; i++) {
@@ -205,24 +191,21 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 			// Ensure have configuration
 			if (objectConfiguration == null) {
-				issues.addIssue(AssetType.TASK, taskName,
-						"No object configuration at index " + i);
+				issues.addIssue(AssetType.TASK, taskName, "No object configuration at index " + i);
 				continue NEXT_OBJECT; // must have configuration
 			}
 
 			// Obtain the type of object required
 			Class<?> objectType = objectConfiguration.getObjectType();
 			if (objectType == null) {
-				issues.addIssue(AssetType.TASK, taskName,
-						"No type for object at index " + i);
+				issues.addIssue(AssetType.TASK, taskName, "No type for object at index " + i);
 				continue NEXT_OBJECT; // must have object type
 			}
 
 			// Determine if a parameter
 			if (objectConfiguration.isParameter()) {
 				// Parameter so use parameter index (note has no scope)
-				taskToWorkMoTranslations[i] = new ManagedObjectIndexImpl(null,
-						TaskJobNode.PARAMETER_INDEX);
+				taskToWorkMoTranslations[i] = new ManagedObjectIndexImpl(null, TaskJobNode.PARAMETER_INDEX);
 
 				// Specify the parameter type
 				if (parameterType == null) {
@@ -238,10 +221,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 						// Existing parameter type is more specific
 					} else {
 						// Parameter use is incompatible
-						issues.addIssue(AssetType.TASK, taskName,
-								"Incompatible parameter types ("
-										+ parameterType.getName() + ", "
-										+ objectType.getName() + ")");
+						issues.addIssue(AssetType.TASK, taskName, "Incompatible parameter types ("
+								+ parameterType.getName() + ", " + objectType.getName() + ")");
 					}
 				}
 
@@ -250,21 +231,16 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			}
 
 			// Obtain the scope managed object name
-			String scopeMoName = objectConfiguration
-					.getScopeManagedObjectName();
+			String scopeMoName = objectConfiguration.getScopeManagedObjectName();
 			if (ConstructUtil.isBlank(scopeMoName)) {
-				issues.addIssue(AssetType.TASK, taskName,
-						"No name for managed object at index " + i);
+				issues.addIssue(AssetType.TASK, taskName, "No name for managed object at index " + i);
 				continue NEXT_OBJECT; // no managed object name
 			}
 
 			// Obtain the scope managed object
-			RawBoundManagedObjectMetaData scopeMo = rawWorkMetaData
-					.getScopeManagedObjectMetaData(scopeMoName);
+			RawBoundManagedObjectMetaData scopeMo = rawWorkMetaData.getScopeManagedObjectMetaData(scopeMoName);
 			if (scopeMo == null) {
-				issues.addIssue(AssetType.TASK, taskName,
-						"Can not find scope managed object '" + scopeMoName
-								+ "'");
+				issues.addIssue(AssetType.TASK, taskName, "Can not find scope managed object '" + scopeMoName + "'");
 				continue NEXT_OBJECT; // no scope managed object
 			}
 
@@ -272,24 +248,15 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			boolean isCompatibleIssue = false;
 			for (RawBoundManagedObjectInstanceMetaData<?> scopeMoInstance : scopeMo
 					.getRawBoundManagedObjectInstanceMetaData()) {
-				Class<?> moObjectType = scopeMoInstance
-						.getRawManagedObjectMetaData().getObjectType();
+				Class<?> moObjectType = scopeMoInstance.getRawManagedObjectMetaData().getObjectType();
 				if (!objectType.isAssignableFrom(moObjectType)) {
 					// Incompatible managed object
 					isCompatibleIssue = true;
-					issues.addIssue(
-							AssetType.TASK,
-							taskName,
-							"Managed object "
-									+ scopeMoName
-									+ " is incompatible (require="
-									+ objectType.getName()
-									+ ", object of managed object type="
-									+ moObjectType.getName()
+					issues.addIssue(AssetType.TASK, taskName,
+							"Managed object " + scopeMoName + " is incompatible (require=" + objectType.getName()
+									+ ", object of managed object type=" + moObjectType.getName()
 									+ ", ManagedObjectSource="
-									+ scopeMoInstance
-											.getRawManagedObjectMetaData()
-											.getManagedObjectName() + ")");
+									+ scopeMoInstance.getRawManagedObjectMetaData().getManagedObjectName() + ")");
 				}
 			}
 			if (isCompatibleIssue) {
@@ -298,51 +265,41 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			}
 
 			// Specify index for task translation and load required indexes
-			taskToWorkMoTranslations[i] = this.loadRequiredManagedObjects(
-					scopeMo, requiredManagedObjects);
+			taskToWorkMoTranslations[i] = this.loadRequiredManagedObjects(scopeMo, requiredManagedObjects);
 		}
 
 		// Obtain the duties for this task
-		TaskDutyAssociation<?>[] preTaskDuties = this
-				.createTaskDutyAssociations(configuration
-						.getPreTaskAdministratorDutyConfiguration(),
-						rawWorkMetaData, issues, taskName, true,
-						requiredManagedObjects);
-		TaskDutyAssociation<?>[] postTaskDuties = this
-				.createTaskDutyAssociations(configuration
-						.getPostTaskAdministratorDutyConfiguration(),
-						rawWorkMetaData, issues, taskName, false,
-						requiredManagedObjects);
+		TaskDutyAssociation<?>[] preTaskDuties = this.createTaskDutyAssociations(
+				configuration.getPreTaskAdministratorDutyConfiguration(), rawWorkMetaData, issues, taskName, true,
+				requiredManagedObjects);
+		TaskDutyAssociation<?>[] postTaskDuties = this.createTaskDutyAssociations(
+				configuration.getPostTaskAdministratorDutyConfiguration(), rawWorkMetaData, issues, taskName, false,
+				requiredManagedObjects);
 
 		// Create the required managed object indexes
-		ManagedObjectIndex[] requiredManagedObjectIndexes = new ManagedObjectIndex[requiredManagedObjects
-				.size()];
+		ManagedObjectIndex[] requiredManagedObjectIndexes = new ManagedObjectIndex[requiredManagedObjects.size()];
 		int requiredIndex = 0;
-		for (ManagedObjectIndex requiredManagedObjectIndex : requiredManagedObjects
-				.keySet()) {
+		for (ManagedObjectIndex requiredManagedObjectIndex : requiredManagedObjects.keySet()) {
 			requiredManagedObjectIndexes[requiredIndex++] = requiredManagedObjectIndex;
 		}
 
 		// Sort the required managed objects
-		if (!this.sortRequiredManagedObjects(requiredManagedObjectIndexes,
-				requiredManagedObjects, taskName, issues)) {
+		if (!this.sortRequiredManagedObjects(requiredManagedObjectIndexes, requiredManagedObjects, taskName, issues)) {
 			// Must be able to sort to allow coordination
 			return null;
 		}
 
 		// Obtain the required governance
 		boolean[] requiredGovernance;
-		TaskGovernanceConfiguration[] governanceConfigurations = configuration
-				.getGovernanceConfiguration();
-		boolean isManuallyManageGovernance = rawOfficeMetaData
-				.isManuallyManageGovernance();
+		TaskGovernanceConfiguration[] governanceConfigurations = configuration.getGovernanceConfiguration();
+		boolean isManuallyManageGovernance = rawOfficeMetaData.isManuallyManageGovernance();
 		if (isManuallyManageGovernance) {
 			// Ensure no governance is configured
 			if (governanceConfigurations.length > 0) {
-				issues.addIssue(AssetType.TASK, taskName, "Manually manage "
-						+ Governance.class.getSimpleName() + " but "
-						+ Governance.class.getSimpleName() + " configured for "
-						+ OfficeFloor.class.getSimpleName() + " management");
+				issues.addIssue(AssetType.TASK, taskName,
+						"Manually manage " + Governance.class.getSimpleName() + " but "
+								+ Governance.class.getSimpleName() + " configured for "
+								+ OfficeFloor.class.getSimpleName() + " management");
 			}
 
 			// No OfficeFloor managed governance for task
@@ -350,8 +307,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 		} else {
 			// OfficeFloor to manage Governance, create base flags
-			Map<String, RawGovernanceMetaData<?, ?>> rawGovernances = rawOfficeMetaData
-					.getGovernanceMetaData();
+			Map<String, RawGovernanceMetaData<?, ?>> rawGovernances = rawOfficeMetaData.getGovernanceMetaData();
 			requiredGovernance = new boolean[rawGovernances.size()];
 			for (int i = 0; i < requiredGovernance.length; i++) {
 				requiredGovernance[i] = false;
@@ -362,20 +318,16 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 				TaskGovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
 
 				// Obtain the name of the governance
-				String governanceName = governanceConfiguration
-						.getGovernanceName();
+				String governanceName = governanceConfiguration.getGovernanceName();
 				if (ConstructUtil.isBlank(governanceName)) {
-					issues.addIssue(AssetType.TASK, taskName,
-							"No Governance name provided for Governance " + i);
+					issues.addIssue(AssetType.TASK, taskName, "No Governance name provided for Governance " + i);
 					continue; // move on to next governance
 				}
 
 				// Obtain the raw governance meta-data
-				RawGovernanceMetaData<?, ?> rawGovernance = rawGovernances
-						.get(governanceName);
+				RawGovernanceMetaData<?, ?> rawGovernance = rawGovernances.get(governanceName);
 				if (rawGovernance == null) {
-					issues.addIssue(AssetType.TASK, taskName,
-							"Unknown Governance '" + governanceName + "'");
+					issues.addIssue(AssetType.TASK, taskName, "Unknown Governance '" + governanceName + "'");
 					continue; // move on to next governance
 				}
 
@@ -390,34 +342,27 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		if (LOGGER.isLoggable(logLevel)) {
 			// Log ordering of dependencies for task
 			StringBuilder log = new StringBuilder();
-			log.append("TASK: " + rawWorkMetaData.getWorkName() + " . "
-					+ taskName + "("
-					+ (parameterType == null ? "" : parameterType.getName())
-					+ ")\n");
+			log.append("TASK: " + rawWorkMetaData.getWorkName() + " . " + taskName + "("
+					+ (parameterType == null ? "" : parameterType.getName()) + ")\n");
 			int sequence = 1;
 			log.append("  Dependency load order:\n");
 			for (ManagedObjectIndex index : requiredManagedObjectIndexes) {
 				// Obtain the managed object for index
-				RawBoundManagedObjectMetaData managedObject = requiredManagedObjects
-						.get(index);
-				log.append("   " + (sequence++) + ") "
-						+ managedObject.getBoundManagedObjectName() + " ["
-						+ index.getManagedObjectScope().name() + ","
-						+ index.getIndexOfManagedObjectWithinScope() + "]\n");
+				RawBoundManagedObjectMetaData managedObject = requiredManagedObjects.get(index);
+				log.append("   " + (sequence++) + ") " + managedObject.getBoundManagedObjectName() + " ["
+						+ index.getManagedObjectScope().name() + "," + index.getIndexOfManagedObjectWithinScope()
+						+ "]\n");
 				LOGGER.log(logLevel, log.toString());
 			}
 		}
 
 		// Create the task meta-data
-		TaskMetaDataImpl<w, ?, ?> taskMetaData = new TaskMetaDataImpl(
-				jobName, taskName, taskFactory, differentiator, parameterType,
-				responsibleTeam, continueTeam, requiredManagedObjectIndexes,
-				taskToWorkMoTranslations, requiredGovernance, preTaskDuties,
-				postTaskDuties);
+		TaskMetaDataImpl<w, ?, ?> taskMetaData = new TaskMetaDataImpl(jobName, taskName, taskFactory, differentiator,
+				parameterType, responsibleTeam, requiredManagedObjectIndexes, taskToWorkMoTranslations,
+				requiredGovernance, preTaskDuties, postTaskDuties, functionLoop);
 
 		// Return the raw task meta-data
-		return new RawTaskMetaDataImpl(taskName, configuration, taskMetaData,
-				rawWorkMetaData);
+		return new RawTaskMetaDataImpl(taskName, configuration, taskMetaData, rawWorkMetaData);
 	}
 
 	/**
@@ -433,8 +378,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 * @return {@link ManagedObjectIndex} of the input
 	 *         {@link RawBoundManagedObjectMetaData}.
 	 */
-	private ManagedObjectIndex loadRequiredManagedObjects(
-			RawBoundManagedObjectMetaData boundMo,
+	private ManagedObjectIndex loadRequiredManagedObjects(RawBoundManagedObjectMetaData boundMo,
 			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects) {
 
 		// Obtain the bound managed object index
@@ -445,12 +389,10 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			requiredManagedObjects.put(boundMoIndex, boundMo);
 			for (RawBoundManagedObjectInstanceMetaData<?> boundMoInstance : boundMo
 					.getRawBoundManagedObjectInstanceMetaData()) {
-				RawBoundManagedObjectMetaData[] dependencies = boundMoInstance
-						.getDependencies();
+				RawBoundManagedObjectMetaData[] dependencies = boundMoInstance.getDependencies();
 				if (dependencies != null) {
 					for (RawBoundManagedObjectMetaData dependency : dependencies) {
-						this.loadRequiredManagedObjects(dependency,
-								requiredManagedObjects);
+						this.loadRequiredManagedObjects(dependency, requiredManagedObjects);
 					}
 				}
 			}
@@ -478,12 +420,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 * @return {@link TaskDutyAssociation} instances.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private TaskDutyAssociation<?>[] createTaskDutyAssociations(
-			TaskDutyConfiguration<?>[] configurations,
-			RawWorkMetaData<?> rawWorkMetaData,
-			OfficeFloorIssues issues,
-			String taskName,
-			boolean isPreNotPost,
+	private TaskDutyAssociation<?>[] createTaskDutyAssociations(TaskDutyConfiguration<?>[] configurations,
+			RawWorkMetaData<?> rawWorkMetaData, OfficeFloorIssues issues, String taskName, boolean isPreNotPost,
 			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects) {
 
 		// Create the listing of task duty associations
@@ -493,10 +431,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			// Obtain the scope administrator name
 			String scopeAdminName = duty.getScopeAdministratorName();
 			if (ConstructUtil.isBlank(scopeAdminName)) {
-				issues.addIssue(AssetType.TASK, taskName,
-						"No administrator name for "
-								+ (isPreNotPost ? "pre" : "post")
-								+ "-task at index " + taskDuties.size());
+				issues.addIssue(AssetType.TASK, taskName, "No administrator name for " + (isPreNotPost ? "pre" : "post")
+						+ "-task at index " + taskDuties.size());
 				continue; // no administrator name
 			}
 
@@ -504,9 +440,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			RawBoundAdministratorMetaData<?, ?> scopeAdmin = rawWorkMetaData
 					.getScopeAdministratorMetaData(scopeAdminName);
 			if (scopeAdmin == null) {
-				issues.addIssue(AssetType.TASK, taskName,
-						"Can not find scope administrator '" + scopeAdminName
-								+ "'");
+				issues.addIssue(AssetType.TASK, taskName, "Can not find scope administrator '" + scopeAdminName + "'");
 				continue; // no administrator
 			}
 
@@ -520,10 +454,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 				dutyKey = scopeAdmin.getDutyKey(key);
 				if (dutyKey == null) {
 					// Must have duty key
-					issues.addIssue(AssetType.TASK, taskName, "No duty for "
-							+ (isPreNotPost ? "pre" : "post")
-							+ "-task at index " + taskDuties.size()
-							+ " (duty key=" + key + ")");
+					issues.addIssue(AssetType.TASK, taskName, "No duty for " + (isPreNotPost ? "pre" : "post")
+							+ "-task at index " + taskDuties.size() + " (duty key=" + key + ")");
 					continue; // no duty
 				}
 			} else {
@@ -531,17 +463,14 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 				String dutyName = duty.getDutyName();
 				if (ConstructUtil.isBlank(dutyName)) {
 					issues.addIssue(AssetType.TASK, taskName,
-							"No duty name/key for pre-task at index "
-									+ taskDuties.size());
+							"No duty name/key for pre-task at index " + taskDuties.size());
 					continue; // must have means to identify duty
 				}
 				dutyKey = scopeAdmin.getDutyKey(dutyName);
 				if (dutyKey == null) {
 					// Must have duty key
-					issues.addIssue(AssetType.TASK, taskName, "No duty for "
-							+ (isPreNotPost ? "pre" : "post")
-							+ "-task at index " + taskDuties.size()
-							+ " (duty name=" + dutyName + ")");
+					issues.addIssue(AssetType.TASK, taskName, "No duty for " + (isPreNotPost ? "pre" : "post")
+							+ "-task at index " + taskDuties.size() + " (duty name=" + dutyName + ")");
 					continue; // no duty
 				}
 			}
@@ -549,13 +478,11 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			// Load the required managed object indexes for the administrator
 			for (RawBoundManagedObjectMetaData administeredManagedObject : scopeAdmin
 					.getAdministeredRawBoundManagedObjects()) {
-				this.loadRequiredManagedObjects(administeredManagedObject,
-						requiredManagedObjects);
+				this.loadRequiredManagedObjects(administeredManagedObject, requiredManagedObjects);
 			}
 
 			// Create and add the task duty association
-			TaskDutyAssociation<?> taskDutyAssociation = new TaskDutyAssociationImpl(
-					adminIndex, dutyKey);
+			TaskDutyAssociation<?> taskDutyAssociation = new TaskDutyAssociationImpl(adminIndex, dutyKey);
 			taskDuties.add(taskDutyAssociation);
 		}
 
@@ -587,108 +514,90 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 *         <code>false</code> indicates unable to sort, possible because of
 	 *         cyclic dependencies.
 	 */
-	private boolean sortRequiredManagedObjects(
-			ManagedObjectIndex[] requiredManagedObjectIndexes,
-			final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects,
-			String taskName, OfficeFloorIssues issues) {
+	private boolean sortRequiredManagedObjects(ManagedObjectIndex[] requiredManagedObjectIndexes,
+			final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects, String taskName,
+			OfficeFloorIssues issues) {
 
 		// Initially sort by scope and index
-		Arrays.sort(requiredManagedObjectIndexes,
-				new Comparator<ManagedObjectIndex>() {
-					@Override
-					public int compare(ManagedObjectIndex a,
-							ManagedObjectIndex b) {
-						int value = a.getManagedObjectScope().ordinal()
-								- b.getManagedObjectScope().ordinal();
-						if (value == 0) {
-							value = a.getIndexOfManagedObjectWithinScope()
-									- b.getIndexOfManagedObjectWithinScope();
-						}
-						return value;
-					}
-				});
+		Arrays.sort(requiredManagedObjectIndexes, new Comparator<ManagedObjectIndex>() {
+			@Override
+			public int compare(ManagedObjectIndex a, ManagedObjectIndex b) {
+				int value = a.getManagedObjectScope().ordinal() - b.getManagedObjectScope().ordinal();
+				if (value == 0) {
+					value = a.getIndexOfManagedObjectWithinScope() - b.getIndexOfManagedObjectWithinScope();
+				}
+				return value;
+			}
+		});
 
 		// Create the set of dependencies for each required managed object
 		final Map<ManagedObjectIndex, Set<ManagedObjectIndex>> dependencies = new HashMap<ManagedObjectIndex, Set<ManagedObjectIndex>>();
 		for (ManagedObjectIndex index : requiredManagedObjectIndexes) {
 
 			// Obtain the managed object for index
-			RawBoundManagedObjectMetaData managedObject = requiredManagedObjects
-					.get(index);
+			RawBoundManagedObjectMetaData managedObject = requiredManagedObjects.get(index);
 
 			// Load the dependencies
 			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> moDependencies = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData>();
 			this.loadRequiredManagedObjects(managedObject, moDependencies);
 
 			// Register the dependencies for the index
-			dependencies.put(index, new HashSet<ManagedObjectIndex>(
-					moDependencies.keySet()));
+			dependencies.put(index, new HashSet<ManagedObjectIndex>(moDependencies.keySet()));
 		}
 
 		try {
 			// Sort so dependencies are first (detecting cyclic dependencies)
-			Arrays.sort(requiredManagedObjectIndexes,
-					new Comparator<ManagedObjectIndex>() {
-						@Override
-						public int compare(ManagedObjectIndex a,
-								ManagedObjectIndex b) {
+			Arrays.sort(requiredManagedObjectIndexes, new Comparator<ManagedObjectIndex>() {
+				@Override
+				public int compare(ManagedObjectIndex a, ManagedObjectIndex b) {
 
-							// Obtain the dependencies
-							Set<ManagedObjectIndex> aDep = dependencies.get(a);
-							Set<ManagedObjectIndex> bDep = dependencies.get(b);
+					// Obtain the dependencies
+					Set<ManagedObjectIndex> aDep = dependencies.get(a);
+					Set<ManagedObjectIndex> bDep = dependencies.get(b);
 
-							// Determine dependency relationship
-							boolean isAdepB = bDep.contains(a);
-							boolean isBdepA = aDep.contains(b);
+					// Determine dependency relationship
+					boolean isAdepB = bDep.contains(a);
+					boolean isBdepA = aDep.contains(b);
 
-							// Compare based on relationship
-							if (isAdepB && isBdepA) {
-								// Cyclic dependency
-								String[] names = new String[2];
-								names[0] = requiredManagedObjects.get(a)
-										.getBoundManagedObjectName();
-								names[1] = requiredManagedObjects.get(b)
-										.getBoundManagedObjectName();
-								Arrays.sort(names);
-								throw new CyclicDependencyException(
-										"Can not have cyclic dependencies ("
-												+ names[0] + ", " + names[1]
-												+ ")");
-							} else if (isAdepB) {
-								// A dependent on B, so B must come first
-								return -1;
-							} else if (isBdepA) {
-								// B dependent on A, so A must come first
-								return 1;
-							} else {
-								/*
-								 * No dependency relationship. As the sorting
-								 * only changes on differences (non 0 value)
-								 * then need means to differentiate when no
-								 * dependency relationship. This is especially
-								 * the case with the merge sort used by default
-								 * by Java.
-								 */
+					// Compare based on relationship
+					if (isAdepB && isBdepA) {
+						// Cyclic dependency
+						String[] names = new String[2];
+						names[0] = requiredManagedObjects.get(a).getBoundManagedObjectName();
+						names[1] = requiredManagedObjects.get(b).getBoundManagedObjectName();
+						Arrays.sort(names);
+						throw new CyclicDependencyException(
+								"Can not have cyclic dependencies (" + names[0] + ", " + names[1] + ")");
+					} else if (isAdepB) {
+						// A dependent on B, so B must come first
+						return -1;
+					} else if (isBdepA) {
+						// B dependent on A, so A must come first
+						return 1;
+					} else {
+						/*
+						 * No dependency relationship. As the sorting only
+						 * changes on differences (non 0 value) then need means
+						 * to differentiate when no dependency relationship.
+						 * This is especially the case with the merge sort used
+						 * by default by Java.
+						 */
 
-								// Least number of dependencies first.
-								// Note: this pushes no dependencies to start.
-								int value = aDep.size() - bDep.size();
-								if (value == 0) {
-									// Same dependencies, so base on scope
-									value = a.getManagedObjectScope().ordinal()
-											- b.getManagedObjectScope()
-													.ordinal();
-									if (value == 0) {
-										// Same scope, so arbitrary order
-										value = a
-												.getIndexOfManagedObjectWithinScope()
-												- b.getIndexOfManagedObjectWithinScope();
-									}
-								}
-								return value;
+						// Least number of dependencies first.
+						// Note: this pushes no dependencies to start.
+						int value = aDep.size() - bDep.size();
+						if (value == 0) {
+							// Same dependencies, so base on scope
+							value = a.getManagedObjectScope().ordinal() - b.getManagedObjectScope().ordinal();
+							if (value == 0) {
+								// Same scope, so arbitrary order
+								value = a.getIndexOfManagedObjectWithinScope() - b.getIndexOfManagedObjectWithinScope();
 							}
 						}
-					});
+						return value;
+					}
+				}
+			});
 
 		} catch (CyclicDependencyException ex) {
 			// Register issue that cyclic dependency
@@ -738,21 +647,18 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	@Override
-	public void linkTasks(OfficeMetaDataLocator genericTaskLocator,
-			WorkMetaData<W> workMetaData,
+	public void linkTasks(OfficeMetaDataLocator genericTaskLocator, WorkMetaData<W> workMetaData,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Create the work specific meta-data locator
-		OfficeMetaDataLocator taskLocator = genericTaskLocator
-				.createWorkSpecificOfficeMetaDataLocator(workMetaData);
+		OfficeMetaDataLocator taskLocator = genericTaskLocator.createWorkSpecificOfficeMetaDataLocator(workMetaData);
 
 		// Obtain the work name and create the asset name
 		String workName = workMetaData.getWorkName();
 		String assetName = workName + "." + this.getTaskName();
 
 		// Obtain the listing of flow meta-data
-		TaskFlowConfiguration<F>[] flowConfigurations = this.configuration
-				.getFlowConfiguration();
+		TaskFlowConfiguration<F>[] flowConfigurations = this.configuration.getFlowConfiguration();
 		FlowMetaData<?>[] flowMetaDatas = new FlowMetaData[flowConfigurations.length];
 		for (int i = 0; i < flowMetaDatas.length; i++) {
 			TaskFlowConfiguration<F> flowConfiguration = flowConfigurations[i];
@@ -763,25 +669,21 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			}
 
 			// Obtain the task reference
-			TaskNodeReference taskNodeReference = flowConfiguration
-					.getInitialTask();
+			TaskNodeReference taskNodeReference = flowConfiguration.getInitialTask();
 			if (taskNodeReference == null) {
-				issues.addIssue(AssetType.TASK, this.getTaskName(),
-						"No task referenced for flow index " + i);
+				issues.addIssue(AssetType.TASK, this.getTaskName(), "No task referenced for flow index " + i);
 				continue; // no reference task for flow
 			}
 
 			// Obtain the task meta-data
-			TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(
-					taskNodeReference, taskLocator, issues, AssetType.TASK,
-					this.getTaskName(), "flow index " + i, false);
+			TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskNodeReference, taskLocator, issues,
+					AssetType.TASK, this.getTaskName(), "flow index " + i, false);
 			if (taskMetaData == null) {
 				continue; // no initial task for flow
 			}
 
 			// Obtain the flow instigation strategy
-			FlowInstigationStrategyEnum instigationStrategy = flowConfiguration
-					.getInstigationStrategy();
+			FlowInstigationStrategyEnum instigationStrategy = flowConfiguration.getInstigationStrategy();
 			if (instigationStrategy == null) {
 				issues.addIssue(AssetType.TASK, this.getTaskName(),
 						"No instigation strategy provided for flow index " + i);
@@ -789,66 +691,54 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			}
 
 			// Create and add the flow meta-data
-			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(
-					instigationStrategy, taskMetaData, assetManagerFactory,
+			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(instigationStrategy, taskMetaData, assetManagerFactory,
 					AssetType.TASK, assetName, "Flow" + i, issues);
 		}
 
 		// Obtain the next task in flow
-		TaskNodeReference nextTaskNodeReference = this.configuration
-				.getNextTaskInFlow();
+		TaskNodeReference nextTaskNodeReference = this.configuration.getNextTaskInFlow();
 		TaskMetaData<?, ?, ?> nextTaskInFlow = null;
 		if (nextTaskNodeReference != null) {
-			nextTaskInFlow = ConstructUtil.getTaskMetaData(
-					nextTaskNodeReference, taskLocator, issues, AssetType.TASK,
+			nextTaskInFlow = ConstructUtil.getTaskMetaData(nextTaskNodeReference, taskLocator, issues, AssetType.TASK,
 					this.getTaskName(), "next task", false);
 		}
 
 		// Create the escalation procedure
-		TaskEscalationConfiguration[] escalationConfigurations = this.configuration
-				.getEscalations();
+		TaskEscalationConfiguration[] escalationConfigurations = this.configuration.getEscalations();
 		EscalationFlow[] escalations = new EscalationFlow[escalationConfigurations.length];
 		for (int i = 0; i < escalations.length; i++) {
 			TaskEscalationConfiguration escalationConfiguration = escalationConfigurations[i];
 
 			// Obtain the type of cause
-			Class<? extends Throwable> typeOfCause = escalationConfiguration
-					.getTypeOfCause();
+			Class<? extends Throwable> typeOfCause = escalationConfiguration.getTypeOfCause();
 			if (typeOfCause == null) {
-				issues.addIssue(AssetType.TASK, this.getTaskName(),
-						"No escalation type for escalation index " + i);
+				issues.addIssue(AssetType.TASK, this.getTaskName(), "No escalation type for escalation index " + i);
 				continue; // no escalation type
 			}
 
 			// Obtain the escalation handler
-			TaskNodeReference escalationReference = escalationConfiguration
-					.getTaskNodeReference();
+			TaskNodeReference escalationReference = escalationConfiguration.getTaskNodeReference();
 			if (escalationReference == null) {
-				issues.addIssue(AssetType.TASK, this.getTaskName(),
-						"No task referenced for escalation index " + i);
+				issues.addIssue(AssetType.TASK, this.getTaskName(), "No task referenced for escalation index " + i);
 				continue; // no escalation handler referenced
 			}
-			TaskMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil
-					.getTaskMetaData(escalationReference, taskLocator, issues,
-							AssetType.TASK, this.getTaskName(),
-							"escalation index " + i, false);
+			TaskMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil.getTaskMetaData(escalationReference,
+					taskLocator, issues, AssetType.TASK, this.getTaskName(), "escalation index " + i, false);
 			if (escalationTaskMetaData == null) {
 				continue; // no escalation handler
 			}
 
 			// Create and add the escalation
-			escalations[i] = new EscalationFlowImpl(typeOfCause,
-					escalationTaskMetaData);
+			escalations[i] = new EscalationFlowImpl(typeOfCause, escalationTaskMetaData);
 		}
-		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(
-				escalations);
+		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalations);
 
 		// Provide details of each Task (to aid debugging application)
 		Level logLevel = Level.FINE;
 		if (LOGGER.isLoggable(logLevel)) {
 			// Log ordering of dependencies for task
 			StringBuilder log = new StringBuilder();
-			log.append("TASK: " + this.taskMetaData.getJobName() + "\n");
+			log.append("TASK: " + this.taskMetaData.getFunctionName() + "\n");
 			int sequence = 1;
 			log.append("  Continuations:\n");
 			for (FlowMetaData<?> flow : flowMetaDatas) {
@@ -856,25 +746,22 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 				if (flow == null) {
 					log.append("<none>\n");
 				} else {
-					log.append(flow.getInitialTaskMetaData().getJobName()
-							+ " [" + flow.getInstigationStrategy().name()
-							+ "]\n");
+					log.append(flow.getInitialTaskMetaData().getFunctionName() + " ["
+							+ flow.getInstigationStrategy().name() + "]\n");
 				}
 			}
 			if (nextTaskInFlow != null) {
-				log.append("   NEXT) " + nextTaskInFlow.getJobName() + "\n");
+				log.append("   NEXT) " + nextTaskInFlow.getFunctionName() + "\n");
 			}
 			sequence = 1;
 			for (EscalationFlow flow : escalations) {
-				log.append("   " + flow.getTypeOfCause().getName() + ") "
-						+ flow.getTaskMetaData().getJobName());
+				log.append("   " + flow.getTypeOfCause().getName() + ") " + flow.getTaskMetaData().getFunctionName());
 			}
 			LOGGER.log(logLevel, log.toString());
 		}
 
 		// Load the remaining state for the task meta-data
-		this.taskMetaData.loadRemainingState(workMetaData, flowMetaDatas,
-				nextTaskInFlow, escalationProcedure);
+		this.taskMetaData.loadRemainingState(workMetaData, flowMetaDatas, nextTaskInFlow, escalationProcedure);
 	}
 
 }

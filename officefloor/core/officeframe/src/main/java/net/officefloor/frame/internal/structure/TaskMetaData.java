@@ -130,7 +130,7 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	TaskDutyAssociation<?>[] getPostAdministrationMetaData();
 
 	/**
-	 * Creates the {@link ManagedFunction} for the {@link Task}.
+	 * Creates the {@link ManagedFunctionContainer} for the {@link Task}.
 	 * 
 	 * @param flow
 	 *            {@link Flow} containing the {@link Task}.
@@ -138,14 +138,14 @@ public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<
 	 *            {@link WorkContainer} for the {@link Work} for the
 	 *            {@link Task}.
 	 * @param parallelJobNodeOwner
-	 *            Parallel {@link ManagedFunction} owner.
+	 *            Parallel {@link ManagedFunctionContainer} owner.
 	 * @param parameter
 	 *            Parameter.
 	 * @param governanceDeactivationStrategy
 	 *            {@link GovernanceDeactivationStrategy}.
 	 * @return {@link FunctionState}.
 	 */
-	ManagedFunction createTaskNode(Flow flow, WorkContainer<W> workContainer, ManagedFunction parallelJobNodeOwner,
+	ManagedFunctionContainer createTaskNode(Flow flow, WorkContainer<W> workContainer, ManagedFunctionContainer parallelJobNodeOwner,
 			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy);
 
 }

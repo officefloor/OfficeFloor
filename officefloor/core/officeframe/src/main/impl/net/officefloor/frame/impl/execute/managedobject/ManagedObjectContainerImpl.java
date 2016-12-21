@@ -32,7 +32,7 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -222,7 +222,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	}
 
 	@Override
-	public FunctionState loadManagedObject(ManagedFunction managedJobNode, WorkContainer<?> workContainer) {
+	public FunctionState loadManagedObject(ManagedFunctionContainer managedJobNode, WorkContainer<?> workContainer) {
 
 		// Propagate failure to thread requiring managed object
 		if (this.failure != null) {
@@ -239,9 +239,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	private class LoadManagedObjectJobNode extends ManagedObjectOperation {
 
 		/**
-		 * Requesting {@link ManagedFunction}.
+		 * Requesting {@link ManagedFunctionContainer}.
 		 */
-		private final ManagedFunction managedJobNode;
+		private final ManagedFunctionContainer managedJobNode;
 
 		private final WorkContainer<?> workContainer;
 
@@ -253,7 +253,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		 * @param workContainer
 		 *            {@link WorkContainer}.
 		 */
-		public LoadManagedObjectJobNode(ManagedFunction managedJobNode, WorkContainer<?> workContainer) {
+		public LoadManagedObjectJobNode(ManagedFunctionContainer managedJobNode, WorkContainer<?> workContainer) {
 			this.managedJobNode = managedJobNode;
 			this.workContainer = workContainer;
 		}
@@ -827,9 +827,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		private final Throwable failure;
 
 		/**
-		 * Optional {@link ManagedFunction} requiring the {@link ManagedObject}.
+		 * Optional {@link ManagedFunctionContainer} requiring the {@link ManagedObject}.
 		 */
-		private final ManagedFunction managedJobNode;
+		private final ManagedFunctionContainer managedJobNode;
 
 		/**
 		 * Instantiate.
@@ -837,9 +837,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		 * @param failure
 		 *            Cause of the failure.
 		 * @param managedJobNode
-		 *            {@link ManagedFunction} requring the {@link ManagedObject}.
+		 *            {@link ManagedFunctionContainer} requring the {@link ManagedObject}.
 		 */
-		public FailManagedObjectJobNode(Throwable failure, ManagedFunction managedJobNode) {
+		public FailManagedObjectJobNode(Throwable failure, ManagedFunctionContainer managedJobNode) {
 			this.failure = failure;
 			this.managedJobNode = managedJobNode;
 		}

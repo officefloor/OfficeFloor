@@ -20,7 +20,7 @@ package net.officefloor.frame.impl.execute.work;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
@@ -69,7 +69,7 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunction managedJobNode) {
+	public FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunctionContainer managedJobNode) {
 		return this.delegate.loadManagedObjects(managedObjectIndexes, managedJobNode);
 	}
 

@@ -53,8 +53,8 @@ public interface OfficeBuilder {
 	void setMonitorOfficeInterval(long monitorOfficeInterval);
 
 	/**
-	 * Registers a {@link Team} which will execute {@link FunctionState} instances
-	 * within this {@link Office}.
+	 * Registers a {@link Team} which will execute {@link FunctionState}
+	 * instances within this {@link Office}.
 	 * 
 	 * @param officeTeamName
 	 *            Name of the {@link Team} to be referenced locally by this
@@ -63,6 +63,16 @@ public interface OfficeBuilder {
 	 *            Name of the {@link Team} within the {@link OfficeFloor}.
 	 */
 	void registerTeam(String officeTeamName, String officeFloorTeamName);
+
+	/**
+	 * Allows optionally specifying the default {@link Team} for the
+	 * {@link Office}.
+	 * 
+	 * @param officeTeamName
+	 *            Name of the {@link Team} within this {@link Office} to use as
+	 *            default {@link Team}.
+	 */
+	void setDefaultTeamName(String officeTeamName);
 
 	/**
 	 * Registers the {@link ManagedObject} within this {@link Office}.
@@ -74,8 +84,7 @@ public interface OfficeBuilder {
 	 *            Name of the {@link ManagedObjectSource} within the
 	 *            {@link OfficeFloor}.
 	 */
-	void registerManagedObjectSource(String officeManagedObjectName,
-			String officeFloorManagedObjectSourceName);
+	void registerManagedObjectSource(String officeManagedObjectName, String officeFloorManagedObjectSourceName);
 
 	/**
 	 * Specifies the input {@link ManagedObject} to be bound to the
@@ -87,8 +96,7 @@ public interface OfficeBuilder {
 	 * @param managedObjectSourceName
 	 *            {@link ManagedObjectSource} name.
 	 */
-	void setBoundInputManagedObject(String inputManagedObjectName,
-			String managedObjectSourceName);
+	void setBoundInputManagedObject(String inputManagedObjectName, String managedObjectSourceName);
 
 	/**
 	 * <p>
@@ -108,8 +116,7 @@ public interface OfficeBuilder {
 	 * @return {@link DependencyMappingBuilder} to build any necessary
 	 *         dependencies for the {@link ManagedObject}. See scope above.
 	 */
-	DependencyMappingBuilder addProcessManagedObject(
-			String processManagedObjectName, String officeManagedObjectName);
+	DependencyMappingBuilder addProcessManagedObject(String processManagedObjectName, String officeManagedObjectName);
 
 	/**
 	 * <p>
@@ -130,8 +137,7 @@ public interface OfficeBuilder {
 	 * @return {@link DependencyMappingBuilder} to build any necessary
 	 *         dependencies for the {@link ManagedObject}. See scope above.
 	 */
-	DependencyMappingBuilder addThreadManagedObject(
-			String threadManagedObjectName, String officeManagedObjectName);
+	DependencyMappingBuilder addThreadManagedObject(String threadManagedObjectName, String officeManagedObjectName);
 
 	/**
 	 * <p>
@@ -164,10 +170,8 @@ public interface OfficeBuilder {
 	 *            Extension interface.
 	 * @return {@link GovernanceBuilder}.
 	 */
-	<I, F extends Enum<F>> GovernanceBuilder<F> addGovernance(
-			String governanceName,
-			GovernanceFactory<? super I, F> governanceFactory,
-			Class<I> extensionInterface);
+	<I, F extends Enum<F>> GovernanceBuilder<F> addGovernance(String governanceName,
+			GovernanceFactory<? super I, F> governanceFactory, Class<I> extensionInterface);
 
 	/**
 	 * <p>
@@ -232,8 +236,7 @@ public interface OfficeBuilder {
 	 *            {@link WorkFactory} to create the {@link Work}.
 	 * @return {@link WorkBuilder} to build the {@link Work}.
 	 */
-	<W extends Work> WorkBuilder<W> addWork(String workName,
-			WorkFactory<W> workFactory);
+	<W extends Work> WorkBuilder<W> addWork(String workName, WorkFactory<W> workFactory);
 
 	/**
 	 * <p>
@@ -248,8 +251,8 @@ public interface OfficeBuilder {
 	void addOfficeEnhancer(OfficeEnhancer officeEnhancer);
 
 	/**
-	 * Adds an {@link EscalationFlow} for issues not handled by the
-	 * {@link Flow} of the {@link Office}.
+	 * Adds an {@link EscalationFlow} for issues not handled by the {@link Flow}
+	 * of the {@link Office}.
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
@@ -260,8 +263,7 @@ public interface OfficeBuilder {
 	 *            Name of {@link Task} on the {@link Work} to handle the
 	 *            {@link EscalationFlow}.
 	 */
-	void addEscalation(Class<? extends Throwable> typeOfCause, String workName,
-			String taskName);
+	void addEscalation(Class<? extends Throwable> typeOfCause, String workName, String taskName);
 
 	/**
 	 * Adds a {@link Task} to invoke on start up of the {@link Office}.

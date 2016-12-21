@@ -35,7 +35,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -55,7 +55,7 @@ import net.officefloor.frame.spi.team.Job;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractManagedFunctionContainer<W extends Work, N extends ManagedFunctionMetaData>
-		extends AbstractLinkedListSetEntry<ManagedFunction, Flow> implements ManagedFunction, ManagedFunctionContext {
+		extends AbstractLinkedListSetEntry<ManagedFunctionContainer, Flow> implements ManagedFunctionContainer, ManagedFunctionContext {
 
 	/**
 	 * {@link Logger}.
@@ -139,11 +139,11 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 
 	/**
 	 * <p>
-	 * Owner if this {@link ManagedFunction} is a parallel
-	 * {@link ManagedFunction}.
+	 * Owner if this {@link ManagedFunctionContainer} is a parallel
+	 * {@link ManagedFunctionContainer}.
 	 * <p>
-	 * This is the {@link ManagedFunction} that is executed once the graph from
-	 * this {@link ManagedFunction} is complete.
+	 * This is the {@link ManagedFunctionContainer} that is executed once the graph from
+	 * this {@link ManagedFunctionContainer} is complete.
 	 */
 	private AbstractManagedFunctionContainer<?, ?> parallelOwner;
 
@@ -178,7 +178,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	 * @param nodeMetaData
 	 *            {@link ManagedFunctionMetaData} for this node.
 	 * @param parallelOwner
-	 *            Parallel owner of this {@link ManagedFunction}. May be
+	 *            Parallel owner of this {@link ManagedFunctionContainer}. May be
 	 *            <code>null</code> if no owner.
 	 * @param requiredManagedObjects
 	 *            {@link Work} {@link ManagedObjectIndex} instances to the
@@ -192,7 +192,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	 *            {@link ActiveGovernance}.
 	 */
 	public AbstractManagedFunctionContainer(Flow flow, WorkContainer<W> workContainer, N nodeMetaData,
-			ManagedFunction parallelOwner, ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance,
+			ManagedFunctionContainer parallelOwner, ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance,
 			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 		this.flow = flow;
 		this.workContainer = workContainer;
@@ -241,7 +241,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	}
 
 	@Override
-	public void setNextManagedFunction(ManagedFunction nextJobNode) {
+	public void setNextManagedFunction(ManagedFunctionContainer nextJobNode) {
 		this.loadSequentialJobNode((AbstractManagedFunctionContainer) nextJobNode);
 	}
 
@@ -380,7 +380,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 					if (nextTaskMetaData != null) {
 						// Create next task
 						AbstractManagedFunctionContainer<?, ?> job = (AbstractManagedFunctionContainer<?, ?>) this.flow
-								.createManagedJobNode(nextTaskMetaData, this.parallelOwner, this.nextJobParameter,
+								.createManagedFunction(nextTaskMetaData, this.parallelOwner, this.nextJobParameter,
 										GovernanceDeactivationStrategy.ENFORCE);
 
 						// Load for sequential execution
@@ -654,7 +654,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 
 			// Create the job node on the same flow as this job node
 			AbstractManagedFunctionContainer<?, ?> sequentialJobNode = (AbstractManagedFunctionContainer<?, ?>) this.flow
-					.createManagedJobNode(initTaskMetaData, this.parallelOwner, parameter,
+					.createManagedFunction(initTaskMetaData, this.parallelOwner, parameter,
 							GovernanceDeactivationStrategy.ENFORCE);
 
 			// Load the sequential node
@@ -667,7 +667,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 
 			// Create the job node
 			AbstractManagedFunctionContainer<?, ?> parallelJobNode = (AbstractManagedFunctionContainer<?, ?>) parallelFlow
-					.createManagedJobNode(initTaskMetaData, this, parameter, GovernanceDeactivationStrategy.ENFORCE);
+					.createManagedFunction(initTaskMetaData, this, parameter, GovernanceDeactivationStrategy.ENFORCE);
 
 			// Load the parallel node
 			this.loadParallelJobNode(parallelJobNode);
@@ -684,7 +684,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 							throw new UnsupportedOperationException("TODO implement Type1481920593530.createJobNode");
 
 						}
-					}, this.nodeMetaData.getJobNodeLoop(), continueJobNode);
+					}, this.nodeMetaData.getFunctionLoop(), continueJobNode);
 			break;
 
 		default:
@@ -746,14 +746,14 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	 * @return {@link FunctionState}.
 	 */
 	private final FunctionState createEscalationJobNode(TaskMetaData<?, ?, ?> taskMetaData, Object parameter,
-			ManagedFunction parallelOwner) {
+			ManagedFunctionContainer parallelOwner) {
 
 		// Create a new flow for execution
 		ThreadState threadState = this.flow.getThreadState();
 		Flow parallelFlow = threadState.createFlow();
 
 		// Create the job node
-		FunctionState escalationJobNode = parallelFlow.createManagedJobNode(taskMetaData, parallelOwner, parameter,
+		FunctionState escalationJobNode = parallelFlow.createManagedFunction(taskMetaData, parallelOwner, parameter,
 				GovernanceDeactivationStrategy.DISREGARD);
 
 		// Return the escalation job node

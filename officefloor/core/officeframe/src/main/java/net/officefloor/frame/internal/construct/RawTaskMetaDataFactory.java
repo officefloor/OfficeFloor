@@ -21,6 +21,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
+import net.officefloor.frame.internal.structure.FunctionLoop;
 
 /**
  * Factory to construct {@link RawTaskMetaData}.
@@ -41,10 +42,11 @@ public interface RawTaskMetaDataFactory {
 	 * @param rawWorkMetaData
 	 *            {@link RawWorkMetaData} of the {@link Work} containing this
 	 *            {@link Task}.
+	 * @param functionLoop
+	 *            {@link FunctionLoop}.
 	 * @return {@link RawTaskMetaData}.
 	 */
-	<W extends Work> RawTaskMetaData<W, ?, ?> constructRawTaskMetaData(
-			TaskConfiguration<W, ?, ?> configuration, OfficeFloorIssues issues,
-			RawWorkMetaData<W> rawWorkMetaData);
+	<W extends Work> RawTaskMetaData<W, ?, ?> constructRawTaskMetaData(TaskConfiguration<W, ?, ?> configuration,
+			OfficeFloorIssues issues, RawWorkMetaData<W> rawWorkMetaData, FunctionLoop functionLoop);
 
 }

@@ -22,21 +22,21 @@ package net.officefloor.frame.internal.structure;
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunction extends FunctionState, LinkedListSetEntry<ManagedFunction, Flow> {
+public interface ManagedFunctionContainer extends FunctionState, LinkedListSetEntry<ManagedFunctionContainer, Flow> {
 
 	/**
-	 * Obtains the {@link Flow} that this {@link ManagedFunction} is within.
+	 * Obtains the {@link Flow} that this {@link ManagedFunctionContainer} is within.
 	 * 
-	 * @return {@link Flow} that this {@link ManagedFunction} is within.
+	 * @return {@link Flow} that this {@link ManagedFunctionContainer} is within.
 	 */
 	Flow getFlow();
 
 	/**
-	 * Enables specify the next sequential {@link ManagedFunction}.
+	 * Enables specify the next sequential {@link ManagedFunctionContainer}.
 	 * 
 	 * @param nextFunction
-	 *            Next sequential {@link ManagedFunction}.
+	 *            Next sequential {@link ManagedFunctionContainer}.
 	 */
-	void setNextManagedFunction(ManagedFunction nextFunction);
+	void setNextManagedFunction(ManagedFunctionContainer nextFunction);
 
 }

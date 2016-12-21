@@ -25,11 +25,10 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Factory to create {@link RawBoundAdministratorMetaData}.
@@ -59,20 +58,16 @@ public interface RawBoundAdministratorMetaDataFactory {
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            registered names.
-	 * @param continueTeam
-	 *            {@link Team} to enable the worker ({@link Thread}) of the
-	 *            responsible {@link Team} to continue on to execute the next
-	 *            {@link Job}.
 	 * @param scopeMo
 	 *            {@link RawBoundManagedObjectMetaData} by their scope names.
+	 * @param functionLoop
+	 *            {@link FunctionLoop}.
 	 * @return Constructed {@link RawBoundAdministratorMetaData} instances.
 	 */
 	RawBoundAdministratorMetaData<?, ?>[] constructRawBoundAdministratorMetaData(
-			AdministratorSourceConfiguration<?, ?>[] configuration,
-			SourceContext sourceContext, OfficeFloorIssues issues,
-			AdministratorScope administratorScope, AssetType assetType,
-			String assetName, Map<String, TeamManagement> officeTeams,
-			Team continueTeam,
-			Map<String, RawBoundManagedObjectMetaData> scopeMo);
+			AdministratorSourceConfiguration<?, ?>[] configuration, SourceContext sourceContext,
+			OfficeFloorIssues issues, AdministratorScope administratorScope, AssetType assetType, String assetName,
+			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
+			FunctionLoop functionLoop);
 
 }

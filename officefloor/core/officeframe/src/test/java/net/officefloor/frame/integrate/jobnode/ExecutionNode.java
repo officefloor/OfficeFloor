@@ -280,7 +280,7 @@ public class ExecutionNode<W extends Work> implements
 	 */
 
 	@Override
-	public String getJobName() {
+	public String getFunctionName() {
 		return String.valueOf(this.executionNodeId);
 	}
 

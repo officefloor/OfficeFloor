@@ -23,9 +23,9 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -110,7 +110,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	/**
 	 * {@link FunctionLoop}.
 	 */
-	private final FunctionLoop jobNodeLoop;
+	private final FunctionLoop functionLoop;
 
 	/**
 	 * <p>
@@ -178,13 +178,14 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 * @param postTaskDuties
 	 *            {@link TaskDutyAssociation} specifying the {@link Duty}
 	 *            instances to be completed after executing the {@link Task}.
-	 * @param jobNodeLoop
+	 * @param functionLoop
 	 *            {@link FunctionLoop}.
 	 */
 	public TaskMetaDataImpl(String jobName, String taskName, TaskFactory<W, D, F> taskFactory, Object differentiator,
 			Class<?> parameterType, TeamManagement responsibleTeam, ManagedObjectIndex[] requiredManagedObjects,
 			ManagedObjectIndex[] taskToWorkMoTranslations, boolean[] requiredGovernance,
-			TaskDutyAssociation<?>[] preTaskDuties, TaskDutyAssociation<?>[] postTaskDuties, FunctionLoop jobNodeLoop) {
+			TaskDutyAssociation<?>[] preTaskDuties, TaskDutyAssociation<?>[] postTaskDuties,
+			FunctionLoop functionLoop) {
 		this.jobName = jobName;
 		this.taskName = taskName;
 		this.taskFactory = taskFactory;
@@ -196,7 +197,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 		this.requiredGovernance = requiredGovernance;
 		this.preTaskDuties = preTaskDuties;
 		this.postTaskDuties = postTaskDuties;
-		this.jobNodeLoop = jobNodeLoop;
+		this.functionLoop = functionLoop;
 	}
 
 	/**
@@ -227,7 +228,7 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	 */
 
 	@Override
-	public String getJobName() {
+	public String getFunctionName() {
 		return this.jobName;
 	}
 
@@ -302,13 +303,14 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	}
 
 	@Override
-	public FunctionLoop getJobNodeLoop() {
-		return this.jobNodeLoop;
+	public FunctionLoop getFunctionLoop() {
+		return this.functionLoop;
 	}
 
 	@Override
-	public ManagedFunction createTaskNode(Flow flow, WorkContainer<W> workContainer, ManagedFunction parallelJobNodeOwner,
-			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy) {
+	public ManagedFunctionContainer createTaskNode(Flow flow, WorkContainer<W> workContainer,
+			ManagedFunctionContainer parallelJobNodeOwner, Object parameter,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 		return new TaskJobNode<W, D, F>(flow, workContainer, this, governanceDeactivationStrategy, parallelJobNodeOwner,
 				parameter);
 	}

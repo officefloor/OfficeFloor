@@ -25,7 +25,7 @@ import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -64,12 +64,12 @@ public class DutyJob<W extends Work, I, A extends Enum<A>>
 	 * @param taskDutyAssociation
 	 *            {@link TaskDutyAssociation}.
 	 * @param parallelOwner
-	 *            Parallel owning {@link ManagedFunction}.
+	 *            Parallel owning {@link ManagedFunctionContainer}.
 	 * @param administeringTaskMetaData
 	 *            {@link TaskMetaData} of the {@link Task} being administered.
 	 */
 	public DutyJob(Flow flow, WorkContainer<W> workContainer, AdministratorMetaData<I, A> adminMetaData,
-			TaskDutyAssociation<A> taskDutyAssociation, ManagedFunction parallelOwner,
+			TaskDutyAssociation<A> taskDutyAssociation, ManagedFunctionContainer parallelOwner,
 			TaskMetaData<?, ?, ?> administeringTaskMetaData) {
 		super(flow, workContainer, adminMetaData, parallelOwner, administeringTaskMetaData.getRequiredManagedObjects(),
 				null, null);

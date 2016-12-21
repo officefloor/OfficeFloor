@@ -55,19 +55,17 @@ import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link RawManagingOfficeMetaData} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
-		RawManagingOfficeMetaData<F> {
+public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawManagingOfficeMetaData<F> {
 
 	/**
-	 * Determines if the {@link ManagedObjectSource} instigates
-	 * {@link Flow} instances.
+	 * Determines if the {@link ManagedObjectSource} instigates {@link Flow}
+	 * instances.
 	 * 
 	 * @param flowMetaData
 	 *            {@link ManagedObjectFlowMetaData} instances of the
@@ -75,8 +73,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	 * @return <code>true</code> if {@link ManagedObjectSource} instigates
 	 *         {@link Flow} instances.
 	 */
-	public static boolean isRequireFlows(
-			ManagedObjectFlowMetaData<?>[] flowMetaData) {
+	public static boolean isRequireFlows(ManagedObjectFlowMetaData<?>[] flowMetaData) {
 		return ((flowMetaData != null) && (flowMetaData.length > 0));
 	}
 
@@ -129,17 +126,6 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	private FlowMetaData<?> recycleFlowMetaData = null;
 
 	/**
-	 * {@link TeamManagement} for escalation handling of the recycle
-	 * {@link FlowMetaData}.
-	 */
-	private TeamManagement recycleEscalationResponsibleTeam = null;
-
-	/**
-	 * {@link Team} to continue in handling of the recycle {@link FlowMetaData}.
-	 */
-	private Team recycleEscalationContinueTeam = null;
-
-	/**
 	 * {@link ManagedObjectExecuteContextFactory}.
 	 */
 	private ManagedObjectExecuteContextFactory<F> managedObjectExecuteContextFactory = null;
@@ -160,10 +146,8 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	 * @param managingOfficeConfiguration
 	 *            {@link ManagingOfficeConfiguration}.
 	 */
-	public RawManagingOfficeMetaDataImpl(String managingOfficeName,
-			String recycleWorkName,
-			InputManagedObjectConfiguration<?> inputConfiguration,
-			ManagedObjectFlowMetaData<F>[] flowMetaDatas,
+	public RawManagingOfficeMetaDataImpl(String managingOfficeName, String recycleWorkName,
+			InputManagedObjectConfiguration<?> inputConfiguration, ManagedObjectFlowMetaData<F>[] flowMetaDatas,
 			ManagingOfficeConfiguration<F> managingOfficeConfiguration) {
 		this.managingOfficeName = managingOfficeName;
 		this.recycleWorkName = recycleWorkName;
@@ -178,8 +162,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	 * @param rawManagedObjectMetaData
 	 *            {@link RawManagedObjectMetaData}.
 	 */
-	public synchronized void setRawManagedObjectMetaData(
-			RawManagedObjectMetaData<?, F> rawManagedObjectMetaData) {
+	public void setRawManagedObjectMetaData(RawManagedObjectMetaData<?, F> rawManagedObjectMetaData) {
 		this.rawManagedObjectMetaData = rawManagedObjectMetaData;
 	}
 
@@ -191,8 +174,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	 *            {@link ManagedObjectMetaData} to be managed by the managing
 	 *            {@link Office}.
 	 */
-	public synchronized void manageManagedObject(
-			ManagedObjectMetaDataImpl<?> moMetaData) {
+	public void manageManagedObject(ManagedObjectMetaDataImpl<?> moMetaData) {
 
 		// Determine if being managed by an office
 		if (this.managedObjectMetaDatas != null) {
@@ -201,10 +183,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 		} else {
 			// Already being managed, so load remaining state
-			moMetaData.loadRemainingState(this.managingOffice,
-					this.recycleFlowMetaData,
-					this.recycleEscalationResponsibleTeam,
-					this.recycleEscalationContinueTeam);
+			moMetaData.loadRemainingState(this.managingOffice, this.recycleFlowMetaData);
 		}
 	}
 
@@ -233,71 +212,47 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 	}
 
 	@Override
-	public synchronized void manageByOffice(
-			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
-			OfficeMetaDataLocator metaDataLocator,
-			Map<String, TeamManagement> officeTeams,
-			TeamManagement continueTeamManagement,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
+	public void manageByOffice(RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
+			OfficeMetaData officeMetaData, OfficeMetaDataLocator metaDataLocator,
+			Map<String, TeamManagement> officeTeams, AssetManagerFactory assetManagerFactory,
+			OfficeFloorIssues issues) {
 
 		// Obtain the name of the managed object source
-		String managedObjectSourceName = this.rawManagedObjectMetaData
-				.getManagedObjectName();
+		String managedObjectSourceName = this.rawManagedObjectMetaData.getManagedObjectName();
 
 		// -----------------------------------------------------------
 		// Load Remaining State to the Managed Object Meta-Data
 		// -----------------------------------------------------------
-
-		// Obtain the office meta-data
-		OfficeMetaData officeMetaData = metaDataLocator.getOfficeMetaData();
-
-		// Obtain the team responsible for managed object source escalation
-		// TODO allow configuring the escalation team
-		TeamManagement escalationResponsibleTeam = continueTeamManagement;
-
-		// Obtain the continue team
-		Team continueTeam = continueTeamManagement.getTeam();
 
 		// Obtain the recycle task meta-data
 		FlowMetaData<?> recycleFlowMetaData = null;
 		if (this.recycleWorkName != null) {
 
 			// Locate the work meta-data
-			WorkMetaData<?> workMetaData = metaDataLocator
-					.getWorkMetaData(this.recycleWorkName);
+			WorkMetaData<?> workMetaData = metaDataLocator.getWorkMetaData(this.recycleWorkName);
 			if (workMetaData == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						managedObjectSourceName, "Recycle work '"
-								+ this.recycleWorkName + "' not found");
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+						"Recycle work '" + this.recycleWorkName + "' not found");
 				return; // must obtain recycle work
 			}
 
 			// Obtain the initial flow of work as recycle flow
 			recycleFlowMetaData = workMetaData.getInitialFlowMetaData();
 			if (recycleFlowMetaData == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						managedObjectSourceName, "No initial flow on work "
-								+ this.recycleWorkName + " for recycle task");
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+						"No initial flow on work " + this.recycleWorkName + " for recycle task");
 				return; // must obtain recycle task
 			}
 
 			// Obtain the parameter type for the recycle task
-			TaskMetaData<?, ?, ?> recycleTaskMetaData = recycleFlowMetaData
-					.getInitialTaskMetaData();
+			TaskMetaData<?, ?, ?> recycleTaskMetaData = recycleFlowMetaData.getInitialTaskMetaData();
 			Class<?> parameterType = recycleTaskMetaData.getParameterType();
 			if (parameterType != null) {
-				if (!parameterType
-						.isAssignableFrom(RecycleManagedObjectParameter.class)) {
-					issues.addIssue(
-							AssetType.MANAGED_OBJECT,
-							managedObjectSourceName,
-							"Incompatible parameter type for recycle task (parameter="
-									+ parameterType.getName()
-									+ ", required type="
-									+ RecycleManagedObjectParameter.class
-											.getName() + ", work="
-									+ this.recycleWorkName + ", task="
-									+ recycleTaskMetaData.getTaskName() + ")");
+				if (!parameterType.isAssignableFrom(RecycleManagedObjectParameter.class)) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+							"Incompatible parameter type for recycle task (parameter=" + parameterType.getName()
+									+ ", required type=" + RecycleManagedObjectParameter.class.getName() + ", work="
+									+ this.recycleWorkName + ", task=" + recycleTaskMetaData.getTaskName() + ")");
 					return; // can not be used as recycle task
 				}
 			}
@@ -305,15 +260,12 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 		// Load remaining state to existing managed object meta-data
 		for (ManagedObjectMetaDataImpl<?> moMetaData : this.managedObjectMetaDatas) {
-			moMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData,
-					escalationResponsibleTeam, continueTeam);
+			moMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData);
 		}
 
 		// Setup for further managed object meta-data to be managed
 		this.managingOffice = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
-		this.recycleEscalationResponsibleTeam = escalationResponsibleTeam;
-		this.recycleEscalationContinueTeam = continueTeam;
 		this.managedObjectMetaDatas = null;
 
 		// -----------------------------------------------------------
@@ -329,30 +281,23 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 			// No flows but issue if flows or input configuration
 			if ((flowConfigurations != null) && (flowConfigurations.length > 0)) {
-				issues.addIssue(
-						AssetType.MANAGED_OBJECT,
-						managedObjectSourceName,
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 						ManagedObjectSourceMetaData.class.getSimpleName()
 								+ " specifies no flows but flows configured for it");
 				return; // configuration does not align to meta-data
 			}
 
 			// No flows, so provide empty execution context
-			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(
-					null, -1, null, officeMetaData, escalationResponsibleTeam,
-					continueTeam);
+			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(null, -1, null,
+					officeMetaData);
 			return;
 		}
 
 		// Obtain the bound input name for this managed object source
-		String processBoundName = this.inputConfiguration
-				.getBoundManagedObjectName();
+		String processBoundName = this.inputConfiguration.getBoundManagedObjectName();
 		if (ConstructUtil.isBlank(processBoundName)) {
-			issues.addIssue(
-					AssetType.MANAGED_OBJECT,
-					managedObjectSourceName,
-					ManagedObjectSource.class.getSimpleName()
-							+ " invokes flows but does not provide input Managed Object binding name");
+			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName, ManagedObjectSource.class.getSimpleName()
+					+ " invokes flows but does not provide input Managed Object binding name");
 			return;
 		}
 
@@ -362,20 +307,17 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 		if (processBoundManagedObjectMetaData != null) {
 			NEXT_BOUND_MO: for (int i = 0; i < processBoundManagedObjectMetaData.length; i++) {
 				RawBoundManagedObjectMetaData boundMetaData = processBoundManagedObjectMetaData[i];
-				if (processBoundName.equals(boundMetaData
-						.getBoundManagedObjectName())) {
+				if (processBoundName.equals(boundMetaData.getBoundManagedObjectName())) {
 					// Found the bound configuration for this managed object
 					processBoundIndex = i;
 
 					// Find the particular instance
 					for (RawBoundManagedObjectInstanceMetaData<?> instanceMetaData : boundMetaData
 							.getRawBoundManagedObjectInstanceMetaData()) {
-						if (managedObjectSourceName.equals(instanceMetaData
-								.getRawManagedObjectMetaData()
-								.getManagedObjectName())) {
+						if (managedObjectSourceName
+								.equals(instanceMetaData.getRawManagedObjectMetaData().getManagedObjectName())) {
 							// Found the instance meta-data
-							managedObjectMetaData = instanceMetaData
-									.getManagedObjectMetaData();
+							managedObjectMetaData = instanceMetaData.getManagedObjectMetaData();
 							break NEXT_BOUND_MO; // index and meta-data obtained
 						}
 					}
@@ -384,13 +326,9 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 		}
 		if ((processBoundIndex < 0) || (managedObjectMetaData == null)) {
 			// Managed Object Source not in Office
-			issues.addIssue(
-					AssetType.MANAGED_OBJECT,
-					managedObjectSourceName,
-					ManagedObjectSource.class.getSimpleName()
-							+ " by input name '" + processBoundName
-							+ "' not managed by Office "
-							+ officeMetaData.getOfficeName());
+			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+					ManagedObjectSource.class.getSimpleName() + " by input name '" + processBoundName
+							+ "' not managed by Office " + officeMetaData.getOfficeName());
 			return;
 		}
 
@@ -418,19 +356,14 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 			// Create name to identify flow
 			String label = flowMetaData.getLabel();
-			String flowLabel = "flow " + index + " (key="
-					+ (flowKey != null ? flowKey.toString() : "<indexed>")
-					+ ", label="
-					+ (!ConstructUtil.isBlank(label) ? label : "<no label>")
-					+ ")";
+			String flowLabel = "flow " + index + " (key=" + (flowKey != null ? flowKey.toString() : "<indexed>")
+					+ ", label=" + (!ConstructUtil.isBlank(label) ? label : "<no label>") + ")";
 
 			// Obtain the flow configuration
-			ManagedObjectFlowConfiguration<F> flowConfiguration = flowMappings
-					.get(new Integer(index));
+			ManagedObjectFlowConfiguration<F> flowConfiguration = flowMappings.get(new Integer(index));
 			if (flowConfiguration == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						managedObjectSourceName, "No flow configured for "
-								+ flowLabel);
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+						"No flow configured for " + flowLabel);
 				return; // flow not configured
 			}
 
@@ -442,44 +375,36 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 
 			// Create the task node reference for the task.
 			// Override argument type as managed object knows better.
-			TaskNodeReference configurationTaskReference = flowConfiguration
-					.getTaskNodeReference();
-			TaskNodeReference flowTaskReference = new TaskNodeReferenceImpl(
-					configurationTaskReference.getWorkName(),
+			TaskNodeReference configurationTaskReference = flowConfiguration.getTaskNodeReference();
+			TaskNodeReference flowTaskReference = new TaskNodeReferenceImpl(configurationTaskReference.getWorkName(),
 					configurationTaskReference.getTaskName(), argumentType);
 
 			// Obtain the task meta-data of flow meta-data
-			TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(
-					flowTaskReference, metaDataLocator, issues,
-					AssetType.MANAGED_OBJECT, managedObjectSourceName,
-					flowLabel, true);
+			TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(flowTaskReference, metaDataLocator,
+					issues, AssetType.MANAGED_OBJECT, managedObjectSourceName, flowLabel, true);
 			if (taskMetaData == null) {
 				return; // can not find task of flow
 			}
 
 			// Create and specify the flow meta-data
-			flows[i] = ConstructUtil.newFlowMetaData(
-					FlowInstigationStrategyEnum.ASYNCHRONOUS, taskMetaData,
-					assetManagerFactory, AssetType.MANAGED_OBJECT,
-					managedObjectSourceName, flowLabel, issues);
+			flows[i] = ConstructUtil.newFlowMetaData(FlowInstigationStrategyEnum.ASYNCHRONOUS, taskMetaData,
+					assetManagerFactory, AssetType.MANAGED_OBJECT, managedObjectSourceName, flowLabel, issues);
 		}
 
 		// Ensure no extra flow configurations
 		if (flowMappings.size() > 0) {
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-					"Extra flows configured than specified by "
-							+ ManagedObjectSourceMetaData.class.getSimpleName());
+					"Extra flows configured than specified by " + ManagedObjectSourceMetaData.class.getSimpleName());
 			return; // should only have configurations for meta-data required
 		}
 
 		// Specify the managed object execute context
-		this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(
-				managedObjectMetaData, processBoundIndex, flows,
-				officeMetaData, escalationResponsibleTeam, continueTeam);
+		this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(managedObjectMetaData,
+				processBoundIndex, flows, officeMetaData);
 	}
 
 	@Override
-	public synchronized ManagedObjectExecuteContextFactory<F> getManagedObjectExecuteContextFactory() {
+	public ManagedObjectExecuteContextFactory<F> getManagedObjectExecuteContextFactory() {
 		return this.managedObjectExecuteContextFactory;
 	}
 

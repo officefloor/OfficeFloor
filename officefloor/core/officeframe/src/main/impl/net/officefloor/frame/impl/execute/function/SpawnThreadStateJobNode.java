@@ -119,7 +119,7 @@ public class SpawnThreadStateJobNode implements FunctionState {
 
 		// Create job node for execution
 		Flow flow = spawnedThreadState.createFlow();
-		FunctionState jobNode = flow.createManagedJobNode(initTaskMetaData, null, this.parameter,
+		FunctionState jobNode = flow.createManagedFunction(initTaskMetaData, null, this.parameter,
 				GovernanceDeactivationStrategy.ENFORCE);
 
 		// Delegate the new thead to be executed

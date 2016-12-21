@@ -67,7 +67,7 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> exte
 	DutyMetaData getDutyMetaData(DutyKey<A> dutyKey);
 
 	/**
-	 * Creates the {@link ManagedFunction} for the {@link Duty}.
+	 * Creates the {@link ManagedFunctionContainer} for the {@link Duty}.
 	 * 
 	 * @param administeringTaskMetaData
 	 *            {@link TaskMetaData} of the administered {@link Task}.
@@ -78,11 +78,11 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> exte
 	 * @param taskDutyAssociation
 	 *            {@link TaskDutyAssociation}.
 	 * @param parallelJobNodeOwner
-	 *            Paralllel {@link ManagedFunction} owner.
-	 * @return {@link ManagedFunction} for the {@link Duty}.
+	 *            Paralllel {@link ManagedFunctionContainer} owner.
+	 * @return {@link ManagedFunctionContainer} for the {@link Duty}.
 	 */
-	ManagedFunction createDutyNode(TaskMetaData<?, ?, ?> administeringTaskMetaData,
+	ManagedFunctionContainer createDutyNode(TaskMetaData<?, ?, ?> administeringTaskMetaData,
 			WorkContainer<?> administeringWorkContainer, Flow flow, TaskDutyAssociation<?> taskDutyAssociation,
-			ManagedFunction parallelJobNodeOwner);
+			ManagedFunctionContainer parallelJobNodeOwner);
 
 }

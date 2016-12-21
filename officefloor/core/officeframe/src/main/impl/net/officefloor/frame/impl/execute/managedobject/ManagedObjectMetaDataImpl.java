@@ -21,9 +21,9 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
@@ -143,12 +143,6 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	private FlowMetaData<?> recycleFlowMetaData;
 
 	/**
-	 * {@link TeamManagement} for handling escalation of recycling the
-	 * {@link ManagedObject}.
-	 */
-	private TeamManagement recycleEscalationResponsibleTeam;
-
-	/**
 	 * Initiate with meta-data of the {@link ManagedObject} to source specific
 	 * to the {@link Work}.
 	 * 
@@ -218,18 +212,10 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	 * @param recycleFlowMetaData
 	 *            {@link FlowMetaData} for the recycling of this
 	 *            {@link ManagedObject}.
-	 * @param recycleEscalationResponsibleTeam
-	 *            {@link TeamManagement} for handling escalation of recycling
-	 *            the {@link ManagedObject}.
-	 * @param recycleEscalationContinueTeam
-	 *            Continue {@link Team} for handling escalation of recycling the
-	 *            {@link ManagedObject}.
 	 */
-	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData<?> recycleFlowMetaData,
-			TeamManagement recycleEscalationResponsibleTeam, Team recycleEscalationContinueTeam) {
+	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData<?> recycleFlowMetaData) {
 		this.officeMetaData = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
-		this.recycleEscalationResponsibleTeam = recycleEscalationResponsibleTeam;
 	}
 
 	/*
@@ -298,7 +284,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 
 	@Override
 	public FunctionLoop getJobNodeLoop() {
-		return this.officeMetaData.getJobNodeLoop();
+		return this.officeMetaData.getFunctionLoop();
 	}
 
 	@Override
@@ -319,7 +305,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 		ManagedObjectReadyCheckWrapper wrapper = new ManagedObjectReadyCheckWrapper(check);
 
 		// Create the array of check job nodes
-		FunctionState[] checkJobNodes = new FunctionState[this.dependencyMapping.length + ((currentContainer != null) ? 1 : 0)];
+		FunctionState[] checkJobNodes = new FunctionState[this.dependencyMapping.length
+				+ ((currentContainer != null) ? 1 : 0)];
 		for (int i = 0; i < this.dependencyMapping.length; i++) {
 			checkJobNodes[i] = workContainer.getManagedObjectContainer(this.dependencyMapping[i])
 					.createCheckReadyJobNode(wrapper);
@@ -363,7 +350,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 		 */
 
 		@Override
-		public ManagedFunction getManagedJobNode() {
+		public ManagedFunctionContainer getManagedJobNode() {
 			return this.delegate.getManagedJobNode();
 		}
 
@@ -465,8 +452,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 
 	@Override
 	public FunctionState createRecycleJobNode(ManagedObject managedObject, ManagedObjectCleanup cleanup) {
-		return cleanup.createCleanUpJobNode(this.recycleFlowMetaData, this.recycleEscalationResponsibleTeam,
-				this.objectType, managedObject, this.pool);
+		return cleanup.createCleanUpJobNode(this.recycleFlowMetaData, this.objectType, managedObject, this.pool);
 	}
 
 }

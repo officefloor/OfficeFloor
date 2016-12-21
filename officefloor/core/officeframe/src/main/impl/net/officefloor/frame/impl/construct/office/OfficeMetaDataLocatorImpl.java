@@ -35,9 +35,9 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 
 	/**
-	 * {@link OfficeMetaData}.
+	 * Listing of all {@link WorkMetaData} within the {@link Office}.
 	 */
-	private final OfficeMetaData officeMetaData;
+	private final WorkMetaData<?>[] allWorkMetaData;
 
 	/**
 	 * {@link WorkMetaData} to default to on locating {@link TaskMetaData}.
@@ -57,12 +57,11 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData} to find the {@link TaskMetaData}
-	 *            within.
+	 * @param allWorkMetaData
+	 *            Listing of all {@link WorkMetaData} within the {@link Office}.
 	 */
-	public OfficeMetaDataLocatorImpl(OfficeMetaData officeMetaData) {
-		this(officeMetaData, null);
+	public OfficeMetaDataLocatorImpl(WorkMetaData<?>[] allWorkMetaData) {
+		this(allWorkMetaData, null);
 	}
 
 	/**
@@ -72,17 +71,15 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 	 *            {@link OfficeMetaData} to find the {@link TaskMetaData}
 	 *            within.
 	 * @param workMetaData
-	 *            {@link WorkMetaData} to default to on locating
-	 *            {@link TaskMetaData}.
+	 *            Listing of all {@link WorkMetaData} within the {@link Office}.
 	 */
-	private OfficeMetaDataLocatorImpl(OfficeMetaData officeMetaData,
-			WorkMetaData<?> workMetaData) {
-		this.officeMetaData = officeMetaData;
+	private OfficeMetaDataLocatorImpl(WorkMetaData<?>[] allWorkMetaData, WorkMetaData<?> workMetaData) {
+		this.allWorkMetaData = allWorkMetaData;
 		this.workMetaData = workMetaData;
 
 		// Load the work entries and specify default work entry
 		WorkEntry defaultWork = null;
-		for (WorkMetaData<?> work : officeMetaData.getWorkMetaData()) {
+		for (WorkMetaData<?> work : this.allWorkMetaData) {
 
 			// Create and register the work entry for the work
 			String workName = work.getWorkName();
@@ -102,19 +99,13 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 	 */
 
 	@Override
-	public OfficeMetaData getOfficeMetaData() {
-		return this.officeMetaData;
-	}
-
-	@Override
 	public WorkMetaData<?> getDefaultWorkMetaData() {
 		return this.workMetaData;
 	}
 
 	@Override
-	public OfficeMetaDataLocator createWorkSpecificOfficeMetaDataLocator(
-			WorkMetaData<?> workMetaData) {
-		return new OfficeMetaDataLocatorImpl(this.officeMetaData, workMetaData);
+	public OfficeMetaDataLocator createWorkSpecificOfficeMetaDataLocator(WorkMetaData<?> workMetaData) {
+		return new OfficeMetaDataLocatorImpl(this.allWorkMetaData, workMetaData);
 	}
 
 	@Override
@@ -124,17 +115,14 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getTaskMetaData(String workName,
-			String taskName) {
-		WorkEntry workEntry = (workName != null ? this.officeWork.get(workName)
-				: this.defaultWorkEntry);
+	public TaskMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName) {
+		WorkEntry workEntry = (workName != null ? this.officeWork.get(workName) : this.defaultWorkEntry);
 		return (workEntry != null ? workEntry.tasks.get(taskName) : null);
 	}
 
 	@Override
 	public TaskMetaData<?, ?, ?> getTaskMetaData(String taskName) {
-		return (this.defaultWorkEntry != null ? this.defaultWorkEntry.tasks
-				.get(taskName) : null);
+		return (this.defaultWorkEntry != null ? this.defaultWorkEntry.tasks.get(taskName) : null);
 	}
 
 	/**
@@ -162,8 +150,7 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 			this.workMetaData = workMetaData;
 
 			// Load the tasks
-			for (TaskMetaData<?, ?, ?> taskMetaData : workMetaData
-					.getTaskMetaData()) {
+			for (TaskMetaData<?, ?, ?> taskMetaData : workMetaData.getTaskMetaData()) {
 				String taskName = taskMetaData.getTaskName();
 				this.tasks.put(taskName, taskMetaData);
 			}

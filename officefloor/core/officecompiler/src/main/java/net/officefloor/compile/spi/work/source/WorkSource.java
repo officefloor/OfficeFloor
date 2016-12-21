@@ -25,6 +25,7 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // remove Work and change to ManagedFunctionSource
 public interface WorkSource<W extends Work> {
 
 	/**
@@ -52,7 +53,6 @@ public interface WorkSource<W extends Work> {
 	 * @throws Exception
 	 *             If fails to populate the {@link WorkTypeBuilder}.
 	 */
-	void sourceWork(WorkTypeBuilder<W> workTypeBuilder,
-			WorkSourceContext context) throws Exception;
+	void sourceWork(WorkTypeBuilder<W> workTypeBuilder, WorkSourceContext context) throws Exception;
 
 }

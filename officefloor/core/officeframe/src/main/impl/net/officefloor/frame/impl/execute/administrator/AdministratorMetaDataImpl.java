@@ -20,16 +20,15 @@ package net.officefloor.frame.impl.execute.administrator;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.duty.DutyJob;
-import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.GovernanceActivity;
-import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -37,7 +36,6 @@ import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -45,8 +43,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
-		implements AdministratorMetaData<I, A> {
+public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>> implements AdministratorMetaData<I, A> {
 
 	/**
 	 * {@link AdministratorSource}.
@@ -65,15 +62,14 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	private final TeamManagement responsibleTeam;
 
 	/**
-	 * {@link Team} to enable the worker ({@link Thread}) of the responsible
-	 * {@link Team} to continue on to execute the next {@link Job}.
-	 */
-	private final Team continueTeam;
-
-	/**
 	 * {@link EscalationProcedure}.
 	 */
 	private final EscalationProcedure escalationProcedure;
+
+	/**
+	 * {@link FunctionLoop}.
+	 */
+	private final FunctionLoop functionLoop;
 
 	/**
 	 * <p>
@@ -94,23 +90,19 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link GovernanceActivity}.
-	 * @param continueTeam
-	 *            {@link Team} to enable the worker ({@link Thread}) of the
-	 *            responsible {@link Team} to continue on to execute the next
-	 *            {@link Job}.
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure}.
+	 * @param functionLoop
+	 *            {@link FunctionLoop}.
 	 */
-	public AdministratorMetaDataImpl(
-			AdministratorSource<I, A> administratorSource,
-			ExtensionInterfaceMetaData<I>[] eiMetaData,
-			TeamManagement responsibleTeam, Team continueTeam,
-			EscalationProcedure escalationProcedure) {
+	public AdministratorMetaDataImpl(AdministratorSource<I, A> administratorSource,
+			ExtensionInterfaceMetaData<I>[] eiMetaData, TeamManagement responsibleTeam,
+			EscalationProcedure escalationProcedure, FunctionLoop functionLoop) {
 		this.eiMetaData = eiMetaData;
 		this.administratorSource = administratorSource;
 		this.responsibleTeam = responsibleTeam;
-		this.continueTeam = continueTeam;
 		this.escalationProcedure = escalationProcedure;
+		this.functionLoop = functionLoop;
 	}
 
 	/**
@@ -129,10 +121,9 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	 */
 
 	@Override
-	public String getJobName() {
+	public String getFunctionName() {
 		// TODO provide information of duty
-		return Administrator.class.getSimpleName() + "-"
-				+ this.administratorSource.getClass().getName();
+		return Administrator.class.getSimpleName() + "-" + this.administratorSource.getClass().getName();
 	}
 
 	@Override
@@ -156,18 +147,13 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	}
 
 	@Override
-	public JobNodeActivatableSet createJobActivableSet() {
-		return new JobNodeActivatableSetImpl();
-	}
-
-	@Override
 	public TeamManagement getResponsibleTeam() {
 		return this.responsibleTeam;
 	}
 
 	@Override
-	public Team getContinueTeam() {
-		return this.continueTeam;
+	public FunctionLoop getFunctionLoop() {
+		return this.functionLoop;
 	}
 
 	@Override
@@ -183,13 +169,10 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public FunctionState createDutyNode(
-			TaskMetaData<?, ?, ?> administeringTaskMetaData,
-			WorkContainer<?> administeringWorkContainer, Flow flow,
-			TaskDutyAssociation<?> taskDutyAssociation,
-			FunctionState parallelJobNodeOwner) {
-		return new DutyJob(flow, administeringWorkContainer, this,
-				taskDutyAssociation, parallelJobNodeOwner,
+	public ManagedFunctionContainer createDutyNode(TaskMetaData<?, ?, ?> administeringTaskMetaData,
+			WorkContainer<?> administeringWorkContainer, Flow flow, TaskDutyAssociation<?> taskDutyAssociation,
+			ManagedFunctionContainer parallelJobNodeOwner) {
+		return new DutyJob(flow, administeringWorkContainer, this, taskDutyAssociation, parallelJobNodeOwner,
 				administeringTaskMetaData);
 	}
 

@@ -54,8 +54,10 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -72,17 +74,14 @@ import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.source.UnknownClassError;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for the bound {@link Administrator}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
-		RawBoundAdministratorMetaDataFactory,
-		RawBoundAdministratorMetaData<I, A> {
+public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
+		implements RawBoundAdministratorMetaDataFactory, RawBoundAdministratorMetaData<I, A> {
 
 	/**
 	 * Obtains the {@link RawBoundAdministratorMetaDataFactory}.
@@ -91,8 +90,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static RawBoundAdministratorMetaDataFactory getFactory() {
-		return new RawBoundAdministratorMetaDataImpl(null, null, null, null,
-				null, null, null);
+		return new RawBoundAdministratorMetaDataImpl(null, null, null, null, null, null, null);
 	}
 
 	/**
@@ -154,14 +152,10 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 * @param adminMetaData
 	 *            {@link AdministratorMetaData}.
 	 */
-	private RawBoundAdministratorMetaDataImpl(
-			String boundAdministratorName,
-			AdministratorIndex administratorIndex,
+	private RawBoundAdministratorMetaDataImpl(String boundAdministratorName, AdministratorIndex administratorIndex,
 			AdministratorSourceConfiguration<A, ?> administratorSourceConfiguration,
-			RawBoundManagedObjectMetaData[] administeredRawBoundManagedObjects,
-			Map<String, DutyKey<A>> dutyKeysByName,
-			Map<A, DutyKey<A>> dutyKeysByKey,
-			AdministratorMetaDataImpl<I, A> adminMetaData) {
+			RawBoundManagedObjectMetaData[] administeredRawBoundManagedObjects, Map<String, DutyKey<A>> dutyKeysByName,
+			Map<A, DutyKey<A>> dutyKeysByKey, AdministratorMetaDataImpl<I, A> adminMetaData) {
 		this.boundAdministratorName = boundAdministratorName;
 		this.administratorIndex = administratorIndex;
 		this.administratorSourceConfiguration = administratorSourceConfiguration;
@@ -178,12 +172,10 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public RawBoundAdministratorMetaData<?, ?>[] constructRawBoundAdministratorMetaData(
-			AdministratorSourceConfiguration<?, ?>[] configuration,
-			SourceContext sourceContext, OfficeFloorIssues issues,
-			AdministratorScope administratorScope, AssetType assetType,
-			String assetName, Map<String, TeamManagement> officeTeams,
-			Team continueTeam,
-			Map<String, RawBoundManagedObjectMetaData> scopeMo) {
+			AdministratorSourceConfiguration<?, ?>[] configuration, SourceContext sourceContext,
+			OfficeFloorIssues issues, AdministratorScope administratorScope, AssetType assetType, String assetName,
+			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
+			FunctionLoop functionLoop) {
 
 		// Register the bound administrators
 		List<RawBoundAdministratorMetaData<?, ?>> boundAdministrators = new LinkedList<RawBoundAdministratorMetaData<?, ?>>();
@@ -191,21 +183,18 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 		for (AdministratorSourceConfiguration config : configuration) {
 
 			// Create the administrator index
-			AdministratorIndex adminIndex = new AdministratorIndexImpl(
-					administratorScope, boundAdminIndex++);
+			AdministratorIndex adminIndex = new AdministratorIndexImpl(administratorScope, boundAdminIndex++);
 
 			// Construct the bound administrator
-			RawBoundAdministratorMetaData<?, ?> rawMetaData = constructRawBoundAdministratorMetaData(
-					config, sourceContext, issues, adminIndex, assetType,
-					assetName, officeTeams, continueTeam, scopeMo);
+			RawBoundAdministratorMetaData<?, ?> rawMetaData = constructRawBoundAdministratorMetaData(config,
+					sourceContext, issues, adminIndex, assetType, assetName, officeTeams, scopeMo, functionLoop);
 			if (rawMetaData != null) {
 				boundAdministrators.add(rawMetaData);
 			}
 		}
 
 		// Return the bound administrators
-		return boundAdministrators
-				.toArray(new RawBoundAdministratorMetaData[0]);
+		return boundAdministrators.toArray(new RawBoundAdministratorMetaData[0]);
 	}
 
 	/**
@@ -228,112 +217,94 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            registered names.
-	 * @param continueTeam
-	 *            {@link Team} to enable the worker ({@link Thread}) of the
-	 *            responsible {@link Team} to continue on to execute the next
-	 *            {@link Job}.
 	 * @param scopeMo
 	 *            {@link RawBoundManagedObjectMetaData} by their scope names.
+	 * @param functionLoop
+	 *            {@link FunctionLoop}.
 	 * @return Constructed {@link RawBoundAdministratorMetaData}.
 	 */
 	@SuppressWarnings("unchecked")
 	private <a extends Enum<a>, i, AS extends AdministratorSource<i, a>> RawBoundAdministratorMetaData<i, a> constructRawBoundAdministratorMetaData(
-			AdministratorSourceConfiguration<a, AS> configuration,
-			SourceContext sourceContext, OfficeFloorIssues issues,
-			AdministratorIndex administratorIndex, AssetType assetType,
-			String assetName, Map<String, TeamManagement> officeTeams,
-			Team continueTeam,
-			Map<String, RawBoundManagedObjectMetaData> scopeMo) {
+			AdministratorSourceConfiguration<a, AS> configuration, SourceContext sourceContext,
+			OfficeFloorIssues issues, AdministratorIndex administratorIndex, AssetType assetType, String assetName,
+			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
+			FunctionLoop functionLoop) {
 
 		// Obtain the administrator name
 		String adminName = configuration.getAdministratorName();
 		if (ConstructUtil.isBlank(adminName)) {
-			issues.addIssue(assetType, assetName,
-					"Administrator added without a name");
+			issues.addIssue(assetType, assetName, "Administrator added without a name");
 			return null; // no name
 		}
 
 		// Obtain the administrator source
-		Class<AS> adminSourceClass = configuration
-				.getAdministratorSourceClass();
+		Class<AS> adminSourceClass = configuration.getAdministratorSourceClass();
 		if (adminSourceClass == null) {
-			issues.addIssue(assetType, assetName,
-					"Administrator '" + adminName + "' did not provide an "
-							+ AdministratorSource.class.getSimpleName()
-							+ " class");
+			issues.addIssue(assetType, assetName, "Administrator '" + adminName + "' did not provide an "
+					+ AdministratorSource.class.getSimpleName() + " class");
 			return null; // no class
 		}
 
 		// Obtain the administrator source instance
-		AS adminSource = (AS) ConstructUtil.newInstance(adminSourceClass,
-				AdministratorSource.class, "Administrator '" + adminName + "'",
-				assetType, assetName, issues);
+		AS adminSource = (AS) ConstructUtil.newInstance(adminSourceClass, AdministratorSource.class,
+				"Administrator '" + adminName + "'", assetType, assetName, issues);
 		if (adminSource == null) {
 			return null; // no instance
 		}
 
 		// Obtain context to initialise the administrator source
 		SourceProperties properties = configuration.getProperties();
-		AdministratorSourceContext context = new AdministratorSourceContextImpl(
-				false, properties, sourceContext);
+		AdministratorSourceContext context = new AdministratorSourceContextImpl(false, properties, sourceContext);
 
 		try {
 			// Initialise the administrator source
 			adminSource.init(context);
 
 		} catch (UnknownPropertyError ex) {
-			issues.addIssue(assetType, assetName,
-					"Property '" + ex.getUnknownPropertyName()
-							+ "' must be specified");
+			issues.addIssue(assetType, assetName, "Property '" + ex.getUnknownPropertyName() + "' must be specified");
 			return null; // must have property
 
 		} catch (UnknownClassError ex) {
-			issues.addIssue(assetType, assetName,
-					"Can not load class '" + ex.getUnknownClassName() + "'");
+			issues.addIssue(assetType, assetName, "Can not load class '" + ex.getUnknownClassName() + "'");
 			return null; // must have class
 
 		} catch (UnknownResourceError ex) {
-			issues.addIssue(
-					assetType,
-					assetName,
-					"Can not obtain resource at location '"
-							+ ex.getUnknownResourceLocation() + "'");
+			issues.addIssue(assetType, assetName,
+					"Can not obtain resource at location '" + ex.getUnknownResourceLocation() + "'");
 			return null; // must have resource
 
 		} catch (Throwable ex) {
-			issues.addIssue(assetType, assetName,
-					"Failed to initialise Administrator " + adminName, ex);
+			issues.addIssue(assetType, assetName, "Failed to initialise Administrator " + adminName, ex);
 			return null; // not initialised
 		}
 
 		// Ensure have the meta-data
 		AdministratorSourceMetaData<i, a> metaData = adminSource.getMetaData();
 		if (metaData == null) {
-			issues.addIssue(assetType, assetName,
-					"Administrator " + adminName + " must provide "
-							+ AdministratorSourceMetaData.class.getSimpleName());
+			issues.addIssue(assetType, assetName, "Administrator " + adminName + " must provide "
+					+ AdministratorSourceMetaData.class.getSimpleName());
 			return null; // must provide meta-data
 		}
 
 		// Obtain the team responsible for the duties
 		String teamName = configuration.getOfficeTeamName();
 		if (ConstructUtil.isBlank(teamName)) {
-			issues.addIssue(assetType, assetName, "Administrator " + adminName
-					+ " must specify team responsible for duties");
+			issues.addIssue(assetType, assetName,
+					"Administrator " + adminName + " must specify team responsible for duties");
 			return null; // must have team specified
 		}
 		TeamManagement responsibleTeam = officeTeams.get(teamName);
 		if (responsibleTeam == null) {
-			issues.addIssue(assetType, assetName, "Administrator " + adminName
-					+ " team '" + teamName + "' can not be found");
+			issues.addIssue(assetType, assetName,
+					"Administrator " + adminName + " team '" + teamName + "' can not be found");
 			return null; // unknown team
 		}
 
 		// Obtain the extension interface
 		Class<i> extensionInterfaceType = metaData.getExtensionInterface();
 		if (extensionInterfaceType == null) {
-			issues.addIssue(assetType, assetName, "Administrator " + adminName
-					+ " did not provide extension interface type");
+			issues.addIssue(assetType, assetName,
+					"Administrator " + adminName + " did not provide extension interface type");
 			return null; // no extension interface
 		}
 
@@ -344,24 +315,22 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 
 			// Ensure have managed object name
 			if (ConstructUtil.isBlank(moName)) {
-				issues.addIssue(assetType, assetName, "Administrator "
-						+ adminName + " specifying no name for managed object");
+				issues.addIssue(assetType, assetName,
+						"Administrator " + adminName + " specifying no name for managed object");
 				return null; // unspecified managed object name
 			}
 
 			// Obtain the managed object
 			RawBoundManagedObjectMetaData mo = scopeMo.get(moName);
 			if (mo == null) {
-				issues.addIssue(assetType, assetName, "Managed Object '"
-						+ moName + "' not available to Administrator "
-						+ adminName);
+				issues.addIssue(assetType, assetName,
+						"Managed Object '" + moName + "' not available to Administrator " + adminName);
 				return null; // unknown managed object
 			}
 
 			// Obtain the extension factories for the managed object instances.
 			// (Keeping order of factories as order of managed object instances)
-			RawBoundManagedObjectInstanceMetaData<?>[] moInstances = mo
-					.getRawBoundManagedObjectInstanceMetaData();
+			RawBoundManagedObjectInstanceMetaData<?>[] moInstances = mo.getRawBoundManagedObjectInstanceMetaData();
 			ExtensionInterfaceFactory<i>[] extensionInterfaceFactories = new ExtensionInterfaceFactory[moInstances.length];
 			boolean isExtensionInterfaceFactoryIssue = false;
 			NEXT_INSTANCE: for (int i = 0; i < moInstances.length; i++) {
@@ -369,19 +338,14 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 
 				// Obtain the extension factory for the managed object instance
 				ExtensionInterfaceFactory<i> extensionInterfaceFactory = null;
-				ManagedObjectExtensionInterfaceMetaData<?>[] moEiMetaDatas = moInstance
-						.getRawManagedObjectMetaData()
-						.getManagedObjectSourceMetaData()
-						.getExtensionInterfacesMetaData();
+				ManagedObjectExtensionInterfaceMetaData<?>[] moEiMetaDatas = moInstance.getRawManagedObjectMetaData()
+						.getManagedObjectSourceMetaData().getExtensionInterfacesMetaData();
 				if (moEiMetaDatas != null) {
 					for (ManagedObjectExtensionInterfaceMetaData<?> moEiMetaData : moEiMetaDatas) {
 
 						// Obtain the extension interface
-						Class<?> moEiType = moEiMetaData
-								.getExtensionInterfaceType();
-						if ((moEiType != null)
-								&& (extensionInterfaceType
-										.isAssignableFrom(moEiType))) {
+						Class<?> moEiType = moEiMetaData.getExtensionInterfaceType();
+						if ((moEiType != null) && (extensionInterfaceType.isAssignableFrom(moEiType))) {
 
 							// Specify the extension interface factory
 							extensionInterfaceFactory = (ExtensionInterfaceFactory<i>) moEiMetaData
@@ -389,19 +353,10 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 							if (extensionInterfaceFactory == null) {
 								// Managed Object invalid
 								isExtensionInterfaceFactoryIssue = true;
-								issues.addIssue(
-										assetType,
-										assetName,
-										"Managed Object did not provide "
-												+ ExtensionInterfaceFactory.class
-														.getSimpleName()
-												+ " for Administrator "
-												+ adminName
-												+ " (ManagedObjectSource="
-												+ moInstance
-														.getRawManagedObjectMetaData()
-														.getManagedObjectName()
-												+ ")");
+								issues.addIssue(assetType, assetName, "Managed Object did not provide "
+										+ ExtensionInterfaceFactory.class.getSimpleName() + " for Administrator "
+										+ adminName + " (ManagedObjectSource="
+										+ moInstance.getRawManagedObjectMetaData().getManagedObjectName() + ")");
 								continue NEXT_INSTANCE; // invalid
 							}
 
@@ -414,15 +369,11 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 				if (extensionInterfaceFactory == null) {
 					// Managed Object invalid
 					isExtensionInterfaceFactoryIssue = true;
-					issues.addIssue(assetType, assetName, "Managed Object '"
-							+ moName
-							+ "' does not support extension interface "
-							+ extensionInterfaceType.getName()
-							+ " required by Administrator "
-							+ adminName
-							+ " (ManagedObjectSource="
-							+ moInstance.getRawManagedObjectMetaData()
-									.getManagedObjectName() + ")");
+					issues.addIssue(assetType, assetName,
+							"Managed Object '" + moName + "' does not support extension interface "
+									+ extensionInterfaceType.getName() + " required by Administrator " + adminName
+									+ " (ManagedObjectSource="
+									+ moInstance.getRawManagedObjectMetaData().getManagedObjectName() + ")");
 					continue NEXT_INSTANCE; // invalid
 				}
 			}
@@ -437,16 +388,13 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			administeredManagedObjects.add(mo);
 
 			// Add the extension interface meta-data
-			eiMetaDatas.add(new ExtensionInterfaceMetaDataImpl<i>(moIndex,
-					extensionInterfaceFactories));
+			eiMetaDatas.add(new ExtensionInterfaceMetaDataImpl<i>(moIndex, extensionInterfaceFactories));
 		}
 
 		// Obtain the duties meta-data
-		AdministratorDutyMetaData<a, ?>[] dutyMetaDatas = metaData
-				.getAdministratorDutyMetaData();
+		AdministratorDutyMetaData<a, ?>[] dutyMetaDatas = metaData.getAdministratorDutyMetaData();
 		if ((dutyMetaDatas == null) || (dutyMetaDatas.length == 0)) {
-			issues.addIssue(assetType, assetName, "Administrator " + adminName
-					+ " does not provide duties");
+			issues.addIssue(assetType, assetName, "Administrator " + adminName + " does not provide duties");
 			return null; // must have duties
 		}
 
@@ -461,14 +409,12 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			// Ensure have the duty name
 			String dutyName = dutyMetaData.getDutyName();
 			if (ConstructUtil.isBlank(dutyName)) {
-				issues.addIssue(assetType, assetName,
-						"No name provided for duty " + i);
+				issues.addIssue(assetType, assetName, "No name provided for duty " + i);
 				isDutyKeyIssue = true;
 				continue; // can not process this duty
 			}
 			if (dutyKeysByName.containsKey(dutyName)) {
-				issues.addIssue(assetType, assetName, "Duplicate duty by name "
-						+ dutyName);
+				issues.addIssue(assetType, assetName, "Duplicate duty by name " + dutyName);
 				isDutyKeyIssue = true;
 				continue; // can not process duplicate duty
 			}
@@ -476,8 +422,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			// Obtain the duty key
 			a dutyKey = dutyMetaData.getKey();
 			if ((dutyKey != null) && (dutyKeysByKey.containsKey(dutyKey))) {
-				issues.addIssue(assetType, assetName, "Duplicate duty by key "
-						+ dutyKey);
+				issues.addIssue(assetType, assetName, "Duplicate duty by key " + dutyKey);
 				isDutyKeyIssue = true;
 				continue; // can not process duplicate duty
 			}
@@ -485,30 +430,26 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			// Determine if should have duty key
 			if (i == 0) {
 				// First duty, so provide duty key class (if available)
-				dutyKeyClass = (dutyKey == null ? null : dutyKey
-						.getDeclaringClass());
+				dutyKeyClass = (dutyKey == null ? null : dutyKey.getDeclaringClass());
 			} else {
 				// Ensure consistency of further duties in having key
 				if (dutyKeyClass == null) {
 					if (dutyKey != null) {
-						issues.addIssue(assetType, assetName,
-								"Duty meta-data provides only keys for some duties");
+						issues.addIssue(assetType, assetName, "Duty meta-data provides only keys for some duties");
 						return null; // can not load duties
 					}
 				} else {
 					if (dutyKey == null) {
-						issues.addIssue(assetType, assetName,
-								"Duty meta-data provides only keys for some duties");
+						issues.addIssue(assetType, assetName, "Duty meta-data provides only keys for some duties");
 						return null; // can not load duties
 					}
 
 					// Ensure of duty key correct type
 					if (!dutyKeyClass.isInstance(dutyKey)) {
-						issues.addIssue(assetType, assetName, "Duty key "
-								+ dutyKey + " is of incorrect type [type="
-								+ dutyKey.getDeclaringClass().getName()
-								+ ", required type=" + dutyKeyClass.getName()
-								+ "]");
+						issues.addIssue(assetType, assetName,
+								"Duty key " + dutyKey + " is of incorrect type [type="
+										+ dutyKey.getDeclaringClass().getName() + ", required type="
+										+ dutyKeyClass.getName() + "]");
 						isDutyKeyIssue = true;
 						continue; // must be correct duty key type
 					}
@@ -516,8 +457,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			}
 
 			// Create the duty key
-			DutyKey<a> key = (dutyKey == null ? new DutyKeyImpl<a>(i)
-					: new DutyKeyImpl<a>(dutyKey));
+			DutyKey<a> key = (dutyKey == null ? new DutyKeyImpl<a>(i) : new DutyKeyImpl<a>(dutyKey));
 
 			// Register the duty
 			dutyKeysByName.put(dutyName, key);
@@ -533,17 +473,15 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl();
 
 		// Create the administrator meta-data
-		AdministratorMetaDataImpl<i, a> adminMetaData = new AdministratorMetaDataImpl<i, a>(
-				adminSource, ConstructUtil.toArray(eiMetaDatas,
-						new ExtensionInterfaceMetaData[0]), responsibleTeam,
-				continueTeam, escalationProcedure);
+		AdministratorMetaDataImpl<i, a> adminMetaData = new AdministratorMetaDataImpl<i, a>(adminSource,
+				ConstructUtil.toArray(eiMetaDatas, new ExtensionInterfaceMetaData[0]), responsibleTeam,
+				escalationProcedure, functionLoop);
 
 		// Create the raw bound administrator meta-data
 		RawBoundAdministratorMetaData<i, a> rawBoundAdminMetaData = new RawBoundAdministratorMetaDataImpl<i, a>(
 				adminName, administratorIndex, configuration,
-				administeredManagedObjects
-						.toArray(new RawBoundManagedObjectMetaData[0]),
-				dutyKeysByName, dutyKeysByKey, adminMetaData);
+				administeredManagedObjects.toArray(new RawBoundManagedObjectMetaData[0]), dutyKeysByName, dutyKeysByKey,
+				adminMetaData);
 
 		// Return the raw bound administrator meta-data
 		return rawBoundAdminMetaData;
@@ -554,23 +492,20 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 */
 
 	@Override
-	public void linkOfficeMetaData(OfficeMetaDataLocator taskLocator,
+	public void linkOfficeMetaData(OfficeMetaData officeMetaData, OfficeMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Create the set of required duties to ensure they are configured
-		Set<DutyKey<A>> requiredDuties = new HashSet<DutyKey<A>>(
-				this.linkedDutyKeys);
+		Set<DutyKey<A>> requiredDuties = new HashSet<DutyKey<A>>(this.linkedDutyKeys);
 
 		// Obtain the duty meta-data by its duty key index
 		Map<Integer, DutyMetaData> dutyMetaData = new HashMap<Integer, DutyMetaData>();
-		for (DutyConfiguration<A> dutyConfiguration : this.administratorSourceConfiguration
-				.getDutyConfiguration()) {
+		for (DutyConfiguration<A> dutyConfiguration : this.administratorSourceConfiguration.getDutyConfiguration()) {
 
 			// Obtain the duty name
 			String dutyName = dutyConfiguration.getDutyName();
 			if (ConstructUtil.isBlank(dutyName)) {
-				issues.addIssue(AssetType.ADMINISTRATOR,
-						this.boundAdministratorName,
+				issues.addIssue(AssetType.ADMINISTRATOR, this.boundAdministratorName,
 						"Duty name not provided by duty configuration");
 				return; // must have duty name
 			}
@@ -578,9 +513,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			// Obtain the duty key
 			DutyKey<?> dutyKey = this.dutyKeysByName.get(dutyName);
 			if (dutyKey == null) {
-				issues.addIssue(AssetType.ADMINISTRATOR,
-						this.boundAdministratorName, "No duty by name "
-								+ dutyName);
+				issues.addIssue(AssetType.ADMINISTRATOR, this.boundAdministratorName, "No duty by name " + dutyName);
 				return; // must have duty
 			}
 
@@ -588,11 +521,9 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			requiredDuties.remove(dutyKey);
 
 			// Obtain the task node references
-			TaskNodeReference[] dutyTaskReferences = dutyConfiguration
-					.getLinkedProcessConfiguration();
+			TaskNodeReference[] dutyTaskReferences = dutyConfiguration.getLinkedProcessConfiguration();
 			if (dutyTaskReferences == null) {
-				issues.addIssue(AssetType.ADMINISTRATOR,
-						this.boundAdministratorName,
+				issues.addIssue(AssetType.ADMINISTRATOR, this.boundAdministratorName,
 						"Task references not provided for duty " + dutyName);
 				return; // must have task references for duty
 			}
@@ -603,54 +534,43 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 				TaskNodeReference taskReference = dutyTaskReferences[i];
 
 				// Obtain the task meta-data for the flow
-				TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil
-						.getTaskMetaData(taskReference, taskLocator, issues,
-								AssetType.ADMINISTRATOR,
-								this.boundAdministratorName, "Duty " + dutyName
-										+ " Flow " + i, true);
+				TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskReference, taskLocator, issues,
+						AssetType.ADMINISTRATOR, this.boundAdministratorName, "Duty " + dutyName + " Flow " + i, true);
 				if (taskMetaData == null) {
 					return; // no task
 				}
 
 				// Create and register the flow for the duty.
 				// All direct duty flows are invoked in parallel.
-				dutyFlows[i] = ConstructUtil.newFlowMetaData(
-						FlowInstigationStrategyEnum.PARALLEL, taskMetaData,
-						assetManagerFactory, AssetType.ADMINISTRATOR,
-						this.boundAdministratorName, "Duty " + dutyKey
-								+ " Flow " + i, issues);
+				dutyFlows[i] = ConstructUtil.newFlowMetaData(FlowInstigationStrategyEnum.PARALLEL, taskMetaData,
+						assetManagerFactory, AssetType.ADMINISTRATOR, this.boundAdministratorName,
+						"Duty " + dutyKey + " Flow " + i, issues);
 			}
 
 			// Obtain the governance mapping for the duty
 			DutyGovernanceConfiguration<?>[] dutyGovernanceConfigurations = dutyConfiguration
 					.getGovernanceConfiguration();
 			int[] governanceMapping = new int[dutyGovernanceConfigurations.length];
-			GovernanceMetaData<?, ?>[] governanceMetaDatas = taskLocator
-					.getOfficeMetaData().getProcessMetaData()
-					.getThreadMetaData().getGovernanceMetaData();
+			GovernanceMetaData<?, ?>[] governanceMetaDatas = officeMetaData.getProcessMetaData().getThreadMetaData()
+					.getGovernanceMetaData();
 			for (DutyGovernanceConfiguration<?> dutyGovernanceConfiguration : dutyGovernanceConfigurations) {
 
 				// Index of governance for the duty
-				int dutyGovernanceIndex = dutyGovernanceConfiguration
-						.getIndex();
+				int dutyGovernanceIndex = dutyGovernanceConfiguration.getIndex();
 
 				// Obtain the governance
-				String governanceName = dutyGovernanceConfiguration
-						.getGovernanceName();
+				String governanceName = dutyGovernanceConfiguration.getGovernanceName();
 				int processGovernanceIndex = -1;
 				for (int i = 0; i < governanceMetaDatas.length; i++) {
 					GovernanceMetaData<?, ?> governanceMetaData = governanceMetaDatas[i];
-					if (governanceName.equals(governanceMetaData
-							.getGovernanceName())) {
+					if (governanceName.equals(governanceMetaData.getGovernanceName())) {
 						processGovernanceIndex = i; // found governance
 					}
 				}
 				if (processGovernanceIndex < 0) {
 					// Did not find the process governance
-					issues.addIssue(AssetType.ADMINISTRATOR,
-							this.boundAdministratorName,
-							"Can not find governance '" + governanceName
-									+ "' for duty '" + dutyName + "'");
+					issues.addIssue(AssetType.ADMINISTRATOR, this.boundAdministratorName,
+							"Can not find governance '" + governanceName + "' for duty '" + dutyName + "'");
 				}
 
 				// Specify the governance mapping
@@ -658,24 +578,19 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			}
 
 			// Create and register the duty meta-data
-			dutyMetaData.put(new Integer(dutyKey.getIndex()),
-					new DutyMetaDataImpl(dutyFlows, governanceMapping));
+			dutyMetaData.put(new Integer(dutyKey.getIndex()), new DutyMetaDataImpl(dutyFlows, governanceMapping));
 		}
 
 		// Must have configuration for each required duty
 		for (DutyKey<A> requiredDuty : requiredDuties) {
-			issues.addIssue(
-					AssetType.ADMINISTRATOR,
-					this.boundAdministratorName,
-					"Must provide configuration for duty [index="
-							+ requiredDuty.getIndex() + ", key="
+			issues.addIssue(AssetType.ADMINISTRATOR, this.boundAdministratorName,
+					"Must provide configuration for duty [index=" + requiredDuty.getIndex() + ", key="
 							+ requiredDuty.getKey() + "]");
 			return; // must have configuration for each duty
 		}
 
 		// Obtain the listing of duty meta-data
-		DutyMetaData[] metaData = ConstructUtil.toArray(dutyMetaData,
-				new DutyMetaData[0]);
+		DutyMetaData[] metaData = ConstructUtil.toArray(dutyMetaData, new DutyMetaData[0]);
 
 		// Load the duties to the administrator meta-data
 		this.adminMetaData.loadRemainingState(metaData);

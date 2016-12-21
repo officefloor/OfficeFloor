@@ -21,6 +21,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -92,6 +93,8 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	 * Links the {@link TaskMetaData} instances to create {@link Flow} of
 	 * execution, along with the {@link Governance}.
 	 * 
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param taskMetaDataLocator
 	 *            {@link OfficeMetaDataLocator}.
 	 * @param assetManagerFactory
@@ -99,7 +102,7 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkOfficeMetaData(OfficeMetaDataLocator taskMetaDataLocator,
+	void linkOfficeMetaData(OfficeMetaData officeMetaData, OfficeMetaDataLocator taskMetaDataLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 }

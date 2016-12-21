@@ -32,19 +32,16 @@ public interface ManagedObjectCleanup {
 	 * 
 	 * @param recycleFlowMetaData
 	 *            {@link FlowMetaData} to recycle the {@link ManagedObject}.
-	 * @param responsibleTeam
-	 *            {@link TeamManagement} responsible for cleaning up the
-	 *            {@link ManagedObject}.
 	 * @param objectType
 	 *            Type of the object from the {@link ManagedObject}.
 	 * @param managedObject
 	 *            {@link ManagedObject} to be cleaned up.
 	 * @param managedObjectPool
 	 *            Optional {@link ManagedObjectPool} to return the
-	 *            {@link ManagedObject}.
+	 *            {@link ManagedObject}. May be <code>null</code>.
 	 * @return {@link FunctionState} to clean up the {@link ManagedObject}.
 	 */
-	FunctionState createCleanUpJobNode(FlowMetaData<?> recycleFlowMetaData, TeamManagement responsibleTeam,
-			Class<?> objectType, ManagedObject managedObject, ManagedObjectPool managedObjectPool);
+	FunctionState createCleanUpJobNode(FlowMetaData<?> recycleFlowMetaData, Class<?> objectType,
+			ManagedObject managedObject, ManagedObjectPool managedObjectPool);
 
 }

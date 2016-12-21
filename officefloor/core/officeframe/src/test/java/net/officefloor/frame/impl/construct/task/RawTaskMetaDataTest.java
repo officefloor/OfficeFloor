@@ -334,7 +334,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Verify initial details
 		TaskMetaData<?, ?, ?> taskMetaData = metaData.getTaskMetaData();
 		assertEquals("Incorrect job name", DEFAULT_WORK_NAME + "." + TASK_NAME,
-				taskMetaData.getJobName());
+				taskMetaData.getFunctionName());
 		assertEquals("Incorect task factory", this.taskFactory,
 				taskMetaData.getTaskFactory());
 		assertNull("No differentiator", taskMetaData.getDifferentiator());

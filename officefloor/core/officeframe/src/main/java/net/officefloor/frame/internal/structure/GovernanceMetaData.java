@@ -129,17 +129,19 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends ManagedFunctio
 	FlowMetaData<?> getFlow(int flowIndex);
 
 	/**
-	 * Creates the {@link ManagedFunction} for the {@link GovernanceActivity}.
+	 * Creates the {@link ManagedFunctionContainer} for the
+	 * {@link GovernanceActivity}.
 	 * 
 	 * @param flow
 	 *            {@link Flow} for containing this {@link GovernanceActivity}.
 	 * @param governanceActivity
 	 *            {@link GovernanceActivity}.
 	 * @param parallelJobNodeOwner
-	 *            Parallel {@link ManagedFunction} owner.
-	 * @return {@link ManagedFunction} for the {@link GovernanceActivity}.
+	 *            Parallel {@link ManagedFunctionContainer} owner.
+	 * @return {@link ManagedFunctionContainer} for the
+	 *         {@link GovernanceActivity}.
 	 */
-	ManagedFunction createGovernanceJobNode(Flow flow, GovernanceActivity<I, F> governanceActivity,
-			ManagedFunction parallelJobNodeOwner);
+	ManagedFunctionContainer createGovernanceFunction(Flow flow, GovernanceActivity<I, F> governanceActivity,
+			ManagedFunctionContainer parallelJobNodeOwner);
 
 }

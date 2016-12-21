@@ -17,8 +17,10 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
+import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl.ActiveThreadState;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -53,7 +55,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 	 *            Default {@link TeamManagement}.
 	 */
 	public FunctionLoopImpl(TeamManagement defaultTeam) {
-		this.defaultTeam = defaultTeam;
+		this.defaultTeam = (defaultTeam != null) ? defaultTeam : new TeamManagementImpl(LOOP_TEAM, new PassiveTeam());
 	}
 
 	/*

@@ -27,13 +27,13 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface ManagedObjectReadyCheck {
 
 	/**
-	 * Obtains the {@link ManagedFunction} requiring the check on the
-	 * {@link ManagedFunction}.
+	 * Obtains the {@link ManagedFunctionContainer} requiring the check on the
+	 * {@link ManagedFunctionContainer}.
 	 * 
-	 * @return {@link ManagedFunction} requiring the check on the
+	 * @return {@link ManagedFunctionContainer} requiring the check on the
 	 *         {@link ManagedObject}.
 	 */
-	ManagedFunction getManagedJobNode();
+	ManagedFunctionContainer getManagedJobNode();
 
 	/**
 	 * Flags that a {@link ManagedObject} or one of its dependency

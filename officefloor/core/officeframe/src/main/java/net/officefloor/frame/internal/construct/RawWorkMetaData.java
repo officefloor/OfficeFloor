@@ -23,6 +23,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -62,8 +63,7 @@ public interface RawWorkMetaData<W extends Work> {
 	 * @return {@link RawBoundManagedObjectMetaData} or <code>null</code> not
 	 *         found.
 	 */
-	RawBoundManagedObjectMetaData getScopeManagedObjectMetaData(
-			String scopeManagedObjectName);
+	RawBoundManagedObjectMetaData getScopeManagedObjectMetaData(String scopeManagedObjectName);
 
 	/**
 	 * Obtains the {@link AdministratorIndex} for the {@link Work}
@@ -75,14 +75,15 @@ public interface RawWorkMetaData<W extends Work> {
 	 * @return {@link RawBoundAdministratorMetaData} or <code>null</code> if not
 	 *         found.
 	 */
-	RawBoundAdministratorMetaData<?, ?> getScopeAdministratorMetaData(
-			String scopeAdministratorName);
+	RawBoundAdministratorMetaData<?, ?> getScopeAdministratorMetaData(String scopeAdministratorName);
 
 	/**
 	 * Links the {@link TaskMetaData} instances to enable {@link Flow} of
 	 * execution. Also links the {@link Governance} for any possible associated
 	 * {@link Duty}.
 	 * 
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param taskLocator
 	 *            {@link OfficeMetaDataLocator}.
 	 * @param assetManagerFactory
@@ -90,7 +91,7 @@ public interface RawWorkMetaData<W extends Work> {
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkOfficeMetaData(OfficeMetaDataLocator taskLocator,
+	void linkOfficeMetaData(OfficeMetaData officeMetaData, OfficeMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 	/**

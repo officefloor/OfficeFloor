@@ -19,6 +19,7 @@ package net.officefloor.frame.internal.structure;
 
 import java.util.Timer;
 
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 
 /**
@@ -31,15 +32,14 @@ public interface ManagedObjectExecuteContextFactory<F extends Enum<F>> {
 	/**
 	 * Creates the {@link ManagedObjectExecuteContext}.
 	 * 
-	 * @param ticker
-	 *            {@link ProcessTicker} to keep track of the active
-	 *            {@link ProcessState} instances.
 	 * @param timer
 	 *            {@link Timer} to enable delay of {@link ProcessState}
 	 *            invocation.
+	 * @param escalationResponsibleTeam
+	 *            {@link EscalationHandler} responsible {@link TeamManagement}.
 	 * @return {@link ManagedObjectExecuteContext}.
 	 */
-	ManagedObjectExecuteContext<F> createManagedObjectExecuteContext(
-			ProcessTicker ticker, Timer timer);
+	ManagedObjectExecuteContext<F> createManagedObjectExecuteContext(Timer timer,
+			TeamManagement escalationResponsibleTeam);
 
 }

@@ -149,9 +149,6 @@ public class ProcessStateImpl implements ProcessState {
 	 * @param escalationResponsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for
 	 *            handling {@link Escalation}.
-	 * @param escalationContinueTeam
-	 *            {@link Team} to enable worker ({@link Thread}) of responsible
-	 *            {@link Team} to continue on to handle {@link Escalation}.
 	 * @param escalationHandlerRequiredGovernance
 	 *            {@link EscalationHandler} required {@link Governance}.
 	 * @param completionListeners
@@ -160,11 +157,10 @@ public class ProcessStateImpl implements ProcessState {
 	public ProcessStateImpl(ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
 			OfficeMetaData officeMetaData, EscalationFlow officeFloorEscalation, ProcessProfiler processProfiler,
 			EscalationHandler invocationEscalationHandler, TeamManagement escalationResponsibleTeam,
-			Team escalationContinueTeam, boolean[] escalationHandlerRequiredGovernance,
-			ProcessCompletionListener[] completionListeners) {
+			boolean[] escalationHandlerRequiredGovernance, ProcessCompletionListener[] completionListeners) {
 		this(processMetaData, processContextListeners, officeMetaData, officeFloorEscalation, processProfiler, null,
-				null, -1, invocationEscalationHandler, escalationResponsibleTeam, escalationContinueTeam,
-				escalationHandlerRequiredGovernance, completionListeners);
+				null, -1, invocationEscalationHandler, escalationResponsibleTeam, escalationHandlerRequiredGovernance,
+				completionListeners);
 	}
 
 	/**
@@ -196,9 +192,6 @@ public class ProcessStateImpl implements ProcessState {
 	 * @param escalationResponsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for
 	 *            handling {@link Escalation}.
-	 * @param escalationContinueTeam
-	 *            {@link Team} to enable worker ({@link Thread}) of responsible
-	 *            {@link Team} to continue on to handle {@link Escalation}.
 	 * @param escalationHandlerRequiredGovernance
 	 *            {@link EscalationHandler} required {@link Governance}.
 	 * @param completionListeners
@@ -208,8 +201,8 @@ public class ProcessStateImpl implements ProcessState {
 			OfficeMetaData officeMetaData, EscalationFlow officeFloorEscalation, ProcessProfiler processProfiler,
 			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
 			int inputManagedObjectIndex, EscalationHandler invocationEscalationHandler,
-			TeamManagement escalationResponsibleTeam, Team escalationContinueTeam,
-			boolean[] escalationHandlerRequiredGovernance, ProcessCompletionListener[] completionListeners) {
+			TeamManagement escalationResponsibleTeam, boolean[] escalationHandlerRequiredGovernance,
+			ProcessCompletionListener[] completionListeners) {
 		this.processMetaData = processMetaData;
 		this.processContextListeners = processContextListeners;
 		this.officeMetaData = officeMetaData;
@@ -237,7 +230,7 @@ public class ProcessStateImpl implements ProcessState {
 
 		// Create all admin containers (final for thread safety)
 		AdministratorMetaData<?, ?>[] administratorMetaData = this.processMetaData.getAdministratorMetaData();
-		AdministratorContainer[] administratorContainers = new AdministratorContainer[administratorMetaData.length];
+		AdministratorContainer<?, ?>[] administratorContainers = new AdministratorContainer[administratorMetaData.length];
 		for (int i = 0; i < administratorContainers.length; i++) {
 			administratorContainers[i] = administratorMetaData[i].createAdministratorContainer();
 		}
@@ -246,7 +239,7 @@ public class ProcessStateImpl implements ProcessState {
 		// Escalation handled by invocation of this process
 		this.invocationEscalation = (invocationEscalationHandler == null ? null
 				: new EscalationHandlerEscalation(invocationEscalationHandler, escalationResponsibleTeam,
-						escalationContinueTeam, escalationHandlerRequiredGovernance));
+						escalationHandlerRequiredGovernance, officeMetaData.getFunctionLoop()));
 
 		// Create the clean up
 		this.cleanup = new ManagedObjectCleanupImpl(this, this.officeMetaData);

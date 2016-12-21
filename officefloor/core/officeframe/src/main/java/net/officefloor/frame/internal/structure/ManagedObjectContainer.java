@@ -40,14 +40,14 @@ public interface ManagedObjectContainer {
 	 * Loads the {@link ManagedObject}.
 	 * 
 	 * @param managedJobNode
-	 *            {@link ManagedFunction} requiring the {@link ManagedObject}.
+	 *            {@link ManagedFunctionContainer} requiring the {@link ManagedObject}.
 	 * @return Optional {@link FunctionState} to load the {@link ManagedObject}.
-	 *         Should this return </code>null</code>, the {@link ManagedFunction}
+	 *         Should this return </code>null</code>, the {@link ManagedFunctionContainer}
 	 *         should not then be executed, as it is expecting to wait. This
-	 *         will return the {@link ManagedFunction} when the
+	 *         will return the {@link ManagedFunctionContainer} when the
 	 *         {@link ManagedObject} is loaded.
 	 */
-	FunctionState loadManagedObject(ManagedFunction managedJobNode, WorkContainer<?> workContainer);
+	FunctionState loadManagedObject(ManagedFunctionContainer managedJobNode, WorkContainer<?> workContainer);
 
 	/**
 	 * <p>
@@ -55,7 +55,7 @@ public interface ManagedObjectContainer {
 	 * within this {@link ManagedObjectContainer} is ready.
 	 * <p>
 	 * Should the {@link ManagedObject} not be ready, then will latch the
-	 * {@link ManagedFunction} to wait for the {@link ManagedObject} to be ready.
+	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to be ready.
 	 * 
 	 * @param check
 	 *            {@link ManagedObjectReadyCheck}.

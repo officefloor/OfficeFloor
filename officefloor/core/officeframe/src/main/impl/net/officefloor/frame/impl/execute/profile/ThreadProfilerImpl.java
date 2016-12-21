@@ -64,7 +64,7 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThread {
 		long startTimestamp = System.nanoTime();
 
 		// Obtain the job name
-		String jobName = jobMetaData.getJobName();
+		String jobName = jobMetaData.getFunctionName();
 
 		// Obtain the executing thread name
 		String executingThreadName = Thread.currentThread().getName();

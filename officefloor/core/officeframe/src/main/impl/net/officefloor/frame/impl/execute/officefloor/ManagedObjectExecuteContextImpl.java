@@ -23,13 +23,12 @@ import java.util.TimerTask;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -79,12 +78,7 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	/**
 	 * {@link FunctionLoop}.
 	 */
-	private final FunctionLoop jobNodeLoop;
-
-	/**
-	 * {@link ProcessTicker}.
-	 */
-	private final ProcessTicker processTicker;
+	private final FunctionLoop functionLoop;
 
 	/**
 	 * {@link Timer}.
@@ -108,25 +102,20 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	 * @param escalationResponsibleTeam
 	 *            {@link TeamManagement} of the {@link Team} responsible for the
 	 *            {@link ManagedObjectSource} {@link Escalation} handling.
-	 * @param escalationContinueTeam
-	 *            {@link Team} to let the worker ({@link Thread}) continue on to
-	 *            execute the {@link ManagedObjectSource}
-	 *            {@link EscalationHandler}.
-	 * @param processTicker
-	 *            {@link ProcessTicker}.
+	 * @param functionLoop
+	 *            {@link FunctionLoop}.
 	 * @param timer
 	 *            {@link Timer}.
 	 */
 	public ManagedObjectExecuteContextImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
 			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData, TeamManagement escalationResponsibleTeam,
-			FunctionLoop jobNodeLoop, ProcessTicker processTicker, Timer timer) {
+			FunctionLoop functionLoop, Timer timer) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
 		this.officeMetaData = officeMetaData;
 		this.escalationResponsibleTeam = escalationResponsibleTeam;
-		this.jobNodeLoop = jobNodeLoop;
-		this.processTicker = processTicker;
+		this.functionLoop = functionLoop;
 		this.timer = timer;
 	}
 
@@ -164,18 +153,10 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 		}
 		FlowMetaData<?> flowMetaData = this.processLinks[processIndex];
 
-		// Create the job in a new process
-		final FunctionState jobNode = this.officeMetaData.createProcess(flowMetaData, parameter, escalationHandler,
-				this.escalationResponsibleTeam, managedObject, this.managedObjectMetaData, this.processMoIndex);
-
-		// Obtain the process state
-		ProcessState processState = jobNode.getThreadState().getProcessState();
-
-		// Indicate process started and register to be notified of completion
-		if (this.processTicker != null) {
-			this.processTicker.processStarted();
-			processState.registerProcessCompletionListener(this.processTicker);
-		}
+		// Create the function in a new process
+		final FunctionState function = this.officeMetaData.createProcess(flowMetaData, parameter, escalationHandler,
+				this.escalationResponsibleTeam, managedObject, this.managedObjectMetaData, this.processMoIndex,
+				completionListener);
 
 		// Trigger the process
 		if (delay > 0) {
@@ -183,13 +164,13 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 			this.timer.schedule(new TimerTask() {
 				@Override
 				public void run() {
-					ManagedObjectExecuteContextImpl.this.jobNodeLoop.delegateFunction(jobNode);
+					ManagedObjectExecuteContextImpl.this.functionLoop.delegateFunction(function);
 				}
 			}, delay);
 
 		} else {
 			// Execute the process immediately
-			this.jobNodeLoop.executeFunction(jobNode);
+			this.functionLoop.executeFunction(function);
 		}
 	}
 

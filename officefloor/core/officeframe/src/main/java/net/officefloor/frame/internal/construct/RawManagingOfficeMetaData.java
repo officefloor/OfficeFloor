@@ -24,12 +24,11 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Meta-data of a {@link ManagedObject} that is managed by the {@link Office}.
@@ -94,26 +93,22 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	 *            {@link RawBoundManagedObjectMetaData} of the
 	 *            {@link ProcessState} bound {@link ManagedObject} instances of
 	 *            the managing {@link Office}.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param metaDataLocator
 	 *            {@link OfficeMetaDataLocator} for the {@link Office} managing
 	 *            the {@link ManagedObjectSource}.
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            names.
-	 * @param continueTeamManagement
-	 *            {@link TeamManagement} for the {@link Team} to let the worker
-	 *            ({@link Thread}) continue on to execute the next {@link Job}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void manageByOffice(
-			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
-			OfficeMetaDataLocator metaDataLocator,
-			Map<String, TeamManagement> officeTeams,
-			TeamManagement continueTeamManagement,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
+	void manageByOffice(RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
+			OfficeMetaData officeMetaData, OfficeMetaDataLocator metaDataLocator,
+			Map<String, TeamManagement> officeTeams, AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link ManagedObjectExecuteContextFactory} for the

@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.managedobject;
 
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -31,9 +31,9 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 
 	/**
-	 * {@link ManagedFunction} requiring the check.
+	 * {@link ManagedFunctionContainer} requiring the check.
 	 */
-	private final ManagedFunction managedJobNode;
+	private final ManagedFunctionContainer managedJobNode;
 
 	/**
 	 * Flag indicating if ready.
@@ -44,9 +44,9 @@ public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 	 * Instantiate.
 	 * 
 	 * @param managedJobNode
-	 *            {@link ManagedFunction} requiring the check.
+	 *            {@link ManagedFunctionContainer} requiring the check.
 	 */
-	public ManagedObjectReadyCheckImpl(ManagedFunction managedJobNode) {
+	public ManagedObjectReadyCheckImpl(ManagedFunctionContainer managedJobNode) {
 		this.managedJobNode = managedJobNode;
 	}
 
@@ -64,7 +64,7 @@ public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 	 */
 
 	@Override
-	public ManagedFunction getManagedJobNode() {
+	public ManagedFunctionContainer getManagedJobNode() {
 		return this.managedJobNode;
 	}
 

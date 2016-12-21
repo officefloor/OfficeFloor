@@ -28,7 +28,7 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.ManagedFunction;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -116,7 +116,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunction managedJobNode) {
+	public FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunctionContainer managedJobNode) {
 
 		// Load the managed objects
 		if (this.loadIndex < managedObjectIndexes.length) {

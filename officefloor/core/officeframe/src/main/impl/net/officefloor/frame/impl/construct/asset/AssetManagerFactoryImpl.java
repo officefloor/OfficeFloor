@@ -60,6 +60,12 @@ public class AssetManagerFactoryImpl implements AssetManagerFactory {
 	private final FunctionLoop functionLoop;
 
 	/**
+	 * Flag to ensure no further {@link AssetManager} instances are created once
+	 * the {@link AssetManager} array is created.
+	 */
+	private boolean isAssetManagerListCreated = false;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param officeManagerProcessState
@@ -78,6 +84,16 @@ public class AssetManagerFactoryImpl implements AssetManagerFactory {
 		this.functionLoop = functionLoop;
 	}
 
+	/**
+	 * Obtain all the registered {@link AssetManager} instances.
+	 * 
+	 * @return Registered {@link AssetManager} instances.
+	 */
+	public AssetManager[] getAssetManagers() {
+		this.isAssetManagerListCreated = true;
+		return this.registry.values().stream().toArray(AssetManager[]::new);
+	}
+
 	/*
 	 * ================= AssetManagerFactory =================================
 	 */
@@ -88,6 +104,12 @@ public class AssetManagerFactoryImpl implements AssetManagerFactory {
 
 		// Create the name of the asset manager
 		String assetManagerName = assetType.toString() + ":" + assetName + "[" + responsibility + "]";
+
+		// Ensure will be included in the list
+		if (this.isAssetManagerListCreated) {
+			throw new IllegalStateException("Can not create " + AssetManager.class.getSimpleName() + " "
+					+ assetManagerName + " as list already generated");
+		}
 
 		// Determine if manager already available for responsibility over asset
 		if (this.registry.get(assetManagerName) != null) {

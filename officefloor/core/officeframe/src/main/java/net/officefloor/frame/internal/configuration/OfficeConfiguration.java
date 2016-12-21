@@ -60,6 +60,14 @@ public interface OfficeConfiguration {
 	long getMonitorOfficeInterval();
 
 	/**
+	 * Obtains the default {@link Team} name for the {@link Office}.
+	 * 
+	 * @return Default {@link Team} name for the {@link Office}. May be
+	 *         <code>null</code> to use the existing {@link Thread}.
+	 */
+	String getOfficeDefaultTeamName();
+
+	/**
 	 * <p>
 	 * Obtains the {@link OfficeBuilder} for this {@link Office}.
 	 * <p>
@@ -187,8 +195,7 @@ public interface OfficeConfiguration {
 	 *            Name of the {@link Task}.
 	 * @return {@link TaskBuilder}.
 	 */
-	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String workName,
-			String taskName);
+	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String workName, String taskName);
 
 	/**
 	 * Obtains the list of {@link TaskNodeReference} instances referencing the

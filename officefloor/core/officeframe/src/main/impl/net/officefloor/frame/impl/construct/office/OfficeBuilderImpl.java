@@ -56,6 +56,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Implements the {@link OfficeBuilder}.
@@ -93,6 +94,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * Listing of {@link LinkedTeamConfiguration}.
 	 */
 	private final List<LinkedTeamConfiguration> teams = new LinkedList<LinkedTeamConfiguration>();
+
+	/**
+	 * Default {@link Team}.
+	 */
+	private String defaultOfficeTeamName = null;
 
 	/**
 	 * Listing of {@link LinkedManagedObjectSourceConfiguration}.
@@ -186,43 +192,42 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	@Override
 	public void registerTeam(String officeTeamName, String officeFloorTeamName) {
-		this.teams.add(new LinkedTeamConfigurationImpl(officeTeamName,
-				officeFloorTeamName));
+		this.teams.add(new LinkedTeamConfigurationImpl(officeTeamName, officeFloorTeamName));
 	}
 
 	@Override
-	public void registerManagedObjectSource(String officeManagedObjectName,
-			String officeFloorManagedObjectSourceName) {
-		this.managedObjectSources
-				.add(new LinkedManagedObjectSourceConfigurationImpl(
-						officeManagedObjectName,
-						officeFloorManagedObjectSourceName));
+	public void setDefaultTeamName(String officeTeamName) {
+		this.defaultOfficeTeamName = officeTeamName;
 	}
 
 	@Override
-	public void setBoundInputManagedObject(String inputManagedObjectName,
-			String managedObjectSourceName) {
+	public void registerManagedObjectSource(String officeManagedObjectName, String officeFloorManagedObjectSourceName) {
+		this.managedObjectSources.add(new LinkedManagedObjectSourceConfigurationImpl(officeManagedObjectName,
+				officeFloorManagedObjectSourceName));
+	}
+
+	@Override
+	public void setBoundInputManagedObject(String inputManagedObjectName, String managedObjectSourceName) {
 		this.boundInputManagedObjects
-				.add(new BoundInputManagedObjectConfigurationImpl(
-						inputManagedObjectName, managedObjectSourceName));
+				.add(new BoundInputManagedObjectConfigurationImpl(inputManagedObjectName, managedObjectSourceName));
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public DependencyMappingBuilder addThreadManagedObject(
-			String threadManagedObjectName, String officeManagedObjectName) {
-		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(
-				threadManagedObjectName, officeManagedObjectName);
+	public DependencyMappingBuilder addThreadManagedObject(String threadManagedObjectName,
+			String officeManagedObjectName) {
+		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(threadManagedObjectName,
+				officeManagedObjectName);
 		this.threadManagedObjects.add(builder);
 		return builder;
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public DependencyMappingBuilder addProcessManagedObject(
-			String processManagedObjectName, String officeManagedObjectName) {
-		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(
-				processManagedObjectName, officeManagedObjectName);
+	public DependencyMappingBuilder addProcessManagedObject(String processManagedObjectName,
+			String officeManagedObjectName) {
+		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(processManagedObjectName,
+				officeManagedObjectName);
 		this.processManagedObjects.add(builder);
 		return builder;
 	}
@@ -233,12 +238,10 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public <I, F extends Enum<F>> GovernanceBuilder<F> addGovernance(
-			String governanceName,
-			GovernanceFactory<? super I, F> governanceFactory,
-			Class<I> extensionInterface) {
-		GovernanceBuilderImpl<I, F> builder = new GovernanceBuilderImpl<I, F>(
-				governanceName, governanceFactory, extensionInterface);
+	public <I, F extends Enum<F>> GovernanceBuilder<F> addGovernance(String governanceName,
+			GovernanceFactory<? super I, F> governanceFactory, Class<I> extensionInterface) {
+		GovernanceBuilderImpl<I, F> builder = new GovernanceBuilderImpl<I, F>(governanceName, governanceFactory,
+				extensionInterface);
 		this.governances.add(builder);
 		return builder;
 	}
@@ -246,8 +249,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addProcessAdministrator(
 			String processAdministratorName, Class<AS> adminsistratorSource) {
-		AdministratorBuilderImpl<I, A, AS> builder = new AdministratorBuilderImpl<I, A, AS>(
-				processAdministratorName, adminsistratorSource);
+		AdministratorBuilderImpl<I, A, AS> builder = new AdministratorBuilderImpl<I, A, AS>(processAdministratorName,
+				adminsistratorSource);
 		this.processAdministrator.add(builder);
 		return builder;
 	}
@@ -255,17 +258,15 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addThreadAdministrator(
 			String threadAdministratorName, Class<AS> adminsistratorSource) {
-		AdministratorBuilderImpl<I, A, AS> builder = new AdministratorBuilderImpl<I, A, AS>(
-				threadAdministratorName, adminsistratorSource);
+		AdministratorBuilderImpl<I, A, AS> builder = new AdministratorBuilderImpl<I, A, AS>(threadAdministratorName,
+				adminsistratorSource);
 		this.threadAdministrator.add(builder);
 		return builder;
 	}
 
 	@Override
-	public <W extends Work> WorkBuilder<W> addWork(String workName,
-			WorkFactory<W> workFactory) {
-		WorkBuilderImpl<W> workBuilder = new WorkBuilderImpl<W>(workName,
-				workFactory);
+	public <W extends Work> WorkBuilder<W> addWork(String workName, WorkFactory<W> workFactory) {
+		WorkBuilderImpl<W> workBuilder = new WorkBuilderImpl<W>(workName, workFactory);
 		this.works.add(workBuilder);
 		return workBuilder;
 	}
@@ -276,8 +277,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public void addEscalation(Class<? extends Throwable> typeOfCause,
-			String workName, String taskName) {
+	public void addEscalation(Class<? extends Throwable> typeOfCause, String workName, String taskName) {
 		this.escalations.add(new TaskEscalationConfigurationImpl(typeOfCause,
 				new TaskNodeReferenceImpl(workName, taskName, typeOfCause)));
 	}
@@ -285,8 +285,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public void addStartupTask(String workName, String taskName) {
 		// No argument to a start up task
-		this.startupTasks.add(new TaskNodeReferenceImpl(workName, taskName,
-				null));
+		this.startupTasks.add(new TaskNodeReferenceImpl(workName, taskName, null));
 	}
 
 	@Override
@@ -319,27 +318,28 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
+	public String getOfficeDefaultTeamName() {
+		return this.defaultOfficeTeamName;
+	}
+
+	@Override
 	public LinkedManagedObjectSourceConfiguration[] getRegisteredManagedObjectSources() {
-		return this.managedObjectSources
-				.toArray(new LinkedManagedObjectSourceConfiguration[0]);
+		return this.managedObjectSources.toArray(new LinkedManagedObjectSourceConfiguration[0]);
 	}
 
 	@Override
 	public BoundInputManagedObjectConfiguration[] getBoundInputManagedObjectConfiguration() {
-		return this.boundInputManagedObjects
-				.toArray(new BoundInputManagedObjectConfiguration[0]);
+		return this.boundInputManagedObjects.toArray(new BoundInputManagedObjectConfiguration[0]);
 	}
 
 	@Override
 	public ManagedObjectConfiguration<?>[] getProcessManagedObjectConfiguration() {
-		return this.processManagedObjects
-				.toArray(new ManagedObjectConfiguration[0]);
+		return this.processManagedObjects.toArray(new ManagedObjectConfiguration[0]);
 	}
 
 	@Override
 	public ManagedObjectConfiguration<?>[] getThreadManagedObjectConfiguration() {
-		return this.threadManagedObjects
-				.toArray(new ManagedObjectConfiguration[0]);
+		return this.threadManagedObjects.toArray(new ManagedObjectConfiguration[0]);
 	}
 
 	@Override
@@ -349,20 +349,17 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	@Override
 	public GovernanceConfiguration<?, ?>[] getGovernanceConfiguration() {
-		return this.governances
-				.toArray(new GovernanceConfiguration[this.governances.size()]);
+		return this.governances.toArray(new GovernanceConfiguration[this.governances.size()]);
 	}
 
 	@Override
 	public AdministratorSourceConfiguration<?, ?>[] getProcessAdministratorSourceConfiguration() {
-		return this.processAdministrator
-				.toArray(new AdministratorSourceConfiguration[0]);
+		return this.processAdministrator.toArray(new AdministratorSourceConfiguration[0]);
 	}
 
 	@Override
 	public AdministratorSourceConfiguration<?, ?>[] getThreadAdministratorSourceConfiguration() {
-		return this.threadAdministrator
-				.toArray(new AdministratorSourceConfiguration[0]);
+		return this.threadAdministrator.toArray(new AdministratorSourceConfiguration[0]);
 	}
 
 	@Override
@@ -382,8 +379,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace,
-			String workName, String taskName) {
+	public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String workName, String taskName) {
 
 		// Obtain the work builder
 		String namespacedWorkName = getNamespacedName(namespace, workName);

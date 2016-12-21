@@ -178,7 +178,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * {@link ManagedObject} are ready.
 	 * <p>
 	 * Should a {@link ManagedObject} not be ready, then will latch the
-	 * {@link ManagedFunction} to wait for the {@link ManagedObject} to be ready.
+	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to be ready.
 	 * 
 	 * @param check
 	 *            {@link ManagedObjectReadyCheck}.

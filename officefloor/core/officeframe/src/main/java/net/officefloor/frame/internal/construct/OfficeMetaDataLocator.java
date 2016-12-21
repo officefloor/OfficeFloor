@@ -19,7 +19,6 @@ package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -30,15 +29,6 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
  * @author Daniel Sagenschneider
  */
 public interface OfficeMetaDataLocator {
-
-	/**
-	 * Obtains the {@link OfficeMetaData} of the {@link Office} that
-	 * {@link TaskMetaData} is being located within.
-	 * 
-	 * @return {@link OfficeMetaData} of the {@link Office} that
-	 *         {@link TaskMetaData} is being located within.
-	 */
-	OfficeMetaData getOfficeMetaData();
 
 	/**
 	 * Obtains the default {@link WorkMetaData}.
@@ -56,8 +46,7 @@ public interface OfficeMetaDataLocator {
 	 *            for {@link TaskMetaData}.
 	 * @return {@link OfficeMetaDataLocator}.
 	 */
-	OfficeMetaDataLocator createWorkSpecificOfficeMetaDataLocator(
-			WorkMetaData<?> workMetaData);
+	OfficeMetaDataLocator createWorkSpecificOfficeMetaDataLocator(WorkMetaData<?> workMetaData);
 
 	/**
 	 * Obtains the {@link WorkMetaData} by the {@link Work} name.

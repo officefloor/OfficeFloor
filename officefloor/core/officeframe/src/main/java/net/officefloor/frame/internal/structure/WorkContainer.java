@@ -46,12 +46,12 @@ public interface WorkContainer<W extends Work> {
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances to be loaded.
 	 * @param managedJobNode
-	 *            {@link ManagedFunction} requiring the {@link ManagedObject}.
+	 *            {@link ManagedFunctionContainer} requiring the {@link ManagedObject}.
 	 * @return {@link FunctionState} for next {@link Job}. May be <code>null</code> to
 	 *         indicate no further {@link FunctionState} instances are required to
 	 *         load {@link ManagedObject} instances.
 	 */
-	FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunction managedJobNode);
+	FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunctionContainer managedJobNode);
 
 	/**
 	 * Obtains the {@link ManagedObjectContainer} for the

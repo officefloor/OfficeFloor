@@ -25,11 +25,11 @@ import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.impl.execute.function.RunInThreadStateJobNode;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -77,8 +77,8 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 	 */
 
 	@Override
-	public FunctionState createCleanUpJobNode(final FlowMetaData<?> recycleFlowMetaData, final TeamManagement responsibleTeam,
-			final Class<?> objectType, final ManagedObject managedObject, final ManagedObjectPool managedObjectPool) {
+	public FunctionState createCleanUpJobNode(final FlowMetaData<?> recycleFlowMetaData, final Class<?> objectType,
+			final ManagedObject managedObject, final ManagedObjectPool managedObjectPool) {
 		return new CleanupOperation() {
 			@Override
 			public FunctionState execute() {
@@ -90,13 +90,17 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 					// Create the recycle managed object parameter
 					RecycleManagedObjectParameterImpl<ManagedObject> parameter = new RecycleManagedObjectParameterImpl<ManagedObject>(
 							objectType, managedObject, managedObjectPool);
+					
+					// Use the recycle function responsible team for escalations
+					TaskMetaData<?, ?, ?> initialFunctionMetaData = recycleFlowMetaData.getInitialTaskMetaData();
+					TeamManagement escalationResponsibleTeam = initialFunctionMetaData.getResponsibleTeam();
 
-					// Create the recycle job node
-					FunctionState recycleJobNode = ManagedObjectCleanupImpl.this.officeMetaData
-							.createProcess(recycleFlowMetaData, parameter, parameter, responsibleTeam);
+					// Create the recycle function
+					FunctionState recycleFunction = ManagedObjectCleanupImpl.this.officeMetaData
+							.createProcess(recycleFlowMetaData, parameter, parameter, escalationResponsibleTeam, parameter);
 
 					// Run recycle job node in main thread state
-					return new RunInThreadStateJobNode(recycleJobNode,
+					return new RunInThreadStateJobNode(recycleFunction,
 							ManagedObjectCleanupImpl.this.processState.getMainThreadState());
 				}
 			}
