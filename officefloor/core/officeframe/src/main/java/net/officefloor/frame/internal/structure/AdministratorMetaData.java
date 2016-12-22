@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyKey;
@@ -29,15 +29,18 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministratorMetaData<I extends Object, A extends Enum<A>> extends ManagedFunctionMetaData {
+public interface AdministratorMetaData<I extends Object, A extends Enum<A>> extends ManagedFunctionContainerMetaData {
 
 	/**
 	 * Creates a new {@link AdministratorContainer} from this
 	 * {@link AdministratorMetaData}.
 	 * 
+	 * @param threadState
+	 *            {@link ThreadState} responsible for managing this
+	 *            {@link AdministratorContainer}.
 	 * @return New {@link AdministratorContainer}.
 	 */
-	AdministratorContainer<I, A> createAdministratorContainer();
+	AdministratorContainer<I, A> createAdministratorContainer(ThreadState threadState);
 
 	/**
 	 * Obtains the {@link AdministratorSource}.
@@ -70,9 +73,9 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> exte
 	 * Creates the {@link ManagedFunctionContainer} for the {@link Duty}.
 	 * 
 	 * @param administeringTaskMetaData
-	 *            {@link TaskMetaData} of the administered {@link Task}.
+	 *            {@link ManagedFunctionMetaData} of the administered {@link ManagedFunction}.
 	 * @param administeringWorkContainer
-	 *            {@link WorkContainer} of the administered {@link Task}.
+	 *            {@link WorkContainer} of the administered {@link ManagedFunction}.
 	 * @param flow
 	 *            {@link Flow}.
 	 * @param taskDutyAssociation
@@ -81,7 +84,7 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> exte
 	 *            Paralllel {@link ManagedFunctionContainer} owner.
 	 * @return {@link ManagedFunctionContainer} for the {@link Duty}.
 	 */
-	ManagedFunctionContainer createDutyNode(TaskMetaData<?, ?, ?> administeringTaskMetaData,
+	ManagedFunctionContainer createDutyNode(ManagedFunctionMetaData<?, ?, ?> administeringTaskMetaData,
 			WorkContainer<?> administeringWorkContainer, Flow flow, TaskDutyAssociation<?> taskDutyAssociation,
 			ManagedFunctionContainer parallelJobNodeOwner);
 

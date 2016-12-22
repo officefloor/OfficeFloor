@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -40,7 +40,7 @@ public interface HttpSecuritySourceMetaData<S, C, D extends Enum<D>, F extends E
 	 * application.
 	 * <p>
 	 * An instance of this {@link Class} is to be provided as a parameter to the
-	 * {@link Task} that attempts authentication. This allows application
+	 * {@link ManagedFunction} that attempts authentication. This allows application
 	 * specific behaviour to obtain the credentials (such as a login page).
 	 * <p>
 	 * Should the security protocol be application agnostic (such as client

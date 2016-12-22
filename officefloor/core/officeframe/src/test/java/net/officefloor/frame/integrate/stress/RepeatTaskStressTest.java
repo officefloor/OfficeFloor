@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.integrate.stress;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
@@ -28,14 +28,14 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 
 /**
- * Tests running the same {@link Task} many times.
+ * Tests running the same {@link ManagedFunction} many times.
  * 
  * @author Daniel Sagenschneider
  */
 public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensures no issues arising in stress repeating a {@link Task} with a
+	 * Ensures no issues arising in stress repeating a {@link ManagedFunction} with a
 	 * {@link OnePersonTeam}.
 	 */
 	@StressTest
@@ -44,7 +44,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensures no issues arising in stress repeating a {@link Task} with a
+	 * Ensures no issues arising in stress repeating a {@link ManagedFunction} with a
 	 * {@link LeaderFollowerTeam}.
 	 */
 	@StressTest
@@ -54,7 +54,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensures no issues arising in stress repeating a {@link Task} with a
+	 * Ensures no issues arising in stress repeating a {@link ManagedFunction} with a
 	 * {@link ExecutorFixedTeamSource}.
 	 */
 	@StressTest
@@ -67,7 +67,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 	 * Does the repeat stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link Task} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -127,9 +127,9 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 		 * Repeating task.
 		 * 
 		 * @param context
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
-		public synchronized void repeat(TaskContext<?, ?, ?> context) {
+		public synchronized void repeat(ManagedFunctionContext<?, ?, ?> context) {
 
 			// Determine if repeated enough
 			if (this.repeatCount >= this.maxRepeatCalls) {

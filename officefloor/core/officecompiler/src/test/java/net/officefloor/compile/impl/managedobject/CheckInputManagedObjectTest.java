@@ -24,7 +24,7 @@ import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -109,7 +109,7 @@ public class CheckInputManagedObjectTest extends OfficeFrameTestCase {
 	/**
 	 * Validates that determine is {@link OfficeFloorInputManagedObject} as
 	 * {@link ManagedObjectDependencyType} instances that need configuring as it
-	 * has private {@link Task} instances for the {@link ManagedObjectSource}
+	 * has private {@link ManagedFunction} instances for the {@link ManagedObjectSource}
 	 * due to having {@link ManagedObjectTeamType} instances.
 	 */
 	public void testInputManagedObjectByTeams() {

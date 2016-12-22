@@ -23,8 +23,8 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.spi.section.TaskFlow;
-import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
@@ -40,7 +40,7 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 	private final String flowName;
 
 	/**
-	 * Indicates if this {@link TaskFlow} is for a {@link TaskEscalationType}.
+	 * Indicates if this {@link TaskFlow} is for a {@link ManagedFunctionEscalationType}.
 	 */
 	private final boolean isEscalation;
 
@@ -72,7 +72,7 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 	 *            Name of this {@link TaskFlow}.
 	 * @param isEscalation
 	 *            Indicates if this {@link TaskFlow} is for a
-	 *            {@link TaskEscalationType}.
+	 *            {@link ManagedFunctionEscalationType}.
 	 * @param task
 	 *            Parent {@link TaskNode}.
 	 * @param context

@@ -20,8 +20,8 @@ package net.officefloor.frame.integrate.managedobject.flow;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -88,7 +88,7 @@ public class ManagedObjectSourceInstigateProcessTest extends
 
 		// Provide task for managed object source input
 		this.constructWork("WORK", this.inputTask, "TASK");
-		TaskBuilder<Work, Indexed, Indexed> taskBuilder = this.constructTask(
+		ManagedFunctionBuilder<Work, Indexed, Indexed> taskBuilder = this.constructTask(
 				"TASK", this.inputTask, "TEAM", "INPUT", Object.class, null,
 				null);
 		taskBuilder.linkParameter(1, Object.class);
@@ -168,7 +168,7 @@ public class ManagedObjectSourceInstigateProcessTest extends
 		 */
 
 		@Override
-		public Object doTask(TaskContext<Work, Indexed, Indexed> context)
+		public Object execute(ManagedFunctionContext<Work, Indexed, Indexed> context)
 				throws Throwable {
 
 			// Obtain the object

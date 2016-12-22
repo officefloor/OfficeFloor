@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.spi.managedobject.source;
 
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -29,7 +29,7 @@ import net.officefloor.frame.api.execute.Work;
 public interface ManagedObjectWorkBuilder<W extends Work> {
 
 	/**
-	 * Creates the {@link ManagedObjectTaskBuilder} to build a {@link Task} for
+	 * Creates the {@link ManagedObjectTaskBuilder} to build a {@link ManagedFunction} for
 	 * this {@link Work}.
 	 * 
 	 * @param <D>
@@ -39,10 +39,10 @@ public interface ManagedObjectWorkBuilder<W extends Work> {
 	 * @param taskName
 	 *            Name of task local to this {@link Work}.
 	 * @param taskFactory
-	 *            {@link TaskFactory} to create the {@link Task}.
+	 *            {@link ManagedFunctionFactory} to create the {@link ManagedFunction}.
 	 * @return Specific {@link ManagedObjectTaskBuilder}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>> ManagedObjectTaskBuilder<D, F> addTask(
-			String taskName, TaskFactory<W, D, F> taskFactory);
+			String taskName, ManagedFunctionFactory<W, D, F> taskFactory);
 
 }

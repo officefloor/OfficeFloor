@@ -20,7 +20,7 @@ package net.officefloor.maven;
 import net.officefloor.building.manager.OfficeBuildingManager;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.console.OfficeBuilding;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -31,8 +31,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 /**
- * Maven goal to invoke a {@link Task} - either directly or as initial
- * {@link Task} of {@link Work}.
+ * Maven goal to invoke a {@link ManagedFunction} - either directly or as initial
+ * {@link ManagedFunction} of {@link Work}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -46,33 +46,33 @@ public class InvokeGoal extends AbstractGoal {
 	private Integer port = StartOfficeBuildingGoal.DEFAULT_OFFICE_BUILDING_PORT;
 
 	/**
-	 * Process name for the {@link OfficeFloor} to invoke the {@link Task}
+	 * Process name for the {@link OfficeFloor} to invoke the {@link ManagedFunction}
 	 * within.
 	 */
 	@Parameter(property = "processName")
 	private String processName;
 
 	/**
-	 * Name of {@link Office} containing the {@link Task} to invoke.
+	 * Name of {@link Office} containing the {@link ManagedFunction} to invoke.
 	 */
 	@Parameter(required = true, property = "office")
 	private String office;
 
 	/**
-	 * Name of {@link Work} containing the {@link Task} to invoke.
+	 * Name of {@link Work} containing the {@link ManagedFunction} to invoke.
 	 */
 	@Parameter(required = true, property = "work")
 	private String work;
 
 	/**
-	 * Name of {@link Task} to invoke. May be <code>null</code> to invoke
-	 * initial {@link Task} of {@link Work}.
+	 * Name of {@link ManagedFunction} to invoke. May be <code>null</code> to invoke
+	 * initial {@link ManagedFunction} of {@link Work}.
 	 */
 	@Parameter(property = "task")
 	private String task;
 
 	/**
-	 * Parameter value for the {@link Task}. May be <code>null</code>.
+	 * Parameter value for the {@link ManagedFunction}. May be <code>null</code>.
 	 */
 	@Parameter(property = "parameter")
 	private String parameter;

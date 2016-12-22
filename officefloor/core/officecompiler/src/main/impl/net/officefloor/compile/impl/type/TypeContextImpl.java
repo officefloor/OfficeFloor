@@ -29,10 +29,10 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.WorkNode;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.compile.type.TypeContext;
-import net.officefloor.compile.work.WorkType;
 
 /**
  * {@link TypeContext} implementation.
@@ -47,9 +47,9 @@ public class TypeContextImpl implements TypeContext {
 	private final Map<ManagedObjectSourceNode, TypeHolder<ManagedObjectType<?>>> managedObjectTypes = new HashMap<ManagedObjectSourceNode, TypeContextImpl.TypeHolder<ManagedObjectType<?>>>();
 
 	/**
-	 * {@link WorkType} by {@link WorkNode} instances.
+	 * {@link FunctionNamespaceType} by {@link WorkNode} instances.
 	 */
-	private final Map<WorkNode, TypeHolder<WorkType<?>>> workTypes = new HashMap<WorkNode, TypeContextImpl.TypeHolder<WorkType<?>>>();
+	private final Map<WorkNode, TypeHolder<FunctionNamespaceType<?>>> workTypes = new HashMap<WorkNode, TypeContextImpl.TypeHolder<FunctionNamespaceType<?>>>();
 
 	/**
 	 * {@link TeamType} by {@link TeamNode} instances.
@@ -125,7 +125,7 @@ public class TypeContextImpl implements TypeContext {
 	}
 
 	@Override
-	public WorkType<?> getOrLoadWorkType(WorkNode workNode) {
+	public FunctionNamespaceType<?> getOrLoadWorkType(WorkNode workNode) {
 		return getOrLoadType(workNode, this.workTypes,
 				(node) -> node.loadWorkType());
 	}

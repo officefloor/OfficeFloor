@@ -24,8 +24,8 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
@@ -98,7 +98,7 @@ public class InputManagedObjectStressTest extends
 	 * Does the asynchronous operation stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link Task} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -189,9 +189,9 @@ public class InputManagedObjectStressTest extends
 		 * Runs.
 		 * 
 		 * @param context
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
-		public void run(TaskContext<ReflectiveWorkBuilder, None, None> context) {
+		public void run(ManagedFunctionContext<ReflectiveWorkBuilder, None, None> context) {
 
 			// Trigger processing on first invocation
 			if (!this.isTriggeredProcessing) {

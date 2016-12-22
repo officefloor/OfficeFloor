@@ -19,13 +19,13 @@ package net.officefloor.plugin.web.http.resource.source;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocation;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
@@ -37,7 +37,7 @@ import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.DependencyKeys;
 
 /**
- * {@link WorkSource} to locate a {@link HttpFile} on the class path.
+ * {@link ManagedFunctionSource} to locate a {@link HttpFile} on the class path.
  * 
  * @author Daniel Sagenschneider
  */
@@ -62,9 +62,9 @@ public class HttpFileFactoryWorkSource
 	}
 
 	@Override
-	public void sourceWork(
-			WorkTypeBuilder<HttpFileFactoryTask<HttpFileFactoryTaskFlows>> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(
+			FunctionNamespaceBuilder<HttpFileFactoryTask<HttpFileFactoryTaskFlows>> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Create the class path HTTP file factory
 		HttpResourceFactory httpFileFactory = SourceHttpResourceFactory
@@ -81,7 +81,7 @@ public class HttpFileFactoryWorkSource
 			@Override
 			public void httpResourceCreated(HttpResource httpResource,
 					ServerHttpConnection connection,
-					TaskContext<?, ?, HttpFileFactoryTaskFlows> context)
+					ManagedFunctionContext<?, ?, HttpFileFactoryTaskFlows> context)
 					throws IOException {
 				// Determine if the file exists
 				if (!httpResource.isExist()) {
@@ -100,14 +100,14 @@ public class HttpFileFactoryWorkSource
 		workTypeBuilder.setWorkFactory(task);
 
 		// Load the task to create the HTTP file
-		TaskTypeBuilder<DependencyKeys, HttpFileFactoryTaskFlows> taskTypeBuilder = workTypeBuilder
-				.addTaskType("FindFile", task, DependencyKeys.class,
+		ManagedFunctionTypeBuilder<DependencyKeys, HttpFileFactoryTaskFlows> taskTypeBuilder = workTypeBuilder
+				.addManagedFunctionType("FindFile", task, DependencyKeys.class,
 						HttpFileFactoryTaskFlows.class);
 		taskTypeBuilder.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.SERVER_HTTP_CONNECTION);
 		taskTypeBuilder.addObject(HttpApplicationLocation.class).setKey(
 				DependencyKeys.HTTP_APPLICATION_LOCATION);
-		TaskFlowTypeBuilder<HttpFileFactoryTaskFlows> flowTypeBuilder = taskTypeBuilder
+		ManagedFunctionFlowTypeBuilder<HttpFileFactoryTaskFlows> flowTypeBuilder = taskTypeBuilder
 				.addFlow();
 		flowTypeBuilder.setKey(HttpFileFactoryTaskFlows.HTTP_FILE_NOT_FOUND);
 		flowTypeBuilder.setArgumentType(HttpFile.class);

@@ -42,7 +42,7 @@ import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -232,7 +232,7 @@ public class ProcessStateImpl implements ProcessState {
 		AdministratorMetaData<?, ?>[] administratorMetaData = this.processMetaData.getAdministratorMetaData();
 		AdministratorContainer<?, ?>[] administratorContainers = new AdministratorContainer[administratorMetaData.length];
 		for (int i = 0; i < administratorContainers.length; i++) {
-			administratorContainers[i] = administratorMetaData[i].createAdministratorContainer();
+			administratorContainers[i] = administratorMetaData[i].createAdministratorContainer(this.mainThreadState);
 		}
 		this.administratorContainers = administratorContainers;
 
@@ -270,7 +270,7 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
+	public ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
 			throws UnknownWorkException, UnknownTaskException {
 
 		// Look for work
@@ -278,8 +278,8 @@ public class ProcessStateImpl implements ProcessState {
 			if (work.getWorkName().equals(workName)) {
 
 				// Found work, look for task
-				for (TaskMetaData<?, ?, ?> task : work.getTaskMetaData()) {
-					if (task.getTaskName().equals(taskName)) {
+				for (ManagedFunctionMetaData<?, ?, ?> task : work.getTaskMetaData()) {
+					if (task.getFunctionName().equals(taskName)) {
 						// Found the task
 						return task;
 					}

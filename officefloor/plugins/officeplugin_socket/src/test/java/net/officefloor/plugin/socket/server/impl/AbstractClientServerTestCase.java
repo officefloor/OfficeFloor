@@ -33,7 +33,7 @@ import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -82,7 +82,7 @@ public abstract class AbstractClientServerTestCase extends OfficeFrameTestCase
 	private ServerSocketAccepter accepter;
 
 	/**
-	 * {@link TaskContext}.
+	 * {@link ManagedFunctionContext}.
 	 */
 	private final MockTaskContext taskContext = new MockTaskContext();
 

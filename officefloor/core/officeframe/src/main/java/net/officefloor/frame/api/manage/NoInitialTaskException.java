@@ -17,11 +17,11 @@
  */
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * Indicates there is no initial {@link Task} for a {@link Work}.
+ * Indicates there is no initial {@link ManagedFunction} for a {@link Work}.
  * 
  * @author Daniel Sagenschneider
  */

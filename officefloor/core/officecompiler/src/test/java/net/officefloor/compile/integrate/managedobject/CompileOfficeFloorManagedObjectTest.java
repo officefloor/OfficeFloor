@@ -41,10 +41,10 @@ import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -364,7 +364,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE",
@@ -427,7 +427,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject(
@@ -448,7 +448,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 
 	/**
 	 * Tests linking the {@link ManagedObjectSource} invoked
-	 * {@link ProcessState} with a {@link Task}.
+	 * {@link ProcessState} with a {@link ManagedFunction}.
 	 */
 	public void testManagedObjectSourceFlowLinkedToTask() {
 
@@ -462,7 +462,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject(
@@ -478,7 +478,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 	}
 
 	/**
-	 * Ensure issue if linking {@link ManagedObjectFlow} to {@link Task} that is
+	 * Ensure issue if linking {@link ManagedObjectFlow} to {@link ManagedFunction} that is
 	 * not in the {@link ManagingOffice} for the {@link ManagedObjectSource}.
 	 */
 	public void testManagedObjectSourceFlowLinkedToTaskNotInManagingOffice() {
@@ -496,7 +496,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		this.record_officeFloorBuilder_addOffice("OFFICE_WITH_TASK",
 				"OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 
@@ -578,7 +578,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject(
@@ -619,7 +619,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE",
@@ -715,7 +715,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 	@TestSource
 	public static class TeamManagedObject extends
 			AbstractManagedObjectSource<None, None> implements
-			WorkFactory<Work>, TaskFactory<Work, None, None> {
+			WorkFactory<Work>, ManagedFunctionFactory<Work, None, None> {
 
 		/*
 		 * ================= AbstractManagedObjectSource =====================
@@ -759,7 +759,7 @@ public class CompileOfficeFloorManagedObjectTest extends
 		 */
 
 		@Override
-		public Task<Work, None, None> createTask(Work work) {
+		public ManagedFunction<Work, None, None> createManagedFunction(Work work) {
 			fail("Should not require task in compiling");
 			return null;
 		}

@@ -18,10 +18,10 @@
 package net.officefloor.frame.spi.managedobject.source;
 
 import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
- * Builds the {@link Task} necessary for the {@link ManagedObjectSource}.
+ * Builds the {@link ManagedFunction} necessary for the {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -29,7 +29,7 @@ public interface ManagedObjectTaskBuilder<D extends Enum<D>, F extends Enum<F>>
 		extends FlowNodeBuilder<F> {
 
 	/**
-	 * Links in the parameter for this {@link Task}.
+	 * Links in the parameter for this {@link ManagedFunction}.
 	 * 
 	 * @param key
 	 *            Key identifying the parameter.
@@ -39,7 +39,7 @@ public interface ManagedObjectTaskBuilder<D extends Enum<D>, F extends Enum<F>>
 	void linkParameter(D key, Class<?> parameterType);
 
 	/**
-	 * Links in the parameter for this {@link Task}.
+	 * Links in the parameter for this {@link ManagedFunction}.
 	 * 
 	 * @param index
 	 *            Index identifying the parameter.

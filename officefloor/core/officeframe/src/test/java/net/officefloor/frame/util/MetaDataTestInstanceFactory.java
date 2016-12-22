@@ -17,12 +17,12 @@
  */
 package net.officefloor.frame.util;
 
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
-import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
+import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -31,7 +31,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
@@ -64,29 +64,29 @@ public class MetaDataTestInstanceFactory {
 		// Create the meta-data
 		WorkMetaDataImpl<W> metaData = new WorkMetaDataImpl<W>("TEST_WORK",
 				workFactory, new ManagedObjectMetaData<?>[0],
-				new AdministratorMetaData<?, ?>[0], null, new TaskMetaData[0]);
+				new AdministratorMetaData<?, ?>[0], null, new ManagedFunctionMetaData[0]);
 
 		// Return the meta-data
 		return metaData;
 	}
 
 	/**
-	 * Creates the {@link TaskMetaData}.
+	 * Creates the {@link ManagedFunctionMetaData}.
 	 * 
 	 * @param task
-	 *            {@link Task}.
+	 *            {@link ManagedFunction}.
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
-	 * @return {@link TaskMetaData}.
+	 * @return {@link ManagedFunctionMetaData}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskMetaData<W, D, F> createTaskMetaData(
-			final Task<W, D, F> task, WorkMetaData<?> workMetaData) {
+	public static <W extends Work, D extends Enum<D>, F extends Enum<F>> ManagedFunctionMetaData<W, D, F> createTaskMetaData(
+			final ManagedFunction<W, D, F> task, WorkMetaData<?> workMetaData) {
 
 		// Task Factory
-		final TaskFactory<W, D, F> taskFactory = new TaskFactory<W, D, F>() {
+		final ManagedFunctionFactory<W, D, F> taskFactory = new ManagedFunctionFactory<W, D, F>() {
 			@Override
-			public Task<W, D, F> createTask(W work) {
+			public ManagedFunction<W, D, F> createManagedFunction(W work) {
 				return task;
 			}
 		};
@@ -100,7 +100,7 @@ public class MetaDataTestInstanceFactory {
 				new PassiveTeam());
 
 		// Create and initialise the meta-data
-		TaskMetaDataImpl<W, D, F> metaData = new TaskMetaDataImpl<W, D, F>(
+		ManagedFunctionMetaDataImpl<W, D, F> metaData = new ManagedFunctionMetaDataImpl<W, D, F>(
 				jobName, taskName, taskFactory, "TEST_DIFFERENTIATOR",
 				Object.class, teamManagement, teamManagement.getTeam(),
 				new ManagedObjectIndex[0], new ManagedObjectIndex[0],

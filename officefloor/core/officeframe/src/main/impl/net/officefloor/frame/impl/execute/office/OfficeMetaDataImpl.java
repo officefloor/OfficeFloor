@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.office;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
@@ -45,7 +45,7 @@ import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -78,7 +78,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 *            <code>null</code>.
 	 * @return {@link ProcessFuture} for the invoked {@link ProcessState}.
 	 * @throws InvalidParameterTypeException
-	 *             Should the parameter type be incorrect the {@link Task}.
+	 *             Should the parameter type be incorrect the {@link ManagedFunction}.
 	 */
 	public static <W extends Work> void invokeProcess(OfficeMetaData officeMetaData, FlowMetaData<W> flowMetaData,
 			Object parameter, ProcessCompletionListener completionListener) throws InvalidParameterTypeException {
@@ -305,7 +305,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		Flow flow = threadState.createFlow();
 
 		// Obtain the function meta-data
-		TaskMetaData<W, ?, ?> functionMetaData = flowMetaData.getInitialTaskMetaData();
+		ManagedFunctionMetaData<W, ?, ?> functionMetaData = flowMetaData.getInitialTaskMetaData();
 
 		// Create the initial function of the process
 		ManagedFunctionContainer function = flow.createManagedFunction(functionMetaData, null, parameter,

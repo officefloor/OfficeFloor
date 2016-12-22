@@ -29,7 +29,7 @@ import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -239,7 +239,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject(
@@ -272,7 +272,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("DESK.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject(

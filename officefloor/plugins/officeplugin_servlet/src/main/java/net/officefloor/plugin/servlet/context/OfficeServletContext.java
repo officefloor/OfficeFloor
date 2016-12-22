@@ -29,7 +29,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.plugin.servlet.container.HttpServletContainer;
 import net.officefloor.plugin.servlet.filter.FilterChainFactory;
@@ -71,7 +71,7 @@ public interface OfficeServletContext {
 	/**
 	 * <p>
 	 * Obtains the {@link ServletTaskReference} to the {@link Servlet}
-	 * {@link Task} corresponding the the input path.
+	 * {@link ManagedFunction} corresponding the the input path.
 	 * <p>
 	 * This is a non {@link ServletContext} method and is provided to allow
 	 * routing to a {@link Servlet} for servicing the {@link HttpRequest}.
@@ -79,9 +79,9 @@ public interface OfficeServletContext {
 	 * @param office
 	 *            {@link Office}.
 	 * @param path
-	 *            Path to be mapped to a {@link Servlet} {@link Task}.
+	 *            Path to be mapped to a {@link Servlet} {@link ManagedFunction}.
 	 * @return {@link ServletTaskReference} for the path or <code>null</code> if
-	 *         path does not map to a {@link Servlet} {@link Task}.
+	 *         path does not map to a {@link Servlet} {@link ManagedFunction}.
 	 */
 	ServletTaskReference mapPath(Office office, String path);
 

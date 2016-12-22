@@ -27,7 +27,7 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.integrate.governance.MockTransaction;
 import net.officefloor.frame.integrate.governance.MockTransactionalGovernanceFactory;
@@ -80,11 +80,11 @@ public abstract class AbstractGovernanceStressTestCase extends
 	 * Configures particulars of the test.
 	 * 
 	 * @param commitTask
-	 *            Commit {@link Task}.
+	 *            Commit {@link ManagedFunction}.
 	 * @param rollbackTask
-	 *            Rollback {@link Task}.
+	 *            Rollback {@link ManagedFunction}.
 	 * @param tidyUpTask
-	 *            Tidy up {@link Task}.
+	 *            Tidy up {@link ManagedFunction}.
 	 * @return <code>true</code> if managed {@link Governance}.
 	 */
 	protected abstract boolean configure(ReflectiveTaskBuilder commitTask,
@@ -99,7 +99,7 @@ public abstract class AbstractGovernanceStressTestCase extends
 	 * Does the {@link Governance} stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link Task} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
 	 */
 	protected void doTest(Team team) throws Throwable {
 
@@ -681,7 +681,7 @@ public abstract class AbstractGovernanceStressTestCase extends
 		public volatile boolean isManagedGovernance = false;
 
 		/**
-		 * Setup {@link Task} to trigger testing.
+		 * Setup {@link ManagedFunction} to trigger testing.
 		 * 
 		 * @param object
 		 *            {@link MockObject}.
@@ -701,7 +701,7 @@ public abstract class AbstractGovernanceStressTestCase extends
 		}
 
 		/**
-		 * Commit {@link Task}.
+		 * Commit {@link ManagedFunction}.
 		 * 
 		 * @param object
 		 *            {@link MockObject}.
@@ -711,7 +711,7 @@ public abstract class AbstractGovernanceStressTestCase extends
 		}
 
 		/**
-		 * Rollback {@link Task}.
+		 * Rollback {@link ManagedFunction}.
 		 * 
 		 * @param object
 		 *            {@link MockObject}.
@@ -726,7 +726,7 @@ public abstract class AbstractGovernanceStressTestCase extends
 		}
 
 		/**
-		 * Tidy up {@link Task}.
+		 * Tidy up {@link ManagedFunction}.
 		 * 
 		 * @param object
 		 *            {@link MockObject}.

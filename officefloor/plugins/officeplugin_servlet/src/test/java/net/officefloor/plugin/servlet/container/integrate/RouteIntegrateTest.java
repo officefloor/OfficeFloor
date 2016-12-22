@@ -26,9 +26,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -80,12 +80,12 @@ public class RouteIntegrateTest extends MockHttpServletServer {
 
 		// Construct the router
 		HttpServicerTask routerRef = new HttpServicerTask("ROUTE", "Route");
-		WorkType<ServletRouteTask> type = WorkLoaderUtil
+		FunctionNamespaceType<ServletRouteTask> type = WorkLoaderUtil
 				.loadWorkType(ServletRouteWorkSource.class);
-		TaskBuilder<ServletRouteTask, DependencyKeys, FlowKeys> task = (TaskBuilder<ServletRouteTask, DependencyKeys, FlowKeys>) this
+		ManagedFunctionBuilder<ServletRouteTask, DependencyKeys, FlowKeys> task = (ManagedFunctionBuilder<ServletRouteTask, DependencyKeys, FlowKeys>) this
 				.constructWork(routerRef.workName, type.getWorkFactory())
-				.addTask(routerRef.taskName,
-						type.getTaskTypes()[0].getTaskFactory());
+				.addManagedFunction(routerRef.taskName,
+						type.getManagedFunctionTypes()[0].getManagedFunctionFactory());
 		task.setTeam("TEAM");
 		task.linkManagedObject(DependencyKeys.HTTP_CONNECTION, httpName,
 				ServerHttpConnection.class);

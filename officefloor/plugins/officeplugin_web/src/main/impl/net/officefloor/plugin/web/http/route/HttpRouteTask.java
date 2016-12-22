@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.TaskManager;
@@ -48,7 +48,7 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 
 /**
- * {@link Task} for routing {@link HttpRequest} instances and ensuring
+ * {@link ManagedFunction} for routing {@link HttpRequest} instances and ensuring
  * appropriately secure {@link ServerHttpConnection} for servicing the
  * {@link HttpRequest}.
  * 
@@ -63,7 +63,7 @@ public class HttpRouteTask
 	 * <p>
 	 * Undertakes a redirect.
 	 * <p>
-	 * This may be utilised by any {@link Task} with a
+	 * This may be utilised by any {@link ManagedFunction} with a
 	 * {@link HttpUrlContinuationDifferentiator} to trigger a redirect that will
 	 * have the {@link HttpRequest} state appropriately managed across the
 	 * redirect by the {@link HttpRouteTask}.
@@ -195,8 +195,8 @@ public class HttpRouteTask
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<HttpRouteTask, HttpRouteTaskDependencies, HttpRouteTaskFlows> context)
+	public Object execute(
+			ManagedFunctionContext<HttpRouteTask, HttpRouteTaskDependencies, HttpRouteTaskFlows> context)
 			throws InvalidHttpRequestUriException,
 			HttpRequestTokeniseException, IOException, UnknownWorkException,
 			UnknownTaskException, InvalidParameterTypeException {

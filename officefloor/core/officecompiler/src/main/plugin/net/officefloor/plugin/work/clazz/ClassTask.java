@@ -22,20 +22,20 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * {@link Task} to invoke a method on the {@link Work} object.
+ * {@link ManagedFunction} to invoke a method on the {@link Work} object.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassTask implements Task<ClassWork, Indexed, Indexed> {
+public class ClassTask implements ManagedFunction<ClassWork, Indexed, Indexed> {
 
 	/**
 	 * <p>
-	 * Invokes the {@link Method} as the {@link Task} on a type.
+	 * Invokes the {@link Method} as the {@link ManagedFunction} on a type.
 	 * <p>
 	 * As the Object could be of any child of the type, the {@link Method} may
 	 * need to be derived from the input instance.
@@ -83,7 +83,7 @@ public class ClassTask implements Task<ClassWork, Indexed, Indexed> {
 	}
 
 	/**
-	 * Invokes the {@link Method} as the {@link Task} directly on the
+	 * Invokes the {@link Method} as the {@link ManagedFunction} directly on the
 	 * {@link Object}.
 	 * 
 	 * @param instance
@@ -139,7 +139,7 @@ public class ClassTask implements Task<ClassWork, Indexed, Indexed> {
 	}
 
 	/**
-	 * Method to invoke for this {@link Task}.
+	 * Method to invoke for this {@link ManagedFunction}.
 	 */
 	private final Method method;
 
@@ -157,7 +157,7 @@ public class ClassTask implements Task<ClassWork, Indexed, Indexed> {
 	 * Initiate.
 	 * 
 	 * @param method
-	 *            Method to invoke for this {@link Task}.
+	 *            Method to invoke for this {@link ManagedFunction}.
 	 * @param isStaticMethod
 	 *            Indicates if the {@link Method} is <code>static</code>.
 	 * @param parameterFactories
@@ -171,9 +171,9 @@ public class ClassTask implements Task<ClassWork, Indexed, Indexed> {
 	}
 
 	/**
-	 * Returns the {@link Method} for the {@link Task}.
+	 * Returns the {@link Method} for the {@link ManagedFunction}.
 	 * 
-	 * @return {@link Method} for the {@link Task}.
+	 * @return {@link Method} for the {@link ManagedFunction}.
 	 */
 	public Method getMethod() {
 		return this.method;
@@ -184,7 +184,7 @@ public class ClassTask implements Task<ClassWork, Indexed, Indexed> {
 	 */
 
 	@Override
-	public Object doTask(TaskContext<ClassWork, Indexed, Indexed> context)
+	public Object execute(ManagedFunctionContext<ClassWork, Indexed, Indexed> context)
 			throws Throwable {
 
 		// Obtain the instance to invoke the method on

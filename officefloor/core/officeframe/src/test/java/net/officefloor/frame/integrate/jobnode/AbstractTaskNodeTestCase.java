@@ -52,7 +52,7 @@ import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -149,7 +149,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		WorkMetaData workMetaData = new WorkMetaDataImpl("TEST_WORK",
 				workFactory, new ManagedObjectMetaData[] { workMo },
 				new AdministratorMetaData[0], initialFlowMetaData,
-				new TaskMetaData[0]);
+				new ManagedFunctionMetaData[0]);
 
 		// Initial node
 		this.initialNode = new ExecutionNode(this.nextExecutionNodeId(), this,
@@ -251,7 +251,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 			TeamManagement responsibleTeam, ExecutionTeam expectedExecutionTeam) {
 
 		// Ensure next node not already bound
-		if (currentNode.getNextTaskInFlow() != null) {
+		if (currentNode.getNextManagedFunctionContainerMetaData() != null) {
 			fail("Next node already bound");
 		}
 

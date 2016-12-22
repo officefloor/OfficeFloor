@@ -19,7 +19,7 @@ package net.officefloor.autowire;
 
 import javax.management.ObjectName;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -46,20 +46,20 @@ public interface AutoWireOfficeFloor {
 
 	/**
 	 * <p>
-	 * Invokes a {@link Task} on the {@link OfficeFloor}.
+	 * Invokes a {@link ManagedFunction} on the {@link OfficeFloor}.
 	 * <p>
 	 * Should the {@link OfficeFloor} not be open, it is opened before invoking
-	 * the {@link Task}. Please note however the {@link OfficeFloor} will not be
+	 * the {@link ManagedFunction}. Please note however the {@link OfficeFloor} will not be
 	 * re-opened after being closed.
 	 * 
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param parameter
-	 *            Parameter for the {@link Task}. May be <code>null</code>.
+	 *            Parameter for the {@link ManagedFunction}. May be <code>null</code>.
 	 * @throws Exception
-	 *             If fails invoking the {@link Task}.
+	 *             If fails invoking the {@link ManagedFunction}.
 	 */
 	void invokeTask(String workName, String taskName, Object parameter)
 			throws Exception;

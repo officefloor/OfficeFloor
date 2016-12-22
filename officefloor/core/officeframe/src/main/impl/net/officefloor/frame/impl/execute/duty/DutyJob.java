@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.duty;
 
 import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
@@ -26,9 +26,9 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.ManagedFunctionContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainerContext;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Duty;
@@ -66,11 +66,11 @@ public class DutyJob<W extends Work, I, A extends Enum<A>>
 	 * @param parallelOwner
 	 *            Parallel owning {@link ManagedFunctionContainer}.
 	 * @param administeringTaskMetaData
-	 *            {@link TaskMetaData} of the {@link Task} being administered.
+	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction} being administered.
 	 */
 	public DutyJob(Flow flow, WorkContainer<W> workContainer, AdministratorMetaData<I, A> adminMetaData,
 			TaskDutyAssociation<A> taskDutyAssociation, ManagedFunctionContainer parallelOwner,
-			TaskMetaData<?, ?, ?> administeringTaskMetaData) {
+			ManagedFunctionMetaData<?, ?, ?> administeringTaskMetaData) {
 		super(flow, workContainer, adminMetaData, parallelOwner, administeringTaskMetaData.getRequiredManagedObjects(),
 				null, null);
 		this.taskDutyAssociation = taskDutyAssociation;
@@ -86,7 +86,7 @@ public class DutyJob<W extends Work, I, A extends Enum<A>>
 	}
 
 	@Override
-	protected Object executeFunction(ManagedFunctionContext context) throws Throwable {
+	protected Object executeFunction(ManagedFunctionContainerContext context) throws Throwable {
 
 		// Administer the duty
 		this.workContainer.administerManagedObjects(this.taskDutyAssociation, this.administratorContext);

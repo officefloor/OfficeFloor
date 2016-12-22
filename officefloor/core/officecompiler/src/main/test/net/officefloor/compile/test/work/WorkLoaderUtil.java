@@ -21,43 +21,43 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.work.WorkTypeImpl;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * Utility class for testing a {@link WorkSource}.
+ * Utility class for testing a {@link ManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
 public class WorkLoaderUtil {
 
 	/**
-	 * Validates the {@link WorkSourceSpecification} for the {@link WorkSource}.
+	 * Validates the {@link ManagedFunctionSourceSpecification} for the {@link ManagedFunctionSource}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 * @param <WS>
-	 *            {@link WorkSource} type.
+	 *            {@link ManagedFunctionSource} type.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
+	 *            {@link ManagedFunctionSource} class.
 	 * @param propertyNameLabels
 	 *            Listing of name/label pairs for the {@link Property}
 	 *            instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
-	public static <W extends Work, WS extends WorkSource<W>> PropertyList validateSpecification(
+	public static <W extends Work, WS extends ManagedFunctionSource<W>> PropertyList validateSpecification(
 			Class<WS> workSourceClass, String... propertyNameLabels) {
 
 		// Load the specification
@@ -73,82 +73,82 @@ public class WorkLoaderUtil {
 	}
 
 	/**
-	 * Creates the {@link WorkTypeBuilder} to create the expected
-	 * {@link WorkType}.
+	 * Creates the {@link FunctionNamespaceBuilder} to create the expected
+	 * {@link FunctionNamespaceType}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 * @param workFactory
-	 *            {@link WorkFactory} for the {@link WorkType}.
-	 * @return {@link WorkTypeBuilder} to build the expected {@link WorkType}.
+	 *            {@link WorkFactory} for the {@link FunctionNamespaceType}.
+	 * @return {@link FunctionNamespaceBuilder} to build the expected {@link FunctionNamespaceType}.
 	 */
-	public static <W extends Work> WorkTypeBuilder<W> createWorkTypeBuilder(
+	public static <W extends Work> FunctionNamespaceBuilder<W> createWorkTypeBuilder(
 			WorkFactory<W> workFactory) {
-		WorkTypeBuilder<W> workTypeBuilder = new WorkTypeImpl<W>();
+		FunctionNamespaceBuilder<W> workTypeBuilder = new WorkTypeImpl<W>();
 		workTypeBuilder.setWorkFactory(workFactory);
 		return workTypeBuilder;
 	}
 
 	/**
-	 * Convenience method that validates the {@link WorkType} loaded from the
-	 * input {@link WorkSource} against the expected {@link WorkType} from the
-	 * {@link WorkTypeBuilder}.
+	 * Convenience method that validates the {@link FunctionNamespaceType} loaded from the
+	 * input {@link ManagedFunctionSource} against the expected {@link FunctionNamespaceType} from the
+	 * {@link FunctionNamespaceBuilder}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 * @param <WS>
-	 *            {@link WorkSource} type.
+	 *            {@link ManagedFunctionSource} type.
 	 * @param expectedWorkType
-	 *            {@link WorkTypeBuilder} that has had the expected
-	 *            {@link WorkType} built against it.
+	 *            {@link FunctionNamespaceBuilder} that has had the expected
+	 *            {@link FunctionNamespaceType} built against it.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
+	 *            {@link ManagedFunctionSource} class.
 	 * @param propertyNameValues
 	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link WorkSource}.
-	 * @return Loaded {@link WorkType}.
+	 *            the {@link ManagedFunctionSource}.
+	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
-	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> validateWorkType(
-			WorkTypeBuilder<?> expectedWorkType, Class<WS> workSourceClass,
+	public static <W extends Work, WS extends ManagedFunctionSource<W>> FunctionNamespaceType<W> validateWorkType(
+			FunctionNamespaceBuilder<?> expectedWorkType, Class<WS> workSourceClass,
 			String... propertyNameValues) {
 		return validateWorkType(expectedWorkType, workSourceClass, null,
 				propertyNameValues);
 	}
 
 	/**
-	 * Convenience method that validates the {@link WorkType} loaded from the
-	 * input {@link WorkSource} against the expected {@link WorkType} from the
-	 * {@link WorkTypeBuilder}.
+	 * Convenience method that validates the {@link FunctionNamespaceType} loaded from the
+	 * input {@link ManagedFunctionSource} against the expected {@link FunctionNamespaceType} from the
+	 * {@link FunctionNamespaceBuilder}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 * @param <WS>
-	 *            {@link WorkSource} type.
+	 *            {@link ManagedFunctionSource} type.
 	 * @param expectedWorkType
-	 *            {@link WorkTypeBuilder} that has had the expected
-	 *            {@link WorkType} built against it.
+	 *            {@link FunctionNamespaceBuilder} that has had the expected
+	 *            {@link FunctionNamespaceType} built against it.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
+	 *            {@link ManagedFunctionSource} class.
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}. May be <code>null</code>.
 	 * @param propertyNameValues
 	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link WorkSource}.
-	 * @return Loaded {@link WorkType}.
+	 *            the {@link ManagedFunctionSource}.
+	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> validateWorkType(
-			WorkTypeBuilder<?> expectedWorkType, Class<WS> workSourceClass,
+	public static <W extends Work, WS extends ManagedFunctionSource<W>> FunctionNamespaceType<W> validateWorkType(
+			FunctionNamespaceBuilder<?> expectedWorkType, Class<WS> workSourceClass,
 			OfficeFloorCompiler compiler, String... propertyNameValues) {
 
 		// Cast to obtain expected work type
-		if (!(expectedWorkType instanceof WorkType)) {
+		if (!(expectedWorkType instanceof FunctionNamespaceType)) {
 			TestCase.fail("expectedWorkType must be created from createWorkTypeBuilder");
 		}
-		WorkType<W> expectedWork = (WorkType<W>) expectedWorkType;
+		FunctionNamespaceType<W> expectedWork = (FunctionNamespaceType<W>) expectedWorkType;
 
 		// Load the actual work type
-		WorkType<W> actualWork = loadWorkType(workSourceClass, compiler,
+		FunctionNamespaceType<W> actualWork = loadWorkType(workSourceClass, compiler,
 				propertyNameValues);
 		TestCase.assertNotNull("Failed to load WorkType", actualWork);
 
@@ -157,23 +157,23 @@ public class WorkLoaderUtil {
 				.getWorkFactory().getClass(), actualWork.getWorkFactory()
 				.getClass());
 		TestCase.assertEquals("Incorrect number of tasks",
-				expectedWork.getTaskTypes().length,
-				actualWork.getTaskTypes().length);
-		for (int i = 0; i < expectedWork.getTaskTypes().length; i++) {
-			TaskType<W, ?, ?> expectedTask = expectedWork.getTaskTypes()[i];
-			TaskType<W, ?, ?> actualTask = actualWork.getTaskTypes()[i];
+				expectedWork.getManagedFunctionTypes().length,
+				actualWork.getManagedFunctionTypes().length);
+		for (int i = 0; i < expectedWork.getManagedFunctionTypes().length; i++) {
+			ManagedFunctionType<W, ?, ?> expectedTask = expectedWork.getManagedFunctionTypes()[i];
+			ManagedFunctionType<W, ?, ?> actualTask = actualWork.getManagedFunctionTypes()[i];
 
 			// Verify the task type
 			TestCase.assertEquals("Incorrect task name (task=" + i + ")",
-					expectedTask.getTaskName(), actualTask.getTaskName());
+					expectedTask.getFunctionName(), actualTask.getFunctionName());
 			TestCase.assertEquals("Incorrect return type (task=" + i + ")",
 					expectedTask.getReturnType(), actualTask.getReturnType());
 			TestCase.assertEquals("Incorrect dependency keys (task="
-					+ expectedTask.getTaskName() + ")",
+					+ expectedTask.getFunctionName() + ")",
 					expectedTask.getObjectKeyClass(),
 					actualTask.getObjectKeyClass());
 			TestCase.assertEquals(
-					"Incorrect flow keys (task=" + expectedTask.getTaskName()
+					"Incorrect flow keys (task=" + expectedTask.getFunctionName()
 							+ ")", expectedTask.getFlowKeyClass(),
 					actualTask.getFlowKeyClass());
 
@@ -182,81 +182,81 @@ public class WorkLoaderUtil {
 			Object actualDifferentiator = actualTask.getDifferentiator();
 			if (expectedDifferentiator == null) {
 				TestCase.assertNull("Should not have differentiator (task="
-						+ expectedTask.getTaskName() + ")",
+						+ expectedTask.getFunctionName() + ")",
 						actualDifferentiator);
 			} else {
 				// Match differentiator on type
 				TestCase.assertEquals("Incorrect differentiator type (task="
-						+ expectedTask.getTaskName() + ")",
+						+ expectedTask.getFunctionName() + ")",
 						expectedDifferentiator.getClass(),
 						(actualDifferentiator == null ? null
 								: actualDifferentiator.getClass()));
 			}
 
 			// If work factory and task factory match then should be so
-			if (expectedWork.getWorkFactory() == expectedTask.getTaskFactory()) {
+			if (expectedWork.getWorkFactory() == expectedTask.getManagedFunctionFactory()) {
 				TestCase.assertTrue(
 						"WorkFactory and TaskFactoryManufacturer should be the same",
 						(actualWork.getWorkFactory() == actualTask
-								.getTaskFactory()));
+								.getManagedFunctionFactory()));
 			}
 
 			// Verify the dependencies
 			TestCase.assertEquals("Incorrect number of dependences (task="
-					+ expectedTask.getTaskName() + ")",
+					+ expectedTask.getFunctionName() + ")",
 					expectedTask.getObjectTypes().length,
 					actualTask.getObjectTypes().length);
 			for (int d = 0; d < expectedTask.getObjectTypes().length; d++) {
-				TaskObjectType<?> expectedDependency = expectedTask
+				ManagedFunctionObjectType<?> expectedDependency = expectedTask
 						.getObjectTypes()[d];
-				TaskObjectType<?> actualDependency = actualTask
+				ManagedFunctionObjectType<?> actualDependency = actualTask
 						.getObjectTypes()[d];
 
 				// Verify the dependency
 				TestCase.assertEquals("Incorrect dependency key (task="
-						+ expectedTask.getTaskName() + ", dependency=" + d
+						+ expectedTask.getFunctionName() + ", dependency=" + d
 						+ ")", expectedDependency.getKey(),
 						actualDependency.getKey());
 				TestCase.assertEquals("Incorrect dependency type (task="
-						+ expectedTask.getTaskName() + ", dependency=" + d
+						+ expectedTask.getFunctionName() + ", dependency=" + d
 						+ ")", expectedDependency.getObjectType(),
 						actualDependency.getObjectType());
 				TestCase.assertEquals("Incorrect dependency qualifier (task="
-						+ expectedTask.getTaskName() + ", dependency=" + d
+						+ expectedTask.getFunctionName() + ", dependency=" + d
 						+ ")", expectedDependency.getTypeQualifier(),
 						actualDependency.getTypeQualifier());
 				TestCase.assertEquals("Incorrect dependency index (task="
-						+ expectedTask.getTaskName() + ", dependency=" + d
+						+ expectedTask.getFunctionName() + ", dependency=" + d
 						+ ")", expectedDependency.getIndex(),
 						actualDependency.getIndex());
 				TestCase.assertEquals("Incorrect dependency name (task="
-						+ expectedTask.getTaskName() + ", dependency=" + d
+						+ expectedTask.getFunctionName() + ", dependency=" + d
 						+ ")", expectedDependency.getObjectName(),
 						actualDependency.getObjectName());
 			}
 
 			// Verify the flows
 			TestCase.assertEquals("Incorrect number of flows (task="
-					+ expectedTask.getTaskName() + ")",
+					+ expectedTask.getFunctionName() + ")",
 					expectedTask.getFlowTypes().length,
 					actualTask.getFlowTypes().length);
 			for (int f = 0; f < expectedTask.getFlowTypes().length; f++) {
-				TaskFlowType<?> expectedFlow = expectedTask.getFlowTypes()[f];
-				TaskFlowType<?> actualFlow = actualTask.getFlowTypes()[f];
+				ManagedFunctionFlowType<?> expectedFlow = expectedTask.getFlowTypes()[f];
+				ManagedFunctionFlowType<?> actualFlow = actualTask.getFlowTypes()[f];
 
 				// Verify the flow
 				TestCase.assertEquals("Incorrect flow key (task="
-						+ expectedTask.getTaskName() + ", flow=" + f + ")",
+						+ expectedTask.getFunctionName() + ", flow=" + f + ")",
 						expectedFlow.getKey(), actualFlow.getKey());
 				TestCase.assertEquals("Incorrect flow argument type (task="
-						+ expectedTask.getTaskName() + ", flow=" + f + ")",
+						+ expectedTask.getFunctionName() + ", flow=" + f + ")",
 						expectedFlow.getArgumentType(),
 						actualFlow.getArgumentType());
 				TestCase.assertEquals("Incorrect flow index (task="
-						+ expectedTask.getTaskName() + ", flow=" + f + ")",
+						+ expectedTask.getFunctionName() + ", flow=" + f + ")",
 						expectedFlow.getIndex(), actualFlow.getIndex());
 				TestCase.assertEquals("Incorrect flow name (task="
-						+ expectedTask.getTaskName() + ", flow=" + f + ")",
+						+ expectedTask.getFunctionName() + ", flow=" + f + ")",
 						expectedFlow.getFlowName(), actualFlow.getFlowName());
 			}
 
@@ -265,18 +265,18 @@ public class WorkLoaderUtil {
 					+ ")", expectedTask.getEscalationTypes().length,
 					actualTask.getEscalationTypes().length);
 			for (int e = 0; e < expectedTask.getEscalationTypes().length; e++) {
-				TaskEscalationType expectedEscalation = expectedTask
+				ManagedFunctionEscalationType expectedEscalation = expectedTask
 						.getEscalationTypes()[e];
-				TaskEscalationType actualEscalation = actualTask
+				ManagedFunctionEscalationType actualEscalation = actualTask
 						.getEscalationTypes()[e];
 
 				// Verify the flow
 				TestCase.assertEquals("Incorrect escalation type (task="
-						+ expectedTask.getTaskName() + ", escalation=" + e
+						+ expectedTask.getFunctionName() + ", escalation=" + e
 						+ ")", expectedEscalation.getEscalationType(),
 						actualEscalation.getEscalationType());
 				TestCase.assertEquals("Incorrect escalation name (task="
-						+ expectedTask.getTaskName() + ", escalation=" + e
+						+ expectedTask.getFunctionName() + ", escalation=" + e
 						+ ")", expectedEscalation.getEscalationName(),
 						actualEscalation.getEscalationName());
 			}
@@ -287,44 +287,44 @@ public class WorkLoaderUtil {
 	}
 
 	/**
-	 * Convenience method that loads the {@link WorkType} by obtaining the
-	 * {@link ClassLoader} from the {@link WorkSource} class.
+	 * Convenience method that loads the {@link FunctionNamespaceType} by obtaining the
+	 * {@link ClassLoader} from the {@link ManagedFunctionSource} class.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 * @param <WS>
-	 *            {@link WorkSource} type.
+	 *            {@link ManagedFunctionSource} type.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
+	 *            {@link ManagedFunctionSource} class.
 	 * @param propertyNameValues
 	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link WorkSource}.
-	 * @return Loaded {@link WorkType}.
+	 *            the {@link ManagedFunctionSource}.
+	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
-	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
+	public static <W extends Work, WS extends ManagedFunctionSource<W>> FunctionNamespaceType<W> loadWorkType(
 			Class<WS> workSourceClass, String... propertyNameValues) {
 		// Return the loaded work
 		return loadWorkType(workSourceClass, null, propertyNameValues);
 	}
 
 	/**
-	 * Convenience method that loads the {@link WorkType} with the provided
+	 * Convenience method that loads the {@link FunctionNamespaceType} with the provided
 	 * {@link OfficeFloorCompiler}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 * @param <WS>
-	 *            {@link WorkSource} type.
+	 *            {@link ManagedFunctionSource} type.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
+	 *            {@link ManagedFunctionSource} class.
 	 * @param compiler
 	 *            {@link OfficeFloorCompiler}.
 	 * @param propertyNameValues
 	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link WorkSource}.
-	 * @return Loaded {@link WorkType}.
+	 *            the {@link ManagedFunctionSource}.
+	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
-	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
+	public static <W extends Work, WS extends ManagedFunctionSource<W>> FunctionNamespaceType<W> loadWorkType(
 			Class<WS> workSourceClass, OfficeFloorCompiler compiler,
 			String... propertyNameValues) {
 
@@ -337,7 +337,7 @@ public class WorkLoaderUtil {
 		}
 
 		// Return the loaded work
-		return getOfficeFloorCompiler(compiler).getWorkLoader().loadWorkType(
+		return getOfficeFloorCompiler(compiler).getWorkLoader().loadFunctionNamespaceType(
 				workSourceClass, propertyList);
 	}
 

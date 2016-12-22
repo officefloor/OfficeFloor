@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.spi.section;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
  * {@link Object} required by the {@link SectionTask}.
@@ -34,7 +34,7 @@ public interface TaskObject {
 	String getTaskObjectName();
 
 	/**
-	 * Flags this {@link TaskObject} as a parameter for the {@link Task}.
+	 * Flags this {@link TaskObject} as a parameter for the {@link ManagedFunction}.
 	 */
 	void flagAsParameter();
 

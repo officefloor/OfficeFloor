@@ -21,7 +21,7 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 
@@ -46,7 +46,7 @@ public interface SuppliedManagedObjectType {
 	 * Indicates if this is to be an {@link OfficeFloorInputManagedObject}.
 	 * <p>
 	 * The {@link ManagedObjectSourceWirer} may provide the necessary
-	 * {@link Task} instances and {@link Team} instances, so that that they may
+	 * {@link ManagedFunction} instances and {@link Team} instances, so that that they may
 	 * not visible on the type. It is therefore necessary to provide this method
 	 * to identify if this is the case.
 	 * 

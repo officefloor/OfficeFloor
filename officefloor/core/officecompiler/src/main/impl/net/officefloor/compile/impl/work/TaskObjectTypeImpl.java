@@ -18,16 +18,16 @@
 package net.officefloor.compile.impl.work;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
-import net.officefloor.compile.work.TaskObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 
 /**
- * {@link TaskObjectType} implementation.
+ * {@link ManagedFunctionObjectType} implementation.
  * 
  * @author Daniel Sagenschneider
  */
 public class TaskObjectTypeImpl<M extends Enum<M>> implements
-		TaskObjectType<M>, TaskObjectTypeBuilder<M> {
+		ManagedFunctionObjectType<M>, ManagedFunctionObjectTypeBuilder<M> {
 
 	/**
 	 * Type of the dependency {@link Object}.
@@ -40,27 +40,27 @@ public class TaskObjectTypeImpl<M extends Enum<M>> implements
 	private String typeQualifier;
 
 	/**
-	 * Label describing this {@link TaskObjectType}.
+	 * Label describing this {@link ManagedFunctionObjectType}.
 	 */
 	private String label = null;
 
 	/**
-	 * Index identifying this {@link TaskObjectType}.
+	 * Index identifying this {@link ManagedFunctionObjectType}.
 	 */
 	private int index;
 
 	/**
-	 * {@link Enum} key identifying this {@link TaskObjectType}.
+	 * {@link Enum} key identifying this {@link ManagedFunctionObjectType}.
 	 */
 	private M key = null;
 
 	/**
-	 * Initiate with the index of the {@link TaskObjectType}.
+	 * Initiate with the index of the {@link ManagedFunctionObjectType}.
 	 * 
 	 * @param objectType
 	 *            Type of the dependency {@link Object}.
 	 * @param index
-	 *            Index identifying this {@link TaskObjectType}.
+	 *            Index identifying this {@link ManagedFunctionObjectType}.
 	 */
 	public TaskObjectTypeImpl(Class<?> objectType, int index) {
 		this.objectType = objectType;

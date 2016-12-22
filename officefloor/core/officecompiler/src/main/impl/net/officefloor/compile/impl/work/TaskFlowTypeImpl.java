@@ -18,25 +18,25 @@
 package net.officefloor.compile.impl.work;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.work.TaskFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * {@link TaskFlowType} implementation.
+ * {@link ManagedFunctionFlowType} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskFlowTypeImpl<F extends Enum<F>> implements TaskFlowType<F>,
-		TaskFlowTypeBuilder<F> {
+public class TaskFlowTypeImpl<F extends Enum<F>> implements ManagedFunctionFlowType<F>,
+		ManagedFunctionFlowTypeBuilder<F> {
 
 	/**
-	 * Index of this {@link TaskFlowType}.
+	 * Index of this {@link ManagedFunctionFlowType}.
 	 */
 	private int index;
 
 	/**
-	 * Label for the {@link TaskFlowType}.
+	 * Label for the {@link ManagedFunctionFlowType}.
 	 */
 	private String label = null;
 
@@ -54,7 +54,7 @@ public class TaskFlowTypeImpl<F extends Enum<F>> implements TaskFlowType<F>,
 	 * Initiate.
 	 * 
 	 * @param index
-	 *            Index of this {@link TaskFlowType}.
+	 *            Index of this {@link ManagedFunctionFlowType}.
 	 */
 	public TaskFlowTypeImpl(int index) {
 		this.index = index;

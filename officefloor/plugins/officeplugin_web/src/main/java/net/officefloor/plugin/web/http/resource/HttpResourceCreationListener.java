@@ -19,7 +19,7 @@ package net.officefloor.plugin.web.http.resource;
 
 import java.io.IOException;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
@@ -43,12 +43,12 @@ public interface HttpResourceCreationListener<F extends Enum<F>> {
 	 *            {@link ServerHttpConnection} requesting the
 	 *            {@link HttpResource}.
 	 * @param context
-	 *            {@link TaskContext}.
+	 *            {@link ManagedFunctionContext}.
 	 * @throws IOException
 	 *             If fails to handle {@link HttpResource} found.
 	 */
 	void httpResourceCreated(HttpResource httpResource,
-			ServerHttpConnection connection, TaskContext<?, ?, F> context)
+			ServerHttpConnection connection, ManagedFunctionContext<?, ?, F> context)
 			throws IOException;
 
 }

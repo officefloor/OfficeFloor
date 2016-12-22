@@ -20,9 +20,9 @@ package net.officefloor.model.impl.desk;
 import java.sql.Connection;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.WorkModel;
@@ -41,7 +41,7 @@ public class AddWorkTest extends AbstractDeskChangesTestCase {
 	public void testAddWorkWithoutKeys() {
 
 		// Create the work type to add
-		WorkType<?> work = this.constructWorkType(new WorkTypeConstructor() {
+		FunctionNamespaceType<?> work = this.constructWorkType(new WorkTypeConstructor() {
 			@Override
 			public void construct(WorkTypeContext context) {
 				// First task
@@ -74,7 +74,7 @@ public class AddWorkTest extends AbstractDeskChangesTestCase {
 	public void testAddWorkWithKeys() {
 
 		// Create the work type to add
-		WorkType<?> work = this.constructWorkType(new WorkTypeConstructor() {
+		FunctionNamespaceType<?> work = this.constructWorkType(new WorkTypeConstructor() {
 			@Override
 			public void construct(WorkTypeContext context) {
 				// First task
@@ -101,7 +101,7 @@ public class AddWorkTest extends AbstractDeskChangesTestCase {
 	}
 
 	/**
-	 * Keys identifying {@link TaskObjectType} instances.
+	 * Keys identifying {@link ManagedFunctionObjectType} instances.
 	 */
 	private enum TaskObjectKeys {
 		ONE, TWO
@@ -113,7 +113,7 @@ public class AddWorkTest extends AbstractDeskChangesTestCase {
 	public void testAddWorkWithSubsetOfTasks() {
 
 		// Create the work type to add
-		WorkType<?> work = this.constructWorkType(new WorkTypeConstructor() {
+		FunctionNamespaceType<?> work = this.constructWorkType(new WorkTypeConstructor() {
 			@Override
 			public void construct(WorkTypeContext context) {
 				// Add many tasks
@@ -133,13 +133,13 @@ public class AddWorkTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensure can add {@link WorkModel} and that the {@link WorkTaskModel}
-	 * instances are ordered by the {@link Task} name to make merging the XML
+	 * instances are ordered by the {@link ManagedFunction} name to make merging the XML
 	 * files easier under SCM.
 	 */
 	public void testAddWorkEnsuringTaskOrdering() {
 
 		// Create the work type to add
-		WorkType<?> work = this.constructWorkType(new WorkTypeConstructor() {
+		FunctionNamespaceType<?> work = this.constructWorkType(new WorkTypeConstructor() {
 			@Override
 			public void construct(WorkTypeContext context) {
 				// Add in wrong order
@@ -163,7 +163,7 @@ public class AddWorkTest extends AbstractDeskChangesTestCase {
 	public void testAddMultipleWorkEnsuringWorkOrdering() {
 
 		// Create the work type
-		WorkType<?> work = this.constructWorkType(new WorkTypeConstructor() {
+		FunctionNamespaceType<?> work = this.constructWorkType(new WorkTypeConstructor() {
 			@Override
 			public void construct(WorkTypeContext context) {
 				context.addTask("TASK");

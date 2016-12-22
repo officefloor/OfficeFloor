@@ -18,7 +18,7 @@
 package net.officefloor.frame.spi.managedobject.source;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -54,7 +54,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param key
 	 *            Key identifying the {@link Flow} to instigate.
 	 * @param parameter
-	 *            Parameter to first {@link Task} of the {@link Flow}.
+	 *            Parameter to first {@link ManagedFunction} of the {@link Flow}.
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
@@ -75,7 +75,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow} to instigate.
 	 * @param parameter
-	 *            Parameter that to the first {@link Task} of the {@link Flow}.
+	 *            Parameter that to the first {@link ManagedFunction} of the {@link Flow}.
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
@@ -101,7 +101,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param key
 	 *            Key identifying the {@link Flow} to instigate.
 	 * @param parameter
-	 *            Parameter to the first {@link Task} of the {@link Flow} .
+	 *            Parameter to the first {@link ManagedFunction} of the {@link Flow} .
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.
@@ -129,7 +129,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow} to instigate.
 	 * @param parameter
-	 *            Parameter to first {@link Task} of the {@link Flow}.
+	 *            Parameter to first {@link ManagedFunction} of the {@link Flow}.
 	 * @param managedObject
 	 *            {@link ManagedObject} for the {@link ProcessState} of the
 	 *            {@link Flow}.

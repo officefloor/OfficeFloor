@@ -18,8 +18,8 @@
 package net.officefloor.frame.integrate.stress;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
@@ -76,7 +76,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 	 * Does the asynchronous join stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link Task} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -116,7 +116,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 	}
 
 	/**
-	 * Contains the {@link Task} functionality for testing.
+	 * Contains the {@link ManagedFunction} functionality for testing.
 	 */
 	public class Tasks {
 
@@ -147,7 +147,7 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 		private FlowFuture[] flowFutures;
 
 		/**
-		 * Number of asynchronous {@link Task} instances run.
+		 * Number of asynchronous {@link ManagedFunction} instances run.
 		 */
 		private int asynchronousTasksRunCount;
 
@@ -181,11 +181,11 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 		 * Invokes and joins the asynchronous {@link Flow} instances.
 		 * 
 		 * @param taskContext
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 * @param flow
 		 *            asynchronousTask {@link Flow}.
 		 */
-		public void invokeAndJoin(TaskContext<?, ?, ?> taskContext,
+		public void invokeAndJoin(ManagedFunctionContext<?, ?, ?> taskContext,
 				ReflectiveFlow flow) {
 			try {
 
@@ -284,12 +284,12 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 		}
 
 		/**
-		 * Asynchronous {@link Task} invoked.
+		 * Asynchronous {@link ManagedFunction} invoked.
 		 * 
 		 * @param taskContext
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
-		public void asynchronousTask(TaskContext<?, ?, ?> taskContext)
+		public void asynchronousTask(ManagedFunctionContext<?, ?, ?> taskContext)
 				throws Exception {
 			// Increment runs (safe as all threads of same process)
 			synchronized (taskContext.getProcessLock()) {

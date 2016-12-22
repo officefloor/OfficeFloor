@@ -21,9 +21,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.escalate.FlowJoinTimedOutEscalation;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.governance.GovernanceJob;
+import net.officefloor.frame.impl.execute.governance.GovernanceFunction;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
@@ -38,7 +38,7 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainerMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
@@ -46,7 +46,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadProfiler;
@@ -88,7 +88,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 				.createMock(AdministratorContainer.class);
 		final ThreadProfiler threadProfiler = this
 				.createMock(ThreadProfiler.class);
-		final ManagedFunctionMetaData jobMetaData = this.createMock(ManagedFunctionMetaData.class);
+		final ManagedFunctionContainerMetaData jobMetaData = this.createMock(ManagedFunctionContainerMetaData.class);
 
 		// Record creating the ThreadState
 		this.recordReturn(this.threadMetaData,
@@ -190,7 +190,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	public void testNotProfile() {
 
-		final ManagedFunctionMetaData jobMetaData = this.createMock(ManagedFunctionMetaData.class);
+		final ManagedFunctionContainerMetaData jobMetaData = this.createMock(ManagedFunctionContainerMetaData.class);
 
 		// Record creating and completing the ThreadState
 		this.record_ThreadState_init();
@@ -298,7 +298,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 				governanceTeamManagement.getTeam(), governanceTeam);
 		governanceTeam.assignJob(null, null);
 		this.control(governanceTeam).setMatcher(
-				new TypeMatcher(GovernanceJob.class, TeamIdentifier.class));
+				new TypeMatcher(GovernanceFunction.class, TeamIdentifier.class));
 
 		// Test
 		this.replayMockObjects();
@@ -377,12 +377,12 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	public void testJobNodeNotWaitOnItsOwnThread() {
 
 		final Work work = this.createMock(Work.class);
-		final Task<?, ?, ?> task = this.createMock(Task.class);
+		final ManagedFunction<?, ?, ?> task = this.createMock(ManagedFunction.class);
 		final FunctionState[] jobNode = new FunctionState[1];
 
 		final WorkMetaData<Work> workMetaData = MetaDataTestInstanceFactory
 				.createWorkMetaData(work);
-		final TaskMetaData taskMetaData = MetaDataTestInstanceFactory
+		final ManagedFunctionMetaData taskMetaData = MetaDataTestInstanceFactory
 				.createTaskMetaData(task, workMetaData);
 
 		// Record initialising ThreadState and create a JobNode from it

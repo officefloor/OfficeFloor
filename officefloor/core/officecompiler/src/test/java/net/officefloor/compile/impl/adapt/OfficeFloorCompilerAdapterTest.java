@@ -39,6 +39,8 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.IssueCapture;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
@@ -46,10 +48,8 @@ import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.team.TeamLoader;
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.spi.TestSource;
@@ -237,7 +237,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public static class AdaptWork {
 
 		/**
-		 * {@link Task}.
+		 * {@link ManagedFunction}.
 		 * 
 		 * @param fileLocation
 		 *            Location of the {@link File} to notify run. Necessary as
@@ -320,7 +320,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public static class AdaptManagedObjectWork {
 
 		/**
-		 * {@link Task}.
+		 * {@link ManagedFunction}.
 		 * 
 		 * @param mo
 		 *            {@link AdaptManagedObject}.
@@ -409,10 +409,10 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Tests obtaining specification from {@link WorkLoader}.
+	 * Tests obtaining specification from {@link ManagedFunctionLoader}.
 	 */
 	public void testWorkLoaderSpecification() {
-		WorkLoader loader = this.compiler.getWorkLoader();
+		ManagedFunctionLoader loader = this.compiler.getWorkLoader();
 		PropertyList specification = loader
 				.loadSpecification(ClassWorkSource.class);
 		assertEquals("Should have a property", 1,
@@ -420,13 +420,13 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Tests obtaining {@link WorkType} from {@link TypeLoader}.
+	 * Tests obtaining {@link FunctionNamespaceType} from {@link TypeLoader}.
 	 */
 	public void testWorkFromTypeLoader() {
 		PropertyList properties = this.compiler.createPropertyList();
 		properties.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(AdaptManagedObjectWork.class.getName());
-		WorkType<?> workType = this.typeLoader.loadWorkType(
+		FunctionNamespaceType<?> workType = this.typeLoader.loadWorkType(
 				ClassWorkSource.class.getName(), properties);
 		assertNotNull("Must have work type", workType);
 	}

@@ -23,36 +23,36 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionEscalationTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * {@link TaskType} implementation.
+ * {@link ManagedFunctionType} implementation.
  * 
  * @author Daniel Sagenschneider
  */
 public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
-		implements TaskType<W, M, F>, TaskTypeBuilder<M, F> {
+		implements ManagedFunctionType<W, M, F>, ManagedFunctionTypeBuilder<M, F> {
 
 	/**
-	 * Name of the {@link Task}.
+	 * Name of the {@link ManagedFunction}.
 	 */
 	private final String taskName;
 
 	/**
-	 * {@link TaskFactory}.
+	 * {@link ManagedFunctionFactory}.
 	 */
-	private final TaskFactory<W, M, F> taskFactory;
+	private final ManagedFunctionFactory<W, M, F> taskFactory;
 
 	/**
 	 * {@link Enum} providing keys for dependent {@link Object} instances.
@@ -60,9 +60,9 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	private final Class<M> objectKeyClass;
 
 	/**
-	 * {@link TaskObjectType} instances.
+	 * {@link ManagedFunctionObjectType} instances.
 	 */
-	private final List<TaskObjectType<M>> objects = new LinkedList<TaskObjectType<M>>();
+	private final List<ManagedFunctionObjectType<M>> objects = new LinkedList<ManagedFunctionObjectType<M>>();
 
 	/**
 	 * {@link Enum} providing keys for instigated {@link Flow} instances.
@@ -70,14 +70,14 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	private final Class<F> flowKeyClass;
 
 	/**
-	 * {@link TaskFlowType} instances.
+	 * {@link ManagedFunctionFlowType} instances.
 	 */
-	private final List<TaskFlowType<F>> flows = new LinkedList<TaskFlowType<F>>();
+	private final List<ManagedFunctionFlowType<F>> flows = new LinkedList<ManagedFunctionFlowType<F>>();
 
 	/**
-	 * {@link TaskEscalationType} instances.
+	 * {@link ManagedFunctionEscalationType} instances.
 	 */
-	private final List<TaskEscalationType> escalations = new LinkedList<TaskEscalationType>();
+	private final List<ManagedFunctionEscalationType> escalations = new LinkedList<ManagedFunctionEscalationType>();
 
 	/**
 	 * Differentiator.
@@ -93,9 +93,9 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 * Initiate.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param taskFactory
-	 *            {@link TaskFactory}.
+	 *            {@link ManagedFunctionFactory}.
 	 * @param objectKeyClass
 	 *            {@link Enum} providing keys for dependent {@link Object}
 	 *            instances.
@@ -103,7 +103,7 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 *            {@link Enum} providing keys for instigated {@link Flow}
 	 *            instances.
 	 */
-	public TaskTypeImpl(String taskName, TaskFactory<W, M, F> taskFactory,
+	public TaskTypeImpl(String taskName, ManagedFunctionFactory<W, M, F> taskFactory,
 			Class<M> objectKeyClass, Class<F> flowKeyClass) {
 		this.taskName = taskName;
 		this.taskFactory = taskFactory;
@@ -126,7 +126,7 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public TaskObjectTypeBuilder<M> addObject(Class<?> objectType) {
+	public ManagedFunctionObjectTypeBuilder<M> addObject(Class<?> objectType) {
 		TaskObjectTypeImpl<M> object = new TaskObjectTypeImpl<M>(objectType,
 				this.objects.size());
 		this.objects.add(object);
@@ -134,14 +134,14 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public TaskFlowTypeBuilder<F> addFlow() {
+	public ManagedFunctionFlowTypeBuilder<F> addFlow() {
 		TaskFlowTypeImpl<F> flow = new TaskFlowTypeImpl<F>(this.flows.size());
 		this.flows.add(flow);
 		return flow;
 	}
 
 	@Override
-	public <E extends Throwable> TaskEscalationTypeBuilder addEscalation(
+	public <E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(
 			Class<E> escalationType) {
 		TaskEscalationTypeImpl escalation = new TaskEscalationTypeImpl(
 				escalationType);
@@ -154,12 +154,12 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 */
 
 	@Override
-	public String getTaskName() {
+	public String getFunctionName() {
 		return this.taskName;
 	}
 
 	@Override
-	public TaskFactory<W, M, F> getTaskFactory() {
+	public ManagedFunctionFactory<W, M, F> getManagedFunctionFactory() {
 		return this.taskFactory;
 	}
 
@@ -174,12 +174,12 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public TaskObjectType<M>[] getObjectTypes() {
-		TaskObjectType<M>[] objectTypes = CompileUtil.toArray(this.objects,
-				new TaskObjectType[0]);
-		Arrays.sort(objectTypes, new Comparator<TaskObjectType<M>>() {
+	public ManagedFunctionObjectType<M>[] getObjectTypes() {
+		ManagedFunctionObjectType<M>[] objectTypes = CompileUtil.toArray(this.objects,
+				new ManagedFunctionObjectType[0]);
+		Arrays.sort(objectTypes, new Comparator<ManagedFunctionObjectType<M>>() {
 			@Override
-			public int compare(TaskObjectType<M> a, TaskObjectType<M> b) {
+			public int compare(ManagedFunctionObjectType<M> a, ManagedFunctionObjectType<M> b) {
 				return a.getIndex() - b.getIndex();
 			}
 		});
@@ -192,12 +192,12 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public TaskFlowType<F>[] getFlowTypes() {
-		TaskFlowType<F>[] flowTypes = CompileUtil.toArray(this.flows,
-				new TaskFlowType[0]);
-		Arrays.sort(flowTypes, new Comparator<TaskFlowType<F>>() {
+	public ManagedFunctionFlowType<F>[] getFlowTypes() {
+		ManagedFunctionFlowType<F>[] flowTypes = CompileUtil.toArray(this.flows,
+				new ManagedFunctionFlowType[0]);
+		Arrays.sort(flowTypes, new Comparator<ManagedFunctionFlowType<F>>() {
 			@Override
-			public int compare(TaskFlowType<F> a, TaskFlowType<F> b) {
+			public int compare(ManagedFunctionFlowType<F> a, ManagedFunctionFlowType<F> b) {
 				return a.getIndex() - b.getIndex();
 			}
 		});
@@ -205,8 +205,8 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public TaskEscalationType[] getEscalationTypes() {
-		return this.escalations.toArray(new TaskEscalationType[0]);
+	public ManagedFunctionEscalationType[] getEscalationTypes() {
+		return this.escalations.toArray(new ManagedFunctionEscalationType[0]);
 	}
 
 	@Override

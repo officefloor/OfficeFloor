@@ -20,8 +20,8 @@ package net.officefloor.frame.impl.construct.office;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -51,11 +51,11 @@ public class OfficeBuilderImplTest extends OfficeFrameTestCase {
 	private WorkFactory<Work> workFactory = this.createMock(WorkFactory.class);
 
 	/**
-	 * {@link TaskFactory}.
+	 * {@link ManagedFunctionFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	private TaskFactory<Work, Indexed, Indexed> taskFactory = this
-			.createMock(TaskFactory.class);
+	private ManagedFunctionFactory<Work, Indexed, Indexed> taskFactory = this
+			.createMock(ManagedFunctionFactory.class);
 
 	/**
 	 * Ensure able to get the {@link FlowNodeBuilder}.
@@ -67,8 +67,8 @@ public class OfficeBuilderImplTest extends OfficeFrameTestCase {
 				"namespace", "work");
 
 		// Add a task
-		TaskBuilder<Work, Indexed, Indexed> taskBuilder = this.officeBuilder
-				.addWork(namespacedWork, this.workFactory).addTask("task",
+		ManagedFunctionBuilder<Work, Indexed, Indexed> taskBuilder = this.officeBuilder
+				.addWork(namespacedWork, this.workFactory).addManagedFunction("task",
 						this.taskFactory);
 
 		// Ensure can get task as flow node builder

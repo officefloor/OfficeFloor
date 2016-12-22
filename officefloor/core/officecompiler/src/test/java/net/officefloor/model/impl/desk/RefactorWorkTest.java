@@ -20,9 +20,9 @@ package net.officefloor.model.impl.desk;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.work.WorkType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.TaskEscalationModel;
 import net.officefloor.model.desk.TaskFlowModel;
@@ -32,7 +32,7 @@ import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
 
 /**
- * Tests refactoring the {@link WorkModel} to a {@link WorkType} via the
+ * Tests refactoring the {@link WorkModel} to a {@link FunctionNamespaceType} via the
  * {@link DeskChanges}.
  * 
  * @author Daniel Sagenschneider
@@ -48,7 +48,7 @@ public class RefactorWorkTest extends AbstractRefactorWorkTest {
 	}
 
 	/**
-	 * Tests changing the {@link WorkSource} for the {@link WorkModel}.
+	 * Tests changing the {@link ManagedFunctionSource} for the {@link WorkModel}.
 	 */
 	public void testChangeWorkSourceClass() {
 		this.refactor_workSourceClassName("net.another.AnotherWorkSource");

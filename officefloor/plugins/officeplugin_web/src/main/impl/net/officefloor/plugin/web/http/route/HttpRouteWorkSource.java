@@ -19,11 +19,11 @@ package net.officefloor.plugin.web.http.route;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.TaskManager;
@@ -41,7 +41,7 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
 
 /**
  * <p>
- * {@link WorkSource} to provide appropriately secure
+ * {@link ManagedFunctionSource} to provide appropriately secure
  * {@link ServerHttpConnection}.
  * <p>
  * Configuration of what to secure is determined by
@@ -67,16 +67,16 @@ public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 	}
 
 	@Override
-	public void sourceWork(WorkTypeBuilder<HttpRouteTask> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<HttpRouteTask> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Configure the work factory
 		HttpRouteTask factory = new HttpRouteTask();
 		workTypeBuilder.setWorkFactory(factory);
 
 		// Configure the task
-		TaskTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> task = workTypeBuilder
-				.addTaskType(TASK_NAME, factory,
+		ManagedFunctionTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> task = workTypeBuilder
+				.addManagedFunctionType(TASK_NAME, factory,
 						HttpRouteTaskDependencies.class,
 						HttpRouteTaskFlows.class);
 		task.addObject(ServerHttpConnection.class).setKey(

@@ -21,14 +21,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -97,10 +97,10 @@ public class HttpUrlContinuationWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create the expected type
 		HttpUrlContinuationTask factory = new HttpUrlContinuationTask();
-		WorkTypeBuilder<HttpUrlContinuationTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpUrlContinuationTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
 
-		TaskTypeBuilder<None, None> taskType = type.addTaskType(
+		ManagedFunctionTypeBuilder<None, None> taskType = type.addManagedFunctionType(
 				HttpUrlContinuationWorkSource.TASK_NAME, factory, None.class,
 				None.class);
 		taskType.setDifferentiator(new HttpUrlContinuationDifferentiatorImpl(
@@ -118,12 +118,12 @@ public class HttpUrlContinuationWorkSourceTest extends OfficeFrameTestCase {
 		}
 
 		// Validate type
-		WorkType<HttpUrlContinuationTask> work = WorkLoaderUtil
+		FunctionNamespaceType<HttpUrlContinuationTask> work = WorkLoaderUtil
 				.validateWorkType(type, HttpUrlContinuationWorkSource.class,
 						properties.toArray(new String[properties.size()]));
 
 		// Validate the URL continuation
-		TaskType<HttpUrlContinuationTask, ?, ?> task = work.getTaskTypes()[0];
+		ManagedFunctionType<HttpUrlContinuationTask, ?, ?> task = work.getManagedFunctionTypes()[0];
 		HttpUrlContinuationDifferentiator urlContinuation = (HttpUrlContinuationDifferentiator) task
 				.getDifferentiator();
 		assertEquals("Incorrect URI path on URL continuation", expectedUriPath,
@@ -138,19 +138,19 @@ public class HttpUrlContinuationWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testTask() throws Throwable {
 
-		final TaskContext context = this.createMock(TaskContext.class);
+		final ManagedFunctionContext context = this.createMock(ManagedFunctionContext.class);
 
 		// Load the Task
-		WorkType<HttpUrlContinuationTask> type = WorkLoaderUtil.loadWorkType(
+		FunctionNamespaceType<HttpUrlContinuationTask> type = WorkLoaderUtil.loadWorkType(
 				HttpUrlContinuationWorkSource.class,
 				HttpUrlContinuationWorkSource.PROPERTY_URI_PATH, "uri");
-		Task<HttpUrlContinuationTask, ?, ?> task = type.getTaskTypes()[0]
-				.getTaskFactory()
-				.createTask(type.getWorkFactory().createWork());
+		ManagedFunction<HttpUrlContinuationTask, ?, ?> task = type.getManagedFunctionTypes()[0]
+				.getManagedFunctionFactory()
+				.createManagedFunction(type.getWorkFactory().createWork());
 
 		// Execute the task (should do nothing as always link by next)
 		this.replayMockObjects();
-		task.doTask(context);
+		task.execute(context);
 		this.verifyMockObjects();
 	}
 

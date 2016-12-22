@@ -19,34 +19,34 @@ package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link Task} and {@link TaskFactory} to log out.
+ * {@link ManagedFunction} and {@link ManagedFunctionFactory} to log out.
  * 
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectHttpLogoutTask implements
-		Task<HttpSecurityWork, Indexed, None>,
-		TaskFactory<HttpSecurityWork, Indexed, None> {
+		ManagedFunction<HttpSecurityWork, Indexed, None>,
+		ManagedFunctionFactory<HttpSecurityWork, Indexed, None> {
 
 	/*
 	 * =================== HttpChallengeTask ======================
 	 */
 
 	@Override
-	public Task<HttpSecurityWork, Indexed, None> createTask(
+	public ManagedFunction<HttpSecurityWork, Indexed, None> createManagedFunction(
 			HttpSecurityWork work) {
 		return this;
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Object doTask(TaskContext<HttpSecurityWork, Indexed, None> context)
+	public Object execute(ManagedFunctionContext<HttpSecurityWork, Indexed, None> context)
 			throws Throwable {
 
 		// Obtain the dependencies
@@ -99,9 +99,9 @@ public class ManagedObjectHttpLogoutTask implements
 		private final HttpSession session;
 
 		/**
-		 * {@link TaskContext}.
+		 * {@link ManagedFunctionContext}.
 		 */
-		private final TaskContext<HttpSecurityWork, Indexed, None> context;
+		private final ManagedFunctionContext<HttpSecurityWork, Indexed, None> context;
 
 		/**
 		 * Initiate.
@@ -111,11 +111,11 @@ public class ManagedObjectHttpLogoutTask implements
 		 * @param session
 		 *            {@link HttpSession}.
 		 * @param context
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
 		public HttpLogoutContextImpl(ServerHttpConnection connection,
 				HttpSession session,
-				TaskContext<HttpSecurityWork, Indexed, None> context) {
+				ManagedFunctionContext<HttpSecurityWork, Indexed, None> context) {
 			this.connection = connection;
 			this.session = session;
 			this.context = context;

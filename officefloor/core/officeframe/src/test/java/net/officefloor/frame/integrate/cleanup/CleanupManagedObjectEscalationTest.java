@@ -22,11 +22,11 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.spi.TestSource;
@@ -124,8 +124,8 @@ public class CleanupManagedObjectEscalationTest extends
 	@TestSource
 	public static abstract class AbstractTestManagedObjectSource extends
 			AbstractManagedObjectSource<None, None> implements ManagedObject,
-			WorkFactory<Work>, Work, TaskFactory<Work, Indexed, None>,
-			Task<Work, Indexed, None> {
+			WorkFactory<Work>, Work, ManagedFunctionFactory<Work, Indexed, None>,
+			ManagedFunction<Work, Indexed, None> {
 
 		/**
 		 * ==================== ManagedObjectSource ==========================
@@ -180,7 +180,7 @@ public class CleanupManagedObjectEscalationTest extends
 		 */
 
 		@Override
-		public Task<Work, Indexed, None> createTask(Work work) {
+		public ManagedFunction<Work, Indexed, None> createManagedFunction(Work work) {
 			return this;
 		}
 	}
@@ -211,7 +211,7 @@ public class CleanupManagedObjectEscalationTest extends
 		 */
 
 		@Override
-		public Object doTask(TaskContext<Work, Indexed, None> context)
+		public Object execute(ManagedFunctionContext<Work, Indexed, None> context)
 				throws Throwable {
 			// Throw the escalation
 			throw this.escalation;
@@ -235,7 +235,7 @@ public class CleanupManagedObjectEscalationTest extends
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object doTask(TaskContext<Work, Indexed, None> context)
+		public Object execute(ManagedFunctionContext<Work, Indexed, None> context)
 				throws Throwable {
 
 			// Obtain the recycle parameter

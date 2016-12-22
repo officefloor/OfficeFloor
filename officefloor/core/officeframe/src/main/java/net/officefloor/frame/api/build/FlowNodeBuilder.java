@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -44,41 +44,41 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	void setTeam(String officeTeamName);
 
 	/**
-	 * Specifies the next {@link Task} in the {@link Flow} ({@link Task}
+	 * Specifies the next {@link ManagedFunction} in the {@link Flow} ({@link ManagedFunction}
 	 * will reside on the same {@link Work}).
 	 * 
 	 * @param taskName
-	 *            Name of the next {@link Task} in the {@link Flow}.
+	 *            Name of the next {@link ManagedFunction} in the {@link Flow}.
 	 * @param argumentType
-	 *            Type of argument passed to the next {@link Task}. May be
+	 *            Type of argument passed to the next {@link ManagedFunction}. May be
 	 *            <code>null</code> to indicate no argument.
 	 */
 	void setNextTaskInFlow(String taskName, Class<?> argumentType);
 
 	/**
-	 * Specifies the next {@link Task} in the {@link Flow} ({@link Task}
+	 * Specifies the next {@link ManagedFunction} in the {@link Flow} ({@link ManagedFunction}
 	 * may reside on another {@link Work}).
 	 * 
 	 * @param workName
-	 *            Name of {@link Work} containing the {@link Task}.
+	 *            Name of {@link Work} containing the {@link ManagedFunction}.
 	 * @param taskName
-	 *            Name of the next {@link Task} in the {@link Flow}.
+	 *            Name of the next {@link ManagedFunction} in the {@link Flow}.
 	 * @param argumentType
-	 *            Type of argument passed to the next {@link Task}. May be
+	 *            Type of argument passed to the next {@link ManagedFunction}. May be
 	 *            <code>null</code> to indicate no argument.
 	 */
 	void setNextTaskInFlow(String workName, String taskName,
 			Class<?> argumentType);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link Task} of
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link Flow}.
 	 * @param taskName
-	 *            Name of {@link Task} that resides on same {@link Work} as this
-	 *            {@link Task}.
+	 *            Name of {@link ManagedFunction} that resides on same {@link Work} as this
+	 *            {@link ManagedFunction}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
 	 * @param argumentType
@@ -89,14 +89,14 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 			Class<?> argumentType);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link Task} of
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow}.
 	 * @param taskName
-	 *            Name of {@link Task} that resides on same {@link Work} as this
-	 *            {@link Task}.
+	 *            Name of {@link ManagedFunction} that resides on same {@link Work} as this
+	 *            {@link ManagedFunction}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
 	 * @param argumentType
@@ -107,17 +107,17 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link Task} of
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link Flow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
 	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link Task} that resides on a different {@link Work}
-	 *            as this {@link Task}.
+	 *            Name of {@link ManagedFunction} that resides on a different {@link Work}
+	 *            as this {@link ManagedFunction}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
 	 * @param argumentType
@@ -128,17 +128,17 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link Task} of
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
 	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link Task} that resides on a different {@link Work}
-	 *            as this {@link Task}.
+	 *            Name of {@link ManagedFunction} that resides on a different {@link Work}
+	 *            as this {@link ManagedFunction}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
 	 * @param argumentType
@@ -151,7 +151,7 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	/**
 	 * <p>
 	 * Adds an {@link EscalationFlow} to the {@link EscalationProcedure} for the
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 * <p>
 	 * The order in which the {@link EscalationFlow} instances are added is the
 	 * order in which they are checked for handling escalation. Only one
@@ -161,8 +161,8 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
 	 * @param taskName
-	 *            Name of the {@link Task} that resides on the same {@link Work}
-	 *            as this {@link Task}.
+	 *            Name of the {@link ManagedFunction} that resides on the same {@link Work}
+	 *            as this {@link ManagedFunction}.
 	 * 
 	 * @see #addEscalation(Class, String, String)
 	 */
@@ -170,16 +170,16 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 
 	/**
 	 * Adds an {@link EscalationFlow} to the {@link EscalationProcedure} for the
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
 	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link Task} that resides on a different {@link Work}
-	 *            as this {@link Task}.
+	 *            Name of {@link ManagedFunction} that resides on a different {@link Work}
+	 *            as this {@link ManagedFunction}.
 	 * 
 	 * @see #addEscalation(Class, String)
 	 */

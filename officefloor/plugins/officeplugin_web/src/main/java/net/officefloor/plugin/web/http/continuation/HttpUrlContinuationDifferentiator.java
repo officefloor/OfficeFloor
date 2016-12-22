@@ -17,27 +17,27 @@
  */
 package net.officefloor.plugin.web.http.continuation;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
  * <p>
- * Differentiator on a {@link Task} to specify it to service a URL continuation.
+ * Differentiator on a {@link ManagedFunction} to specify it to service a URL continuation.
  * <p>
  * This allows routing {@link HttpRequest} instances to the appropriate
- * {@link Task} for servicing.
+ * {@link ManagedFunction} for servicing.
  * 
  * @author Daniel Sagenschneider
  */
 public interface HttpUrlContinuationDifferentiator {
 
 	/**
-	 * Obtains the URI path for the application that the {@link Task} will
+	 * Obtains the URI path for the application that the {@link ManagedFunction} will
 	 * service.
 	 * 
-	 * @return URI path for the application that the {@link Task} will service.
-	 *         <code>null</code> will not register the {@link Task} for
+	 * @return URI path for the application that the {@link ManagedFunction} will service.
+	 *         <code>null</code> will not register the {@link ManagedFunction} for
 	 *         servicing.
 	 */
 	String getApplicationUriPath();

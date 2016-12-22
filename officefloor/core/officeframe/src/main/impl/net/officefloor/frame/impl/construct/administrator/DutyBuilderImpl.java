@@ -22,7 +22,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.DutyBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
@@ -44,7 +44,7 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 	private final String dutyName;
 
 	/**
-	 * Registry of {@link Task} instances that may be invoked from the
+	 * Registry of {@link ManagedFunction} instances that may be invoked from the
 	 * {@link Duty}.
 	 */
 	private final Map<Integer, TaskNodeReference> flows = new HashMap<Integer, TaskNodeReference>();

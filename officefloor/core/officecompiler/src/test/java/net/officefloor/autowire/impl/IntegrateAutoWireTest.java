@@ -28,7 +28,7 @@ import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -50,12 +50,12 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	private static volatile Connection dependencyObject = null;
 
 	/**
-	 * {@link Thread} instances that executed the {@link Task} instances.
+	 * {@link Thread} instances that executed the {@link ManagedFunction} instances.
 	 */
 	private static final List<Thread> threadForTask = new ArrayList<Thread>(2);
 
 	/**
-	 * Registers the {@link Thread} for the {@link Task}.
+	 * Registers the {@link Thread} for the {@link ManagedFunction}.
 	 */
 	private static void registerTaskThread() {
 		synchronized (threadForTask) {
@@ -106,7 +106,7 @@ public class IntegrateAutoWireTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can integrate on running a {@link Task}.
+	 * Ensure can integrate on running a {@link ManagedFunction}.
 	 */
 	public void testIntegrationByTask() throws Exception {
 

@@ -17,17 +17,17 @@
  */
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
- * Indicates an unknown {@link Task} was requested.
+ * Indicates an unknown {@link ManagedFunction} was requested.
  * 
  * @author Daniel Sagenschneider
  */
 public class UnknownTaskException extends Exception {
 
 	/**
-	 * Name of the unknown {@link Task}.
+	 * Name of the unknown {@link ManagedFunction}.
 	 */
 	private final String unknownTaskName;
 
@@ -35,7 +35,7 @@ public class UnknownTaskException extends Exception {
 	 * Initiate.
 	 * 
 	 * @param unknownTaskName
-	 *            Name of the unknown {@link Task}.
+	 *            Name of the unknown {@link ManagedFunction}.
 	 */
 	public UnknownTaskException(String unknownTaskName) {
 		super("Unknown Task '" + unknownTaskName + "'");
@@ -43,9 +43,9 @@ public class UnknownTaskException extends Exception {
 	}
 
 	/**
-	 * Obtains the name of the unknown {@link Task}.
+	 * Obtains the name of the unknown {@link ManagedFunction}.
 	 * 
-	 * @return Name of the unknown {@link Task}.
+	 * @return Name of the unknown {@link ManagedFunction}.
 	 */
 	public String getUnknownTaskName() {
 		return this.unknownTaskName;

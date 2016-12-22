@@ -25,9 +25,9 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.team.TeamType;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
@@ -50,15 +50,15 @@ public interface TypeContext {
 	ManagedObjectType<?> getOrLoadManagedObjectType(ManagedObjectSourceNode managedObjectSourceNode);
 
 	/**
-	 * Obtains the existing or loads the {@link WorkType} for the
+	 * Obtains the existing or loads the {@link FunctionNamespaceType} for the
 	 * {@link WorkNode}.
 	 * 
 	 * @param workNode
-	 *            {@link WorkNode} to obtain the {@link WorkType}.
-	 * @return {@link WorkType} or <code>null</code> with issue reported to the
+	 *            {@link WorkNode} to obtain the {@link FunctionNamespaceType}.
+	 * @return {@link FunctionNamespaceType} or <code>null</code> with issue reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	WorkType<?> getOrLoadWorkType(WorkNode workNode);
+	FunctionNamespaceType<?> getOrLoadWorkType(WorkNode workNode);
 
 	/**
 	 * Obtains the existing or loads the {@link TeamType} for the

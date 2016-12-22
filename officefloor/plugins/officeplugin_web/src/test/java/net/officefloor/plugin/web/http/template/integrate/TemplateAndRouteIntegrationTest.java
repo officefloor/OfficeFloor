@@ -22,7 +22,7 @@ import java.util.Properties;
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.socket.server.http.HttpTestUtil;
 import net.officefloor.plugin.web.http.template.HttpTemplateWorkSource;
@@ -85,7 +85,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 
 	/**
 	 * Ensure that {@link HttpTemplate} link is routed to the handling
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 */
 	public void testRoute() throws Exception {
 
@@ -109,7 +109,7 @@ public class TemplateAndRouteIntegrationTest extends TestCase {
 
 	/**
 	 * Ensure that root {@link HttpTemplate} link is routed to the handling
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 */
 	public void testRouteRoot() throws Exception {
 

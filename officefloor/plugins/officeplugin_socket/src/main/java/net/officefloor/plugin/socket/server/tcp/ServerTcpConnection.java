@@ -19,7 +19,7 @@ package net.officefloor.plugin.socket.server.tcp;
 
 import java.io.IOException;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.protocol.Connection;
@@ -43,10 +43,10 @@ public interface ServerTcpConnection {
 
 	/**
 	 * <p>
-	 * Flags for the {@link ManagedObject} to not execute another {@link Task}
+	 * Flags for the {@link ManagedObject} to not execute another {@link ManagedFunction}
 	 * until further data is received from the client.
 	 * <p>
-	 * On calling this the next time a {@link Task} is invoked using this
+	 * On calling this the next time a {@link ManagedFunction} is invoked using this
 	 * {@link ManagedObject}, data will be available from the
 	 * {@link ServerInputStream}.
 	 * 

@@ -30,8 +30,8 @@ public interface ThreadProfiler {
 	 * Profiles execution of a {@link Job}.
 	 * 
 	 * @param jobMetaData
-	 *            {@link ManagedFunctionMetaData} of the {@link Job} being executed.
+	 *            {@link ManagedFunctionContainerMetaData} of the {@link Job} being executed.
 	 */
-	void profileJob(ManagedFunctionMetaData jobMetaData);
+	void profileJob(ManagedFunctionContainerMetaData jobMetaData);
 
 }

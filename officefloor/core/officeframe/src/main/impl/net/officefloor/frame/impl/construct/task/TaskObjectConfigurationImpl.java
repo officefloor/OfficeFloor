@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -41,7 +41,7 @@ public class TaskObjectConfigurationImpl<D extends Enum<D>> implements
 	private final String scopeManagedObjectName;
 
 	/**
-	 * {@link Object} type required by the {@link Task}.
+	 * {@link Object} type required by the {@link ManagedFunction}.
 	 */
 	private final Class<?> objectType;
 

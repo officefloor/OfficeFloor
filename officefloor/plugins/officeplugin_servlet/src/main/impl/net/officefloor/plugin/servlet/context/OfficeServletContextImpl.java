@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.TaskManager;
@@ -467,7 +467,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		private final String workName;
 
 		/**
-		 * Name of {@link Task} for forwarding.
+		 * Name of {@link ManagedFunction} for forwarding.
 		 */
 		private final String taskName;
 
@@ -482,7 +482,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 * @param workName
 		 *            Name of {@link Work} for forwarding.
 		 * @param taskName
-		 *            Name of {@link Task} for forwarding.
+		 *            Name of {@link ManagedFunction} for forwarding.
 		 * @param httpServlet
 		 *            {@link HttpServletServicer} to include {@link HttpServlet}
 		 *            .
@@ -555,7 +555,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		private final String workName;
 
 		/**
-		 * Name of {@link Task} for forwarding.
+		 * Name of {@link ManagedFunction} for forwarding.
 		 */
 		private final String taskName;
 
@@ -575,7 +575,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 		 * @param workName
 		 *            Name of {@link Work} for forwarding.
 		 * @param taskName
-		 *            Name of {@link Task} for forwarding.
+		 *            Name of {@link ManagedFunction} for forwarding.
 		 * @param httpServlet
 		 *            {@link HttpServletServicer} to include {@link HttpServlet}
 		 *            .

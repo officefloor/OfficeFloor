@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -260,7 +260,7 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public TaskMetaData<Work, ?, ?>[] getTaskMetaData() {
+		public ManagedFunctionMetaData<Work, ?, ?>[] getTaskMetaData() {
 			return WorkContainerTest.this.workMetaData.getTaskMetaData();
 		}
 

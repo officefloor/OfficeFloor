@@ -47,7 +47,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFacto
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -245,14 +245,14 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 			}
 
 			// Obtain the parameter type for the recycle task
-			TaskMetaData<?, ?, ?> recycleTaskMetaData = recycleFlowMetaData.getInitialTaskMetaData();
+			ManagedFunctionMetaData<?, ?, ?> recycleTaskMetaData = recycleFlowMetaData.getInitialTaskMetaData();
 			Class<?> parameterType = recycleTaskMetaData.getParameterType();
 			if (parameterType != null) {
 				if (!parameterType.isAssignableFrom(RecycleManagedObjectParameter.class)) {
 					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 							"Incompatible parameter type for recycle task (parameter=" + parameterType.getName()
 									+ ", required type=" + RecycleManagedObjectParameter.class.getName() + ", work="
-									+ this.recycleWorkName + ", task=" + recycleTaskMetaData.getTaskName() + ")");
+									+ this.recycleWorkName + ", task=" + recycleTaskMetaData.getFunctionName() + ")");
 					return; // can not be used as recycle task
 				}
 			}
@@ -380,7 +380,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 					configurationTaskReference.getTaskName(), argumentType);
 
 			// Obtain the task meta-data of flow meta-data
-			TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(flowTaskReference, metaDataLocator,
+			ManagedFunctionMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(flowTaskReference, metaDataLocator,
 					issues, AssetType.MANAGED_OBJECT, managedObjectSourceName, flowLabel, true);
 			if (taskMetaData == null) {
 				return; // can not find task of flow

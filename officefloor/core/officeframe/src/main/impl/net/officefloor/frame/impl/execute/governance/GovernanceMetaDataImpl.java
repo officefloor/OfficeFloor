@@ -18,24 +18,15 @@
 package net.officefloor.frame.impl.execute.governance;
 
 import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.ActiveGovernanceControl;
-import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
-import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.ManagedObjectContainer;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
-import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
@@ -45,11 +36,6 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceMetaData<I, F> {
-
-	/**
-	 * {@link GovernanceWork} as {@link WorkMetaData}.
-	 */
-	private static final WorkMetaData<Work> governanceWorkMetaData = new GovernanceWork();
 
 	/**
 	 * Name of the {@link Governance}.
@@ -62,15 +48,15 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	private final GovernanceFactory<? super I, F> governanceFactory;
 
 	/**
+	 * {@link FunctionLoop}.
+	 */
+	private final FunctionLoop functionLoop;
+
+	/**
 	 * {@link TeamManagement} of {@link Team} responsible for the
 	 * {@link GovernanceActivity} instances.
 	 */
 	private final TeamManagement responsibleTeam;
-
-	/**
-	 * {@link FunctionLoop}.
-	 */
-	private final FunctionLoop functionLoop;
 
 	/**
 	 * {@link FlowMetaData} instances.
@@ -117,8 +103,13 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	/*
-	 * ======================= JobMetaData =============================
+	 * ============ ManagedFunctionContainerMetaData ==================
 	 */
+
+	@Override
+	public String getFunctionName() {
+		return this.governanceName;
+	}
 
 	@Override
 	public TeamManagement getResponsibleTeam() {
@@ -126,7 +117,13 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getNextTaskInFlow() {
+	public FunctionLoop getFunctionLoop() {
+		return this.functionLoop;
+
+	}
+
+	@Override
+	public ManagedFunctionMetaData<?, ?, ?> getNextManagedFunctionMetaData() {
 		// Never a next task for governance activity
 		return null;
 	}
@@ -141,21 +138,13 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	 */
 
 	@Override
-	public String getFunctionName() {
-		// TODO indicate type of governance action being undertaken
-		return Governance.class.getSimpleName() + "-" + this.governanceName;
-	}
-
-	@Override
 	public String getGovernanceName() {
 		return this.governanceName;
 	}
 
 	@Override
-	public FunctionLoop getFunctionLoop() {
-		// TODO implement ManagedFunctionMetaData.getFunctionLoop
-		throw new UnsupportedOperationException("TODO implement ManagedFunctionMetaData.getFunctionLoop");
-
+	public GovernanceContainer<I> createGovernanceContainer(ThreadState threadState) {
+		return new GovernanceContainerImpl<>(this, threadState);
 	}
 
 	@Override
@@ -164,55 +153,8 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	@Override
-	public GovernanceContainer<I, F> createGovernanceContainer(ThreadState threadState, int processRegisteredIndex) {
-		return new GovernanceContainerImpl<I, F>(this, threadState, processRegisteredIndex);
-	}
-
-	@Override
-	public ActiveGovernanceManager<I, F> createActiveGovernance(GovernanceContainer<I, F> governanceContainer,
-			GovernanceControl<I, F> governanceControl, I extensionInterface,
-			ManagedObjectContainer managedobjectContainer, WorkContainer<?> workContainer,
-			int managedObjectContainerRegisteredIndex) {
-		return new ActiveGovernanceImpl<I, F>(governanceContainer, this, governanceControl, extensionInterface,
-				managedobjectContainer, workContainer, managedObjectContainerRegisteredIndex);
-	}
-
-	@Override
-	public GovernanceActivity<I, F> createActivateActivity(GovernanceControl<I, F> governanceControl) {
-		return new ActivateGovernanceActivity<I, F>(this, governanceControl);
-	}
-
-	@Override
-	public GovernanceActivity<I, F> createGovernActivity(ActiveGovernanceControl<F> activeGovernanceControl) {
-		return new GovernGovernanceActivity<I, F>(this, activeGovernanceControl);
-	}
-
-	@Override
-	public GovernanceActivity<I, F> createEnforceActivity(GovernanceControl<I, F> governanceControl) {
-		return new EnforceGovernanceActivity<I, F>(this, governanceControl);
-	}
-
-	@Override
-	public GovernanceActivity<I, F> createDisregardActivity(GovernanceControl<I, F> governanceControl) {
-		return new DisregardGovernanceActivity<I, F>(this, governanceControl);
-	}
-
-	@Override
 	public FlowMetaData<?> getFlow(int flowIndex) {
 		return this.flowMetaData[flowIndex];
-	}
-
-	@Override
-	public ManagedFunctionContainer createGovernanceFunction(Flow flow, GovernanceActivity<I, F> governanceActivity,
-			ManagedFunctionContainer parallelJobNodeOwner) {
-		// Obtain the thread state
-		ThreadState threadState = flow.getThreadState();
-
-		// Create the work container
-		WorkContainer<Work> workContainer = governanceWorkMetaData.createWorkContainer(threadState);
-
-		// Create and return the job
-		return new GovernanceJob<I, F, Work>(flow, workContainer, this, parallelJobNodeOwner, governanceActivity);
 	}
 
 }

@@ -17,13 +17,13 @@
  */
 package net.officefloor.frame.impl.execute.flow;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 
 /**
  * Implementation of the {@link FlowMetaData}.
@@ -38,9 +38,9 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	private final FlowInstigationStrategyEnum strategy;
 
 	/**
-	 * {@link TaskMetaData} of the initial {@link Task} of the {@link Flow}.
+	 * {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} of the {@link Flow}.
 	 */
-	private final TaskMetaData<W, ?, ?> initialTaskMetaData;
+	private final ManagedFunctionMetaData<W, ?, ?> initialTaskMetaData;
 
 	/**
 	 * {@link AssetManager} to managed this {@link Flow}.
@@ -53,13 +53,13 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param initialTaskMetaData
-	 *            {@link TaskMetaData} of the initial {@link Task} of the
+	 *            {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} of the
 	 *            {@link Flow}.
 	 * @param flowManager
 	 *            {@link AssetManager} to managed this {@link Flow}.
 	 */
 	public FlowMetaDataImpl(FlowInstigationStrategyEnum strategy,
-			TaskMetaData<W, ?, ?> initialTaskMetaData, AssetManager flowManager) {
+			ManagedFunctionMetaData<W, ?, ?> initialTaskMetaData, AssetManager flowManager) {
 		this.strategy = strategy;
 		this.initialTaskMetaData = initialTaskMetaData;
 		this.flowManager = flowManager;
@@ -75,7 +75,7 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	}
 
 	@Override
-	public TaskMetaData<W, ?, ?> getInitialTaskMetaData() {
+	public ManagedFunctionMetaData<W, ?, ?> getInitialTaskMetaData() {
 		return this.initialTaskMetaData;
 	}
 

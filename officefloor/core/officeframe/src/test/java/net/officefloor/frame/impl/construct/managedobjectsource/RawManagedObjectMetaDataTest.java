@@ -26,11 +26,11 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
@@ -164,11 +164,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			.createMock(WorkBuilder.class);
 
 	/**
-	 * {@link TaskBuilder}.
+	 * {@link ManagedFunctionBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskBuilder<Work, None, Indexed> taskBuilder = this
-			.createMock(TaskBuilder.class);
+	private final ManagedFunctionBuilder<Work, None, Indexed> taskBuilder = this
+			.createMock(ManagedFunctionBuilder.class);
 
 	/**
 	 * {@link WorkFactory}
@@ -178,11 +178,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			.createMock(WorkFactory.class);
 
 	/**
-	 * {@link TaskFactory}.
+	 * {@link ManagedFunctionFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskFactory<Work, None, Indexed> taskFactory = this
-			.createMock(TaskFactory.class);
+	private final ManagedFunctionFactory<Work, None, Indexed> taskFactory = this
+			.createMock(ManagedFunctionFactory.class);
 
 	/**
 	 * {@link ManagedObjectSource} instance to use for testing.
@@ -552,7 +552,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to add a {@link Task}.
+	 * Ensure able to add a {@link ManagedFunction}.
 	 */
 	public void testAddTask() {
 
@@ -565,7 +565,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				this.officeBuilder.addWork(WORK_NAME, this.workFactory),
 				this.workBuilder);
 		this.recordReturn(this.workBuilder,
-				this.workBuilder.addTask(TASK_NAME, this.taskFactory),
+				this.workBuilder.addManagedFunction(TASK_NAME, this.taskFactory),
 				this.taskBuilder);
 		this.workBuilder.setInitialTask(TASK_NAME);
 		this.record_createRawMetaData(ManagedObject.class, 0, null);
@@ -579,7 +579,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to link a parameter to the added {@link Task}.
+	 * Ensure able to link a parameter to the added {@link ManagedFunction}.
 	 */
 	public void testLinkParameterToAddedTask() {
 
@@ -593,7 +593,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				this.officeBuilder.addWork(WORK_NAME, this.workFactory),
 				this.workBuilder);
 		this.recordReturn(this.workBuilder,
-				this.workBuilder.addTask(TASK_NAME, this.taskFactory),
+				this.workBuilder.addManagedFunction(TASK_NAME, this.taskFactory),
 				this.taskBuilder);
 		this.workBuilder.setInitialTask(TASK_NAME);
 		this.taskBuilder.linkParameter(0, parameterType);
@@ -609,7 +609,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to link a parameter to the added {@link Task}.
+	 * Ensure able to link a parameter to the added {@link ManagedFunction}.
 	 */
 	public void testLinkFlowToAddedTask() {
 
@@ -624,7 +624,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				this.officeBuilder.addWork(WORK_NAME, this.workFactory),
 				this.workBuilder);
 		this.recordReturn(this.workBuilder,
-				this.workBuilder.addTask(TASK_NAME, this.taskFactory),
+				this.workBuilder.addManagedFunction(TASK_NAME, this.taskFactory),
 				this.taskBuilder);
 		this.workBuilder.setInitialTask(TASK_NAME);
 		this.taskBuilder.linkFlow(0, LINK_WORK_NAME, LINK_TASK_NAME,
@@ -642,7 +642,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to add a startup {@link Task}.
+	 * Ensure able to add a startup {@link ManagedFunction}.
 	 */
 	public void testAddStartupTask() {
 
@@ -1138,22 +1138,22 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public static String addWorkName = null;
 
 		/**
-		 * Name to add {@link Task}.
+		 * Name to add {@link ManagedFunction}.
 		 */
 		public static String addTaskName = null;
 
 		/**
-		 * Parameter type for a linked parameter to the {@link Task}.
+		 * Parameter type for a linked parameter to the {@link ManagedFunction}.
 		 */
 		public static Class<?> addTaskLinkedParameter = null;
 
 		/**
-		 * Name of {@link Flow} to link to the added {@link Task}.
+		 * Name of {@link Flow} to link to the added {@link ManagedFunction}.
 		 */
 		public static String addTaskLinkWorkName = null;
 
 		/**
-		 * Name of {@link Flow} to link to the added {@link Task}.
+		 * Name of {@link Flow} to link to the added {@link ManagedFunction}.
 		 */
 		public static String addTaskLinkTaskName = null;
 
@@ -1163,9 +1163,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public static WorkFactory<?> workFactory = null;
 
 		/**
-		 * {@link TaskFactory}.
+		 * {@link ManagedFunctionFactory}.
 		 */
-		public static TaskFactory<Work, None, Indexed> taskFactory = null;
+		public static ManagedFunctionFactory<Work, None, Indexed> taskFactory = null;
 
 		/**
 		 * Init exception.
@@ -1178,7 +1178,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public static String startupWorkName = null;
 
 		/**
-		 * Name of startup {@link Task}.
+		 * Name of startup {@link ManagedFunction}.
 		 */
 		public static String startupTaskName = null;
 
@@ -1191,12 +1191,12 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		 * Resets state of {@link MockManagedObjectSource} for testing.
 		 * 
 		 * @param taskFactory
-		 *            {@link TaskFactory}.
+		 *            {@link ManagedFunctionFactory}.
 		 * @param metaData
 		 *            {@link ManagedObjectSourceMetaData}.
 		 */
 		public static void reset(WorkFactory<Work> workFactory,
-				TaskFactory<Work, None, Indexed> taskFactory,
+				ManagedFunctionFactory<Work, None, Indexed> taskFactory,
 				ManagedObjectSourceMetaData<Indexed, FlowKey> metaData) {
 			instantiateFailure = null;
 			requiredPropertyName = null;

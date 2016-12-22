@@ -26,7 +26,7 @@ import java.util.Set;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
@@ -58,7 +58,7 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -130,7 +130,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 
 	/**
 	 * {@link DutyKey} instances of the {@link Duty} instances linked to a
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 */
 	private final Set<DutyKey<A>> linkedDutyKeys = new HashSet<DutyKey<A>>();
 
@@ -534,7 +534,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 				TaskNodeReference taskReference = dutyTaskReferences[i];
 
 				// Obtain the task meta-data for the flow
-				TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskReference, taskLocator, issues,
+				ManagedFunctionMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskReference, taskLocator, issues,
 						AssetType.ADMINISTRATOR, this.boundAdministratorName, "Duty " + dutyName + " Flow " + i, true);
 				if (taskMetaData == null) {
 					return; // no task

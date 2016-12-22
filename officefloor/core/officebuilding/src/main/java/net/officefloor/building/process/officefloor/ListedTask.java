@@ -17,13 +17,13 @@
  */
 package net.officefloor.building.process.officefloor;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * Listed {@link Task} within the {@link OfficeFloor}.
+ * Listed {@link ManagedFunction} within the {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -44,9 +44,9 @@ public interface ListedTask {
 	String getWorkName();
 
 	/**
-	 * Obtains the {@link Task} name.
+	 * Obtains the {@link ManagedFunction} name.
 	 * 
-	 * @return Name of the {@link Task}.
+	 * @return Name of the {@link ManagedFunction}.
 	 */
 	String getTaskName();
 

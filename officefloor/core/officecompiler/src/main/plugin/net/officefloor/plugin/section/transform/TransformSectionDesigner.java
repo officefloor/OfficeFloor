@@ -20,6 +20,7 @@ package net.officefloor.plugin.section.transform;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -37,7 +38,6 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -164,7 +164,7 @@ public class TransformSectionDesigner implements SectionDesigner {
 	}
 
 	@Override
-	public SectionWork addSectionWork(String workName, WorkSource<?> workSource) {
+	public SectionWork addSectionWork(String workName, ManagedFunctionSource<?> workSource) {
 		return this.delegate.addSectionWork(workName, workSource);
 	}
 

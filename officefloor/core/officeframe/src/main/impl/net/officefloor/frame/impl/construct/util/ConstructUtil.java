@@ -33,7 +33,7 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 
 /**
  * Utility class to aid in construction of the {@link OfficeFloor}.
@@ -164,14 +164,14 @@ public class ConstructUtil {
 	}
 
 	/**
-	 * Obtains the {@link TaskMetaData} reporting any failure to find to the
+	 * Obtains the {@link ManagedFunctionMetaData} reporting any failure to find to the
 	 * {@link OfficeFloorIssues}.
 	 * 
 	 * @param taskNodeReference
 	 *            {@link TaskNodeReference}.
 	 * @param taskLocator
 	 *            {@link OfficeMetaDataLocator} to use to locate the
-	 *            {@link TaskMetaData}.
+	 *            {@link ManagedFunctionMetaData}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @param assetType
@@ -180,16 +180,16 @@ public class ConstructUtil {
 	 *            {@link Asset} name for reporting issues.
 	 * @param forItemDescription
 	 *            Description after &quot;for&quot; indicating what the
-	 *            {@link TaskMetaData} is for.
+	 *            {@link ManagedFunctionMetaData} is for.
 	 * @param isWorkNameRequired
 	 *            Flags indicating if {@link Work} name is required.
 	 *            <code>false</code> indicates that the
 	 *            {@link OfficeMetaDataLocator} has a default {@link Work} to
-	 *            find {@link TaskMetaData}.
-	 * @return {@link TaskMetaData} or <code>null</code> if not found with
+	 *            find {@link ManagedFunctionMetaData}.
+	 * @return {@link ManagedFunctionMetaData} or <code>null</code> if not found with
 	 *         issues reported to the {@link OfficeFloorIssues}.
 	 */
-	public static TaskMetaData<?, ?, ?> getTaskMetaData(
+	public static ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(
 			TaskNodeReference taskNodeReference,
 			OfficeMetaDataLocator taskLocator, OfficeFloorIssues issues,
 			AssetType assetType, String assetName, String forItemDescription,
@@ -215,7 +215,7 @@ public class ConstructUtil {
 		}
 
 		// Obtain the task meta-data
-		TaskMetaData<?, ?, ?> taskMetaData;
+		ManagedFunctionMetaData<?, ?, ?> taskMetaData;
 		if (isHaveWorkName) {
 			taskMetaData = taskLocator.getTaskMetaData(workName, taskName);
 		} else {
@@ -276,7 +276,7 @@ public class ConstructUtil {
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param taskMetaData
-	 *            {@link TaskMetaData}.
+	 *            {@link ManagedFunctionMetaData}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param assetType
@@ -291,7 +291,7 @@ public class ConstructUtil {
 	 */
 	public static <W extends Work> FlowMetaData<W> newFlowMetaData(
 			FlowInstigationStrategyEnum instigationStrategy,
-			TaskMetaData<W, ?, ?> taskMetaData,
+			ManagedFunctionMetaData<W, ?, ?> taskMetaData,
 			AssetManagerFactory assetManagerFactory, AssetType assetType,
 			String assetName, String responsibility, OfficeFloorIssues issues) {
 

@@ -21,13 +21,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -44,11 +44,11 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileWorkSource.SendHt
 public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
-	 * Mock {@link TaskContext}.
+	 * Mock {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskContext<HttpFileFactoryTask<None>, DependencyKeys, None> taskContext = this
-			.createMock(TaskContext.class);
+	private final ManagedFunctionContext<HttpFileFactoryTask<None>, DependencyKeys, None> taskContext = this
+			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * Mock {@link ServerHttpConnection}.
@@ -80,11 +80,11 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 	public void testType() {
 
 		// Create expected type
-		WorkTypeBuilder<SendHttpFileTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<SendHttpFileTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(null);
 		SendHttpFileTask factory = new SendHttpFileTask(null);
 		type.setWorkFactory(factory);
-		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
+		ManagedFunctionTypeBuilder<DependencyKeys, None> task = type.addManagedFunctionType(
 				HttpFileWorkSource.TASK_HTTP_FILE, factory,
 				DependencyKeys.class, None.class);
 		task.addObject(ServerHttpConnection.class).setKey(
@@ -139,18 +139,18 @@ public class HttpFileWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load the work type
-		WorkType<SendHttpFileTask> workType = WorkLoaderUtil.loadWorkType(
+		FunctionNamespaceType<SendHttpFileTask> workType = WorkLoaderUtil.loadWorkType(
 				HttpFileWorkSource.class,
 				SourceHttpResourceFactory.PROPERTY_CLASS_PATH_PREFIX, this
 						.getClass().getPackage().getName(),
 				HttpFileWorkSource.PROPERTY_RESOURCE_PATH, configuredFilePath);
 
 		// Create the task
-		Task task = workType.getTaskTypes()[0].getTaskFactory().createTask(
+		ManagedFunction task = workType.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
 				workType.getWorkFactory().createWork());
 
 		// Execute the task to send the HTTP file
-		Object result = task.doTask(this.taskContext);
+		Object result = task.execute(this.taskContext);
 		assertNull("File should be sent and no return value", result);
 
 		// Verify

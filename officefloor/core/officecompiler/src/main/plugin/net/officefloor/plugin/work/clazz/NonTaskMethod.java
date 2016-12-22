@@ -23,11 +23,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
  * Enables flagging a <code>public</code> method of a {@link Class} to not be
- * {@link Task} for the {@link ClassWorkSource}.
+ * {@link ManagedFunction} for the {@link ClassWorkSource}.
  * 
  * @author Daniel Sagenschneider
  */

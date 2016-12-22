@@ -52,7 +52,7 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -227,11 +227,11 @@ public class RawWorkMetaDataImpl<W extends Work> implements RawWorkMetaDataFacto
 
 		// Obtain the name of the task for the initial flow of work
 		String initialTaskName = configuration.getInitialTaskName();
-		TaskMetaData<w, ?, ?> initialTaskMetaData = null;
+		ManagedFunctionMetaData<w, ?, ?> initialTaskMetaData = null;
 
 		// Construct the task meta-data of this work (also find initial task)
 		rawWorkMetaData.rawTaskMetaDatas = new LinkedList<RawTaskMetaData<w, ?, ?>>();
-		List<TaskMetaData<w, ?, ?>> taskMetaDatas = new LinkedList<TaskMetaData<w, ?, ?>>();
+		List<ManagedFunctionMetaData<w, ?, ?>> taskMetaDatas = new LinkedList<ManagedFunctionMetaData<w, ?, ?>>();
 		for (TaskConfiguration<w, ?, ?> taskConfiguration : configuration.getTaskConfiguration()) {
 
 			// Construct and register the raw task meta-data
@@ -243,7 +243,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements RawWorkMetaDataFacto
 			rawWorkMetaData.rawTaskMetaDatas.add(rawTaskMetaData);
 
 			// Construct and register the task meta-data
-			TaskMetaData<w, ?, ?> taskMetaData = rawTaskMetaData.getTaskMetaData();
+			ManagedFunctionMetaData<w, ?, ?> taskMetaData = rawTaskMetaData.getTaskMetaData();
 			taskMetaDatas.add(taskMetaData);
 
 			// Determine if the initial task for the work
@@ -296,7 +296,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements RawWorkMetaDataFacto
 		// Create the work meta-data
 		rawWorkMetaData.workMetaData = new WorkMetaDataImpl<w>(rawWorkMetaData.workName, workFactory,
 				managedObjectMetaData, administratorMetaData, initialFlowMetaData,
-				ConstructUtil.toArray(taskMetaDatas, new TaskMetaData[0]));
+				ConstructUtil.toArray(taskMetaDatas, new ManagedFunctionMetaData[0]));
 
 		// Return the raw work meta-data
 		return rawWorkMetaData;

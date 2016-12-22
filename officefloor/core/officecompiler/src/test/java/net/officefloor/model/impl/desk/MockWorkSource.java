@@ -19,26 +19,26 @@ package net.officefloor.model.impl.desk;
 
 import org.junit.Assert;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.TestSource;
 
 /**
- * Mock {@link WorkSource} for testing the {@link DeskModelSectionSource}.
+ * Mock {@link ManagedFunctionSource} for testing the {@link DeskModelSectionSource}.
  *
  * @author Daniel Sagenschneider
  */
 @TestSource
 public class MockWorkSource extends AbstractWorkSource<Work> implements
-		WorkFactory<Work>, Work, TaskFactory<Work, Indexed, Indexed> {
+		WorkFactory<Work>, Work, ManagedFunctionFactory<Work, Indexed, Indexed> {
 
 	/*
 	 * ================== WorkSource =========================
@@ -49,10 +49,10 @@ public class MockWorkSource extends AbstractWorkSource<Work> implements
 	}
 
 	@Override
-	public void sourceWork(WorkTypeBuilder<Work> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<Work> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 		workTypeBuilder.setWorkFactory(this);
-		TaskTypeBuilder<Indexed, Indexed> task = workTypeBuilder.addTaskType(
+		ManagedFunctionTypeBuilder<Indexed, Indexed> task = workTypeBuilder.addManagedFunctionType(
 				"WORK_TASK", this, Indexed.class, Indexed.class);
 		task.addObject(Integer.class).setLabel("PARAMETER");
 	}
@@ -71,7 +71,7 @@ public class MockWorkSource extends AbstractWorkSource<Work> implements
 	 */
 
 	@Override
-	public Task<Work, Indexed, Indexed> createTask(Work work) {
+	public ManagedFunction<Work, Indexed, Indexed> createManagedFunction(Work work) {
 		Assert.fail("Should not require creating task");
 		return null;
 	}

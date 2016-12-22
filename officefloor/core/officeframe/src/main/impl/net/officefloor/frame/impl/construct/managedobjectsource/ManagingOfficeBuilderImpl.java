@@ -22,7 +22,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
@@ -104,7 +104,7 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 	 * @param workName
 	 *            Name of {@link Work}.
 	 * @param taskName
-	 *            Name of {@link Task}.
+	 *            Name of {@link ManagedFunction}.
 	 */
 	private void linkProcess(int index, F key, String workName, String taskName) {
 

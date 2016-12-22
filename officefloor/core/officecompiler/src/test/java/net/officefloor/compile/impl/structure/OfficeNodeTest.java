@@ -51,7 +51,7 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -1300,8 +1300,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		final WorkFactory<Work> workFactory = this
 				.createMock(WorkFactory.class);
-		final TaskFactory<Work, None, None> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, None, None> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record already being linked
 		this.issues.recordIssue("TEAM", ManagedObjectTeamNodeImpl.class,

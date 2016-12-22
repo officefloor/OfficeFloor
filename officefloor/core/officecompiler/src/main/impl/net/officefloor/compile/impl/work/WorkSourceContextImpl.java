@@ -20,16 +20,16 @@ package net.officefloor.compile.impl.work;
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
- * {@link WorkSourceContext} implementation.
+ * {@link ManagedFunctionSourceContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
 public class WorkSourceContextImpl extends SourceContextImpl implements
-		WorkSourceContext {
+		ManagedFunctionSourceContext {
 
 	/**
 	 * Initiate.

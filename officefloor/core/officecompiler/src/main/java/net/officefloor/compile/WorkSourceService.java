@@ -19,32 +19,32 @@ package net.officefloor.compile;
 
 import java.util.ServiceLoader;
 
-import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.frame.api.execute.Work;
 
 /**
  * <p>
- * {@link ServiceLoader} service to plug-in an {@link WorkSource} {@link Class}
- * alias by including the extension {@link WorkSource} jar on the class path.
+ * {@link ServiceLoader} service to plug-in an {@link ManagedFunctionSource} {@link Class}
+ * alias by including the extension {@link ManagedFunctionSource} jar on the class path.
  * <p>
  * {@link OfficeFloorCompiler#addWorkSourceAlias(String, Class)} will be invoked
  * for each found {@link WorkSourceService}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface WorkSourceService<W extends Work, S extends WorkSource<W>> {
+public interface WorkSourceService<W extends Work, S extends ManagedFunctionSource<W>> {
 
 	/**
-	 * Obtains the alias for the {@link WorkSource} {@link Class}.
+	 * Obtains the alias for the {@link ManagedFunctionSource} {@link Class}.
 	 * 
-	 * @return Alias for the {@link WorkSource} {@link Class}.
+	 * @return Alias for the {@link ManagedFunctionSource} {@link Class}.
 	 */
 	String getWorkSourceAlias();
 
 	/**
-	 * Obtains the {@link WorkSource} {@link Class}.
+	 * Obtains the {@link ManagedFunctionSource} {@link Class}.
 	 * 
-	 * @return {@link WorkSource} {@link Class}.
+	 * @return {@link ManagedFunctionSource} {@link Class}.
 	 */
 	Class<S> getWorkSourceClass();
 

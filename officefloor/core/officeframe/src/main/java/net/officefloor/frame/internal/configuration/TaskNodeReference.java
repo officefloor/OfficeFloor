@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FunctionState;
 
@@ -29,23 +29,23 @@ import net.officefloor.frame.internal.structure.FunctionState;
 public interface TaskNodeReference {
 
 	/**
-	 * Obtains the name of the {@link Work} containing the {@link Task}.
+	 * Obtains the name of the {@link Work} containing the {@link ManagedFunction}.
 	 * 
-	 * @return Name of the {@link Work} containing the {@link Task}.
+	 * @return Name of the {@link Work} containing the {@link ManagedFunction}.
 	 */
 	String getWorkName();
 
 	/**
-	 * Obtains the name of the {@link Task}.
+	 * Obtains the name of the {@link ManagedFunction}.
 	 * 
-	 * @return Name of the {@link Task}.
+	 * @return Name of the {@link ManagedFunction}.
 	 */
 	String getTaskName();
 
 	/**
-	 * Obtains the type of argument to be passed to the referenced {@link Task}.
+	 * Obtains the type of argument to be passed to the referenced {@link ManagedFunction}.
 	 * 
-	 * @return Type of argument to be passed to the referenced {@link Task}.
+	 * @return Type of argument to be passed to the referenced {@link ManagedFunction}.
 	 */
 	Class<?> getArgumentType();
 

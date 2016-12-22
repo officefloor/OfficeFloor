@@ -17,8 +17,8 @@
  */
 package net.officefloor.plugin.servlet.route.source;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
@@ -49,9 +49,9 @@ public class ServletRouteWorkSourceTest extends OfficeFrameTestCase {
 		final ServletRouteTask factory = new ServletRouteTask();
 
 		// Create expected type
-		WorkTypeBuilder<ServletRouteTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<ServletRouteTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
-		TaskTypeBuilder<DependencyKeys, FlowKeys> task = type.addTaskType(
+		ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> task = type.addManagedFunctionType(
 				ServletRouteWorkSource.TASK_ROUTE, factory,
 				DependencyKeys.class, FlowKeys.class);
 		task.addObject(ServerHttpConnection.class).setKey(

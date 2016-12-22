@@ -26,7 +26,7 @@ import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.spi.governance.Governance;
@@ -236,14 +236,14 @@ public interface AutoWireApplication {
 	/**
 	 * Assigns a {@link Team} responsible for:
 	 * <ol>
-	 * <li>{@link Task} dependent on the specified object types</li>
+	 * <li>{@link ManagedFunction} dependent on the specified object types</li>
 	 * <li>{@link Governance} with the extension interface object type</li>
 	 * </ol>
 	 * 
 	 * @param teamSourceClassName
 	 *            Class name of the {@link TeamSource}. May be an alias.
 	 * @param autoWiring
-	 *            {@link AutoWire} instances to identify dependent {@link Task}
+	 *            {@link AutoWire} instances to identify dependent {@link ManagedFunction}
 	 *            object types and {@link Governance} extension interfaces the
 	 *            {@link Team} is responsible for. Must have at least one
 	 *            {@link AutoWire} provided.
@@ -252,7 +252,7 @@ public interface AutoWireApplication {
 	AutoWireTeam assignTeam(String teamSourceClassName, AutoWire... autoWiring);
 
 	/**
-	 * Assigns a {@link Team} responsible for unassigned {@link Task} instances.
+	 * Assigns a {@link Team} responsible for unassigned {@link ManagedFunction} instances.
 	 * 
 	 * @param teamSourceClassName
 	 *            Class name of the {@link TeamSource}. May be an alias.

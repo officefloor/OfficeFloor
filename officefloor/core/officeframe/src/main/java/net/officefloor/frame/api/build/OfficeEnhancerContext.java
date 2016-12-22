@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -30,19 +30,19 @@ public interface OfficeEnhancerContext {
 
 	/**
 	 * Obtains the {@link FlowNodeBuilder} registered under the input
-	 * {@link Work} and {@link Task} names.
+	 * {@link Work} and {@link ManagedFunction} names.
 	 * 
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @return {@link FlowNodeBuilder}.
 	 */
 	FlowNodeBuilder<?> getFlowNodeBuilder(String workName, String taskName);
 
 	/**
 	 * Obtains the {@link FlowNodeBuilder} registered by the
-	 * {@link ManagedObjectSource} under the input {@link Work} and {@link Task}
+	 * {@link ManagedObjectSource} under the input {@link Work} and {@link ManagedFunction}
 	 * names.
 	 * 
 	 * @param managedObjectSourceName
@@ -51,7 +51,7 @@ public interface OfficeEnhancerContext {
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @return {@link FlowNodeBuilder}.
 	 */
 	FlowNodeBuilder<?> getFlowNodeBuilder(String managedObjectSourceName,

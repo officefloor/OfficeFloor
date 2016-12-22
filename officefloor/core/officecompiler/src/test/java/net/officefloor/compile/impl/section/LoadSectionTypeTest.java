@@ -32,6 +32,7 @@ import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
 import net.officefloor.compile.impl.work.MockLoadWork;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -48,7 +49,6 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -563,7 +563,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load {@link WorkType}.
+	 * Ensure can load {@link FunctionNamespaceType}.
 	 */
 	public void testLoadWorkType() {
 
@@ -581,7 +581,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 				properties
 						.addProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME)
 						.setValue(MockLoadWork.class.getName());
-				WorkType<?> workType = context.loadWorkType(
+				FunctionNamespaceType<?> workType = context.loadWorkType(
 						ClassWorkSource.class.getName(), properties);
 
 				// Ensure correct work type
@@ -591,7 +591,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if fails to load the {@link WorkType}.
+	 * Ensure issue if fails to load the {@link FunctionNamespaceType}.
 	 */
 	public void testFailLoadingWorkType() {
 

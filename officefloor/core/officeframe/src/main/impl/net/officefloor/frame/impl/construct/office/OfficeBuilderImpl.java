@@ -29,7 +29,7 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.profile.Profiler;
@@ -156,7 +156,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<TaskEscalationConfiguration> escalations = new LinkedList<TaskEscalationConfiguration>();
 
 	/**
-	 * List of start up {@link Task} instances for the {@link Office}.
+	 * List of start up {@link ManagedFunction} instances for the {@link Office}.
 	 */
 	private final List<TaskNodeReference> startupTasks = new LinkedList<TaskNodeReference>();
 

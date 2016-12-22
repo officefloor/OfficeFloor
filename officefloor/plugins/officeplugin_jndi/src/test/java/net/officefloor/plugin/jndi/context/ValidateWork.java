@@ -19,7 +19,7 @@ package net.officefloor.plugin.jndi.context;
 
 import javax.resource.spi.work.Work;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
@@ -104,7 +104,7 @@ public class ValidateWork {
 	}
 
 	/**
-	 * Flag indicating if this {@link Task} was invoked.
+	 * Flag indicating if this {@link ManagedFunction} was invoked.
 	 */
 	private static volatile boolean isTaskInvoked = false;
 
@@ -116,9 +116,9 @@ public class ValidateWork {
 	}
 
 	/**
-	 * Indicates if the {@link Task} was invoked.
+	 * Indicates if the {@link ManagedFunction} was invoked.
 	 * 
-	 * @return <code>true</code> if the {@link Task} was invoked.
+	 * @return <code>true</code> if the {@link ManagedFunction} was invoked.
 	 */
 	public static boolean isTaskInvoked() {
 		return isTaskInvoked;

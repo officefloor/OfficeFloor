@@ -27,8 +27,8 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -86,22 +86,22 @@ public class TransactionGovernanceContextTest extends
 			.createSynchronizedMock(TransactionalObject.class);
 
 	/**
-	 * {@link Task} one.
+	 * {@link ManagedFunction} one.
 	 */
 	private ReflectiveTaskBuilder taskOne;
 
 	/**
-	 * {@link Task} two.
+	 * {@link ManagedFunction} two.
 	 */
 	private ReflectiveTaskBuilder taskTwo;
 
 	/**
-	 * Flags for {@link Task} one to be constructed under {@link Governance}.
+	 * Flags for {@link ManagedFunction} one to be constructed under {@link Governance}.
 	 */
 	private boolean isTaskOneGoverned = true;
 
 	/**
-	 * {@link FlowInstigationStrategyEnum} from {@link Task} one.
+	 * {@link FlowInstigationStrategyEnum} from {@link ManagedFunction} one.
 	 */
 	private FlowInstigationStrategyEnum instigationStrategy = FlowInstigationStrategyEnum.SEQUENTIAL;
 
@@ -123,7 +123,7 @@ public class TransactionGovernanceContextTest extends
 	}
 
 	/**
-	 * Ensure commit transaction on next {@link Task} not requiring
+	 * Ensure commit transaction on next {@link ManagedFunction} not requiring
 	 * {@link Governance}.
 	 */
 	public void testCommitOnNextTaskDeactivation() throws Throwable {
@@ -163,7 +163,7 @@ public class TransactionGovernanceContextTest extends
 	}
 
 	/**
-	 * Ensure commit transaction on flow {@link Task} not requiring
+	 * Ensure commit transaction on flow {@link ManagedFunction} not requiring
 	 * {@link Governance}.
 	 */
 	public void testCommitOnFlowDeactivation() throws Throwable {
@@ -250,7 +250,7 @@ public class TransactionGovernanceContextTest extends
 
 	/**
 	 * Ensure {@link Governance} is deactivated for parallel flow and then
-	 * reactivated for invokee {@link Task}.
+	 * reactivated for invokee {@link ManagedFunction}.
 	 */
 	public void testReverseParallelFlowTransaction() throws Throwable {
 
@@ -274,7 +274,7 @@ public class TransactionGovernanceContextTest extends
 
 	/**
 	 * Ensure not reactivate {@link Governance} on parallel flow returning to
-	 * invokee {@link Task} which is complete and flowing onto next {@link Task}
+	 * invokee {@link ManagedFunction} which is complete and flowing onto next {@link ManagedFunction}
 	 * that does not have {@link Governance}.
 	 */
 	public void testNotReactivateOnParallelFlow() throws Throwable {
@@ -381,7 +381,7 @@ public class TransactionGovernanceContextTest extends
 	}
 
 	/**
-	 * Constructs the {@link Task} with basic configuration.
+	 * Constructs the {@link ManagedFunction} with basic configuration.
 	 */
 	protected void constructRawTasks() throws Exception {
 
@@ -420,20 +420,20 @@ public class TransactionGovernanceContextTest extends
 		public volatile SQLException exception = null;
 
 		/**
-		 * Flag indicating if {@link Task} one is to completing.
+		 * Flag indicating if {@link ManagedFunction} one is to completing.
 		 */
 		public boolean isTaskOneToComplete = true;
 
 		/**
-		 * Number of times {@link Task} one is invoked.
+		 * Number of times {@link ManagedFunction} one is invoked.
 		 */
 		private int taskOneInvokeCount = 0;
 
 		/**
-		 * {@link Task} one.
+		 * {@link ManagedFunction} one.
 		 */
 		public void taskOne(TransactionalObject object, ReflectiveFlow flow,
-				Boolean isInvokeFlow, TaskContext<?, ?, ?> taskContext)
+				Boolean isInvokeFlow, ManagedFunctionContext<?, ?, ?> taskContext)
 				throws Exception {
 
 			// Undertake functionality
@@ -453,7 +453,7 @@ public class TransactionGovernanceContextTest extends
 		}
 
 		/**
-		 * {@link Task} two.
+		 * {@link ManagedFunction} two.
 		 */
 		public void taskTwo(TransactionalObject object) {
 			object.stepTwo();
@@ -473,12 +473,12 @@ public class TransactionGovernanceContextTest extends
 	public static interface TransactionalObject extends MockTransaction {
 
 		/**
-		 * Invoked identifying {@link Task} one.
+		 * Invoked identifying {@link ManagedFunction} one.
 		 */
 		void stepOne() throws Exception;
 
 		/**
-		 * Invoked identifying {@link Task} two.
+		 * Invoked identifying {@link ManagedFunction} two.
 		 */
 		void stepTwo();
 	}

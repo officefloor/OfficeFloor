@@ -17,47 +17,47 @@
  */
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 
 /**
- * Interface to manage a particular {@link Task}.
+ * Interface to manage a particular {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface TaskManager {
 
 	/**
-	 * Obtains the differentiator for this {@link Task}.
+	 * Obtains the differentiator for this {@link ManagedFunction}.
 	 * 
-	 * @return Differentiator for this {@link Task}. May be <code>null</code> if
-	 *         no differentiator for {@link Task}.
+	 * @return Differentiator for this {@link ManagedFunction}. May be <code>null</code> if
+	 *         no differentiator for {@link ManagedFunction}.
 	 * 
-	 * @see TaskBuilder#setDifferentiator(Object)
+	 * @see ManagedFunctionBuilder#setDifferentiator(Object)
 	 */
 	Object getDifferentiator();
 
 	/**
-	 * Obtains the parameter type for invoking this {@link Task}.
+	 * Obtains the parameter type for invoking this {@link ManagedFunction}.
 	 * 
-	 * @return Parameter type for invoking the {@link Task}. Will be
-	 *         <code>null</code> if no parameter to the {@link Task}.
+	 * @return Parameter type for invoking the {@link ManagedFunction}. Will be
+	 *         <code>null</code> if no parameter to the {@link ManagedFunction}.
 	 */
 	Class<?> getParameterType();
 
 	/**
-	 * Invokes the {@link Task} which is done within the {@link Office}.
+	 * Invokes the {@link ManagedFunction} which is done within the {@link Office}.
 	 * 
 	 * @param parameter
-	 *            Parameter for the {@link Task}.
-	 * @return {@link ProcessFuture} to indicate when the {@link ProcessState}
-	 *         executing the {@link Task} has completed.
+	 *            Parameter for the {@link ManagedFunction}.
+	 * @param completionListener
+	 *            {@link ProcessCompletionListener}.
 	 * @throws InvalidParameterTypeException
 	 *             Should the parameter be of incorrect type for the
-	 *             {@link Task}.
+	 *             {@link ManagedFunction}.
 	 */
-	ProcessFuture invokeTask(Object parameter)
+	void invokeTask(Object parameter, ProcessCompletionListener completionListener)
 			throws InvalidParameterTypeException;
 
 }

@@ -22,7 +22,7 @@ import java.nio.channels.ClosedChannelException;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
@@ -42,11 +42,11 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 	private final CleanupTask task = new CleanupTask();
 
 	/**
-	 * {@link TaskContext}.
+	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskContext<Work, None, None> context = this
-			.createMock(TaskContext.class);
+	private final ManagedFunctionContext<Work, None, None> context = this
+			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * {@link RecycleManagedObjectParameter}.
@@ -79,7 +79,7 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.task.doTask(this.context);
+		this.task.execute(this.context);
 		this.verifyMockObjects();
 	}
 
@@ -102,7 +102,7 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.task.doTask(this.context);
+		this.task.execute(this.context);
 		this.verifyMockObjects();
 
 	}
@@ -127,7 +127,7 @@ public class CleanupTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.task.doTask(this.context);
+		this.task.execute(this.context);
 		this.verifyMockObjects();
 	}
 

@@ -18,17 +18,17 @@
 package net.officefloor.compile.impl.work;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
-import net.officefloor.compile.work.TaskEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionEscalationTypeBuilder;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
- * {@link TaskEscalationType} implementation.
+ * {@link ManagedFunctionEscalationType} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskEscalationTypeImpl implements TaskEscalationType,
-		TaskEscalationTypeBuilder {
+public class TaskEscalationTypeImpl implements ManagedFunctionEscalationType,
+		ManagedFunctionEscalationTypeBuilder {
 
 	/**
 	 * Type of the {@link EscalationFlow}.

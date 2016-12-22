@@ -20,16 +20,16 @@ package net.officefloor.plugin.work.clazz;
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * {@link TaskFactory} for the {@link ClassTask}.
+ * {@link ManagedFunctionFactory} for the {@link ClassTask}.
  * 
  * @author Daniel Sagenschneider
  */
 public class ClassTaskFactory implements
-		TaskFactory<ClassWork, Indexed, Indexed> {
+		ManagedFunctionFactory<ClassWork, Indexed, Indexed> {
 
 	/**
 	 * Method to invoke for this task.
@@ -77,7 +77,7 @@ public class ClassTaskFactory implements
 	 */
 
 	@Override
-	public ClassTask createTask(ClassWork work) {
+	public ClassTask createManagedFunction(ClassWork work) {
 		return new ClassTask(this.method, this.isStaticMethod, this.parameters);
 	}
 

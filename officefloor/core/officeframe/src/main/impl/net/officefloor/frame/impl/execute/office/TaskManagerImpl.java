@@ -17,16 +17,15 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessTicker;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ProcessCompletionListener;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 
 /**
  * {@link TaskManager} implementation.
@@ -36,9 +35,9 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 public class TaskManagerImpl implements TaskManager {
 
 	/**
-	 * {@link TaskMetaData}.
+	 * {@link ManagedFunctionMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?> taskMetaData;
+	private final ManagedFunctionMetaData<?, ?, ?> taskMetaData;
 
 	/**
 	 * {@link OfficeMetaData}.
@@ -51,25 +50,16 @@ public class TaskManagerImpl implements TaskManager {
 	private final FlowMetaData<?> flowMetaData = new TaskManagerFlowMetaData();
 
 	/**
-	 * {@link ProcessTicker}.
-	 */
-	private final ProcessTicker processTicker;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param taskMetaData
-	 *            {@link TaskMetaData}.
+	 *            {@link ManagedFunctionMetaData}.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
-	 * @param processTicker
-	 *            {@link ProcessTicker}.
 	 */
-	public TaskManagerImpl(TaskMetaData<?, ?, ?> taskMetaData,
-			OfficeMetaData officeMetaData, ProcessTicker processTicker) {
+	public TaskManagerImpl(ManagedFunctionMetaData<?, ?, ?> taskMetaData, OfficeMetaData officeMetaData) {
 		this.taskMetaData = taskMetaData;
 		this.officeMetaData = officeMetaData;
-		this.processTicker = processTicker;
 	}
 
 	/*
@@ -87,27 +77,21 @@ public class TaskManagerImpl implements TaskManager {
 	}
 
 	@Override
-	public ProcessFuture invokeTask(Object parameter)
+	public void invokeTask(Object parameter, ProcessCompletionListener completionListener)
 			throws InvalidParameterTypeException {
-
 		// Invoke the process for the task
-		ProcessFuture future = OfficeMetaDataImpl.invokeProcess(
-				this.officeMetaData, this.flowMetaData, parameter,
-				this.processTicker);
-
-		// Indicate when process of task complete
-		return future;
+		OfficeMetaDataImpl.invokeProcess(this.officeMetaData, this.flowMetaData, parameter, completionListener);
 	}
 
 	/**
-	 * {@link FlowMetaData} for invoking a {@link Task} by this
+	 * {@link FlowMetaData} for invoking a {@link ManagedFunction} by this
 	 * {@link TaskManager}.
 	 */
 	@SuppressWarnings("rawtypes")
 	private class TaskManagerFlowMetaData implements FlowMetaData {
 
 		@Override
-		public TaskMetaData<?, ?, ?> getInitialTaskMetaData() {
+		public ManagedFunctionMetaData<?, ?, ?> getInitialTaskMetaData() {
 			return TaskManagerImpl.this.taskMetaData;
 		}
 

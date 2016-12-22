@@ -40,7 +40,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.plugin.section.clazz.ManagedObject;
@@ -101,7 +101,7 @@ public class WebApplicationAutoWireOfficeFloorSource extends AutoWireOfficeFloor
 	}
 
 	/**
-	 * Prefix for the link service {@link Task} name.
+	 * Prefix for the link service {@link ManagedFunction} name.
 	 */
 	private static final String LINK_SERVICE_TASK_NAME_PREFIX = "LINK_";
 

@@ -33,7 +33,7 @@ import net.officefloor.building.process.officefloor.MockOfficeFloorSource;
 import net.officefloor.building.process.officefloor.MockWork;
 import net.officefloor.building.util.OfficeBuildingTestUtil;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -186,8 +186,8 @@ public class OfficeBuildingTest extends AbstractConsoleMainTestCase {
 	}
 
 	/**
-	 * Ensure able to open the {@link OfficeFloor} invoking a {@link Task} and
-	 * stops {@link Process} once {@link Task} complete.
+	 * Ensure able to open the {@link OfficeFloor} invoking a {@link ManagedFunction} and
+	 * stops {@link Process} once {@link ManagedFunction} complete.
 	 */
 	public void testOpenOfficeFloorInvokingTask() throws Throwable {
 

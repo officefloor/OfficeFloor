@@ -25,19 +25,19 @@ import javax.naming.Context;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.work.clazz.ClassTask;
 
 /**
- * {@link TaskFactory} for the {@link JndiObjectTask}.
+ * {@link ManagedFunctionFactory} for the {@link JndiObjectTask}.
  * 
  * @author Daniel Sagenschneider
  */
 public class JndiObjectTaskFactory implements
-		TaskFactory<JndiWork, Indexed, None> {
+		ManagedFunctionFactory<JndiWork, Indexed, None> {
 
 	/**
 	 * {@link Method}.
@@ -81,21 +81,21 @@ public class JndiObjectTaskFactory implements
 	 */
 
 	@Override
-	public Task<JndiWork, Indexed, None> createTask(JndiWork work) {
+	public ManagedFunction<JndiWork, Indexed, None> createManagedFunction(JndiWork work) {
 		return new JndiObjectTask();
 	}
 
 	/**
-	 * {@link Task} to execute JNDI {@link Work} Object {@link Method}.
+	 * {@link ManagedFunction} to execute JNDI {@link Work} Object {@link Method}.
 	 */
-	private class JndiObjectTask implements Task<JndiWork, Indexed, None> {
+	private class JndiObjectTask implements ManagedFunction<JndiWork, Indexed, None> {
 
 		/*
 		 * ======================== Task ===============================
 		 */
 
 		@Override
-		public Object doTask(TaskContext<JndiWork, Indexed, None> context)
+		public Object execute(ManagedFunctionContext<JndiWork, Indexed, None> context)
 				throws Throwable {
 
 			// Obtain the JNDI object

@@ -17,7 +17,7 @@
  */
 package net.officefloor.model.impl.desk;
 
-import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
@@ -56,7 +56,7 @@ public class AddWorkTaskTest extends AbstractDeskChangesTestCase {
 	public void testAddWorkTaskWithoutKeys() {
 
 		// Create the task type
-		TaskType<?, ?, ?> task = this.constructTaskType("TASK",
+		ManagedFunctionType<?, ?, ?> task = this.constructTaskType("TASK",
 				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
@@ -84,7 +84,7 @@ public class AddWorkTaskTest extends AbstractDeskChangesTestCase {
 	public void testAddWorkTaskWithKeys() {
 
 		// Create the task type
-		TaskType<?, ?, ?> task = this.constructTaskType("TASK",
+		ManagedFunctionType<?, ?, ?> task = this.constructTaskType("TASK",
 				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
@@ -113,7 +113,7 @@ public class AddWorkTaskTest extends AbstractDeskChangesTestCase {
 	public void testAddWorkTaskWithLabels() {
 
 		// Create the task type
-		TaskType<?, ?, ?> task = this.constructTaskType("TASK",
+		ManagedFunctionType<?, ?, ?> task = this.constructTaskType("TASK",
 				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
@@ -137,9 +137,9 @@ public class AddWorkTaskTest extends AbstractDeskChangesTestCase {
 	public void testAddMultipleWorkTasksEnsuringOrdering() {
 
 		// Create the task type
-		TaskType<?, ?, ?> taskB = this.constructTaskType("TASK_B", null);
-		TaskType<?, ?, ?> taskA = this.constructTaskType("TASK_A", null);
-		TaskType<?, ?, ?> taskC = this.constructTaskType("TASK_C", null);
+		ManagedFunctionType<?, ?, ?> taskB = this.constructTaskType("TASK_B", null);
+		ManagedFunctionType<?, ?, ?> taskA = this.constructTaskType("TASK_A", null);
+		ManagedFunctionType<?, ?, ?> taskC = this.constructTaskType("TASK_C", null);
 
 		// Create the changes to add the work tasks
 		Change<WorkTaskModel> changeB = this.operations.addWorkTask(this.work,
@@ -163,12 +163,12 @@ public class AddWorkTaskTest extends AbstractDeskChangesTestCase {
 	}
 
 	/**
-	 * Ensure can add the {@link TaskType} only once to the {@link WorkModel}.
+	 * Ensure can add the {@link ManagedFunctionType} only once to the {@link WorkModel}.
 	 */
 	public void testAddWorkTaskOnlyOnceForWork() {
 
 		// Create the task type and have it added
-		TaskType<?, ?, ?> task = this.constructTaskType("TASK", null);
+		ManagedFunctionType<?, ?, ?> task = this.constructTaskType("TASK", null);
 		this.operations.addWorkTask(this.work, task).apply();
 
 		// Create the change to add the task

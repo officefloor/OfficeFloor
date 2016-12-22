@@ -27,7 +27,7 @@ import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
@@ -63,12 +63,12 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 			.createSynchronizedMock(TransactionalObject.class);
 
 	/**
-	 * Flag indicating whether to provide commit after {@link Task}.
+	 * Flag indicating whether to provide commit after {@link ManagedFunction}.
 	 */
 	private boolean isCommit = false;
 
 	/**
-	 * Flag indicating whether to rollback after {@link Task}.
+	 * Flag indicating whether to rollback after {@link ManagedFunction}.
 	 */
 	private boolean isRollback = false;
 
@@ -235,12 +235,12 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 	public class TransactionalWork {
 
 		/**
-		 * Indicates if the {@link Task} was invoked.
+		 * Indicates if the {@link ManagedFunction} was invoked.
 		 */
 		public volatile boolean isTaskInvoked = false;
 
 		/**
-		 * {@link Task}.
+		 * {@link ManagedFunction}.
 		 */
 		public void doTask(TransactionalObject object) {
 

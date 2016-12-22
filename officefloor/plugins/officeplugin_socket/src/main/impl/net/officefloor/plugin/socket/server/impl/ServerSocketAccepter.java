@@ -28,7 +28,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.EstablishedConnection;
@@ -155,7 +155,7 @@ public class ServerSocketAccepter extends
 	 */
 
 	@Override
-	public Object doTask(TaskContext<ServerSocketAccepter, None, None> context)
+	public Object execute(ManagedFunctionContext<ServerSocketAccepter, None, None> context)
 			throws Exception {
 
 		// Synchronized as may be called by differing threads

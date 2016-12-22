@@ -19,18 +19,18 @@ package net.officefloor.plugin.web.http.resource.file;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 import net.officefloor.plugin.web.http.resource.file.HttpFileWriterTask.HttpFileWriterTaskDependencies;
 
 /**
- * {@link WorkSource} that sends a {@link HttpFile}.
+ * {@link ManagedFunctionSource} that sends a {@link HttpFile}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -47,8 +47,8 @@ public class HttpFileWriterWorkSource extends
 	}
 
 	@Override
-	public void sourceWork(WorkTypeBuilder<HttpFileWriterTask> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<HttpFileWriterTask> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Create the factory
 		HttpFileWriterTask factory = new HttpFileWriterTask();
@@ -57,8 +57,8 @@ public class HttpFileWriterWorkSource extends
 		workTypeBuilder.setWorkFactory(factory);
 
 		// Add the task
-		TaskTypeBuilder<HttpFileWriterTaskDependencies, None> task = workTypeBuilder
-				.addTaskType("WriteFileToResponse", factory,
+		ManagedFunctionTypeBuilder<HttpFileWriterTaskDependencies, None> task = workTypeBuilder
+				.addManagedFunctionType("WriteFileToResponse", factory,
 						HttpFileWriterTaskDependencies.class, None.class);
 		task.addObject(HttpFile.class).setKey(
 				HttpFileWriterTaskDependencies.HTTP_FILE);

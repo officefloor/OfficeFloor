@@ -26,8 +26,8 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -226,7 +226,7 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 
 	/**
 	 * Tests linking the {@link ManagedObjectSource} invoked
-	 * {@link ProcessState} with a {@link Task}.
+	 * {@link ProcessState} with a {@link ManagedFunction}.
 	 */
 	public void testManagedObjectSourceFlowLinkedToTask() {
 
@@ -237,7 +237,7 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("DESK.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject(
@@ -281,7 +281,7 @@ public class CompileDeskManagedObjectTest extends AbstractCompileTestCase {
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.DESK_A.MANAGED_OBJECT_SOURCE");
 		managingOffice.linkProcess(0, "DESK_B.WORK", "INPUT");
 		this.record_officeBuilder_addWork("DESK_B.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 

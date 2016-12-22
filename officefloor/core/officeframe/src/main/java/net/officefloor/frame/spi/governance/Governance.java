@@ -33,15 +33,15 @@ public interface Governance<I, F extends Enum<F>> {
 	/**
 	 * Registers the {@link ManagedObject} for {@link Governance}.
 	 * 
-	 * @param extensionInterface
-	 *            Extension interface of the {@link ManagedObject}.
+	 * @param managedObjectExtension
+	 *            Extension of the {@link ManagedObject} to enable
+	 *            {@link Governance}.
 	 * @param context
 	 *            {@link GovernanceContext}.
 	 * @throws Throwable
 	 *             If fails to govern the {@link ManagedObject}.
 	 */
-	void governManagedObject(I extensionInterface, GovernanceContext<F> context)
-			throws Throwable;
+	void governManagedObject(I managedObjectExtension, GovernanceContext<F> context) throws Throwable;
 
 	/**
 	 * Enforces the {@link Governance} of the {@link ManagedObject} instances

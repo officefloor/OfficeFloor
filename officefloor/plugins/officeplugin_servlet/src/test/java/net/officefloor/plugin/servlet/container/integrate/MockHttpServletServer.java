@@ -23,15 +23,15 @@ import java.security.Principal;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 
-import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -95,7 +95,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 	 *            Name of the {@link HttpSession}.
 	 * @param securityName
 	 *            Name of the {@link HttpSecurity}.
-	 * @return {@link HttpServicerTask} identifying the {@link Task} to service
+	 * @return {@link HttpServicerTask} identifying the {@link ManagedFunction} to service
 	 *         the {@link HttpRequest}.
 	 */
 	public abstract HttpServicerTask buildServlet(String servletContextName,
@@ -151,7 +151,7 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 	private boolean isHttpServletTeamConstructed = false;
 
 	/**
-	 * Convenience method to construct {@link HttpServlet} {@link WorkSource}.
+	 * Convenience method to construct {@link HttpServlet} {@link ManagedFunctionSource}.
 	 * 
 	 * @param workName
 	 *            Name of {@link Work} for the {@link HttpServlet}.
@@ -166,18 +166,18 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 	 * @param securityName
 	 *            Name of the {@link HttpSecurity}.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
+	 *            {@link ManagedFunctionSource} class.
 	 * @param properties
-	 *            Properties for the {@link WorkSource}.
+	 *            Properties for the {@link ManagedFunctionSource}.
 	 * @return {@link HttpServicerTask} for the constructed {@link HttpServlet}
-	 *         {@link Task}.
+	 *         {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected HttpServicerTask constructHttpServlet(String workName,
 			String servletContextName, String httpName,
 			String requestAttributesName, String sessionName,
 			String securityName,
-			Class<? extends WorkSource<HttpServletTask>> workSourceClass,
+			Class<? extends ManagedFunctionSource<HttpServletTask>> workSourceClass,
 			String... properties) {
 
 		// Construct the reference
@@ -192,14 +192,14 @@ public abstract class MockHttpServletServer extends MockHttpServer {
 		}
 
 		// Constructs the HTTP Servlet
-		WorkType<HttpServletTask> servlet = WorkLoaderUtil.loadWorkType(
+		FunctionNamespaceType<HttpServletTask> servlet = WorkLoaderUtil.loadWorkType(
 				workSourceClass, properties);
 		this.constructWork(reference.workName, servlet.getWorkFactory());
-		TaskBuilder<HttpServletTask, DependencyKeys, None> service = (TaskBuilder<HttpServletTask, DependencyKeys, None>) this
+		ManagedFunctionBuilder<HttpServletTask, DependencyKeys, None> service = (ManagedFunctionBuilder<HttpServletTask, DependencyKeys, None>) this
 				.constructTask(reference.taskName,
-						servlet.getTaskTypes()[0].getTaskFactory(),
+						servlet.getManagedFunctionTypes()[0].getManagedFunctionFactory(),
 						SERVICER_NAME);
-		service.setDifferentiator(servlet.getTaskTypes()[0].getDifferentiator());
+		service.setDifferentiator(servlet.getManagedFunctionTypes()[0].getDifferentiator());
 		service.linkParameter(DependencyKeys.SERVICER_MAPPING,
 				ServicerMapping.class);
 		service.linkManagedObject(DependencyKeys.OFFICE_SERVLET_CONTEXT,

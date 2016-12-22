@@ -18,50 +18,50 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
- * Raw meta-data for a {@link Task}.
+ * Raw meta-data for a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface RawTaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
-	 * Obtains the name of the {@link Task}.
+	 * Obtains the name of the {@link ManagedFunction}.
 	 * 
-	 * @return Name of the {@link Task}.
+	 * @return Name of the {@link ManagedFunction}.
 	 */
 	String getTaskName();
 
 	/**
 	 * Obtains the {@link RawWorkMetaData} of the {@link Work} containing this
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 * 
 	 * @return {@link RawWorkMetaData}.
 	 */
 	RawWorkMetaData<W> getRawWorkMetaData();
 
 	/**
-	 * Obtains the {@link TaskMetaData}.
+	 * Obtains the {@link ManagedFunctionMetaData}.
 	 * 
-	 * @return {@link TaskMetaData}.
+	 * @return {@link ManagedFunctionMetaData}.
 	 */
-	TaskMetaData<W, D, F> getTaskMetaData();
+	ManagedFunctionMetaData<W, D, F> getTaskMetaData();
 
 	/**
-	 * Links the {@link TaskMetaData} instances to create {@link Flow} of
+	 * Links the {@link ManagedFunctionMetaData} instances to create {@link Flow} of
 	 * execution.
 	 * 
 	 * @param taskMetaDataLocator
 	 *            {@link OfficeMetaDataLocator}.
 	 * @param workMetaData
-	 *            {@link WorkMetaData} containing this {@link TaskMetaData}.
+	 *            {@link WorkMetaData} containing this {@link ManagedFunctionMetaData}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory} to create the {@link AssetManager}
 	 *            instances that manage {@link Flow} instances.

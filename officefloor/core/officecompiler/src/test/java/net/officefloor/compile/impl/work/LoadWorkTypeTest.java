@@ -23,32 +23,32 @@ import java.util.Properties;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests loading the {@link WorkType} from the {@link WorkSource}.
+ * Tests loading the {@link FunctionNamespaceType} from the {@link ManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -70,8 +70,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	 * {@link TaskFactoryManufacturer}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskFactory<Work, Indexed, Indexed> taskFactory = this
-			.createMock(TaskFactory.class);
+	private final ManagedFunctionFactory<Work, Indexed, Indexed> taskFactory = this
+			.createMock(ManagedFunctionFactory.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -79,7 +79,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if fail to instantiate the {@link WorkSource}.
+	 * Ensure issue if fail to instantiate the {@link ManagedFunctionSource}.
 	 */
 	public void testFailInstantiate() {
 
@@ -108,8 +108,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				context.getProperty("missing");
 			}
 		});
@@ -123,8 +123,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(true, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
 				assertEquals("Ensure get property ONE", "1",
@@ -146,7 +146,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 				// Providing minimal work type
 				work.setWorkFactory(workFactory);
-				work.addTaskType("IGNORE", taskFactory, null, null);
+				work.addManagedFunctionType("IGNORE", taskFactory, null, null);
 			}
 		}, "ONE", "1", "TWO", "2");
 	}
@@ -163,8 +163,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				context.loadClass("missing");
 			}
 		});
@@ -183,8 +183,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				context.getResource("missing");
 			}
 		});
@@ -198,21 +198,21 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(true, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				assertEquals("Incorrect class loader",
 						LoadWorkTypeTest.class.getClassLoader(),
 						context.getClassLoader());
 
 				// Providing minimal work type
 				work.setWorkFactory(workFactory);
-				work.addTaskType("IGNORE", taskFactory, null, null);
+				work.addManagedFunctionType("IGNORE", taskFactory, null, null);
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if fails to source the {@link WorkType}.
+	 * Ensure issue if fails to source the {@link FunctionNamespaceType}.
 	 */
 	public void testFailSourceWorkType() {
 
@@ -227,8 +227,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				throw failure;
 			}
 		});
@@ -246,16 +246,16 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				// Not add work factory
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if no {@link TaskType} instances as no point of {@link Work}
-	 * without at least one {@link Task}.
+	 * Ensure issue if no {@link ManagedFunctionType} instances as no point of {@link Work}
+	 * without at least one {@link ManagedFunction}.
 	 */
 	public void testNoTasks() {
 
@@ -267,8 +267,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
 				// No tasks
 			}
@@ -276,7 +276,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link TaskType} name.
+	 * Ensure issue if no {@link ManagedFunctionType} name.
 	 */
 	public void testNoTaskName() {
 
@@ -288,16 +288,16 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				work.addTaskType(null, taskFactory, null, null);
+				work.addManagedFunctionType(null, taskFactory, null, null);
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if duplicate {@link TaskType} name.
+	 * Ensure issue if duplicate {@link ManagedFunctionType} name.
 	 */
 	public void testDuplicateTaskNames() {
 
@@ -309,11 +309,11 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				work.addTaskType("SAME", taskFactory, null, null);
-				work.addTaskType("SAME", taskFactory, null, null);
+				work.addManagedFunctionType("SAME", taskFactory, null, null);
+				work.addManagedFunctionType("SAME", taskFactory, null, null);
 			}
 		});
 	}
@@ -331,10 +331,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				work.addTaskType("TASK", (TaskFactory<Work, ?, ?>) null, null,
+				work.addManagedFunctionType("TASK", (ManagedFunctionFactory<Work, ?, ?>) null, null,
 						null);
 			}
 		});
@@ -346,22 +346,22 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testNoDifferentiator() {
 
-		final TaskFactory<Work, None, None> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, None, None> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Attempt to load differentiator
-		WorkType<Work> work = this.loadWorkType(true, new Loader() {
+		FunctionNamespaceType<Work> work = this.loadWorkType(true, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				work.addTaskType("TASK", taskFactory, None.class, None.class);
+				work.addManagedFunctionType("TASK", taskFactory, None.class, None.class);
 				// Do not specify differentiator
 			}
 		});
 
 		// Ensure differentiator available
-		Object differentiator = work.getTaskTypes()[0].getDifferentiator();
+		Object differentiator = work.getManagedFunctionTypes()[0].getDifferentiator();
 		assertNull("Should not have differentiator", differentiator);
 	}
 
@@ -371,36 +371,36 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testDifferentiator() {
 
-		final TaskFactory<Work, None, None> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, None, None> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 		final Object DIFFERENTIATOR = "Differentiator";
 
 		// Attempt to load differentiator
-		WorkType<Work> work = this.loadWorkType(true, new Loader() {
+		FunctionNamespaceType<Work> work = this.loadWorkType(true, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<None, None> task = work.addTaskType("TASK",
+				ManagedFunctionTypeBuilder<None, None> task = work.addManagedFunctionType("TASK",
 						taskFactory, None.class, None.class);
 				task.setDifferentiator(DIFFERENTIATOR);
 			}
 		});
 
 		// Ensure differentiator available
-		Object differentiator = work.getTaskTypes()[0].getDifferentiator();
+		Object differentiator = work.getManagedFunctionTypes()[0].getDifferentiator();
 		assertEquals("Incorrect differentiator", DIFFERENTIATOR, differentiator);
 	}
 
 	/**
-	 * Ensure issue if using {@link Enum} but no {@link TaskObjectType} provided
+	 * Ensure issue if using {@link Enum} but no {@link ManagedFunctionObjectType} provided
 	 * for a key.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testMissingObjectForKey() {
 
-		final TaskFactory<Work, ObjectKey, Indexed> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, ObjectKey, Indexed> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record no tasks
 		this.issues.recordIssue("No TaskObjectType provided for key "
@@ -411,22 +411,22 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				work.addTaskType("TASK", taskFactory, ObjectKey.class, null);
+				work.addManagedFunctionType("TASK", taskFactory, ObjectKey.class, null);
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if no key for {@link TaskObjectType} by provided key class.
+	 * Ensure issue if no key for {@link ManagedFunctionObjectType} by provided key class.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testNoKeyForObject() {
 
-		final TaskFactory<Work, ObjectKey, Indexed> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, ObjectKey, Indexed> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record no tasks
 		this.issues
@@ -437,10 +437,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		this.loadWorkType(false, new Loader() {
 			@Override
 			@SuppressWarnings("rawtypes")
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						ObjectKey.class, null);
 
 				// Add task without key
@@ -450,14 +450,14 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if incorrect key type for {@link TaskObjectType} by provided
+	 * Ensure issue if incorrect key type for {@link ManagedFunctionObjectType} by provided
 	 * key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testIncorrectKeyTypeForObject() {
 
-		final TaskFactory<Work, ObjectKey, Indexed> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, ObjectKey, Indexed> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record no tasks
 		this.issues
@@ -469,10 +469,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						ObjectKey.class, null);
 
 				// Add task with wrong key
@@ -482,13 +482,13 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if more {@link TaskObjectType} instances than keys.
+	 * Ensure issue if more {@link ManagedFunctionObjectType} instances than keys.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testMoreObjectsThanKeys() {
 
-		final TaskFactory<Work, ObjectKey, Indexed> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, ObjectKey, Indexed> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record no tasks
 		this.issues
@@ -498,10 +498,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						ObjectKey.class, null);
 
 				// Add extra objects than keys
@@ -513,13 +513,13 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if key provided for {@link TaskObjectType} but no key class.
+	 * Ensure issue if key provided for {@link ManagedFunctionObjectType} but no key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testObjectHasKeyButNoKeyClass() {
 
-		final TaskFactory<Work, ObjectKey, Indexed> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, ObjectKey, Indexed> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record indexes out of order
 		this.issues
@@ -529,10 +529,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, null);
 
 				// Add extra objects than keys
@@ -555,10 +555,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		this.loadWorkType(false, new Loader() {
 			@Override
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, null);
 
 				// Add task wit no object type
@@ -581,10 +581,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		this.loadWorkType(false, new Loader() {
 			@Override
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, null);
 
 				// Add objects with same name
@@ -595,25 +595,25 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if {@link TaskObjectType} are not ordered to {@link Enum}
+	 * Ensure issue if {@link ManagedFunctionObjectType} are not ordered to {@link Enum}
 	 * key order.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testKeyOrderingForObjectType() {
 
-		final TaskFactory<Work, ObjectKey, Indexed> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, ObjectKey, Indexed> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 		final Class<?> oneType = String.class;
 		final Class<?> twoType = Connection.class;
 
 		// Attempt to load work type
-		WorkType<Work> workType = this.loadWorkType(true, new Loader() {
+		FunctionNamespaceType<Work> workType = this.loadWorkType(true, new Loader() {
 			@Override
 			@SuppressWarnings("rawtypes")
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						ObjectKey.class, null);
 
 				// Add in wrong order
@@ -623,21 +623,21 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Validate the key class
-		TaskType<Work, ?, ?> task = workType.getTaskTypes()[0];
+		ManagedFunctionType<Work, ?, ?> task = workType.getManagedFunctionTypes()[0];
 		assertEquals("Incorrect object key class", ObjectKey.class,
 				task.getObjectKeyClass());
 
 		// Validate the object type order
-		TaskObjectType<?>[] objects = task.getObjectTypes();
+		ManagedFunctionObjectType<?>[] objects = task.getObjectTypes();
 		assertEquals("Incorrect number of objects", 2, objects.length);
-		TaskObjectType<?> one = objects[0];
+		ManagedFunctionObjectType<?> one = objects[0];
 		assertEquals("Incorrect key one", ObjectKey.ONE, one.getKey());
 		assertEquals("Incorrect index one", ObjectKey.ONE.ordinal(),
 				one.getIndex());
 		assertEquals("Incorrect name one", ObjectKey.ONE.toString(),
 				one.getObjectName());
 		assertEquals("Incorrect type one", oneType, one.getObjectType());
-		TaskObjectType<?> two = objects[1];
+		ManagedFunctionObjectType<?> two = objects[1];
 		assertEquals("Incorrect key two", ObjectKey.TWO, two.getKey());
 		assertEquals("Incorrect index two", ObjectKey.TWO.ordinal(),
 				two.getIndex());
@@ -659,17 +659,17 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testObjectTypeQualification() {
 
-		final TaskFactory<Work, Indexed, Indexed> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, Indexed, Indexed> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Attempt to load work type
-		WorkType<Work> workType = this.loadWorkType(true, new Loader() {
+		FunctionNamespaceType<Work> workType = this.loadWorkType(true, new Loader() {
 			@Override
 			@SuppressWarnings("rawtypes")
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, null);
 
 				// Add objects with type qualified for on
@@ -679,30 +679,30 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Validate the type qualification
-		TaskType<Work, ?, ?> task = workType.getTaskTypes()[0];
-		TaskObjectType<?>[] objects = task.getObjectTypes();
+		ManagedFunctionType<Work, ?, ?> task = workType.getManagedFunctionTypes()[0];
+		ManagedFunctionObjectType<?>[] objects = task.getObjectTypes();
 		assertEquals("Incorrect number of objects", 2, objects.length);
 
 		// Validate qualified object
-		TaskObjectType<?> one = objects[0];
+		ManagedFunctionObjectType<?> one = objects[0];
 		assertEquals("Incorrect type", Connection.class, one.getObjectType());
 		assertEquals("Incorrect qualifier", "QUALIFIED", one.getTypeQualifier());
 
 		// Validate unqualified object
-		TaskObjectType<?> two = objects[1];
+		ManagedFunctionObjectType<?> two = objects[1];
 		assertEquals("Incorrect type", Connection.class, two.getObjectType());
 		assertNull("Should be unqualified", two.getTypeQualifier());
 	}
 
 	/**
-	 * Ensure issue if using {@link Enum} but no {@link TaskFlowType} provided
+	 * Ensure issue if using {@link Enum} but no {@link ManagedFunctionFlowType} provided
 	 * for a key.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testMissingFlowForKey() {
 
-		final TaskFactory<Work, Indexed, FlowKey> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, Indexed, FlowKey> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record no tasks
 		this.issues.recordIssue("No TaskFlowType provided for key "
@@ -713,22 +713,22 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				work.addTaskType("TASK", taskFactory, null, FlowKey.class);
+				work.addManagedFunctionType("TASK", taskFactory, null, FlowKey.class);
 			}
 		});
 	}
 
 	/**
-	 * Ensure issue if no key for {@link TaskFlowType} but provided key class.
+	 * Ensure issue if no key for {@link ManagedFunctionFlowType} but provided key class.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testNoKeyForFlow() {
 
-		final TaskFactory<Work, Indexed, ObjectKey> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, Indexed, ObjectKey> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record no tasks
 		this.issues
@@ -739,10 +739,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		this.loadWorkType(false, new Loader() {
 			@Override
 			@SuppressWarnings("rawtypes")
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, ObjectKey.class);
 
 				// Add task without key
@@ -752,14 +752,14 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if incorrect key type for {@link TaskFlowType} but provided
+	 * Ensure issue if incorrect key type for {@link ManagedFunctionFlowType} but provided
 	 * key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testIncorrectKeyTypeForFlow() {
 
-		final TaskFactory<Work, Indexed, FlowKey> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, Indexed, FlowKey> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record no tasks
 		this.issues
@@ -771,10 +771,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, FlowKey.class);
 
 				// Add task with wrong key
@@ -784,13 +784,13 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if more {@link TaskFlowType} instances than keys.
+	 * Ensure issue if more {@link ManagedFunctionFlowType} instances than keys.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testMoreFlowsThanKeys() {
 
-		final TaskFactory<Work, Indexed, FlowKey> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, Indexed, FlowKey> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record no tasks
 		this.issues
@@ -800,10 +800,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, FlowKey.class);
 
 				// Add extra objects than keys
@@ -815,13 +815,13 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if key provided for {@link TaskFlowType} but no key class.
+	 * Ensure issue if key provided for {@link ManagedFunctionFlowType} but no key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testFlowHasKeyButNoKeyClass() {
 
-		final TaskFactory<Work, Indexed, FlowKey> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, Indexed, FlowKey> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 
 		// Record indexes out of order
 		this.issues
@@ -831,10 +831,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Attempt to load work type
 		this.loadWorkType(false, new Loader() {
 			@Override
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, null);
 
 				// Add flow with key
@@ -844,7 +844,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if duplicate {@link TaskFlowType} names.
+	 * Ensure issue if duplicate {@link ManagedFunctionFlowType} names.
 	 */
 	public void testDuplicateFlowNames() {
 
@@ -857,10 +857,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		this.loadWorkType(false, new Loader() {
 			@Override
 			@SuppressWarnings("rawtypes")
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, null);
 
 				// Add flows with same name
@@ -871,43 +871,43 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if {@link TaskFlowType} are not ordered to {@link Enum} key
+	 * Ensure issue if {@link ManagedFunctionFlowType} are not ordered to {@link Enum} key
 	 * order.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testKeyOrderingForFlowType() {
 
-		final TaskFactory<Work, Indexed, FlowKey> taskFactory = this
-				.createMock(TaskFactory.class);
+		final ManagedFunctionFactory<Work, Indexed, FlowKey> taskFactory = this
+				.createMock(ManagedFunctionFactory.class);
 		final Class<?> oneType = String.class;
 
 		// Attempt to load work type
-		WorkType<Work> workType = this.loadWorkType(true, new Loader() {
+		FunctionNamespaceType<Work> workType = this.loadWorkType(true, new Loader() {
 			@Override
 			@SuppressWarnings("rawtypes")
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, FlowKey.class);
 
 				// Add in wrong order
 				task.addFlow().setKey(FlowKey.TWO);
-				TaskFlowTypeBuilder<FlowKey> flowType = task.addFlow();
+				ManagedFunctionFlowTypeBuilder<FlowKey> flowType = task.addFlow();
 				flowType.setKey(FlowKey.ONE);
 				flowType.setArgumentType(oneType);
 			}
 		});
 
 		// Validate the key class
-		TaskType<Work, ?, ?> task = workType.getTaskTypes()[0];
+		ManagedFunctionType<Work, ?, ?> task = workType.getManagedFunctionTypes()[0];
 		assertEquals("Incorrect flow key class", FlowKey.class,
 				task.getFlowKeyClass());
 
 		// Validate the flow type order
-		TaskFlowType<?>[] flows = task.getFlowTypes();
+		ManagedFunctionFlowType<?>[] flows = task.getFlowTypes();
 		assertEquals("Incorrect number of flows", 2, flows.length);
-		TaskFlowType<?> one = flows[0];
+		ManagedFunctionFlowType<?> one = flows[0];
 		assertEquals("Incorrect key one", FlowKey.ONE, one.getKey());
 		assertEquals("Incorrect index one", FlowKey.ONE.ordinal(),
 				one.getIndex());
@@ -915,7 +915,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 				one.getFlowName());
 		assertEquals("Incorrect argument type one", oneType,
 				one.getArgumentType());
-		TaskFlowType<?> two = flows[1];
+		ManagedFunctionFlowType<?> two = flows[1];
 		assertEquals("Incorrect key two", FlowKey.TWO, two.getKey());
 		assertEquals("Incorrect index two", FlowKey.TWO.ordinal(),
 				two.getIndex());
@@ -945,10 +945,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		this.loadWorkType(false, new Loader() {
 			@Override
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, null);
 
 				// Add no escalation type
@@ -971,10 +971,10 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		this.loadWorkType(false, new Loader() {
 			@Override
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, null);
 
 				// Add duplicate escalation names
@@ -990,13 +990,13 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	public void testEscalation() {
 
 		// Attempt to load work type
-		WorkType<Work> workType = this.loadWorkType(true, new Loader() {
+		FunctionNamespaceType<Work> workType = this.loadWorkType(true, new Loader() {
 			@Override
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType("TASK", taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType("TASK", taskFactory,
 						null, null);
 
 				// Add escalations
@@ -1006,7 +1006,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Validate the escalation
-		TaskEscalationType[] escalations = workType.getTaskTypes()[0]
+		ManagedFunctionEscalationType[] escalations = workType.getManagedFunctionTypes()[0]
 				.getEscalationTypes();
 		assertEquals("Incorrect number of escalation", 2, escalations.length);
 		assertEquals("Incorrect first escalation type", Error.class,
@@ -1031,13 +1031,13 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		final String ESCALATION_NAME = "ESCALATION";
 
 		// Attempt to load work type
-		WorkType<Work> work = this.loadWorkType(true, new Loader() {
+		FunctionNamespaceType<Work> work = this.loadWorkType(true, new Loader() {
 			@Override
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			public void sourceWork(WorkTypeBuilder<Work> work,
-					WorkSourceContext context) throws Exception {
+			public void sourceWork(FunctionNamespaceBuilder<Work> work,
+					ManagedFunctionSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder task = work.addTaskType(TASK_NAME, taskFactory,
+				ManagedFunctionTypeBuilder task = work.addManagedFunctionType(TASK_NAME, taskFactory,
 						null, null);
 
 				// Add object, flow, escalation labels
@@ -1048,12 +1048,12 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Validate no key classes
-		TaskType<Work, ?, ?> task = work.getTaskTypes()[0];
+		ManagedFunctionType<Work, ?, ?> task = work.getManagedFunctionTypes()[0];
 		assertNull("Should not have object key class", task.getObjectKeyClass());
 		assertNull("Should not have flow key class", task.getFlowKeyClass());
 
 		// Validate the names
-		assertEquals("Incorrect task name", TASK_NAME, task.getTaskName());
+		assertEquals("Incorrect task name", TASK_NAME, task.getFunctionName());
 		assertEquals("Incorrect object name", OBJECT_NAME,
 				task.getObjectTypes()[0].getObjectName());
 		assertEquals("Incorrect flow name", FLOW_NAME,
@@ -1070,17 +1070,17 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Loads the {@link WorkType} within the input {@link Loader}.
+	 * Loads the {@link FunctionNamespaceType} within the input {@link Loader}.
 	 * 
 	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the {@link WorkType}.
+	 *            Flag indicating if expecting to load the {@link FunctionNamespaceType}.
 	 * @param loader
 	 *            {@link Loader}.
 	 * @param propertyNameValuePairs
 	 *            {@link Property} name value pairs.
-	 * @return Loaded {@link WorkType}.
+	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
-	private WorkType<Work> loadWorkType(boolean isExpectedToLoad,
+	private FunctionNamespaceType<Work> loadWorkType(boolean isExpectedToLoad,
 			Loader loader, String... propertyNameValuePairs) {
 
 		// Replay mock objects
@@ -1098,9 +1098,9 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
-		WorkLoader workLoader = compiler.getWorkLoader();
+		ManagedFunctionLoader workLoader = compiler.getWorkLoader();
 		MockWorkSource.loader = loader;
-		WorkType<Work> workType = workLoader.loadWorkType(MockWorkSource.class,
+		FunctionNamespaceType<Work> workType = workLoader.loadFunctionNamespaceType(MockWorkSource.class,
 				propertyList);
 
 		// Verify the mock objects
@@ -1118,32 +1118,32 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Implemented to load the {@link WorkType}.
+	 * Implemented to load the {@link FunctionNamespaceType}.
 	 */
 	private interface Loader {
 
 		/**
-		 * Implemented to load the {@link WorkType}.
+		 * Implemented to load the {@link FunctionNamespaceType}.
 		 * 
 		 * @param work
-		 *            {@link WorkTypeBuilder}.
+		 *            {@link FunctionNamespaceBuilder}.
 		 * @param context
-		 *            {@link WorkSourceContext}.
+		 *            {@link ManagedFunctionSourceContext}.
 		 * @throws Exception
-		 *             If fails to source {@link WorkType}.
+		 *             If fails to source {@link FunctionNamespaceType}.
 		 */
-		void sourceWork(WorkTypeBuilder<Work> work, WorkSourceContext context)
+		void sourceWork(FunctionNamespaceBuilder<Work> work, ManagedFunctionSourceContext context)
 				throws Exception;
 	}
 
 	/**
-	 * Mock {@link WorkSource} for testing.
+	 * Mock {@link ManagedFunctionSource} for testing.
 	 */
 	@TestSource
-	public static class MockWorkSource implements WorkSource<Work> {
+	public static class MockWorkSource implements ManagedFunctionSource<Work> {
 
 		/**
-		 * {@link Loader} to load the {@link WorkType}.
+		 * {@link Loader} to load the {@link FunctionNamespaceType}.
 		 */
 		public static Loader loader;
 
@@ -1174,14 +1174,14 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public WorkSourceSpecification getSpecification() {
+		public ManagedFunctionSourceSpecification getSpecification() {
 			fail("Should not be invoked in obtaining work type");
 			return null;
 		}
 
 		@Override
-		public void sourceWork(WorkTypeBuilder<Work> workTypeBuilder,
-				WorkSourceContext context) throws Exception {
+		public void sourceManagedFunctions(FunctionNamespaceBuilder<Work> workTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
 			loader.sourceWork(workTypeBuilder, context);
 		}
 	}

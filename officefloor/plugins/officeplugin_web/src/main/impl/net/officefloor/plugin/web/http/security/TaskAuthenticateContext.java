@@ -17,12 +17,12 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link Task} authentication context.
+ * {@link ManagedFunction} authentication context.
  * 
  * @author Daniel Sagenschneider
  */

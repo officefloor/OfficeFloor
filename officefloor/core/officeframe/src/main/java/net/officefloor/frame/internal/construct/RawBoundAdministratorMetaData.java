@@ -22,7 +22,7 @@ import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyKey;
@@ -90,7 +90,7 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	DutyKey<A> getDutyKey(String dutyName);
 
 	/**
-	 * Links the {@link TaskMetaData} instances to create {@link Flow} of
+	 * Links the {@link ManagedFunctionMetaData} instances to create {@link Flow} of
 	 * execution, along with the {@link Governance}.
 	 * 
 	 * @param officeMetaData

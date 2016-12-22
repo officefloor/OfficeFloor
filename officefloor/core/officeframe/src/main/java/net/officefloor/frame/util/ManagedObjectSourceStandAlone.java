@@ -25,8 +25,8 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -171,34 +171,34 @@ public class ManagedObjectSourceStandAlone {
 	}
 
 	/**
-	 * Registers the initial {@link Task} for the invoked {@link ProcessState}.
+	 * Registers the initial {@link ManagedFunction} for the invoked {@link ProcessState}.
 	 * 
 	 * @param processKey
 	 *            Key of the {@link ProcessState}.
 	 * @param task
-	 *            Initial {@link Task} for the {@link ProcessState}.
+	 *            Initial {@link ManagedFunction} for the {@link ProcessState}.
 	 * @param taskContext
-	 *            {@link TaskContext} for the {@link Task}. Allows for mocking
-	 *            the {@link TaskContext} to validate functionality for the
-	 *            {@link Task}.
+	 *            {@link ManagedFunctionContext} for the {@link ManagedFunction}. Allows for mocking
+	 *            the {@link ManagedFunctionContext} to validate functionality for the
+	 *            {@link ManagedFunction}.
 	 */
-	public void registerInvokeProcessTask(Enum<?> processKey, Task<?, ?, ?> task, TaskContext<?, ?, ?> taskContext) {
+	public void registerInvokeProcessTask(Enum<?> processKey, ManagedFunction<?, ?, ?> task, ManagedFunctionContext<?, ?, ?> taskContext) {
 		this.registerInvokeProcessTask(processKey.ordinal(), task, taskContext);
 	}
 
 	/**
-	 * Registers the initial {@link Task} for the invoked {@link ProcessState}.
+	 * Registers the initial {@link ManagedFunction} for the invoked {@link ProcessState}.
 	 * 
 	 * @param processIndex
 	 *            Index of the {@link ProcessState}.
 	 * @param task
-	 *            Initial {@link Task} for the {@link ProcessState}.
+	 *            Initial {@link ManagedFunction} for the {@link ProcessState}.
 	 * @param taskContext
-	 *            {@link TaskContext} for the {@link Task}. Allows for mocking
-	 *            the {@link TaskContext} to validate functionality for the
-	 *            {@link Task}.
+	 *            {@link ManagedFunctionContext} for the {@link ManagedFunction}. Allows for mocking
+	 *            the {@link ManagedFunctionContext} to validate functionality for the
+	 *            {@link ManagedFunction}.
 	 */
-	public void registerInvokeProcessTask(int processIndex, Task<?, ?, ?> task, TaskContext<?, ?, ?> taskContext) {
+	public void registerInvokeProcessTask(int processIndex, ManagedFunction<?, ?, ?> task, ManagedFunctionContext<?, ?, ?> taskContext) {
 		this.registerInvokeProcessServicer(processIndex, new TaskInvokedProcessServicer(task, taskContext));
 	}
 
@@ -230,29 +230,29 @@ public class ManagedObjectSourceStandAlone {
 
 	/**
 	 * {@link InvokedProcessServicer} containing the details for the initial
-	 * {@link Task} to be executed for the invoked {@link ProcessState}.
+	 * {@link ManagedFunction} to be executed for the invoked {@link ProcessState}.
 	 */
 	private class TaskInvokedProcessServicer implements InvokedProcessServicer {
 
 		/**
-		 * {@link Task}.
+		 * {@link ManagedFunction}.
 		 */
-		public final Task<?, ?, ?> task;
+		public final ManagedFunction<?, ?, ?> task;
 
 		/**
-		 * {@link TaskContext}.
+		 * {@link ManagedFunctionContext}.
 		 */
-		public final TaskContext<?, ?, ?> taskContext;
+		public final ManagedFunctionContext<?, ?, ?> taskContext;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param task
-		 *            {@link Task}.
+		 *            {@link ManagedFunction}.
 		 * @param taskContext
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
-		public TaskInvokedProcessServicer(Task<?, ?, ?> task, TaskContext<?, ?, ?> taskContext) {
+		public TaskInvokedProcessServicer(ManagedFunction<?, ?, ?> task, ManagedFunctionContext<?, ?, ?> taskContext) {
 			this.task = task;
 			this.taskContext = taskContext;
 		}
@@ -264,7 +264,7 @@ public class ManagedObjectSourceStandAlone {
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void service(int processIndex, Object parameter, ManagedObject managedObject) throws Throwable {
-			this.task.doTask((TaskContext) this.taskContext);
+			this.task.execute((ManagedFunctionContext) this.taskContext);
 		}
 	}
 
@@ -274,7 +274,7 @@ public class ManagedObjectSourceStandAlone {
 	private class LoadExecuteContext<F extends Enum<F>> implements ManagedObjectExecuteContext<F> {
 
 		/**
-		 * Processes the {@link Task} for the invoked {@link ProcessState}.
+		 * Processes the {@link ManagedFunction} for the invoked {@link ProcessState}.
 		 * 
 		 * @param processIndex
 		 *            Index of the {@link ProcessState} to invoke.
@@ -283,7 +283,7 @@ public class ManagedObjectSourceStandAlone {
 		 * @param delay
 		 *            Delay to invoke {@link ProcessState}.
 		 * @param parameter
-		 *            Parameter to initial {@link Task} of the invoked
+		 *            Parameter to initial {@link ManagedFunction} of the invoked
 		 *            {@link ProcessState}.
 		 * @param managedObject
 		 *            {@link ManagedObject} for the {@link ProcessState}.

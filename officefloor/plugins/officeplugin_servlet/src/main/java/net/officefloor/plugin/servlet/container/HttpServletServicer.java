@@ -26,13 +26,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.mapping.ServicerMapper;
 
 /**
  * {@link HttpServlet} servicer that is also the differentiator type for a
- * {@link HttpServlet} {@link Task}.
+ * {@link HttpServlet} {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */

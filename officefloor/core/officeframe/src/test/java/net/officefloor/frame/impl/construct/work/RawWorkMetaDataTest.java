@@ -23,7 +23,7 @@ import java.util.Map;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
@@ -50,7 +50,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -185,7 +185,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to construct {@link Work} without {@link ManagedObject}
-	 * instances, {@link Administrator} instances or {@link Task} instances.
+	 * instances, {@link Administrator} instances or {@link ManagedFunction} instances.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testNoManagedObjectsAdministratorsOrTasks() {
@@ -340,7 +340,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure handle no {@link Task} scoped {@link ManagedObject}.
+	 * Ensure handle no {@link ManagedFunction} scoped {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testNoTaskScopedManagedObject() {
@@ -482,7 +482,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to construct with a single {@link Task}.
+	 * Ensure able to construct with a single {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testSingleTask() {
@@ -502,14 +502,14 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
 
 		// Ensure contains the task
-		TaskMetaData<?, ?, ?>[] taskMetaDatas = workMetaData.getTaskMetaData();
+		ManagedFunctionMetaData<?, ?, ?>[] taskMetaDatas = workMetaData.getTaskMetaData();
 		assertEquals("Should have a single task", 1, taskMetaDatas.length);
 		assertEquals("Incorrect task meta-data", task.taskMetaData,
 				taskMetaDatas[0]);
 	}
 
 	/**
-	 * Ensure able to specify the initial {@link Task}.
+	 * Ensure able to specify the initial {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testInitialTask() {
@@ -543,7 +543,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to link {@link Task} instances.
+	 * Ensure able to link {@link ManagedFunction} instances.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testLinkTasks() {
@@ -729,11 +729,11 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Convenience method to record {@link Task} construction without an initial
-	 * {@link Task}.
+	 * Convenience method to record {@link ManagedFunction} construction without an initial
+	 * {@link ManagedFunction}.
 	 * 
 	 * @param tasks
-	 *            {@link RecordedTask} instances for each {@link Task}.
+	 *            {@link RecordedTask} instances for each {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("unchecked")
 	private void record_tasks(RecordedTask... tasks) {
@@ -741,15 +741,15 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records creation of {@link Task} instances on the {@link Work}.
+	 * Records creation of {@link ManagedFunction} instances on the {@link Work}.
 	 * 
 	 * @param initialTaskName
-	 *            Name of the initial {@link Task} on the {@link Work}. May be
-	 *            <code>null</code> if no initial {@link Task}.
+	 *            Name of the initial {@link ManagedFunction} on the {@link Work}. May be
+	 *            <code>null</code> if no initial {@link ManagedFunction}.
 	 * @param assetManager
-	 *            {@link AssetManager} for the initial {@link Task}.
+	 *            {@link AssetManager} for the initial {@link ManagedFunction}.
 	 * @param tasks
-	 *            {@link RecordedTask} instances for each {@link Task}.
+	 *            {@link RecordedTask} instances for each {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("unchecked")
 	private void record_tasks(String initialTaskName,
@@ -827,12 +827,12 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Details of a recorded {@link Task}.
+	 * Details of a recorded {@link ManagedFunction}.
 	 */
 	private class RecordedTask {
 
 		/**
-		 * Name of the {@link Task}.
+		 * Name of the {@link ManagedFunction}.
 		 */
 		public final String taskName;
 
@@ -843,13 +843,13 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 				.createMock(RawTaskMetaData.class);
 
 		/**
-		 * {@link TaskMetaData}.
+		 * {@link ManagedFunctionMetaData}.
 		 */
-		public final TaskMetaData<?, ?, ?> taskMetaData = RawWorkMetaDataTest.this
-				.createMock(TaskMetaData.class);
+		public final ManagedFunctionMetaData<?, ?, ?> taskMetaData = RawWorkMetaDataTest.this
+				.createMock(ManagedFunctionMetaData.class);
 
 		/**
-		 * {@link TaskConfiguration} that is run on {@link Task} creation.
+		 * {@link TaskConfiguration} that is run on {@link ManagedFunction} creation.
 		 */
 		public final TaskConstruction taskConstruction;
 
@@ -857,7 +857,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		 * Initiate.
 		 * 
 		 * @param taskName
-		 *            Name of the {@link Task}.
+		 *            Name of the {@link ManagedFunction}.
 		 * @param taskConstruction
 		 *            {@link TaskConstruction}.
 		 */
@@ -870,7 +870,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		 * Initiate.
 		 * 
 		 * @param taskName
-		 *            Name of the {@link Task}.
+		 *            Name of the {@link ManagedFunction}.
 		 */
 		public RecordedTask(String taskName) {
 			this(taskName, null);
@@ -883,7 +883,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	private interface TaskConstruction {
 
 		/**
-		 * Constructs the {@link TaskMetaData}.
+		 * Constructs the {@link ManagedFunctionMetaData}.
 		 * 
 		 * @param rawWorkMetaData
 		 *            {@link RawWorkMetaData}.

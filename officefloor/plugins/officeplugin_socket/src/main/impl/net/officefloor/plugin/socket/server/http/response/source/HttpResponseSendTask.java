@@ -20,19 +20,19 @@ package net.officefloor.plugin.socket.server.http.response.source;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
- * {@link Task} to trigger sending the {@link HttpResponse}.
+ * {@link ManagedFunction} to trigger sending the {@link HttpResponse}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -48,22 +48,22 @@ public class HttpResponseSendTask
 	}
 
 	/**
-	 * Adds the {@link TaskType} information for {@link HttpResponseSendTask}.
+	 * Adds the {@link ManagedFunctionType} information for {@link HttpResponseSendTask}.
 	 * 
 	 * @param taskName
-	 *            {@link Task} name.
+	 *            {@link ManagedFunction} name.
 	 * @param taskFactory
 	 *            {@link HttpResponseSendTask}.
 	 * @param workTypeBuilder
-	 *            {@link WorkTypeBuilder}.
-	 * @return {@link TaskTypeBuilder} that added this
+	 *            {@link FunctionNamespaceBuilder}.
+	 * @return {@link ManagedFunctionTypeBuilder} that added this
 	 *         {@link HttpResponseSendTask} type information.
 	 */
-	public static TaskTypeBuilder<HttpResponseSendTaskDependencies, None> addTaskType(
+	public static ManagedFunctionTypeBuilder<HttpResponseSendTaskDependencies, None> addTaskType(
 			String taskName, HttpResponseSendTask taskFactory,
-			WorkTypeBuilder<Work> workTypeBuilder) {
-		TaskTypeBuilder<HttpResponseSendTaskDependencies, None> task = workTypeBuilder
-				.addTaskType(taskName, taskFactory,
+			FunctionNamespaceBuilder<Work> workTypeBuilder) {
+		ManagedFunctionTypeBuilder<HttpResponseSendTaskDependencies, None> task = workTypeBuilder
+				.addManagedFunctionType(taskName, taskFactory,
 						HttpResponseSendTaskDependencies.class, None.class);
 		task.addObject(ServerHttpConnection.class).setKey(
 				HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION);
@@ -108,8 +108,8 @@ public class HttpResponseSendTask
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<Work, HttpResponseSendTaskDependencies, None> context)
+	public Object execute(
+			ManagedFunctionContext<Work, HttpResponseSendTaskDependencies, None> context)
 			throws IOException {
 
 		// Obtain the response

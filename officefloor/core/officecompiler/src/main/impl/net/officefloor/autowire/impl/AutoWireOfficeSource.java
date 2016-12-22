@@ -72,7 +72,7 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -387,11 +387,11 @@ public class AutoWireOfficeSource extends AbstractOfficeSource {
 	}
 
 	/**
-	 * Adds an available {@link OfficeTeam} for executing {@link Task} instances
+	 * Adds an available {@link OfficeTeam} for executing {@link ManagedFunction} instances
 	 * that has an object dependency of the input type.
 	 * 
 	 * @param autoWire
-	 *            Object dependency {@link AutoWire} for the {@link Task}.
+	 *            Object dependency {@link AutoWire} for the {@link ManagedFunction}.
 	 */
 	public void addAvailableOfficeTeam(AutoWire autoWire) {
 		this.availableTeamAutoWiring.add(autoWire);

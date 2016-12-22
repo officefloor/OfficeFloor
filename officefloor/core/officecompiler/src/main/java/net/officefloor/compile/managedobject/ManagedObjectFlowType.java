@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.managedobject;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.Flow;
@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * <code>Type definition</code> of a {@link Flow} instigated by the
- * {@link ManagedObjectSource} or one of its {@link Task} instances.
+ * {@link ManagedObjectSource} or one of its {@link ManagedFunction} instances.
  * 
  * @author Daniel Sagenschneider
  */
@@ -41,7 +41,7 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 	/**
 	 * Obtains the name of the {@link Work} instigating the {@link Flow}.
 	 * Should the {@link Flow} be instigated by the
-	 * {@link ManagedObjectSource} directly (rather than a {@link Task} it
+	 * {@link ManagedObjectSource} directly (rather than a {@link ManagedFunction} it
 	 * added) this will return <code>null</code>.
 	 * 
 	 * @return {@link Work} name instigating {@link Flow} or
@@ -54,20 +54,20 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Obtains the name of the {@link Task} instigating the {@link Flow}.
+	 * Obtains the name of the {@link ManagedFunction} instigating the {@link Flow}.
 	 * Should the {@link Flow} be instigated by the
-	 * {@link ManagedObjectSource} directly (rather than a {@link Task} it
+	 * {@link ManagedObjectSource} directly (rather than a {@link ManagedFunction} it
 	 * added) this will return <code>null</code>.
 	 * <p>
-	 * For clarity, this is not the name of the {@link Task} to be invoked by
-	 * the {@link Flow} but rather the {@link Task} triggering the
+	 * For clarity, this is not the name of the {@link ManagedFunction} to be invoked by
+	 * the {@link Flow} but rather the {@link ManagedFunction} triggering the
 	 * {@link Flow}. In other words, it is a {@link Flow}
 	 * invocation that requires to be defined for the
-	 * {@link ManagedObjectSource} as it is triggered from a {@link Task} added
+	 * {@link ManagedObjectSource} as it is triggered from a {@link ManagedFunction} added
 	 * by the {@link ManagedObjectSource} and handled by some {@link Office}
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 * 
-	 * @return {@link Task} name instigating {@link Flow} or
+	 * @return {@link ManagedFunction} name instigating {@link Flow} or
 	 *         <code>null</code> if instigated directly by
 	 *         {@link ManagedObjectSource}.
 	 */

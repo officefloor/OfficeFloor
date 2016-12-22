@@ -28,16 +28,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -298,19 +298,19 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	/**
-	 * Creates a {@link WorkTaskModel} for a {@link TaskType}.
+	 * Creates a {@link WorkTaskModel} for a {@link ManagedFunctionType}.
 	 *
 	 * @param taskType
-	 *            {@link TaskType}.
-	 * @return {@link WorkTaskModel} for the {@link TaskType}.
+	 *            {@link ManagedFunctionType}.
+	 * @return {@link WorkTaskModel} for the {@link ManagedFunctionType}.
 	 */
-	private WorkTaskModel createWorkTaskModel(TaskType<?, ?, ?> taskType) {
+	private WorkTaskModel createWorkTaskModel(ManagedFunctionType<?, ?, ?> taskType) {
 
 		// Create the work task model
-		WorkTaskModel workTask = new WorkTaskModel(taskType.getTaskName());
+		WorkTaskModel workTask = new WorkTaskModel(taskType.getFunctionName());
 
 		// Add the task object models
-		for (TaskObjectType<?> taskObjectType : taskType.getObjectTypes()) {
+		for (ManagedFunctionObjectType<?> taskObjectType : taskType.getObjectTypes()) {
 			Enum<?> key = taskObjectType.getKey();
 			WorkTaskObjectModel taskObject = new WorkTaskObjectModel(
 					taskObjectType.getObjectName(), (key == null ? null : key
@@ -502,7 +502,7 @@ public class DeskChangesImpl implements DeskChanges {
 	@Override
 	public <W extends Work> Change<WorkModel> addWork(String workName,
 			String workSourceClassName, PropertyList properties,
-			WorkType<W> workType, String... taskNames) {
+			FunctionNamespaceType<W> workType, String... taskNames) {
 
 		// Create the work model for the work type
 		final WorkModel work = new WorkModel(workName, workSourceClassName);
@@ -520,10 +520,10 @@ public class DeskChangesImpl implements DeskChanges {
 		}
 
 		// Add the work task models
-		for (TaskType<?, ?, ?> taskType : workType.getTaskTypes()) {
+		for (ManagedFunctionType<?, ?, ?> taskType : workType.getManagedFunctionTypes()) {
 
 			// Determine if include the task type
-			String taskName = taskType.getTaskName();
+			String taskName = taskType.getFunctionName();
 			if ((includeTaskNames.size() > 0)
 					&& (!includeTaskNames.contains(taskName))) {
 				// Task to not be included
@@ -674,7 +674,7 @@ public class DeskChangesImpl implements DeskChanges {
 	public <W extends Work> Change<WorkModel> refactorWork(
 			final WorkModel workModel, final String workName,
 			final String workSourceClassName, PropertyList properties,
-			WorkType<W> workType, Map<String, String> workTaskNameMapping,
+			FunctionNamespaceType<W> workType, Map<String, String> workTaskNameMapping,
 			Map<String, Map<String, String>> workTaskToObjectNameMapping,
 			Map<String, Map<String, String>> taskToFlowNameMapping,
 			Map<String, Map<String, String>> taskToEscalationTypeMapping,
@@ -759,13 +759,13 @@ public class DeskChangesImpl implements DeskChanges {
 				.asList(taskNames));
 
 		// Refactor tasks
-		TaskType<?, ?, ?>[] taskTypes = workType.getTaskTypes();
+		ManagedFunctionType<?, ?, ?>[] taskTypes = workType.getManagedFunctionTypes();
 		List<WorkTaskModel> targetTaskList = new LinkedList<WorkTaskModel>();
 		for (int t = 0; t < taskTypes.length; t++) {
-			TaskType<?, ?, ?> taskType = taskTypes[t];
+			ManagedFunctionType<?, ?, ?> taskType = taskTypes[t];
 
 			// Obtain the details of the task type
-			final String workTaskName = taskType.getTaskName();
+			final String workTaskName = taskType.getFunctionName();
 			Class<?> returnClass = taskType.getReturnType();
 			final String returnTypeName = (returnClass == null ? null
 					: returnClass.getName());
@@ -837,10 +837,10 @@ public class DeskChangesImpl implements DeskChanges {
 			}
 
 			// Obtain the objects in order as per type
-			TaskObjectType<?>[] objectTypes = taskType.getObjectTypes();
+			ManagedFunctionObjectType<?>[] objectTypes = taskType.getObjectTypes();
 			final WorkTaskObjectModel[] targetObjectOrder = new WorkTaskObjectModel[objectTypes.length];
 			for (int o = 0; o < objectTypes.length; o++) {
-				TaskObjectType<?> objectType = objectTypes[o];
+				ManagedFunctionObjectType<?> objectType = objectTypes[o];
 
 				// Obtain the details of the object type
 				final String objectName = objectType.getObjectName();
@@ -964,10 +964,10 @@ public class DeskChangesImpl implements DeskChanges {
 				}
 
 				// Obtain the flows in order of type
-				TaskFlowType<?>[] flowTypes = taskType.getFlowTypes();
+				ManagedFunctionFlowType<?>[] flowTypes = taskType.getFlowTypes();
 				final TaskFlowModel[] targetFlowOrder = new TaskFlowModel[flowTypes.length];
 				for (int f = 0; f < targetFlowOrder.length; f++) {
-					TaskFlowType<?> flowType = flowTypes[f];
+					ManagedFunctionFlowType<?> flowType = flowTypes[f];
 
 					// Obtain the details of the flow type
 					final String flowName = flowType.getFlowName();
@@ -1077,11 +1077,11 @@ public class DeskChangesImpl implements DeskChanges {
 				}
 
 				// Obtain the escalations in order of type
-				TaskEscalationType[] escalationTypes = taskType
+				ManagedFunctionEscalationType[] escalationTypes = taskType
 						.getEscalationTypes();
 				final TaskEscalationModel[] targetEscalationOrder = new TaskEscalationModel[escalationTypes.length];
 				for (int e = 0; e < targetEscalationOrder.length; e++) {
-					TaskEscalationType escalationType = escalationTypes[e];
+					ManagedFunctionEscalationType escalationType = escalationTypes[e];
 
 					// Obtain details of the escalation type
 					final String escalationTypeName = escalationType
@@ -1296,10 +1296,10 @@ public class DeskChangesImpl implements DeskChanges {
 
 	@Override
 	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> addWorkTask(
-			final WorkModel workModel, TaskType<W, D, F> taskType) {
+			final WorkModel workModel, ManagedFunctionType<W, D, F> taskType) {
 
 		// Ensure the work task is not already added
-		String taskName = taskType.getTaskName();
+		String taskName = taskType.getFunctionName();
 		for (WorkTaskModel workTask : workModel.getWorkTasks()) {
 			if (taskName.equals(taskName)) {
 				// Task already added
@@ -1404,14 +1404,14 @@ public class DeskChangesImpl implements DeskChanges {
 	@Override
 	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<TaskModel> addTask(
 			String taskName, final WorkTaskModel workTask,
-			TaskType<W, D, F> taskType) {
+			ManagedFunctionType<W, D, F> taskType) {
 
 		// Create the task model
 		Class<?> returnType = taskType.getReturnType();
 		final TaskModel task = new TaskModel(taskName, false, null, workTask
 				.getWorkTaskName(), (returnType != null ? returnType.getName()
 				: null));
-		for (TaskFlowType<?> flowType : taskType.getFlowTypes()) {
+		for (ManagedFunctionFlowType<?> flowType : taskType.getFlowTypes()) {
 			Enum<?> key = flowType.getKey();
 			Class<?> argumentType = flowType.getArgumentType();
 			TaskFlowModel taskFlow = new TaskFlowModel(flowType.getFlowName(),
@@ -1419,7 +1419,7 @@ public class DeskChangesImpl implements DeskChanges {
 					(argumentType != null ? argumentType.getName() : null));
 			task.addTaskFlow(taskFlow);
 		}
-		for (TaskEscalationType escalationType : taskType.getEscalationTypes()) {
+		for (ManagedFunctionEscalationType escalationType : taskType.getEscalationTypes()) {
 			TaskEscalationModel taskEscalation = new TaskEscalationModel(
 					escalationType.getEscalationType().getName());
 			task.addTaskEscalation(taskEscalation);
@@ -1445,10 +1445,10 @@ public class DeskChangesImpl implements DeskChanges {
 		task.setWorkName(work.getWorkName());
 
 		// Ensure the work task for the task type
-		if (!workTask.getWorkTaskName().equals(taskType.getTaskName())) {
+		if (!workTask.getWorkTaskName().equals(taskType.getFunctionName())) {
 			// Not correct task type for the work task
 			return new NoChange<TaskModel>(task, "Add task " + taskName,
-					"Task type " + taskType.getTaskName()
+					"Task type " + taskType.getFunctionName()
 							+ " does not match work task "
 							+ workTask.getWorkTaskName());
 		}

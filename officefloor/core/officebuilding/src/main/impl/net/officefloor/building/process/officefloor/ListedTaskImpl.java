@@ -19,7 +19,7 @@ package net.officefloor.building.process.officefloor;
 
 import java.io.Serializable;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 
@@ -46,7 +46,7 @@ public class ListedTaskImpl implements ListedTask, Serializable {
 	private final String workName;
 
 	/**
-	 * Name of the {@link Task}.
+	 * Name of the {@link ManagedFunction}.
 	 */
 	private final String taskName;
 
@@ -63,7 +63,7 @@ public class ListedTaskImpl implements ListedTask, Serializable {
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param paramaterType
 	 *            Fully qualified class name of the parameter. May be
 	 *            <code>null</code>.

@@ -83,7 +83,7 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -564,7 +564,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		for (int i = 0; i < startupTasksLength; i++) {
 
 			// Obtain the task meta-data for the startup task
-			TaskMetaData<?, ?, ?> startupTaskMetaData = ConstructUtil.getTaskMetaData(startupTaskReferences[i],
+			ManagedFunctionMetaData<?, ?, ?> startupTaskMetaData = ConstructUtil.getTaskMetaData(startupTaskReferences[i],
 					metaDataLocator, issues, AssetType.OFFICE, officeName, "Startup Task " + i, true);
 			if (startupTaskMetaData == null) {
 				continue; // startup task not found
@@ -595,7 +595,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			}
 
 			// Obtain the task meta-data for the escalation
-			TaskMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil.getTaskMetaData(
+			ManagedFunctionMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil.getTaskMetaData(
 					officeEscalationConfigurations[i].getTaskNodeReference(), metaDataLocator, issues, AssetType.OFFICE,
 					officeName, "Office Escalation " + i, true);
 			if (escalationTaskMetaData == null) {
@@ -689,7 +689,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 	}
 
 	/**
-	 * Links the {@link TaskMetaData} instances into the
+	 * Links the {@link ManagedFunctionMetaData} instances into the
 	 * {@link RawBoundAdministratorMetaData} instances.
 	 * 
 	 * @param officeMetaData

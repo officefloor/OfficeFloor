@@ -20,7 +20,7 @@ package net.officefloor.plugin.socket.server.tcp.source;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
 
@@ -42,10 +42,10 @@ public class MessageWork {
 	 * @param connection
 	 *            {@link ServerTcpConnection}.
 	 * @param taskContext
-	 *            {@link TaskContext}.
+	 *            {@link ManagedFunctionContext}.
 	 */
 	public void service(ServerTcpConnection connection,
-			TaskContext<?, ?, ?> taskContext) throws Throwable {
+			ManagedFunctionContext<?, ?, ?> taskContext) throws Throwable {
 		try {
 
 			// Ensure not waiting too long

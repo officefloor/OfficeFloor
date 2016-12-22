@@ -39,7 +39,7 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.desk.DeskChanges;
@@ -606,7 +606,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 	 * @param designer
 	 *            {@link SectionDesigner}.
 	 * @param taskName
-	 *            Name of the {@link Task} for reporting issues.
+	 *            Name of the {@link ManagedFunction} for reporting issues.
 	 * @param flowName
 	 *            Name of the {@link TaskFlow} for reporting issues.
 	 * @return {@link FlowInstigationStrategyEnum}.

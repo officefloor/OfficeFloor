@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.governance;
 import net.officefloor.compile.governance.GovernanceFlowType;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
  * {@link GovernanceFlowType} implementation.
@@ -51,7 +51,7 @@ public class GovernanceFlowTypeImpl<F extends Enum<F>> implements
 	private final F key;
 
 	/**
-	 * Initiate for a {@link GovernanceFlowType} invoked from a {@link Task}
+	 * Initiate for a {@link GovernanceFlowType} invoked from a {@link ManagedFunction}
 	 * added by the {@link GovernanceSource}.
 	 * 
 	 * @param index

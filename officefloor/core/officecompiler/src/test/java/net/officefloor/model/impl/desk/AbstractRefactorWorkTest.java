@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.PropertyModel;
@@ -42,7 +42,7 @@ import net.officefloor.model.desk.WorkTaskObjectModel;
 
 /**
  * Abstract functionality to test refactoring the {@link WorkModel} to a
- * {@link WorkType} via the {@link DeskChanges}.
+ * {@link FunctionNamespaceType} via the {@link DeskChanges}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -60,7 +60,7 @@ public abstract class AbstractRefactorWorkTest extends
 	private String workName;
 
 	/**
-	 * {@link WorkSource} class name to refactor the {@link WorkModel} to have.
+	 * {@link ManagedFunctionSource} class name to refactor the {@link WorkModel} to have.
 	 */
 	private String workSourceClassName;
 
@@ -70,30 +70,30 @@ public abstract class AbstractRefactorWorkTest extends
 	private PropertyList properties = null;
 
 	/**
-	 * Mapping of {@link TaskType} name to {@link WorkTaskModel} name.
+	 * Mapping of {@link ManagedFunctionType} name to {@link WorkTaskModel} name.
 	 */
 	private final Map<String, String> workTaskNameMapping = new HashMap<String, String>();
 
 	/**
-	 * Mapping for a {@link WorkTaskModel} of the {@link TaskObjectType} name to
+	 * Mapping for a {@link WorkTaskModel} of the {@link ManagedFunctionObjectType} name to
 	 * the {@link WorkTaskObjectModel} name.
 	 */
 	private final Map<String, Map<String, String>> workTaskToObjectNameMapping = new HashMap<String, Map<String, String>>();
 
 	/**
-	 * Mapping for a {@link TaskModel} of the {@link TaskFlowType} name to the
+	 * Mapping for a {@link TaskModel} of the {@link ManagedFunctionFlowType} name to the
 	 * {@link TaskFlowModel} name.
 	 */
 	private final Map<String, Map<String, String>> taskToFlowNameMapping = new HashMap<String, Map<String, String>>();
 
 	/**
-	 * Mapping for a {@link TaskModel} of the {@link TaskEscalationType} name to
+	 * Mapping for a {@link TaskModel} of the {@link ManagedFunctionEscalationType} name to
 	 * the {@link TaskEscalationModel} name.
 	 */
 	private final Map<String, Map<String, String>> taskToEscalationTypeMapping = new HashMap<String, Map<String, String>>();
 
 	/**
-	 * Listing of {@link TaskType} names included on the {@link WorkModel}.
+	 * Listing of {@link ManagedFunctionType} names included on the {@link WorkModel}.
 	 */
 	private String[] tasks = null;
 
@@ -133,11 +133,11 @@ public abstract class AbstractRefactorWorkTest extends
 	}
 
 	/**
-	 * Flags to refactor the {@link WorkSource} class name for the
+	 * Flags to refactor the {@link ManagedFunctionSource} class name for the
 	 * {@link WorkModel}.
 	 * 
 	 * @param workSourceClassName
-	 *            New {@link WorkSource} class name for the {@link WorkModel}.
+	 *            New {@link ManagedFunctionSource} class name for the {@link WorkModel}.
 	 */
 	protected void refactor_workSourceClassName(String workSourceClassName) {
 		this.workSourceClassName = workSourceClassName;
@@ -163,10 +163,10 @@ public abstract class AbstractRefactorWorkTest extends
 	}
 
 	/**
-	 * Maps the {@link TaskType} to the {@link WorkTaskModel}.
+	 * Maps the {@link ManagedFunctionType} to the {@link WorkTaskModel}.
 	 * 
 	 * @param taskTypeName
-	 *            Name of the {@link TaskType}.
+	 *            Name of the {@link ManagedFunctionType}.
 	 * @param workTaskModelName
 	 *            Name of the {@link WorkTaskModel}.
 	 */
@@ -176,13 +176,13 @@ public abstract class AbstractRefactorWorkTest extends
 	}
 
 	/**
-	 * Maps the {@link TaskObjectType} name to the {@link WorkTaskObjectModel}
+	 * Maps the {@link ManagedFunctionObjectType} name to the {@link WorkTaskObjectModel}
 	 * name for a {@link WorkTaskModel}.
 	 * 
 	 * @param workTaskName
 	 *            Name of the {@link WorkTaskModel}.
 	 * @param objectTypeName
-	 *            Name of the {@link TaskObjectType}.
+	 *            Name of the {@link ManagedFunctionObjectType}.
 	 * @param workTaskObjectName
 	 *            Name of the {@link WorkTaskObjectModel}.
 	 */
@@ -193,13 +193,13 @@ public abstract class AbstractRefactorWorkTest extends
 	}
 
 	/**
-	 * Maps the {@link TaskFlowType} name to the {@link TaskFlowModel} name for
+	 * Maps the {@link ManagedFunctionFlowType} name to the {@link TaskFlowModel} name for
 	 * a {@link TaskModel}.
 	 * 
 	 * @param taskName
 	 *            Name of the {@link TaskModel}.
 	 * @param flowTypeName
-	 *            Name of the {@link TaskFlowType}.
+	 *            Name of the {@link ManagedFunctionFlowType}.
 	 * @param taskFlowName
 	 *            Name of the {@link TaskFlowModel}.
 	 */
@@ -210,13 +210,13 @@ public abstract class AbstractRefactorWorkTest extends
 	}
 
 	/**
-	 * Maps the {@link TaskEscalationType} name to the
+	 * Maps the {@link ManagedFunctionEscalationType} name to the
 	 * {@link TaskEscalationModel} name for the {@link TaskModel}.
 	 * 
 	 * @param taskName
 	 *            Name of the {@link TaskModel}.
 	 * @param escalationTypeName
-	 *            Name of the {@link TaskEscalationType}.
+	 *            Name of the {@link ManagedFunctionEscalationType}.
 	 * @param taskEscalationName
 	 *            Name of the {@link TaskEscalationModel}.
 	 */
@@ -253,11 +253,11 @@ public abstract class AbstractRefactorWorkTest extends
 	}
 
 	/**
-	 * Specifies the names of the {@link TaskType} instances to include on the
+	 * Specifies the names of the {@link ManagedFunctionType} instances to include on the
 	 * {@link WorkModel}.
 	 * 
 	 * @param taskNames
-	 *            Names of the {@link TaskType} instances to include on the
+	 *            Names of the {@link ManagedFunctionType} instances to include on the
 	 *            {@link WorkModel}.
 	 */
 	protected void refactor_includeTasks(String... taskNames) {
@@ -265,10 +265,10 @@ public abstract class AbstractRefactorWorkTest extends
 	}
 
 	/**
-	 * Convenience method to do refactoring with a simple {@link WorkType}.
+	 * Convenience method to do refactoring with a simple {@link FunctionNamespaceType}.
 	 */
 	protected void doRefactor() {
-		this.doRefactor((WorkType<?>) null);
+		this.doRefactor((FunctionNamespaceType<?>) null);
 	}
 
 	/**
@@ -281,7 +281,7 @@ public abstract class AbstractRefactorWorkTest extends
 	protected void doRefactor(WorkTypeConstructor workTypeConstructor) {
 
 		// Construct the work type
-		WorkType<?> workType = this.constructWorkType(workTypeConstructor);
+		FunctionNamespaceType<?> workType = this.constructWorkType(workTypeConstructor);
 
 		// Do the refactoring
 		this.doRefactor(workType);
@@ -291,9 +291,9 @@ public abstract class AbstractRefactorWorkTest extends
 	 * Does the refactoring and validates applying and reverting.
 	 * 
 	 * @param workType
-	 *            {@link WorkType}.
+	 *            {@link FunctionNamespaceType}.
 	 */
-	protected void doRefactor(WorkType<?> workType) {
+	protected void doRefactor(FunctionNamespaceType<?> workType) {
 
 		// Ensure have a work type
 		if (workType == null) {

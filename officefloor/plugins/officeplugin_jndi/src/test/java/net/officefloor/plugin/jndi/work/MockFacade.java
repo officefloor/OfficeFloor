@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
@@ -66,7 +66,7 @@ public class MockFacade {
 
 	/**
 	 * Only methods with the JNDI Object type as input are included as
-	 * {@link Task} instances.
+	 * {@link ManagedFunction} instances.
 	 * 
 	 * @param notJndiObject
 	 *            Not {@link MockJndiObject} being used in tests.
@@ -75,18 +75,18 @@ public class MockFacade {
 	}
 
 	/**
-	 * Simple facade {@link Task}.
+	 * Simple facade {@link ManagedFunction}.
 	 * 
 	 * @param object
 	 *            Required {@link MockJndiObject} parameter type to be included
-	 *            as a {@link Task}.
+	 *            as a {@link ManagedFunction}.
 	 */
 	public void simpleFacade(MockJndiObject object) {
 		object.simpleTask();
 	}
 
 	/**
-	 * Complex facade {@link Task}.
+	 * Complex facade {@link ManagedFunction}.
 	 * 
 	 * @param xml
 	 *            Test parameter.
@@ -94,7 +94,7 @@ public class MockFacade {
 	 *            Identifier to the {@link XmlUnmarshaller}.
 	 * @param object
 	 *            Required {@link MockJndiObject} parameter type to be included
-	 *            as a {@link Task}.
+	 *            as a {@link ManagedFunction}.
 	 * @return Test return value.
 	 * @throws Exception
 	 *             Test exception.
@@ -115,11 +115,11 @@ public class MockFacade {
 	/**
 	 * Same {@link Method} name as
 	 * {@link MockJndiObject#complexTask(String, XmlUnmarshaller)} to override
-	 * as the {@link Task}.
+	 * as the {@link ManagedFunction}.
 	 * 
 	 * @param object
 	 *            Required {@link MockJndiObject} parameter type to be included
-	 *            as a {@link Task}.
+	 *            as a {@link ManagedFunction}.
 	 */
 	public void complexTask(MockJndiObject object) {
 		// Only example of overriding task

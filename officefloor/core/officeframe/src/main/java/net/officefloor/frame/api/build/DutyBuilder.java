@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Duty;
@@ -34,7 +34,7 @@ import net.officefloor.frame.spi.governance.Governance;
 public interface DutyBuilder {
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link Task} of
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 * 
 	 * @param <F>
@@ -42,10 +42,10 @@ public interface DutyBuilder {
 	 * @param key
 	 *            Key identifying the {@link Flow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
 	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link Task} that resides on the {@link Work}.
+	 *            Name of {@link ManagedFunction} that resides on the {@link Work}.
 	 * @param argumentType
 	 *            Type of argument passed to the instigated {@link Flow}.
 	 *            May be <code>null</code> to indicate no argument.
@@ -54,16 +54,16 @@ public interface DutyBuilder {
 			Class<?> argumentType);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link Task} of
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
 	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link Task} that resides on the {@link Work}.
+	 *            Name of {@link ManagedFunction} that resides on the {@link Work}.
 	 * @param argumentType
 	 *            Type of argument passed to the instigated {@link Flow}.
 	 *            May be <code>null</code> to indicate no argument.

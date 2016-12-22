@@ -20,13 +20,12 @@ package net.officefloor.frame.impl.execute.function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
-import net.officefloor.frame.internal.structure.ActiveGovernance;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.Flow;
@@ -36,11 +35,12 @@ import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.ManagedFunctionContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainerContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainerMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
@@ -54,13 +54,14 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractManagedFunctionContainer<W extends Work, N extends ManagedFunctionMetaData>
-		extends AbstractLinkedListSetEntry<ManagedFunctionContainer, Flow> implements ManagedFunctionContainer, ManagedFunctionContext {
+public abstract class AbstractManagedFunctionContainer<W extends Work, N extends ManagedFunctionContainerMetaData>
+		extends AbstractLinkedListSetEntry<ManagedFunctionContainer, Flow>
+		implements ManagedFunctionContainer, ManagedFunctionContainerContext {
 
 	/**
-	 * {@link Logger}.
+	 * Provide logging of {@link OfficeFloor} framework failures.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(OfficeFrame.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(OfficeFloor.class.getName());
 
 	/**
 	 * {@link Flow}.
@@ -74,19 +75,14 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	protected final WorkContainer<W> workContainer;
 
 	/**
-	 * {@link ManagedFunctionMetaData}.
+	 * {@link ManagedFunctionContainerMetaData}.
 	 */
-	protected final N nodeMetaData;
-
-	/**
-	 * State of this {@link Job}.
-	 */
-	private JobState jobState = JobState.LOAD_MANAGED_OBJECTS;
+	protected final N functionContainerMetaData;
 
 	/**
 	 * {@link work} {@link ManagedObjectIndex} instances to the
 	 * {@link ManagedObject} instances that must be loaded before the
-	 * {@link Task} may be executed.
+	 * {@link ManagedFunction} may be executed.
 	 */
 	@Deprecated // make part of job meta-data
 	private final ManagedObjectIndex[] requiredManagedObjects;
@@ -127,6 +123,11 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	// private final JobNode escalationParent;
 
 	/**
+	 * State of this {@link ManagedFunctionContainer}.
+	 */
+	private JobState containerState = JobState.LOAD_MANAGED_OBJECTS;
+
+	/**
 	 * Next {@link AbstractManagedFunctionContainer} in the sequential listing.
 	 */
 	private AbstractManagedFunctionContainer<?, ?> nextTaskNode = null;
@@ -142,8 +143,8 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	 * Owner if this {@link ManagedFunctionContainer} is a parallel
 	 * {@link ManagedFunctionContainer}.
 	 * <p>
-	 * This is the {@link ManagedFunctionContainer} that is executed once the graph from
-	 * this {@link ManagedFunctionContainer} is complete.
+	 * This is the {@link ManagedFunctionContainer} that is executed once the
+	 * graph from this {@link ManagedFunctionContainer} is complete.
 	 */
 	private AbstractManagedFunctionContainer<?, ?> parallelOwner;
 
@@ -163,6 +164,12 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	private boolean isSequentialJobInvoked = false;
 
 	/**
+	 * Optional next {@link FunctionState} to be executed once the
+	 * {@link ManagedFunctionContainer} has executed.
+	 */
+	private FunctionState nextFunction = null;
+
+	/**
 	 * Spawn {@link ThreadState} {@link FunctionState}.
 	 */
 	private SpawnThreadStateJobNode spawnThreadStateJobNode = null;
@@ -174,29 +181,29 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	 *            {@link Flow} containing this {@link Job}.
 	 * @param workContainer
 	 *            {@link WorkContainer} of the {@link Work} for this
-	 *            {@link Task}.
-	 * @param nodeMetaData
-	 *            {@link ManagedFunctionMetaData} for this node.
+	 *            {@link ManagedFunction}.
+	 * @param functionContainerMetaData
+	 *            {@link ManagedFunctionContainerMetaData} for this node.
 	 * @param parallelOwner
-	 *            Parallel owner of this {@link ManagedFunctionContainer}. May be
-	 *            <code>null</code> if no owner.
+	 *            Parallel owner of this {@link ManagedFunctionContainer}. May
+	 *            be <code>null</code> if no owner.
 	 * @param requiredManagedObjects
 	 *            {@link Work} {@link ManagedObjectIndex} instances to the
 	 *            {@link ManagedObject} instances that must be loaded before the
-	 *            {@link Task} may be executed.
+	 *            {@link ManagedFunction} may be executed.
 	 * @param requiredGovernance
 	 *            Identifies the required activation state of the
 	 *            {@link Governance} for this {@link Job}.
 	 * @param governanceDeactivationStrategy
 	 *            {@link GovernanceDeactivationStrategy} for
-	 *            {@link ActiveGovernance}.
+	 *            {@link RegisteredGovernance}.
 	 */
-	public AbstractManagedFunctionContainer(Flow flow, WorkContainer<W> workContainer, N nodeMetaData,
-			ManagedFunctionContainer parallelOwner, ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
+	public AbstractManagedFunctionContainer(Flow flow, WorkContainer<W> workContainer, N functionContainerMetaData,
+			ManagedFunctionContainer parallelOwner, ManagedObjectIndex[] requiredManagedObjects,
+			boolean[] requiredGovernance, GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 		this.flow = flow;
 		this.workContainer = workContainer;
-		this.nodeMetaData = nodeMetaData;
+		this.functionContainerMetaData = functionContainerMetaData;
 		this.parallelOwner = (AbstractManagedFunctionContainer) parallelOwner;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.requiredGovernance = requiredGovernance;
@@ -204,23 +211,15 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	}
 
 	/**
-	 * Loads the {@link Job} name to the message.
-	 * 
-	 * @param message
-	 *            Message to receive the {@link Job} name.
-	 */
-	protected abstract void loadJobName(StringBuilder message);
-
-	/**
 	 * Overridden by specific container to execute the {@link FunctionState}.
 	 * 
 	 * @param context
-	 *            {@link ManagedFunctionContext}.
+	 *            {@link ManagedFunctionContainerContext}.
 	 * @return Parameter for the next {@link FunctionState}.
 	 * @throws Throwable
 	 *             If failure in executing the {@link FunctionState}.
 	 */
-	protected abstract Object executeFunction(ManagedFunctionContext context) throws Throwable;
+	protected abstract Object executeFunction(ManagedFunctionContainerContext context) throws Throwable;
 
 	/*
 	 * =================== LinkedListSetEntry =================================
@@ -246,12 +245,12 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	}
 
 	/*
-	 * ======================== JobNode =======================================
+	 * ===================== FunctionState ===============================
 	 */
 
 	@Override
 	public TeamManagement getResponsibleTeam() {
-		return this.nodeMetaData.getResponsibleTeam();
+		return this.functionContainerMetaData.getResponsibleTeam();
 	}
 
 	@Override
@@ -267,7 +266,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 		ProcessState processState = threadState.getProcessState();
 
 		// Profile job being executed
-		threadState.profile(this.nodeMetaData);
+		threadState.profile(this.functionContainerMetaData);
 
 		// Escalation cause
 		Throwable escalationCause = null;
@@ -295,22 +294,22 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 						if (isGovernanceRequired != threadState.isGovernanceActive(this.index_governance)) {
 
 							// Obtain the governance
-							GovernanceContainer<?, ?> governance = threadState
+							GovernanceContainer<?> governance = threadState
 									.getGovernanceContainer(this.index_governance);
 
 							// Incorrect state, so correct
 							if (isGovernanceRequired) {
 								// Activate the governance
-								return governance.activateGovernance().then(this);
+								return governance.activateGovernance(this.flow, this.workContainer).then(this);
 
 							} else {
 								// De-activate the governance
 								switch (this.governanceDeactivationStrategy) {
 								case ENFORCE:
-									return governance.enforceGovernance().then(this);
+									return governance.enforceGovernance(this.flow, this.workContainer).then(this);
 
 								case DISREGARD:
-									return governance.disregardGovernance().then(this);
+									return governance.disregardGovernance(this.flow, this.workContainer).then(this);
 
 								default:
 									// Unknown de-activation strategy
@@ -331,7 +330,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 			FunctionState loadJobNode = this.workContainer.loadManagedObjects(this.requiredManagedObjects, this);
 			if (loadJobNode != null) {
 				// Execute the job once managed objects loaded
-				this.jobState = JobState.EXECUTE_JOB;
+				this.containerState = JobState.EXECUTE_JOB;
 				return loadJobNode;
 			}
 
@@ -340,29 +339,14 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 				return new SynchroniseProcessStateJobNode(threadState).then(this);
 			}
 
-			switch (this.jobState) {
+			switch (this.containerState) {
 			case EXECUTE_JOB:
-
-				// Log execution of the Job
-				if (LOGGER.isLoggable(Level.FINER)) {
-					StringBuilder msg = new StringBuilder();
-					msg.append("Executing job ");
-					this.loadJobName(msg);
-					msg.append(" (thread=");
-					msg.append(threadState);
-					msg.append(" process=");
-					msg.append(processState);
-					msg.append(", team=");
-					msg.append(Thread.currentThread().getName());
-					msg.append(")");
-					LOGGER.log(Level.FINER, msg.toString());
-				}
 
 				// Execute the job
 				this.nextJobParameter = this.executeFunction(this);
 
 				// Job executed, so now to activate the next job
-				this.jobState = JobState.ACTIVATE_NEXT_JOB_NODE;
+				this.containerState = JobState.ACTIVATE_NEXT_JOB_NODE;
 
 				// Spawn any threads
 				if (this.spawnThreadStateJobNode != null) {
@@ -371,20 +355,26 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 					return spawn;
 				}
 
+				// Determine if next function registered
+				if (this.nextFunction != null) {
+					return this.nextFunction.then(this);
+				}
+
 			case ACTIVATE_NEXT_JOB_NODE:
 
 				// Load next job if no sequential job invoked
 				if (!this.isSequentialJobInvoked) {
 					// No sequential node, load next task of flow
-					TaskMetaData<?, ?, ?> nextTaskMetaData = this.nodeMetaData.getNextTaskInFlow();
-					if (nextTaskMetaData != null) {
-						// Create next task
-						AbstractManagedFunctionContainer<?, ?> job = (AbstractManagedFunctionContainer<?, ?>) this.flow
-								.createManagedFunction(nextTaskMetaData, this.parallelOwner, this.nextJobParameter,
-										GovernanceDeactivationStrategy.ENFORCE);
+					ManagedFunctionMetaData<?, ?, ?> nextFunctionMetaData = this.functionContainerMetaData
+							.getNextManagedFunctionMetaData();
+					if (nextFunctionMetaData != null) {
+						// Create next managed function container
+						AbstractManagedFunctionContainer<?, ?> nextContainer = (AbstractManagedFunctionContainer<?, ?>) this.flow
+								.createManagedFunction(nextFunctionMetaData, this.parallelOwner, this.nextJobParameter,
+										this.governanceDeactivationStrategy);
 
 						// Load for sequential execution
-						this.loadSequentialJobNode(job);
+						this.loadSequentialJobNode(nextContainer);
 					}
 
 					// Sequential job now invoked
@@ -412,7 +402,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 				break;
 
 			default:
-				throw new IllegalStateException("Should not be in state " + this.jobState);
+				throw new IllegalStateException("Should not be in state " + this.containerState);
 			}
 		} catch (PropagateEscalationError ex) {
 			// Obtain the cause of the escalation
@@ -425,25 +415,10 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 		} catch (Throwable ex) {
 			// Flag for escalation
 			escalationCause = ex;
-
-			// Log execution of the Job
-			if (LOGGER.isLoggable(Level.FINE)) {
-				StringBuilder msg = new StringBuilder();
-				msg.append("EXCEPTION from job ");
-				this.loadJobName(msg);
-				msg.append(" (thread=");
-				msg.append(threadState);
-				msg.append(" process=");
-				msg.append(processState);
-				msg.append(", team=");
-				msg.append(Thread.currentThread().getName());
-				msg.append(")");
-				LOGGER.log(Level.FINE, msg.toString(), ex);
-			}
 		}
 
 		// Job failure
-		this.jobState = JobState.FAILED;
+		this.containerState = JobState.FAILED;
 		try {
 
 			/*
@@ -482,7 +457,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 				AbstractManagedFunctionContainer<?, ?> node = this;
 				AbstractManagedFunctionContainer<?, ?> escalationOwnerNode = this.parallelOwner;
 				do {
-					EscalationFlow escalation = node.nodeMetaData.getEscalationProcedure()
+					EscalationFlow escalation = node.functionContainerMetaData.getEscalationProcedure()
 							.getEscalation(escalationCause);
 					if (escalation == null) {
 						// Clear node as not handles escalation
@@ -563,9 +538,8 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 		} catch (Throwable ex) {
 			// Should not receive failure here.
 			// If so likely something has corrupted - eg OOM.
-			if (LOGGER.isLoggable(Level.SEVERE)) {
-				LOGGER.log(Level.SEVERE, "FAILURE: please restart OfficeFloor as likely become corrupt", ex);
-			}
+			LOGGER.log(Level.SEVERE, "Please restart OfficeFloor as it has become corrupt due to an unhandled failure",
+					ex);
 		}
 
 		// Now complete
@@ -636,14 +610,19 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	}
 
 	/*
-	 * ======================= ManagedJobNodeContext ==========================
+	 * =================== ManagedFunctionContainerContext ===================
 	 */
+
+	@Override
+	public void next(FunctionState nextFunction) {
+		this.nextFunction = nextFunction;
+	}
 
 	@Override
 	public final void doFlow(FlowMetaData<?> flowMetaData, Object parameter, FlowCallback callback) {
 
 		// Obtain the task meta-data for instigating the flow
-		TaskMetaData<?, ?, ?> initTaskMetaData = flowMetaData.getInitialTaskMetaData();
+		ManagedFunctionMetaData<?, ?, ?> initTaskMetaData = flowMetaData.getInitialTaskMetaData();
 
 		// Instigate the flow
 		switch (flowMetaData.getInstigationStrategy()) {
@@ -684,7 +663,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 							throw new UnsupportedOperationException("TODO implement Type1481920593530.createJobNode");
 
 						}
-					}, this.nodeMetaData.getFunctionLoop(), continueJobNode);
+					}, this.functionContainerMetaData.getFunctionLoop(), continueJobNode);
 			break;
 
 		default:
@@ -734,10 +713,10 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 
 	/**
 	 * Creates an {@link EscalationFlow} {@link FunctionState} from the input
-	 * {@link TaskMetaData}.
+	 * {@link ManagedFunctionMetaData}.
 	 * 
 	 * @param taskMetaData
-	 *            {@link TaskMetaData}.
+	 *            {@link ManagedFunctionMetaData}.
 	 * @param parameter
 	 *            Parameter.
 	 * @param parallelOwner
@@ -745,7 +724,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	 *            {@link FunctionState}.
 	 * @return {@link FunctionState}.
 	 */
-	private final FunctionState createEscalationJobNode(TaskMetaData<?, ?, ?> taskMetaData, Object parameter,
+	private final FunctionState createEscalationJobNode(ManagedFunctionMetaData<?, ?, ?> taskMetaData, Object parameter,
 			ManagedFunctionContainer parallelOwner) {
 
 		// Create a new flow for execution
@@ -799,7 +778,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	private FunctionState completeJobNode() {
 
 		// Do nothing if already complete
-		if (this.jobState == JobState.COMPLETED) {
+		if (this.containerState == JobState.COMPLETED) {
 			return null;
 		}
 
@@ -816,7 +795,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 		}
 
 		// Complete the job
-		this.jobState = JobState.COMPLETED;
+		this.containerState = JobState.COMPLETED;
 		return null;
 	}
 

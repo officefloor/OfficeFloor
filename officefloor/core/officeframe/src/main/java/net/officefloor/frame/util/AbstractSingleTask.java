@@ -18,12 +18,12 @@
 package net.officefloor.frame.util;
 
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
@@ -33,12 +33,12 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Provides an abstract {@link Task}.
+ * Provides an abstract {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		implements WorkFactory<W>, Work, TaskFactory<W, D, F>, Task<W, D, F> {
+		implements WorkFactory<W>, Work, ManagedFunctionFactory<W, D, F>, ManagedFunction<W, D, F> {
 
 	/**
 	 * Registers this {@link Work} with the input {@link OfficeBuilder}.
@@ -56,24 +56,24 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	}
 
 	/**
-	 * Registers the {@link Task} with the input {@link WorkBuilder}.
+	 * Registers the {@link ManagedFunction} with the input {@link WorkBuilder}.
 	 * 
 	 * @param taskName
-	 *            Name for {@link Task}.
+	 *            Name for {@link ManagedFunction}.
 	 * @param teamName
 	 *            Name for {@link Team}.
 	 * @param workBuilder
 	 *            {@link WorkBuilder}.
-	 * @return {@link TaskBuilder} to configure the {@link Task}.
+	 * @return {@link ManagedFunctionBuilder} to configure the {@link ManagedFunction}.
 	 */
-	public TaskBuilder<W, D, F> registerTask(String taskName, String teamName,
+	public ManagedFunctionBuilder<W, D, F> registerTask(String taskName, String teamName,
 			WorkBuilder<W> workBuilder) {
 
 		// Configure the work builder
 		workBuilder.setInitialTask(taskName);
 
 		// Configure this as a task
-		TaskBuilder<W, D, F> task = workBuilder.addTask(taskName, this);
+		ManagedFunctionBuilder<W, D, F> task = workBuilder.addManagedFunction(taskName, this);
 		task.setTeam(teamName);
 
 		// Return the task builder
@@ -81,44 +81,44 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	}
 
 	/**
-	 * Registers this {@link Task} with the input {@link OfficeBuilder}.
+	 * Registers this {@link ManagedFunction} with the input {@link OfficeBuilder}.
 	 * 
 	 * @param workName
 	 *            Name for {@link Work}.
 	 * @param taskName
-	 *            Name for {@link Task}.
+	 *            Name for {@link ManagedFunction}.
 	 * @param teamName
 	 *            Name for {@link Team}.
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder}.
-	 * @return {@link TaskBuilder} to configure the {@link Task}.
+	 * @return {@link ManagedFunctionBuilder} to configure the {@link ManagedFunction}.
 	 */
-	public TaskBuilder<W, D, F> registerTask(String workName, String taskName,
+	public ManagedFunctionBuilder<W, D, F> registerTask(String workName, String taskName,
 			String teamName, OfficeBuilder officeBuilder) {
 
 		// Create and register the work builder
 		WorkBuilder<W> work = this.registerWork(workName, officeBuilder);
 
 		// Create and register the task builder
-		TaskBuilder<W, D, F> task = this.registerTask(taskName, teamName, work);
+		ManagedFunctionBuilder<W, D, F> task = this.registerTask(taskName, teamName, work);
 
 		// Return the task builder
 		return task;
 	}
 
 	/**
-	 * Registers this {@link Task} with the input
+	 * Registers this {@link ManagedFunction} with the input
 	 * {@link ManagedObjectSourceContext}.
 	 * 
 	 * @param workName
 	 *            Name for {@link Work}.
 	 * @param taskName
-	 *            Name for {@link Task}.
+	 *            Name for {@link ManagedFunction}.
 	 * @param teamName
 	 *            Name for {@link Team}.
 	 * @param context
 	 *            {@link ManagedObjectSourceContext}.
-	 * @return {@link ManagedObjectTaskBuilder} to configure the {@link Task}.
+	 * @return {@link ManagedObjectTaskBuilder} to configure the {@link ManagedFunction}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectTaskBuilder<D, F> registerTask(String workName,
@@ -137,13 +137,13 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	}
 
 	/**
-	 * Registers this {@link Task} to recycle the {@link ManagedObject}.
+	 * Registers this {@link ManagedFunction} to recycle the {@link ManagedObject}.
 	 *
 	 * @param context
 	 *            {@link ManagedObjectSourceContext}.
 	 * @param teamName
 	 *            Name of the {@link Team} to recycle the {@link ManagedObject}.
-	 * @see #getRecycleManagedObjectParameter(TaskContext, Class)
+	 * @see #getRecycleManagedObjectParameter(ManagedFunctionContext, Class)
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void registerAsRecycleTask(ManagedObjectSourceContext context,
@@ -165,14 +165,14 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	 * @param <MO>
 	 *            {@link ManagedObject} type.
 	 * @param context
-	 *            {@link TaskContext}.
+	 *            {@link ManagedFunctionContext}.
 	 * @param managedObjectClass
 	 *            {@link Class} of the {@link ManagedObject}.
 	 * @return {@link RecycleManagedObjectParameter}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <MO extends ManagedObject> RecycleManagedObjectParameter<MO> getRecycleManagedObjectParameter(
-			TaskContext<W, D, F> context, Class<MO> managedObjectClass) {
+			ManagedFunctionContext<W, D, F> context, Class<MO> managedObjectClass) {
 		return (RecycleManagedObjectParameter<MO>) context.getObject(0);
 	}
 
@@ -191,7 +191,7 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	 */
 
 	@Override
-	public Task<W, D, F> createTask(W work) {
+	public ManagedFunction<W, D, F> createManagedFunction(W work) {
 		return this;
 	}
 

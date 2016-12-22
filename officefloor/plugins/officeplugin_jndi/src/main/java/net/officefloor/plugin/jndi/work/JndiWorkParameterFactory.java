@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.jndi.work;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -33,7 +33,7 @@ public class JndiWorkParameterFactory implements ParameterFactory {
 
 	@Override
 	public Object createParameter(Object jndiWorkObject,
-			TaskContext<?, ?, ?> context) throws Exception {
+			ManagedFunctionContext<?, ?, ?> context) throws Exception {
 		return jndiWorkObject;
 	}
 

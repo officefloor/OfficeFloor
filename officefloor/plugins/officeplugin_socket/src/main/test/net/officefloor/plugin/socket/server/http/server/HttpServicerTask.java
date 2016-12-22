@@ -17,12 +17,12 @@
  */
 package net.officefloor.plugin.socket.server.http.server;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
- * Reference to a {@link Task} to be invoked to service the
+ * Reference to a {@link ManagedFunction} to be invoked to service the
  * {@link ServerHttpConnection}.
  *
  * @author Daniel Sagenschneider
@@ -35,7 +35,7 @@ public class HttpServicerTask {
 	public final String workName;
 
 	/**
-	 * Name of the {@link Task}.
+	 * Name of the {@link ManagedFunction}.
 	 */
 	public final String taskName;
 
@@ -45,7 +45,7 @@ public class HttpServicerTask {
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 */
 	public HttpServicerTask(String workName, String taskName) {
 		this.workName = workName;

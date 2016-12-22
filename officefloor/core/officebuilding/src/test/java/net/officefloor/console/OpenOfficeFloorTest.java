@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.building.process.officefloor.MockWork;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -40,7 +40,7 @@ public class OpenOfficeFloorTest extends AbstractConsoleMainTestCase {
 	}
 
 	/**
-	 * Ensure able to open the {@link OfficeFloor} and invoke a {@link Task}.
+	 * Ensure able to open the {@link OfficeFloor} and invoke a {@link ManagedFunction}.
 	 */
 	public void testOpenOfficeFloorAndInvokeTask() throws Throwable {
 

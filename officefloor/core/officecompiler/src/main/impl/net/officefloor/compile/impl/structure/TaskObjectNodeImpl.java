@@ -25,13 +25,13 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.type.TypeContext;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
  * {@link TaskObjectNode} implementation.
@@ -68,7 +68,7 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 
 	/**
 	 * Flag indicating if this {@link TaskObject} is a parameter to the
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 */
 	private boolean isParameter = false;
 
@@ -139,14 +139,14 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	public ObjectDependencyType loadObjectDependencyType(TypeContext typeContext) {
 
 		// Obtain the task type
-		TaskType<?, ?, ?> taskType = this.taskNode.loadTaskType(typeContext);
+		ManagedFunctionType<?, ?, ?> taskType = this.taskNode.loadTaskType(typeContext);
 		if (taskType == null) {
 			return null;
 		}
 
 		// Obtain the task object type
-		TaskObjectType<?> object = null;
-		for (TaskObjectType<?> objectType : taskType.getObjectTypes()) {
+		ManagedFunctionObjectType<?> object = null;
+		for (ManagedFunctionObjectType<?> objectType : taskType.getObjectTypes()) {
 			if (this.objectName.equals(objectType.getObjectName())) {
 				object = objectType;
 			}

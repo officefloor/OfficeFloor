@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.integrate.escalation;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -41,7 +41,7 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensures handles escalation by same {@link Task}.
+	 * Ensures handles escalation by same {@link ManagedFunction}.
 	 */
 	public void testEscalationHandledBySameTask() throws Exception {
 

@@ -18,14 +18,14 @@
 package net.officefloor.frame.impl.execute.work;
 
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -67,9 +67,9 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	private final FlowMetaData<W> initialFlowMetaData;
 
 	/**
-	 * {@link TaskMetaData} of the {@link Task} instances of this {@link Work}.
+	 * {@link ManagedFunctionMetaData} of the {@link ManagedFunction} instances of this {@link Work}.
 	 */
-	private final TaskMetaData<W, ?, ?>[] taskMetaData;
+	private final ManagedFunctionMetaData<W, ?, ?>[] taskMetaData;
 
 	/**
 	 * Initiate.
@@ -88,12 +88,12 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 *            {@link FlowMetaData} for the initial {@link Flow} of the
 	 *            {@link Work}.
 	 * @param taskMetaData
-	 *            {@link TaskMetaData} of the {@link Task} instances of this
+	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction} instances of this
 	 *            {@link Work}.
 	 */
 	public WorkMetaDataImpl(String workName, WorkFactory<W> workFactory, ManagedObjectMetaData<?>[] moMetaData,
 			AdministratorMetaData<?, ?>[] adminMetaData, FlowMetaData<W> initialFlowMetaData,
-			TaskMetaData<W, ?, ?>[] taskMetaData) {
+			ManagedFunctionMetaData<W, ?, ?>[] taskMetaData) {
 		this.workName = workName;
 		this.workFactory = workFactory;
 		this.managedObjectMetaData = moMetaData;
@@ -138,7 +138,7 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	}
 
 	@Override
-	public TaskMetaData<W, ?, ?>[] getTaskMetaData() {
+	public ManagedFunctionMetaData<W, ?, ?>[] getTaskMetaData() {
 		return this.taskMetaData;
 	}
 

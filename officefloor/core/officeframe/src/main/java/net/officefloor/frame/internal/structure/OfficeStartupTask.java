@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -35,9 +35,9 @@ public interface OfficeStartupTask {
 	FlowMetaData<?> getFlowMetaData();
 
 	/**
-	 * Obtains the parameter to invoke the startup {@link Task} with.
+	 * Obtains the parameter to invoke the startup {@link ManagedFunction} with.
 	 * 
-	 * @return Parameter for the startup {@link Task}.
+	 * @return Parameter for the startup {@link ManagedFunction}.
 	 */
 	Object getParameter();
 

@@ -25,7 +25,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
@@ -52,7 +52,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.spi.TestSource;
@@ -890,7 +890,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Test only required {@link DutyConfiguration} for a {@link Duty} if linked
-	 * to a {@link Task}.
+	 * to a {@link ManagedFunction}.
 	 */
 	public void testNotRequireDutyConfiguration() {
 
@@ -920,7 +920,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link Task} is found for the {@link Duty}
+	 * Ensure issue if no {@link ManagedFunction} is found for the {@link Duty}
 	 * {@link Flow}.
 	 */
 	public void testNoTaskForDutyFlow() {
@@ -976,8 +976,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		final TaskNodeReference taskReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		final OfficeMetaData officeMetaData = this
 				.createMock(OfficeMetaData.class);
@@ -1476,7 +1476,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Constructs the {@link RawBoundAdministratorMetaData} including linking
-	 * its {@link Task} instances.
+	 * its {@link ManagedFunction} instances.
 	 * 
 	 * @return Constructed {@link RawBoundAdministratorMetaData}.
 	 */

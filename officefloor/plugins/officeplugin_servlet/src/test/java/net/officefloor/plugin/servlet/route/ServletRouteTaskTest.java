@@ -19,7 +19,7 @@ package net.officefloor.plugin.servlet.route;
 
 import javax.servlet.Servlet;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
@@ -47,11 +47,11 @@ public class ServletRouteTaskTest extends OfficeFrameTestCase {
 	private final Office office = this.createMock(Office.class);
 
 	/**
-	 * {@link TaskContext}.
+	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskContext<ServletRouteTask, DependencyKeys, FlowKeys> taskContext = this
-			.createMock(TaskContext.class);
+	private final ManagedFunctionContext<ServletRouteTask, DependencyKeys, FlowKeys> taskContext = this
+			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -110,7 +110,7 @@ public class ServletRouteTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.task.doTask(this.taskContext);
+		this.task.execute(this.taskContext);
 		this.verifyMockObjects();
 	}
 
@@ -137,7 +137,7 @@ public class ServletRouteTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.task.doTask(this.taskContext);
+		this.task.execute(this.taskContext);
 		this.verifyMockObjects();
 	}
 

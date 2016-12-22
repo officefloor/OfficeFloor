@@ -19,7 +19,7 @@ package net.officefloor.plugin.jms.server;
 
 import javax.jms.Message;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.util.AbstractSingleTask;
 
@@ -52,8 +52,8 @@ public class OnMessageTask
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<Work, OnMessageDependencies, OnMessageFlows> context)
+	public Object execute(
+			ManagedFunctionContext<Work, OnMessageDependencies, OnMessageFlows> context)
 			throws Exception {
 
 		// Obtain the JMS Server Managed Object

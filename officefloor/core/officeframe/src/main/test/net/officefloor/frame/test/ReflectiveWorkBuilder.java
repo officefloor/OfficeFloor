@@ -24,13 +24,13 @@ import junit.framework.TestCase;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.Flow;
@@ -107,7 +107,7 @@ public class ReflectiveWorkBuilder implements Work,
 	}
 
 	/**
-	 * Builds a reflective {@link Task} on the work object.
+	 * Builds a reflective {@link ManagedFunction} on the work object.
 	 * 
 	 * @param methodName
 	 *            Name of the method to invoke.
@@ -134,8 +134,8 @@ public class ReflectiveWorkBuilder implements Work,
 				taskMethod);
 
 		// Create the task builder (parameter type Object)
-		TaskBuilder<ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder = this.workBuilder
-				.addTask(methodName, taskMetaData);
+		ManagedFunctionBuilder<ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder = this.workBuilder
+				.addManagedFunction(methodName, taskMetaData);
 		taskMetaData.setTaskBuilder(taskBuilder);
 
 		// Initiate the task builder
@@ -155,11 +155,11 @@ public class ReflectiveWorkBuilder implements Work,
 	}
 
 	/**
-	 * Reflective {@link Task} meta-data.
+	 * Reflective {@link ManagedFunction} meta-data.
 	 */
 	public class ReflectiveTaskBuilder implements
-			TaskFactory<ReflectiveWorkBuilder, Indexed, Indexed>,
-			Task<ReflectiveWorkBuilder, Indexed, Indexed> {
+			ManagedFunctionFactory<ReflectiveWorkBuilder, Indexed, Indexed>,
+			ManagedFunction<ReflectiveWorkBuilder, Indexed, Indexed> {
 
 		/**
 		 * {@link Method} on work object to invoke.
@@ -172,9 +172,9 @@ public class ReflectiveWorkBuilder implements Work,
 		private final Class<?>[] parameterTypes;
 
 		/**
-		 * {@link TaskBuilder}.
+		 * {@link ManagedFunctionBuilder}.
 		 */
-		private TaskBuilder<ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder;
+		private ManagedFunctionBuilder<ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder;
 
 		/**
 		 * {@link ParameterFactory} instances for the method.
@@ -211,35 +211,35 @@ public class ReflectiveWorkBuilder implements Work,
 		}
 
 		/**
-		 * Specifies the {@link TaskBuilder}.
+		 * Specifies the {@link ManagedFunctionBuilder}.
 		 * 
 		 * @param taskBuilder
-		 *            {@link TaskBuilder}.
+		 *            {@link ManagedFunctionBuilder}.
 		 */
 		void setTaskBuilder(
-				TaskBuilder<ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder) {
+				ManagedFunctionBuilder<ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder) {
 			this.taskBuilder = taskBuilder;
 		}
 
 		/**
-		 * Obtains the {@link TaskBuilder}.
+		 * Obtains the {@link ManagedFunctionBuilder}.
 		 * 
-		 * @return {@link TaskBuilder}.
+		 * @return {@link ManagedFunctionBuilder}.
 		 */
-		public TaskBuilder<ReflectiveWorkBuilder, Indexed, Indexed> getBuilder() {
+		public ManagedFunctionBuilder<ReflectiveWorkBuilder, Indexed, Indexed> getBuilder() {
 			return this.taskBuilder;
 		}
 
 		/**
-		 * Builds the {@link TaskContext}.
+		 * Builds the {@link ManagedFunctionContext}.
 		 */
 		public void buildTaskContext() {
 
 			// Ensure parameter is TaskContext
 			Class<?> parameterType = this.parameterTypes[this.parameterIndex];
 			TestCase.assertTrue("Parameter " + this.parameterIndex
-					+ " must be " + TaskContext.class.getSimpleName(),
-					TaskContext.class.isAssignableFrom(parameterType));
+					+ " must be " + ManagedFunctionContext.class.getSimpleName(),
+					ManagedFunctionContext.class.isAssignableFrom(parameterType));
 
 			// Link TaskContext
 			this.parameterFactories[this.parameterIndex] = new TaskContextParameterFactory();
@@ -267,7 +267,7 @@ public class ReflectiveWorkBuilder implements Work,
 		}
 
 		/**
-		 * Links the {@link ManagedObject} to the {@link Task}.
+		 * Links the {@link ManagedObject} to the {@link ManagedFunction}.
 		 * 
 		 * @param scopeManagedObjectName
 		 *            Scope name of the {@link ManagedObject}.
@@ -381,7 +381,7 @@ public class ReflectiveWorkBuilder implements Work,
 		}
 
 		/**
-		 * Specifies the next {@link Task} using the return type of the
+		 * Specifies the next {@link ManagedFunction} using the return type of the
 		 * {@link Method} as the argument type.
 		 * 
 		 * @param taskName
@@ -392,7 +392,7 @@ public class ReflectiveWorkBuilder implements Work,
 		}
 
 		/**
-		 * Specifies the next {@link Task} using the return type of the
+		 * Specifies the next {@link ManagedFunction} using the return type of the
 		 * {@link Method} as the argument type.
 		 * 
 		 * @param workName
@@ -422,7 +422,7 @@ public class ReflectiveWorkBuilder implements Work,
 		 */
 
 		@Override
-		public Task<ReflectiveWorkBuilder, Indexed, Indexed> createTask(
+		public ManagedFunction<ReflectiveWorkBuilder, Indexed, Indexed> createManagedFunction(
 				ReflectiveWorkBuilder work) {
 			return this;
 		}
@@ -432,8 +432,8 @@ public class ReflectiveWorkBuilder implements Work,
 		 */
 
 		@Override
-		public Object doTask(
-				TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context)
+		public Object execute(
+				ManagedFunctionContext<ReflectiveWorkBuilder, Indexed, Indexed> context)
 				throws Throwable {
 
 			// Create the parameters
@@ -464,22 +464,22 @@ public class ReflectiveWorkBuilder implements Work,
 
 	/**
 	 * Interface for a factory to create the parameter from the
-	 * {@link TaskContext}.
+	 * {@link ManagedFunctionContext}.
 	 */
 	private static interface ParameterFactory {
 		Object createParamater(
-				TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context);
+				ManagedFunctionContext<ReflectiveWorkBuilder, Indexed, Indexed> context);
 	}
 
 	/**
-	 * {@link ParameterFactory} to obtain the {@link TaskContext}.
+	 * {@link ParameterFactory} to obtain the {@link ManagedFunctionContext}.
 	 */
 	private static class TaskContextParameterFactory implements
 			ParameterFactory {
 
 		@Override
 		public Object createParamater(
-				TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context) {
+				ManagedFunctionContext<ReflectiveWorkBuilder, Indexed, Indexed> context) {
 			return context;
 		}
 	}
@@ -506,7 +506,7 @@ public class ReflectiveWorkBuilder implements Work,
 
 		@Override
 		public Object createParamater(
-				TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context) {
+				ManagedFunctionContext<ReflectiveWorkBuilder, Indexed, Indexed> context) {
 			// Return the managed object
 			return context.getObject(index);
 		}
@@ -534,7 +534,7 @@ public class ReflectiveWorkBuilder implements Work,
 
 		@Override
 		public Object createParamater(
-				final TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context) {
+				final ManagedFunctionContext<ReflectiveWorkBuilder, Indexed, Indexed> context) {
 			return new ReflectiveFlow() {
 				@Override
 				public FlowFuture doFlow(Object parameter) {

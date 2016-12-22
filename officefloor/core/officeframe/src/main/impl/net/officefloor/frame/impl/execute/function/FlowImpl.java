@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.execute.duty.DutyJob;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
@@ -25,14 +25,14 @@ import net.officefloor.frame.impl.execute.work.WorkContainerProxy;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
-import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -84,18 +84,19 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedFunctionContainer createManagedFunction(TaskMetaData<?, ?, ?> taskMetaData, ManagedFunctionContainer parallelNodeOwner,
-			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy) {
+	public ManagedFunctionContainer createManagedFunction(ManagedFunctionMetaData<?, ?, ?> managedFunctionMetaData,
+			ManagedFunctionContainer parallelFunctionOwner, Object parameter,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 
 		// Obtain the work meta-data
-		WorkMetaData workMetaData = taskMetaData.getWorkMetaData();
+		WorkMetaData workMetaData = managedFunctionMetaData.getWorkMetaData();
 
 		// Create the work container for a new work
 		WorkContainer workContainer = workMetaData.createWorkContainer(this.threadState);
 
 		// Obtain the administration meta-data to determine if require proxy
-		TaskDutyAssociation[] preTaskDuties = taskMetaData.getPreAdministrationMetaData();
-		TaskDutyAssociation[] postTaskDuties = taskMetaData.getPostAdministrationMetaData();
+		TaskDutyAssociation[] preTaskDuties = managedFunctionMetaData.getPreAdministrationMetaData();
+		TaskDutyAssociation[] postTaskDuties = managedFunctionMetaData.getPostAdministrationMetaData();
 
 		// Create the work container proxy (if required)
 		WorkContainerProxy proxyWorkContainer = null;
@@ -108,41 +109,38 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 		// Load the pre-task administrator duty jobs.
 		// Never use actual work container for pre duties.
-		this.loadDutyJobs(firstLastJobs, preTaskDuties, workMetaData, null, proxyWorkContainer, parallelNodeOwner,
-				taskMetaData);
+		this.loadDutyJobs(firstLastJobs, preTaskDuties, workMetaData, null, proxyWorkContainer, parallelFunctionOwner,
+				managedFunctionMetaData);
 
 		// If no post duties then task is last job
 		WorkContainer taskWorkContainer = (postTaskDuties.length == 0 ? workContainer : proxyWorkContainer);
 
-		// Create and register the active task job
-		ManagedFunctionContainer taskJob = taskMetaData.createTaskNode(this, taskWorkContainer, parallelNodeOwner, parameter,
-				governanceDeactivationStrategy);
-		this.activeJobNodes.addEntry(taskJob);
+		// Create and register the managed function
+		ManagedFunctionContainer managedFunction = managedFunctionMetaData.createManagedFunctionContainer(this,
+				workContainer, parallelFunctionOwner, parameter, governanceDeactivationStrategy);
+		this.activeJobNodes.addEntry(managedFunction);
 
 		// Load the task job
-		this.loadJob(firstLastJobs, taskJob);
+		this.loadJob(firstLastJobs, managedFunction);
 
 		// Load the post-task administrator duty jobs
 		this.loadDutyJobs(firstLastJobs, postTaskDuties, workMetaData, workContainer, proxyWorkContainer,
-				parallelNodeOwner, taskMetaData);
+				parallelFunctionOwner, managedFunctionMetaData);
 
-		// Return the starting job
+		// Return the starting function
 		return firstLastJobs[0];
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ManagedFunctionContainer createGovernanceNode(GovernanceActivity<?, ?> governanceActivity,
-			ManagedFunctionContainer parallelNodeOwner) {
+	public <F extends Enum<F>> ManagedFunctionContainer createGovernanceFunction(
+			GovernanceActivity<F> governanceActivity, GovernanceMetaData<?, F> governanceMetaData) {
 
-		// Create and register the governance job
-		GovernanceMetaData governanceMetaData = governanceActivity.getGovernanceMetaData();
-		ManagedFunctionContainer governanceJob = governanceMetaData.createGovernanceFunction(this, governanceActivity,
-				parallelNodeOwner);
-		this.activeJobNodes.addEntry(governanceJob);
+		// Create and register the governance function
+		ManagedFunctionContainer governanceFunction = governanceMetaData.createGovernanceFunction(governanceActivity);
+		this.activeJobNodes.addEntry(governanceFunction);
 
-		// Return the governance job
-		return governanceJob;
+		// Return the governance function
+		return governanceFunction;
 	}
 
 	/**
@@ -162,12 +160,13 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 * @param parallelNodeOwner
 	 *            Parallel owning {@link ManagedFunctionContainer}.
 	 * @param administeringTaskMetaData
-	 *            {@link TaskMetaData} of the {@link Task} being administered.
+	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction}
+	 *            being administered.
 	 */
 	private void loadDutyJobs(ManagedFunctionContainer[] firstLastJobs, TaskDutyAssociation<?>[] taskDutyAssociations,
 			WorkMetaData<?> workMetaData, WorkContainer<?> actualWorkContainer,
 			WorkContainerProxy<?> proxyWorkContainer, ManagedFunctionContainer parallelNodeOwner,
-			TaskMetaData<?, ?, ?> administeringTaskMetaData) {
+			ManagedFunctionMetaData<?, ?, ?> administeringTaskMetaData) {
 
 		// Load the duty jobs
 		for (int i = 0; i < taskDutyAssociations.length; i++) {
@@ -203,8 +202,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			}
 
 			// Create and register the active duty job
-			ManagedFunctionContainer dutyJob = adminMetaData.createDutyNode(administeringTaskMetaData, workContainer, this,
-					taskDutyAssociation, parallelNodeOwner);
+			ManagedFunctionContainer dutyJob = adminMetaData.createDutyNode(administeringTaskMetaData, workContainer,
+					this, taskDutyAssociation, parallelNodeOwner);
 			this.activeJobNodes.addEntry(dutyJob);
 
 			// Load the duty job

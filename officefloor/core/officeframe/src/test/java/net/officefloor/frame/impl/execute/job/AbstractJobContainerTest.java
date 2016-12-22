@@ -21,7 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.AssetManager;
@@ -35,15 +35,15 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainerMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.ManagedFunctionContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainerContext;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
@@ -100,9 +100,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	private final Flow flow = this.createMock(Flow.class);
 
 	/**
-	 * {@link ManagedFunctionMetaData}.
+	 * {@link ManagedFunctionContainerMetaData}.
 	 */
-	private final ManagedFunctionMetaData jobMetaData = this.createMock(ManagedFunctionMetaData.class);
+	private final ManagedFunctionContainerMetaData jobMetaData = this.createMock(ManagedFunctionContainerMetaData.class);
 
 	/**
 	 * {@link ParallelOwnerJob}.
@@ -116,10 +116,10 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	private final JobContext jobContext = this.createMock(JobContext.class);
 
 	/**
-	 * Next {@link TaskMetaData}.
+	 * Next {@link ManagedFunctionMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?> nextTaskMetaData = this
-			.createMock(TaskMetaData.class);
+	private final ManagedFunctionMetaData<?, ?, ?> nextTaskMetaData = this
+			.createMock(ManagedFunctionMetaData.class);
 
 	/**
 	 * Next {@link Job}.
@@ -133,10 +133,10 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(FlowMetaData.class);
 
 	/**
-	 * Sequential {@link TaskMetaData}.
+	 * Sequential {@link ManagedFunctionMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?> sequentialTaskMetaData = this
-			.createMock(TaskMetaData.class);
+	private final ManagedFunctionMetaData<?, ?, ?> sequentialTaskMetaData = this
+			.createMock(ManagedFunctionMetaData.class);
 
 	/**
 	 * Sequential {@link Job}.
@@ -151,10 +151,10 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(FlowMetaData.class);
 
 	/**
-	 * Parallel {@link TaskMetaData}.
+	 * Parallel {@link ManagedFunctionMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?> parallelTaskMetaData = this
-			.createMock(TaskMetaData.class);
+	private final ManagedFunctionMetaData<?, ?, ?> parallelTaskMetaData = this
+			.createMock(ManagedFunctionMetaData.class);
 
 	/**
 	 * Parallel {@link Flow}.
@@ -179,10 +179,10 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(AssetManager.class);
 
 	/**
-	 * Asynchronous {@link TaskMetaData}.
+	 * Asynchronous {@link ManagedFunctionMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?> asynchronousTaskMetaData = this
-			.createMock(TaskMetaData.class);
+	private final ManagedFunctionMetaData<?, ?, ?> asynchronousTaskMetaData = this
+			.createMock(ManagedFunctionMetaData.class);
 
 	/**
 	 * Asynchronous {@link Flow}.
@@ -202,10 +202,10 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(ThreadState.class);
 
 	/**
-	 * {@link EscalationFlow} {@link TaskMetaData}.
+	 * {@link EscalationFlow} {@link ManagedFunctionMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?> escalationTaskMetaData = this
-			.createMock(TaskMetaData.class);
+	private final ManagedFunctionMetaData<?, ?, ?> escalationTaskMetaData = this
+			.createMock(ManagedFunctionMetaData.class);
 
 	/**
 	 * {@link EscalationFlow} {@link Flow}.
@@ -364,7 +364,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * @param job
 	 *            {@link Job}.
 	 * @param isSetupTask
-	 *            Indicates to add a setup {@link Task}.
+	 *            Indicates to add a setup {@link ManagedFunction}.
 	 * @param isGovernanceActivity
 	 *            Indicates to add a {@link GovernanceActivity}.
 	 */
@@ -379,8 +379,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		if (isSetupTask) {
 
-			final TaskMetaData<?, ?, ?> setuptaskMetaData = this
-					.createMock(TaskMetaData.class);
+			final ManagedFunctionMetaData<?, ?, ?> setuptaskMetaData = this
+					.createMock(ManagedFunctionMetaData.class);
 			final Object parameter = new Object();
 
 			// Trigger setup task from govern managed objects
@@ -554,7 +554,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the {@link TaskMetaData} of the next {@link Task} to
+	 * Records obtaining the {@link ManagedFunctionMetaData} of the next {@link ManagedFunction} to
 	 * execute.
 	 * 
 	 * @param hasNextJob
@@ -562,10 +562,10 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 */
 	protected void record_JobMetaData_getNextTaskInFlow(boolean hasNextJob) {
 		// Determine if next task
-		TaskMetaData<?, ?, ?> taskMetaData = (hasNextJob ? this.nextTaskMetaData
+		ManagedFunctionMetaData<?, ?, ?> taskMetaData = (hasNextJob ? this.nextTaskMetaData
 				: null);
 		this.recordReturn(this.jobMetaData,
-				this.jobMetaData.getNextTaskInFlow(), taskMetaData);
+				this.jobMetaData.getNextManagedFunctionContainerMetaData(), taskMetaData);
 	}
 
 	/**
@@ -879,17 +879,17 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records {@link ContainerContext} adding a setup {@link Task}.
+	 * Records {@link ContainerContext} adding a setup {@link ManagedFunction}.
 	 * 
 	 * @param job
 	 *            {@link Job}.
 	 * @param taskMetaData
-	 *            {@link TaskMetaData}.
+	 *            {@link ManagedFunctionMetaData}.
 	 * @param parameter
 	 *            Parameter.
 	 */
 	protected void record_ContainerContext_addSetupTask(Job job,
-			TaskMetaData<?, ?, ?> taskMetaData, Object parameter) {
+			ManagedFunctionMetaData<?, ?, ?> taskMetaData, Object parameter) {
 		FunctionalityJob functionalityJob = (FunctionalityJob) job;
 
 		final Flow setupJobSequence = this.createMock(Flow.class);
@@ -923,7 +923,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadState,
 				this.threadState.createJobSequence(), setupJobSequence);
 		this.recordReturn(setupJobSequence, setupJobSequence
-				.createGovernanceNode(activity, functionalityJob),
+				.createGovernanceFunction(activity, functionalityJob),
 				this.parallelJob);
 		this.parallelJob.setParallelOwner(functionalityJob);
 	}
@@ -1042,7 +1042,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * functionality.
 	 */
 	protected class FunctionalityJob extends
-			AbstractManagedFunctionContainer<Work, ManagedFunctionMetaData> implements
+			AbstractManagedFunctionContainer<Work, ManagedFunctionContainerMetaData> implements
 			JobFunctionalityContext {
 
 		/**
@@ -1117,7 +1117,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected Object executeJob(ManagedFunctionContext context,
+		protected Object executeJob(ManagedFunctionContainerContext context,
 				JobContext jobContext, JobNodeActivateSet activateSet)
 				throws Throwable {
 			// Indicate the job is executed
@@ -1205,14 +1205,14 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	protected static interface JobFunctionalityContext {
 
 		/**
-		 * Adds a setup {@link Task}.
+		 * Adds a setup {@link ManagedFunction}.
 		 * 
 		 * @param taskMetaData
-		 *            {@link TaskMetaData}.
+		 *            {@link ManagedFunctionMetaData}.
 		 * @param parameter
 		 *            Parameter.
 		 */
-		void addSetupTask(TaskMetaData<?, ?, ?> taskMetaData, Object parameter);
+		void addSetupTask(ManagedFunctionMetaData<?, ?, ?> taskMetaData, Object parameter);
 
 		/**
 		 * Adds a {@link GovernanceActivity}.

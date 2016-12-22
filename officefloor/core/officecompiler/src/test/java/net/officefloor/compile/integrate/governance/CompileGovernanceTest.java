@@ -28,8 +28,8 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.governance.Governance;
@@ -103,7 +103,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 				ClassGovernanceSource.class, SimpleManagedObject.class);
 		office.setBoundInputManagedObject("INPUT_MO", "MANAGED_OBJECT_SOURCE_A");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+		ManagedFunctionBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 		this.record_officeFloorBuilder_addManagedObject(
@@ -181,7 +181,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 				ClassGovernanceSource.class, SimpleManagedObject.class);
 
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask(
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask(
 				"doSomething", "OFFICE_TEAM");
 		task.linkManagedObject(0, "OFFICE.SECTION.OBJECT",
 				SectionWithManagedObject.class);
@@ -214,7 +214,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling {@link Governance} over a {@link Task} within a
+	 * Tests compiling {@link Governance} over a {@link ManagedFunction} within a
 	 * {@link OfficeSection}.
 	 */
 	public void testGovernSection() {
@@ -231,7 +231,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
 				ClassGovernanceSource.class, SimpleManagedObject.class);
 		this.record_officeBuilder_addWork("DESK.WORK");
-		TaskBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
+		ManagedFunctionBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
 				"TASK", "OFFICE_TEAM");
 		governedTask.addGovernance("GOVERNANCE");
 
@@ -257,7 +257,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
 				ClassGovernanceSource.class, SimpleManagedObject.class);
 		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
-		TaskBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
+		ManagedFunctionBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
 				"TASK", "OFFICE_TEAM");
 		governedTask.addGovernance("GOVERNANCE");
 
@@ -282,7 +282,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
 				ClassGovernanceSource.class, SimpleManagedObject.class);
 		this.record_officeBuilder_addWork("DESK.WORK");
-		TaskBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
+		ManagedFunctionBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
 				"TASK", "OFFICE_TEAM");
 		governedTask.addGovernance("GOVERNANCE");
 
@@ -291,7 +291,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling {@link Governance} over a {@link Task} within a
+	 * Tests compiling {@link Governance} over a {@link ManagedFunction} within a
 	 * {@link OfficeSubSection}.
 	 */
 	public void testSubSectionTaskInheritGovernance() {
@@ -309,7 +309,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM",
 				ClassGovernanceSource.class, SimpleManagedObject.class);
 		this.record_officeBuilder_addWork("GOVERNED_SECTION.GOVERNED_DESK.WORK");
-		TaskBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
+		ManagedFunctionBuilder<?, ?, ?> governedTask = this.record_workBuilder_addTask(
 				"TASK", "OFFICE_TEAM");
 		governedTask.addGovernance("GOVERNANCE");
 		this.record_officeBuilder_addWork("NON_GOVERNED_DESK.WORK");

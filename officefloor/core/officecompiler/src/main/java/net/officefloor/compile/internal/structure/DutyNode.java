@@ -18,9 +18,9 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeDuty;
-import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
  * {@link OfficeDuty} node.
@@ -40,25 +40,25 @@ public interface DutyNode extends Node, OfficeDuty {
 	void initialise();
 
 	/**
-	 * Builds the pre {@link Task} administration.
+	 * Builds the pre {@link ManagedFunction} administration.
 	 * 
 	 * @param workBuilder
 	 *            {@link WorkBuilder}.
 	 * @param taskBuilder
-	 *            {@link TaskBuilder}.
+	 *            {@link ManagedFunctionBuilder}.
 	 */
 	void buildPreTaskAdministration(WorkBuilder<?> workBuilder,
-			TaskBuilder<?, ?, ?> taskBuilder);
+			ManagedFunctionBuilder<?, ?, ?> taskBuilder);
 
 	/**
-	 * Builds the post {@link Task} administration.
+	 * Builds the post {@link ManagedFunction} administration.
 	 * 
 	 * @param workBuilder
 	 *            {@link WorkBuilder}.
 	 * @param taskBuilder
-	 *            {@link TaskBuilder}.
+	 *            {@link ManagedFunctionBuilder}.
 	 */
 	void buildPostTaskAdministration(WorkBuilder<?> workBuilder,
-			TaskBuilder<?, ?, ?> taskBuilder);
+			ManagedFunctionBuilder<?, ?, ?> taskBuilder);
 
 }

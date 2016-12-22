@@ -22,14 +22,14 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * Tests loading a {@link Task}.
+ * Tests loading a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -41,13 +41,13 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 	private final WorkFactory<Work> workFactory = this.createMockWorkFactory();
 
 	/**
-	 * {@link TaskFactory}.
+	 * {@link ManagedFunctionFactory}.
 	 */
-	private final TaskFactory<Work, ?, ?> taskFactory = this
+	private final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
 			.createMockTaskFactory();
 
 	/**
-	 * Ensure can load a simple {@link Task}.
+	 * Ensure can load a simple {@link ManagedFunction}.
 	 */
 	public void testLoadSimpleTask() {
 
@@ -58,7 +58,7 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 				.record_officefloor_addOffice("OFFICE");
 		officeBuilder.registerTeam("OFFICE_TEAM", "OFFICE_FLOOR_TEAM");
 		this.record_office_addWork("SECTION.WORK", this.workFactory);
-		TaskBuilder<?, ?, ?> taskBuilder = this.record_work_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> taskBuilder = this.record_work_addTask("TASK",
 				this.taskFactory);
 		taskBuilder.setTeam("OFFICE_TEAM");
 

@@ -24,7 +24,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
@@ -61,7 +61,7 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 
 	/**
 	 * {@link Team} name responsible to undertake the {@link Governance}
-	 * {@link Task} instances.
+	 * {@link ManagedFunction} instances.
 	 */
 	private String teamName;
 
@@ -127,7 +127,7 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param argumentType

@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.integrate.stress;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
@@ -32,7 +32,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
- * Stress tests invoking a parallel {@link Task}.
+ * Stress tests invoking a parallel {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -72,7 +72,7 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 	 * Does the parallel stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link Task} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -120,12 +120,12 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 		private final int maxParallelCalls;
 
 		/**
-		 * Number of parallel {@link Task} instances run.
+		 * Number of parallel {@link ManagedFunction} instances run.
 		 */
 		public long parallelCount = 0;
 
 		/**
-		 * Maximum number of times to trigger parallel {@link Task} instances.
+		 * Maximum number of times to trigger parallel {@link ManagedFunction} instances.
 		 */
 		private final int maxTriggers;
 
@@ -140,7 +140,7 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 		 * @param maxParallelCalls
 		 *            Maximum number of parallel calls.
 		 * @param maxTriggers
-		 *            Maximum number of times to trigger parallel {@link Task}
+		 *            Maximum number of times to trigger parallel {@link ManagedFunction}
 		 *            instances.
 		 */
 		public ParallelInvoker(int maxParallelCalls, int maxTriggers) {
@@ -152,11 +152,11 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 		 * Triggers the parallel flow and repeats so many times.
 		 * 
 		 * @param taskContext
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 * @param flow
-		 *            Parallel {@link Task}.
+		 *            Parallel {@link ManagedFunction}.
 		 */
-		public void trigger(TaskContext<?, ?, ?> taskContext,
+		public void trigger(ManagedFunctionContext<?, ?, ?> taskContext,
 				ReflectiveFlow flow) {
 
 			// Invoke the parallel task
@@ -170,12 +170,12 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/**
-		 * Parallel {@link Task}.
+		 * Parallel {@link ManagedFunction}.
 		 * 
 		 * @param callCount
 		 *            Number of parallel calls so far.
 		 * @param flow
-		 *            Parallel {@link Task}.
+		 *            Parallel {@link ManagedFunction}.
 		 */
 		public void parallel(Integer callCount, ReflectiveFlow flow) {
 

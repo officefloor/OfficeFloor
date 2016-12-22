@@ -24,7 +24,7 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -98,7 +98,7 @@ public interface ManagedObjectTypeBuilder {
 	 *            <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 * @param taskName
-	 *            Name of {@link Task} instigating the {@link Flow} or
+	 *            Name of {@link ManagedFunction} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 */
@@ -122,7 +122,7 @@ public interface ManagedObjectTypeBuilder {
 	 *            <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 * @param taskName
-	 *            Name of {@link Task} instigating the {@link Flow} or
+	 *            Name of {@link ManagedFunction} instigating the {@link Flow} or
 	 *            <code>null</code> if done directly by
 	 *            {@link ManagedObjectSource}.
 	 */

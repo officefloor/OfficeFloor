@@ -24,22 +24,22 @@ import java.util.Set;
 
 import javax.naming.Context;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
-import net.officefloor.compile.work.TaskObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * {@link WorkSource} to execute {@link Method} instances on a JNDI Object.
+ * {@link ManagedFunctionSource} to execute {@link Method} instances on a JNDI Object.
  * 
  * @author Daniel Sagenschneider
  */
@@ -67,7 +67,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 	 * <p>
 	 * Only {@link Method} instances of the facade that have a parameter as per
 	 * {@link #PROPERTY_WORK_TYPE} are included. The JNDI Object will however
-	 * not appear as a {@link TaskObjectType}, as it will be provided from the
+	 * not appear as a {@link ManagedFunctionObjectType}, as it will be provided from the
 	 * {@link Work}.
 	 * <p>
 	 * Should the facade have a {@link Method} of the same name as a
@@ -76,7 +76,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 	 * <p>
 	 * The facade allows for example to:
 	 * <ol>
-	 * <li>Manipulating the parameter of the {@link Task} to the JNDI Object
+	 * <li>Manipulating the parameter of the {@link ManagedFunction} to the JNDI Object
 	 * {@link Method} parameters</li>
 	 * <li>Changing the type/order of parameters to the JNDI Object
 	 * {@link Method}</li>
@@ -97,8 +97,8 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 	}
 
 	@Override
-	public void sourceWork(WorkTypeBuilder<JndiWork> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<JndiWork> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the JNDI name
 		String jndiName = context.getProperty(PROPERTY_JNDI_NAME);
@@ -128,7 +128,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 						workType, new TaskFactoryManufacturer() {
 							@Override
 							@SuppressWarnings("rawtypes")
-							public TaskFactory createTaskFactory(
+							public ManagedFunctionFactory createTaskFactory(
 									String taskName, Method method,
 									boolean isStatic,
 									ParameterFactory[] parameters) {
@@ -156,7 +156,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 					new TaskFactoryManufacturer() {
 						@Override
 						@SuppressWarnings("rawtypes")
-						public TaskFactory createTaskFactory(String taskName,
+						public ManagedFunctionFactory createTaskFactory(String taskName,
 								Method method, boolean isStatic,
 								ParameterFactory[] parameters) {
 
@@ -174,35 +174,35 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 	}
 
 	/**
-	 * Manufacturer of a {@link TaskFactory}.
+	 * Manufacturer of a {@link ManagedFunctionFactory}.
 	 */
 	private interface TaskFactoryManufacturer {
 
 		/**
-		 * Creates the {@link TaskFactory}.
+		 * Creates the {@link ManagedFunctionFactory}.
 		 * 
 		 * @param taskName
-		 *            Name of the {@link Task}.
+		 *            Name of the {@link ManagedFunction}.
 		 * @param method
-		 *            {@link Method} for the {@link Task}.
+		 *            {@link Method} for the {@link ManagedFunction}.
 		 * @param isStatic
 		 *            <code>true</code> if the {@link Method} is static.
 		 * @param parameters
-		 *            {@link ParameterFactory} instances for the {@link Task}.
-		 * @return {@link TaskFactory}.
+		 *            {@link ParameterFactory} instances for the {@link ManagedFunction}.
+		 * @return {@link ManagedFunctionFactory}.
 		 */
 		@SuppressWarnings("rawtypes")
-		TaskFactory createTaskFactory(String taskName, Method method,
+		ManagedFunctionFactory createTaskFactory(String taskName, Method method,
 				boolean isStatic, ParameterFactory[] parameters);
 	}
 
 	/**
-	 * Registers the {@link Task}.
+	 * Registers the {@link ManagedFunction}.
 	 * 
 	 * @param workTypeBuilder
-	 *            {@link WorkTypeBuilder}.
+	 *            {@link FunctionNamespaceBuilder}.
 	 * @param method
-	 *            {@link Method} to potentially create the {@link Task} from.
+	 *            {@link Method} to potentially create the {@link ManagedFunction} from.
 	 * @param workType
 	 *            Type of JNDI {@link Work} object. May be <code>null</code> but
 	 *            if provided must be one of the parameter types of the
@@ -211,7 +211,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 	 *            {@link TaskFactoryManufacturer}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void registerMethodAsPotentialTask(WorkTypeBuilder workTypeBuilder,
+	private void registerMethodAsPotentialTask(FunctionNamespaceBuilder workTypeBuilder,
 			Method method, Class<?> workType,
 			TaskFactoryManufacturer manufacturer) {
 
@@ -252,15 +252,15 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 		boolean isStatic = Modifier.isStatic(method.getModifiers());
 
 		// Create the TaskFactory
-		TaskFactory taskFactory = manufacturer.createTaskFactory(methodName,
+		ManagedFunctionFactory taskFactory = manufacturer.createTaskFactory(methodName,
 				method, isStatic, parameters);
 		if (taskFactory == null) {
 			return; // no task factory, so do not register
 		}
 
 		// Include method as task in type definition
-		TaskTypeBuilder<Indexed, None> taskTypeBuilder = workTypeBuilder
-				.addTaskType(methodName, taskFactory, Indexed.class, None.class);
+		ManagedFunctionTypeBuilder<Indexed, None> taskTypeBuilder = workTypeBuilder
+				.addManagedFunctionType(methodName, taskFactory, Indexed.class, None.class);
 
 		// Define the return type (it not void)
 		Class<?> returnType = method.getReturnType();
@@ -279,7 +279,7 @@ public class JndiWorkSource extends AbstractWorkSource<JndiWork> {
 			Class<?> paramType = paramTypes[i];
 
 			// Determine if task context
-			if (TaskContext.class.equals(paramType)) {
+			if (ManagedFunctionContext.class.equals(paramType)) {
 				// Parameter is a task context.
 				parameters[i] = new TaskContextParameterFactory();
 				continue;

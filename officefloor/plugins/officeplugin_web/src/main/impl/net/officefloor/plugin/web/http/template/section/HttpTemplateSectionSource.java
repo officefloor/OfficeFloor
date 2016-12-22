@@ -35,6 +35,7 @@ import java.util.Set;
 
 import net.officefloor.compile.impl.properties.PropertiesUtil;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
@@ -46,8 +47,7 @@ import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -293,11 +293,11 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	/**
-	 * Creates the {@link Task} key from the {@link Task} name.
+	 * Creates the {@link ManagedFunction} key from the {@link ManagedFunction} name.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @return Key for the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
+	 * @return Key for the {@link ManagedFunction}.
 	 */
 	private static String createTaskKey(String taskName) {
 		// Provide name in upper case to avoid case sensitivity
@@ -800,9 +800,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		public final SectionTask task;
 
 		/**
-		 * {@link TaskType}.
+		 * {@link ManagedFunctionType}.
 		 */
-		public final TaskType<?, ?, ?> type;
+		public final ManagedFunctionType<?, ?, ?> type;
 
 		/**
 		 * {@link Method} for the {@link SectionTask}.
@@ -821,14 +821,14 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 * @param task
 		 *            {@link SectionTask}.
 		 * @param type
-		 *            {@link TaskType}.
+		 *            {@link ManagedFunctionType}.
 		 * @param method
 		 *            {@link Method} for the {@link SectionTask}.
 		 * @param parameter
 		 *            Type of parameter for {@link SectionTask}.
 		 *            <code>null</code> indicates no parameter.
 		 */
-		public TemplateClassTask(SectionTask task, TaskType<?, ?, ?> type, Method method, Class<?> parameter) {
+		public TemplateClassTask(SectionTask task, ManagedFunctionType<?, ?, ?> type, Method method, Class<?> parameter) {
 			this.task = task;
 			this.type = type;
 			this.method = method;
@@ -847,9 +847,9 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		public final TaskFlow taskFlow;
 
 		/**
-		 * {@link TaskType} of the {@link Task} for the {@link TaskFlow}.
+		 * {@link ManagedFunctionType} of the {@link ManagedFunction} for the {@link TaskFlow}.
 		 */
-		public final TaskType<?, ?, ?> taskType;
+		public final ManagedFunctionType<?, ?, ?> taskType;
 
 		/**
 		 * Flow interface type.
@@ -872,7 +872,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 * @param taskFlow
 		 *            {@link TaskFlow} to be linked.
 		 * @param taskType
-		 *            {@link TaskType} of the {@link Task} for the
+		 *            {@link ManagedFunctionType} of the {@link ManagedFunction} for the
 		 *            {@link TaskFlow}.
 		 * @param flowInterfaceType
 		 *            Flow interface type.
@@ -881,7 +881,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 * @param flowArgumentType
 		 *            Flow interface method argument type.
 		 */
-		public TemplateFlowLink(TaskFlow taskFlow, TaskType<?, ?, ?> taskType, Class<?> flowInterfaceType,
+		public TemplateFlowLink(TaskFlow taskFlow, ManagedFunctionType<?, ?, ?> taskType, Class<?> flowInterfaceType,
 				Method flowMethod, Class<?> flowArgumentType) {
 			this.taskFlow = taskFlow;
 			this.taskType = taskType;
@@ -907,7 +907,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		private final String extensionPropertyPrefix;
 
 		/**
-		 * {@link Set} to be populated with keys to {@link Task} instances that
+		 * {@link Set} to be populated with keys to {@link ManagedFunction} instances that
 		 * are not to have the template rendered on their completion.
 		 */
 		private final Set<String> nonRenderTemplateTaskKeys;
@@ -920,7 +920,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 		 * @param extensionPropertyPrefix
 		 *            Prefix for a property of this extension.
 		 * @param nonRenderTemplateTaskKeys
-		 *            {@link Set} to be populated with keys to {@link Task}
+		 *            {@link Set} to be populated with keys to {@link ManagedFunction}
 		 *            instances that are not to have the template rendered on
 		 *            their completion.
 		 */
@@ -1139,7 +1139,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	@Override
-	protected void enrichTask(SectionTask task, TaskType<?, ?, ?> taskType, Method method, Class<?> parameterType) {
+	protected void enrichTask(SectionTask task, ManagedFunctionType<?, ?, ?> taskType, Method method, Class<?> parameterType) {
 
 		// Do not include if no logic class
 		if (NoLogicClass.class.equals(this.sectionClass)) {
@@ -1155,7 +1155,7 @@ public class HttpTemplateSectionSource extends ClassSectionSource {
 	}
 
 	@Override
-	protected void linkTaskFlow(TaskFlow taskFlow, TaskType<?, ?, ?> taskType, Class<?> flowInterfaceType,
+	protected void linkTaskFlow(TaskFlow taskFlow, ManagedFunctionType<?, ?, ?> taskType, Class<?> flowInterfaceType,
 			Method flowMethod, Class<?> flowArgumentType) {
 		// At this stage, the template content tasks are not available.
 		// Therefore just keep track of flows for later linking.

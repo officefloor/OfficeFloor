@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
@@ -45,7 +45,7 @@ import net.officefloor.frame.spi.team.source.ProcessContextListener;
  * {@link Work} via the {@link WorkManager}.
  * <p>
  * To enable the invoking {@link Thread} to be available for executing
- * {@link Task} instances of the {@link ProcessState}, the {@link Work} by the
+ * {@link ManagedFunction} instances of the {@link ProcessState}, the {@link Work} by the
  * {@link WorkManager} needs to be invoked with the
  * {@link #doWork(WorkManager, Object)} method.
  * <p>
@@ -73,7 +73,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	/**
 	 * <p>
 	 * Wrap invoking {@link Work} on the {@link WorkManager} to allow the
-	 * {@link Thread} to be available to execute the {@link Task} instances of
+	 * {@link Thread} to be available to execute the {@link ManagedFunction} instances of
 	 * the {@link ProcessState}.
 	 * <p>
 	 * This method blocks until the invoked {@link ProcessState} of the invoked
@@ -82,12 +82,12 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @param workManager
 	 *            {@link WorkManager} managing the {@link Work} to invoked.
 	 * @param parameter
-	 *            Parameter for the initial {@link Task} of the {@link Work}.
+	 *            Parameter for the initial {@link ManagedFunction} of the {@link Work}.
 	 * @throws NoInitialTaskException
 	 *             If {@link Work} of the {@link WorkManager} has no initial
-	 *             {@link Task}.
+	 *             {@link ManagedFunction}.
 	 * @throws InvalidParameterTypeException
-	 *             Should the parameter type be invalid for the {@link Task}.
+	 *             Should the parameter type be invalid for the {@link ManagedFunction}.
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
@@ -103,19 +103,19 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 	/**
 	 * <p>
-	 * Wrap invoking {@link Task} on the {@link TaskManager} to allow the
-	 * {@link Thread} to be available to execute the {@link Task} instances of
+	 * Wrap invoking {@link ManagedFunction} on the {@link TaskManager} to allow the
+	 * {@link Thread} to be available to execute the {@link ManagedFunction} instances of
 	 * the {@link ProcessState}.
 	 * <p>
 	 * This method blocks until the invoked {@link ProcessState} of the invoked
-	 * {@link Task} is complete.
+	 * {@link ManagedFunction} is complete.
 	 * 
 	 * @param taskManager
-	 *            {@link TaskManager} managing the {@link Task} to invoked.
+	 *            {@link TaskManager} managing the {@link ManagedFunction} to invoked.
 	 * @param parameter
-	 *            Parameter for the {@link Task}.
+	 *            Parameter for the {@link ManagedFunction}.
 	 * @throws InvalidParameterTypeException
-	 *             Should the parameter type be invalid for the {@link Task}.
+	 *             Should the parameter type be invalid for the {@link ManagedFunction}.
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
@@ -137,7 +137,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * <p>
 	 * Wrap invoking {@link ProcessState} on the
 	 * {@link ManagedObjectExecuteContext} to allow the {@link Thread} to be
-	 * available to execute the {@link Task} instances of the
+	 * available to execute the {@link ManagedFunction} instances of the
 	 * {@link ProcessState}.
 	 * <p>
 	 * This method blocks until the invoked {@link ProcessState} is complete.
@@ -149,7 +149,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @param flowKey
 	 *            {@link Flow} key.
 	 * @param parameter
-	 *            Parameter for the initial {@link Task}.
+	 *            Parameter for the initial {@link ManagedFunction}.
 	 * @param managedObject
 	 *            {@link ManagedObject}.
 	 * @param escalationHandler
@@ -167,7 +167,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * <p>
 	 * Wrap invoking {@link ProcessState} on the
 	 * {@link ManagedObjectExecuteContext} to allow the {@link Thread} to be
-	 * available to execute the {@link Task} instances of the
+	 * available to execute the {@link ManagedFunction} instances of the
 	 * {@link ProcessState}.
 	 * <p>
 	 * This method blocks until the invoked {@link ProcessState} is complete.
@@ -177,7 +177,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @param flowIndex
 	 *            {@link Flow} index.
 	 * @param parameter
-	 *            Parameter for the initial {@link Task}.
+	 *            Parameter for the initial {@link ManagedFunction}.
 	 * @param managedObject
 	 *            {@link ManagedObject}.
 	 * @param escalationHandler
@@ -213,9 +213,9 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		 * @return {@link ProcessFuture} for the {@link ProcessState}.
 		 * @throws NoInitialTaskException
 		 *             If {@link Work} of the {@link WorkManager} has no initial
-		 *             {@link Task}.
+		 *             {@link ManagedFunction}.
 		 * @throws InvalidParameterTypeException
-		 *             Should the parameter type be invalid for {@link Task}.
+		 *             Should the parameter type be invalid for {@link ManagedFunction}.
 		 */
 		ProcessFuture invokeProcessState() throws NoInitialTaskException, InvalidParameterTypeException;
 	}
@@ -223,7 +223,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	/**
 	 * <p>
 	 * Wrap invoking {@link ProcessState} on the {@link InvokeProcessState} to
-	 * allow the {@link Thread} to be available to execute the {@link Task}
+	 * allow the {@link Thread} to be available to execute the {@link ManagedFunction}
 	 * instances of the {@link ProcessState}.
 	 * <p>
 	 * This method blocks until the invoked {@link ProcessState} is complete.
@@ -232,9 +232,9 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 *            {@link InvokeProcessState}.
 	 * @throws NoInitialTaskException
 	 *             If {@link Work} of the {@link WorkManager} has no initial
-	 *             {@link Task}.
+	 *             {@link ManagedFunction}.
 	 * @throws InvalidParameterTypeException
-	 *             Should the parameter type be invalid for the {@link Task}.
+	 *             Should the parameter type be invalid for the {@link ManagedFunction}.
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */

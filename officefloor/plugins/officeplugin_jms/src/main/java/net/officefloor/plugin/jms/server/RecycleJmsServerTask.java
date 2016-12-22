@@ -19,7 +19,7 @@ package net.officefloor.plugin.jms.server;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.util.AbstractSingleTask;
 
@@ -51,8 +51,8 @@ public class RecycleJmsServerTask extends
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<RecycleJmsServerTask, Indexed, None> context)
+	public Object execute(
+			ManagedFunctionContext<RecycleJmsServerTask, Indexed, None> context)
 			throws Exception {
 
 		// Obtain the recycle parameter

@@ -27,12 +27,12 @@ import java.util.logging.Logger;
 import net.officefloor.frame.api.build.NameAwareWorkFactory;
 import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
-import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -55,8 +55,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(OfficeFloorImpl.class
-			.getName());
+	private static final Logger LOGGER = Logger.getLogger(OfficeFloorImpl.class.getName());
 
 	/**
 	 * {@link OfficeFloorMetaData} for this {@link OfficeFloor}.
@@ -93,13 +92,13 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 */
 
 	/**
-	 * {@link TeamIdentifier} for the startup {@link Task} instances.
+	 * {@link TeamIdentifier} for the startup {@link ManagedFunction} instances.
 	 */
 	public static final TeamIdentifier STARTUP_TEAM = new TeamIdentifier() {
 	};
 
 	@Override
-	public synchronized void openOfficeFloor() throws Exception {
+	public void openOfficeFloor() throws Exception {
 
 		// Ensure not already open
 		if (this.offices != null) {
@@ -122,7 +121,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 			}
 
 			@Override
-			public void processComplete(TeamIdentifier currentTeam) {
+			public void processComplete() {
 				// Decrement the number of active processes
 				ticker.decrementAndGet();
 			}
@@ -132,25 +131,22 @@ public class OfficeFloorImpl implements OfficeFloor {
 		this.timer = new Timer(true);
 
 		// Create the offices to open floor for work
-		OfficeMetaData[] officeMetaDatas = this.officeFloorMetaData
-				.getOfficeMetaData();
+		OfficeMetaData[] officeMetaDatas = this.officeFloorMetaData.getOfficeMetaData();
 		this.offices = new HashMap<String, Office>(officeMetaDatas.length);
 		for (OfficeMetaData officeMetaData : officeMetaDatas) {
 
 			// Create the office
 			String officeName = officeMetaData.getOfficeName();
-			Office office = new OfficeImpl(officeMetaData, this.processTicker);
+			Office office = new OfficeImpl(officeMetaData);
 
 			// Iterate over Office meta-data providing additional functionality
-			for (WorkMetaData<?> workMetaData : officeMetaData
-					.getWorkMetaData()) {
+			for (WorkMetaData<?> workMetaData : officeMetaData.getWorkMetaData()) {
 				WorkFactory<?> workFactory = workMetaData.getWorkFactory();
 
 				// Handle if name aware
 				if (workFactory instanceof NameAwareWorkFactory<?>) {
 					NameAwareWorkFactory<?> nameAwareWorkFactory = (NameAwareWorkFactory<?>) workFactory;
-					nameAwareWorkFactory.setBoundWorkName(workMetaData
-							.getWorkName());
+					nameAwareWorkFactory.setBoundWorkName(workMetaData.getWorkName());
 				}
 
 				// Handle if Office aware
@@ -165,8 +161,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 		}
 
 		// Start the managed object source instances
-		for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
-				.getManagedObjectSourceInstances()) {
+		for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData.getManagedObjectSourceInstances()) {
 			this.startManagedObjectSourceInstance(mosInstance);
 		}
 
@@ -176,15 +171,13 @@ public class OfficeFloorImpl implements OfficeFloor {
 		}
 
 		// Start the teams working within the offices
-		for (TeamManagement teamManagement : this.officeFloorMetaData
-				.getTeams()) {
+		for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
 			teamManagement.getTeam().startWorking();
 		}
 
 		// Invoke the startup tasks for each office
 		for (OfficeMetaData officeMetaData : officeMetaDatas) {
-			for (OfficeStartupTask officeStartupTask : officeMetaData
-					.getStartupTasks()) {
+			for (OfficeStartupTask officeStartupTask : officeMetaData.getStartupTasks()) {
 
 				// Ensure have startup task
 				if (officeStartupTask == null) {
@@ -192,10 +185,9 @@ public class OfficeFloorImpl implements OfficeFloor {
 				}
 
 				// Create and activate the startup task
-				FunctionState startupTask = officeMetaData.createProcess(
-						officeStartupTask.getFlowMetaData(),
+				ManagedFunctionContainer startupTask = officeMetaData.createProcess(officeStartupTask.getFlowMetaData(),
 						officeStartupTask.getParameter(), null, null, null);
-				startupTask.activateJob(STARTUP_TEAM);
+				officeMetaData.getFunctionLoop().delegateFunction(startupTask);
 			}
 		}
 	}
@@ -208,17 +200,15 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * @throws Exception
 	 *             If fails to start the {@link ManagedObjectSourceInstance}.
 	 */
-	private <F extends Enum<F>> void startManagedObjectSourceInstance(
-			ManagedObjectSourceInstance<F> mosInstance) throws Exception {
+	private <F extends Enum<F>> void startManagedObjectSourceInstance(ManagedObjectSourceInstance<F> mosInstance)
+			throws Exception {
 
 		// Obtain the managed object source
 		ManagedObjectSource<?, F> mos = mosInstance.getManagedObjectSource();
 
 		// Start the managed object source
-		ManagedObjectExecuteContext<F> executeContext = mosInstance
-				.getManagedObjectExecuteContextFactory()
-				.createManagedObjectExecuteContext(this.processTicker,
-						this.timer);
+		ManagedObjectExecuteContext<F> executeContext = mosInstance.getManagedObjectExecuteContextFactory()
+				.createManagedObjectExecuteContext(this.timer, mosInstance.getResponsibleTeam());
 		mos.start(executeContext);
 
 		// Determine if pooled
@@ -230,7 +220,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	}
 
 	@Override
-	public synchronized void closeOfficeFloor() {
+	public void closeOfficeFloor() {
 
 		// Ensure open to be closed
 		if (this.offices == null) {
@@ -260,8 +250,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 			if (this.processTicker.activeProcessCount() > 0) {
 				if (LOGGER.isLoggable(Level.WARNING)) {
 					LOGGER.warning("Timed out waiting for processes to complete ("
-							+ this.processTicker.activeProcessCount()
-							+ " remaining).  Forcing close of OfficeFloor.");
+							+ this.processTicker.activeProcessCount() + " remaining).  Forcing close of OfficeFloor.");
 				}
 			}
 
@@ -269,14 +258,12 @@ public class OfficeFloorImpl implements OfficeFloor {
 			this.timer.cancel();
 
 			// Stop the teams working as closing
-			for (TeamManagement teamManagement : this.officeFloorMetaData
-					.getTeams()) {
+			for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
 				teamManagement.getTeam().stopWorking();
 			}
 
 			// Stop the office managers
-			for (OfficeMetaData officeMetaData : this.officeFloorMetaData
-					.getOfficeMetaData()) {
+			for (OfficeMetaData officeMetaData : this.officeFloorMetaData.getOfficeMetaData()) {
 				officeMetaData.getOfficeManager().stopManaging();
 			}
 
@@ -289,7 +276,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	}
 
 	@Override
-	public synchronized String[] getOfficeNames() {
+	public String[] getOfficeNames() {
 
 		// Ensure open
 		this.ensureOfficeFloorOpen();
@@ -299,8 +286,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	}
 
 	@Override
-	public synchronized Office getOffice(String officeName)
-			throws UnknownOfficeException {
+	public Office getOffice(String officeName) throws UnknownOfficeException {
 
 		// Ensure open
 		this.ensureOfficeFloorOpen();
@@ -323,8 +309,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 */
 	private void ensureOfficeFloorOpen() throws IllegalStateException {
 		if (this.offices == null) {
-			throw new IllegalStateException(
-					"Must open the Office Floor before obtaining Offices");
+			throw new IllegalStateException("Must open the Office Floor before obtaining Offices");
 		}
 	}
 

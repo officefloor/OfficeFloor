@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.servlet.mapping.ServicerMapping;
 import net.officefloor.plugin.servlet.security.HttpServletSecurity;
@@ -54,7 +54,7 @@ public interface HttpServletContainer {
 	 *            {@link HttpServletSecurity}. May be <code>null</code> if
 	 *            anonymous {@link HttpRequest}.
 	 * @param taskContext
-	 *            {@link TaskContext} to allow access to {@link OfficeFloor}
+	 *            {@link ManagedFunctionContext} to allow access to {@link OfficeFloor}
 	 *            capabilities.
 	 * @param mapping
 	 *            {@link ServicerMapping} that mapped the {@link HttpRequest} to
@@ -67,7 +67,7 @@ public interface HttpServletContainer {
 	 */
 	void service(ServerHttpConnection connection, HttpRequestState attributes,
 			HttpSession session, HttpServletSecurity security,
-			TaskContext<?, ?, ?> taskContext, ServicerMapping mapping)
+			ManagedFunctionContext<?, ?, ?> taskContext, ServicerMapping mapping)
 			throws ServletException, IOException;
 
 	/**

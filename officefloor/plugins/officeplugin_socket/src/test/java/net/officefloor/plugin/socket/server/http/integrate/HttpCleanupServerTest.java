@@ -25,11 +25,11 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -172,8 +172,8 @@ public class HttpCleanupServerTest extends MockHttpServer {
 	@TestSource
 	public static class RecycleEscalationManagedObjectSource extends
 			AbstractManagedObjectSource<None, None> implements ManagedObject,
-			WorkFactory<Work>, Work, TaskFactory<Work, Indexed, None>,
-			Task<Work, Indexed, None> {
+			WorkFactory<Work>, Work, ManagedFunctionFactory<Work, Indexed, None>,
+			ManagedFunction<Work, Indexed, None> {
 
 		/**
 		 * {@link Escalation} on cleanup.
@@ -233,7 +233,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 		 */
 
 		@Override
-		public Task<Work, Indexed, None> createTask(Work work) {
+		public ManagedFunction<Work, Indexed, None> createManagedFunction(Work work) {
 			return this;
 		}
 
@@ -242,7 +242,7 @@ public class HttpCleanupServerTest extends MockHttpServer {
 		 */
 
 		@Override
-		public Object doTask(TaskContext<Work, Indexed, None> context)
+		public Object execute(ManagedFunctionContext<Work, Indexed, None> context)
 				throws Throwable {
 
 			// Trigger escalation if provided

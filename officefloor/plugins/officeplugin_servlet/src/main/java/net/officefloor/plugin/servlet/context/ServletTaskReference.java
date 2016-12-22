@@ -20,13 +20,13 @@ package net.officefloor.plugin.servlet.context;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.servlet.mapping.ServicerMapper;
 
 /**
  * <p>
- * Reference to a {@link Servlet} {@link Task}.
+ * Reference to a {@link Servlet} {@link ManagedFunction}.
  * <p>
  * This allows for the {@link OfficeServletContext} to provide routing with
  * similar rules to {@link RequestDispatcher} (i.e. {@link ServicerMapper}).
@@ -43,9 +43,9 @@ public interface ServletTaskReference {
 	String getWorkName();
 
 	/**
-	 * Obtains the {@link Task} name.
+	 * Obtains the {@link ManagedFunction} name.
 	 * 
-	 * @return {@link Task} name.
+	 * @return {@link ManagedFunction} name.
 	 */
 	String getTaskName();
 

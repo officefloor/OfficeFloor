@@ -17,24 +17,24 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.route.HttpUrlContinuation;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link Task} and {@link TaskFactory} for completing authentication with
+ * {@link ManagedFunction} and {@link ManagedFunctionFactory} for completing authentication with
  * application specific credentials.
  * 
  * @author Daniel Sagenschneider
  */
 public class CompleteApplicationHttpAuthenticateTask
 		implements
-		TaskFactory<HttpSecurityWork, CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows>,
-		Task<HttpSecurityWork, CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows> {
+		ManagedFunctionFactory<HttpSecurityWork, CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows>,
+		ManagedFunction<HttpSecurityWork, CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows> {
 
 	/**
 	 * Dependency keys.
@@ -55,7 +55,7 @@ public class CompleteApplicationHttpAuthenticateTask
 	 */
 
 	@Override
-	public Task<HttpSecurityWork, Dependencies, Flows> createTask(
+	public ManagedFunction<HttpSecurityWork, Dependencies, Flows> createManagedFunction(
 			HttpSecurityWork work) {
 		return this;
 	}
@@ -66,8 +66,8 @@ public class CompleteApplicationHttpAuthenticateTask
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public Object doTask(
-			TaskContext<HttpSecurityWork, Dependencies, Flows> context)
+	public Object execute(
+			ManagedFunctionContext<HttpSecurityWork, Dependencies, Flows> context)
 			throws Throwable {
 
 		// Obtain the HTTP authentication to check on authentication

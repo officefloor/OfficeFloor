@@ -20,14 +20,14 @@ package net.officefloor.plugin.web.http.resource.source;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.protocol.HttpStatus;
@@ -45,7 +45,7 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.Depen
 
 /**
  * <p>
- * {@link WorkSource} to send a {@link HttpFile}.
+ * {@link ManagedFunctionSource} to send a {@link HttpFile}.
  * <p>
  * This provides common handling of sending a {@link HttpFile} by:
  * <ol>
@@ -68,7 +68,7 @@ public class HttpFileSenderWorkSource extends
 	public static final String PROPERTY_NOT_FOUND_FILE_PATH = "not.found.file.path";
 
 	/**
-	 * Name of the {@link Task} to send the {@link HttpFile}.
+	 * Name of the {@link ManagedFunction} to send the {@link HttpFile}.
 	 */
 	public static final String TASK_NAME = "SendFile";
 
@@ -99,9 +99,9 @@ public class HttpFileSenderWorkSource extends
 	}
 
 	@Override
-	public void sourceWork(
-			WorkTypeBuilder<HttpFileFactoryTask<None>> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(
+			FunctionNamespaceBuilder<HttpFileFactoryTask<None>> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the properties
 		String notFoundContentPath = context.getProperty(
@@ -159,7 +159,7 @@ public class HttpFileSenderWorkSource extends
 			@Override
 			public void httpResourceCreated(HttpResource httpResource,
 					ServerHttpConnection connection,
-					TaskContext<?, ?, None> context) throws IOException {
+					ManagedFunctionContext<?, ?, None> context) throws IOException {
 
 				// Obtain the response to write
 				HttpResponse response = connection.getHttpResponse();
@@ -197,8 +197,8 @@ public class HttpFileSenderWorkSource extends
 		workTypeBuilder.setWorkFactory(task);
 
 		// Load the task to send the HTTP file
-		TaskTypeBuilder<DependencyKeys, None> taskTypeBuilder = workTypeBuilder
-				.addTaskType(TASK_NAME, task, DependencyKeys.class, None.class);
+		ManagedFunctionTypeBuilder<DependencyKeys, None> taskTypeBuilder = workTypeBuilder
+				.addManagedFunctionType(TASK_NAME, task, DependencyKeys.class, None.class);
 		taskTypeBuilder.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.SERVER_HTTP_CONNECTION);
 		taskTypeBuilder.addObject(HttpApplicationLocation.class).setKey(

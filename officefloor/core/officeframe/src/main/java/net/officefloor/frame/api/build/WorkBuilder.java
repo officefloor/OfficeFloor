@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -30,6 +30,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // add managed function directly to office
 public interface WorkBuilder<W extends Work> {
 
 	/**
@@ -51,8 +52,8 @@ public interface WorkBuilder<W extends Work> {
 	 *            the {@link Office}.
 	 * @return {@link DependencyMappingBuilder}.
 	 */
-	DependencyMappingBuilder addWorkManagedObject(String workManagedObjectName,
-			String officeManagedObjectName);
+	@Deprecated // move to ManagedFunctionBuilder
+	DependencyMappingBuilder addWorkManagedObject(String workManagedObjectName, String officeManagedObjectName);
 
 	/**
 	 * Adds a {@link Work} bound {@link Administrator}.
@@ -70,32 +71,35 @@ public interface WorkBuilder<W extends Work> {
 	 *            {@link AdministratorSource} class.
 	 * @return {@link AdministratorBuilder} for the {@link Administrator}.
 	 */
+	@Deprecated // only bind administrators to thread state
 	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addWorkAdministrator(
 			String workAdministratorName, Class<AS> adminsistratorSource);
 
 	/**
-	 * Specifies the initial {@link Task} of the {@link Work}.
+	 * Specifies the initial {@link ManagedFunction} of the {@link Work}.
 	 * 
 	 * @param initialTaskName
-	 *            Initial {@link Task}.
+	 *            Initial {@link ManagedFunction}.
 	 */
+	@Deprecated // no longer initial task to work
 	void setInitialTask(String initialTaskName);
 
 	/**
-	 * Creates the {@link TaskBuilder} to build a {@link Task} for this
-	 * {@link Work}.
+	 * Creates the {@link ManagedFunctionBuilder} to build a
+	 * {@link ManagedFunction}.
 	 * 
 	 * @param <D>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
-	 * @param taskName
-	 *            Name of task local to this {@link Work}.
-	 * @param taskFactory
-	 *            {@link TaskFactory} to create the {@link Task}.
-	 * @return {@link TaskBuilder} for the {@link Task}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @param mangedFunctionFactory
+	 *            {@link ManagedFunctionFactory} to create the
+	 *            {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
 	 */
-	<D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> addTask(
-			String taskName, TaskFactory<? super W, D, F> taskFactory);
+	<D extends Enum<D>, F extends Enum<F>> ManagedFunctionBuilder<W, D, F> addManagedFunction(String functionName,
+			ManagedFunctionFactory<? super W, D, F> mangedFunctionFactory);
 
 }

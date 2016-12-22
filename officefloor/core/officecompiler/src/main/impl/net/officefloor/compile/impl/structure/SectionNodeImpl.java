@@ -43,6 +43,7 @@ import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionInputType;
@@ -56,6 +57,7 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -84,9 +86,7 @@ import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.type.TypeContext;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -522,7 +522,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		OfficeTaskType[] taskTypes = CompileUtil.loadTypes(this.taskNodes, (task) -> task.getOfficeTaskName(), task -> {
 			// Obtain the work type of the work for the task
 			WorkNode work = task.getWorkNode();
-			WorkType<?> workType = typeContext.getOrLoadWorkType(work);
+			FunctionNamespaceType<?> workType = typeContext.getOrLoadWorkType(work);
 			if (workType == null) {
 				return null;
 			}
@@ -709,7 +709,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public SectionWork addSectionWork(String workName, WorkSource<?> workSource) {
+	public SectionWork addSectionWork(String workName, ManagedFunctionSource<?> workSource) {
 		return NodeUtil.getInitialisedNode(workName, this.workNodes, this.context,
 				() -> this.context.createWorkNode(workName, this),
 				(work) -> work.initialise(workSource.getClass().getName(), workSource));

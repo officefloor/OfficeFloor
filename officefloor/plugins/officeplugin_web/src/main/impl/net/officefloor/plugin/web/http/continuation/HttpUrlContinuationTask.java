@@ -18,12 +18,12 @@
 package net.officefloor.plugin.web.http.continuation;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
- * HTTP URL continuation {@link Task}.
+ * HTTP URL continuation {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -35,8 +35,8 @@ public class HttpUrlContinuationTask extends
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<HttpUrlContinuationTask, None, None> context)
+	public Object execute(
+			ManagedFunctionContext<HttpUrlContinuationTask, None, None> context)
 			throws Throwable {
 		// Does nothing as next task will service URL continuation
 		return null;

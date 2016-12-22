@@ -32,6 +32,7 @@ import net.officefloor.compile.impl.adapt.OfficeFloorCompilerAdapter;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -41,12 +42,11 @@ import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.team.TeamLoader;
-import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
@@ -578,28 +578,28 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 	/**
 	 * <p>
-	 * Allows providing an alias name for a {@link WorkSource}.
+	 * Allows providing an alias name for a {@link ManagedFunctionSource}.
 	 * <p>
 	 * This stops the configuration files from being littered with fully
-	 * qualified class names of the {@link WorkSource} classes. This is
+	 * qualified class names of the {@link ManagedFunctionSource} classes. This is
 	 * anticipated to allow flexibility as the functionality evolves so that
 	 * relocating/renaming classes does not require significant configuration
 	 * changes.
 	 * <p>
 	 * Typically this should not be used directly as the
 	 * {@link WorkSourceService} is the preferred means to provide
-	 * {@link WorkSource} aliases.
+	 * {@link ManagedFunctionSource} aliases.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 * @param <S>
-	 *            {@link WorkSource} type.
+	 *            {@link ManagedFunctionSource} type.
 	 * @param alias
-	 *            Alias name for the {@link WorkSource}.
+	 *            Alias name for the {@link ManagedFunctionSource}.
 	 * @param workSourceClass
-	 *            {@link WorkSource} {@link Class} for the alias.
+	 *            {@link ManagedFunctionSource} {@link Class} for the alias.
 	 */
-	public abstract <W extends Work, S extends WorkSource<W>> void addWorkSourceAlias(
+	public abstract <W extends Work, S extends ManagedFunctionSource<W>> void addWorkSourceAlias(
 			String alias, Class<S> workSourceClass);
 
 	/**
@@ -780,11 +780,11 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public abstract SectionLoader getSectionLoader();
 
 	/**
-	 * Obtains the {@link WorkLoader}.
+	 * Obtains the {@link ManagedFunctionLoader}.
 	 * 
-	 * @return {@link WorkLoader}.
+	 * @return {@link ManagedFunctionLoader}.
 	 */
-	public abstract WorkLoader getWorkLoader();
+	public abstract ManagedFunctionLoader getWorkLoader();
 
 	/**
 	 * Obtains the {@link ManagedObjectLoader}.

@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.integrate.stress;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
@@ -33,7 +33,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
- * Ensure dynamically invoking {@link Task} instances is stress tested.
+ * Ensure dynamically invoking {@link ManagedFunction} instances is stress tested.
  * 
  * @author Daniel Sagenschneider
  */
@@ -73,7 +73,7 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 	 * Does the dynamic flow stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to execute {@link Task} instances.
+	 *            {@link Team} to execute {@link ManagedFunction} instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -136,16 +136,16 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 		 * Invokes the {@link Flow} dynamically.
 		 * 
 		 * @param context
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
-		public void initialTask(TaskContext<?, ?, ?> context) throws Exception {
+		public void initialTask(ManagedFunctionContext<?, ?, ?> context) throws Exception {
 			// Invoke the dynamic flow
 			context.doFlow("WORK", "dynamicTask", new Integer(
 					this.invocationCount));
 		}
 
 		/**
-		 * {@link Task} to invoke dynamically.
+		 * {@link ManagedFunction} to invoke dynamically.
 		 * 
 		 * @param flow
 		 *            {@link ReflectiveFlow}.

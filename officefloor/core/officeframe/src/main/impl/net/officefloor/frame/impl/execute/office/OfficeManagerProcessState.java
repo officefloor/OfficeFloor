@@ -40,7 +40,7 @@ import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -110,7 +110,7 @@ public class OfficeManagerProcessState implements ProcessState {
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
+	public ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
 			throws UnknownWorkException, UnknownTaskException {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " should be be involved in specific tasks");
 	}

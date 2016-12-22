@@ -19,7 +19,7 @@ package net.officefloor.frame.integrate.managedobject.asynchronous;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -257,9 +257,9 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 * @param object
 		 *            Object from the {@link ManagedObject}.
 		 * @param taskContext
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
-		public void task(Object object, TaskContext<?, ?, ?> taskContext) {
+		public void task(Object object, ManagedFunctionContext<?, ?, ?> taskContext) {
 
 			// Flag that the Job was executed
 			this.isJobExecuted = true;

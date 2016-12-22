@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -35,13 +35,13 @@ public interface FlowMetaData<W extends Work> {
 	FlowInstigationStrategyEnum getInstigationStrategy();
 
 	/**
-	 * Obtains the {@link TaskMetaData} of the initial {@link Task} within the
+	 * Obtains the {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} within the
 	 * {@link Flow}.
 	 * 
-	 * @return {@link TaskMetaData} of the initial {@link Task} within the
+	 * @return {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} within the
 	 *         {@link Flow}.
 	 */
-	TaskMetaData<W, ?, ?> getInitialTaskMetaData();
+	ManagedFunctionMetaData<W, ?, ?> getInitialTaskMetaData();
 
 	/**
 	 * Obtains the {@link AssetManager} to managed this {@link Flow}.

@@ -19,15 +19,15 @@ package net.officefloor.plugin.web.http.template.section;
 
 import java.lang.reflect.Array;
 
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
@@ -47,7 +47,7 @@ public class HttpTemplateArrayIteratorWorkSource
 	public static final String PROPERTY_COMPONENT_TYPE_NAME = "component.type.name";
 
 	/**
-	 * Name of the {@link Task}.
+	 * Name of the {@link ManagedFunction}.
 	 */
 	public static final String TASK_NAME = "iterate";
 
@@ -71,9 +71,9 @@ public class HttpTemplateArrayIteratorWorkSource
 	}
 
 	@Override
-	public void sourceWork(
-			WorkTypeBuilder<HttpTemplateArrayIteratorTask> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(
+			FunctionNamespaceBuilder<HttpTemplateArrayIteratorTask> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the component type name
 		String componentTypeName = context.getProperty("component.type.name");
@@ -88,11 +88,11 @@ public class HttpTemplateArrayIteratorWorkSource
 		workTypeBuilder.setWorkFactory(task);
 
 		// Specify the task
-		TaskTypeBuilder<DependencyKeys, FlowKeys> taskBuilder = workTypeBuilder
-				.addTaskType(TASK_NAME, task, DependencyKeys.class,
+		ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> taskBuilder = workTypeBuilder
+				.addManagedFunctionType(TASK_NAME, task, DependencyKeys.class,
 						FlowKeys.class);
 		taskBuilder.addObject(arrayType).setKey(DependencyKeys.ARRAY);
-		TaskFlowTypeBuilder<FlowKeys> flow = taskBuilder.addFlow();
+		ManagedFunctionFlowTypeBuilder<FlowKeys> flow = taskBuilder.addFlow();
 		flow.setKey(FlowKeys.RENDER_ELEMENT);
 		flow.setArgumentType(componentType);
 	}
@@ -112,7 +112,7 @@ public class HttpTemplateArrayIteratorWorkSource
 	}
 
 	/**
-	 * {@link Task} implementation.
+	 * {@link ManagedFunction} implementation.
 	 */
 	public static class HttpTemplateArrayIteratorTask
 			extends
@@ -123,8 +123,8 @@ public class HttpTemplateArrayIteratorWorkSource
 		 */
 
 		@Override
-		public Object doTask(
-				TaskContext<HttpTemplateArrayIteratorTask, DependencyKeys, FlowKeys> context) {
+		public Object execute(
+				ManagedFunctionContext<HttpTemplateArrayIteratorTask, DependencyKeys, FlowKeys> context) {
 
 			// Obtain the array
 			Object[] array = (Object[]) context.getObject(DependencyKeys.ARRAY);

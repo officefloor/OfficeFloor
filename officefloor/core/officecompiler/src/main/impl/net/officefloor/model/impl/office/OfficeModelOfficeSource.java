@@ -58,7 +58,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.governance.Governance;
@@ -1306,7 +1306,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 
 	/**
 	 * {@link SubSectionProcessor} to link {@link Duty} instances to the
-	 * {@link Task} instances.
+	 * {@link ManagedFunction} instances.
 	 */
 	private static class TasksToDutiesSubSectionProcessor extends
 			AbstractSubSectionProcessor {

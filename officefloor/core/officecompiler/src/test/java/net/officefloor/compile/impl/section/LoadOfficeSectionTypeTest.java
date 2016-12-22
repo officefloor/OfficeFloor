@@ -25,6 +25,7 @@ import javax.transaction.xa.XAResource;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.TaskObjectNodeImpl;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSectionInputType;
@@ -49,8 +50,7 @@ import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.TaskObject;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -165,7 +165,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadSectionTask() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
+		final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
 				.createMockTaskFactory();
 
 		// Load the office section with a section task
@@ -192,13 +192,13 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure no {@link DependentObjectType} if {@link TaskObjectType} not
+	 * Ensure no {@link DependentObjectType} if {@link ManagedFunctionObjectType} not
 	 * linked.
 	 */
 	public void testTaskObjectDependencyNotLinked() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
+		final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
 				.createMockTaskFactory();
 
 		// Record not linked on first attempt to retrieve dependent
@@ -503,7 +503,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testTaskDependentOnManagedObjectOfSameSection() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
+		final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
 				.createMockTaskFactory();
 
 		// Load the task object dependent on managed object of same section
@@ -554,7 +554,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testTaskDependentOnQualifiedSectionManagedObject() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
+		final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
 				.createMockTaskFactory();
 
 		// Load the task object dependent on managed object of same section
@@ -618,7 +618,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testTaskDependentOnManagedObjectOfAnotherSection() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
+		final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
 				.createMockTaskFactory();
 
 		// Load the task object dependent on managed object of another section
@@ -776,7 +776,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testTaskDependentOnManagedObjectDependentOnAnotherManagedObject() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
+		final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
 				.createMockTaskFactory();
 
 		// Load the task object dependent on managed object of same section
@@ -859,7 +859,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testTaskObjectAsParameter() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
+		final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
 				.createMockTaskFactory();
 
 		// Load the task object dependent on managed object of same section
@@ -899,7 +899,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testTaskObjectNotParameterAndNotLinked() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
+		final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
 				.createMockTaskFactory();
 
 		// Issue as not linked
@@ -925,7 +925,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testTaskObjectNotParameterLinked() {
 
 		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskFactory<Work, ?, ?> taskFactory = this
+		final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
 				.createMockTaskFactory();
 
 		// Load the task object dependent on section object

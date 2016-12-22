@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.construct.governance;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -42,7 +42,7 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements
 	private final FlowInstigationStrategyEnum strategy;
 
 	/**
-	 * Reference to the initial {@link Task} of this {@link Flow}.
+	 * Reference to the initial {@link ManagedFunction} of this {@link Flow}.
 	 */
 	private final TaskNodeReference taskNodeRef;
 
@@ -64,7 +64,7 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param taskNodeRef
-	 *            Reference to the initial {@link Task} of this
+	 *            Reference to the initial {@link ManagedFunction} of this
 	 *            {@link Flow}.
 	 * @param index
 	 *            Index of this {@link Flow}.

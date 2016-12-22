@@ -105,6 +105,8 @@ import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
@@ -113,13 +115,11 @@ import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.team.TeamLoader;
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
@@ -203,7 +203,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	private final Map<String, Class<?>> sectionSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
-	 * {@link WorkSource} {@link Class} instances by their alias name.
+	 * {@link ManagedFunctionSource} {@link Class} instances by their alias name.
 	 */
 	private final Map<String, Class<?>> workSourceAliases = new HashMap<String, Class<?>>();
 
@@ -346,7 +346,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public <W extends Work, S extends WorkSource<W>> void addWorkSourceAlias(
+	public <W extends Work, S extends ManagedFunctionSource<W>> void addWorkSourceAlias(
 			String alias, Class<S> workSourceClass) {
 		this.registerAlias(alias, workSourceClass, this.workSourceAliases,
 				"work");
@@ -418,7 +418,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
-	public WorkLoader getWorkLoader() {
+	public ManagedFunctionLoader getWorkLoader() {
 		return new WorkLoaderImpl(this, this);
 	}
 
@@ -484,7 +484,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public WorkType<?> loadWorkType(String workSourceClassName,
+	public FunctionNamespaceType<?> loadWorkType(String workSourceClassName,
 			PropertyList properties) {
 
 		// Obtain the work source class
@@ -495,7 +495,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 		}
 
 		// Load and return the work type
-		return this.getWorkLoader().loadWorkType(workSourceClass, properties);
+		return this.getWorkLoader().loadFunctionNamespaceType(workSourceClass, properties);
 	}
 
 	@Override
@@ -687,15 +687,15 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends WorkSource<?>> Class<S> getWorkSourceClass(
+	public <S extends ManagedFunctionSource<?>> Class<S> getWorkSourceClass(
 			String workSourceName, Node node) {
 		return (Class<S>) CompileUtil.obtainClass(workSourceName,
-				WorkSource.class, this.workSourceAliases,
+				ManagedFunctionSource.class, this.workSourceAliases,
 				this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public WorkLoader getWorkLoader(Node node) {
+	public ManagedFunctionLoader getWorkLoader(Node node) {
 		return new WorkLoaderImpl(node, this);
 	}
 

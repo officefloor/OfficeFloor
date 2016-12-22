@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.governance;
 
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.ActiveGovernance;
+import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
@@ -241,7 +241,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		assertTrue("Governance should be active", this.container.isActive());
 
 		// Create the active governance
-		ActiveGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
+		RegisteredGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
 				.createActiveGovernance(extension, managedObject, MO_INDEX,
 						workContainer);
 		assertTrue("Should be active", activeGovernance.isActive());
@@ -301,7 +301,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		assertTrue("Governance should be active", this.container.isActive());
 
 		// Create the active governance
-		ActiveGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
+		RegisteredGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
 				.createActiveGovernance(extension, managedObject, MO_INDEX,
 						workContainer);
 		assertTrue("Should be active", activeGovernance.isActive());
@@ -398,7 +398,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		assertTrue("Governance should be active", this.container.isActive());
 
 		// Create the active governance
-		ActiveGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
+		RegisteredGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
 				.createActiveGovernance(extension, managedObject, MO_INDEX,
 						workContainer);
 		assertTrue("Should be active", activeGovernance.isActive());
@@ -458,7 +458,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		assertTrue("Governance should be active", this.container.isActive());
 
 		// Create the active governance
-		ActiveGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
+		RegisteredGovernance<MockExtensionInterface, Indexed> activeGovernance = this.container
 				.createActiveGovernance(extension, managedObject, MO_INDEX,
 						workContainer);
 		assertTrue("Should be active", activeGovernance.isActive());
@@ -560,7 +560,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 		assertTrue("Governance should be active", this.container.isActive());
 
 		// Create the active governances
-		final ActiveGovernance<MockExtensionInterface, Indexed>[] activeGovernances = new ActiveGovernance[MANAGED_OBJECT_COUNT];
+		final RegisteredGovernance<MockExtensionInterface, Indexed>[] activeGovernances = new RegisteredGovernance[MANAGED_OBJECT_COUNT];
 		for (int i = 0; i < managers.length; i++) {
 			activeGovernances[i] = this.container.createActiveGovernance(
 					extensions[i], managedObjects[i], i, workContainers[i]);
@@ -607,7 +607,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records the creating the {@link ActiveGovernance}.
+	 * Records the creating the {@link RegisteredGovernance}.
 	 */
 	@SuppressWarnings("unchecked")
 	private ActiveGovernanceManager<MockExtensionInterface, Indexed> record_createActiveGovernance(
@@ -619,7 +619,7 @@ public class GovernanceContainerTest extends OfficeFrameTestCase {
 				.createMock(ActiveGovernanceManager.class);
 
 		// Create active governance
-		final ActiveGovernance<MockExtensionInterface, Indexed> activeGovernance = new ActiveGovernanceImpl<MockExtensionInterface, Indexed>(
+		final RegisteredGovernance<MockExtensionInterface, Indexed> activeGovernance = new ActiveGovernanceImpl<MockExtensionInterface, Indexed>(
 				this.container, this.metaData, this.container, extension,
 				managedObject, workContainer, registeredIndex);
 

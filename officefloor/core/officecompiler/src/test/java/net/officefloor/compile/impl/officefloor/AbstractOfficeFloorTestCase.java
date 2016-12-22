@@ -30,12 +30,12 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -113,13 +113,13 @@ public abstract class AbstractOfficeFloorTestCase extends
 	}
 
 	/**
-	 * Creates the mock {@link TaskBuilder}.
+	 * Creates the mock {@link ManagedFunctionBuilder}.
 	 * 
-	 * @return Mock {@link TaskBuilder}.
+	 * @return Mock {@link ManagedFunctionBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected TaskBuilder<Work, ?, ?> createMockTaskBuilder() {
-		return this.createMock(TaskBuilder.class);
+	protected ManagedFunctionBuilder<Work, ?, ?> createMockTaskBuilder() {
+		return this.createMock(ManagedFunctionBuilder.class);
 	}
 
 	/**
@@ -199,23 +199,23 @@ public abstract class AbstractOfficeFloorTestCase extends
 	}
 
 	/**
-	 * Current {@link TaskBuilder}.
+	 * Current {@link ManagedFunctionBuilder}.
 	 */
 	@SuppressWarnings("rawtypes")
-	private TaskBuilder taskBuilder = null;
+	private ManagedFunctionBuilder taskBuilder = null;
 
 	/**
-	 * Records adding a {@link Task}.
+	 * Records adding a {@link ManagedFunction}.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param factory
-	 *            {@link TaskFactory}.
-	 * @return {@link TaskBuilder}.
+	 *            {@link ManagedFunctionFactory}.
+	 * @return {@link ManagedFunctionBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <W extends Work> TaskBuilder<W, ?, ?> record_work_addTask(
-			String taskName, TaskFactory<W, ?, ?> factory) {
+	protected <W extends Work> ManagedFunctionBuilder<W, ?, ?> record_work_addTask(
+			String taskName, ManagedFunctionFactory<W, ?, ?> factory) {
 
 		// Ensure manufacturer is a mock
 		assertNotNull("Manufacturer must be a mock", this.control(factory));
@@ -223,7 +223,7 @@ public abstract class AbstractOfficeFloorTestCase extends
 		// Record adding the task
 		this.taskBuilder = this.createMockTaskBuilder();
 		this.recordReturn(this.workBuilder,
-				this.workBuilder.addTask("TASK", factory), this.taskBuilder);
+				this.workBuilder.addManagedFunction("TASK", factory), this.taskBuilder);
 		return this.taskBuilder;
 	}
 

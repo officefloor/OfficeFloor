@@ -24,12 +24,12 @@ import java.util.Comparator;
 import java.util.List;
 
 import net.officefloor.compile.properties.Property;
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -40,7 +40,7 @@ import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link WorkSource} for {@link HttpSecurity}.
+ * {@link ManagedFunctionSource} for {@link HttpSecurity}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -104,8 +104,8 @@ public class HttpSecurityWorkSource extends
 	}
 
 	@Override
-	public void sourceWork(WorkTypeBuilder<HttpSecurityWork> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<HttpSecurityWork> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Retrieve the HTTP Security configuration
 		String key = context.getProperty(PROPERTY_HTTP_SECURITY_SOURCE_KEY);
@@ -149,8 +149,8 @@ public class HttpSecurityWorkSource extends
 		});
 
 		// Add the managed object authentication task
-		TaskTypeBuilder<Indexed, None> moAuthenticate = workTypeBuilder
-				.addTaskType(TASK_MANAGED_OBJECT_AUTHENTICATE,
+		ManagedFunctionTypeBuilder<Indexed, None> moAuthenticate = workTypeBuilder
+				.addManagedFunctionType(TASK_MANAGED_OBJECT_AUTHENTICATE,
 						new ManagedObjectHttpAuthenticateTask(), Indexed.class,
 						None.class);
 		moAuthenticate.addObject(TaskAuthenticateContext.class).setLabel(
@@ -162,7 +162,7 @@ public class HttpSecurityWorkSource extends
 		}
 
 		// Add the managed object logout task
-		TaskTypeBuilder<Indexed, None> logout = workTypeBuilder.addTaskType(
+		ManagedFunctionTypeBuilder<Indexed, None> logout = workTypeBuilder.addManagedFunctionType(
 				TASK_MANAGED_OBJECT_LOGOUT, new ManagedObjectHttpLogoutTask(),
 				Indexed.class, None.class);
 		logout.addObject(TaskLogoutContext.class).setLabel(
@@ -173,8 +173,8 @@ public class HttpSecurityWorkSource extends
 		}
 
 		// Add the challenge task
-		TaskTypeBuilder<Indexed, Indexed> challenge = workTypeBuilder
-				.addTaskType(TASK_CHALLENGE, new HttpChallengeTask(),
+		ManagedFunctionTypeBuilder<Indexed, Indexed> challenge = workTypeBuilder
+				.addManagedFunctionType(TASK_CHALLENGE, new HttpChallengeTask(),
 						Indexed.class, Indexed.class);
 		challenge.addObject(HttpAuthenticationRequiredException.class)
 				.setLabel("HTTP_AUTHENTICATION_REQUIRED_EXCEPTION");
@@ -187,18 +187,18 @@ public class HttpSecurityWorkSource extends
 			challenge.addObject(dependencyType.getDependencyType()).setLabel(
 					"DEPENDENCY_" + dependencyType.getDependencyName());
 		}
-		TaskFlowTypeBuilder<Indexed> challengeFailureFlow = challenge.addFlow();
+		ManagedFunctionFlowTypeBuilder<Indexed> challengeFailureFlow = challenge.addFlow();
 		challengeFailureFlow.setLabel("FAILURE");
 		challengeFailureFlow.setArgumentType(Throwable.class);
 		for (HttpSecurityFlowType<?> flowType : flowTypes) {
-			TaskFlowTypeBuilder<?> flow = challenge.addFlow();
+			ManagedFunctionFlowTypeBuilder<?> flow = challenge.addFlow();
 			flow.setArgumentType(flowType.getArgumentType());
 			flow.setLabel("FLOW_" + flowType.getFlowName());
 		}
 
 		// Add the start application authentication task
-		TaskTypeBuilder<StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows> appStart = workTypeBuilder
-				.addTaskType(
+		ManagedFunctionTypeBuilder<StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows> appStart = workTypeBuilder
+				.addManagedFunctionType(
 						TASK_START_APPLICATION_AUTHENTICATE,
 						new StartApplicationHttpAuthenticateTask(),
 						StartApplicationHttpAuthenticateTask.Dependencies.class,
@@ -207,15 +207,15 @@ public class HttpSecurityWorkSource extends
 				StartApplicationHttpAuthenticateTask.Dependencies.CREDENTIALS);
 		appStart.addObject(HttpAuthentication.class)
 				.setKey(StartApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION);
-		TaskFlowTypeBuilder<StartApplicationHttpAuthenticateTask.Flows> appStartFailureFlow = appStart
+		ManagedFunctionFlowTypeBuilder<StartApplicationHttpAuthenticateTask.Flows> appStartFailureFlow = appStart
 				.addFlow();
 		appStartFailureFlow
 				.setKey(StartApplicationHttpAuthenticateTask.Flows.FAILURE);
 		appStartFailureFlow.setArgumentType(Throwable.class);
 
 		// Add the complete application authentication task
-		TaskTypeBuilder<CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows> appComplete = workTypeBuilder
-				.addTaskType(
+		ManagedFunctionTypeBuilder<CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows> appComplete = workTypeBuilder
+				.addManagedFunctionType(
 						TASK_COMPLETE_APPLICATION_AUTHENTICATE,
 						new CompleteApplicationHttpAuthenticateTask(),
 						CompleteApplicationHttpAuthenticateTask.Dependencies.class,
@@ -232,7 +232,7 @@ public class HttpSecurityWorkSource extends
 		appComplete
 				.addObject(HttpRequestState.class)
 				.setKey(CompleteApplicationHttpAuthenticateTask.Dependencies.REQUEST_STATE);
-		TaskFlowTypeBuilder<CompleteApplicationHttpAuthenticateTask.Flows> appCompleteFailureFlow = appComplete
+		ManagedFunctionFlowTypeBuilder<CompleteApplicationHttpAuthenticateTask.Flows> appCompleteFailureFlow = appComplete
 				.addFlow();
 		appCompleteFailureFlow
 				.setKey(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE);

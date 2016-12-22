@@ -19,7 +19,7 @@ package net.officefloor.frame.integrate.profile;
 
 import java.util.List;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.profile.ProfiledJob;
 import net.officefloor.frame.api.profile.ProfiledProcess;
@@ -81,13 +81,13 @@ public class ProfilerIntegrationTest extends AbstractOfficeConstructTestCase {
 	public static class ProfiledWork {
 
 		/**
-		 * First {@link Task}.
+		 * First {@link ManagedFunction}.
 		 */
 		public void taskOne() {
 		}
 
 		/**
-		 * Second {@link Task}.
+		 * Second {@link ManagedFunction}.
 		 */
 		public void taskTwo() {
 		}

@@ -23,21 +23,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * {@link WorkType} implementation.
+ * {@link FunctionNamespaceType} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkTypeImpl<W extends Work> implements WorkType<W>,
-		WorkTypeBuilder<W> {
+public class WorkTypeImpl<W extends Work> implements FunctionNamespaceType<W>,
+		FunctionNamespaceBuilder<W> {
 
 	/**
 	 * {@link WorkFactory}.
@@ -45,9 +45,9 @@ public class WorkTypeImpl<W extends Work> implements WorkType<W>,
 	private WorkFactory<W> workFactory;
 
 	/**
-	 * Listing of the {@link TaskType} definitions.
+	 * Listing of the {@link ManagedFunctionType} definitions.
 	 */
-	private final List<TaskType<W, ?, ?>> tasks = new LinkedList<TaskType<W, ?, ?>>();
+	private final List<ManagedFunctionType<W, ?, ?>> tasks = new LinkedList<ManagedFunctionType<W, ?, ?>>();
 
 	/*
 	 * =================== WorkTypeBuilder ====================================
@@ -60,8 +60,8 @@ public class WorkTypeImpl<W extends Work> implements WorkType<W>,
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <M extends Enum<M>, F extends Enum<F>> TaskTypeBuilder<M, F> addTaskType(
-			String taskName, TaskFactory<? super W, M, F> taskFactory,
+	public <M extends Enum<M>, F extends Enum<F>> ManagedFunctionTypeBuilder<M, F> addManagedFunctionType(
+			String taskName, ManagedFunctionFactory<? super W, M, F> taskFactory,
 			Class<M> objectKeysClass, Class<F> flowKeysClass) {
 		TaskTypeImpl taskType = new TaskTypeImpl(taskName, taskFactory,
 				objectKeysClass, flowKeysClass);
@@ -79,14 +79,14 @@ public class WorkTypeImpl<W extends Work> implements WorkType<W>,
 	}
 
 	@Override
-	public TaskType<W, ?, ?>[] getTaskTypes() {
+	public ManagedFunctionType<W, ?, ?>[] getManagedFunctionTypes() {
 		// Create and return the sorted listing of task types
-		TaskType<W, ?, ?>[] taskTypes = CompileUtil.toArray(this.tasks,
-				new TaskType[0]);
-		Arrays.sort(taskTypes, new Comparator<TaskType<W, ?, ?>>() {
+		ManagedFunctionType<W, ?, ?>[] taskTypes = CompileUtil.toArray(this.tasks,
+				new ManagedFunctionType[0]);
+		Arrays.sort(taskTypes, new Comparator<ManagedFunctionType<W, ?, ?>>() {
 			@Override
-			public int compare(TaskType<W, ?, ?> a, TaskType<W, ?, ?> b) {
-				return a.getTaskName().compareTo(b.getTaskName());
+			public int compare(ManagedFunctionType<W, ?, ?> a, ManagedFunctionType<W, ?, ?> b) {
+				return a.getFunctionName().compareTo(b.getFunctionName());
 			}
 		});
 		return taskTypes;

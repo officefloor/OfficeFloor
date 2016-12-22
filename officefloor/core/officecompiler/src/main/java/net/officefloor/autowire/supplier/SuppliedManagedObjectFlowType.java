@@ -19,12 +19,12 @@ package net.officefloor.autowire.supplier;
 
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.spi.section.SectionInput;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * <code>Type definition</code> of a flow instigated by the supplied
- * {@link ManagedObject} or one of its {@link Task} instances.
+ * {@link ManagedObject} or one of its {@link ManagedFunction} instances.
  * 
  * @author Daniel Sagenschneider
  */

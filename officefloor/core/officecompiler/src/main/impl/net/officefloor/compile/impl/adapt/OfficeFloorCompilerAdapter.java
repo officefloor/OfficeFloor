@@ -27,6 +27,7 @@ import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -34,12 +35,11 @@ import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.team.TeamLoader;
-import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
@@ -190,7 +190,7 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	}
 
 	@Override
-	public <W extends Work, S extends WorkSource<W>> void addWorkSourceAlias(
+	public <W extends Work, S extends ManagedFunctionSource<W>> void addWorkSourceAlias(
 			String alias, Class<S> workSourceClass) {
 		this.invokeMethod("addWorkSourceAlias", new Object[] { alias,
 				workSourceClass }, String.class, Class.class);
@@ -264,8 +264,8 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	}
 
 	@Override
-	public WorkLoader getWorkLoader() {
-		return (WorkLoader) this.invokeMethod("getWorkLoader", null);
+	public ManagedFunctionLoader getWorkLoader() {
+		return (ManagedFunctionLoader) this.invokeMethod("getWorkLoader", null);
 	}
 
 	@Override

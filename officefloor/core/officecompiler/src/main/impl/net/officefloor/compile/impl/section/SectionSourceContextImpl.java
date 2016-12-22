@@ -22,6 +22,8 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -29,8 +31,6 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
@@ -96,9 +96,9 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public WorkType<?> loadWorkType(String workSourceClassName,
+	public FunctionNamespaceType<?> loadWorkType(String workSourceClassName,
 			PropertyList properties) {
-		return CompileUtil.loadType(WorkType.class,
+		return CompileUtil.loadType(FunctionNamespaceType.class,
 				workSourceClassName,
 				this.context.getCompilerIssues(),
 				() -> {
@@ -111,8 +111,8 @@ public class SectionSourceContextImpl extends SourceContextImpl implements
 				}
 
 				// Load and return the work type
-				WorkLoader workLoader = this.context.getWorkLoader(this.node);
-				return workLoader.loadWorkType(workSourceClass, properties);
+				ManagedFunctionLoader workLoader = this.context.getWorkLoader(this.node);
+				return workLoader.loadFunctionNamespaceType(workSourceClass, properties);
 			});
 	}
 

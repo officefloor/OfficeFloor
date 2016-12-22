@@ -25,21 +25,21 @@ import java.util.List;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.section.work.WorkSectionSource;
 
 /**
- * {@link WorkSource} to route the cause of an {@link Escalation}.
+ * {@link ManagedFunctionSource} to route the cause of an {@link Escalation}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -48,7 +48,7 @@ public class AutoWireEscalationCauseRouteWorkSource
 		AbstractWorkSource<AutoWireEscalationCauseRouteWorkSource.AutoWireEscalationCauseRouteTask> {
 
 	/**
-	 * Name of the {@link Task} handling the {@link Escalation}.
+	 * Name of the {@link ManagedFunction} handling the {@link Escalation}.
 	 */
 	public static final String HANDLER_TASK_NAME = "Handle";
 
@@ -97,9 +97,9 @@ public class AutoWireEscalationCauseRouteWorkSource
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void sourceWork(
-			WorkTypeBuilder<AutoWireEscalationCauseRouteTask> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(
+			FunctionNamespaceBuilder<AutoWireEscalationCauseRouteTask> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the listing of escalation types
 		List<Class<? extends Throwable>> escalationTypes = new LinkedList<Class<? extends Throwable>>();
@@ -151,12 +151,12 @@ public class AutoWireEscalationCauseRouteWorkSource
 		AutoWireEscalationCauseRouteTask factory = new AutoWireEscalationCauseRouteTask(
 				escalations);
 		workTypeBuilder.setWorkFactory(factory);
-		TaskTypeBuilder<Dependencies, Indexed> task = workTypeBuilder
-				.addTaskType(HANDLER_TASK_NAME, factory, Dependencies.class,
+		ManagedFunctionTypeBuilder<Dependencies, Indexed> task = workTypeBuilder
+				.addManagedFunctionType(HANDLER_TASK_NAME, factory, Dependencies.class,
 						Indexed.class);
 		task.addObject(Throwable.class).setKey(Dependencies.ESCALATION);
 		for (Class<? extends Throwable> escalation : escalations) {
-			TaskFlowTypeBuilder<Indexed> flow = task.addFlow();
+			ManagedFunctionFlowTypeBuilder<Indexed> flow = task.addFlow();
 			flow.setArgumentType(escalation);
 			flow.setLabel(escalation.getName());
 		}
@@ -171,7 +171,7 @@ public class AutoWireEscalationCauseRouteWorkSource
 	}
 
 	/**
-	 * {@link Task} for the routing the {@link Escalation} cause.
+	 * {@link ManagedFunction} for the routing the {@link Escalation} cause.
 	 */
 	public static class AutoWireEscalationCauseRouteTask
 			extends
@@ -202,8 +202,8 @@ public class AutoWireEscalationCauseRouteWorkSource
 		 */
 
 		@Override
-		public Object doTask(
-				TaskContext<AutoWireEscalationCauseRouteTask, Dependencies, Indexed> context)
+		public Object execute(
+				ManagedFunctionContext<AutoWireEscalationCauseRouteTask, Dependencies, Indexed> context)
 				throws Throwable {
 
 			// Obtain the cause

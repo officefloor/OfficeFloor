@@ -23,14 +23,14 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -50,11 +50,11 @@ import net.officefloor.plugin.web.http.resource.source.HttpFileFactoryTask.Depen
 public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
-	 * Mock {@link TaskContext}.
+	 * Mock {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskContext<HttpFileFactoryTask<None>, DependencyKeys, None> taskContext = this
-			.createMock(TaskContext.class);
+	private final ManagedFunctionContext<HttpFileFactoryTask<None>, DependencyKeys, None> taskContext = this
+			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * Mock {@link ServerHttpConnection}.
@@ -98,12 +98,12 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		// Provide work type
 		HttpFileFactoryTask<None> task = new HttpFileFactoryTask<None>(null,
 				null);
-		WorkTypeBuilder<HttpFileFactoryTask<None>> workBuilder = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpFileFactoryTask<None>> workBuilder = WorkLoaderUtil
 				.createWorkTypeBuilder(task);
 
 		// Provide task type
-		TaskTypeBuilder<DependencyKeys, None> taskBuilder = workBuilder
-				.addTaskType("SendFile", task, DependencyKeys.class, None.class);
+		ManagedFunctionTypeBuilder<DependencyKeys, None> taskBuilder = workBuilder
+				.addManagedFunctionType("SendFile", task, DependencyKeys.class, None.class);
 		taskBuilder.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.SERVER_HTTP_CONNECTION);
 		taskBuilder.addObject(HttpApplicationLocation.class).setKey(
@@ -134,11 +134,11 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load work and obtain the task
-		Task<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
+		ManagedFunction<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
 				.loadWorkAndObtainTask();
 
 		// Execute the task to send the HTTP file
-		Object result = task.doTask(this.taskContext);
+		Object result = task.execute(this.taskContext);
 		assertNotNull("Ensure have HTTP file returned", result);
 		HttpFile httpFile = (HttpFile) result;
 		assertTrue("HTTP file should exist", httpFile.isExist());
@@ -160,11 +160,11 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load work and obtain the task
-		Task<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
+		ManagedFunction<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
 				.loadWorkAndObtainTask();
 
 		// Execute the task to send the HTTP file
-		Object result = task.doTask(this.taskContext);
+		Object result = task.execute(this.taskContext);
 		assertNotNull("Ensure have HTTP resource returned", result);
 		HttpResource httpResource = (HttpResource) result;
 		assertFalse("HTTP resource should be missing", httpResource.isExist());
@@ -186,13 +186,13 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load work and obtain the task
-		Task<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
+		ManagedFunction<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
 				.loadWorkAndObtainTask(
 						HttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
 						"OverrideFileNotFound.html");
 
 		// Execute the task to send the HTTP file
-		Object result = task.doTask(this.taskContext);
+		Object result = task.execute(this.taskContext);
 		assertNotNull("Ensure have HTTP resource returned", result);
 		HttpResource httpResource = (HttpResource) result;
 		assertFalse("HTTP resource should be missing", httpResource.isExist());
@@ -214,13 +214,13 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load work and obtain the task
-		Task<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
+		ManagedFunction<HttpFileFactoryTask<None>, DependencyKeys, None> task = this
 				.loadWorkAndObtainTask(
 						HttpFileSenderWorkSource.PROPERTY_NOT_FOUND_FILE_PATH,
 						"non-canonical/../OverrideFileNotFound.html");
 
 		// Execute the task to send the HTTP file
-		Object result = task.doTask(this.taskContext);
+		Object result = task.execute(this.taskContext);
 		assertNotNull("Ensure have HTTP resource returned", result);
 		HttpResource httpResource = (HttpResource) result;
 		assertFalse("HTTP resource should be missing", httpResource.isExist());
@@ -230,14 +230,14 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Loads the {@link WorkSource} and returns a created {@link Task}.
+	 * Loads the {@link ManagedFunctionSource} and returns a created {@link ManagedFunction}.
 	 * 
 	 * @param additionalParameterNameValues
 	 *            Addition parmaeter name/value pairs.
-	 * @return {@link Task} to execute.
+	 * @return {@link ManagedFunction} to execute.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private final Task<HttpFileFactoryTask<None>, DependencyKeys, None> loadWorkAndObtainTask(
+	private final ManagedFunction<HttpFileFactoryTask<None>, DependencyKeys, None> loadWorkAndObtainTask(
 			String... additionalParameterNameValues) {
 
 		// Create the listing of parameters
@@ -253,12 +253,12 @@ public class HttpFileSenderWorkSourceTest extends OfficeFrameTestCase {
 		}
 
 		// Load the work type
-		WorkType<HttpFileFactoryTask<None>> workType = WorkLoaderUtil
+		FunctionNamespaceType<HttpFileFactoryTask<None>> workType = WorkLoaderUtil
 				.loadWorkType((Class) HttpFileSenderWorkSource.class,
 						parameters.toArray(new String[parameters.size()]));
 
 		// Create the task
-		Task task = workType.getTaskTypes()[0].getTaskFactory().createTask(
+		ManagedFunction task = workType.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
 				workType.getWorkFactory().createWork());
 
 		// Return the task

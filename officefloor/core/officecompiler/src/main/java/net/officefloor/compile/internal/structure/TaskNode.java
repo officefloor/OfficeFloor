@@ -18,14 +18,14 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
 import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.type.TypeContext;
-import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -44,7 +44,7 @@ public interface TaskNode extends LinkFlowNode, SectionTask, OfficeSectionTask {
 	 * Initialises this {@link TaskNode}.
 	 * 
 	 * @param taskTypeName
-	 *            {@link TaskType} name.
+	 *            {@link ManagedFunctionType} name.
 	 * @param work
 	 *            {@link WorkNode} for the {@link TaskNode}.
 	 */
@@ -71,22 +71,22 @@ public interface TaskNode extends LinkFlowNode, SectionTask, OfficeSectionTask {
 	WorkNode getWorkNode();
 
 	/**
-	 * Loads the {@link TaskType} for this {@link TaskNode}.
+	 * Loads the {@link ManagedFunctionType} for this {@link TaskNode}.
 	 * 
 	 * @param typeContext
 	 *            {@link TypeContext}.
-	 * @return {@link TaskType} for this {@link TaskNode}. May be
-	 *         <code>null</code> if can not determine {@link TaskType}.
+	 * @return {@link ManagedFunctionType} for this {@link TaskNode}. May be
+	 *         <code>null</code> if can not determine {@link ManagedFunctionType}.
 	 */
-	TaskType<?, ?, ?> loadTaskType(TypeContext typeContext);
+	ManagedFunctionType<?, ?, ?> loadTaskType(TypeContext typeContext);
 
 	/**
-	 * Builds the {@link Task} for this {@link TaskNode}.
+	 * Builds the {@link ManagedFunction} for this {@link TaskNode}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 * @param workBuilder
-	 *            {@link WorkBuilder} for the {@link Work} of this {@link Task}.
+	 *            {@link WorkBuilder} for the {@link Work} of this {@link ManagedFunction}.
 	 * @param typeContext
 	 *            {@link TypeContext}.
 	 */

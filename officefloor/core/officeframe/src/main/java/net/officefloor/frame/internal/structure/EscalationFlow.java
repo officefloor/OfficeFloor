@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
  * {@link Flow} to handle an {@link Escalation} from a {@link FunctionState}.
@@ -35,10 +35,10 @@ public interface EscalationFlow {
 	Class<? extends Throwable> getTypeOfCause();
 
 	/**
-	 * Obtains the {@link TaskMetaData} of the escalation handling {@link Task}.
+	 * Obtains the {@link ManagedFunctionMetaData} of the escalation handling {@link ManagedFunction}.
 	 * 
-	 * @return {@link TaskMetaData} of the escalation handling {@link Task}.
+	 * @return {@link ManagedFunctionMetaData} of the escalation handling {@link ManagedFunction}.
 	 */
-	TaskMetaData<?, ?, ?> getTaskMetaData();
+	ManagedFunctionMetaData<?, ?, ?> getTaskMetaData();
 
 }

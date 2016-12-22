@@ -22,7 +22,7 @@ import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.spi.office.OfficeDuty;
-import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 
 /**
@@ -125,7 +125,7 @@ public class DutyNodeImpl implements DutyNode {
 
 	@Override
 	public void buildPreTaskAdministration(WorkBuilder<?> workBuilder,
-			TaskBuilder<?, ?, ?> taskBuilder) {
+			ManagedFunctionBuilder<?, ?, ?> taskBuilder) {
 
 		// Link the pre task duty
 		taskBuilder.linkPreTaskAdministration(
@@ -134,7 +134,7 @@ public class DutyNodeImpl implements DutyNode {
 
 	@Override
 	public void buildPostTaskAdministration(WorkBuilder<?> workBuilder,
-			TaskBuilder<?, ?, ?> taskBuilder) {
+			ManagedFunctionBuilder<?, ?, ?> taskBuilder) {
 
 		// Link the post task duty
 		taskBuilder.linkPostTaskAdministration(

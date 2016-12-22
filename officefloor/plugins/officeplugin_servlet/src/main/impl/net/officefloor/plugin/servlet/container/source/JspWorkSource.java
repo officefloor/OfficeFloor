@@ -19,16 +19,16 @@ package net.officefloor.plugin.servlet.container.source;
 
 import javax.servlet.http.HttpServlet;
 
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 
 import org.apache.jasper.servlet.JspServlet;
 
 /**
- * {@link WorkSource} to service a {@link HttpRequest} via a {@link JspServlet}.
+ * {@link ManagedFunctionSource} to service a {@link HttpRequest} via a {@link JspServlet}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -55,8 +55,8 @@ public class JspWorkSource extends AbstractWorkSource<HttpServletTask> {
 	}
 
 	@Override
-	public void sourceWork(WorkTypeBuilder<HttpServletTask> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<HttpServletTask> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Create the JSP Servlet
 		HttpServlet servlet = new JspServlet();

@@ -18,8 +18,8 @@
 package net.officefloor.frame.integrate.stress;
 
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
@@ -79,7 +79,7 @@ public class AsynchronousOperationStressTest extends
 	 * Does the asynchronous operation stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link Task} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -149,7 +149,7 @@ public class AsynchronousOperationStressTest extends
 	public static class SetupWork {
 
 		/**
-		 * Flag indicating if {@link Task} one is running.
+		 * Flag indicating if {@link ManagedFunction} one is running.
 		 */
 		private boolean isTaskOneRunning = false;
 
@@ -159,17 +159,17 @@ public class AsynchronousOperationStressTest extends
 		private boolean isAsynchronousOperationStarted = false;
 
 		/**
-		 * {@link Task}.
+		 * {@link ManagedFunction}.
 		 * 
 		 * @param taskOne
-		 *            {@link Task} one.
+		 *            {@link ManagedFunction} one.
 		 * @param taskTwo
-		 *            {@link Task} two.
+		 *            {@link ManagedFunction} two.
 		 * @param taskContext
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
 		public synchronized void setup(ReflectiveFlow taskOne,
-				ReflectiveFlow taskTwo, TaskContext<?, ?, ?> taskContext) {
+				ReflectiveFlow taskTwo, ManagedFunctionContext<?, ?, ?> taskContext) {
 
 			// Trigger task one
 			if (!this.isTaskOneRunning) {
@@ -202,7 +202,7 @@ public class AsynchronousOperationStressTest extends
 	public class AsynchronousOperationWork {
 
 		/**
-		 * {@link MockManagedObject} for the other {@link Task}.
+		 * {@link MockManagedObject} for the other {@link ManagedFunction}.
 		 */
 		private final MockManagedObject otherTaskManagedObject;
 
@@ -230,12 +230,12 @@ public class AsynchronousOperationStressTest extends
 		 * Initiate.
 		 * 
 		 * @param otherTaskManagedObject
-		 *            {@link MockManagedObject} for the other {@link Task}.
+		 *            {@link MockManagedObject} for the other {@link ManagedFunction}.
 		 * @param maxRepeats
 		 *            Maximum number of repeats.
 		 * @param setupWork
-		 *            {@link SetupWork} for first {@link Task} and
-		 *            <code>null</code> for second {@link Task}.
+		 *            {@link SetupWork} for first {@link ManagedFunction} and
+		 *            <code>null</code> for second {@link ManagedFunction}.
 		 */
 		public AsynchronousOperationWork(
 				MockManagedObject otherTaskManagedObject, int maxRepeats,
@@ -247,15 +247,15 @@ public class AsynchronousOperationStressTest extends
 		}
 
 		/**
-		 * {@link Task}.
+		 * {@link ManagedFunction}.
 		 * 
 		 * @param ownManagedObject
-		 *            {@link MockManagedObject} instance for this {@link Task}.
+		 *            {@link MockManagedObject} instance for this {@link ManagedFunction}.
 		 * @param taskContext
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
 		public void task(MockManagedObject ownManagedObject,
-				TaskContext<?, ?, ?> taskContext) {
+				ManagedFunctionContext<?, ?, ?> taskContext) {
 
 			// Output progress
 			if (this.isPrintOutput) {

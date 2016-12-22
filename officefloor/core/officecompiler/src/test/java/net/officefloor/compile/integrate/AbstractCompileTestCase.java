@@ -38,13 +38,13 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -459,7 +459,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * @param workName
 	 *            Name of {@link Work} to handle {@link Escalation}.
 	 * @param taskName
-	 *            Name of {@link Task} within {@link Work} to handle
+	 *            Name of {@link ManagedFunction} within {@link Work} to handle
 	 *            {@link Escalation}.
 	 */
 	protected <E extends Throwable> void record_officeBuilder_addEscalation(
@@ -501,12 +501,12 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records adding a start-up {@link Task} to the {@link OfficeBuilder}.
+	 * Records adding a start-up {@link ManagedFunction} to the {@link OfficeBuilder}.
 	 * 
 	 * @param workName
-	 *            Name of {@link Work} for the start-up {@link Task}.
+	 *            Name of {@link Work} for the start-up {@link ManagedFunction}.
 	 * @param taskName
-	 *            Name of start-up {@link Task}.
+	 *            Name of start-up {@link ManagedFunction}.
 	 */
 	protected void record_officeBuilder_addStartupTask(String workName,
 			String taskName) {
@@ -559,45 +559,45 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Current {@link TaskBuilder}.
+	 * Current {@link ManagedFunctionBuilder}.
 	 */
-	private TaskBuilder<Work, ?, ?> taskBuilder;
+	private ManagedFunctionBuilder<Work, ?, ?> taskBuilder;
 
 	/**
-	 * Records adding a {@link TaskBuilder}.
+	 * Records adding a {@link ManagedFunctionBuilder}.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @return Added {@link TaskBuilder}.
+	 *            Name of the {@link ManagedFunction}.
+	 * @return Added {@link ManagedFunctionBuilder}.
 	 */
-	protected TaskBuilder<Work, ?, ?> record_workBuilder_addTask(String taskName) {
+	protected ManagedFunctionBuilder<Work, ?, ?> record_workBuilder_addTask(String taskName) {
 		return this.record_workBuilder_addTask(taskName, null);
 	}
 
 	/**
-	 * Flags if the matcher has been specified to add a {@link Task}.
+	 * Flags if the matcher has been specified to add a {@link ManagedFunction}.
 	 */
 	private boolean isMatcherSet_workBuilder_addTask = false;
 
 	/**
-	 * Convenience method for recording adding a {@link TaskBuilder} and
-	 * specifying the {@link Team} for the {@link Task}.
+	 * Convenience method for recording adding a {@link ManagedFunctionBuilder} and
+	 * specifying the {@link Team} for the {@link ManagedFunction}.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param officeTeamName
 	 *            {@link Office} {@link Team} name.
-	 * @return Added {@link TaskBuilder}.
+	 * @return Added {@link ManagedFunctionBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected TaskBuilder<Work, ?, ?> record_workBuilder_addTask(
+	protected ManagedFunctionBuilder<Work, ?, ?> record_workBuilder_addTask(
 			String taskName, String officeTeamName) {
 
 		// Record adding the task
-		this.taskBuilder = this.createMock(TaskBuilder.class);
-		TaskFactory<Work, Indexed, Indexed> taskFactory = null;
+		this.taskBuilder = this.createMock(ManagedFunctionBuilder.class);
+		ManagedFunctionFactory<Work, Indexed, Indexed> taskFactory = null;
 		this.recordReturn(this.workBuilder,
-				this.workBuilder.addTask(taskName, taskFactory),
+				this.workBuilder.addManagedFunction(taskName, taskFactory),
 				this.taskBuilder);
 		if (!this.isMatcherSet_workBuilder_addTask) {
 			this.control(this.workBuilder).setMatcher(new AbstractMatcher() {
@@ -621,7 +621,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Specifies the {@link Team} for the {@link Task}.
+	 * Specifies the {@link Team} for the {@link ManagedFunction}.
 	 * 
 	 * @param officeTeamName
 	 *            {@link Office} {@link Team} name.
@@ -631,7 +631,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Specifies the Differentiator for the {@link Task}.
+	 * Specifies the Differentiator for the {@link ManagedFunction}.
 	 * 
 	 * @param differentiator
 	 *            Differentiator.

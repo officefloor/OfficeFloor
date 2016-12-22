@@ -20,11 +20,11 @@ package net.officefloor.plugin.web.http.template.section;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.impl.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
@@ -37,7 +37,7 @@ import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.
 import net.officefloor.plugin.web.http.template.section.HttpTemplateInitialTask.Flows;
 
 /**
- * {@link WorkSource} to provide the {@link HttpTemplateInitialTask}.
+ * {@link ManagedFunctionSource} to provide the {@link HttpTemplateInitialTask}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -80,9 +80,9 @@ public class HttpTemplateInitialWorkSource extends
 	}
 
 	@Override
-	public void sourceWork(
-			WorkTypeBuilder<HttpTemplateInitialTask> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(
+			FunctionNamespaceBuilder<HttpTemplateInitialTask> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the template URI path
 		String templateUriPath = HttpTemplateWorkSource
@@ -123,8 +123,8 @@ public class HttpTemplateInitialWorkSource extends
 
 		// Configure the task
 		workTypeBuilder.setWorkFactory(factory);
-		TaskTypeBuilder<Dependencies, Flows> task = workTypeBuilder
-				.addTaskType("TASK", factory, Dependencies.class, Flows.class);
+		ManagedFunctionTypeBuilder<Dependencies, Flows> task = workTypeBuilder
+				.addManagedFunctionType("TASK", factory, Dependencies.class, Flows.class);
 		task.addObject(ServerHttpConnection.class).setKey(
 				Dependencies.SERVER_HTTP_CONNECTION);
 		task.addObject(HttpApplicationLocation.class).setKey(

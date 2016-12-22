@@ -17,11 +17,11 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
- * Configuration of a {@link Governance} for the {@link Task}.
+ * Configuration of a {@link Governance} for the {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */

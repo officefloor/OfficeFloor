@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
  * Represents a sub-graph of the {@link ManagedFunctionContainer} graph making
@@ -32,12 +32,12 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 
 	/**
 	 * Creates a new managed {@link ManagedFunctionContainer} contained in this
-	 * {@link Flow} for the {@link Task}.
+	 * {@link Flow} for the {@link ManagedFunction}.
 	 * 
 	 * @param functionMetaData
-	 *            {@link TaskMetaData} for the new
+	 *            {@link ManagedFunctionMetaData} for the new
 	 *            {@link ManagedFunctionContainer}.
-	 * @param parallelNodeOwner
+	 * @param parallelFunctionOwner
 	 *            {@link ManagedFunctionContainer} that is the parallel owner of
 	 *            the new {@link ManagedFunctionContainer}.
 	 * @param parameter
@@ -46,23 +46,9 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 	 *            {@link GovernanceDeactivationStrategy}.
 	 * @return New {@link ManagedFunctionContainer}.
 	 */
-	ManagedFunctionContainer createManagedFunction(TaskMetaData<?, ?, ?> functionMetaData,
-			ManagedFunctionContainer parallelNodeOwner, Object parameter,
+	ManagedFunctionContainer createManagedFunction(ManagedFunctionMetaData<?, ?, ?> functionMetaData,
+			ManagedFunctionContainer parallelFunctionOwner, Object parameter,
 			GovernanceDeactivationStrategy governanceDeactivationStrategy);
-
-	/**
-	 * Creates a new {@link ManagedFunctionContainer} contained in this
-	 * {@link Flow} for the {@link GovernanceActivity}.
-	 * 
-	 * @param governanceActivity
-	 *            {@link GovernanceActivity}.
-	 * @param parallelNodeOwner
-	 *            {@link ManagedFunctionContainer} that is the parallel owner of
-	 *            the new {@link ManagedFunctionContainer}.
-	 * @return New {@link ManagedFunctionContainer}.
-	 */
-	ManagedFunctionContainer createGovernanceNode(GovernanceActivity<?, ?> governanceActivity,
-			ManagedFunctionContainer parallelNodeOwner);
 
 	/**
 	 * Flags that the input {@link ManagedFunctionContainer} has completed.

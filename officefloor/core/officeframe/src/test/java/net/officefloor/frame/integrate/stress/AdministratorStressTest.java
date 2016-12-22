@@ -22,9 +22,9 @@ import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
@@ -88,7 +88,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	 * Does the {@link Administrator} stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link Task} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
 	 */
 	public void doTest(Team team) throws Exception {
 
@@ -146,7 +146,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		ReflectiveTaskBuilder administeredTask = workBuilder.buildTask(
 				"administeredTask", "TEAM");
 		administeredTask.buildObject("MO");
-		TaskBuilder<?, ?, ?> adminTaskBuilder = administeredTask.getBuilder();
+		ManagedFunctionBuilder<?, ?, ?> adminTaskBuilder = administeredTask.getBuilder();
 		adminTaskBuilder.linkPreTaskAdministration("PRE", "DUTY");
 		adminTaskBuilder.linkPostTaskAdministration("POST", "DUTY");
 
@@ -206,17 +206,17 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/**
-		 * Setup task that runs the administered {@link Task}.
+		 * Setup task that runs the administered {@link ManagedFunction}.
 		 * 
 		 * @param flow
 		 *            {@link ReflectiveFlow}.
 		 * @param context
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 * @param object
 		 *            {@link AdministeredObject}.
 		 */
 		public void setupTask(ReflectiveFlow flow,
-				TaskContext<?, ?, ?> context, AdministeredObject object) {
+				ManagedFunctionContext<?, ?, ?> context, AdministeredObject object) {
 
 			// Determine if first time run
 			if (this.adminTaskCount > 0) {
@@ -241,7 +241,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/**
-		 * Administered {@link Task}.
+		 * Administered {@link ManagedFunction}.
 		 * 
 		 * @param object
 		 *            {@link AdministeredObject}.

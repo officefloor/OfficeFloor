@@ -28,7 +28,7 @@ import net.officefloor.frame.api.escalate.ManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
-import net.officefloor.frame.internal.structure.ActiveGovernance;
+import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetLatch;
@@ -359,10 +359,10 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	private ManagedObjectGovernanceMetaData<?>[] moGovernanceMetaData;
 
 	/**
-	 * {@link ActiveGovernance} instances for the
+	 * {@link RegisteredGovernance} instances for the
 	 * {@link ManagedObjectGovernanceMetaData}.
 	 */
-	private ActiveGovernance<?, ?>[] activeGovernances;
+	private RegisteredGovernance<?, ?>[] activeGovernances;
 
 	/**
 	 * {@link JobNodeActivateSet} instances.
@@ -475,7 +475,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 		// Create the managed object governance meta-data
 		this.moGovernanceMetaData = new ManagedObjectGovernanceMetaData<?>[governanceCount];
-		this.activeGovernances = new ActiveGovernance[governanceCount];
+		this.activeGovernances = new RegisteredGovernance[governanceCount];
 		this.activeGovernanceActivateSets = new JobNodeActivateSet[governanceCount];
 		for (int i = 0; i < this.moGovernanceMetaData.length; i++) {
 			this.moGovernanceMetaData[i] = this
@@ -649,7 +649,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 * Records governing the {@link ManagedObject}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected ActiveGovernance[] record_MoContainer_governManagedObject(
+	protected RegisteredGovernance[] record_MoContainer_governManagedObject(
 			boolean... isActivateGovernances) {
 
 		if (!this.isGoverned) {
@@ -682,7 +682,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 					: false;
 
 			// Determine if already active
-			ActiveGovernance activeGovernance = this.activeGovernances[i];
+			RegisteredGovernance activeGovernance = this.activeGovernances[i];
 			if (activeGovernance != null) {
 				// Record whether active
 				this.recordReturn(activeGovernance,
@@ -711,7 +711,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 						governanceContainer);
 
 				// Create active governance for managed object
-				activeGovernance = this.createMock(ActiveGovernance.class);
+				activeGovernance = this.createMock(RegisteredGovernance.class);
 				this.activeGovernances[i] = activeGovernance;
 
 				final ExtensionInterfaceExtractor<?> eiExtractor = this
@@ -984,7 +984,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			}
 
 			// Obtain the active governance to unregister
-			ActiveGovernance<?, ?> activeGovernance = this.activeGovernances[i];
+			RegisteredGovernance<?, ?> activeGovernance = this.activeGovernances[i];
 
 			// Record unregistering the active governance
 			this.recordReturn(activeGovernance,
@@ -1263,7 +1263,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			}
 
 			// Obtain the active governance to unregister
-			ActiveGovernance<?, ?> activeGovernance = this.activeGovernances[i];
+			RegisteredGovernance<?, ?> activeGovernance = this.activeGovernances[i];
 
 			// Unregistering the active governance
 			mo.unregisterManagedObjectFromGovernance(activeGovernance,

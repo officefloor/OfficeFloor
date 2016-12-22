@@ -17,13 +17,13 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.spi.team.Job;
 
 /**
@@ -34,7 +34,7 @@ import net.officefloor.frame.spi.team.Job;
 public class SetupJobContainerTest extends AbstractJobContainerTest {
 
 	/**
-	 * Ensures execution of setup {@link FunctionState} requested before {@link Task}
+	 * Ensures execution of setup {@link FunctionState} requested before {@link ManagedFunction}
 	 * execution.
 	 */
 	public void testPreExecuteSetupTask() {
@@ -82,13 +82,13 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of setup {@link FunctionState} requested during {@link Task}
+	 * Ensures execution of setup {@link FunctionState} requested during {@link ManagedFunction}
 	 * execution.
 	 */
 	public void testPostExecuteSetupTask() {
 
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 		final Object parameter = new Object();
 
 		// Create a job with setup task
@@ -130,7 +130,7 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of setup {@link FunctionState} requested before {@link Task}
+	 * Ensures execution of setup {@link FunctionState} requested before {@link ManagedFunction}
 	 * execution.
 	 */
 	public void testPreExecuteGovernanceActivity() {
@@ -178,7 +178,7 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of setup {@link FunctionState} requested during {@link Task}
+	 * Ensures execution of setup {@link FunctionState} requested during {@link ManagedFunction}
 	 * execution.
 	 */
 	public void testPostExecuteGovernanceActivity() {

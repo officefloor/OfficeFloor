@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.jndi.work;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.xml.XmlMarshallException;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
@@ -33,12 +33,12 @@ import net.officefloor.plugin.xml.XmlUnmarshaller;
 public interface MockJndiObject {
 
 	/**
-	 * Simple {@link Task}.
+	 * Simple {@link ManagedFunction}.
 	 */
 	public void simpleTask();
 
 	/**
-	 * Complex {@link Task}.
+	 * Complex {@link ManagedFunction}.
 	 * 
 	 * @param xml
 	 *            Test parameter.

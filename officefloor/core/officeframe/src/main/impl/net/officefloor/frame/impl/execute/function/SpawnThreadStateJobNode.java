@@ -25,7 +25,7 @@ import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -111,7 +111,7 @@ public class SpawnThreadStateJobNode implements FunctionState {
 	public FunctionState execute() {
 
 		// Obtain the task meta-data for instigating the flow
-		TaskMetaData<?, ?, ?> initTaskMetaData = this.flowMetaData.getInitialTaskMetaData();
+		ManagedFunctionMetaData<?, ?, ?> initTaskMetaData = this.flowMetaData.getInitialTaskMetaData();
 
 		// Create thread to execute asynchronously
 		AssetManager flowAssetManager = this.flowMetaData.getFlowManager();

@@ -39,6 +39,11 @@ import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.internal.structure.TaskTeamNode;
 import net.officefloor.compile.internal.structure.WorkNode;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
@@ -50,15 +55,10 @@ import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.type.TypeContext;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.governance.Governance;
@@ -91,7 +91,7 @@ public class TaskNodeImpl implements TaskNode {
 	private class InitialisedState {
 
 		/**
-		 * Name of the {@link TaskType} for this {@link SectionTask}.
+		 * Name of the {@link ManagedFunctionType} for this {@link SectionTask}.
 		 */
 		private final String taskTypeName;
 
@@ -104,7 +104,7 @@ public class TaskNodeImpl implements TaskNode {
 		 * Initialise the state.
 		 * 
 		 * @param taskTypeName
-		 *            Name of the {@link TaskType} for this {@link SectionTask}.
+		 *            Name of the {@link ManagedFunctionType} for this {@link SectionTask}.
 		 * @param workNode
 		 *            {@link WorkNode} containing this {@link TaskNode}.
 		 */
@@ -143,7 +143,7 @@ public class TaskNodeImpl implements TaskNode {
 
 	/**
 	 * Listing of {@link OfficeGovernance} instances providing
-	 * {@link Governance} over this {@link Task}.
+	 * {@link Governance} over this {@link ManagedFunction}.
 	 */
 	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
@@ -214,18 +214,18 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
-	public TaskType<?, ?, ?> loadTaskType(TypeContext typeContext) {
+	public ManagedFunctionType<?, ?, ?> loadTaskType(TypeContext typeContext) {
 
 		// Obtain the work type
-		WorkType<?> workType = typeContext
+		FunctionNamespaceType<?> workType = typeContext
 				.getOrLoadWorkType(this.state.workNode);
 		if (workType == null) {
 			return null;
 		}
 
 		// Find the task type for this task node
-		for (TaskType<?, ?, ?> type : workType.getTaskTypes()) {
-			if (this.state.taskTypeName.equals(type.getTaskName())) {
+		for (ManagedFunctionType<?, ?, ?> type : workType.getManagedFunctionTypes()) {
+			if (this.state.taskTypeName.equals(type.getFunctionName())) {
 				// Found the type for this task
 				return type;
 			}
@@ -244,7 +244,7 @@ public class TaskNodeImpl implements TaskNode {
 			OfficeSubSectionType parentSubSectionType, TypeContext typeContext) {
 
 		// Load the task type
-		TaskType<?, ?, ?> taskType = this.loadTaskType(typeContext);
+		ManagedFunctionType<?, ?, ?> taskType = this.loadTaskType(typeContext);
 		if (taskType == null) {
 			return null;
 		}
@@ -269,7 +269,7 @@ public class TaskNodeImpl implements TaskNode {
 			TypeContext typeContext) {
 
 		// Obtain the task factory for this task
-		TaskType<?, ?, ?> taskType = this.loadTaskType(typeContext);
+		ManagedFunctionType<?, ?, ?> taskType = this.loadTaskType(typeContext);
 		if (taskType == null) {
 			this.context.getCompilerIssues().addIssue(this,
 					"Can not find task type '" + this.state.taskTypeName + "'");
@@ -285,8 +285,8 @@ public class TaskNodeImpl implements TaskNode {
 		}
 
 		// Build the task
-		TaskFactory taskFactory = taskType.getTaskFactory();
-		TaskBuilder taskBuilder = workBuilder.addTask(this.taskName,
+		ManagedFunctionFactory taskFactory = taskType.getManagedFunctionFactory();
+		ManagedFunctionBuilder taskBuilder = workBuilder.addManagedFunction(this.taskName,
 				taskFactory);
 		taskBuilder.setTeam(officeTeam.getOfficeTeamName());
 
@@ -297,9 +297,9 @@ public class TaskNodeImpl implements TaskNode {
 		}
 
 		// Build the flows
-		TaskFlowType<?>[] flowTypes = taskType.getFlowTypes();
+		ManagedFunctionFlowType<?>[] flowTypes = taskType.getFlowTypes();
 		for (int flowIndex = 0; flowIndex < flowTypes.length; flowIndex++) {
-			TaskFlowType<?> flowType = flowTypes[flowIndex];
+			ManagedFunctionFlowType<?> flowType = flowTypes[flowIndex];
 
 			// Obtain type details for linking
 			String flowName = flowType.getFlowName();
@@ -384,9 +384,9 @@ public class TaskNodeImpl implements TaskNode {
 		}
 
 		// Build the objects
-		TaskObjectType<?>[] objectTypes = taskType.getObjectTypes();
+		ManagedFunctionObjectType<?>[] objectTypes = taskType.getObjectTypes();
 		for (int objectIndex = 0; objectIndex < objectTypes.length; objectIndex++) {
-			TaskObjectType<?> objectType = objectTypes[objectIndex];
+			ManagedFunctionObjectType<?> objectType = objectTypes[objectIndex];
 
 			// Obtain the type details for linking
 			String objectName = objectType.getObjectName();
@@ -435,9 +435,9 @@ public class TaskNodeImpl implements TaskNode {
 		}
 
 		// Build the escalations
-		TaskEscalationType[] escalationTypes = taskType.getEscalationTypes();
+		ManagedFunctionEscalationType[] escalationTypes = taskType.getEscalationTypes();
 		for (int i = 0; i < escalationTypes.length; i++) {
-			TaskEscalationType escalationType = escalationTypes[i];
+			ManagedFunctionEscalationType escalationType = escalationTypes[i];
 
 			// Obtain the type details for linking
 			Class<? extends Throwable> escalationClass = escalationType

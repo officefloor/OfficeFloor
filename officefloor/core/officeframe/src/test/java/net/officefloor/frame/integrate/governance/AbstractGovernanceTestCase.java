@@ -22,7 +22,7 @@ import java.util.Enumeration;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.execute.managedobject.AbstractManagedObjectContainerImplTest;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -119,7 +119,7 @@ public abstract class AbstractGovernanceTestCase extends
 	}
 
 	/**
-	 * Name of {@link Task} {@link Team}.
+	 * Name of {@link ManagedFunction} {@link Team}.
 	 */
 	protected static final String TEAM_TASK = "TEAM_TASK";
 
@@ -139,7 +139,7 @@ public abstract class AbstractGovernanceTestCase extends
 	protected String testMethodName;
 
 	/**
-	 * Indicates if multi-threaded {@link Team} responsible for {@link Task}.
+	 * Indicates if multi-threaded {@link Team} responsible for {@link ManagedFunction}.
 	 */
 	protected boolean isMultiThreadedTask = false;
 

@@ -20,15 +20,15 @@ package net.officefloor.plugin.web.http.security;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.web.http.security.type.HttpSecurityType;
 
 /**
  * Provides means to configure the {@link HttpSecurity}
- * {@link ManagedObjectSource}, {@link WorkSource} and {@link SectionSource}
+ * {@link ManagedObjectSource}, {@link ManagedFunctionSource} and {@link SectionSource}
  * instances.
  * 
  * @author Daniel Sagenschneider

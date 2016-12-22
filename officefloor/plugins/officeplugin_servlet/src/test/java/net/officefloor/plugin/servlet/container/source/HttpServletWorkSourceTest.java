@@ -26,12 +26,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.source.HttpServletTask.DependencyKeys;
@@ -76,9 +76,9 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 				new MockHttpServlet(), new HashMap<String, String>());
 
 		// Create expected type
-		WorkTypeBuilder<HttpServletTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpServletTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
-		TaskTypeBuilder<DependencyKeys, None> task = type.addTaskType(
+		ManagedFunctionTypeBuilder<DependencyKeys, None> task = type.addManagedFunctionType(
 				"service", factory, DependencyKeys.class, None.class);
 		task.setDifferentiator(factory);
 		task.addObject(ServicerMapping.class).setKey(
@@ -111,8 +111,8 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 	public void testService() throws Throwable {
 
 		// Mocks
-		final TaskContext<HttpServletTask, DependencyKeys, None> taskContext = this
-				.createMock(TaskContext.class);
+		final ManagedFunctionContext<HttpServletTask, DependencyKeys, None> taskContext = this
+				.createMock(ManagedFunctionContext.class);
 		final OfficeServletContext officeServletContext = this
 				.createMock(OfficeServletContext.class);
 		final ServerHttpConnection connection = this
@@ -177,7 +177,7 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Load the work type
-		WorkType<HttpServletTask> type = WorkLoaderUtil.loadWorkType(
+		FunctionNamespaceType<HttpServletTask> type = WorkLoaderUtil.loadWorkType(
 				HttpServletWorkSource.class,
 				HttpServletWorkSource.PROPERTY_SERVLET_NAME, "ServletName",
 				HttpServletWorkSource.PROPERTY_HTTP_SERVLET_CLASS_NAME,
@@ -190,7 +190,7 @@ public class HttpServletWorkSourceTest extends OfficeFrameTestCase {
 		// Create the task and service request
 		HttpServletTask task = type.getWorkFactory().createWork();
 		task.setOffice(office);
-		task.doTask(taskContext);
+		task.execute(taskContext);
 
 		// Verify functionality
 		this.verifyMockObjects();

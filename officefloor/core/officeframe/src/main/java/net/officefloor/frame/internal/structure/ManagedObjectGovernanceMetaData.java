@@ -28,9 +28,10 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface ManagedObjectGovernanceMetaData<I> {
 
 	/**
-	 * Obtains the index for the {@link Governance}.
+	 * Obtains the index for the {@link Governance} within the
+	 * {@link ThreadState}.
 	 * 
-	 * @return Index for the {@link Governance}.
+	 * @return Index for the {@link Governance} within the {@link ThreadState}.
 	 */
 	int getGovernanceIndex();
 

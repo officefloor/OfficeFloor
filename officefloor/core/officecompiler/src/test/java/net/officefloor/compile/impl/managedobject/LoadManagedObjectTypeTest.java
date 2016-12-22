@@ -25,6 +25,7 @@ import javax.transaction.xa.XAResource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -34,12 +35,11 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -87,11 +87,11 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 			.createMock(WorkFactory.class);
 
 	/**
-	 * {@link TaskFactory}.
+	 * {@link ManagedFunctionFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskFactory<Work, ?, ?> taskFactory = this
-			.createMock(TaskFactory.class);
+	private final ManagedFunctionFactory<Work, ?, ?> taskFactory = this
+			.createMock(ManagedFunctionFactory.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -1004,7 +1004,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if {@link Work} added without {@link Task} instances.
+	 * Ensure issue if {@link Work} added without {@link ManagedFunction} instances.
 	 */
 	public void testAddWorkWithNoTasks() {
 
@@ -1023,7 +1023,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if {@link Task} added without a {@link Work} name.
+	 * Ensure issue if {@link ManagedFunction} added without a {@link Work} name.
 	 */
 	public void testAddTaskWithNoWorkName() {
 
@@ -1043,7 +1043,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if {@link Task} added without a {@link Task} name.
+	 * Ensure issue if {@link ManagedFunction} added without a {@link ManagedFunction} name.
 	 */
 	public void testAddTaskWithNoTaskName() {
 
@@ -1063,7 +1063,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if {@link Task} added without a {@link Team}.
+	 * Ensure issue if {@link ManagedFunction} added without a {@link Team}.
 	 */
 	public void testAddTaskWithoutTeam() {
 
@@ -1085,7 +1085,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures {@link ManagedObjectTeamType} is available for the added
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 */
 	public void testAddTask() {
 
@@ -1113,7 +1113,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures {@link ManagedObjectTeamType} is available for the added recycle
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 */
 	public void testAddRecycleTask() {
 
@@ -1141,7 +1141,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures only a single {@link ManagedObjectTeamType} is available
-	 * {@link Task} instances added using the same {@link Team}.
+	 * {@link ManagedFunction} instances added using the same {@link Team}.
 	 */
 	public void testAddTasksWithSameTeam() {
 
@@ -1180,7 +1180,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures only a multiple {@link ManagedObjectTeamType} are available for
-	 * added {@link Task} instances that use various {@link Team} instances.
+	 * added {@link ManagedFunction} instances that use various {@link Team} instances.
 	 */
 	public void testMultipleTeams() {
 
@@ -1215,7 +1215,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if link {@link Task} to another {@link Task} with
+	 * Ensures issue if link {@link ManagedFunction} to another {@link ManagedFunction} with
 	 * <code>null</code> {@link FlowInstigationStrategyEnum}.
 	 */
 	public void testAddTaskLinkWithNoInstigationStrategy() {
@@ -1241,7 +1241,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if link {@link Task} to another {@link Task} providing only
+	 * Ensures issue if link {@link ManagedFunction} to another {@link ManagedFunction} providing only
 	 * a {@link Work} name.
 	 */
 	public void testAddTaskLinkWithWorkNameButNoTaskName() {
@@ -1268,8 +1268,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if an added {@link Task} is linking an unknown added
-	 * {@link Task}.
+	 * Ensures issue if an added {@link ManagedFunction} is linking an unknown added
+	 * {@link ManagedFunction}.
 	 */
 	public void testAddTaskLinkingUnknownFlow() {
 
@@ -1296,7 +1296,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures only the {@link ManagedObjectTeamType} is available for the added
-	 * {@link Task} with a link to another added {@link Task}.
+	 * {@link ManagedFunction} with a link to another added {@link ManagedFunction}.
 	 */
 	public void testAddTaskWithLinkToAddedTask() {
 
@@ -1335,7 +1335,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures a {@link ManagedObjectFlowType} is added for the link from the
-	 * added {@link Task}.
+	 * added {@link ManagedFunction}.
 	 */
 	public void testAddTaskRequiringFlow() {
 
@@ -1491,7 +1491,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if link process without a {@link Task} name.
+	 * Ensures issue if link process without a {@link ManagedFunction} name.
 	 */
 	public void testLinkProcessWithoutTaskName() {
 
@@ -1513,7 +1513,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures issue if linking {@link ManagedObjectFlowMetaData} to an unknown
-	 * added {@link Task}.
+	 * added {@link ManagedFunction}.
 	 */
 	public void testLinkProcessToUnknownTask() {
 
@@ -1533,7 +1533,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures can link to added {@link Task} which removes the
+	 * Ensures can link to added {@link ManagedFunction} which removes the
 	 * {@link ManagedObjectFlowType} for the {@link ManagedObjectFlowMetaData}
 	 * from being included in the {@link ManagedObjectType}.
 	 */
@@ -1650,7 +1650,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * Loads the {@link ManagedObjectType}.
 	 * 
 	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the {@link WorkType}.
+	 *            Flag indicating if expecting to load the {@link FunctionNamespaceType}.
 	 * @param init
 	 *            {@link Init}.
 	 * @param propertyNameValuePairs
@@ -1727,11 +1727,11 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		}
 
 		/**
-		 * Obtains the {@link TaskFactory}.
+		 * Obtains the {@link ManagedFunctionFactory}.
 		 * 
-		 * @return {@link TaskFactory}.
+		 * @return {@link ManagedFunctionFactory}.
 		 */
-		public TaskFactory<Work, ?, ?> getTaskFactory() {
+		public ManagedFunctionFactory<Work, ?, ?> getTaskFactory() {
 			return LoadManagedObjectTypeTest.this.taskFactory;
 		}
 	}

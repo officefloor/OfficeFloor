@@ -32,6 +32,7 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // functions do not maintain state (use managed objects)
 public interface WorkFactory<W extends Work> {
 
 	/**

@@ -21,14 +21,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -37,7 +37,7 @@ import net.officefloor.plugin.web.http.parameters.HttpParametersLoader;
 import net.officefloor.plugin.web.http.parameters.HttpParametersLoaderImpl;
 
 /**
- * {@link WorkSource} to load the {@link HttpRequest} parameters onto a
+ * {@link ManagedFunctionSource} to load the {@link HttpRequest} parameters onto a
  * dependency Object.
  * 
  * @author Daniel Sagenschneider
@@ -80,9 +80,9 @@ public class HttpParametersLoaderWorkSource
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void sourceWork(
-			WorkTypeBuilder<HttpParametersLoaderTask> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(
+			FunctionNamespaceBuilder<HttpParametersLoaderTask> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the type
 		String typeName = context.getProperty(PROPERTY_TYPE_NAME);
@@ -119,8 +119,8 @@ public class HttpParametersLoaderWorkSource
 		workTypeBuilder.setWorkFactory(task);
 
 		// Build the task
-		TaskTypeBuilder<HttpParametersLoaderDependencies, None> taskBuilder = workTypeBuilder
-				.addTaskType("LOADER", task,
+		ManagedFunctionTypeBuilder<HttpParametersLoaderDependencies, None> taskBuilder = workTypeBuilder
+				.addManagedFunctionType("LOADER", task,
 						HttpParametersLoaderDependencies.class, None.class);
 		taskBuilder.addObject(ServerHttpConnection.class).setKey(
 				HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION);
@@ -132,7 +132,7 @@ public class HttpParametersLoaderWorkSource
 	}
 
 	/**
-	 * {@link Task} to load the {@link HttpRequest} parameters onto a dependency
+	 * {@link ManagedFunction} to load the {@link HttpRequest} parameters onto a dependency
 	 * Object.
 	 */
 	public class HttpParametersLoaderTask
@@ -145,8 +145,8 @@ public class HttpParametersLoaderWorkSource
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object doTask(
-				TaskContext<HttpParametersLoaderTask, HttpParametersLoaderDependencies, None> context)
+		public Object execute(
+				ManagedFunctionContext<HttpParametersLoaderTask, HttpParametersLoaderDependencies, None> context)
 				throws IOException, HttpParametersException {
 
 			// Obtain the dependencies

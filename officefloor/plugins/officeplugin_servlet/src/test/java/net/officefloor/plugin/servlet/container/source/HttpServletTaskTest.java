@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.HttpServletContainer;
@@ -88,11 +88,11 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 	private final Map<String, String> initParameters = new HashMap<String, String>();
 
 	/**
-	 * {@link TaskContext}.
+	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskContext<HttpServletTask, DependencyKeys, None> taskContext = this
-			.createMock(TaskContext.class);
+	private final ManagedFunctionContext<HttpServletTask, DependencyKeys, None> taskContext = this
+			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * {@link OfficeServletContext}.
@@ -174,7 +174,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 
 		// Create the task
 		HttpServletTask work = factory.createWork();
-		this.task = (HttpServletTask) factory.createTask(work);
+		this.task = (HttpServletTask) factory.createManagedFunction(work);
 	}
 
 	/**
@@ -187,7 +187,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.task.doTask(this.taskContext);
+		this.task.execute(this.taskContext);
 		this.verifyMockObjects();
 
 		// Ensure service is invoked
@@ -207,8 +207,8 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.task.doTask(this.taskContext);
-		this.task.doTask(this.taskContext);
+		this.task.execute(this.taskContext);
+		this.task.execute(this.taskContext);
 		this.verifyMockObjects();
 
 		// Ensure service is initialised only once in servicing
@@ -230,7 +230,7 @@ public class HttpServletTaskTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.task.doTask(this.taskContext);
+		this.task.execute(this.taskContext);
 		this.verifyMockObjects();
 
 		// Ensure service is initialised only once in servicing

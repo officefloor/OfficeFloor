@@ -20,14 +20,14 @@ package net.officefloor.plugin.section.clazz;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.plugin.work.clazz.ClassTask;
 import net.officefloor.plugin.work.clazz.ClassWork;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
@@ -35,7 +35,7 @@ import net.officefloor.plugin.work.clazz.ParameterFactory;
 import net.officefloor.plugin.work.clazz.Sequence;
 
 /**
- * {@link WorkSource} implementation to provide the {@link Task} instances for
+ * {@link ManagedFunctionSource} implementation to provide the {@link ManagedFunction} instances for
  * the {@link ClassSectionSource}.
  * 
  * @author Daniel Sagenschneider
@@ -60,21 +60,21 @@ public class SectionClassWorkSource extends ClassWorkSource {
 	}
 
 	@Override
-	protected TaskFactory<ClassWork, Indexed, Indexed> createTaskFactory(
+	protected ManagedFunctionFactory<ClassWork, Indexed, Indexed> createTaskFactory(
 			Class<?> clazz, Method method, boolean isStatic,
 			ParameterFactory[] parameters) {
 		return new SectionTaskFactory(method, isStatic, parameters);
 	}
 
 	@Override
-	protected TaskTypeBuilder<Indexed, Indexed> addTaskType(Class<?> clazz,
-			WorkTypeBuilder<ClassWork> workTypeBuilder, String taskName,
-			TaskFactory<ClassWork, Indexed, Indexed> taskFactory,
+	protected ManagedFunctionTypeBuilder<Indexed, Indexed> addTaskType(Class<?> clazz,
+			FunctionNamespaceBuilder<ClassWork> workTypeBuilder, String taskName,
+			ManagedFunctionFactory<ClassWork, Indexed, Indexed> taskFactory,
 			Sequence objectSequence, Sequence flowSequence) {
 
 		// Include method as task in type definition
-		TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder = workTypeBuilder
-				.addTaskType(taskName, taskFactory, null, null);
+		ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder = workTypeBuilder
+				.addManagedFunctionType(taskName, taskFactory, null, null);
 
 		// Add the section object always as first dependency
 		taskTypeBuilder.addObject(clazz).setLabel("OBJECT");
@@ -107,14 +107,14 @@ public class SectionClassWorkSource extends ClassWorkSource {
 	}
 
 	/**
-	 * {@link TaskFactory} for overriding {@link ClassWorkSource} behaviour.
+	 * {@link ManagedFunctionFactory} for overriding {@link ClassWorkSource} behaviour.
 	 */
 	public static class SectionTaskFactory implements
-			TaskFactory<ClassWork, Indexed, Indexed>,
-			Task<ClassWork, Indexed, Indexed> {
+			ManagedFunctionFactory<ClassWork, Indexed, Indexed>,
+			ManagedFunction<ClassWork, Indexed, Indexed> {
 
 		/**
-		 * {@link Method} for the {@link Task}.
+		 * {@link Method} for the {@link ManagedFunction}.
 		 */
 		private final Method method;
 
@@ -133,7 +133,7 @@ public class SectionClassWorkSource extends ClassWorkSource {
 		 * Initiate.
 		 * 
 		 * @param method
-		 *            {@link Method} for the {@link Task}.
+		 *            {@link Method} for the {@link ManagedFunction}.
 		 * @param isStatic
 		 *            Indicates if the {@link Method} is static.
 		 * @param parameters
@@ -170,7 +170,7 @@ public class SectionClassWorkSource extends ClassWorkSource {
 		 */
 
 		@Override
-		public Task<ClassWork, Indexed, Indexed> createTask(ClassWork work) {
+		public ManagedFunction<ClassWork, Indexed, Indexed> createManagedFunction(ClassWork work) {
 			return this;
 		}
 
@@ -179,7 +179,7 @@ public class SectionClassWorkSource extends ClassWorkSource {
 		 */
 
 		@Override
-		public Object doTask(TaskContext<ClassWork, Indexed, Indexed> context)
+		public Object execute(ManagedFunctionContext<ClassWork, Indexed, Indexed> context)
 				throws Throwable {
 
 			// Obtain the section object

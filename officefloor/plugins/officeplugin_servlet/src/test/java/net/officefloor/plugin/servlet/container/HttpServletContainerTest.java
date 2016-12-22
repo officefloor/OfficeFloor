@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
@@ -113,10 +113,10 @@ public class HttpServletContainerTest extends OfficeFrameTestCase {
 			.createMock(HttpServletSecurity.class);
 
 	/**
-	 * {@link TaskContext}.
+	 * {@link ManagedFunctionContext}.
 	 */
-	private final TaskContext<?, ?, ?> taskContext = this
-			.createMock(TaskContext.class);
+	private final ManagedFunctionContext<?, ?, ?> taskContext = this
+			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * {@link ServicerMapping}.

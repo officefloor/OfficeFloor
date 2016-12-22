@@ -19,28 +19,28 @@ package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link Task} and {@link TaskFactory} for
+ * {@link ManagedFunction} and {@link ManagedFunctionFactory} for
  * {@link HttpAuthenticationManagedObjectSource} authentication.
  * 
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectHttpAuthenticateTask implements
-		Task<HttpSecurityWork, Indexed, None>,
-		TaskFactory<HttpSecurityWork, Indexed, None> {
+		ManagedFunction<HttpSecurityWork, Indexed, None>,
+		ManagedFunctionFactory<HttpSecurityWork, Indexed, None> {
 
 	/*
 	 * ==================== TaskFactory ============================
 	 */
 
 	@Override
-	public Task<HttpSecurityWork, Indexed, None> createTask(
+	public ManagedFunction<HttpSecurityWork, Indexed, None> createManagedFunction(
 			HttpSecurityWork work) {
 		return this;
 	}
@@ -51,7 +51,7 @@ public class ManagedObjectHttpAuthenticateTask implements
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Object doTask(TaskContext<HttpSecurityWork, Indexed, None> context)
+	public Object execute(ManagedFunctionContext<HttpSecurityWork, Indexed, None> context)
 			throws Throwable {
 
 		// Obtain the HTTP Security Source
@@ -98,9 +98,9 @@ public class ManagedObjectHttpAuthenticateTask implements
 		private final TaskAuthenticateContext<S, C> taskAuthenticateContext;
 
 		/**
-		 * {@link TaskContext}.
+		 * {@link ManagedFunctionContext}.
 		 */
-		private final TaskContext<HttpSecurityWork, Indexed, None> taskContext;
+		private final ManagedFunctionContext<HttpSecurityWork, Indexed, None> taskContext;
 
 		/**
 		 * Security.
@@ -113,11 +113,11 @@ public class ManagedObjectHttpAuthenticateTask implements
 		 * @param taskAuthenticateContext
 		 *            {@link TaskAuthenticateContext}.
 		 * @param taskContext
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
 		public HttpAuthenticateContextImpl(
 				TaskAuthenticateContext<S, C> taskAuthenticateContext,
-				TaskContext<HttpSecurityWork, Indexed, None> taskContext) {
+				ManagedFunctionContext<HttpSecurityWork, Indexed, None> taskContext) {
 			this.taskAuthenticateContext = taskAuthenticateContext;
 			this.taskContext = taskContext;
 		}

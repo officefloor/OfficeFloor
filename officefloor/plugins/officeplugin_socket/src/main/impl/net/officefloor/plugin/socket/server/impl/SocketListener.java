@@ -33,8 +33,8 @@ import java.util.logging.Logger;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
@@ -146,7 +146,7 @@ public class SocketListener extends
 		try {
 			CloseSelectorTaskContext context = new CloseSelectorTaskContext();
 			while (!(context.isComplete())) {
-				this.doTask(context);
+				this.execute(context);
 			}
 		} catch (Exception ex) {
 			if (LOGGER.isLoggable(Level.WARNING)) {
@@ -271,7 +271,7 @@ public class SocketListener extends
 	 */
 
 	@Override
-	public Object doTask(TaskContext<SocketListener, None, Indexed> context)
+	public Object execute(ManagedFunctionContext<SocketListener, None, Indexed> context)
 			throws Exception {
 
 		// Synchronising as may be invoked by differing threads
@@ -505,12 +505,12 @@ public class SocketListener extends
 
 	/**
 	 * <p>
-	 * Close {@link Selector} {@link TaskContext}.
+	 * Close {@link Selector} {@link ManagedFunctionContext}.
 	 * <p>
-	 * Enables running this {@link Task} until the {@link Selector} is closed.
+	 * Enables running this {@link ManagedFunction} until the {@link Selector} is closed.
 	 */
 	private class CloseSelectorTaskContext implements
-			TaskContext<SocketListener, None, Indexed> {
+			ManagedFunctionContext<SocketListener, None, Indexed> {
 
 		/**
 		 * Indicates if complete, which means {@link Selector} is closed.

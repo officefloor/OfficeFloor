@@ -23,14 +23,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -126,11 +126,11 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 				false, null, null, null);
 
 		// Create the expected type
-		WorkTypeBuilder<HttpTemplateInitialTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpTemplateInitialTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
 
 		// Initial task
-		TaskTypeBuilder<Dependencies, Flows> initial = type.addTaskType("TASK",
+		ManagedFunctionTypeBuilder<Dependencies, Flows> initial = type.addManagedFunctionType("TASK",
 				factory, Dependencies.class, Flows.class);
 		initial.addObject(ServerHttpConnection.class).setKey(
 				Dependencies.SERVER_HTTP_CONNECTION);
@@ -161,12 +161,12 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 		}
 
 		// Validate type (must also convert
-		WorkType<HttpTemplateInitialTask> work = WorkLoaderUtil
+		FunctionNamespaceType<HttpTemplateInitialTask> work = WorkLoaderUtil
 				.validateWorkType(type, HttpTemplateInitialWorkSource.class,
 						properties.toArray(new String[properties.size()]));
 
 		// Ensure correct URI path
-		TaskType<HttpTemplateInitialTask, ?, ?> task = work.getTaskTypes()[0];
+		ManagedFunctionType<HttpTemplateInitialTask, ?, ?> task = work.getManagedFunctionTypes()[0];
 		HttpUrlContinuationDifferentiator differentiator = (HttpUrlContinuationDifferentiator) task
 				.getDifferentiator();
 		assertEquals("Incorrect URI path", expectedUrlContinuationPath,
@@ -271,7 +271,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 			String redirectUriPath, String contentType, Charset charset) {
 		try {
 
-			final TaskContext context = this.createMock(TaskContext.class);
+			final ManagedFunctionContext context = this.createMock(ManagedFunctionContext.class);
 			final ServerHttpConnection connection = this
 					.createMock(ServerHttpConnection.class);
 			final HttpRequestState requestState = this
@@ -307,11 +307,11 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 						HttpTemplateInitialWorkSource.PROPERTY_CHARSET,
 						charset.name()));
 			}
-			WorkType<HttpTemplateInitialTask> work = WorkLoaderUtil
+			FunctionNamespaceType<HttpTemplateInitialTask> work = WorkLoaderUtil
 					.loadWorkType(HttpTemplateInitialWorkSource.class,
 							properties.toArray(new String[properties.size()]));
-			Task<HttpTemplateInitialTask, ?, ?> task = work.getTaskTypes()[0]
-					.getTaskFactory().createTask(
+			ManagedFunction<HttpTemplateInitialTask, ?, ?> task = work.getManagedFunctionTypes()[0]
+					.getManagedFunctionFactory().createManagedFunction(
 							work.getWorkFactory().createWork());
 
 			// Record obtaining the dependencies
@@ -360,7 +360,7 @@ public class HttpTemplateInitialWorkSourceTest extends OfficeFrameTestCase {
 
 			// Test
 			this.replayMockObjects();
-			task.doTask(context);
+			task.execute(context);
 			this.verifyMockObjects();
 
 		} catch (Throwable ex) {

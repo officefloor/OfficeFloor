@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -35,7 +35,7 @@ public interface GovernanceBuilder<F extends Enum<F>> {
 
 	/**
 	 * Specifies the name of the {@link Team} responsible for executing the
-	 * {@link Governance} {@link Task} instances.
+	 * {@link Governance} {@link ManagedFunction} instances.
 	 * 
 	 * @param teamName
 	 *            {@link Team} name.
@@ -43,17 +43,17 @@ public interface GovernanceBuilder<F extends Enum<F>> {
 	void setTeam(String teamName);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link Task} of
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link Flow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
 	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link Task} that resides on a different {@link Work}
-	 *            as this {@link Task}.
+	 *            Name of {@link ManagedFunction} that resides on a different {@link Work}
+	 *            as this {@link ManagedFunction}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
 	 * @param argumentType
@@ -64,17 +64,17 @@ public interface GovernanceBuilder<F extends Enum<F>> {
 			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link Task} of
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
 	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link Task} that resides on a different {@link Work}
-	 *            as this {@link Task}.
+	 *            Name of {@link ManagedFunction} that resides on a different {@link Work}
+	 *            as this {@link ManagedFunction}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
 	 * @param argumentType
@@ -91,10 +91,10 @@ public interface GovernanceBuilder<F extends Enum<F>> {
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
 	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link Task} on the {@link Work}.
+	 *            Name of {@link ManagedFunction} on the {@link Work}.
 	 */
 	void addEscalation(Class<? extends Throwable> typeOfCause, String workName,
 			String taskName);

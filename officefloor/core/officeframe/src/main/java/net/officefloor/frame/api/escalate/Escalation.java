@@ -17,14 +17,14 @@
  */
 package net.officefloor.frame.api.escalate;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
  * <p>
- * An escalation is &quot;thrown&quot; (escalated) on processing of {@link Task}
+ * An escalation is &quot;thrown&quot; (escalated) on processing of {@link ManagedFunction}
  * and {@link Duty} instances.
  * <p>
  * They are not &quot;thrown&quot; in the sense of a java {@link Throwable}

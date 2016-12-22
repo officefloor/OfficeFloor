@@ -18,7 +18,6 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * <p>
@@ -127,16 +126,12 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	ManagedObjectContainer getManagedObjectContainer(int index);
 
 	/**
-	 * <p>
-	 * Checks whether the particular {@link Governance} is active.
-	 * <p>
-	 * This enables light weight checking by not having to create the
-	 * {@link GovernanceContainer}.
+	 * Enables checking if the {@link Governance} is active (without having to
+	 * create the {@link GovernanceContainer}).
 	 * 
 	 * @param index
-	 *            Index of the {@link GovernanceContainer} to determine if the
-	 *            {@link Governance} is active.
-	 * @return <code>true</code> if the {@link Governance} is activate.
+	 *            Index of the {@link GovernanceContainer}.
+	 * @return <code>true</code> if the {@link Governance} is active.
 	 */
 	boolean isGovernanceActive(int index);
 
@@ -148,16 +143,18 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * @return {@link GovernanceContainer} for the index only if active. If not
 	 *         active will return <code>null</code>.
 	 */
-	GovernanceContainer<?, ?> getGovernanceContainer(int index);
+	GovernanceContainer<?> getGovernanceContainer(int index);
 
 	/**
-	 * Flags the {@link Governance} has completed.
+	 * Creates a new {@link ManagedFunctionContainer} contained in this
+	 * {@link ThreadState} for the {@link GovernanceActivity}.
 	 * 
-	 * @param governanceContainer
-	 *            {@link GovernanceContainer} of the completed
-	 *            {@link Governance}.
+	 * @param governanceActivity
+	 *            {@link GovernanceActivity}.
+	 * @return New {@link ManagedFunctionContainer}.
 	 */
-	void governanceComplete(GovernanceContainer<?, ?> governanceContainer);
+	<F extends Enum<F>> ManagedFunctionContainer createGovernanceFunction(GovernanceActivity<F> governanceActivity,
+			GovernanceMetaData<?, F> governanceMetaData);
 
 	/**
 	 * Obtains the {@link AdministratorContainer} for the input index.
@@ -205,11 +202,12 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	void setEscalationLevel(EscalationLevel escalationLevel);
 
 	/**
-	 * Profiles that {@link Job} is being executed.
+	 * Profiles that {@link ManagedObjectContainer} is being executed.
 	 * 
-	 * @param jobMetaData
-	 *            {@link ManagedFunctionMetaData} of the {@link Job} being executed.
+	 * @param functionMetaData
+	 *            {@link ManagedFunctionContainerMetaData} of the
+	 *            {@link ManagedFunctionContainer} being executed.
 	 */
-	void profile(ManagedFunctionMetaData jobMetaData);
+	void profile(ManagedFunctionContainerMetaData functionMetaData);
 
 }

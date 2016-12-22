@@ -22,11 +22,11 @@ import java.util.List;
 
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
@@ -68,7 +68,7 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	private final List<AdministratorSourceConfiguration<?, ?>> workAdministrators = new LinkedList<AdministratorSourceConfiguration<?, ?>>();
 
 	/**
-	 * Name of the initial {@link Task} for the {@link Work}.
+	 * Name of the initial {@link ManagedFunction} for the {@link Work}.
 	 */
 	private String initialTaskName;
 
@@ -91,15 +91,15 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	}
 
 	/**
-	 * Obtains the {@link TaskBuilder}.
+	 * Obtains the {@link ManagedFunctionBuilder}.
 	 * 
 	 * @param namespace
-	 *            Name space to identify the {@link TaskBuilder}.
+	 *            Name space to identify the {@link ManagedFunctionBuilder}.
 	 * @param taskName
-	 *            Name of the {@link TaskBuilder}.
-	 * @return {@link TaskBuilder}.
+	 *            Name of the {@link ManagedFunctionBuilder}.
+	 * @return {@link ManagedFunctionBuilder}.
 	 */
-	public TaskBuilder<W, ?, ?> getTaskBuilder(String namespace, String taskName) {
+	public ManagedFunctionBuilder<W, ?, ?> getTaskBuilder(String namespace, String taskName) {
 
 		// Obtain the task builder
 		TaskBuilderImpl<W, ?, ?> taskBuilder = null;
@@ -143,8 +143,8 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> addTask(
-			String taskName, TaskFactory<? super W, D, F> taskFactory) {
+	public <D extends Enum<D>, F extends Enum<F>> ManagedFunctionBuilder<W, D, F> addManagedFunction(
+			String taskName, ManagedFunctionFactory<? super W, D, F> taskFactory) {
 		TaskBuilderImpl builder = new TaskBuilderImpl(taskName, taskFactory);
 		this.tasks.add(builder);
 		return builder;

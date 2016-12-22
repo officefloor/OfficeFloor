@@ -20,6 +20,12 @@ package net.officefloor.compile.integrate.task;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.structure.TaskNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
@@ -28,19 +34,13 @@ import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
-import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
@@ -55,14 +55,14 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
 import net.officefloor.plugin.work.clazz.ParameterFactory;
 
 /**
- * Tests compiling a {@link Task}.
+ * Tests compiling a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
 public class CompileTaskTest extends AbstractCompileTestCase {
 
 	/**
-	 * Tests compiling a simple {@link Task}.
+	 * Tests compiling a simple {@link ManagedFunction}.
 	 */
 	public void testSimpleTask() {
 
@@ -83,7 +83,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} with a differentiator.
+	 * Tests compiling a {@link ManagedFunction} with a differentiator.
 	 */
 	public void testDifferentiatorTask() {
 
@@ -105,7 +105,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling {@link Work} with an initial {@link Task}.
+	 * Tests compiling {@link Work} with an initial {@link ManagedFunction}.
 	 */
 	public void testInitialTaskForWork() {
 
@@ -181,8 +181,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link Flow} to another
-	 * {@link Task} on the same {@link Work}.
+	 * Tests compiling a {@link ManagedFunction} linking a {@link Flow} to another
+	 * {@link ManagedFunction} on the same {@link Work}.
 	 */
 	public void testLinkFlowToTaskOnSameWork() {
 
@@ -196,7 +196,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> taskOne = this.record_workBuilder_addTask(
+		ManagedFunctionBuilder<?, ?, ?> taskOne = this.record_workBuilder_addTask(
 				"TASK_A", "OFFICE_TEAM");
 		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
 		taskOne.linkFlow(0, "TASK_B", FlowInstigationStrategyEnum.PARALLEL,
@@ -207,7 +207,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link Flow} to different
+	 * Tests compiling a {@link ManagedFunction} linking a {@link Flow} to different
 	 * {@link Work} in the same {@link OfficeSection}.
 	 */
 	public void testLinkFlowToTaskOnDifferentWorkInSameSection() {
@@ -222,7 +222,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK_A");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK_A",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK_A",
 				"OFFICE_TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK_B");
 		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
@@ -234,8 +234,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link Flow} to a
-	 * {@link Task} in a different {@link SubSection}.
+	 * Tests compiling a {@link ManagedFunction} linking a {@link Flow} to a
+	 * {@link ManagedFunction} in a different {@link SubSection}.
 	 */
 	public void testLinkFlowToTaskInDifferentSubSection() {
 
@@ -249,7 +249,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.SUB_SECTION_A.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		this.record_officeBuilder_addWork("SECTION.SUB_SECTION_B.WORK");
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
@@ -261,8 +261,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link Flow} to a
-	 * {@link Task} in a different {@link OfficeSection}.
+	 * Tests compiling a {@link ManagedFunction} linking a {@link Flow} to a
+	 * {@link ManagedFunction} in a different {@link OfficeSection}.
 	 */
 	public void testLinkFlowToTaskInDifferentOfficeSection() {
 
@@ -277,7 +277,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION_A.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		this.record_officeBuilder_addWork("SECTION_B.WORK");
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
@@ -289,7 +289,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensures compiling a {@link Task} linking to next {@link Task} on the same
+	 * Ensures compiling a {@link ManagedFunction} linking to next {@link ManagedFunction} on the same
 	 * {@link Work}.
 	 */
 	public void testLinkTaskNextToTaskOnSameWork() {
@@ -304,7 +304,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK_A",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK_A",
 				"OFFICE_TEAM");
 		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
 		task.setNextTaskInFlow("TASK_B", Integer.class);
@@ -314,7 +314,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensures compiling a {@link Task} linking to next {@link Task} in a
+	 * Ensures compiling a {@link ManagedFunction} linking to next {@link ManagedFunction} in a
 	 * different {@link OfficeSection}.
 	 */
 	public void testLinkTaskNextToTaskInDifferentOfficeSection() {
@@ -330,7 +330,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION_A.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		this.record_officeBuilder_addWork("SECTION_B.WORK");
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
@@ -341,7 +341,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensures compiling a {@link Task} linking to next {@link Task} that is
+	 * Ensures compiling a {@link ManagedFunction} linking to next {@link ManagedFunction} that is
 	 * through a parent {@link SubSection}.
 	 */
 	public void testLinkTaskNextToTaskThroughParentSection() {
@@ -357,7 +357,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION_A.desk-one.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		this.record_officeBuilder_addWork("SECTION_B.WORK");
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
@@ -368,7 +368,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensures compiling a {@link Task} linking to next {@link Task} that is
+	 * Ensures compiling a {@link ManagedFunction} linking to next {@link ManagedFunction} that is
 	 * through a child {@link SubSection}.
 	 */
 	public void testLinkTaskNextToTaskThroughChildSection() {
@@ -384,7 +384,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION_A.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		this.record_officeBuilder_addWork("SECTION_B.desk-two.WORK");
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
@@ -420,7 +420,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link Task} link the {@link TaskObject} as a
+	 * Ensure compiling a {@link ManagedFunction} link the {@link TaskObject} as a
 	 * parameter.
 	 */
 	public void testLinkTaskObjectAsParameter() {
@@ -435,7 +435,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkParameter(0, CompileManagedObject.class);
 
@@ -444,7 +444,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link Task} linking the {@link TaskObject} to a
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link TaskObject} to a
 	 * {@link OfficeFloorManagedObject}.
 	 */
 	public void testLinkTaskObjectToOfficeFloorManagedObject() {
@@ -463,7 +463,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
 				"MANAGED_OBJECT");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkManagedObject(0, "MANAGED_OBJECT", CompileManagedObject.class);
 		this.record_officeFloorBuilder_addManagedObject(
@@ -476,7 +476,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link Task} linking the {@link TaskObject} to an
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link TaskObject} to an
 	 * {@link OfficeFloorInputManagedObject}.
 	 */
 	public void testLinkTaskObjectToOfficeFloorInputManagedObject() {
@@ -491,7 +491,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<Work, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkManagedObject(0, "INPUT_MANAGED_OBJECT",
 				InputManagedObject.class);
@@ -508,7 +508,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link Task} linking the {@link TaskObject} to an
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link TaskObject} to an
 	 * {@link OfficeManagedObject}.
 	 */
 	public void testLinkTaskObjectToOfficeManagedObject() {
@@ -527,7 +527,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addThreadManagedObject(
 				"OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkManagedObject(0, "OFFICE.MANAGED_OBJECT",
 				CompileManagedObject.class);
@@ -541,7 +541,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link Task} linking the {@link TaskObject} to a
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link TaskObject} to a
 	 * {@link SectionManagedObject}.
 	 */
 	public void testLinkTaskObjectToSectionManagedObject() {
@@ -566,7 +566,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkManagedObject(0, "OFFICE.SECTION.MANAGED_OBJECT",
 				CompileManagedObject.class);
@@ -576,7 +576,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link Task} linking the {@link TaskObject} to a
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link TaskObject} to a
 	 * {@link DeskManagedObject}.
 	 */
 	public void testLinkTaskObjectToDeskManagedObject() {
@@ -591,7 +591,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
 				"OFFICE", "OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkManagedObject(0, "OFFICE.SECTION.DESK.MANAGED_OBJECT",
 				CompileManagedObject.class);
@@ -631,7 +631,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
 				"MANAGED_OBJECT");
 		this.record_officeBuilder_addWork("SECTION.DESK.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkManagedObject(0, "MANAGED_OBJECT", CompileManagedObject.class);
 		this.record_officeFloorBuilder_addManagedObject(
@@ -644,8 +644,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link Escalation} to another
-	 * {@link Task} on the same {@link Work}.
+	 * Tests compiling a {@link ManagedFunction} linking a {@link Escalation} to another
+	 * {@link ManagedFunction} on the same {@link Work}.
 	 */
 	public void testLinkEscalationToTaskOnSameWork() {
 
@@ -659,7 +659,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK_A",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK_A",
 				"OFFICE_TEAM");
 		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
 		task.addEscalation(Exception.class, "TASK_B");
@@ -669,8 +669,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link Escalation} to a
-	 * {@link Task} in a different {@link OfficeSection}.
+	 * Tests compiling a {@link ManagedFunction} linking a {@link Escalation} to a
+	 * {@link ManagedFunction} in a different {@link OfficeSection}.
 	 */
 	public void testLinkEscalationToTaskInDifferentOfficeSection() {
 
@@ -685,7 +685,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION_A.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		this.record_officeBuilder_addWork("SECTION_B.WORK");
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
@@ -696,7 +696,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensures issue if {@link TaskEscalationType} not linked.
+	 * Ensures issue if {@link ManagedFunctionEscalationType} not linked.
 	 */
 	public void testEscalationNotPropagatedToOffice() {
 
@@ -720,7 +720,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} that propagates the {@link Escalation} to
+	 * Tests compiling a {@link ManagedFunction} that propagates the {@link Escalation} to
 	 * the {@link Office}.
 	 */
 	public void testEscalationPropagatedToOffice() {
@@ -742,8 +742,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link Task} linking a {@link Flow} to a
-	 * {@link Task} in a different {@link OfficeSection}.
+	 * Tests compiling a {@link ManagedFunction} linking a {@link Flow} to a
+	 * {@link ManagedFunction} in a different {@link OfficeSection}.
 	 */
 	public void testLinkStartToOfficeSectionInput() {
 
@@ -805,7 +805,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * {@link WorkSource} to load differentiator for {@link Task}.
+	 * {@link ManagedFunctionSource} to load differentiator for {@link ManagedFunction}.
 	 */
 	public static class DifferentiatorWorkSource extends
 			AbstractWorkSource<ClassWork> {
@@ -822,12 +822,12 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		}
 
 		@Override
-		public void sourceWork(WorkTypeBuilder<ClassWork> workTypeBuilder,
-				WorkSourceContext context) throws Exception {
+		public void sourceManagedFunctions(FunctionNamespaceBuilder<ClassWork> workTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
 			workTypeBuilder.setWorkFactory(new ClassWorkFactory(
 					CompileTaskWork.class));
-			TaskTypeBuilder<Indexed, Indexed> task = workTypeBuilder
-					.addTaskType("task", new ClassTaskFactory(
+			ManagedFunctionTypeBuilder<Indexed, Indexed> task = workTypeBuilder
+					.addManagedFunctionType("task", new ClassTaskFactory(
 							CompileTaskWork.class.getMethod("simpleTask"),
 							false, new ParameterFactory[0]), Indexed.class,
 							Indexed.class);

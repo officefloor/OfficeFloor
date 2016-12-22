@@ -17,14 +17,14 @@
  */
 package net.officefloor.compile.spi.section;
 
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
- * {@link Task} for a {@link SectionWork}.
+ * {@link ManagedFunction} for a {@link SectionWork}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -38,32 +38,32 @@ public interface SectionTask {
 	String getSectionTaskName();
 
 	/**
-	 * Obtains the {@link TaskFlow} for the {@link TaskFlowType}.
+	 * Obtains the {@link TaskFlow} for the {@link ManagedFunctionFlowType}.
 	 * 
 	 * @param taskFlowName
-	 *            Name of the {@link TaskFlowType}.
+	 *            Name of the {@link ManagedFunctionFlowType}.
 	 * @return {@link TaskFlow}.
 	 */
 	TaskFlow getTaskFlow(String taskFlowName);
 
 	/**
-	 * Obtains the {@link TaskObject} for the {@link TaskObjectType}.
+	 * Obtains the {@link TaskObject} for the {@link ManagedFunctionObjectType}.
 	 * 
 	 * @param taskObjectName
-	 *            Name of the {@link TaskObjectType}.
+	 *            Name of the {@link ManagedFunctionObjectType}.
 	 * @return {@link TaskObject}.
 	 */
 	TaskObject getTaskObject(String taskObjectName);
 
 	/**
-	 * Obtains the {@link TaskFlow} for the {@link TaskEscalationType}.
+	 * Obtains the {@link TaskFlow} for the {@link ManagedFunctionEscalationType}.
 	 * 
 	 * @param escalationType
 	 *            Fully qualified class name of the {@link Throwable}
-	 *            identifying the {@link TaskEscalationType}. The
+	 *            identifying the {@link ManagedFunctionEscalationType}. The
 	 *            {@link Escalation} type is used rather than the name as
 	 *            handling is done by the {@link Escalation} type.
-	 * @return {@link TaskFlow} for the {@link TaskEscalationType}.
+	 * @return {@link TaskFlow} for the {@link ManagedFunctionEscalationType}.
 	 */
 	TaskFlow getTaskEscalation(String escalationType);
 

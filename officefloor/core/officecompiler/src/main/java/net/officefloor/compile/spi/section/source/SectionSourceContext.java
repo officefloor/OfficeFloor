@@ -17,13 +17,13 @@
  */
 package net.officefloor.compile.spi.section.source;
 
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -55,21 +55,21 @@ public interface SectionSourceContext extends SourceContext {
 
 	/**
 	 * <p>
-	 * Loads the {@link WorkType}.
+	 * Loads the {@link FunctionNamespaceType}.
 	 * <p>
 	 * This is to enable obtaining the type information for the {@link Work} to
 	 * allow reflective configuration by the {@link SectionSource}.
 	 * 
 	 * @param workSourceClassName
-	 *            Name of the implementing {@link WorkSource} class. May also be
+	 *            Name of the implementing {@link ManagedFunctionSource} class. May also be
 	 *            an alias.
 	 * @param properties
 	 *            {@link PropertyList} to configure the implementing
-	 *            {@link WorkSource}.
-	 * @return {@link WorkType} or <code>null</code> if fails to load the
-	 *         {@link WorkType}.
+	 *            {@link ManagedFunctionSource}.
+	 * @return {@link FunctionNamespaceType} or <code>null</code> if fails to load the
+	 *         {@link FunctionNamespaceType}.
 	 */
-	WorkType<?> loadWorkType(String workSourceClassName, PropertyList properties);
+	FunctionNamespaceType<?> loadWorkType(String workSourceClassName, PropertyList properties);
 
 	/**
 	 * <p>

@@ -25,7 +25,7 @@ import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.governance.ActivateGovernanceActivity;
@@ -40,7 +40,7 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
-import net.officefloor.frame.internal.structure.ActiveGovernance;
+import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -51,7 +51,7 @@ import net.officefloor.frame.internal.structure.GovernanceControl;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -285,7 +285,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Validate correct govern meta-data
 		ActiveGovernanceManager<?, ?> manager = governanceMetaData
 				.createActiveGovernance(null, null, null, null, null, 0);
-		ActiveGovernance<?, ?> activeGovernance = manager.getActiveGovernance();
+		RegisteredGovernance<?, ?> activeGovernance = manager.getActiveGovernance();
 		assertTrue(
 				"Incorrect govern activity",
 				activeGovernance.createGovernActivity() instanceof GovernGovernanceActivity);
@@ -326,7 +326,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link Task} name for flow.
+	 * Ensure issue if no {@link ManagedFunction} name for flow.
 	 */
 	public void testNoFlowTaskName() {
 
@@ -361,7 +361,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link Task} for flow.
+	 * Ensure issue if no {@link ManagedFunction} for flow.
 	 */
 	public void testNoFlowTask() {
 
@@ -407,8 +407,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 				.createMock(GovernanceFlowConfiguration.class);
 		final TaskNodeReference taskNode = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record initiate
 		this.record_initGovernance();
@@ -454,8 +454,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 				.createMock(GovernanceFlowConfiguration.class);
 		final TaskNodeReference taskNode = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record initiate
 		this.record_initGovernance();
@@ -497,7 +497,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Record flows for governance
 		this.record_initGovernance();
-		TaskMetaData<?, ?, ?>[] taskMetaDatas = this.record_flows(
+		ManagedFunctionMetaData<?, ?, ?>[] taskMetaDatas = this.record_flows(
 				FlowInstigationStrategyEnum.SEQUENTIAL,
 				FlowInstigationStrategyEnum.ASYNCHRONOUS);
 		this.record_escalations();
@@ -605,7 +605,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link Task} name for {@link Escalation}.
+	 * Ensure issue if no {@link ManagedFunction} name for {@link Escalation}.
 	 */
 	public void testNoEscalationTaskName() {
 
@@ -641,7 +641,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link Task} for {@link Escalation}.
+	 * Ensure issue if no {@link ManagedFunction} for {@link Escalation}.
 	 */
 	public void testNoEscalationTask() {
 
@@ -682,7 +682,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if parameter type {@link Task} is incorrect for
+	 * Ensure issue if parameter type {@link ManagedFunction} is incorrect for
 	 * {@link Escalation}.
 	 */
 	public void testEscalationTaskIncorrectParameter() {
@@ -693,8 +693,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 				.createMock(TaskNodeReference.class);
 		final String WORK_NAME = "WORK";
 		final String TASK_NAME = "TASK";
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record simple governance
 		this.record_initGovernance();
@@ -745,7 +745,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record simple governance
 		this.record_initGovernance();
 		this.record_flows();
-		TaskMetaData<?, ?, ?> taskMetaData = this.record_escalations(exception)[0];
+		ManagedFunctionMetaData<?, ?, ?> taskMetaData = this.record_escalations(exception)[0];
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -795,20 +795,20 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 * @param instigationStrategies
 	 *            {@link FlowInstigationStrategyEnum} strategies for the
 	 *            respective flows.
-	 * @return {@link TaskMetaData} for the flow instances.
+	 * @return {@link ManagedFunctionMetaData} for the flow instances.
 	 */
-	private TaskMetaData<?, ?, ?>[] record_flows(
+	private ManagedFunctionMetaData<?, ?, ?>[] record_flows(
 			FlowInstigationStrategyEnum... instigationStrategies) {
 
 		// Create the listing of mocks
 		final GovernanceFlowConfiguration<?>[] flowConfigurations = new GovernanceFlowConfiguration<?>[instigationStrategies.length];
 		final TaskNodeReference[] taskNodes = new TaskNodeReference[instigationStrategies.length];
-		final TaskMetaData<?, ?, ?>[] taskMetaDatas = new TaskMetaData<?, ?, ?>[instigationStrategies.length];
+		final ManagedFunctionMetaData<?, ?, ?>[] taskMetaDatas = new ManagedFunctionMetaData<?, ?, ?>[instigationStrategies.length];
 		for (int i = 0; i < instigationStrategies.length; i++) {
 			flowConfigurations[i] = this
 					.createMock(GovernanceFlowConfiguration.class);
 			taskNodes[i] = this.createMock(TaskNodeReference.class);
-			taskMetaDatas[i] = this.createMock(TaskMetaData.class);
+			taskMetaDatas[i] = this.createMock(ManagedFunctionMetaData.class);
 		}
 
 		// Record configuration for flows
@@ -819,7 +819,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		for (int i = 0; i < instigationStrategies.length; i++) {
 			GovernanceFlowConfiguration<?> flowConfiguration = flowConfigurations[i];
 			TaskNodeReference taskNode = taskNodes[i];
-			TaskMetaData<?, ?, ?> taskMetaData = taskMetaDatas[i];
+			ManagedFunctionMetaData<?, ?, ?> taskMetaData = taskMetaDatas[i];
 			FlowInstigationStrategyEnum instigationStrategy = instigationStrategies[i];
 
 			String workName = "WORK" + i;
@@ -861,17 +861,17 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 * 
 	 * @param exceptions
 	 *            {@link Throwable} instances to be handled.
-	 * @return {@link TaskMetaData} for the {@link Throwable} instances.
+	 * @return {@link ManagedFunctionMetaData} for the {@link Throwable} instances.
 	 */
-	private TaskMetaData<?, ?, ?>[] record_escalations(Throwable... exceptions) {
+	private ManagedFunctionMetaData<?, ?, ?>[] record_escalations(Throwable... exceptions) {
 
 		// Create the mocks for the exceptions
 		GovernanceEscalationConfiguration[] escalations = new GovernanceEscalationConfiguration[exceptions.length];
-		TaskMetaData<?, ?, ?>[] taskMetaDatas = new TaskMetaData<?, ?, ?>[exceptions.length];
+		ManagedFunctionMetaData<?, ?, ?>[] taskMetaDatas = new ManagedFunctionMetaData<?, ?, ?>[exceptions.length];
 		for (int i = 0; i < exceptions.length; i++) {
 			escalations[i] = this
 					.createMock(GovernanceEscalationConfiguration.class);
-			taskMetaDatas[i] = this.createMock(TaskMetaData.class);
+			taskMetaDatas[i] = this.createMock(ManagedFunctionMetaData.class);
 		}
 
 		// Record obtain the escalations
@@ -882,7 +882,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		for (int i = 0; i < exceptions.length; i++) {
 			Throwable exception = exceptions[i];
 			GovernanceEscalationConfiguration escalation = escalations[i];
-			TaskMetaData<?, ?, ?> taskMetaData = taskMetaDatas[i];
+			ManagedFunctionMetaData<?, ?, ?> taskMetaData = taskMetaDatas[i];
 
 			final TaskNodeReference taskNodeReference = this
 					.createMock(TaskNodeReference.class);

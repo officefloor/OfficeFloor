@@ -18,18 +18,18 @@
 package net.officefloor.model.impl.desk;
 
 import net.officefloor.compile.impl.work.WorkTypeImpl;
-import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionEscalationTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskChanges;
@@ -83,13 +83,13 @@ public abstract class AbstractDeskChangesTestCase extends
 	}
 
 	/**
-	 * Creates a {@link WorkType}.
+	 * Creates a {@link FunctionNamespaceType}.
 	 * 
 	 * @param constructor
-	 *            {@link WorkTypeConstructor} to construct the {@link WorkType}.
-	 * @return {@link WorkType}.
+	 *            {@link WorkTypeConstructor} to construct the {@link FunctionNamespaceType}.
+	 * @return {@link FunctionNamespaceType}.
 	 */
-	protected WorkType<Work> constructWorkType(WorkTypeConstructor constructor) {
+	protected FunctionNamespaceType<Work> constructWorkType(WorkTypeConstructor constructor) {
 
 		// Create the work type builder
 		WorkTypeImpl<Work> workTypeBuilder = new WorkTypeImpl<Work>();
@@ -103,12 +103,12 @@ public abstract class AbstractDeskChangesTestCase extends
 	}
 
 	/**
-	 * {@link WorkTypeConstructor} to construct the {@link WorkType}.
+	 * {@link WorkTypeConstructor} to construct the {@link FunctionNamespaceType}.
 	 */
 	protected interface WorkTypeConstructor {
 
 		/**
-		 * Constructs the {@link WorkType}.
+		 * Constructs the {@link FunctionNamespaceType}.
 		 * 
 		 * @param context
 		 *            {@link WorkTypeContext}.
@@ -117,81 +117,81 @@ public abstract class AbstractDeskChangesTestCase extends
 	}
 
 	/**
-	 * Context to construct the {@link WorkType}.
+	 * Context to construct the {@link FunctionNamespaceType}.
 	 */
 	protected interface WorkTypeContext {
 
 		/**
-		 * Adds a {@link TaskType}.
+		 * Adds a {@link ManagedFunctionType}.
 		 * 
 		 * @param taskName
-		 *            Name of the {@link Task}.
+		 *            Name of the {@link ManagedFunction}.
 		 * @return {@link TaskTypeConstructor} to provide simplified
-		 *         {@link TaskType} construction.
+		 *         {@link ManagedFunctionType} construction.
 		 */
 		TaskTypeConstructor addTask(String taskName);
 
 		/**
-		 * Adds a {@link TaskTypeBuilder}.
+		 * Adds a {@link ManagedFunctionTypeBuilder}.
 		 * 
 		 * @param taskName
-		 *            Name of the {@link Task}.
+		 *            Name of the {@link ManagedFunction}.
 		 * @param dependencyKeys
 		 *            Dependency keys {@link Enum}.
 		 * @param flowKeys
 		 *            Flow keys {@link Enum}.
-		 * @return {@link TaskTypeBuilder}.
+		 * @return {@link ManagedFunctionTypeBuilder}.
 		 */
-		<D extends Enum<D>, F extends Enum<F>> TaskTypeBuilder<D, F> addTask(
+		<D extends Enum<D>, F extends Enum<F>> ManagedFunctionTypeBuilder<D, F> addTask(
 				String taskName, Class<D> dependencyKeys, Class<F> flowKeys);
 	}
 
 	/**
-	 * Provides simplified construction of a {@link TaskType}.
+	 * Provides simplified construction of a {@link ManagedFunctionType}.
 	 */
 	protected interface TaskTypeConstructor {
 
 		/**
-		 * Adds a {@link TaskObjectType}.
+		 * Adds a {@link ManagedFunctionObjectType}.
 		 * 
 		 * @param objectType
 		 *            {@link Object} type.
 		 * @param key
-		 *            Key identifying the {@link TaskObjectType}.
-		 * @return {@link TaskObjectTypeBuilder} for the added
-		 *         {@link TaskObjectType}.
+		 *            Key identifying the {@link ManagedFunctionObjectType}.
+		 * @return {@link ManagedFunctionObjectTypeBuilder} for the added
+		 *         {@link ManagedFunctionObjectType}.
 		 */
-		TaskObjectTypeBuilder<?> addObject(Class<?> objectType, Enum<?> key);
+		ManagedFunctionObjectTypeBuilder<?> addObject(Class<?> objectType, Enum<?> key);
 
 		/**
-		 * Adds a {@link TaskFlowType}.
+		 * Adds a {@link ManagedFunctionFlowType}.
 		 * 
 		 * @param argumentType
 		 *            Argument type.
 		 * @param key
-		 *            Key identifying the {@link TaskFlowType}.
-		 * @return {@link TaskFlowTypeBuilder} for the added
-		 *         {@link TaskObjectType}.
+		 *            Key identifying the {@link ManagedFunctionFlowType}.
+		 * @return {@link ManagedFunctionFlowTypeBuilder} for the added
+		 *         {@link ManagedFunctionObjectType}.
 		 */
-		TaskFlowTypeBuilder<?> addFlow(Class<?> argumentType, Enum<?> key);
+		ManagedFunctionFlowTypeBuilder<?> addFlow(Class<?> argumentType, Enum<?> key);
 
 		/**
-		 * Adds a {@link TaskEscalationType}.
+		 * Adds a {@link ManagedFunctionEscalationType}.
 		 * 
 		 * @param escalationType
 		 *            Escalation type.
-		 * @return {@link TaskEscalationTypeBuilder} for the added
-		 *         {@link TaskEscalationType}.
+		 * @return {@link ManagedFunctionEscalationTypeBuilder} for the added
+		 *         {@link ManagedFunctionEscalationType}.
 		 */
-		TaskEscalationTypeBuilder addEscalation(
+		ManagedFunctionEscalationTypeBuilder addEscalation(
 				Class<? extends Throwable> escalationType);
 
 		/**
-		 * Obtains the underlying {@link TaskTypeBuilder}.
+		 * Obtains the underlying {@link ManagedFunctionTypeBuilder}.
 		 * 
-		 * @return Underlying {@link TaskTypeBuilder}.
+		 * @return Underlying {@link ManagedFunctionTypeBuilder}.
 		 */
-		TaskTypeBuilder<?, ?> getBuilder();
+		ManagedFunctionTypeBuilder<?, ?> getBuilder();
 	}
 
 	/**
@@ -200,17 +200,17 @@ public abstract class AbstractDeskChangesTestCase extends
 	private class WorkTypeContextImpl implements WorkTypeContext {
 
 		/**
-		 * {@link WorkTypeBuilder}.
+		 * {@link FunctionNamespaceBuilder}.
 		 */
-		private final WorkTypeBuilder<?> workTypeBuilder;
+		private final FunctionNamespaceBuilder<?> workTypeBuilder;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param workTypeBuilder
-		 *            {@link WorkTypeBuilder}.
+		 *            {@link FunctionNamespaceBuilder}.
 		 */
-		public WorkTypeContextImpl(WorkTypeBuilder<?> workTypeBuilder) {
+		public WorkTypeContextImpl(FunctionNamespaceBuilder<?> workTypeBuilder) {
 			this.workTypeBuilder = workTypeBuilder;
 		}
 
@@ -222,8 +222,8 @@ public abstract class AbstractDeskChangesTestCase extends
 		@SuppressWarnings("rawtypes")
 		public TaskTypeConstructor addTask(String taskName) {
 			// Add the task
-			TaskTypeBuilder taskTypeBuilder = this.workTypeBuilder
-					.addTaskType(taskName, null, (Class<Indexed>) null,
+			ManagedFunctionTypeBuilder taskTypeBuilder = this.workTypeBuilder
+					.addManagedFunctionType(taskName, null, (Class<Indexed>) null,
 							(Class<Indexed>) null);
 
 			// Return the task type constructor for the task type builder
@@ -231,9 +231,9 @@ public abstract class AbstractDeskChangesTestCase extends
 		}
 
 		@Override
-		public <D extends Enum<D>, F extends Enum<F>> TaskTypeBuilder<D, F> addTask(
+		public <D extends Enum<D>, F extends Enum<F>> ManagedFunctionTypeBuilder<D, F> addTask(
 				String taskName, Class<D> dependencyKeys, Class<F> flowKeys) {
-			return this.workTypeBuilder.addTaskType(taskName, null,
+			return this.workTypeBuilder.addManagedFunctionType(taskName, null,
 					dependencyKeys, flowKeys);
 		}
 	}
@@ -244,17 +244,17 @@ public abstract class AbstractDeskChangesTestCase extends
 	private class TaskTypeConstructorImpl implements TaskTypeConstructor {
 
 		/**
-		 * {@link TaskTypeBuilder}.
+		 * {@link ManagedFunctionTypeBuilder}.
 		 */
-		private final TaskTypeBuilder<?, ?> taskTypeBuilder;
+		private final ManagedFunctionTypeBuilder<?, ?> taskTypeBuilder;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param taskTypeBuilder
-		 *            {@link TaskTypeBuilder}.
+		 *            {@link ManagedFunctionTypeBuilder}.
 		 */
-		public TaskTypeConstructorImpl(TaskTypeBuilder<?, ?> taskTypeBuilder) {
+		public TaskTypeConstructorImpl(ManagedFunctionTypeBuilder<?, ?> taskTypeBuilder) {
 			this.taskTypeBuilder = taskTypeBuilder;
 		}
 
@@ -264,9 +264,9 @@ public abstract class AbstractDeskChangesTestCase extends
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public TaskObjectTypeBuilder<?> addObject(Class<?> objectType,
+		public ManagedFunctionObjectTypeBuilder<?> addObject(Class<?> objectType,
 				Enum<?> key) {
-			TaskObjectTypeBuilder object = this.taskTypeBuilder
+			ManagedFunctionObjectTypeBuilder object = this.taskTypeBuilder
 					.addObject(objectType);
 			if (key != null) {
 				object.setKey(key);
@@ -276,8 +276,8 @@ public abstract class AbstractDeskChangesTestCase extends
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public TaskFlowTypeBuilder<?> addFlow(Class<?> argumentType, Enum<?> key) {
-			TaskFlowTypeBuilder flow = this.taskTypeBuilder.addFlow();
+		public ManagedFunctionFlowTypeBuilder<?> addFlow(Class<?> argumentType, Enum<?> key) {
+			ManagedFunctionFlowTypeBuilder flow = this.taskTypeBuilder.addFlow();
 			flow.setArgumentType(argumentType);
 			if (key != null) {
 				flow.setKey(key);
@@ -286,47 +286,47 @@ public abstract class AbstractDeskChangesTestCase extends
 		}
 
 		@Override
-		public TaskEscalationTypeBuilder addEscalation(
+		public ManagedFunctionEscalationTypeBuilder addEscalation(
 				Class<? extends Throwable> escalationType) {
-			TaskEscalationTypeBuilder escalation = this.taskTypeBuilder
+			ManagedFunctionEscalationTypeBuilder escalation = this.taskTypeBuilder
 					.addEscalation(escalationType);
 			return escalation;
 		}
 
 		@Override
-		public TaskTypeBuilder<?, ?> getBuilder() {
+		public ManagedFunctionTypeBuilder<?, ?> getBuilder() {
 			return this.taskTypeBuilder;
 		}
 	}
 
 	/**
-	 * Constructor to construct the {@link TaskType}.
+	 * Constructor to construct the {@link ManagedFunctionType}.
 	 */
 	protected interface TaskConstructor {
 
 		/**
-		 * Constructs the {@link TaskType}.
+		 * Constructs the {@link ManagedFunctionType}.
 		 * 
 		 * @param task
-		 *            {@link TaskType}.
+		 *            {@link ManagedFunctionType}.
 		 */
 		void construct(TaskTypeConstructor task);
 	}
 
 	/**
-	 * Constructs the {@link TaskType}.
+	 * Constructs the {@link ManagedFunctionType}.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link TaskType}.
+	 *            Name of the {@link ManagedFunctionType}.
 	 * @param constructor
 	 *            {@link TaskConstructor}.
-	 * @return {@link TaskType}.
+	 * @return {@link ManagedFunctionType}.
 	 */
-	protected TaskType<?, ?, ?> constructTaskType(final String taskName,
+	protected ManagedFunctionType<?, ?, ?> constructTaskType(final String taskName,
 			final TaskConstructor constructor) {
 
 		// Construct the work
-		WorkType<?> workType = this
+		FunctionNamespaceType<?> workType = this
 				.constructWorkType(new WorkTypeConstructor() {
 					@Override
 					public void construct(WorkTypeContext context) {
@@ -339,7 +339,7 @@ public abstract class AbstractDeskChangesTestCase extends
 				});
 
 		// Return the task from the work
-		return workType.getTaskTypes()[0];
+		return workType.getManagedFunctionTypes()[0];
 	}
 
 }

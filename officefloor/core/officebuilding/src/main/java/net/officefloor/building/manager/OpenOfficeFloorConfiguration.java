@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -87,12 +87,12 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	private String workName = null;
 
 	/**
-	 * Name of the {@link Task} to run.
+	 * Name of the {@link ManagedFunction} to run.
 	 */
 	private String taskName = null;
 
 	/**
-	 * Parameter for the {@link Task} to run.
+	 * Parameter for the {@link ManagedFunction} to run.
 	 */
 	private String parameter = null;
 
@@ -250,16 +250,16 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	}
 
 	/**
-	 * Specifies the {@link Task} to trigger on opening the {@link OfficeFloor}.
+	 * Specifies the {@link ManagedFunction} to trigger on opening the {@link OfficeFloor}.
 	 * 
 	 * @param officeName
 	 *            Name of the {@link Office} containing the {@link Work}.
 	 * @param workName
 	 *            Name of {@link Work}.
 	 * @param taskName
-	 *            Name of {@link Task}.
+	 *            Name of {@link ManagedFunction}.
 	 * @param parameter
-	 *            Parameter to the {@link Task}.
+	 *            Parameter to the {@link ManagedFunction}.
 	 */
 	public void setOpenTask(String officeName, String workName, String taskName, String parameter) {
 		this.officeName = officeName;
@@ -288,18 +288,18 @@ public final class OpenOfficeFloorConfiguration implements Serializable {
 	}
 
 	/**
-	 * Obtains the name of the {@link Task} to be run.
+	 * Obtains the name of the {@link ManagedFunction} to be run.
 	 * 
-	 * @return Name of the {@link Task} to be run.
+	 * @return Name of the {@link ManagedFunction} to be run.
 	 */
 	public String getTaskName() {
 		return this.taskName;
 	}
 
 	/**
-	 * Obtains the parameter for the {@link Task} to be run.
+	 * Obtains the parameter for the {@link ManagedFunction} to be run.
 	 * 
-	 * @return Parameter for the {@link Task} to be run.
+	 * @return Parameter for the {@link ManagedFunction} to be run.
 	 */
 	public String getParameter() {
 		return this.parameter;

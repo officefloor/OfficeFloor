@@ -22,14 +22,14 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskRegistry;
 import net.officefloor.compile.internal.structure.WorkNode;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
-import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.type.TypeContext;
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 
@@ -76,28 +76,28 @@ public class WorkNodeImpl implements WorkNode {
 	private static class InitialisedState {
 
 		/**
-		 * Class name of the {@link WorkSource}.
+		 * Class name of the {@link ManagedFunctionSource}.
 		 */
 		private final String workSourceClassName;
 
 		/**
-		 * {@link WorkSource} instance to use. If this is specified it overrides
+		 * {@link ManagedFunctionSource} instance to use. If this is specified it overrides
 		 * using the {@link Class} name.
 		 */
 		@SuppressWarnings("unused")
-		private final WorkSource<?> workSource;
+		private final ManagedFunctionSource<?> workSource;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param workSourceClassName
-		 *            Class name of the {@link WorkSource}.
+		 *            Class name of the {@link ManagedFunctionSource}.
 		 * @param workSource
-		 *            {@link WorkSource} instance to use. If this is specified
+		 *            {@link ManagedFunctionSource} instance to use. If this is specified
 		 *            it overrides using the {@link Class} name.
 		 */
 		public InitialisedState(String workSourceClassName,
-				WorkSource<?> workSource) {
+				ManagedFunctionSource<?> workSource) {
 			this.workSourceClassName = workSourceClassName;
 			this.workSource = workSource;
 		}
@@ -159,7 +159,7 @@ public class WorkNodeImpl implements WorkNode {
 	}
 
 	@Override
-	public void initialise(String workSourceClassName, WorkSource<?> workSource) {
+	public void initialise(String workSourceClassName, ManagedFunctionSource<?> workSource) {
 		this.state = NodeUtil.initialise(this, this.context, this.state,
 				() -> new InitialisedState(workSourceClassName, workSource));
 	}
@@ -204,18 +204,18 @@ public class WorkNodeImpl implements WorkNode {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public WorkType<?> loadWorkType() {
+	public FunctionNamespaceType<?> loadWorkType() {
 
 		// Obtain the work source class
-		Class<? extends WorkSource> workSourceClass = this.context
+		Class<? extends ManagedFunctionSource> workSourceClass = this.context
 				.getWorkSourceClass(this.state.workSourceClassName, this);
 		if (workSourceClass == null) {
 			return null; // must obtain work source class
 		}
 
 		// Load and return the work type
-		WorkLoader workLoader = this.context.getWorkLoader(this);
-		return workLoader.loadWorkType(workSourceClass, this.propertyList);
+		ManagedFunctionLoader workLoader = this.context.getWorkLoader(this);
+		return workLoader.loadFunctionNamespaceType(workSourceClass, this.propertyList);
 	}
 
 	@Override
@@ -223,7 +223,7 @@ public class WorkNodeImpl implements WorkNode {
 			TypeContext typeContext) {
 
 		// Obtain the work type
-		WorkType<?> workType = typeContext.getOrLoadWorkType(this);
+		FunctionNamespaceType<?> workType = typeContext.getOrLoadWorkType(this);
 		if (workType == null) {
 			return null; // must have WorkType to build work
 		}

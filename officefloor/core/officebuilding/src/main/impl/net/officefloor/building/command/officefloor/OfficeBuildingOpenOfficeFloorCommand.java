@@ -52,7 +52,7 @@ import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.console.OfficeBuilding;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -142,12 +142,12 @@ public class OfficeBuildingOpenOfficeFloorCommand implements OfficeFloorCommandF
 	private final WorkNameOfficeFloorCommandParameter workName = new WorkNameOfficeFloorCommandParameter();
 
 	/**
-	 * {@link Task} name.
+	 * {@link ManagedFunction} name.
 	 */
 	private final TaskNameOfficeFloorCommandParameter taskName = new TaskNameOfficeFloorCommandParameter();
 
 	/**
-	 * Parameter for {@link Task}.
+	 * Parameter for {@link ManagedFunction}.
 	 */
 	private final ParameterOfficeFloorCommandParameter parameter = new ParameterOfficeFloorCommandParameter();
 

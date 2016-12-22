@@ -309,10 +309,10 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 				+ ((currentContainer != null) ? 1 : 0)];
 		for (int i = 0; i < this.dependencyMapping.length; i++) {
 			checkJobNodes[i] = workContainer.getManagedObjectContainer(this.dependencyMapping[i])
-					.createCheckReadyJobNode(wrapper);
+					.createCheckReadyFunction(wrapper);
 		}
 		if (currentContainer != null) {
-			checkJobNodes[checkJobNodes.length - 1] = currentContainer.createCheckReadyJobNode(wrapper);
+			checkJobNodes[checkJobNodes.length - 1] = currentContainer.createCheckReadyFunction(wrapper);
 		}
 
 		// Return job to check all managed objects are ready

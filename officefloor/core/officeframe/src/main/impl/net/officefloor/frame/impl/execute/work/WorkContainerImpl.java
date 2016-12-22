@@ -116,7 +116,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunctionContainer managedJobNode) {
+	public FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
+			ManagedFunctionContainer managedJobNode) {
 
 		// Load the managed objects
 		if (this.loadIndex < managedObjectIndexes.length) {
@@ -191,7 +192,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			adminContainer = this.administrators[adminScopeIndex];
 			if (adminContainer == null) {
 				adminContainer = this.workMetaData.getAdministratorMetaData()[adminScopeIndex]
-						.createAdministratorContainer();
+						.createAdministratorContainer(adminContext.getThreadState());
 				this.administrators[adminScopeIndex] = adminContainer;
 			}
 			break;

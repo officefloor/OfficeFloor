@@ -26,18 +26,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -95,13 +95,13 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create the expected work
 		HttpTemplateWork workFactory = new HttpTemplateWork();
-		WorkTypeBuilder<HttpTemplateWork> work = WorkLoaderUtil.createWorkTypeBuilder(workFactory);
+		FunctionNamespaceBuilder<HttpTemplateWork> work = WorkLoaderUtil.createWorkTypeBuilder(workFactory);
 
 		// Create the task factory
 		HttpTemplateTask httpTemplateTaskFactory = new HttpTemplateTask(null, false, Charset.defaultCharset());
 
 		// 'template' task
-		TaskTypeBuilder<Indexed, None> template = work.addTaskType("template", httpTemplateTaskFactory, Indexed.class,
+		ManagedFunctionTypeBuilder<Indexed, None> template = work.addManagedFunctionType("template", httpTemplateTaskFactory, Indexed.class,
 				None.class);
 		template.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		template.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
@@ -109,7 +109,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		template.addEscalation(IOException.class);
 
 		// 'BeanTree' task
-		TaskTypeBuilder<Indexed, None> beanTree = work.addTaskType("BeanTree", httpTemplateTaskFactory, Indexed.class,
+		ManagedFunctionTypeBuilder<Indexed, None> beanTree = work.addManagedFunctionType("BeanTree", httpTemplateTaskFactory, Indexed.class,
 				None.class);
 		beanTree.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		beanTree.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
@@ -117,7 +117,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		beanTree.addEscalation(IOException.class);
 
 		// 'NullBean' task
-		TaskTypeBuilder<Indexed, None> nullBean = work.addTaskType("NullBean", httpTemplateTaskFactory, Indexed.class,
+		ManagedFunctionTypeBuilder<Indexed, None> nullBean = work.addManagedFunctionType("NullBean", httpTemplateTaskFactory, Indexed.class,
 				None.class);
 		nullBean.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		nullBean.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
@@ -125,14 +125,14 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		nullBean.addEscalation(IOException.class);
 
 		// 'NoBean' task
-		TaskTypeBuilder<Indexed, None> noBean = work.addTaskType("NoBean", httpTemplateTaskFactory, Indexed.class,
+		ManagedFunctionTypeBuilder<Indexed, None> noBean = work.addManagedFunctionType("NoBean", httpTemplateTaskFactory, Indexed.class,
 				None.class);
 		noBean.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		noBean.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
 		noBean.addEscalation(IOException.class);
 
 		// 'List' task
-		TaskTypeBuilder<Indexed, None> list = work.addTaskType("List", httpTemplateTaskFactory, Indexed.class,
+		ManagedFunctionTypeBuilder<Indexed, None> list = work.addManagedFunctionType("List", httpTemplateTaskFactory, Indexed.class,
 				None.class);
 		list.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		list.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
@@ -140,7 +140,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		list.addEscalation(IOException.class);
 
 		// 'Tail' task
-		TaskTypeBuilder<Indexed, None> tail = work.addTaskType("Tail", httpTemplateTaskFactory, Indexed.class,
+		ManagedFunctionTypeBuilder<Indexed, None> tail = work.addManagedFunctionType("Tail", httpTemplateTaskFactory, Indexed.class,
 				None.class);
 		tail.addObject(ServerHttpConnection.class).setLabel("SERVER_HTTP_CONNECTION");
 		tail.addObject(HttpApplicationLocation.class).setLabel("HTTP_APPLICATION_LOCATION");
@@ -172,7 +172,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Test loading ensuring indicates failure
 		this.replayMockObjects();
-		compiler.getWorkLoader().loadWorkType(HttpTemplateWorkSource.class, propertyList);
+		compiler.getWorkLoader().loadFunctionNamespaceType(HttpTemplateWorkSource.class, propertyList);
 		this.verifyMockObjects();
 	}
 
@@ -201,7 +201,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 
 		// Test loading ensuring indicates failure
 		this.replayMockObjects();
-		compiler.getWorkLoader().loadWorkType(HttpTemplateWorkSource.class, propertyList);
+		compiler.getWorkLoader().loadFunctionNamespaceType(HttpTemplateWorkSource.class, propertyList);
 		this.verifyMockObjects();
 	}
 
@@ -240,7 +240,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	public void doTemplateTest(boolean isTemplateSecure, String templateUriSuffix) throws Throwable {
 
 		// Create the mock objects
-		TaskContext taskContext = this.createMock(TaskContext.class);
+		ManagedFunctionContext taskContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection httpConnection = this.createMock(ServerHttpConnection.class);
 		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
@@ -272,7 +272,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		}
 
 		// Load the work type
-		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateWorkSource.class,
+		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateWorkSource.class,
 				this.getProperties(this.templatePath, "uri",
 						additionalProperties.toArray(new String[additionalProperties.size()])));
 
@@ -373,7 +373,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	public void testLoadWithResourceSource() throws Throwable {
 
 		// Create the mock objects
-		TaskContext taskContext = this.createMock(TaskContext.class);
+		ManagedFunctionContext taskContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection httpConnection = this.createMock(ServerHttpConnection.class);
 		MockHttpResponse httpResponse = new MockHttpResponse();
 		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
@@ -404,7 +404,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		});
 
 		// Load the work type
-		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateWorkSource.class, compiler,
+		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateWorkSource.class, compiler,
 				this.getProperties(this.templatePath, "uri"));
 
 		// Create the work and provide name
@@ -433,7 +433,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	public void testRootTemplate() throws Throwable {
 
 		// Create the mock objects
-		TaskContext taskContext = this.createMock(TaskContext.class);
+		ManagedFunctionContext taskContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection httpConnection = this.createMock(ServerHttpConnection.class);
 		HttpApplicationLocation location = this.createMock(HttpApplicationLocation.class);
 
@@ -441,7 +441,7 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		MockHttpResponse httpResponse = new MockHttpResponse();
 
 		// Load the work type
-		WorkType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateWorkSource.class,
+		FunctionNamespaceType<HttpTemplateWork> workType = WorkLoaderUtil.loadWorkType(HttpTemplateWorkSource.class,
 				this.getProperties(this.rootTemplatePath, "/"));
 
 		// Create as root template
@@ -600,28 +600,28 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Does the {@link Task} on the {@link WorkType}.
+	 * Does the {@link ManagedFunction} on the {@link FunctionNamespaceType}.
 	 * 
 	 * @param taskName
-	 *            Name of {@link Task} on {@link WorkType} to execute.
+	 *            Name of {@link ManagedFunction} on {@link FunctionNamespaceType} to execute.
 	 * @param work
 	 *            {@link HttpTemplateWork}.
 	 * @param workType
-	 *            {@link WorkType}.
+	 *            {@link FunctionNamespaceType}.
 	 * @param taskContext
-	 *            {@link TaskContext}.
+	 *            {@link ManagedFunctionContext}.
 	 * @throws Throwable
 	 *             If fails.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void doTask(String taskName, HttpTemplateWork work, WorkType<HttpTemplateWork> workType,
-			TaskContext<HttpTemplateWork, ?, ?> taskContext) throws Throwable {
+	private void doTask(String taskName, HttpTemplateWork work, FunctionNamespaceType<HttpTemplateWork> workType,
+			ManagedFunctionContext<HttpTemplateWork, ?, ?> taskContext) throws Throwable {
 
 		// Obtain the index of the task
 		int taskIndex = -1;
-		TaskType<?, ?, ?>[] taskTypes = workType.getTaskTypes();
+		ManagedFunctionType<?, ?, ?>[] taskTypes = workType.getManagedFunctionTypes();
 		for (int i = 0; i < taskTypes.length; i++) {
-			if (taskName.equals(taskTypes[i].getTaskName())) {
+			if (taskName.equals(taskTypes[i].getFunctionName())) {
 				taskIndex = i;
 			}
 		}
@@ -630,10 +630,10 @@ public class HttpTemplateWorkSourceTest extends OfficeFrameTestCase {
 		}
 
 		// Create the task
-		Task task = workType.getTaskTypes()[taskIndex].getTaskFactory().createTask(work);
+		ManagedFunction task = workType.getManagedFunctionTypes()[taskIndex].getManagedFunctionFactory().createManagedFunction(work);
 
 		// Execute the task
-		task.doTask(taskContext);
+		task.execute(taskContext);
 	}
 
 	/**

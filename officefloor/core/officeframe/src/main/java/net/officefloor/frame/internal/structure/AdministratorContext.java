@@ -18,8 +18,8 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.spi.administration.Administrator;
 
 /**
@@ -43,7 +43,7 @@ public interface AdministratorContext {
 	 *            {@link FlowMetaData} of the {@link Flow} to instigate.
 	 * @param parameter
 	 *            Parameter that will be available from the
-	 *            {@link TaskContext#getObject(int)} of the first {@link Task}
+	 *            {@link ManagedFunctionContext#getObject(int)} of the first {@link ManagedFunction}
 	 *            of the flow to be run.
 	 * @param callback
 	 *            {@link FlowCallback} to be invoked once the {@link Flow}

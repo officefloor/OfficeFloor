@@ -19,13 +19,13 @@ package net.officefloor.plugin.web.http.parameters.source;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -58,10 +58,10 @@ public class HttpParametersLoaderWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testType() {
 		HttpParametersLoaderTask task = new HttpParametersLoaderWorkSource().new HttpParametersLoaderTask();
-		WorkTypeBuilder<HttpParametersLoaderTask> workBuilder = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpParametersLoaderTask> workBuilder = WorkLoaderUtil
 				.createWorkTypeBuilder(task);
-		TaskTypeBuilder<HttpParametersLoaderDependencies, None> taskBuilder = workBuilder
-				.addTaskType("LOADER", task,
+		ManagedFunctionTypeBuilder<HttpParametersLoaderDependencies, None> taskBuilder = workBuilder
+				.addManagedFunctionType("LOADER", task,
 						HttpParametersLoaderDependencies.class, None.class);
 		taskBuilder.addObject(ServerHttpConnection.class).setKey(
 				HttpParametersLoaderDependencies.SERVER_HTTP_CONNECTION);
@@ -77,13 +77,13 @@ public class HttpParametersLoaderWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Validates can source {@link Work} and do the {@link Task}.
+	 * Validates can source {@link Work} and do the {@link ManagedFunction}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testDoTask() throws Throwable {
 
 		// Record executing task (loading object)
-		TaskContext taskContext = this.createMock(TaskContext.class);
+		ManagedFunctionContext taskContext = this.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
 		this.recordReturn(
@@ -102,14 +102,14 @@ public class HttpParametersLoaderWorkSourceTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		WorkType<HttpParametersLoaderTask> workType = WorkLoaderUtil
+		FunctionNamespaceType<HttpParametersLoaderTask> workType = WorkLoaderUtil
 				.loadWorkType(HttpParametersLoaderWorkSource.class,
 						HttpParametersLoaderWorkSource.PROPERTY_TYPE_NAME,
 						MockType.class.getName());
-		Task<HttpParametersLoaderTask, ?, ?> task = workType.getTaskTypes()[0]
-				.getTaskFactory().createTask(
+		ManagedFunction<HttpParametersLoaderTask, ?, ?> task = workType.getManagedFunctionTypes()[0]
+				.getManagedFunctionFactory().createManagedFunction(
 						workType.getWorkFactory().createWork());
-		Object result = task.doTask(taskContext);
+		Object result = task.execute(taskContext);
 		assertEquals("Incorrect resulting object", object, result);
 		this.verifyMockObjects();
 	}

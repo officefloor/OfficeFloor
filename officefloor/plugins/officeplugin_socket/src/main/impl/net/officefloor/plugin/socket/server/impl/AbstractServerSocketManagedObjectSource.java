@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -152,7 +152,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 		// Provide dummy task for consistency of teams across all server sockets
 		AbstractSingleTask<Work, None, None> dummy = new AbstractSingleTask<Work, None, None>() {
 			@Override
-			public Object doTask(TaskContext<Work, None, None> context)
+			public Object execute(ManagedFunctionContext<Work, None, None> context)
 					throws Throwable {
 				throw new IllegalStateException(
 						"Dummy auto-wire listener task should not be invoked");

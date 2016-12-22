@@ -18,36 +18,36 @@
 package net.officefloor.plugin.web.http.security;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
 import net.officefloor.plugin.web.http.route.HttpUrlContinuation;
 import net.officefloor.plugin.web.http.session.HttpSession;
 
 /**
- * {@link Task} and {@link TaskFactory} to challenge the client.
+ * {@link ManagedFunction} and {@link ManagedFunctionFactory} to challenge the client.
  * 
  * @author Daniel Sagenschneider
  */
 public class HttpChallengeTask implements
-		Task<HttpSecurityWork, Indexed, Indexed>,
-		TaskFactory<HttpSecurityWork, Indexed, Indexed> {
+		ManagedFunction<HttpSecurityWork, Indexed, Indexed>,
+		ManagedFunctionFactory<HttpSecurityWork, Indexed, Indexed> {
 
 	/*
 	 * =================== HttpChallengeTask ======================
 	 */
 
 	@Override
-	public Task<HttpSecurityWork, Indexed, Indexed> createTask(
+	public ManagedFunction<HttpSecurityWork, Indexed, Indexed> createManagedFunction(
 			HttpSecurityWork work) {
 		return this;
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Object doTask(TaskContext<HttpSecurityWork, Indexed, Indexed> context)
+	public Object execute(ManagedFunctionContext<HttpSecurityWork, Indexed, Indexed> context)
 			throws Throwable {
 
 		// Obtain the dependencies
@@ -100,9 +100,9 @@ public class HttpChallengeTask implements
 		private final HttpSession session;
 
 		/**
-		 * {@link TaskContext}.
+		 * {@link ManagedFunctionContext}.
 		 */
-		private final TaskContext<HttpSecurityWork, Indexed, Indexed> context;
+		private final ManagedFunctionContext<HttpSecurityWork, Indexed, Indexed> context;
 
 		/**
 		 * Initiate.
@@ -112,11 +112,11 @@ public class HttpChallengeTask implements
 		 * @param session
 		 *            {@link HttpSession}.
 		 * @param context
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
 		public HttpChallengeContextImpl(ServerHttpConnection connection,
 				HttpSession session,
-				TaskContext<HttpSecurityWork, Indexed, Indexed> context) {
+				ManagedFunctionContext<HttpSecurityWork, Indexed, Indexed> context) {
 			this.connection = connection;
 			this.session = session;
 			this.context = context;

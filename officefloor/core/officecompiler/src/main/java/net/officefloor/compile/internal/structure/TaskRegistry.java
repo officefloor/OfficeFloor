@@ -18,7 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.issues.CompilerIssue;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -50,7 +50,7 @@ public interface TaskRegistry {
 	 * @param taskName
 	 *            Name of the {@link TaskNode}.
 	 * @param taskTypeName
-	 *            Type name of the {@link Task} within the {@link Work}.
+	 *            Type name of the {@link ManagedFunction} within the {@link Work}.
 	 * @param workNode
 	 *            Parent {@link WorkNode}.
 	 * @return Initialised {@link TaskNode} by the name.

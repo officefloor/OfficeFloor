@@ -17,19 +17,19 @@
  */
 package net.officefloor.plugin.web.http.continuation;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
-import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.location.HttpApplicationLocationMangedObject;
 import net.officefloor.plugin.web.http.location.InvalidHttpRequestUriException;
 
 /**
- * {@link WorkSource} for a HTTP URL continuation.
+ * {@link ManagedFunctionSource} for a HTTP URL continuation.
  * 
  * @author Daniel Sagenschneider
  */
@@ -49,7 +49,7 @@ public class HttpUrlContinuationWorkSource extends
 	public static final String PROPERTY_SECURE = "http.continuation.secure";
 
 	/**
-	 * Name of the {@link TaskType}.
+	 * Name of the {@link ManagedFunctionType}.
 	 */
 	public static final String TASK_NAME = "CONTINUATION";
 
@@ -87,9 +87,9 @@ public class HttpUrlContinuationWorkSource extends
 	}
 
 	@Override
-	public void sourceWork(
-			WorkTypeBuilder<HttpUrlContinuationTask> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(
+			FunctionNamespaceBuilder<HttpUrlContinuationTask> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the application URI path (for use)
 		String applicationUriPath = context.getProperty(PROPERTY_URI_PATH);
@@ -109,7 +109,7 @@ public class HttpUrlContinuationWorkSource extends
 
 		// Configure the work and task
 		workTypeBuilder.setWorkFactory(factory);
-		workTypeBuilder.addTaskType(TASK_NAME, factory, None.class, None.class)
+		workTypeBuilder.addManagedFunctionType(TASK_NAME, factory, None.class, None.class)
 				.setDifferentiator(differentiator);
 	}
 }

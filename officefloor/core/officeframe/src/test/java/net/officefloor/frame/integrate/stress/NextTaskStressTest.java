@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.integrate.stress;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
@@ -31,14 +31,14 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
- * Stress tests invoking a next {@link Task}.
+ * Stress tests invoking a next {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
 public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensures no issues arising in stress next {@link Task} with a
+	 * Ensures no issues arising in stress next {@link ManagedFunction} with a
 	 * {@link OnePersonTeam}.
 	 */
 	@StressTest
@@ -48,7 +48,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensures no issues arising in stress next {@link Task} with a
+	 * Ensures no issues arising in stress next {@link ManagedFunction} with a
 	 * {@link LeaderFollowerTeam}.
 	 */
 	@StressTest
@@ -58,7 +58,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensures no issues arising in stress next {@link Task} with a
+	 * Ensures no issues arising in stress next {@link ManagedFunction} with a
 	 * {@link ExecutorFixedTeamSource}.
 	 */
 	@StressTest
@@ -71,7 +71,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 	 * Does the parallel stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link Task} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -115,7 +115,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 		private final int maxNextTasks;
 
 		/**
-		 * Number of next {@link Task} instances run.
+		 * Number of next {@link ManagedFunction} instances run.
 		 */
 		public long nextTaskCount = 0;
 
@@ -130,22 +130,22 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/**
-		 * Allows for moving onto the next {@link Task}.
+		 * Allows for moving onto the next {@link ManagedFunction}.
 		 * 
 		 * @param count
-		 *            Count to pass to next {@link Task}.
+		 *            Count to pass to next {@link ManagedFunction}.
 		 */
 		public Integer trigger(Integer count) {
 			return count;
 		}
 
 		/**
-		 * Next {@link Task}.
+		 * Next {@link ManagedFunction}.
 		 * 
 		 * @param callCount
-		 *            Number of next {@link Task} instances invoked so far.
+		 *            Number of next {@link ManagedFunction} instances invoked so far.
 		 * @param flow
-		 *            Trigger {@link Task}.
+		 *            Trigger {@link ManagedFunction}.
 		 */
 		public void nextTask(Integer callCount, ReflectiveFlow flow) {
 

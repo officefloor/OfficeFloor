@@ -19,8 +19,8 @@ package net.officefloor.plugin.web.http.route;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
@@ -56,10 +56,10 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 
 		// Create the expected type
 		HttpRouteTask factory = new HttpRouteTask();
-		WorkTypeBuilder<HttpRouteTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpRouteTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
-		TaskTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> task = type
-				.addTaskType(HttpRouteWorkSource.TASK_NAME, factory,
+		ManagedFunctionTypeBuilder<HttpRouteTaskDependencies, HttpRouteTaskFlows> task = type
+				.addManagedFunctionType(HttpRouteWorkSource.TASK_NAME, factory,
 						HttpRouteTaskDependencies.class,
 						HttpRouteTaskFlows.class);
 		task.addObject(ServerHttpConnection.class).setKey(

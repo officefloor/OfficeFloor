@@ -28,12 +28,12 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCallbackFactory;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
-import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainerMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
@@ -169,9 +169,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * @param assetManager
 	 *            {@link AssetManager} for this {@link ThreadState}.
 	 * @param callbackFactory
-	 *            {@link FlowCallbackFactory} to create the
-	 *            {@link FlowCallback} on completion of this
-	 *            {@link ThreadState}. May be <code>null</code>.
+	 *            {@link FlowCallbackFactory} to create the {@link FlowCallback}
+	 *            on completion of this {@link ThreadState}. May be
+	 *            <code>null</code>.
 	 * @param processState
 	 *            {@link ProcessState} for this {@link ThreadState}.
 	 * @param processProfiler
@@ -377,7 +377,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		// Lazy load the Administrator Container
 		AdministratorContainer<?, ?> container = this.administratorContainers[index];
 		if (container == null) {
-			container = this.threadMetaData.getAdministratorMetaData()[index].createAdministratorContainer();
+			container = this.threadMetaData.getAdministratorMetaData()[index].createAdministratorContainer(this);
 			this.administratorContainers[index] = container;
 		}
 		return container;
@@ -404,7 +404,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public void profile(ManagedFunctionMetaData jobMetaData) {
+	public void profile(ManagedFunctionContainerMetaData jobMetaData) {
 
 		// Only profile if have profiler
 		if (this.profiler == null) {

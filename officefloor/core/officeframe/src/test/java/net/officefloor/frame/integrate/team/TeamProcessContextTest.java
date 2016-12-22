@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.integrate.team;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.team.Job;
@@ -86,7 +86,7 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 	public static class MockWork {
 
 		/**
-		 * {@link Task} to be executed.
+		 * {@link ManagedFunction} to be executed.
 		 */
 		public void task() {
 			assertEquals("Incorrect step", ProcessingStep.ASSIGN_JOB,

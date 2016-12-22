@@ -21,7 +21,6 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
@@ -37,21 +36,13 @@ public class OfficeImpl implements Office {
 	private final OfficeMetaData metaData;
 
 	/**
-	 * {@link ProcessTicker}.
-	 */
-	private final ProcessTicker processTicker;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param metaData
 	 *            {@link OfficeMetaData}.
-	 * @param processTicker
-	 *            {@link ProcessTicker}.
 	 */
-	public OfficeImpl(OfficeMetaData metaData, ProcessTicker processTicker) {
+	public OfficeImpl(OfficeMetaData metaData) {
 		this.metaData = metaData;
-		this.processTicker = processTicker;
 	}
 
 	/*
@@ -73,15 +64,13 @@ public class OfficeImpl implements Office {
 	}
 
 	@Override
-	public WorkManager getWorkManager(String workName)
-			throws UnknownWorkException {
+	public WorkManager getWorkManager(String workName) throws UnknownWorkException {
 
 		// Obtain the work meta-data for the work
 		for (WorkMetaData<?> workMetaData : this.metaData.getWorkMetaData()) {
 			if (workMetaData.getWorkName().equals(workName)) {
 				// Have the work meta-data, so return a work manager for it
-				return new WorkManagerImpl(workMetaData, this.metaData,
-						this.processTicker);
+				return new WorkManagerImpl(workMetaData, this.metaData);
 			}
 		}
 

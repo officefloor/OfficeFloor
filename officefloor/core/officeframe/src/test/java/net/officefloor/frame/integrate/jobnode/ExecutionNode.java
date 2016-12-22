@@ -23,16 +23,16 @@ import java.util.List;
 import org.junit.Assert;
 import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
+import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.impl.execute.task.TaskJobNode;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -44,7 +44,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -63,12 +63,12 @@ import org.easymock.internal.AlwaysMatcher;
  * @author Daniel Sagenschneider
  */
 public class ExecutionNode<W extends Work> implements
-		TaskMetaData<W, Indexed, Indexed>, TaskFactory<W, Indexed, Indexed>,
-		Task<W, Indexed, Indexed> {
+		ManagedFunctionMetaData<W, Indexed, Indexed>, ManagedFunctionFactory<W, Indexed, Indexed>,
+		ManagedFunction<W, Indexed, Indexed> {
 
 	/**
 	 * Test case utilising this {@link ExecutionNode} to test execution of a
-	 * {@link Task} tree.
+	 * {@link ManagedFunction} tree.
 	 */
 	protected final AbstractTaskNodeTestCase<W> testCase;
 
@@ -83,7 +83,7 @@ public class ExecutionNode<W extends Work> implements
 	private final Team continueTeam;
 
 	/**
-	 * {@link Team} expected to execute this {@link Task}.
+	 * {@link Team} expected to execute this {@link ManagedFunction}.
 	 */
 	private final ExecutionTeam expectedExecutionTeam;
 
@@ -103,14 +103,14 @@ public class ExecutionNode<W extends Work> implements
 	private final int executionNodeId;
 
 	/**
-	 * Value to return from {@link Task#doTask(TaskContext)}.
+	 * Value to return from {@link ManagedFunction#execute(ManagedFunctionContext)}.
 	 */
 	private Object taskReturnValue;
 
 	/**
-	 * {@link TaskMetaData} of the next {@link Task}.
+	 * {@link ManagedFunctionMetaData} of the next {@link ManagedFunction}.
 	 */
-	private TaskMetaData<?, ?, ?> nextTask = null;
+	private ManagedFunctionMetaData<?, ?, ?> nextTask = null;
 
 	/**
 	 * Initiate.
@@ -126,7 +126,7 @@ public class ExecutionNode<W extends Work> implements
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
 	 * @param expectedExecutionTeam
-	 *            {@link Team} expected to execute this {@link Task}.
+	 *            {@link Team} expected to execute this {@link ManagedFunction}.
 	 */
 	public ExecutionNode(int executionNodeId,
 			AbstractTaskNodeTestCase<W> testCase,
@@ -239,12 +239,12 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	/**
-	 * Set {@link TaskMetaData} of the next {@link Task}.
+	 * Set {@link ManagedFunctionMetaData} of the next {@link ManagedFunction}.
 	 * 
 	 * @param nextTask
-	 *            {@link TaskMetaData} of the next {@link Task}.
+	 *            {@link ManagedFunctionMetaData} of the next {@link ManagedFunction}.
 	 */
-	void setNextTask(TaskMetaData<W, ?, ?> nextTask) {
+	void setNextTask(ManagedFunctionMetaData<W, ?, ?> nextTask) {
 		this.nextTask = nextTask;
 	}
 
@@ -254,10 +254,10 @@ public class ExecutionNode<W extends Work> implements
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param initialTask
-	 *            {@link TaskMetaData} of the initial {@link Task}.
+	 *            {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction}.
 	 */
 	void addFlow(FlowInstigationStrategyEnum instigationStrategy,
-			TaskMetaData<W, ?, ?> initialTask) {
+			ManagedFunctionMetaData<W, ?, ?> initialTask) {
 		// Add to listing of processing for the Task
 		this.taskProcessing.add(new FlowTaskProcessItem(instigationStrategy,
 				initialTask, this.testCase));
@@ -285,7 +285,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public String getTaskName() {
+	public String getFunctionName() {
 		return this.getClass().getSimpleName();
 	}
 
@@ -295,7 +295,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public TaskFactory<W, Indexed, Indexed> getTaskFactory() {
+	public ManagedFunctionFactory<W, Indexed, Indexed> getManagedFunctionFactory() {
 		return this;
 	}
 
@@ -363,7 +363,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getNextTaskInFlow() {
+	public ManagedFunctionMetaData<?, ?, ?> getNextManagedFunctionContainerMetaData() {
 		return this.nextTask;
 	}
 
@@ -382,7 +382,7 @@ public class ExecutionNode<W extends Work> implements
 			WorkContainer<W> workContainer, FunctionState parallelJobNodeOwner,
 			Object parameter,
 			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
-		return new TaskJobNode<W, Indexed, Indexed>(flow, workContainer, this,
+		return new ManagedFunctionImpl<W, Indexed, Indexed>(flow, workContainer, this,
 				governanceDeactivationStrategy, parallelJobNodeOwner, parameter);
 	}
 
@@ -391,7 +391,7 @@ public class ExecutionNode<W extends Work> implements
 	 */
 
 	@Override
-	public Task<W, Indexed, Indexed> createTask(W work) {
+	public ManagedFunction<W, Indexed, Indexed> createManagedFunction(W work) {
 
 		// Flag this as latest execution task node
 		this.testCase.setLatestTaskNode(this);
@@ -405,13 +405,13 @@ public class ExecutionNode<W extends Work> implements
 	 */
 
 	/**
-	 * Indicates if this {@link Task} has had the {@link TaskProcessItem}
+	 * Indicates if this {@link ManagedFunction} has had the {@link TaskProcessItem}
 	 * instances run.
 	 */
 	protected boolean isTaskProcessed = false;
 
 	@Override
-	public Object doTask(TaskContext<W, Indexed, Indexed> context)
+	public Object execute(ManagedFunctionContext<W, Indexed, Indexed> context)
 			throws Exception {
 
 		// Flag that this task is being executed
@@ -444,7 +444,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	/**
-	 * Contract for a process item of a {@link Task}.
+	 * Contract for a process item of a {@link ManagedFunction}.
 	 */
 	private interface TaskProcessItem<W extends Work> {
 
@@ -454,11 +454,11 @@ public class ExecutionNode<W extends Work> implements
 		 * @param itemIndex
 		 *            Index of this item.
 		 * @param context
-		 *            {@link TaskContext} in which to process.
-		 * @return Flag indicating whether the {@link Task} should be
+		 *            {@link ManagedFunctionContext} in which to process.
+		 * @return Flag indicating whether the {@link ManagedFunction} should be
 		 *         re-executed.
 		 */
-		boolean process(int itemIndex, TaskContext<W, Indexed, Indexed> context);
+		boolean process(int itemIndex, ManagedFunctionContext<W, Indexed, Indexed> context);
 
 	}
 
@@ -506,7 +506,7 @@ public class ExecutionNode<W extends Work> implements
 		 */
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public boolean process(int itemIndex, TaskContext context) {
+		public boolean process(int itemIndex, ManagedFunctionContext context) {
 			// Obtain the object of the Managed Object
 			O object = (O) context.getObject(itemIndex);
 
@@ -531,9 +531,9 @@ public class ExecutionNode<W extends Work> implements
 		protected final FlowInstigationStrategyEnum instigationStrategy;
 
 		/**
-		 * {@link TaskMetaData}.
+		 * {@link ManagedFunctionMetaData}.
 		 */
-		protected final TaskMetaData<W, ?, ?> taskMetaData;
+		protected final ManagedFunctionMetaData<W, ?, ?> taskMetaData;
 
 		/**
 		 * {@link AbstractTaskNodeTestCase}.
@@ -551,13 +551,13 @@ public class ExecutionNode<W extends Work> implements
 		 * @param instigationStrategy
 		 *            {@link FlowInstigationStrategyEnum}.
 		 * @param taskMetaData
-		 *            {@link TaskMetaData}.
+		 *            {@link ManagedFunctionMetaData}.
 		 * @param testCase
 		 *            {@link AbstractTaskNodeTestCase}.
 		 */
 		public FlowTaskProcessItem(
 				FlowInstigationStrategyEnum instigationStrategy,
-				TaskMetaData<W, ?, ?> taskMetaData,
+				ManagedFunctionMetaData<W, ?, ?> taskMetaData,
 				AbstractTaskNodeTestCase<W> testCase) {
 			this.instigationStrategy = instigationStrategy;
 			this.taskMetaData = taskMetaData;
@@ -578,7 +578,7 @@ public class ExecutionNode<W extends Work> implements
 
 		@Override
 		public boolean process(int itemIndex,
-				TaskContext<W, Indexed, Indexed> context) {
+				ManagedFunctionContext<W, Indexed, Indexed> context) {
 			// Do the particular flow
 			FlowFuture future = context.doFlow(itemIndex, null);
 
@@ -602,7 +602,7 @@ public class ExecutionNode<W extends Work> implements
 		}
 
 		@Override
-		public TaskMetaData<W, ?, ?> getInitialTaskMetaData() {
+		public ManagedFunctionMetaData<W, ?, ?> getInitialTaskMetaData() {
 			return this.taskMetaData;
 		}
 
@@ -648,7 +648,7 @@ public class ExecutionNode<W extends Work> implements
 
 		@Override
 		public boolean process(int itemIndex,
-				TaskContext<W, Indexed, Indexed> context) {
+				ManagedFunctionContext<W, Indexed, Indexed> context) {
 
 			// Obtain the flow future for the completing node
 			FlowFuture future = this.testCase.getFlowFuture(this.futureNode);

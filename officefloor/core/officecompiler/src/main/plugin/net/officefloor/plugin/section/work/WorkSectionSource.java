@@ -22,8 +22,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -35,18 +41,12 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
- * {@link SectionSource} implementation that wraps a {@link WorkSource} to
+ * {@link SectionSource} implementation that wraps a {@link ManagedFunctionSource} to
  * expose it as a section.
  * 
  * @author Daniel Sagenschneider
@@ -64,7 +64,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 	public static final String PROPERTY_PARAMETER_PREFIX = "parameter.index.prefix.";
 
 	/**
-	 * Name of property specifying a comma separated list of {@link Task} names
+	 * Name of property specifying a comma separated list of {@link ManagedFunction} names
 	 * that will have a {@link SectionOutput} created and linked as next.
 	 */
 	public static final String PROPERTY_TASKS_NEXT_TO_OUTPUTS = "tasks.next.to.outputs";
@@ -93,7 +93,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 		}
 
 		// Obtain the work type
-		WorkType<?> workType = context.loadWorkType(workSourceName, properties);
+		FunctionNamespaceType<?> workType = context.loadWorkType(workSourceName, properties);
 
 		// Add the work
 		SectionWork work = designer.addSectionWork("WORK", workSourceName);
@@ -112,10 +112,10 @@ public class WorkSectionSource extends AbstractSectionSource {
 		// Add the tasks
 		Map<String, SectionObject> sectionObjects = new HashMap<String, SectionObject>();
 		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();
-		for (TaskType<?, ?, ?> taskType : workType.getTaskTypes()) {
+		for (ManagedFunctionType<?, ?, ?> taskType : workType.getManagedFunctionTypes()) {
 
 			// Obtain the task name
-			String taskName = taskType.getTaskName();
+			String taskName = taskType.getFunctionName();
 
 			// Add the task
 			SectionTask task = work.addSectionTask(taskName, taskName);
@@ -127,7 +127,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 			// Link objects and flag parameter
 			Class<?> parameterType = null;
 			int objectIndex = 1;
-			for (TaskObjectType<?> objectType : taskType.getObjectTypes()) {
+			for (ManagedFunctionObjectType<?> objectType : taskType.getObjectTypes()) {
 
 				// Obtain object details
 				String objectName = objectType.getObjectName();
@@ -188,7 +188,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 			}
 
 			// Link task flows to section outputs
-			for (TaskFlowType<?> flowType : taskType.getFlowTypes()) {
+			for (ManagedFunctionFlowType<?> flowType : taskType.getFlowTypes()) {
 
 				// Obtain the flow details
 				String flowName = flowType.getFlowName();
@@ -213,7 +213,7 @@ public class WorkSectionSource extends AbstractSectionSource {
 			}
 
 			// Link task escalations to section outputs
-			for (TaskEscalationType escalationType : taskType
+			for (ManagedFunctionEscalationType escalationType : taskType
 					.getEscalationTypes()) {
 
 				// Obtain the escalation type

@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -40,29 +39,32 @@ public interface ManagedObjectContainer {
 	 * Loads the {@link ManagedObject}.
 	 * 
 	 * @param managedJobNode
-	 *            {@link ManagedFunctionContainer} requiring the {@link ManagedObject}.
+	 *            {@link ManagedFunctionContainer} requiring the
+	 *            {@link ManagedObject}.
 	 * @return Optional {@link FunctionState} to load the {@link ManagedObject}.
-	 *         Should this return </code>null</code>, the {@link ManagedFunctionContainer}
-	 *         should not then be executed, as it is expecting to wait. This
-	 *         will return the {@link ManagedFunctionContainer} when the
-	 *         {@link ManagedObject} is loaded.
+	 *         Should this return </code>null</code>, the
+	 *         {@link ManagedFunctionContainer} should not then be executed, as
+	 *         it is expecting to wait. This will return the
+	 *         {@link ManagedFunctionContainer} when the {@link ManagedObject}
+	 *         is loaded.
 	 */
 	FunctionState loadManagedObject(ManagedFunctionContainer managedJobNode, WorkContainer<?> workContainer);
 
 	/**
 	 * <p>
-	 * Creates a {@link FunctionState} to check if the {@link ManagedObject} contained
-	 * within this {@link ManagedObjectContainer} is ready.
+	 * Creates a {@link FunctionState} to check if the {@link ManagedObject}
+	 * contained within this {@link ManagedObjectContainer} is ready.
 	 * <p>
 	 * Should the {@link ManagedObject} not be ready, then will latch the
-	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to be ready.
+	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to
+	 * be ready.
 	 * 
 	 * @param check
 	 *            {@link ManagedObjectReadyCheck}.
-	 * @return {@link FunctionState} to check if the {@link ManagedObject} contained
-	 *         within this {@link ManagedObjectContainer} is ready.
+	 * @return {@link FunctionState} to check if the {@link ManagedObject}
+	 *         contained within this {@link ManagedObjectContainer} is ready.
 	 */
-	FunctionState createCheckReadyJobNode(ManagedObjectReadyCheck check);
+	FunctionState createCheckReadyFunction(ManagedObjectReadyCheck check);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
@@ -72,32 +74,9 @@ public interface ManagedObjectContainer {
 	Object getObject();
 
 	/**
-	 * Extracts the extension interface from the {@link ManagedObject} within
-	 * this {@link ManagedObjectContainer}.
-	 * 
-	 * @param <I>
-	 *            Extension interface type.
-	 * @param extractor
-	 *            {@link ExtensionInterfaceExtractor} to extract the extension
-	 *            interface from the {@link ManagedObject}.
-	 * @return Extracted extension interface.
-	 */
-	<I extends Object> I extractExtensionInterface(ExtensionInterfaceExtractor<I> extractor);
-
-	/**
-	 * Unregisters this {@link ManagedObject} from {@link Governance}.
-	 * 
-	 * @param governance
-	 *            {@link ActiveGovernance}.
-	 * @return Optional {@link FunctionState} to unregister the {@link ManagedObject}
-	 *         from {@link Governance}.
-	 */
-	FunctionState unregisterManagedObjectFromGovernance(ActiveGovernance<?, ?> governance);
-
-	/**
 	 * Unloads the {@link ManagedObject}.
 	 * 
-	 * @return Optional {@link FunctionState} to unload the {@link ManagedObject}.
+	 * @return {@link FunctionState} to unload the {@link ManagedObject}.
 	 */
 	FunctionState unloadManagedObject();
 

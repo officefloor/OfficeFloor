@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
@@ -45,35 +45,35 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Implementation of the {@link TaskBuilder}.
+ * Implementation of the {@link ManagedFunctionBuilder}.
  * 
  * @author Daniel Sagenschneider
  */
 public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		implements TaskBuilder<W, D, F>, TaskConfiguration<W, D, F> {
+		implements ManagedFunctionBuilder<W, D, F>, TaskConfiguration<W, D, F> {
 
 	/**
-	 * Name of this {@link Task}.
+	 * Name of this {@link ManagedFunction}.
 	 */
 	private final String taskName;
 
 	/**
-	 * {@link TaskFactory}.
+	 * {@link ManagedFunctionFactory}.
 	 */
-	private final TaskFactory<W, D, F> taskFactory;
+	private final ManagedFunctionFactory<W, D, F> taskFactory;
 
 	/**
-	 * {@link Object} instances to be linked to this {@link Task}.
+	 * {@link Object} instances to be linked to this {@link ManagedFunction}.
 	 */
 	private final Map<Integer, TaskObjectConfigurationImpl<D>> objects = new HashMap<Integer, TaskObjectConfigurationImpl<D>>();
 
 	/**
-	 * {@link Flow} instances to be linked to this {@link Task}.
+	 * {@link Flow} instances to be linked to this {@link ManagedFunction}.
 	 */
 	private final Map<Integer, TaskFlowConfigurationImpl<F>> flows = new HashMap<Integer, TaskFlowConfigurationImpl<F>>();
 
 	/**
-	 * {@link Governance} instances to be active for this {@link Task}.
+	 * {@link Governance} instances to be active for this {@link ManagedFunction}.
 	 */
 	private final List<TaskGovernanceConfiguration> governances = new LinkedList<TaskGovernanceConfiguration>();
 
@@ -94,20 +94,20 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 
 	/**
 	 * Listing of task administration duties to do before executing the
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 */
 	private final List<TaskDutyConfigurationImpl<?>> preTaskDuties = new LinkedList<TaskDutyConfigurationImpl<?>>();
 
 	/**
 	 * Listing of task administration duties to do after executing the
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 */
 	private final List<TaskDutyConfigurationImpl<?>> postTaskDuties = new LinkedList<TaskDutyConfigurationImpl<?>>();
 
 	/**
 	 * Listing of {@link TaskEscalationConfiguration} instances to form the
-	 * {@link EscalationProcedure} for the resulting {@link Task} of this
-	 * {@link TaskBuilder}.
+	 * {@link EscalationProcedure} for the resulting {@link ManagedFunction} of this
+	 * {@link ManagedFunctionBuilder}.
 	 */
 	private final List<TaskEscalationConfiguration> escalations = new LinkedList<TaskEscalationConfiguration>();
 
@@ -115,11 +115,11 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	 * Initiate.
 	 * 
 	 * @param taskName
-	 *            Name of this {@link Task}.
+	 *            Name of this {@link ManagedFunction}.
 	 * @param taskFactory
-	 *            {@link TaskFactory}.
+	 *            {@link ManagedFunctionFactory}.
 	 */
-	public TaskBuilderImpl(String taskName, TaskFactory<W, D, F> taskFactory) {
+	public TaskBuilderImpl(String taskName, ManagedFunctionFactory<W, D, F> taskFactory) {
 		this.taskName = taskName;
 		this.taskFactory = taskFactory;
 	}
@@ -265,7 +265,7 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	 *            Name of the {@link Work}. May be <code>null</code> if same
 	 *            {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param argumentType
@@ -321,7 +321,7 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	}
 
 	@Override
-	public TaskFactory<W, D, F> getTaskFactory() {
+	public ManagedFunctionFactory<W, D, F> getTaskFactory() {
 		return this.taskFactory;
 	}
 

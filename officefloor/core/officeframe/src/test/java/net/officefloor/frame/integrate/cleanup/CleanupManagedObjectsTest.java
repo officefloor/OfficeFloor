@@ -21,10 +21,10 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
@@ -164,8 +164,8 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 	@TestSource
 	public static class TestManagedObjectSource extends
 			AbstractManagedObjectSource<None, None> implements ManagedObject,
-			WorkFactory<Work>, Work, TaskFactory<Work, None, None>,
-			Task<Work, None, None> {
+			WorkFactory<Work>, Work, ManagedFunctionFactory<Work, None, None>,
+			ManagedFunction<Work, None, None> {
 
 		/**
 		 * Lock.
@@ -246,7 +246,7 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Task<Work, None, None> createTask(Work work) {
+		public ManagedFunction<Work, None, None> createManagedFunction(Work work) {
 			return this;
 		}
 
@@ -255,7 +255,7 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Object doTask(TaskContext<Work, None, None> context)
+		public Object execute(ManagedFunctionContext<Work, None, None> context)
 				throws Throwable {
 
 			// Wait to be notified to proceed

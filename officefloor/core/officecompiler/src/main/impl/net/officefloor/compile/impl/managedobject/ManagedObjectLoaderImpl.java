@@ -41,7 +41,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
@@ -468,7 +468,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	/**
 	 * Filters out any {@link ManagedObjectFlowType} instances of the
 	 * {@link ManagedObjectSourceMetaData} that are linked to an added
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 * 
 	 * @param metaDataFlows
 	 *            {@link ManagedObjectFlowType} instances defining linked
@@ -597,7 +597,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 	/**
 	 * Obtains the {@link ManagedObjectFlowType} instigated from the added
-	 * {@link Task} instances.
+	 * {@link ManagedFunction} instances.
 	 * 
 	 * @param office
 	 *            {@link OfficeConfiguration}.
@@ -682,7 +682,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 	/**
 	 * Obtains the {@link ManagedObjectTeamType} instances ensuring all added
-	 * {@link Work} and {@link Task} instances have names.
+	 * {@link Work} and {@link ManagedFunction} instances have names.
 	 * 
 	 * @param office
 	 *            {@link OfficeConfiguration}.
@@ -747,15 +747,15 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	}
 
 	/**
-	 * Indicates if the {@link Task} was added to the {@link Office}.
+	 * Indicates if the {@link ManagedFunction} was added to the {@link Office}.
 	 * 
 	 * @param workName
 	 *            {@link Work} name.
 	 * @param taskName
-	 *            {@link Task} name.
+	 *            {@link ManagedFunction} name.
 	 * @param office
 	 *            {@link OfficeConfiguration}.
-	 * @return <code>true</code> if {@link Task} added to the {@link Office}.
+	 * @return <code>true</code> if {@link ManagedFunction} added to the {@link Office}.
 	 */
 	private boolean isTaskAdded(String workName, String taskName,
 			OfficeConfiguration office) {

@@ -17,9 +17,9 @@
  */
 package net.officefloor.compile.object;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.spi.office.OfficeSectionTask;
-import net.officefloor.compile.work.TaskObjectType;
 
 /**
  * <code>Type definition</code> of a dependent object of an {@link OfficeSectionTask}.
@@ -32,7 +32,7 @@ public interface ObjectDependencyType {
 	 * <p>
 	 * Obtains the name of this object dependency.
 	 * <p>
-	 * This would correspond to either the {@link TaskObjectType} or the
+	 * This would correspond to either the {@link ManagedFunctionObjectType} or the
 	 * {@link ManagedObjectDependencyType} name.
 	 * 
 	 * @return Name of this object dependency.

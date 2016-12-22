@@ -27,10 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.WorkSourceService;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -46,7 +46,7 @@ import net.officefloor.plugin.web.http.template.parse.LinkHttpTemplateSectionCon
 import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectionContent;
 
 /**
- * {@link WorkSource} for the HTTP template.
+ * {@link ManagedFunctionSource} for the HTTP template.
  * 
  * @author Daniel Sagenschneider
  */
@@ -364,8 +364,8 @@ public class HttpTemplateWorkSource extends
 	}
 
 	@Override
-	public void sourceWork(WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<HttpTemplateWork> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the template
 		HttpTemplate template = getHttpTemplate(context);

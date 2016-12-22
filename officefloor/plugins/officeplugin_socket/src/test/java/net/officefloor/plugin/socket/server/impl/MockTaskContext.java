@@ -20,19 +20,19 @@ package net.officefloor.plugin.socket.server.impl;
 import junit.framework.TestCase;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownTaskException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 
 /**
- * Test {@link TaskContext}.
+ * Test {@link ManagedFunctionContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockTaskContext implements TaskContext<Work, None, None> {
+public class MockTaskContext implements ManagedFunctionContext<Work, None, None> {
 
 	/**
 	 * By default is complete.
@@ -40,15 +40,15 @@ public class MockTaskContext implements TaskContext<Work, None, None> {
 	private boolean isComplete = true;
 
 	/**
-	 * Executes the {@link Task}.
+	 * Executes the {@link ManagedFunction}.
 	 * 
 	 * @throws Throwable
-	 *             If failure of the {@link Task}.
+	 *             If failure of the {@link ManagedFunction}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void execute(Task task) throws Throwable {
+	public void execute(ManagedFunction task) throws Throwable {
 		this.isComplete = true;
-		task.doTask(this);
+		task.execute(this);
 	}
 
 	/**

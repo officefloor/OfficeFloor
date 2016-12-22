@@ -20,11 +20,11 @@ package net.officefloor.frame.impl.construct.office;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
@@ -40,7 +40,7 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 	private final WorkMetaData<?>[] allWorkMetaData;
 
 	/**
-	 * {@link WorkMetaData} to default to on locating {@link TaskMetaData}.
+	 * {@link WorkMetaData} to default to on locating {@link ManagedFunctionMetaData}.
 	 */
 	private final WorkMetaData<?> workMetaData;
 
@@ -68,7 +68,7 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 	 * Initiate.
 	 * 
 	 * @param officeMetaData
-	 *            {@link OfficeMetaData} to find the {@link TaskMetaData}
+	 *            {@link OfficeMetaData} to find the {@link ManagedFunctionMetaData}
 	 *            within.
 	 * @param workMetaData
 	 *            Listing of all {@link WorkMetaData} within the {@link Office}.
@@ -115,13 +115,13 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName) {
+	public ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName) {
 		WorkEntry workEntry = (workName != null ? this.officeWork.get(workName) : this.defaultWorkEntry);
 		return (workEntry != null ? workEntry.tasks.get(taskName) : null);
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getTaskMetaData(String taskName) {
+	public ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(String taskName) {
 		return (this.defaultWorkEntry != null ? this.defaultWorkEntry.tasks.get(taskName) : null);
 	}
 
@@ -136,9 +136,9 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 		public final WorkMetaData<?> workMetaData;
 
 		/**
-		 * {@link TaskMetaData} entries by their {@link Task} names.
+		 * {@link ManagedFunctionMetaData} entries by their {@link ManagedFunction} names.
 		 */
-		public final Map<String, TaskMetaData<?, ?, ?>> tasks = new HashMap<String, TaskMetaData<?, ?, ?>>();
+		public final Map<String, ManagedFunctionMetaData<?, ?, ?>> tasks = new HashMap<String, ManagedFunctionMetaData<?, ?, ?>>();
 
 		/**
 		 * Initiate.
@@ -150,8 +150,8 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 			this.workMetaData = workMetaData;
 
 			// Load the tasks
-			for (TaskMetaData<?, ?, ?> taskMetaData : workMetaData.getTaskMetaData()) {
-				String taskName = taskMetaData.getTaskName();
+			for (ManagedFunctionMetaData<?, ?, ?> taskMetaData : workMetaData.getTaskMetaData()) {
+				String taskName = taskMetaData.getFunctionName();
 				this.tasks.put(taskName, taskMetaData);
 			}
 		}

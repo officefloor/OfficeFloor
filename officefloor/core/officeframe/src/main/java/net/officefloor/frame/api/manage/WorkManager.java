@@ -17,9 +17,8 @@
  */
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
  * Interface to manage a particular {@link Work}.
@@ -27,33 +26,6 @@ import net.officefloor.frame.internal.structure.ProcessState;
  * @author Daniel Sagenschneider
  */
 public interface WorkManager {
-
-	/**
-	 * Obtains the parameter type for invoking the {@link Work}.
-	 * 
-	 * @return Parameter type for invoking the {@link Work}. Will be
-	 *         <code>null</code> if no parameter to the {@link Work}.
-	 * @throws NoInitialTaskException
-	 *             If {@link Work} does not have an initial {@link Task}.
-	 */
-	Class<?> getWorkParameterType() throws NoInitialTaskException;
-
-	/**
-	 * Invokes a new instance of {@link Work} which is done within the
-	 * {@link Office}.
-	 * 
-	 * @param parameter
-	 *            Parameter for the first {@link Task} of the {@link Work}.
-	 * @return {@link ProcessFuture} to indicate when the {@link ProcessState}
-	 *         executing the {@link Work} has completed.
-	 * @throws NoInitialTaskException
-	 *             If {@link Work} does not have an initial {@link Task}.
-	 * @throws InvalidParameterTypeException
-	 *             Should the parameter be of incorrect type for the initial
-	 *             {@link Task}.
-	 */
-	ProcessFuture invokeWork(Object parameter) throws NoInitialTaskException,
-			InvalidParameterTypeException;
 
 	/**
 	 * <p>
@@ -68,13 +40,13 @@ public interface WorkManager {
 	String[] getTaskNames();
 
 	/**
-	 * Obtains the {@link TaskManager} for the named {@link Task}.
+	 * Obtains the {@link TaskManager} for the named {@link ManagedFunction}.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @return {@link TaskManager} for the named {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
+	 * @return {@link TaskManager} for the named {@link ManagedFunction}.
 	 * @throws UnknownTaskException
-	 *             If unknown {@link Task} name.
+	 *             If unknown {@link ManagedFunction} name.
 	 */
 	TaskManager getTaskManager(String taskName) throws UnknownTaskException;
 

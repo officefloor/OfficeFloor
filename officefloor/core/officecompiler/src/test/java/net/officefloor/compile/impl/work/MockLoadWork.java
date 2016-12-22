@@ -20,48 +20,47 @@ package net.officefloor.compile.impl.work;
 import java.io.IOException;
 
 import junit.framework.TestCase;
-
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
  * Class for {@link ClassWorkSource} that enables validating loading a
- * {@link WorkType}.
+ * {@link FunctionNamespaceType}.
  * 
  * @author Daniel Sagenschneider
  */
 public class MockLoadWork {
 
 	/**
-	 * Asserts the loaded {@link WorkType} is correct.
+	 * Asserts the loaded {@link FunctionNamespaceType} is correct.
 	 * 
 	 * @param workType
-	 *            {@link WorkType} to validate.
+	 *            {@link FunctionNamespaceType} to validate.
 	 */
-	public static void assertWorkType(WorkType<?> workType) {
+	public static void assertWorkType(FunctionNamespaceType<?> workType) {
 
 		// Ensure correct number of tasks
 		TestCase.assertEquals("Incorrect number of tasks", 2, workType
-				.getTaskTypes().length);
+				.getManagedFunctionTypes().length);
 
 		// Ensure correct first task
-		TaskType<?, ?, ?> taskOne = workType.getTaskTypes()[0];
+		ManagedFunctionType<?, ?, ?> taskOne = workType.getManagedFunctionTypes()[0];
 		TestCase.assertEquals("Incorrect first task", "assertWorkType", taskOne
-				.getTaskName());
+				.getFunctionName());
 		TestCase.assertEquals("Incorrect number of flows", 0, taskOne
 				.getFlowTypes().length);
 		TestCase.assertEquals("Incorrect number of objects", 1, taskOne
 				.getObjectTypes().length);
-		TestCase.assertEquals("Incorrect object type", WorkType.class, taskOne
+		TestCase.assertEquals("Incorrect object type", FunctionNamespaceType.class, taskOne
 				.getObjectTypes()[0].getObjectType());
 		TestCase.assertEquals("Incorrect number of escalations", 0, taskOne
 				.getEscalationTypes().length);
 
 		// Ensure correct second task
-		TaskType<?, ?, ?> taskTwo = workType.getTaskTypes()[1];
+		ManagedFunctionType<?, ?, ?> taskTwo = workType.getManagedFunctionTypes()[1];
 		TestCase.assertEquals("Incorrect second task", "doTask", taskTwo
-				.getTaskName());
+				.getFunctionName());
 		TestCase.assertEquals("Incorrect number of flows", 0, taskTwo
 				.getFlowTypes().length);
 		TestCase.assertEquals("Incorrect number of objects", 1, taskTwo

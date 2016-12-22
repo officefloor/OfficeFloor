@@ -70,7 +70,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -1326,7 +1326,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure used {@link Team} not loaded for qualified {@link Task}
+	 * Ensure used {@link Team} not loaded for qualified {@link ManagedFunction}
 	 * dependency.
 	 */
 	public void testUnusedTeamForQualifiedTaskObject() throws Exception {
@@ -1378,7 +1378,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		MockManagedObject managedObject;
 
 		/**
-		 * {@link Task} depends on {@link #managedObject}.
+		 * {@link ManagedFunction} depends on {@link #managedObject}.
 		 */
 		public void taskAssign() {
 		}
@@ -1425,14 +1425,14 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		MockQualifiedManagedObject managedObject;
 
 		/**
-		 * {@link Task} depends on {@link #managedObject}.
+		 * {@link ManagedFunction} depends on {@link #managedObject}.
 		 */
 		public void taskAssign() {
 		}
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} for {@link Task} having dependency on a
+	 * Ensure can assign a {@link Team} for {@link ManagedFunction} having dependency on a
 	 * {@link ManagedObject} that depends on the matching {@link AutoWire}.
 	 */
 	public void testAssignTeamForManagedObjectDependency() throws Exception {
@@ -1441,7 +1441,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure not load unused {@link Team} for {@link Task} having dependency on
+	 * Ensure not load unused {@link Team} for {@link ManagedFunction} having dependency on
 	 * a {@link ManagedObject} that depends on the matching {@link AutoWire}.
 	 */
 	public void testUnusedTeamForManagedObjectDependency() throws Exception {
@@ -1469,7 +1469,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		MockTeamDependencyManagedObject managedObject;
 
 		/**
-		 * {@link Task} depends on {@link #managedObject} which depends on
+		 * {@link ManagedFunction} depends on {@link #managedObject} which depends on
 		 * {@link Connection}.
 		 */
 		public void taskAssign() {
@@ -1477,7 +1477,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can assign a {@link Team} for {@link Task} having dependency on a
+	 * Ensure can assign a {@link Team} for {@link ManagedFunction} having dependency on a
 	 * {@link ManagedObject} that depends on the matching qualified
 	 * {@link AutoWire}.
 	 */
@@ -1488,7 +1488,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure not load unused {@link Team} for {@link Task} having dependency on
+	 * Ensure not load unused {@link Team} for {@link ManagedFunction} having dependency on
 	 * a {@link ManagedObject} that depends on the matching qualified
 	 * {@link AutoWire}.
 	 */
@@ -1519,7 +1519,7 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 		MockTeamDependencyManagedObject managedObject;
 
 		/**
-		 * {@link Task} depends on {@link #managedObject} which depends on
+		 * {@link ManagedFunction} depends on {@link #managedObject} which depends on
 		 * {@link Connection}.
 		 */
 		public void taskAssign() {
@@ -1683,13 +1683,13 @@ public class AutoWireOfficeSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link OfficeTaskType} instances by {@link OfficeSection} name and
-	 * {@link Task} name.
+	 * {@link ManagedFunction} name.
 	 */
 	private final Map<String, Map<String, OfficeTaskType>> taskTypes = new HashMap<String, Map<String, OfficeTaskType>>();
 
 	/**
 	 * {@link OfficeSectionTask} instances by {@link OfficeSection} name and
-	 * {@link Task} name.
+	 * {@link ManagedFunction} name.
 	 */
 	private final Map<String, Map<String, OfficeSectionTask>> tasks = new HashMap<String, Map<String, OfficeSectionTask>>();
 

@@ -20,8 +20,8 @@ package net.officefloor.frame.integrate.flow;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.Flow;
@@ -33,7 +33,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
- * Ensure able to invoke flow dynamically by {@link Work} and {@link Task} name.
+ * Ensure able to invoke flow dynamically by {@link Work} and {@link ManagedFunction} name.
  * 
  * @author Daniel Sagenschneider
  */
@@ -71,7 +71,7 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 	public static class DynamicInvokeFlowWork {
 
 		/**
-		 * Indicates if the dynamic {@link Task} was invoked.
+		 * Indicates if the dynamic {@link ManagedFunction} was invoked.
 		 */
 		public boolean isDynamicTaskInvoked = false;
 
@@ -84,14 +84,14 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		 * Invokes the {@link Flow} dynamically.
 		 * 
 		 * @param context
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
-		public void initialTask(TaskContext<?, ?, ?> context) throws Exception {
+		public void initialTask(ManagedFunctionContext<?, ?, ?> context) throws Exception {
 			context.doFlow("WORK", "dynamicTask", "PARAMETER");
 		}
 
 		/**
-		 * {@link Task} to invoke dynamically.
+		 * {@link ManagedFunction} to invoke dynamically.
 		 * 
 		 * @param parameter
 		 *            Parameter.
@@ -150,7 +150,7 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		private final Object contextValue;
 
 		/**
-		 * Indicates if the dynamic {@link Task} was invoked.
+		 * Indicates if the dynamic {@link ManagedFunction} was invoked.
 		 */
 		public boolean isDynamicTaskInvoked = false;
 
@@ -176,11 +176,11 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		 * Invokes the {@link Flow} dynamically.
 		 * 
 		 * @param context
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 * @param managedObject
 		 *            {@link ManagedObject} value.
 		 */
-		public void initialTask(TaskContext<?, ?, ?> context,
+		public void initialTask(ManagedFunctionContext<?, ?, ?> context,
 				Map<String, Object> managedObject) throws Exception {
 
 			// Provide context value
@@ -191,7 +191,7 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/**
-		 * {@link Task} to invoke dynamically.
+		 * {@link ManagedFunction} to invoke dynamically.
 		 * 
 		 * @param managedObject
 		 *            {@link ManagedObject} object.

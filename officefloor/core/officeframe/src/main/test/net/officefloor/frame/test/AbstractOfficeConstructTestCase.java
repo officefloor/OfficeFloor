@@ -28,14 +28,14 @@ import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -103,7 +103,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * {@link ReflectiveTaskBuilder} instances.
 	 * <p>
 	 * This is necessary as stress tests using the {@link ReflectiveTaskBuilder}
-	 * will get {@link OutOfMemoryError} issues should every {@link Task}
+	 * will get {@link OutOfMemoryError} issues should every {@link ManagedFunction}
 	 * executed be recorded.
 	 */
 	private boolean isRecordReflectiveTaskMethodsInvoked = false;
@@ -282,7 +282,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @param work
 	 *            {@link Work}.
 	 * @param initialTaskName
-	 *            Name of the initial {@link Task}.
+	 *            Name of the initial {@link ManagedFunction}.
 	 * @return {@link WorkBuilder} for the {@link Work}.
 	 */
 	public <W extends Work> WorkBuilder<W> constructWork(String workName,
@@ -316,7 +316,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            Work name.
 	 * @param initialTaskName
 	 *            Initial task name. May be <code>null</code> if no initial
-	 *            {@link Task}.
+	 *            {@link ManagedFunction}.
 	 * @return {@link ReflectiveWorkBuilder}.
 	 */
 	public ReflectiveWorkBuilder constructWork(Object workObject,
@@ -332,13 +332,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * {@link ReflectiveTaskBuilder} instances.
 	 * <p>
 	 * This is necessary as stress tests using the {@link ReflectiveTaskBuilder}
-	 * will get {@link OutOfMemoryError} issues should every {@link Task}
+	 * will get {@link OutOfMemoryError} issues should every {@link ManagedFunction}
 	 * executed be recorded.
 	 * <p>
 	 * By default this is <code>false</code> to not record.
 	 * 
 	 * @param isRecord
-	 *            <code>true</code> to record the {@link Task} instances
+	 *            <code>true</code> to record the {@link ManagedFunction} instances
 	 *            invoked.
 	 */
 	public void setRecordReflectiveTaskMethodsInvoked(boolean isRecord) {
@@ -393,7 +393,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	}
 
 	/**
-	 * Facade method to register a {@link Task}.
+	 * Facade method to register a {@link ManagedFunction}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
@@ -402,19 +402,19 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @param <F>
 	 *            Flow key type.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param taskFactory
-	 *            {@link TaskFactory}.
+	 *            {@link ManagedFunctionFactory}.
 	 * @param teamName
 	 *            Name of the {@link Team}.
-	 * @return {@link TaskBuilder} for the {@link Task}.
+	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
-			String taskName, TaskFactory<W, D, F> taskFactory, String teamName) {
+	public <W extends Work, D extends Enum<D>, F extends Enum<F>> ManagedFunctionBuilder<W, D, F> constructTask(
+			String taskName, ManagedFunctionFactory<W, D, F> taskFactory, String teamName) {
 
 		// Create the Task Builder
-		TaskBuilder taskBuilder = ((WorkBuilder) this.workBuilder).addTask(
+		ManagedFunctionBuilder taskBuilder = ((WorkBuilder) this.workBuilder).addManagedFunction(
 				taskName, taskFactory);
 
 		// Link to Team
@@ -425,7 +425,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	}
 
 	/**
-	 * Facade method to register a {@link Task}.
+	 * Facade method to register a {@link ManagedFunction}.
 	 *
 	 * @param <W>
 	 *            {@link Work} type.
@@ -434,9 +434,9 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @param <F>
 	 *            Flow key type.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param taskFactory
-	 *            {@link TaskFactory}.
+	 *            {@link ManagedFunctionFactory}.
 	 * @param teamName
 	 *            Name of the {@link Team}.
 	 * @param moName
@@ -444,19 +444,19 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @param moType
 	 *            Type of the {@link ManagedObject}.
 	 * @param nextTaskName
-	 *            Name of the next {@link Task}.
+	 *            Name of the next {@link ManagedFunction}.
 	 * @param nextTaskArgumentType
-	 *            Type of argument to the next {@link Task}.
-	 * @return {@link TaskBuilder} for the {@link Task}.
+	 *            Type of argument to the next {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
-			String taskName, TaskFactory<W, D, F> taskFactory, String teamName,
+	public <W extends Work, D extends Enum<D>, F extends Enum<F>> ManagedFunctionBuilder<W, D, F> constructTask(
+			String taskName, ManagedFunctionFactory<W, D, F> taskFactory, String teamName,
 			String moName, Class<?> moType, String nextTaskName,
 			Class<?> nextTaskArgumentType) {
 
 		// Create the Task Builder
-		TaskBuilder taskBuilder = this.constructTask(taskName, taskFactory,
+		ManagedFunctionBuilder taskBuilder = this.constructTask(taskName, taskFactory,
 				teamName);
 
 		// Register the next task and managed object
@@ -472,7 +472,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	}
 
 	/**
-	 * Facade method to register a {@link Task}.
+	 * Facade method to register a {@link ManagedFunction}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
@@ -481,25 +481,25 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @param <F>
 	 *            Flow key type.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param task
-	 *            {@link Task}.
+	 *            {@link ManagedFunction}.
 	 * @param teamName
 	 *            Name of the {@link Team}.
 	 * @param nextTaskName
-	 *            Name of the next {@link Task}.
+	 *            Name of the next {@link ManagedFunction}.
 	 * @param nextTaskArgumentType
-	 *            {@link Class} of the argument to the next {@link Task}.
-	 * @return {@link TaskBuilder} for the {@link Task}.
+	 *            {@link Class} of the argument to the next {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("rawtypes")
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder constructTask(
-			String taskName, final Task<W, D, F> task, String teamName,
+	public <W extends Work, D extends Enum<D>, F extends Enum<F>> ManagedFunctionBuilder constructTask(
+			String taskName, final ManagedFunction<W, D, F> task, String teamName,
 			String nextTaskName, Class<?> nextTaskArgumentType) {
 
 		// Create the Task Factory
-		TaskFactory<W, D, F> taskFactory = new TaskFactory<W, D, F>() {
-			public Task<W, D, F> createTask(W work) {
+		ManagedFunctionFactory<W, D, F> taskFactory = new ManagedFunctionFactory<W, D, F>() {
+			public ManagedFunction<W, D, F> createManagedFunction(W work) {
 				return task;
 			}
 		};

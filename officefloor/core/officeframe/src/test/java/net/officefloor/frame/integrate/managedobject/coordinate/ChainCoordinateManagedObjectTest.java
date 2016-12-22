@@ -24,7 +24,7 @@ import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
@@ -160,7 +160,7 @@ public class ChainCoordinateManagedObjectTest extends
 		public volatile String coordination = null;
 
 		/**
-		 * {@link Task} to receive results of chained coordination.
+		 * {@link ManagedFunction} to receive results of chained coordination.
 		 * 
 		 * @param coordination
 		 *            Result of chained coordination.

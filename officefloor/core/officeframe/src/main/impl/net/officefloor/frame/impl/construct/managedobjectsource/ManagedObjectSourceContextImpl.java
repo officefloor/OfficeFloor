@@ -19,11 +19,11 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -200,7 +200,7 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 		private final WorkBuilder<W> workBuilder;
 
 		/**
-		 * Flag indicating if first {@link Task} being added.
+		 * Flag indicating if first {@link ManagedFunction} being added.
 		 */
 		private boolean isFirstTask = true;
 
@@ -220,10 +220,10 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 
 		@Override
 		public <d extends Enum<d>, f extends Enum<f>> ManagedObjectTaskBuilder<d, f> addTask(
-				String taskName, TaskFactory<W, d, f> taskFactory) {
+				String taskName, ManagedFunctionFactory<W, d, f> taskFactory) {
 
 			// Create and initialise the task
-			TaskBuilder<W, d, f> taskBuilder = this.workBuilder.addTask(
+			ManagedFunctionBuilder<W, d, f> taskBuilder = this.workBuilder.addManagedFunction(
 					taskName, taskFactory);
 
 			// Register as initial task of work if first task
@@ -244,17 +244,17 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 			implements ManagedObjectTaskBuilder<d, f> {
 
 		/**
-		 * {@link TaskBuilder}.
+		 * {@link ManagedFunctionBuilder}.
 		 */
-		private final TaskBuilder<?, d, f> taskBuilder;
+		private final ManagedFunctionBuilder<?, d, f> taskBuilder;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param taskBuilder
-		 *            {@link TaskBuilder}.
+		 *            {@link ManagedFunctionBuilder}.
 		 */
-		public ManagedObjectTaskBuilderImpl(TaskBuilder<?, d, f> taskBuilder) {
+		public ManagedObjectTaskBuilderImpl(ManagedFunctionBuilder<?, d, f> taskBuilder) {
 			this.taskBuilder = taskBuilder;
 		}
 

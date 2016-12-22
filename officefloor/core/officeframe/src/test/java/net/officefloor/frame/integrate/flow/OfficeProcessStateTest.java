@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.integrate.flow;
 
-import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
@@ -63,7 +63,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		WorkBuilder<WorkOne> workOneBuilder = this.constructWork("WORK_ONE",
 				workOne, "SENDER");
 		workOneBuilder.addWorkManagedObject("mo-one", "MANAGED_OBJECT");
-		TaskBuilder<WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> taskOneBuilder = this
+		ManagedFunctionBuilder<WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> taskOneBuilder = this
 				.constructTask("SENDER", workOne, "TEAM", null, null);
 		taskOneBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
 				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL,
@@ -77,7 +77,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		WorkBuilder<WorkTwo> workTwoBuilder = this.constructWork("WORK_TWO",
 				workTwo, "RECEIVER");
 		workTwoBuilder.addWorkManagedObject("mo-two", "MANAGED_OBJECT");
-		TaskBuilder<WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> taskTwoBuilder = this
+		ManagedFunctionBuilder<WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> taskTwoBuilder = this
 				.constructTask("RECEIVER", workTwo, "TEAM", null, null);
 		taskTwoBuilder.linkManagedObject(
 				WorkTwoManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(),
@@ -111,7 +111,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 	 * First {@link Work} type for testing.
 	 */
 	private class WorkOne implements Work,
-			Task<WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> {
+			ManagedFunction<WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> {
 
 		/**
 		 * Parameter to invoke delegate work with.
@@ -133,8 +133,8 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Object doTask(
-				TaskContext<WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> context)
+		public Object execute(
+				ManagedFunctionContext<WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> context)
 				throws Exception {
 
 			// Obtain the Managed Object
@@ -167,7 +167,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 	 * Second {@link Work} type for testing.
 	 */
 	private class WorkTwo implements Work,
-			Task<WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> {
+			ManagedFunction<WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> {
 
 		/**
 		 * Parameter received when {@link Work} invoked.
@@ -188,8 +188,8 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Object doTask(
-				TaskContext<WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> context)
+		public Object execute(
+				ManagedFunctionContext<WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> context)
 				throws Exception {
 
 			// Obtain the Managed Object

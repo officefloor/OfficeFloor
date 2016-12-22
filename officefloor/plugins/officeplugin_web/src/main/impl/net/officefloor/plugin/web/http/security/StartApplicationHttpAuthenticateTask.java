@@ -17,20 +17,20 @@
  */
 package net.officefloor.plugin.web.http.security;
 
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 
 /**
- * {@link Task} and {@link TaskFactory} for triggering authentication with
+ * {@link ManagedFunction} and {@link ManagedFunctionFactory} for triggering authentication with
  * application specific credentials.
  * 
  * @author Daniel Sagenschneider
  */
 public class StartApplicationHttpAuthenticateTask
 		implements
-		TaskFactory<HttpSecurityWork, StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows>,
-		Task<HttpSecurityWork, StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows> {
+		ManagedFunctionFactory<HttpSecurityWork, StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows>,
+		ManagedFunction<HttpSecurityWork, StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows> {
 
 	/**
 	 * Dependency keys.
@@ -51,7 +51,7 @@ public class StartApplicationHttpAuthenticateTask
 	 */
 
 	@Override
-	public Task<HttpSecurityWork, Dependencies, Flows> createTask(
+	public ManagedFunction<HttpSecurityWork, Dependencies, Flows> createManagedFunction(
 			HttpSecurityWork work) {
 		return this;
 	}
@@ -62,8 +62,8 @@ public class StartApplicationHttpAuthenticateTask
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Object doTask(
-			TaskContext<HttpSecurityWork, Dependencies, Flows> context)
+	public Object execute(
+			ManagedFunctionContext<HttpSecurityWork, Dependencies, Flows> context)
 			throws Throwable {
 
 		// Obtain the dependencies

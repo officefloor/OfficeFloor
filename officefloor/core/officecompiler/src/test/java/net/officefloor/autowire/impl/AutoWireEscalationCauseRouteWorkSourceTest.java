@@ -26,9 +26,9 @@ import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.impl.AutoWireEscalationCauseRouteWorkSource.AutoWireEscalationCauseRouteTask;
 import net.officefloor.autowire.impl.AutoWireEscalationCauseRouteWorkSource.Dependencies;
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -95,9 +95,9 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 		// Create the expected type
 		AutoWireEscalationCauseRouteTask factory = new AutoWireEscalationCauseRouteTask(
 				null);
-		WorkTypeBuilder<AutoWireEscalationCauseRouteTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<AutoWireEscalationCauseRouteTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
-		TaskTypeBuilder<Dependencies, Indexed> task = type.addTaskType(
+		ManagedFunctionTypeBuilder<Dependencies, Indexed> task = type.addManagedFunctionType(
 				"Handle", factory, Dependencies.class, Indexed.class);
 		task.addObject(Throwable.class).setKey(Dependencies.ESCALATION);
 		task.addEscalation(Throwable.class);
@@ -115,9 +115,9 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 		// Create the expected type
 		AutoWireEscalationCauseRouteTask factory = new AutoWireEscalationCauseRouteTask(
 				null);
-		WorkTypeBuilder<AutoWireEscalationCauseRouteTask> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<AutoWireEscalationCauseRouteTask> type = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
-		TaskTypeBuilder<Dependencies, Indexed> task = type.addTaskType(
+		ManagedFunctionTypeBuilder<Dependencies, Indexed> task = type.addManagedFunctionType(
 				"Handle", factory, Dependencies.class, Indexed.class);
 		task.addObject(Throwable.class).setKey(Dependencies.ESCALATION);
 		this.registerFlow(task, IOException.class);
@@ -144,13 +144,13 @@ public class AutoWireEscalationCauseRouteWorkSourceTest extends
 	 * Register the flow.
 	 * 
 	 * @param task
-	 *            {@link TaskTypeBuilder}.
+	 *            {@link ManagedFunctionTypeBuilder}.
 	 * @param cause
 	 *            {@link Class} of the cause.
 	 */
-	private void registerFlow(TaskTypeBuilder<Dependencies, Indexed> task,
+	private void registerFlow(ManagedFunctionTypeBuilder<Dependencies, Indexed> task,
 			Class<? extends Throwable> cause) {
-		TaskFlowTypeBuilder<Indexed> flow = task.addFlow();
+		ManagedFunctionFlowTypeBuilder<Indexed> flow = task.addFlow();
 		flow.setArgumentType(cause);
 		flow.setLabel(cause.getName());
 	}

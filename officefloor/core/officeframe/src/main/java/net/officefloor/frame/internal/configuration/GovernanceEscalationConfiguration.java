@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
@@ -35,10 +35,10 @@ public interface GovernanceEscalationConfiguration {
 	Class<? extends Throwable> getTypeOfCause();
 
 	/**
-	 * Obtains the {@link TaskNodeReference} for the {@link Task} handling the
+	 * Obtains the {@link TaskNodeReference} for the {@link ManagedFunction} handling the
 	 * escalation.
 	 * 
-	 * @return {@link TaskNodeReference} for the {@link Task} handling the
+	 * @return {@link TaskNodeReference} for the {@link ManagedFunction} handling the
 	 *         escalation.
 	 */
 	TaskNodeReference getTaskNodeReference();

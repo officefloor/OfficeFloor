@@ -22,8 +22,8 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
@@ -33,7 +33,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 import net.officefloor.plugin.web.http.template.parse.HttpTemplate;
 
 /**
- * Initial {@link Task} to ensure appropriate conditions for rendering the
+ * Initial {@link ManagedFunction} to ensure appropriate conditions for rendering the
  * {@link HttpTemplate}.
  * 
  * @author Daniel Sagenschneider
@@ -127,8 +127,8 @@ public class HttpTemplateInitialTask
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<HttpTemplateInitialTask, Dependencies, Flows> context)
+	public Object execute(
+			ManagedFunctionContext<HttpTemplateInitialTask, Dependencies, Flows> context)
 			throws IOException {
 
 		// Obtain the dependencies

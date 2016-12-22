@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -62,21 +62,21 @@ public interface WorkConfiguration<W extends Work> {
 	AdministratorSourceConfiguration<?, ?>[] getAdministratorConfiguration();
 
 	/**
-	 * Obtains the name of the initial {@link Task} of the {@link Work}.
+	 * Obtains the name of the initial {@link ManagedFunction} of the {@link Work}.
 	 * 
-	 * @return Name of the initial {@link Task} of the {@link Work}.
+	 * @return Name of the initial {@link ManagedFunction} of the {@link Work}.
 	 */
 	String getInitialTaskName();
 
 	/**
-	 * Obtains the configuration for the {@link Task} instances for the
+	 * Obtains the configuration for the {@link ManagedFunction} instances for the
 	 * {@link Work}.
 	 * 
 	 * @param <D>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
-	 * @return Configuration for the {@link Task} instances of the {@link Work}.
+	 * @return Configuration for the {@link ManagedFunction} instances of the {@link Work}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>> TaskConfiguration<W, D, F>[] getTaskConfiguration();
 

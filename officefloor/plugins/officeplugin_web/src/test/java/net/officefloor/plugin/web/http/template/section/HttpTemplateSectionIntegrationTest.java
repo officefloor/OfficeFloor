@@ -30,7 +30,7 @@ import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.autowire.ManagedObjectSourceWirerContext;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -700,8 +700,8 @@ public class HttpTemplateSectionIntegrationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure on submit link that has next {@link Task} instances that if last
-	 * {@link Task} in Flow does not indicate {@link NextTask} that the template
+	 * Ensure on submit link that has next {@link ManagedFunction} instances that if last
+	 * {@link ManagedFunction} in Flow does not indicate {@link NextTask} that the template
 	 * is rendered.
 	 */
 	public void testRenderByDefault() throws Exception {

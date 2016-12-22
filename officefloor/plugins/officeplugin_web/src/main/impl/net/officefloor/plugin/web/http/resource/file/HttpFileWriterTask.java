@@ -20,8 +20,8 @@ package net.officefloor.plugin.web.http.resource.file;
 import java.io.IOException;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -29,7 +29,7 @@ import net.officefloor.plugin.web.http.resource.AbstractHttpFile;
 import net.officefloor.plugin.web.http.resource.HttpFile;
 
 /**
- * {@link TaskFactory} to write a {@link HttpFile} to the {@link HttpResponse}.
+ * {@link ManagedFunctionFactory} to write a {@link HttpFile} to the {@link HttpResponse}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -49,8 +49,8 @@ public class HttpFileWriterTask
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<HttpFileWriterTask, HttpFileWriterTaskDependencies, None> context)
+	public Object execute(
+			ManagedFunctionContext<HttpFileWriterTask, HttpFileWriterTaskDependencies, None> context)
 			throws IOException {
 
 		// Obtain the dependencies

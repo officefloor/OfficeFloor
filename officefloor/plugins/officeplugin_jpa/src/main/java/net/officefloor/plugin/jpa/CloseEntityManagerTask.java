@@ -20,13 +20,13 @@ package net.officefloor.plugin.jpa;
 import javax.persistence.EntityManager;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
- * {@link Task} to close the {@link EntityManager}.
+ * {@link ManagedFunction} to close the {@link EntityManager}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -36,7 +36,7 @@ public class CloseEntityManagerTask
 		AbstractSingleTask<CloseEntityManagerTask, CloseEntityManagerTask.CloseEntityManagerDependencies, None> {
 
 	/**
-	 * Recycle {@link Task} dependencies to close the {@link EntityManager}.
+	 * Recycle {@link ManagedFunction} dependencies to close the {@link EntityManager}.
 	 */
 	public static enum CloseEntityManagerDependencies {
 		MANAGED_OBJECT
@@ -48,8 +48,8 @@ public class CloseEntityManagerTask
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object doTask(
-			TaskContext<CloseEntityManagerTask, CloseEntityManagerDependencies, None> context)
+	public Object execute(
+			ManagedFunctionContext<CloseEntityManagerTask, CloseEntityManagerDependencies, None> context)
 			throws Throwable {
 
 		// Obtain the recycle parameter

@@ -17,31 +17,37 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
+ * <p>
  * Container managing the {@link Governance}.
+ * <p>
+ * {@link Governance} may only reside on the single {@link ThreadState}
+ * requiring the {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceContainer<I, F extends Enum<F>> {
+public interface GovernanceContainer<I> {
 
 	/**
-	 * Obtains the index of this {@link Governance} registered within the
-	 * {@link ProcessState}.
+	 * Registers the {@link ManagedObject} for {@link Governance}.
 	 * 
-	 * @return Index of this {@link Governance} registered within the
-	 *         {@link ProcessState}.
+	 * @param managedObjectExtension
+	 *            Extension of the {@link ManagedObject} to enable
+	 *            {@link Governance}.
+	 * @param managedObjectContainer
+	 *            {@link ManagedObjectContainer} for the {@link ManagedObject}.
+	 * @param flow
+	 *            {@link Flow} that the {@link Governance} will be involved in.
+	 *            {@link ManagedFunction}.
+	 * @param workContainer
+	 *            {@link WorkContainer}.
+	 * @return {@link RegisteredGovernance}.
 	 */
-	int getProcessRegisteredIndex();
-
-	/**
-	 * Indicates if this {@link Governance} is active.
-	 * 
-	 * @return <code>true</code> if this {@link Governance} is active.
-	 */
-	boolean isActive();
+	RegisteredGovernance registerManagedObject(I managedObjectExtension, ManagedObjectContainer managedObjectContainer);
 
 	/**
 	 * Activates the {@link Governance}.
@@ -49,20 +55,6 @@ public interface GovernanceContainer<I, F extends Enum<F>> {
 	 * @return {@link FunctionState} to activate the {@link Governance}.
 	 */
 	FunctionState activateGovernance();
-
-	/**
-	 * Creates the {@link ActiveGovernance} to enable activation of
-	 * {@link Governance} of the {@link ManagedObject}.
-	 * 
-	 * @param extensionInterface
-	 *            Appropriate extension interface of the {@link ManagedObject}
-	 *            to allow {@link Governance} over it.
-	 * @param managedobjectContainer
-	 *            {@link ManagedObjectContainer} of the {@link ManagedObject}.
-	 * @return {@link ActiveGovernance} for the {@link ManagedObject} of the
-	 *         {@link ManagedObjectContainer}.
-	 */
-	ActiveGovernance<I, F> createActiveGovernance(I extensionInterface, ManagedObjectContainer managedobjectContainer);
 
 	/**
 	 * Enforces the {@link Governance}.

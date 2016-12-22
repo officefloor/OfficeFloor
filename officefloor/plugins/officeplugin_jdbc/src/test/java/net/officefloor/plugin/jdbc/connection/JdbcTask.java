@@ -24,10 +24,10 @@ import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
@@ -35,7 +35,7 @@ import net.officefloor.plugin.jdbc.ConnectionValidator;
 import net.officefloor.plugin.jdbc.connection.JdbcManagedObjectSource;
 
 /**
- * {@link Task} providing testing of a {@link Connection} from a
+ * {@link ManagedFunction} providing testing of a {@link Connection} from a
  * {@link JdbcManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
@@ -63,7 +63,7 @@ public class JdbcTask extends AbstractSingleTask<Work, Indexed, None> {
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder} to construct against.
 	 * @param namePrefix
-	 *            Prefix for {@link Work} and {@link Task} names.
+	 *            Prefix for {@link Work} and {@link ManagedFunction} names.
 	 * @param jdbcMoName
 	 *            Name of the {@link JdbcManagedObjectSource}.
 	 * @param teamName
@@ -85,7 +85,7 @@ public class JdbcTask extends AbstractSingleTask<Work, Indexed, None> {
 		workBuilder.addWorkManagedObject("mo", jdbcMoName);
 
 		// Configure the Task
-		TaskBuilder<Work, Indexed, None> taskBuilder = this.registerTask(
+		ManagedFunctionBuilder<Work, Indexed, None> taskBuilder = this.registerTask(
 				"Task", teamName, workBuilder);
 		taskBuilder.linkManagedObject(0, "mo", Connection.class);
 
@@ -98,7 +98,7 @@ public class JdbcTask extends AbstractSingleTask<Work, Indexed, None> {
 	 */
 
 	@Override
-	public Object doTask(TaskContext<Work, Indexed, None> context)
+	public Object execute(ManagedFunctionContext<Work, Indexed, None> context)
 			throws Throwable {
 
 		// Obtain the Connection

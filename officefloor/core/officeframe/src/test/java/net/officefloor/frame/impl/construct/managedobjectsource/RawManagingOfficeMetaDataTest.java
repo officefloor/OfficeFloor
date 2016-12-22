@@ -22,7 +22,7 @@ import java.util.Map;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.ProcessFuture;
@@ -48,7 +48,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ProcessTicker;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -153,7 +153,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 			.createMock(OfficeFloorIssues.class);
 
 	/**
-	 * Ensure issue if no {@link WorkMetaData} for recycle {@link Task}.
+	 * Ensure issue if no {@link WorkMetaData} for recycle {@link ManagedFunction}.
 	 */
 	public void testNoWorkForRecycleTask() {
 
@@ -176,7 +176,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no initial {@link FlowMetaData} for recycle {@link Task}.
+	 * Ensure issue if no initial {@link FlowMetaData} for recycle {@link ManagedFunction}.
 	 */
 	public void testNoInitialFlowForRecycleTask() {
 
@@ -205,7 +205,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if incompatible parameter type for recycle {@link Task}.
+	 * Ensure issue if incompatible parameter type for recycle {@link ManagedFunction}.
 	 */
 	public void testIncompatibleRecycleTask() {
 
@@ -215,8 +215,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(WorkMetaData.class);
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record recycle task has incompatible parameter
 		this.record_managedObjectSourceName();
@@ -233,7 +233,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				taskMetaData);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(),
 				Integer.class);
-		this.recordReturn(taskMetaData, taskMetaData.getTaskName(), "TASK");
+		this.recordReturn(taskMetaData, taskMetaData.getFunctionName(), "TASK");
 		this.record_issue("Incompatible parameter type for recycle task (parameter="
 				+ Integer.class.getName()
 				+ ", required type="
@@ -247,7 +247,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to link the recycle {@link Task} before managing.
+	 * Ensure able to link the recycle {@link ManagedFunction} before managing.
 	 */
 	public void testLinkRecycleTaskBeforeManaging() {
 
@@ -257,8 +257,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(WorkMetaData.class);
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
@@ -307,7 +307,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to link the recycle {@link Task} after managing.
+	 * Ensure able to link the recycle {@link ManagedFunction} after managing.
 	 */
 	public void testLinkRecycleTaskAfterManaging() {
 
@@ -317,8 +317,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(WorkMetaData.class);
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this
 				.createMock(ManagedObject.class);
@@ -365,7 +365,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to not have a recycle {@link Task}.
+	 * Ensure able to not have a recycle {@link ManagedFunction}.
 	 */
 	public void testNoRecycleTask() {
 
@@ -558,7 +558,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no {@link TaskMetaData} for the {@link Flow}.
+	 * Ensures issue if no {@link ManagedFunctionMetaData} for the {@link Flow}.
 	 */
 	public void testNoFlowTask() {
 
@@ -596,7 +596,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if incompatible argument to {@link flow} {@link Task}.
+	 * Ensures issue if incompatible argument to {@link flow} {@link ManagedFunction}.
 	 */
 	public void testIncompatibleFlowArgument() {
 
@@ -606,8 +606,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowConfiguration.class);
 		final TaskNodeReference taskReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record incompatible argument
 		this.record_managedObjectSourceName();
@@ -653,8 +653,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowConfiguration.class);
 		final TaskNodeReference taskReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);
 		final ManagedObjectFlowConfiguration<?> flowConfigurationTwo = this
 				.createMock(ManagedObjectFlowConfiguration.class);
@@ -705,8 +705,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowConfiguration.class);
 		final TaskNodeReference taskReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);
 		final String parameter = "PARAMETER";
 		final ManagedObject managedObject = this
@@ -828,8 +828,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowConfiguration.class);
 		final TaskNodeReference taskReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);
 		final String parameter = "PARAMETER";
 		final ManagedObject managedObject = this
@@ -959,7 +959,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records no recycle {@link Task}.
+	 * Records no recycle {@link ManagedFunction}.
 	 */
 	private void record_noRecycleTask() {
 		this.recordReturn(this.metaDataLocator,

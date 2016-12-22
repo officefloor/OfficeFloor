@@ -23,7 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -53,10 +53,10 @@ public interface ServletRequestForwarder {
 	 * @param workName
 	 *            Name of {@link Work} to forward the {@link ServletRequest}.
 	 * @param taskName
-	 *            Name of {@link Task} on the {@link Work} to forward the
+	 *            Name of {@link ManagedFunction} on the {@link Work} to forward the
 	 *            {@link ServletRequest}.
 	 * @param parameter
-	 *            Parameter for the {@link Task}.
+	 *            Parameter for the {@link ManagedFunction}.
 	 * @throws ServletException
 	 *             If fails to forward the {@link ServletRequest}.
 	 */

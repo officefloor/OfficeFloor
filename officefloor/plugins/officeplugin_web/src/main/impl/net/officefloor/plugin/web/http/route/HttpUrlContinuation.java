@@ -20,7 +20,7 @@ package net.officefloor.plugin.web.http.route;
 import java.io.IOException;
 import java.io.Serializable;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -109,7 +109,7 @@ public class HttpUrlContinuation {
 	private final String workName;
 
 	/**
-	 * Name of the {@link Task}.
+	 * Name of the {@link ManagedFunction}.
 	 */
 	private final String taskName;
 
@@ -125,7 +125,7 @@ public class HttpUrlContinuation {
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param isSecure
 	 *            Indicates if secure. May be <code>null</code> to indicate
 	 *            service either way.
@@ -147,10 +147,10 @@ public class HttpUrlContinuation {
 	}
 
 	/**
-	 * Obtains the name of the {@link Task} on the {@link Work} to service the
+	 * Obtains the name of the {@link ManagedFunction} on the {@link Work} to service the
 	 * URL continuation.
 	 * 
-	 * @return {@link Task} name.
+	 * @return {@link ManagedFunction} name.
 	 */
 	public String getTaskName() {
 		return this.taskName;

@@ -20,10 +20,10 @@ package net.officefloor.frame.integrate.stress;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
@@ -88,7 +88,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 * Does the coordination stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link Task} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -149,7 +149,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	public class CoordinateWork {
 
 		/**
-		 * Maximum number of times to invoke another {@link Task}.
+		 * Maximum number of times to invoke another {@link ManagedFunction}.
 		 */
 		private final int maxInvokes;
 
@@ -172,7 +172,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		 * Initiate.
 		 * 
 		 * @param maxInvokes
-		 *            Maximum number of times to invoke another {@link Task}.
+		 *            Maximum number of times to invoke another {@link ManagedFunction}.
 		 */
 		public CoordinateWork(int maxInvokes) {
 			this.maxInvokes = maxInvokes;
@@ -220,7 +220,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * {@link ManagedObject} used directly by {@link Task}.
+	 * {@link ManagedObject} used directly by {@link ManagedFunction}.
 	 */
 	public static class DirectUseManagedObject implements
 			CoordinatingManagedObject<Indexed> {
@@ -387,8 +387,8 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	public static class DependencyManagedObjectSource extends
 			AbstractManagedObjectSource<None, Indexed> implements
 			WorkFactory<DependencyManagedObjectSource>, Work,
-			TaskFactory<DependencyManagedObjectSource, Indexed, None>,
-			Task<DependencyManagedObjectSource, Indexed, None> {
+			ManagedFunctionFactory<DependencyManagedObjectSource, Indexed, None>,
+			ManagedFunction<DependencyManagedObjectSource, Indexed, None> {
 
 		/**
 		 * {@link ManagedObjectExecuteContext}.
@@ -448,14 +448,14 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		public Task<DependencyManagedObjectSource, Indexed, None> createTask(
+		public ManagedFunction<DependencyManagedObjectSource, Indexed, None> createTask(
 				DependencyManagedObjectSource work) {
 			return work;
 		}
 
 		@Override
-		public Object doTask(
-				TaskContext<DependencyManagedObjectSource, Indexed, None> context)
+		public Object execute(
+				ManagedFunctionContext<DependencyManagedObjectSource, Indexed, None> context)
 				throws Throwable {
 
 			// Obtain the dependency managed object

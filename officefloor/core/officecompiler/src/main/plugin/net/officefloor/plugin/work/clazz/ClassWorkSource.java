@@ -30,24 +30,24 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.WorkSourceService;
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * {@link WorkSource} for a {@link Class} having the {@link Object} as the
- * {@link Work} and {@link Method} instances as the {@link Task} instances.
+ * {@link ManagedFunctionSource} for a {@link Class} having the {@link Object} as the
+ * {@link Work} and {@link Method} instances as the {@link ManagedFunction} instances.
  * 
  * @author Daniel Sagenschneider
  */
@@ -90,7 +90,7 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 	}
 
 	/**
-	 * Allows overriding the creation of the {@link TaskFactory}.
+	 * Allows overriding the creation of the {@link ManagedFunctionFactory}.
 	 * 
 	 * @param clazz
 	 *            {@link Work} class.
@@ -101,7 +101,7 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 	}
 
 	/**
-	 * Allows overriding the creation of the {@link TaskFactory}.
+	 * Allows overriding the creation of the {@link ManagedFunctionFactory}.
 	 * 
 	 * @param clazz
 	 *            {@link Work} class.
@@ -111,39 +111,39 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 	 *            Indicates if the {@link Method} is static.
 	 * @param parameters
 	 *            {@link ParameterFactory} instances.
-	 * @return {@link TaskFactory}.
+	 * @return {@link ManagedFunctionFactory}.
 	 */
-	protected TaskFactory<ClassWork, Indexed, Indexed> createTaskFactory(
+	protected ManagedFunctionFactory<ClassWork, Indexed, Indexed> createTaskFactory(
 			Class<?> clazz, Method method, boolean isStatic,
 			ParameterFactory[] parameters) {
 		return new ClassTaskFactory(method, isStatic, parameters);
 	}
 
 	/**
-	 * Allows overriding the addition of the {@link TaskTypeBuilder}.
+	 * Allows overriding the addition of the {@link ManagedFunctionTypeBuilder}.
 	 * 
 	 * @param clazz
 	 *            {@link Work} class.
 	 * @param workTypeBuilder
-	 *            {@link WorkTypeBuilder}.
+	 *            {@link FunctionNamespaceBuilder}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param taskFactory
-	 *            {@link TaskFactory}.
+	 *            {@link ManagedFunctionFactory}.
 	 * @param objectSequence
 	 *            Object {@link Sequence}.
 	 * @param flowSequence
 	 *            Flow {@link Sequence}.
-	 * @return Added {@link TaskTypeBuilder}.
+	 * @return Added {@link ManagedFunctionTypeBuilder}.
 	 */
-	protected TaskTypeBuilder<Indexed, Indexed> addTaskType(Class<?> clazz,
-			WorkTypeBuilder<ClassWork> workTypeBuilder, String taskName,
-			TaskFactory<ClassWork, Indexed, Indexed> taskFactory,
+	protected ManagedFunctionTypeBuilder<Indexed, Indexed> addTaskType(Class<?> clazz,
+			FunctionNamespaceBuilder<ClassWork> workTypeBuilder, String taskName,
+			ManagedFunctionFactory<ClassWork, Indexed, Indexed> taskFactory,
 			Sequence objectSequence, Sequence flowSequence) {
 
 		// Include method as task in type definition
-		TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder = workTypeBuilder
-				.addTaskType(taskName, taskFactory, null, null);
+		ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder = workTypeBuilder
+				.addManagedFunctionType(taskName, taskFactory, null, null);
 
 		// Return the task type builder
 		return taskTypeBuilder;
@@ -173,8 +173,8 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 	}
 
 	@SuppressWarnings("unchecked")
-	public void sourceWork(WorkTypeBuilder<ClassWork> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<ClassWork> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the class loader
 		ClassLoader classLoader = context.getClassLoader();
@@ -238,11 +238,11 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 				Sequence flowSequence = new Sequence();
 
 				// Create the task factory
-				TaskFactory<ClassWork, Indexed, Indexed> taskFactory = this
+				ManagedFunctionFactory<ClassWork, Indexed, Indexed> taskFactory = this
 						.createTaskFactory(clazz, method, isStatic, parameters);
 
 				// Include method as task in type definition
-				TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder = this
+				ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder = this
 						.addTaskType(clazz, workTypeBuilder, methodName,
 								taskFactory, objectSequence, flowSequence);
 
@@ -280,7 +280,7 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 						// Otherwise must be an dependency object
 						parameterFactory = new ObjectParameterFactory(
 								objectSequence.nextIndex());
-						TaskObjectTypeBuilder<Indexed> objectTypeBuilder = taskTypeBuilder
+						ManagedFunctionObjectTypeBuilder<Indexed> objectTypeBuilder = taskTypeBuilder
 								.addObject(paramType);
 
 						// Determine type qualifier
@@ -346,11 +346,11 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 		 * Creates the {@link ParameterFactory}.
 		 * 
 		 * @param taskName
-		 *            Name of the {@link Task}.
+		 *            Name of the {@link ManagedFunction}.
 		 * @param parameterType
 		 *            Parameter type.
 		 * @param taskTypeBuilder
-		 *            {@link TaskTypeBuilder}.
+		 *            {@link ManagedFunctionTypeBuilder}.
 		 * @param objectSequence
 		 *            Object {@link Sequence}.
 		 * @param flowSequence
@@ -365,25 +365,25 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 		 */
 		ParameterFactory createParameterFactory(String taskName,
 				Class<?> parameterType,
-				TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder,
+				ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder,
 				Sequence objectSequence, Sequence flowSequence,
 				ClassLoader classLoader) throws Exception;
 	}
 
 	/**
-	 * {@link ParameterManufacturer} for the {@link TaskContext}.
+	 * {@link ParameterManufacturer} for the {@link ManagedFunctionContext}.
 	 */
 	protected static class TaskContextParameterManufacturer implements
 			ParameterManufacturer {
 		@Override
 		public ParameterFactory createParameterFactory(String taskName,
 				Class<?> parameterType,
-				TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder,
+				ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder,
 				Sequence objectSequence, Sequence flowSequence,
 				ClassLoader classLoader) {
 
 			// Determine if task context
-			if (TaskContext.class.equals(parameterType)) {
+			if (ManagedFunctionContext.class.equals(parameterType)) {
 				// Parameter is a task context
 				return new TaskContextParameterFactory();
 			}
@@ -421,7 +421,7 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 		@Override
 		public ParameterFactory createParameterFactory(String taskName,
 				Class<?> parameterType,
-				TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder,
+				ManagedFunctionTypeBuilder<Indexed, Indexed> taskTypeBuilder,
 				Sequence objectSequence, Sequence flowSequence,
 				ClassLoader classLoader) throws Exception {
 
@@ -513,7 +513,7 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 				flowMethodMetaDatas.put(flowMethodName, flowMethodMetaData);
 
 				// Register the flow
-				TaskFlowTypeBuilder<Indexed> flowTypeBuilder = taskTypeBuilder
+				ManagedFunctionFlowTypeBuilder<Indexed> flowTypeBuilder = taskTypeBuilder
 						.addFlow();
 				flowTypeBuilder.setLabel(flowMethodName);
 				if (flowParameterType != null) {

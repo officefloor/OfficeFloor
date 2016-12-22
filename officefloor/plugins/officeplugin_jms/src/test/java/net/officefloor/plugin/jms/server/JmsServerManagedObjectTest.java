@@ -30,8 +30,8 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
@@ -88,7 +88,7 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		// Create the process message task
 		AbstractSingleTask<Work, Indexed, None> processTask = new AbstractSingleTask<Work, Indexed, None>() {
 			@Override
-			public Object doTask(TaskContext<Work, Indexed, None> context)
+			public Object execute(ManagedFunctionContext<Work, Indexed, None> context)
 					throws Exception {
 
 				// Set text of message
@@ -111,7 +111,7 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		};
 
 		// Configure the process message task
-		TaskBuilder<Work, Indexed, None> taskBuilder = processTask
+		ManagedFunctionBuilder<Work, Indexed, None> taskBuilder = processTask
 				.registerTask("work", "task", "PROCESS_TEAM", officeBuilder);
 		taskBuilder.linkParameter(0, Message.class);
 		taskBuilder.linkPostTaskAdministration("TRANSACTION",

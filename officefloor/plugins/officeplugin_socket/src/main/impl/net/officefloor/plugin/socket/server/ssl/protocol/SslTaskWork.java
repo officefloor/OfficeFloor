@@ -18,12 +18,12 @@
 package net.officefloor.plugin.socket.server.ssl.protocol;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
- * {@link Task} to execute the SSL tasks.
+ * {@link ManagedFunction} to execute the SSL tasks.
  *
  * @author Daniel Sagenschneider
  */
@@ -42,8 +42,8 @@ public class SslTaskWork extends
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<SslTaskWork, SslTaskDependencies, None> context) {
+	public Object execute(
+			ManagedFunctionContext<SslTaskWork, SslTaskDependencies, None> context) {
 
 		// Obtain the task
 		Object task = context.getObject(SslTaskDependencies.TASK);

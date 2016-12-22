@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.Flow;
@@ -48,7 +48,7 @@ public interface ManagingOfficeBuilder<F extends Enum<F>> {
 
 	/**
 	 * Links the {@link Flow} for the {@link ManagedObjectSource} to a
-	 * {@link Task} within the managing {@link Office}.
+	 * {@link ManagedFunction} within the managing {@link Office}.
 	 *
 	 * @param key
 	 *            Key identifying the {@link Flow} instigated by the
@@ -56,13 +56,13 @@ public interface ManagingOfficeBuilder<F extends Enum<F>> {
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 */
 	void linkProcess(F key, String workName, String taskName);
 
 	/**
 	 * Links the {@link Flow} for the {@link ManagedObjectSource} to a
-	 * {@link Task} within the managing {@link Office}.
+	 * {@link ManagedFunction} within the managing {@link Office}.
 	 *
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow} instigated by the
@@ -70,7 +70,7 @@ public interface ManagingOfficeBuilder<F extends Enum<F>> {
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 */
 	void linkProcess(int flowIndex, String workName, String taskName);
 

@@ -24,13 +24,13 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -62,10 +62,10 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testType() {
 		HttpResponseSendTask task = new HttpResponseSendTask(-1, null);
-		WorkTypeBuilder<Work> workTypeBuilder = WorkLoaderUtil
+		FunctionNamespaceBuilder<Work> workTypeBuilder = WorkLoaderUtil
 				.createWorkTypeBuilder(task);
-		TaskTypeBuilder<HttpResponseSendTaskDependencies, None> taskBuilder = workTypeBuilder
-				.addTaskType("SEND", task,
+		ManagedFunctionTypeBuilder<HttpResponseSendTaskDependencies, None> taskBuilder = workTypeBuilder
+				.addManagedFunctionType("SEND", task,
 						HttpResponseSendTaskDependencies.class, None.class);
 		taskBuilder.addObject(ServerHttpConnection.class).setKey(
 				HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION);
@@ -82,8 +82,8 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 
 		final int status = 204;
 
-		TaskContext<Work, HttpResponseSendTaskDependencies, None> taskContext = this
-				.createMock(TaskContext.class);
+		ManagedFunctionContext<Work, HttpResponseSendTaskDependencies, None> taskContext = this
+				.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
 		HttpResponse response = this.createMock(HttpResponse.class);
@@ -102,15 +102,15 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Create the task
-		WorkType<Work> work = WorkLoaderUtil.loadWorkType(
+		FunctionNamespaceType<Work> work = WorkLoaderUtil.loadWorkType(
 				HttpResponseSenderWorkSource.class,
 				HttpResponseSenderWorkSource.PROPERTY_HTTP_STATUS,
 				String.valueOf(status));
-		Task task = work.getTaskTypes()[0].getTaskFactory().createTask(
+		ManagedFunction task = work.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
 				work.getWorkFactory().createWork());
 
 		// Execute the task
-		task.doTask(taskContext);
+		task.execute(taskContext);
 		this.verifyMockObjects();
 	}
 
@@ -128,8 +128,8 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 				"TestContent.html");
 		String testContentFileContents = this.getFileContents(testContentFile);
 
-		TaskContext<Work, HttpResponseSendTaskDependencies, None> taskContext = this
-				.createMock(TaskContext.class);
+		ManagedFunctionContext<Work, HttpResponseSendTaskDependencies, None> taskContext = this
+				.createMock(ManagedFunctionContext.class);
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
 		HttpResponse response = this.createMock(HttpResponse.class);
@@ -163,18 +163,18 @@ public class HttpResponseSenderWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Create the task
-		WorkType<Work> work = WorkLoaderUtil
+		FunctionNamespaceType<Work> work = WorkLoaderUtil
 				.loadWorkType(
 						HttpResponseSenderWorkSource.class,
 						HttpResponseSenderWorkSource.PROPERTY_HTTP_STATUS,
 						String.valueOf(status),
 						HttpResponseSenderWorkSource.PROPERTY_HTTP_RESPONSE_CONTENT_FILE,
 						testContentFilePath);
-		Task task = work.getTaskTypes()[0].getTaskFactory().createTask(
+		ManagedFunction task = work.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
 				work.getWorkFactory().createWork());
 
 		// Execute the task
-		task.doTask(taskContext);
+		task.execute(taskContext);
 		this.verifyMockObjects();
 
 		// Validate the entity contents

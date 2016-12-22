@@ -17,11 +17,11 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionWork;
-import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.type.TypeContext;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Work;
@@ -42,12 +42,12 @@ public interface WorkNode extends Node, SectionWork {
 	 * Initialises the {@link WorkNode}.
 	 * 
 	 * @param workSourceClassName
-	 *            {@link Class} name of the {@link WorkSource}.
+	 *            {@link Class} name of the {@link ManagedFunctionSource}.
 	 * @param workSource
-	 *            Optional instantiated {@link WorkSource}. May be
+	 *            Optional instantiated {@link ManagedFunctionSource}. May be
 	 *            <code>null</code>.
 	 */
-	void initialise(String workSourceClassName, WorkSource<?> workSource);
+	void initialise(String workSourceClassName, ManagedFunctionSource<?> workSource);
 
 	/**
 	 * Obtains the {@link SectionNode} containing this {@link WorkNode}.
@@ -65,12 +65,12 @@ public interface WorkNode extends Node, SectionWork {
 	String getQualifiedWorkName();
 
 	/**
-	 * Obtains the {@link WorkType} for this {@link WorkNode}.
+	 * Obtains the {@link FunctionNamespaceType} for this {@link WorkNode}.
 	 * 
-	 * @return {@link WorkType} for this {@link WorkNode}. May be
-	 *         <code>null</code> if can not load the {@link WorkType}.
+	 * @return {@link FunctionNamespaceType} for this {@link WorkNode}. May be
+	 *         <code>null</code> if can not load the {@link FunctionNamespaceType}.
 	 */
-	WorkType<?> loadWorkType();
+	FunctionNamespaceType<?> loadWorkType();
 
 	/**
 	 * Builds the {@link Work} for this {@link SectionWork}.

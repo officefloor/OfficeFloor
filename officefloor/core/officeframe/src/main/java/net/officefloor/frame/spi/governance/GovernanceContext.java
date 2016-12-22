@@ -17,7 +17,8 @@
  */
 package net.officefloor.frame.spi.governance;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -28,16 +29,17 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface GovernanceContext<F> {
 
 	/**
-	 * Instigates a {@link Flow} to be run in parallel to
-	 * {@link Governance}.
+	 * Instigates a {@link Flow} to be run in parallel to {@link Governance}.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link Flow} to instigate.
 	 * @param parameter
-	 *            Parameter for the first {@link Task} of the
+	 *            Parameter for the first {@link ManagedFunction} of the
 	 *            {@link Flow}.
+	 * @param callback
+	 *            {@link FlowCallback}.
 	 */
-	void doFlow(F key, Object parameter);
+	void doFlow(F key, Object parameter, FlowCallback callback);
 
 	/**
 	 * <p>
@@ -50,9 +52,11 @@ public interface GovernanceContext<F> {
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow} to instigate.
 	 * @param parameter
-	 *            Parameter for the first {@link Task} of the
+	 *            Parameter for the first {@link ManagedFunction} of the
 	 *            {@link Flow}.
+	 * @param callback
+	 *            {@link FlowCallback}.
 	 */
-	void doFlow(int flowIndex, Object parameter);
+	void doFlow(int flowIndex, Object parameter, FlowCallback callback);
 
 }

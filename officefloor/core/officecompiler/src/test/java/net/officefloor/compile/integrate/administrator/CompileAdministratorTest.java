@@ -22,8 +22,8 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -59,7 +59,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests {@link Administrator} pre-administering a {@link Task}.
+	 * Tests {@link Administrator} pre-administering a {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("rawtypes")
 	public void testPreAdministerTask() {
@@ -74,7 +74,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("DESK.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkPreTaskAdministration("ADMIN", "duty");
 		AdministratorBuilder admin = this
@@ -89,7 +89,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests {@link Administrator} post-administering a {@link Task}.
+	 * Tests {@link Administrator} post-administering a {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("rawtypes")
 	public void testPostAdministerTask() {
@@ -104,7 +104,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("DESK.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkPostTaskAdministration("ADMIN", "duty");
 		AdministratorBuilder admin = this

@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.work;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -120,7 +120,7 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 
 	/**
 	 * Tests the full life cycle of the {@link WorkContainer} when re-used by
-	 * different {@link Task}.
+	 * different {@link ManagedFunction}.
 	 */
 	public void testReuse() throws Throwable {
 

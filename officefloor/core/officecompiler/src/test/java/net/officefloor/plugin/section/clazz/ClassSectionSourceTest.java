@@ -32,6 +32,7 @@ import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.issues.CompilerIssue;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -45,10 +46,9 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
-import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -119,7 +119,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Section with methods to not be {@link Task} instances.
+	 * Section with methods to not be {@link ManagedFunction} instances.
 	 */
 	public static class MockIgnoreInputSection {
 		public void includedInput() {
@@ -627,7 +627,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to handle changing the {@link Task} name.
+	 * Ensure able to handle changing the {@link ManagedFunction} name.
 	 */
 	public void testChangeTaskName() {
 
@@ -652,19 +652,19 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link ClassSectionSource} to change {@link Task} name.
+	 * {@link ClassSectionSource} to change {@link ManagedFunction} name.
 	 */
 	public static class MockChangeTaskNameClassSectionSource extends
 			ClassSectionSource {
 		@Override
-		protected String getTaskName(TaskType<?, ?, ?> taskType) {
-			String taskTypeName = taskType.getTaskName();
+		protected String getTaskName(ManagedFunctionType<?, ?, ?> taskType) {
+			String taskTypeName = taskType.getFunctionName();
 			return ("oldName".equals(taskTypeName) ? "newName" : taskTypeName);
 		}
 	}
 
 	/**
-	 * Ensure able to handle changing the {@link Task} name along with keeping
+	 * Ensure able to handle changing the {@link ManagedFunction} name along with keeping
 	 * links working.
 	 */
 	public void testChangeTaskNameAndEnsureCorrectLinkedType() {
@@ -722,7 +722,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to handle changing the {@link Task} name and continue to
+	 * Ensure able to handle changing the {@link ManagedFunction} name and continue to
 	 * execute.
 	 */
 	public void testChangeTaskNameAndEnsureCorrectLinkedExecution()
@@ -762,7 +762,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Mock {@link FlowInterface} for linking to old method name even after
-	 * {@link Task} name change.
+	 * {@link ManagedFunction} name change.
 	 */
 	@FlowInterface
 	public static interface MockChangeNameFlows {
@@ -1221,7 +1221,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Convenience method to add {@link ClassSectionSource} {@link SectionTask}.
 	 * 
 	 * @param taskName
-	 *            {@link SectionTask} and {@link TaskType} name.
+	 *            {@link SectionTask} and {@link ManagedFunctionType} name.
 	 * @return {@link WorkConfigurer}.
 	 */
 	public WorkConfigurer configureClassSectionTask(String taskName) {
@@ -1234,7 +1234,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * @param taskName
 	 *            {@link SectionTask} name.
 	 * @param taskTypeName
-	 *            {@link TaskType} name.
+	 *            {@link ManagedFunctionType} name.
 	 * @return {@link WorkConfigurer}.
 	 */
 	public WorkConfigurer configureClassSectionTask(String taskName,
@@ -1254,7 +1254,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * @param taskName
 	 *            {@link SectionTask} name.
 	 * @param taskTypeName
-	 *            {@link TaskType} name.
+	 *            {@link ManagedFunctionType} name.
 	 * @return {@link SectionTask}.
 	 */
 	public SectionTask addClassSectionTask(SectionDesigner designer,

@@ -19,15 +19,15 @@ package net.officefloor.model.desk;
 
 import java.util.Map;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.Flow;
@@ -88,20 +88,20 @@ public interface DeskChanges {
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param workSourceClassName
-	 *            Fully qualified name of the {@link WorkSource}.
+	 *            Fully qualified name of the {@link ManagedFunctionSource}.
 	 * @param properties
-	 *            {@link PropertyList} to configure the {@link WorkSource}.
+	 *            {@link PropertyList} to configure the {@link ManagedFunctionSource}.
 	 * @param workType
-	 *            {@link WorkType} from the {@link WorkSource}.
+	 *            {@link FunctionNamespaceType} from the {@link ManagedFunctionSource}.
 	 * @param taskNames
 	 *            Listing of {@link WorkTaskModel} names to be loaded. Empty
 	 *            list results in loading all {@link WorkTaskModel} instances
-	 *            for the {@link WorkType}.
+	 *            for the {@link FunctionNamespaceType}.
 	 * @return {@link Change} to add the {@link WorkModel}.
 	 */
 	<W extends Work> Change<WorkModel> addWork(String workName,
 			String workSourceClassName, PropertyList properties,
-			WorkType<W> workType, String... taskNames);
+			FunctionNamespaceType<W> workType, String... taskNames);
 
 	/**
 	 * Removes a {@link WorkModel} from the {@link DeskModel}.
@@ -133,35 +133,35 @@ public interface DeskChanges {
 	 * @param workName
 	 *            New name for the {@link WorkModel}.
 	 * @param workSourceClassName
-	 *            New {@link WorkSource} class name for the {@link WorkModel}.
+	 *            New {@link ManagedFunctionSource} class name for the {@link WorkModel}.
 	 * @param properties
 	 *            New {@link PropertyList} for the {@link WorkModel}.
 	 * @param workType
-	 *            {@link WorkType} that the {@link WorkModel} is being
+	 *            {@link FunctionNamespaceType} that the {@link WorkModel} is being
 	 *            refactored to.
 	 * @param workTaskNameMapping
-	 *            Mapping of the {@link TaskType} name to the
+	 *            Mapping of the {@link ManagedFunctionType} name to the
 	 *            {@link WorkTaskModel} name.
 	 * @param workTaskToObjectNameMapping
 	 *            Mapping of the {@link WorkTaskModel} name to the
-	 *            {@link TaskObjectType} name to the {@link WorkTaskObjectModel}
+	 *            {@link ManagedFunctionObjectType} name to the {@link WorkTaskObjectModel}
 	 *            name.
 	 * @param taskToFlowNameMapping
 	 *            Mapping of the {@link TaskModel} name to the
-	 *            {@link TaskFlowType} name to the {@link TaskFlowModel} name.
+	 *            {@link ManagedFunctionFlowType} name to the {@link TaskFlowModel} name.
 	 * @param taskToEscalationTypeMapping
 	 *            Mapping of the {@link TaskModel} name to the
-	 *            {@link TaskEscalationType} type to the
+	 *            {@link ManagedFunctionEscalationType} type to the
 	 *            {@link TaskEscalationModel} type.
 	 * @param taskNames
 	 *            Listing of {@link WorkTaskModel} names to be loaded. Empty
 	 *            list results in loading all {@link WorkTaskModel} instances
-	 *            for the {@link WorkType}.
+	 *            for the {@link FunctionNamespaceType}.
 	 * @return {@link Change} to refactor the {@link WorkModel}.
 	 */
 	<W extends Work> Change<WorkModel> refactorWork(WorkModel workModel,
 			String workName, String workSourceClassName,
-			PropertyList properties, WorkType<W> workType,
+			PropertyList properties, FunctionNamespaceType<W> workType,
 			Map<String, String> workTaskNameMapping,
 			Map<String, Map<String, String>> workTaskToObjectNameMapping,
 			Map<String, Map<String, String>> taskToFlowNameMapping,
@@ -169,7 +169,7 @@ public interface DeskChanges {
 			String... taskNames);
 
 	/**
-	 * Adds the {@link TaskType} as a {@link WorkTaskModel} to the
+	 * Adds the {@link ManagedFunctionType} as a {@link WorkTaskModel} to the
 	 * {@link WorkModel}.
 	 *
 	 * @param <W>
@@ -179,14 +179,14 @@ public interface DeskChanges {
 	 * @param <F>
 	 *            {@link Flow} type keys.
 	 * @param workModel
-	 *            {@link WorkModel} to have the {@link TaskType} added.
+	 *            {@link WorkModel} to have the {@link ManagedFunctionType} added.
 	 * @param taskType
-	 *            {@link TaskType} to be added to the {@link WorkModel}.
-	 * @return {@link Change} to add the {@link TaskType} to the
+	 *            {@link ManagedFunctionType} to be added to the {@link WorkModel}.
+	 * @return {@link Change} to add the {@link ManagedFunctionType} to the
 	 *         {@link WorkModel}.
 	 */
 	<W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> addWorkTask(
-			WorkModel workModel, TaskType<W, D, F> taskType);
+			WorkModel workModel, ManagedFunctionType<W, D, F> taskType);
 
 	/**
 	 * Removes the {@link WorkTaskModel} from the {@link WorkModel}.
@@ -202,7 +202,7 @@ public interface DeskChanges {
 			WorkTaskModel taskModel);
 
 	/**
-	 * Adds a {@link TaskType} as a {@link TaskModel} to the {@link DeskModel}.
+	 * Adds a {@link ManagedFunctionType} as a {@link TaskModel} to the {@link DeskModel}.
 	 *
 	 * @param <W>
 	 *            {@link Work} type.
@@ -211,17 +211,17 @@ public interface DeskChanges {
 	 * @param <F>
 	 *            {@link Flow} type keys.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param workTaskModel
-	 *            {@link WorkTaskModel} for the {@link TaskType}.
+	 *            {@link WorkTaskModel} for the {@link ManagedFunctionType}.
 	 * @param taskType
-	 *            {@link TaskType} for the {@link TaskModel}.
-	 * @return {@link Change} to add the {@link TaskType} to the
+	 *            {@link ManagedFunctionType} for the {@link TaskModel}.
+	 * @return {@link Change} to add the {@link ManagedFunctionType} to the
 	 *         {@link DeskModel}.
 	 */
 	<W extends Work, D extends Enum<D>, F extends Enum<F>> Change<TaskModel> addTask(
 			String taskName, WorkTaskModel workTaskModel,
-			TaskType<W, D, F> taskType);
+			ManagedFunctionType<W, D, F> taskType);
 
 	/**
 	 * Removes the {@link TaskModel} from the {@link DeskModel}.

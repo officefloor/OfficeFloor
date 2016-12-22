@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.work.clazz;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 
 /**
  * Creates the parameter for the {@link ClassTask}.
@@ -27,14 +27,14 @@ import net.officefloor.frame.api.execute.TaskContext;
 public interface ParameterFactory {
 
 	/**
-	 * Creates the parameter from the {@link TaskContext}.
+	 * Creates the parameter from the {@link ManagedFunctionContext}.
 	 * 
 	 * @param context
-	 *            {@link TaskContext}.
+	 *            {@link ManagedFunctionContext}.
 	 * @return Parameter.
 	 * @throws Exception
 	 *             If fails to create the parameter.
 	 */
-	Object createParameter(TaskContext<?, ?, ?> context) throws Exception;
+	Object createParameter(ManagedFunctionContext<?, ?, ?> context) throws Exception;
 
 }

@@ -23,10 +23,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
- * Annotates a method with the name of the next method ({@link Task}),
+ * Annotates a method with the name of the next method ({@link ManagedFunction}),
  * 
  * @author Daniel Sagenschneider
  */

@@ -41,13 +41,13 @@ import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.building.process.officefloor.OfficeFloorManagerMBean;
 import net.officefloor.console.OfficeBuilding;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * {@link OfficeFloorCommandFactory} to invoke a {@link Task} within an
+ * {@link OfficeFloorCommandFactory} to invoke a {@link ManagedFunction} within an
  * {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
@@ -101,12 +101,12 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 	private final WorkNameOfficeFloorCommandParameter workName = new WorkNameOfficeFloorCommandParameter();
 
 	/**
-	 * {@link Task} name.
+	 * {@link ManagedFunction} name.
 	 */
 	private final TaskNameOfficeFloorCommandParameter taskName = new TaskNameOfficeFloorCommandParameter();
 
 	/**
-	 * Parameter value for {@link Task}.
+	 * Parameter value for {@link ManagedFunction}.
 	 */
 	private final ParameterOfficeFloorCommandParameter parameter = new ParameterOfficeFloorCommandParameter();
 
@@ -174,7 +174,7 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 	}
 
 	/**
-	 * {@link ManagedProcess} to invoke a {@link Task}.
+	 * {@link ManagedProcess} to invoke a {@link ManagedFunction}.
 	 */
 	public static class InvokeManagedProcess implements ManagedProcess {
 
@@ -229,12 +229,12 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		private final String workName;
 
 		/**
-		 * {@link Task} name.
+		 * {@link ManagedFunction} name.
 		 */
 		private final String taskName;
 
 		/**
-		 * Parameter value for the {@link Task}.
+		 * Parameter value for the {@link ManagedFunction}.
 		 */
 		private final String parameter;
 
@@ -260,9 +260,9 @@ public class OfficeBuildingInvokeOfficeFloorCommand implements
 		 * @param workName
 		 *            {@link Work} name.
 		 * @param taskName
-		 *            {@link Task} name.
+		 *            {@link ManagedFunction} name.
 		 * @param parameter
-		 *            Parameter value for the {@link Task}.
+		 *            Parameter value for the {@link ManagedFunction}.
 		 */
 		public InvokeManagedProcess(String officeBuildingHost,
 				int officeBuildingPort, String processNamespace,

@@ -29,7 +29,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -92,7 +92,7 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 							objectType, managedObject, managedObjectPool);
 					
 					// Use the recycle function responsible team for escalations
-					TaskMetaData<?, ?, ?> initialFunctionMetaData = recycleFlowMetaData.getInitialTaskMetaData();
+					ManagedFunctionMetaData<?, ?, ?> initialFunctionMetaData = recycleFlowMetaData.getInitialTaskMetaData();
 					TeamManagement escalationResponsibleTeam = initialFunctionMetaData.getResponsibleTeam();
 
 					// Create the recycle function

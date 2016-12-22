@@ -21,13 +21,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -56,10 +56,10 @@ public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testType() {
 		HttpFileWriterTask factory = new HttpFileWriterTask();
-		WorkTypeBuilder<HttpFileWriterTask> work = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpFileWriterTask> work = WorkLoaderUtil
 				.createWorkTypeBuilder(factory);
-		TaskTypeBuilder<HttpFileWriterTaskDependencies, None> file = work
-				.addTaskType("WriteFileToResponse", factory,
+		ManagedFunctionTypeBuilder<HttpFileWriterTaskDependencies, None> file = work
+				.addManagedFunctionType("WriteFileToResponse", factory,
 						HttpFileWriterTaskDependencies.class, None.class);
 		file.addObject(HttpFile.class).setKey(
 				HttpFileWriterTaskDependencies.HTTP_FILE);
@@ -79,8 +79,8 @@ public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
 		final String contentType = "text/plain";
 		final Charset charset = UsAsciiUtil.US_ASCII;
 
-		TaskContext<HttpFileWriterTask, HttpFileWriterTaskDependencies, None> taskContext = this
-				.createMock(TaskContext.class);
+		ManagedFunctionContext<HttpFileWriterTask, HttpFileWriterTaskDependencies, None> taskContext = this
+				.createMock(ManagedFunctionContext.class);
 		HttpFile httpFile = this.createMock(HttpFile.class);
 		ServerHttpConnection connection = this
 				.createMock(ServerHttpConnection.class);
@@ -116,13 +116,13 @@ public class HttpFileWriterWorkSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Create the task
-		WorkType<HttpFileWriterTask> work = WorkLoaderUtil
+		FunctionNamespaceType<HttpFileWriterTask> work = WorkLoaderUtil
 				.loadWorkType(HttpFileWriterWorkSource.class);
-		Task task = work.getTaskTypes()[0].getTaskFactory().createTask(
+		ManagedFunction task = work.getManagedFunctionTypes()[0].getManagedFunctionFactory().createManagedFunction(
 				work.getWorkFactory().createWork());
 
 		// Execute the task
-		assertNull(task.doTask(taskContext));
+		assertNull(task.execute(taskContext));
 
 		this.verifyMockObjects();
 

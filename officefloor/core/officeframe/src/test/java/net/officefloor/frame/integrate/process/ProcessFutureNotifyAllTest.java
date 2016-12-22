@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.integrate.process;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
@@ -96,7 +96,7 @@ public class ProcessFutureNotifyAllTest extends AbstractOfficeConstructTestCase 
 	public class MockWork {
 
 		/**
-		 * {@link Task} to be executed.
+		 * {@link ManagedFunction} to be executed.
 		 */
 		public void task() throws Exception {
 			// Wait some time to allow ProcessFuture wait to occur

@@ -19,8 +19,8 @@ package net.officefloor.plugin.web.http.resource.source;
 
 import java.io.IOException;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -35,7 +35,7 @@ import net.officefloor.plugin.web.http.resource.HttpResourceFactory;
 import net.officefloor.plugin.web.http.resource.NotExistHttpResource;
 
 /**
- * {@link Task} to locate a {@link HttpFile} via a {@link HttpResourceFactory}.
+ * {@link ManagedFunction} to locate a {@link HttpFile} via a {@link HttpResourceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -79,8 +79,8 @@ public class HttpFileFactoryTask<F extends Enum<F>>
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<HttpFileFactoryTask<F>, DependencyKeys, F> context)
+	public Object execute(
+			ManagedFunctionContext<HttpFileFactoryTask<F>, DependencyKeys, F> context)
 			throws IOException, InvalidHttpRequestUriException {
 
 		// Obtain the HTTP request

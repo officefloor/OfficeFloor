@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -64,20 +64,20 @@ public interface ProcessState {
 	ThreadState getMainThreadState();
 
 	/**
-	 * Obtains the {@link TaskMetaData} for the {@link Work} and {@link Task}
+	 * Obtains the {@link ManagedFunctionMetaData} for the {@link Work} and {@link ManagedFunction}
 	 * within the {@link Office} containing this {@link ProcessState}.
 	 * 
 	 * @param workName
-	 *            {@link Work} name containing the {@link Task}.
+	 *            {@link Work} name containing the {@link ManagedFunction}.
 	 * @param taskName
-	 *            {@link Task} name within the {@link Work}.
-	 * @return {@link TaskMetaData}.
+	 *            {@link ManagedFunction} name within the {@link Work}.
+	 * @return {@link ManagedFunctionMetaData}.
 	 * @throws UnknownWorkException
 	 *             If no {@link Work} by name within the {@link Office}.
 	 * @throws UnknownTaskException
-	 *             If no {@link Task} by name within the {@link Work}.
+	 *             If no {@link ManagedFunction} by name within the {@link Work}.
 	 */
-	TaskMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
+	ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
 			throws UnknownWorkException, UnknownTaskException;
 
 	/**

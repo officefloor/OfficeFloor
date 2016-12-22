@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.work.clazz;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 
 /**
  * {@link ParameterFactory} for an {@link Object}.
@@ -46,7 +46,7 @@ public class ObjectParameterFactory implements ParameterFactory {
 	 */
 
 	@Override
-	public Object createParameter(TaskContext<?, ?, ?> context) {
+	public Object createParameter(ManagedFunctionContext<?, ?, ?> context) {
 		return context.getObject(this.objectIndex);
 	}
 

@@ -20,7 +20,7 @@ package net.officefloor.building.process.officefloor;
 import java.io.IOException;
 
 import net.officefloor.building.process.ProcessException;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -43,7 +43,7 @@ public interface OfficeFloorManagerMBean {
 	String getOfficeFloorLocation() throws IOException;
 
 	/**
-	 * Obtains the listing of the {@link Task} instances within the
+	 * Obtains the listing of the {@link ManagedFunction} instances within the
 	 * {@link OfficeFloor}.
 	 * 
 	 * @return Listing of the {@link ListedTask} instances within the
@@ -64,10 +64,10 @@ public interface OfficeFloorManagerMBean {
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}. May be <code>null</code> to invoke
-	 *            the initial {@link Task} for the {@link Work}.
+	 *            Name of the {@link ManagedFunction}. May be <code>null</code> to invoke
+	 *            the initial {@link ManagedFunction} for the {@link Work}.
 	 * @param parameter
-	 *            Parameter for the initial {@link Task}.
+	 *            Parameter for the initial {@link ManagedFunction}.
 	 * @throws ProcessException
 	 *             If fails to invoke the {@link Work}.
 	 * @throws IOException

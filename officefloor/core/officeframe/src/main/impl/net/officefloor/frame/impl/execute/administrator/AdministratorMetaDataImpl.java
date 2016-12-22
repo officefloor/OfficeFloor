@@ -30,8 +30,9 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.DutyKey;
@@ -127,8 +128,8 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>> impl
 	}
 
 	@Override
-	public AdministratorContainer<I, A> createAdministratorContainer() {
-		return new AdministratorContainerImpl<I, A, None, None>(this);
+	public AdministratorContainer<I, A> createAdministratorContainer(ThreadState threadState) {
+		return new AdministratorContainerImpl<I, A, None, None>(this, threadState);
 	}
 
 	@Override
@@ -162,14 +163,14 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>> impl
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?> getNextTaskInFlow() {
+	public ManagedFunctionMetaData<?, ?, ?> getNextManagedFunctionContainerMetaData() {
 		// Never a next task for an administrator duty
 		return null;
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedFunctionContainer createDutyNode(TaskMetaData<?, ?, ?> administeringTaskMetaData,
+	public ManagedFunctionContainer createDutyNode(ManagedFunctionMetaData<?, ?, ?> administeringTaskMetaData,
 			WorkContainer<?> administeringWorkContainer, Flow flow, TaskDutyAssociation<?> taskDutyAssociation,
 			ManagedFunctionContainer parallelJobNodeOwner) {
 		return new DutyJob(flow, administeringWorkContainer, this, taskDutyAssociation, parallelJobNodeOwner,

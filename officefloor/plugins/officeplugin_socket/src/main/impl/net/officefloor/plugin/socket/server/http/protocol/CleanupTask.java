@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
@@ -51,7 +51,7 @@ public class CleanupTask extends AbstractSingleTask<Work, None, None> {
 	 */
 
 	@Override
-	public Object doTask(TaskContext<Work, None, None> context)
+	public Object execute(ManagedFunctionContext<Work, None, None> context)
 			throws IOException {
 
 		// Obtain the recycle parameter

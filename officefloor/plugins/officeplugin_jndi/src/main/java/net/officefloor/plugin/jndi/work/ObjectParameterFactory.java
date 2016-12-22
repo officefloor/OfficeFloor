@@ -17,17 +17,17 @@
  */
 package net.officefloor.plugin.jndi.work;
 
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 
 /**
- * {@link ParameterFactory} to obtain an Object from the {@link TaskContext}.
+ * {@link ParameterFactory} to obtain an Object from the {@link ManagedFunctionContext}.
  * 
  * @author Daniel Sagenschneider
  */
 public class ObjectParameterFactory implements ParameterFactory {
 
 	/**
-	 * Dependency index of the Object from the {@link TaskContext}.
+	 * Dependency index of the Object from the {@link ManagedFunctionContext}.
 	 */
 	private final int dependencyIndex;
 
@@ -35,7 +35,7 @@ public class ObjectParameterFactory implements ParameterFactory {
 	 * Initiate.
 	 * 
 	 * @param dependencyIndex
-	 *            Dependency index of the Object from the {@link TaskContext}.
+	 *            Dependency index of the Object from the {@link ManagedFunctionContext}.
 	 */
 	public ObjectParameterFactory(int dependencyIndex) {
 		this.dependencyIndex = dependencyIndex;
@@ -47,7 +47,7 @@ public class ObjectParameterFactory implements ParameterFactory {
 
 	@Override
 	public Object createParameter(Object jndiWorkObject,
-			TaskContext<?, ?, ?> context) throws Exception {
+			ManagedFunctionContext<?, ?, ?> context) throws Exception {
 
 		// Obtain the object
 		Object object = context.getObject(this.dependencyIndex);

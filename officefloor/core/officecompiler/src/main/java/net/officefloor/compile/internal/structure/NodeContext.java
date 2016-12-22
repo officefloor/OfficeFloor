@@ -24,6 +24,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -31,13 +32,12 @@ import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.team.TeamLoader;
-import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -306,29 +306,29 @@ public interface NodeContext {
 	SectionNode createSectionNode(String sectionName, SectionNode parentSection);
 
 	/**
-	 * Obtains the {@link WorkSource} class.
+	 * Obtains the {@link ManagedFunctionSource} class.
 	 * 
 	 * @param <S>
-	 *            {@link WorkSource} type.
+	 *            {@link ManagedFunctionSource} type.
 	 * @param workSourceName
-	 *            {@link WorkSource} class name or an alias to a
-	 *            {@link WorkSource} class.
+	 *            {@link ManagedFunctionSource} class name or an alias to a
+	 *            {@link ManagedFunctionSource} class.
 	 * @param node
-	 *            {@link Node} requiring the {@link WorkSource} class.
-	 * @return {@link WorkSource} class, or <code>null</code> with issues
+	 *            {@link Node} requiring the {@link ManagedFunctionSource} class.
+	 * @return {@link ManagedFunctionSource} class, or <code>null</code> with issues
 	 *         reported to the {@link CompilerIssues} of this
 	 *         {@link NodeContext}.
 	 */
-	<S extends WorkSource<?>> Class<S> getWorkSourceClass(String workSourceName, Node node);
+	<S extends ManagedFunctionSource<?>> Class<S> getWorkSourceClass(String workSourceName, Node node);
 
 	/**
-	 * Obtains the {@link WorkLoader}.
+	 * Obtains the {@link ManagedFunctionLoader}.
 	 * 
 	 * @param node
-	 *            {@link Node} requiring the {@link WorkLoader}.
-	 * @return {@link WorkLoader}.
+	 *            {@link Node} requiring the {@link ManagedFunctionLoader}.
+	 * @return {@link ManagedFunctionLoader}.
 	 */
-	WorkLoader getWorkLoader(Node node);
+	ManagedFunctionLoader getWorkLoader(Node node);
 
 	/**
 	 * Creates the {@link WorkNode}.

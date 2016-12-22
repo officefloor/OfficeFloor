@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.MockTeamSource;
@@ -112,7 +112,7 @@ public class ExecuteJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of {@link Job} with next {@link Task}.
+	 * Ensures execution of {@link Job} with next {@link ManagedFunction}.
 	 */
 	public void testExecuteJobWithNextTask() {
 

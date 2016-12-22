@@ -33,7 +33,7 @@ import net.officefloor.building.process.ManagedProcessContext;
 import net.officefloor.building.process.ProcessException;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -115,7 +115,7 @@ public class OfficeFloorManager implements ManagedProcess,
 
 	/**
 	 * Flag indicating if the {@link OfficeFloor} is open and available to have
-	 * {@link Task} instances invoked.
+	 * {@link ManagedFunction} instances invoked.
 	 */
 	private boolean isOpen = false;
 
@@ -380,13 +380,13 @@ public class OfficeFloorManager implements ManagedProcess,
 		private final String workName;
 
 		/**
-		 * Name of the {@link Task}. May be <code>null</code> to invoke initial
-		 * {@link Task} of {@link Work}.
+		 * Name of the {@link ManagedFunction}. May be <code>null</code> to invoke initial
+		 * {@link ManagedFunction} of {@link Work}.
 		 */
 		private final String taskName;
 
 		/**
-		 * Parameter for the initial {@link Task} of the {@link Work}.
+		 * Parameter for the initial {@link ManagedFunction} of the {@link Work}.
 		 */
 		private final Object parameter;
 
@@ -403,10 +403,10 @@ public class OfficeFloorManager implements ManagedProcess,
 		 * @param workName
 		 *            Name of the {@link Work}.
 		 * @param taskName
-		 *            Name of the {@link Task}. May be <code>null</code> to
-		 *            invoke initial {@link Task} of {@link Work}.
+		 *            Name of the {@link ManagedFunction}. May be <code>null</code> to
+		 *            invoke initial {@link ManagedFunction} of {@link Work}.
 		 * @param parameter
-		 *            Parameter for the initial {@link Task}.
+		 *            Parameter for the initial {@link ManagedFunction}.
 		 */
 		public WorkState(String officeName, String workName, String taskName,
 				Object parameter) {

@@ -20,7 +20,7 @@ package net.officefloor.model.impl.desk;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.TaskFlowModel;
@@ -65,7 +65,7 @@ public class AddTaskTest extends AbstractDeskChangesTestCase {
 		WorkTaskModel workTask = new WorkTaskModel("NOT_ON_DESK");
 
 		// Validate not able to add task if work task not on desk
-		TaskType<?, ?, ?> taskType = this
+		ManagedFunctionType<?, ?, ?> taskType = this
 				.constructTaskType("NOT_ON_DESK", null);
 		Change<TaskModel> change = this.operations.addTask("TASK", workTask,
 				taskType);
@@ -76,12 +76,12 @@ public class AddTaskTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensures can not apply change if the {@link WorkTaskModel} name does not
-	 * match the {@link TaskType} name.
+	 * match the {@link ManagedFunctionType} name.
 	 */
 	public void testWorkTaskNameMismatch() {
 
 		// Create a task type with mismatched name
-		TaskType<?, ?, ?> taskType = this.constructTaskType(
+		ManagedFunctionType<?, ?, ?> taskType = this.constructTaskType(
 				"MISMATCH_TASK_NAME", null);
 
 		// Validate not able to add task if work task name mismatch
@@ -99,7 +99,7 @@ public class AddTaskTest extends AbstractDeskChangesTestCase {
 	public void testAddTaskWithoutKeys() {
 
 		// Create the task type
-		TaskType<?, ?, ?> task = this.constructTaskType("WORK_TASK",
+		ManagedFunctionType<?, ?, ?> task = this.constructTaskType("WORK_TASK",
 				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
@@ -128,7 +128,7 @@ public class AddTaskTest extends AbstractDeskChangesTestCase {
 	public void testAddTaskWithKeys() {
 
 		// Create the task type
-		TaskType<?, ?, ?> task = this.constructTaskType("WORK_TASK",
+		ManagedFunctionType<?, ?, ?> task = this.constructTaskType("WORK_TASK",
 				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
@@ -159,7 +159,7 @@ public class AddTaskTest extends AbstractDeskChangesTestCase {
 	public void testAddTaskWithLabels() {
 
 		// Create the task type
-		TaskType<?, ?, ?> task = this.constructTaskType("WORK_TASK",
+		ManagedFunctionType<?, ?, ?> task = this.constructTaskType("WORK_TASK",
 				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
@@ -183,7 +183,7 @@ public class AddTaskTest extends AbstractDeskChangesTestCase {
 	public void testAddMultipleTasksEnsuringOrdering() {
 
 		// Create the task type
-		TaskType<?, ?, ?> taskType = this.constructTaskType("WORK_TASK", null);
+		ManagedFunctionType<?, ?, ?> taskType = this.constructTaskType("WORK_TASK", null);
 
 		// Create the changes to add the tasks
 		Change<TaskModel> changeB = this.operations.addTask("TASK_B",

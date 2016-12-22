@@ -17,11 +17,11 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * {@link Team} responsible for the {@link Task}.
+ * {@link Team} responsible for the {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */

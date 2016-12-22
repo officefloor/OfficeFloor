@@ -24,11 +24,11 @@ import java.util.Properties;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -889,7 +889,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 * Loads the {@link HttpSecurityType}.
 	 * 
 	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the {@link WorkType}.
+	 *            Flag indicating if expecting to load the {@link FunctionNamespaceType}.
 	 * @param init
 	 *            {@link Init}.
 	 * @param propertyNameValuePairs

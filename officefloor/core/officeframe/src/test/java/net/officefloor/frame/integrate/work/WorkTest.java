@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.integrate.work;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.WorkManager;
@@ -33,7 +33,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder;
 public class WorkTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensures the initial {@link Task} is executed for the {@link Work}.
+	 * Ensures the initial {@link ManagedFunction} is executed for the {@link Work}.
 	 */
 	public void testWithInitialTask() throws Exception {
 
@@ -57,7 +57,7 @@ public class WorkTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensures may build with no initial {@link Task} for {@link Work} but may
+	 * Ensures may build with no initial {@link ManagedFunction} for {@link Work} but may
 	 * not invoke the {@link Work}.
 	 */
 	public void testNoInitialTaskForWork() throws Exception {

@@ -18,12 +18,12 @@
 package net.officefloor.compile.spi.section;
 
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -53,7 +53,7 @@ public interface SectionDesigner {
 	 * @param argumentType
 	 *            Argument type for the {@link SectionOutputType}.
 	 * @param isEscalationOnly
-	 *            <code>true</code> if only {@link TaskEscalationType} instances
+	 *            <code>true</code> if only {@link ManagedFunctionEscalationType} instances
 	 *            are using the {@link SectionOutputType}.
 	 * @return {@link SectionOutput} for linking.
 	 */
@@ -77,9 +77,9 @@ public interface SectionDesigner {
 	 * @param workName
 	 *            Name of the {@link SectionWork}.
 	 * @param workSourceClassName
-	 *            Fully qualified class name of the {@link WorkSource}. This
+	 *            Fully qualified class name of the {@link ManagedFunctionSource}. This
 	 *            allows adding the {@link SectionWork} without having to worry
-	 *            if the {@link WorkSource} is available on the class path.
+	 *            if the {@link ManagedFunctionSource} is available on the class path.
 	 * @return {@link SectionWork}.
 	 */
 	SectionWork addSectionWork(String workName, String workSourceClassName);
@@ -90,10 +90,10 @@ public interface SectionDesigner {
 	 * @param workName
 	 *            Name of the {@link SectionWork}.
 	 * @param workSource
-	 *            {@link WorkSource} instance to use.
+	 *            {@link ManagedFunctionSource} instance to use.
 	 * @return {@link SectionWork}.
 	 */
-	SectionWork addSectionWork(String workName, WorkSource<?> workSource);
+	SectionWork addSectionWork(String workName, ManagedFunctionSource<?> workSource);
 
 	/**
 	 * Adds a {@link SectionManagedObjectSource} to the {@link SectionNode}

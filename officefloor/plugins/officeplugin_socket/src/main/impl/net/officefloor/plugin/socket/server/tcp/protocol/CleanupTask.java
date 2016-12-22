@@ -20,7 +20,7 @@ package net.officefloor.plugin.socket.server.tcp.protocol;
 import java.io.OutputStream;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.tcp.ServerTcpConnection;
@@ -37,7 +37,7 @@ public class CleanupTask extends AbstractSingleTask<Work, None, None> {
 	 */
 
 	@Override
-	public Object doTask(TaskContext<Work, None, None> context)
+	public Object execute(ManagedFunctionContext<Work, None, None> context)
 			throws Throwable {
 
 		// Flag to close the connection

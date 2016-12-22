@@ -27,9 +27,9 @@ import net.officefloor.autowire.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -48,7 +48,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 @TestSource
 public class MockTypeManagedObjectSource extends
 		AbstractManagedObjectSource<Indexed, Indexed> implements
-		WorkFactory<Work>, TaskFactory<Work, Indexed, Indexed>,
+		WorkFactory<Work>, ManagedFunctionFactory<Work, Indexed, Indexed>,
 		ExtensionInterfaceFactory<Object> {
 
 	/**
@@ -227,7 +227,7 @@ public class MockTypeManagedObjectSource extends
 	 */
 
 	@Override
-	public Task<Work, Indexed, Indexed> createTask(Work work) {
+	public ManagedFunction<Work, Indexed, Indexed> createManagedFunction(Work work) {
 		TestCase.fail("Should not require creating a task for type testing");
 		return null;
 	}

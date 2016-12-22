@@ -41,7 +41,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -222,7 +222,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 			}
 
 			// Obtain the task meta-data
-			TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskNodeReference, taskLocator, issues,
+			ManagedFunctionMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskNodeReference, taskLocator, issues,
 					AssetType.GOVERNANCE, this.governanceName, "flow index " + i, true);
 			if (taskMetaData == null) {
 				continue; // no initial task for flow
@@ -262,7 +262,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 						"No task referenced for escalation index " + i);
 				continue; // no escalation handler referenced
 			}
-			TaskMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil.getTaskMetaData(escalationReference,
+			ManagedFunctionMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil.getTaskMetaData(escalationReference,
 					taskLocator, issues, AssetType.GOVERNANCE, this.getGovernanceName(), "escalation index " + i, true);
 			if (escalationTaskMetaData == null) {
 				continue; // no escalation handler

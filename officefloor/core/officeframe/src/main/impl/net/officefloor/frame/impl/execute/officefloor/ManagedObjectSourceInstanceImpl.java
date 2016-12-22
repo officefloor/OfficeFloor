@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.officefloor;
 
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -27,8 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements
-		ManagedObjectSourceInstance<F> {
+public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements ManagedObjectSourceInstance<F> {
 
 	/**
 	 * {@link ManagedObjectSource}.
@@ -47,6 +47,12 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements
 	private final ManagedObjectPool managedObjectPool;
 
 	/**
+	 * {@link TeamManagement} responsible for this
+	 * {@link ManagedObjectSourceInstance}.
+	 */
+	private final TeamManagement responsibleTeam;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectSource
@@ -56,14 +62,17 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements
 	 *            {@link ManagedObjectSource}.
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} responsible for this
+	 *            {@link ManagedObjectSourceInstance}.
 	 */
-	public ManagedObjectSourceInstanceImpl(
-			ManagedObjectSource<?, F> managedObjectSource,
+	public ManagedObjectSourceInstanceImpl(ManagedObjectSource<?, F> managedObjectSource,
 			ManagedObjectExecuteContextFactory<F> managedObjectExecuteContextFactory,
-			ManagedObjectPool managedObjectPool) {
+			ManagedObjectPool managedObjectPool, TeamManagement responsibleTeam) {
 		this.managedObjectSource = managedObjectSource;
 		this.managedObjectExecuteContextFactory = managedObjectExecuteContextFactory;
 		this.managedObjectPool = managedObjectPool;
+		this.responsibleTeam = responsibleTeam;
 	}
 
 	/*
@@ -83,6 +92,11 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements
 	@Override
 	public ManagedObjectPool getManagedObjectPool() {
 		return this.managedObjectPool;
+	}
+
+	@Override
+	public TeamManagement getResponsibleTeam() {
+		return this.responsibleTeam;
 	}
 
 }

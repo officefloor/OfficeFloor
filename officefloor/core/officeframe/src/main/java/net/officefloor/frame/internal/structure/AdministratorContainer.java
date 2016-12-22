@@ -19,18 +19,26 @@ package net.officefloor.frame.internal.structure;
 
 import java.util.List;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Job;
 
 /**
- * Container for an {@link Administrator}.
+ * Container for a {@link Duty} of the {@link Administrator}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
+
+	/**
+	 * Obtains the {@link ThreadState} responsible for changes to this
+	 * {@link AdministratorContainer}.
+	 * 
+	 * @return {@link ThreadState} responsible for changes to this
+	 *         {@link AdministratorContainer}.
+	 */
+	ThreadState getResponsibleThreadState();
 
 	/**
 	 * Obtains the {@link ExtensionInterfaceMetaData} to obtain the
@@ -51,13 +59,13 @@ public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
 	 * 
 	 * @param taskDutyAssociation
 	 *            {@link TaskDutyAssociation} of {@link Duty} to execute for the
-	 *            {@link Task}.
+	 *            {@link ManagedFunction}.
 	 * @param extensionInterfaces
 	 *            Extension interfaces to be administered.
 	 * @param context
 	 *            {@link AdministratorContext} for the {@link Duty} be executed
 	 *            within.
-	 * @return Optional {@link Job} to undertake the {@link Duty}.
+	 * @return {@link FunctionState} to undertake the {@link Duty}.
 	 * @throws Throwable
 	 *             If {@link Duty} fails.
 	 */

@@ -24,7 +24,7 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -83,7 +83,7 @@ public class FlowParameterFactory implements ParameterFactory {
 	 */
 
 	@Override
-	public Object createParameter(TaskContext<?, ?, ?> context)
+	public Object createParameter(ManagedFunctionContext<?, ?, ?> context)
 			throws Exception {
 		// Return a new instance of the proxy to invoke the flows
 		return this.proxyConstructor
@@ -96,17 +96,17 @@ public class FlowParameterFactory implements ParameterFactory {
 	private class FlowInvocationHandler implements InvocationHandler {
 
 		/**
-		 * {@link TaskContext}.
+		 * {@link ManagedFunctionContext}.
 		 */
-		private final TaskContext<?, ?, ?> taskContext;
+		private final ManagedFunctionContext<?, ?, ?> taskContext;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param taskContext
-		 *            {@link TaskContext}.
+		 *            {@link ManagedFunctionContext}.
 		 */
-		public FlowInvocationHandler(TaskContext<?, ?, ?> taskContext) {
+		public FlowInvocationHandler(ManagedFunctionContext<?, ?, ?> taskContext) {
 			this.taskContext = taskContext;
 		}
 

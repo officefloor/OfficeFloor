@@ -20,12 +20,12 @@ package net.officefloor.plugin.web.http.route;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
@@ -166,7 +166,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		HttpRouteTask task = this.createHttpRouteTask();
-		task.doTask(this.context);
+		task.execute(this.context);
 		this.verifyMockObjects();
 	}
 
@@ -300,11 +300,11 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	private final HttpSession session = this.createMock(HttpSession.class);
 
 	/**
-	 * {@link TaskContext}.
+	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskContext<HttpRouteTask, HttpRouteTaskDependencies, HttpRouteTaskFlows> context = this
-			.createMock(TaskContext.class);
+	private final ManagedFunctionContext<HttpRouteTask, HttpRouteTaskDependencies, HttpRouteTaskFlows> context = this
+			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * {@link HttpRequest}.
@@ -312,7 +312,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	private final HttpRequest request = this.createMock(HttpRequest.class);
 
 	/**
-	 * {@link UrlServicer} instances by their {@link Task} name.
+	 * {@link UrlServicer} instances by their {@link ManagedFunction} name.
 	 */
 	private final Map<String, UrlServicer> urlServicers = new HashMap<String, UrlServicer>();
 
@@ -376,11 +376,11 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 
 		// Create task and undertake initial request
 		HttpRouteTask task = this.createHttpRouteTask();
-		task.doTask(this.context);
+		task.execute(this.context);
 
 		// Undertake request for redirect (if necessary)
 		if (isRequireRedirect) {
-			task.doTask(this.context);
+			task.execute(this.context);
 		}
 
 		// Verify functionality
@@ -450,16 +450,16 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	private HttpRouteTask createHttpRouteTask() throws Exception {
 
 		// Load the work source and create the task
-		WorkType<HttpRouteTask> workType = WorkLoaderUtil
+		FunctionNamespaceType<HttpRouteTask> workType = WorkLoaderUtil
 				.loadWorkType(HttpRouteWorkSource.class);
-		TaskType<HttpRouteTask, ?, ?> taskType = workType.getTaskTypes()[0];
+		ManagedFunctionType<HttpRouteTask, ?, ?> taskType = workType.getManagedFunctionTypes()[0];
 		HttpRouteTask workFactory = workType.getWorkFactory().createWork();
 
 		// Make Office aware
 		workFactory.setOffice(this.office);
 
 		// Create the task
-		Task<HttpRouteTask, ?, ?> task = taskType.getTaskFactory().createTask(
+		ManagedFunction<HttpRouteTask, ?, ?> task = taskType.getManagedFunctionFactory().createManagedFunction(
 				workFactory);
 
 		// Return the task
@@ -472,7 +472,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * @param taskNameThenUriPathThenIsSecureGroupings
 	 *            Listing of the following sequence grouping of values:
 	 *            <ol>
-	 *            <li>{@link Task} name</li>
+	 *            <li>{@link ManagedFunction} name</li>
 	 *            <li>Application URI path</li>
 	 *            <li>Is Secure flag</li>
 	 *            </ol>

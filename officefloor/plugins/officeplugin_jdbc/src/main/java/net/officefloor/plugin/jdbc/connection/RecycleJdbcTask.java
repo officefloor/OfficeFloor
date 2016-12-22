@@ -18,7 +18,7 @@
 package net.officefloor.plugin.jdbc.connection;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.util.AbstractSingleTask;
 
@@ -35,7 +35,7 @@ public class RecycleJdbcTask extends
 	 */
 
 	@Override
-	public Object doTask(TaskContext<RecycleJdbcTask, Indexed, Indexed> context)
+	public Object execute(ManagedFunctionContext<RecycleJdbcTask, Indexed, Indexed> context)
 			throws Exception {
 
 		// Obtain the recycle parameter

@@ -20,8 +20,8 @@ package net.officefloor.frame.internal.configuration;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -184,7 +184,7 @@ public interface OfficeConfiguration {
 	 * Obtains a {@link FlowNodeBuilder} registered with this
 	 * {@link OfficeBuilder}.
 	 * <p>
-	 * This enables addition configuration of {@link Task} instances registered
+	 * This enables addition configuration of {@link ManagedFunction} instances registered
 	 * by a {@link ManagedObjectSource}.
 	 * 
 	 * @param namespace
@@ -192,14 +192,14 @@ public interface OfficeConfiguration {
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @return {@link TaskBuilder}.
+	 *            Name of the {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionBuilder}.
 	 */
 	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String workName, String taskName);
 
 	/**
 	 * Obtains the list of {@link TaskNodeReference} instances referencing the
-	 * {@link Task} instances to invoke on Office start up.
+	 * {@link ManagedFunction} instances to invoke on Office start up.
 	 * 
 	 * @return List of start up {@link TaskNodeReference} references.
 	 */

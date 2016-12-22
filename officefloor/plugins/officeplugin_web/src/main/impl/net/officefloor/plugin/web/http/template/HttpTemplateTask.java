@@ -25,14 +25,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
@@ -51,7 +51,7 @@ import net.officefloor.plugin.web.http.template.parse.PropertyHttpTemplateSectio
 import net.officefloor.plugin.web.http.template.parse.StaticHttpTemplateSectionContent;
 
 /**
- * {@link Task} to write the {@link HttpTemplateSection}.
+ * {@link ManagedFunction} to write the {@link HttpTemplateSection}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -69,7 +69,7 @@ public class HttpTemplateTask extends
 	public static final String PROPERTY_LINK_SECURE_PREFIX = "link.secure.";
 
 	/**
-	 * Loads the {@link TaskType} to write the {@link HttpTemplateSection}.
+	 * Loads the {@link ManagedFunctionType} to write the {@link HttpTemplateSection}.
 	 * 
 	 * @param section
 	 *            {@link HttpTemplateSection}.
@@ -83,10 +83,10 @@ public class HttpTemplateTask extends
 	 * @param isTemplateSecure
 	 *            Indicates if the template is to be secure.
 	 * @param workTypeBuilder
-	 *            {@link WorkTypeBuilder}.
+	 *            {@link FunctionNamespaceBuilder}.
 	 * @param context
-	 *            {@link WorkSourceContext}.
-	 * @return Listing of {@link Task} names to handle {@link HttpTemplate} link
+	 *            {@link ManagedFunctionSourceContext}.
+	 * @return Listing of {@link ManagedFunction} names to handle {@link HttpTemplate} link
 	 *         requests.
 	 * @throws Exception
 	 *             If fails to prepare the template.
@@ -94,8 +94,8 @@ public class HttpTemplateTask extends
 	public static String[] loadTaskType(HttpTemplateSection section,
 			Charset charset, String templateUriPath, String templateUriSuffix,
 			boolean isTemplateSecure,
-			WorkTypeBuilder<HttpTemplateWork> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+			FunctionNamespaceBuilder<HttpTemplateWork> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the section and task name
 		String sectionAndTaskName = section.getSectionName();
@@ -120,8 +120,8 @@ public class HttpTemplateTask extends
 				isBean, charset);
 
 		// Define the task to write the section
-		TaskTypeBuilder<Indexed, None> taskBuilder = workTypeBuilder
-				.addTaskType(sectionAndTaskName, task, Indexed.class,
+		ManagedFunctionTypeBuilder<Indexed, None> taskBuilder = workTypeBuilder
+				.addManagedFunctionType(sectionAndTaskName, task, Indexed.class,
 						None.class);
 		taskBuilder.addObject(ServerHttpConnection.class).setLabel(
 				"SERVER_HTTP_CONNECTION");
@@ -210,7 +210,7 @@ public class HttpTemplateTask extends
 	 * @param isTemplateSecure
 	 *            Indicates if the template is to be secure.
 	 * @param context
-	 *            {@link WorkSourceContext}.
+	 *            {@link ManagedFunctionSourceContext}.
 	 * @return {@link SectionWriterStruct}.
 	 * @throws Exception
 	 *             If fails to create the {@link SectionWriterStruct}.
@@ -219,7 +219,7 @@ public class HttpTemplateTask extends
 			HttpTemplateSectionContent[] contents, Class<?> beanClass,
 			String sectionAndTaskName, Set<String> linkTaskNames,
 			Charset charset, String templateUriPath, String templateUriSuffix,
-			boolean isTemplateSecure, WorkSourceContext context)
+			boolean isTemplateSecure, ManagedFunctionSourceContext context)
 			throws Exception {
 
 		// Create the content writers for the section
@@ -329,11 +329,11 @@ public class HttpTemplateTask extends
 	 * @param sectionAndTaskName
 	 *            Section and task name.
 	 * @param context
-	 *            {@link WorkSourceContext}.
+	 *            {@link ManagedFunctionSourceContext}.
 	 * @return Bean {@link Class}.
 	 */
 	private static Class<?> getBeanClass(String sectionAndTaskName,
-			boolean isRequired, WorkSourceContext context) {
+			boolean isRequired, ManagedFunctionSourceContext context) {
 
 		// Obtain the bean class name
 		String beanClassPropertyName = PROPERTY_BEAN_PREFIX
@@ -418,7 +418,7 @@ public class HttpTemplateTask extends
 	 */
 
 	@Override
-	public Object doTask(TaskContext<HttpTemplateWork, Indexed, None> context)
+	public Object execute(ManagedFunctionContext<HttpTemplateWork, Indexed, None> context)
 			throws IOException {
 
 		// Obtain the bean dependency

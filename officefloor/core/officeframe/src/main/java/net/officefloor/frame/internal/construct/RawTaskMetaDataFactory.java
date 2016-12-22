@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.structure.FunctionLoop;
@@ -41,7 +41,7 @@ public interface RawTaskMetaDataFactory {
 	 *            {@link OfficeFloorIssues}.
 	 * @param rawWorkMetaData
 	 *            {@link RawWorkMetaData} of the {@link Work} containing this
-	 *            {@link Task}.
+	 *            {@link ManagedFunction}.
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
 	 * @return {@link RawTaskMetaData}.

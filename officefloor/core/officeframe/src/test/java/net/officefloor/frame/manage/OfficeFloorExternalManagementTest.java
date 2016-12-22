@@ -20,7 +20,7 @@ package net.officefloor.frame.manage;
 import java.sql.Connection;
 import java.util.Arrays;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
@@ -67,7 +67,7 @@ public class OfficeFloorExternalManagementTest extends
 	private final Object differentiator = "Differentiator";
 
 	/**
-	 * No initial {@link Task} {@link Work} name.
+	 * No initial {@link ManagedFunction} {@link Work} name.
 	 */
 	private final String noInitialTaskWorkName = "NO_INITIAL_TASK_WORK";
 
@@ -206,7 +206,7 @@ public class OfficeFloorExternalManagementTest extends
 	}
 
 	/**
-	 * Ensures the initial {@link Task} is invoked.
+	 * Ensures the initial {@link ManagedFunction} is invoked.
 	 */
 	public void testInvokeWork() throws UnknownOfficeException,
 			UnknownWorkException, NoInitialTaskException,
@@ -279,7 +279,7 @@ public class OfficeFloorExternalManagementTest extends
 	}
 
 	/**
-	 * Ensure able to obtain {@link Task} listing.
+	 * Ensure able to obtain {@link ManagedFunction} listing.
 	 */
 	public void testTaskListing() throws UnknownOfficeException,
 			UnknownWorkException, UnknownTaskException {
@@ -320,7 +320,7 @@ public class OfficeFloorExternalManagementTest extends
 	}
 
 	/**
-	 * Ensure able to obtain {@link Task} differentiator.
+	 * Ensure able to obtain {@link ManagedFunction} differentiator.
 	 */
 	public void testTaskDifferentiator() throws UnknownOfficeException,
 			UnknownWorkException, UnknownTaskException {
@@ -335,7 +335,7 @@ public class OfficeFloorExternalManagementTest extends
 	}
 
 	/**
-	 * Ensure able to obtain {@link Task} parameter type.
+	 * Ensure able to obtain {@link ManagedFunction} parameter type.
 	 */
 	public void testTaskParameterType() throws UnknownOfficeException,
 			UnknownWorkException, UnknownTaskException {
@@ -350,7 +350,7 @@ public class OfficeFloorExternalManagementTest extends
 	}
 
 	/**
-	 * Ensure able to invoke the {@link Task}.
+	 * Ensure able to invoke the {@link ManagedFunction}.
 	 */
 	public void testInvokeTask() throws UnknownOfficeException,
 			UnknownWorkException, UnknownTaskException,
@@ -422,12 +422,12 @@ public class OfficeFloorExternalManagementTest extends
 	public class MockWork {
 
 		/**
-		 * Indicates if the initial {@link Task} has been invoked.
+		 * Indicates if the initial {@link ManagedFunction} has been invoked.
 		 */
 		public boolean isInitialTaskInvoked = false;
 
 		/**
-		 * Initial {@link Task}.
+		 * Initial {@link ManagedFunction}.
 		 * 
 		 * @param parameter
 		 *            Parameter with distinct type for identifying in testing.

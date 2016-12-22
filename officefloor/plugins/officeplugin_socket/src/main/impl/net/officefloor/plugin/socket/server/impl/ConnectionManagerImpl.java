@@ -20,7 +20,7 @@ package net.officefloor.plugin.socket.server.impl;
 import java.io.IOException;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.ConnectionManager;
 import net.officefloor.plugin.socket.server.EstablishedConnection;
@@ -116,7 +116,7 @@ public class ConnectionManagerImpl extends
 	 */
 
 	@Override
-	public Object doTask(TaskContext<ConnectionManagerImpl, None, None> context)
+	public Object execute(ManagedFunctionContext<ConnectionManagerImpl, None, None> context)
 			throws Throwable {
 
 		// Continue execution until closed

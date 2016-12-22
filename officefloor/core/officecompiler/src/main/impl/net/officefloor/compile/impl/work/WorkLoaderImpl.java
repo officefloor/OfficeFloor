@@ -27,21 +27,21 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkSourceProperty;
-import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.compile.work.WorkType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceProperty;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.source.UnknownClassError;
@@ -49,11 +49,11 @@ import net.officefloor.frame.spi.source.UnknownPropertyError;
 import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
- * {@link WorkLoader} implementation.
+ * {@link ManagedFunctionLoader} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkLoaderImpl implements WorkLoader {
+public class WorkLoaderImpl implements ManagedFunctionLoader {
 
 	/**
 	 * {@link Node} requiring the {@link Work}.
@@ -83,46 +83,46 @@ public class WorkLoaderImpl implements WorkLoader {
 	 */
 
 	@Override
-	public <W extends Work, WS extends WorkSource<W>> PropertyList loadSpecification(
+	public <W extends Work, WS extends ManagedFunctionSource<W>> PropertyList loadSpecification(
 			Class<WS> workSourceClass) {
 
 		// Instantiate the work source
-		WorkSource<W> workSource = CompileUtil.newInstance(workSourceClass,
-				WorkSource.class, this.node,
+		ManagedFunctionSource<W> workSource = CompileUtil.newInstance(workSourceClass,
+				ManagedFunctionSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (workSource == null) {
 			return null; // failed to instantiate
 		}
 
 		// Obtain the specification
-		WorkSourceSpecification specification;
+		ManagedFunctionSourceSpecification specification;
 		try {
 			specification = workSource.getSpecification();
 		} catch (Throwable ex) {
 			this.addIssue(
 					"Failed to obtain "
-							+ WorkSourceSpecification.class.getSimpleName()
+							+ ManagedFunctionSourceSpecification.class.getSimpleName()
 							+ " from " + workSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
-			this.addIssue("No " + WorkSourceSpecification.class.getSimpleName()
+			this.addIssue("No " + ManagedFunctionSourceSpecification.class.getSimpleName()
 					+ " returned from " + workSourceClass.getName());
 			return null; // no specification obtained
 		}
 
 		// Obtain the properties
-		WorkSourceProperty[] workProperties;
+		ManagedFunctionSourceProperty[] workProperties;
 		try {
 			workProperties = specification.getProperties();
 		} catch (Throwable ex) {
 			this.addIssue(
 					"Failed to obtain "
-							+ WorkSourceProperty.class.getSimpleName()
+							+ ManagedFunctionSourceProperty.class.getSimpleName()
 							+ " instances from "
-							+ WorkSourceSpecification.class.getSimpleName()
+							+ ManagedFunctionSourceSpecification.class.getSimpleName()
 							+ " for " + workSourceClass.getName(), ex);
 			return null; // failed to obtain properties
 		}
@@ -131,13 +131,13 @@ public class WorkLoaderImpl implements WorkLoader {
 		PropertyList propertyList = new PropertyListImpl();
 		if (workProperties != null) {
 			for (int i = 0; i < workProperties.length; i++) {
-				WorkSourceProperty workProperty = workProperties[i];
+				ManagedFunctionSourceProperty workProperty = workProperties[i];
 
 				// Ensure have the work property
 				if (workProperty == null) {
-					this.addIssue(WorkSourceProperty.class.getSimpleName()
+					this.addIssue(ManagedFunctionSourceProperty.class.getSimpleName()
 							+ " " + i + " is null from "
-							+ WorkSourceSpecification.class.getSimpleName()
+							+ ManagedFunctionSourceSpecification.class.getSimpleName()
 							+ " for " + workSourceClass.getName());
 					return null; // must have complete property details
 				}
@@ -149,19 +149,19 @@ public class WorkLoaderImpl implements WorkLoader {
 				} catch (Throwable ex) {
 					this.addIssue(
 							"Failed to get name for "
-									+ WorkSourceProperty.class.getSimpleName()
+									+ ManagedFunctionSourceProperty.class.getSimpleName()
 									+ " "
 									+ i
 									+ " from "
-									+ WorkSourceSpecification.class
+									+ ManagedFunctionSourceSpecification.class
 											.getSimpleName() + " for "
 									+ workSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(WorkSourceProperty.class.getSimpleName()
+					this.addIssue(ManagedFunctionSourceProperty.class.getSimpleName()
 							+ " " + i + " provided blank name from "
-							+ WorkSourceSpecification.class.getSimpleName()
+							+ ManagedFunctionSourceSpecification.class.getSimpleName()
 							+ " for " + workSourceClass.getName());
 					return null; // must have complete property details
 				}
@@ -172,9 +172,9 @@ public class WorkLoaderImpl implements WorkLoader {
 					label = workProperty.getLabel();
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get label for "
-							+ WorkSourceProperty.class.getSimpleName() + " "
+							+ ManagedFunctionSourceProperty.class.getSimpleName() + " "
 							+ i + " (" + name + ") from "
-							+ WorkSourceSpecification.class.getSimpleName()
+							+ ManagedFunctionSourceSpecification.class.getSimpleName()
 							+ " for " + workSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
@@ -189,19 +189,19 @@ public class WorkLoaderImpl implements WorkLoader {
 	}
 
 	@Override
-	public <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
+	public <W extends Work, WS extends ManagedFunctionSource<W>> FunctionNamespaceType<W> loadFunctionNamespaceType(
 			Class<WS> workSourceClass, PropertyList propertyList) {
 
 		// Instantiate the work source
-		WorkSource<W> workSource = CompileUtil.newInstance(workSourceClass,
-				WorkSource.class, this.node,
+		ManagedFunctionSource<W> workSource = CompileUtil.newInstance(workSourceClass,
+				ManagedFunctionSource.class, this.node,
 				this.nodeContext.getCompilerIssues());
 		if (workSource == null) {
 			return null; // failed to instantiate
 		}
 
 		// Create the work source context
-		WorkSourceContext context = new WorkSourceContextImpl(true,
+		ManagedFunctionSourceContext context = new WorkSourceContextImpl(true,
 				propertyList, this.nodeContext);
 
 		// Create the work type builder
@@ -209,30 +209,30 @@ public class WorkLoaderImpl implements WorkLoader {
 
 		try {
 			// Source the work type
-			workSource.sourceWork(workType, context);
+			workSource.sourceManagedFunctions(workType, context);
 
 		} catch (UnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
-					+ "' for " + WorkSource.class.getSimpleName() + " "
+					+ "' for " + ManagedFunctionSource.class.getSimpleName() + " "
 					+ workSourceClass.getName());
 			return null; // must have property
 
 		} catch (UnknownClassError ex) {
 			this.addIssue("Can not load class '" + ex.getUnknownClassName()
-					+ "' for " + WorkSource.class.getSimpleName() + " "
+					+ "' for " + ManagedFunctionSource.class.getSimpleName() + " "
 					+ workSourceClass.getName());
 			return null; // must have class
 
 		} catch (UnknownResourceError ex) {
 			this.addIssue("Can not obtain resource at location '"
 					+ ex.getUnknownResourceLocation() + "' for "
-					+ WorkSource.class.getSimpleName() + " "
+					+ ManagedFunctionSource.class.getSimpleName() + " "
 					+ workSourceClass.getName());
 			return null; // must have resource
 
 		} catch (Throwable ex) {
-			this.addIssue("Failed to source " + WorkType.class.getSimpleName()
-					+ " definition from " + WorkSource.class.getSimpleName()
+			this.addIssue("Failed to source " + FunctionNamespaceType.class.getSimpleName()
+					+ " definition from " + ManagedFunctionSource.class.getSimpleName()
 					+ " " + workSourceClass.getName(), ex);
 			return null; // must be successful
 		}
@@ -240,17 +240,17 @@ public class WorkLoaderImpl implements WorkLoader {
 		// Ensure has a work factory
 		if (workType.getWorkFactory() == null) {
 			this.addIssue("No " + WorkFactory.class.getSimpleName()
-					+ " provided by " + WorkSource.class.getSimpleName() + " "
+					+ " provided by " + ManagedFunctionSource.class.getSimpleName() + " "
 					+ workSourceClass.getName());
 			return null; // must have complete type
 		}
 
 		// Ensure has at least one task
-		TaskType<W, ?, ?>[] taskTypes = workType.getTaskTypes();
+		ManagedFunctionType<W, ?, ?>[] taskTypes = workType.getManagedFunctionTypes();
 		if (taskTypes.length == 0) {
-			this.addIssue("No " + TaskType.class.getSimpleName()
+			this.addIssue("No " + ManagedFunctionType.class.getSimpleName()
 					+ " definitions provided by "
-					+ WorkSource.class.getSimpleName() + " "
+					+ ManagedFunctionSource.class.getSimpleName() + " "
 					+ workSourceClass.getName());
 			return null; // must have complete type
 		}
@@ -258,11 +258,11 @@ public class WorkLoaderImpl implements WorkLoader {
 		// Determine if duplicate task names
 		if (this.isDuplicateNaming(
 				taskTypes,
-				(taskType) -> taskType.getTaskName(),
+				(taskType) -> taskType.getFunctionName(),
 				"Two or more "
-						+ TaskType.class.getSimpleName()
+						+ ManagedFunctionType.class.getSimpleName()
 						+ " definitions with the same name (${NAME}) provided by "
-						+ WorkSource.class.getSimpleName() + " "
+						+ ManagedFunctionSource.class.getSimpleName() + " "
 						+ workSourceClass.getName())) {
 			return null; // must have valid type
 		}
@@ -279,21 +279,21 @@ public class WorkLoaderImpl implements WorkLoader {
 	}
 
 	/**
-	 * Determines if the input {@link TaskType} is valid.
+	 * Determines if the input {@link ManagedFunctionType} is valid.
 	 * 
 	 * @param taskType
-	 *            {@link TaskType} to validate.
+	 *            {@link ManagedFunctionType} to validate.
 	 * @param taskIndex
-	 *            Index of the {@link TaskType} on the {@link WorkType}.
+	 *            Index of the {@link ManagedFunctionType} on the {@link FunctionNamespaceType}.
 	 * @param workSourceClass
-	 *            {@link WorkSource} providing the {@link WorkType}.
-	 * @return <code>true</code> if {@link TaskType} is valid.
+	 *            {@link ManagedFunctionSource} providing the {@link FunctionNamespaceType}.
+	 * @return <code>true</code> if {@link ManagedFunctionType} is valid.
 	 */
 	private <W extends Work, M extends Enum<M>, F extends Enum<F>> boolean isValidTaskType(
-			TaskType<W, M, F> taskType, int taskIndex, Class<?> workSourceClass) {
+			ManagedFunctionType<W, M, F> taskType, int taskIndex, Class<?> workSourceClass) {
 
 		// Ensure has name
-		String taskName = taskType.getTaskName();
+		String taskName = taskType.getFunctionName();
 		if (CompileUtil.isBlank(taskName)) {
 			this.addTaskIssue("No task name provided for", taskIndex, taskName,
 					workSourceClass);
@@ -301,8 +301,8 @@ public class WorkLoaderImpl implements WorkLoader {
 		}
 
 		// Ensure has task factory
-		if (taskType.getTaskFactory() == null) {
-			this.addTaskIssue("No " + TaskFactory.class.getSimpleName()
+		if (taskType.getManagedFunctionFactory() == null) {
+			this.addTaskIssue("No " + ManagedFunctionFactory.class.getSimpleName()
 					+ " provided for", taskIndex, taskName, workSourceClass);
 			return false; // must have complete type
 		}
@@ -325,8 +325,8 @@ public class WorkLoaderImpl implements WorkLoader {
 		}
 
 		// Validate common details for objects
-		TaskObjectType<M>[] objectTypes = taskType.getObjectTypes();
-		for (TaskObjectType<M> objectType : objectTypes) {
+		ManagedFunctionObjectType<M>[] objectTypes = taskType.getObjectTypes();
+		for (ManagedFunctionObjectType<M> objectType : objectTypes) {
 
 			// Must have names for objects
 			String objectName = objectType.getObjectName();
@@ -348,7 +348,7 @@ public class WorkLoaderImpl implements WorkLoader {
 		// Validate no duplicate object names
 		if (this.isDuplicateNaming(objectTypes, (item) -> item.getObjectName(),
 				this.getTaskIssueDescription("Two or more "
-						+ TaskObjectType.class.getSimpleName()
+						+ ManagedFunctionObjectType.class.getSimpleName()
 						+ " definitions with the same name (${NAME}) for",
 						taskIndex, taskName, workSourceClass))) {
 			return false; // must have valid type
@@ -371,8 +371,8 @@ public class WorkLoaderImpl implements WorkLoader {
 		}
 
 		// Validate common details for flows
-		TaskFlowType<F>[] flowTypes = taskType.getFlowTypes();
-		for (TaskFlowType<F> flowType : flowTypes) {
+		ManagedFunctionFlowType<F>[] flowTypes = taskType.getFlowTypes();
+		for (ManagedFunctionFlowType<F> flowType : flowTypes) {
 
 			// Must have names for flows
 			if (CompileUtil.isBlank(flowType.getFlowName())) {
@@ -384,21 +384,21 @@ public class WorkLoaderImpl implements WorkLoader {
 
 		// Validate no duplicate flow names
 		if (this.isDuplicateNaming(flowTypes,
-				new NameExtractor<TaskFlowType<F>>() {
+				new NameExtractor<ManagedFunctionFlowType<F>>() {
 					@Override
-					public String extractName(TaskFlowType<F> item) {
+					public String extractName(ManagedFunctionFlowType<F> item) {
 						return item.getFlowName();
 					}
 				}, this.getTaskIssueDescription("Two or more "
-						+ TaskFlowType.class.getSimpleName()
+						+ ManagedFunctionFlowType.class.getSimpleName()
 						+ " definitions with the same name (${NAME}) for",
 						taskIndex, taskName, workSourceClass))) {
 			return false; // must have valid type
 		}
 
 		// Validate the escalations
-		TaskEscalationType[] escalationTypes = taskType.getEscalationTypes();
-		for (TaskEscalationType escalationType : escalationTypes) {
+		ManagedFunctionEscalationType[] escalationTypes = taskType.getEscalationTypes();
+		for (ManagedFunctionEscalationType escalationType : escalationTypes) {
 
 			// Must have escalation type
 			if (escalationType.getEscalationType() == null) {
@@ -417,13 +417,13 @@ public class WorkLoaderImpl implements WorkLoader {
 
 		// Validate no duplicate escalation names
 		if (this.isDuplicateNaming(escalationTypes,
-				new NameExtractor<TaskEscalationType>() {
+				new NameExtractor<ManagedFunctionEscalationType>() {
 					@Override
-					public String extractName(TaskEscalationType item) {
+					public String extractName(ManagedFunctionEscalationType item) {
 						return item.getEscalationName();
 					}
 				}, this.getTaskIssueDescription("Two or more "
-						+ TaskEscalationType.class.getSimpleName()
+						+ ManagedFunctionEscalationType.class.getSimpleName()
 						+ " definitions with the same name (${NAME}) for",
 						taskIndex, taskName, workSourceClass))) {
 			return false; // must have valid type
@@ -434,23 +434,23 @@ public class WorkLoaderImpl implements WorkLoader {
 	}
 
 	/**
-	 * Determines that the {@link TaskObjectType} instances are valid given an
+	 * Determines that the {@link ManagedFunctionObjectType} instances are valid given an
 	 * {@link Enum} providing the dependent {@link Object} keys.
 	 * 
 	 * @param taskType
-	 *            {@link TaskType}.
+	 *            {@link ManagedFunctionType}.
 	 * @param objectKeysClass
 	 *            {@link Enum} providing the keys.
 	 * @param taskIndex
-	 *            Index of the {@link TaskType} on the {@link WorkType}.
+	 *            Index of the {@link ManagedFunctionType} on the {@link FunctionNamespaceType}.
 	 * @param taskName
-	 *            Name of the {@link TaskType}.
+	 *            Name of the {@link ManagedFunctionType}.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
-	 * @return <code>true</code> if {@link TaskObjectType} instances are valid.
+	 *            {@link ManagedFunctionSource} class.
+	 * @return <code>true</code> if {@link ManagedFunctionObjectType} instances are valid.
 	 */
 	private <M extends Enum<M>> boolean isValidObjects(
-			TaskType<?, M, ?> taskType, Class<M> objectKeysClass,
+			ManagedFunctionType<?, M, ?> taskType, Class<M> objectKeysClass,
 			int taskIndex, String taskName, Class<?> workSourceClass) {
 
 		// Obtain the keys are sort by ordinal just to be sure
@@ -463,15 +463,15 @@ public class WorkLoaderImpl implements WorkLoader {
 		});
 
 		// Validate the task object types
-		TaskObjectType<M>[] objectTypes = taskType.getObjectTypes();
+		ManagedFunctionObjectType<M>[] objectTypes = taskType.getObjectTypes();
 		for (int i = 0; i < keys.length; i++) {
 			M key = keys[i];
-			TaskObjectType<M> objectType = (objectTypes.length > i ? objectTypes[i]
+			ManagedFunctionObjectType<M> objectType = (objectTypes.length > i ? objectTypes[i]
 					: null);
 
 			// Ensure object type for the key
 			if (objectType == null) {
-				this.addTaskIssue("No " + TaskObjectType.class.getSimpleName()
+				this.addTaskIssue("No " + ManagedFunctionObjectType.class.getSimpleName()
 						+ " provided for key " + key + " on", taskIndex,
 						taskName, workSourceClass);
 				return false; // not valid
@@ -523,26 +523,26 @@ public class WorkLoaderImpl implements WorkLoader {
 	}
 
 	/**
-	 * Determines that the {@link TaskObjectType} instances are valid given they
+	 * Determines that the {@link ManagedFunctionObjectType} instances are valid given they
 	 * are {@link Indexed}.
 	 * 
 	 * @param taskType
-	 *            {@link TaskType}.
+	 *            {@link ManagedFunctionType}.
 	 * @param taskIndex
-	 *            Index of the {@link TaskType} on the {@link WorkType}.
+	 *            Index of the {@link ManagedFunctionType} on the {@link FunctionNamespaceType}.
 	 * @param taskName
-	 *            Name of the {@link TaskType}.
+	 *            Name of the {@link ManagedFunctionType}.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
-	 * @return <code>true</code> if {@link TaskObjectType} instances are valid.
+	 *            {@link ManagedFunctionSource} class.
+	 * @return <code>true</code> if {@link ManagedFunctionObjectType} instances are valid.
 	 */
-	private boolean isValidObjects(TaskType<?, ?, ?> taskType, int taskIndex,
+	private boolean isValidObjects(ManagedFunctionType<?, ?, ?> taskType, int taskIndex,
 			String taskName, Class<?> workSourceClass) {
 
 		// Validate the task object types
-		TaskObjectType<?>[] objectTypes = taskType.getObjectTypes();
+		ManagedFunctionObjectType<?>[] objectTypes = taskType.getObjectTypes();
 		for (int i = 0; i < objectTypes.length; i++) {
-			TaskObjectType<?> objectType = objectTypes[i];
+			ManagedFunctionObjectType<?> objectType = objectTypes[i];
 
 			// Ensure no key on object
 			Enum<?> key = objectType.getKey();
@@ -566,23 +566,23 @@ public class WorkLoaderImpl implements WorkLoader {
 	}
 
 	/**
-	 * Determines that the {@link TaskFlowType} instances are valid given an
+	 * Determines that the {@link ManagedFunctionFlowType} instances are valid given an
 	 * {@link Enum} providing the instigated {@link Flow} keys.
 	 * 
 	 * @param taskType
-	 *            {@link TaskType}.
+	 *            {@link ManagedFunctionType}.
 	 * @param objectKeysClass
 	 *            {@link Enum} providing the keys.
 	 * @param taskIndex
-	 *            Index of the {@link TaskType} on the {@link WorkType}.
+	 *            Index of the {@link ManagedFunctionType} on the {@link FunctionNamespaceType}.
 	 * @param taskName
-	 *            Name of the {@link TaskType}.
+	 *            Name of the {@link ManagedFunctionType}.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
-	 * @return <code>true</code> if {@link TaskFlowType} instances are valid.
+	 *            {@link ManagedFunctionSource} class.
+	 * @return <code>true</code> if {@link ManagedFunctionFlowType} instances are valid.
 	 */
 	private <F extends Enum<F>> boolean isValidFlows(
-			TaskType<?, ?, F> taskType, Class<F> flowKeysClass, int taskIndex,
+			ManagedFunctionType<?, ?, F> taskType, Class<F> flowKeysClass, int taskIndex,
 			String taskName, Class<?> workSourceClass) {
 
 		// Obtain the keys are sort by ordinal just to be sure
@@ -595,15 +595,15 @@ public class WorkLoaderImpl implements WorkLoader {
 		});
 
 		// Validate the task flow types
-		TaskFlowType<F>[] flowTypes = taskType.getFlowTypes();
+		ManagedFunctionFlowType<F>[] flowTypes = taskType.getFlowTypes();
 		for (int i = 0; i < keys.length; i++) {
 			F key = keys[i];
-			TaskFlowType<F> flowType = (flowTypes.length > i ? flowTypes[i]
+			ManagedFunctionFlowType<F> flowType = (flowTypes.length > i ? flowTypes[i]
 					: null);
 
 			// Ensure flow type for the key
 			if (flowType == null) {
-				this.addTaskIssue("No " + TaskFlowType.class.getSimpleName()
+				this.addTaskIssue("No " + ManagedFunctionFlowType.class.getSimpleName()
 						+ " provided for key " + key + " on", taskIndex,
 						taskName, workSourceClass);
 				return false; // not valid
@@ -655,26 +655,26 @@ public class WorkLoaderImpl implements WorkLoader {
 	}
 
 	/**
-	 * Determines that the {@link TaskFlowType} instances are valid given they
+	 * Determines that the {@link ManagedFunctionFlowType} instances are valid given they
 	 * are {@link Indexed}.
 	 * 
 	 * @param taskType
-	 *            {@link TaskType}.
+	 *            {@link ManagedFunctionType}.
 	 * @param taskIndex
-	 *            Index of the {@link TaskType} on the {@link WorkType}.
+	 *            Index of the {@link ManagedFunctionType} on the {@link FunctionNamespaceType}.
 	 * @param taskName
-	 *            Name of the {@link TaskType}.
+	 *            Name of the {@link ManagedFunctionType}.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
-	 * @return <code>true</code> if {@link TaskFlowType} instances are valid.
+	 *            {@link ManagedFunctionSource} class.
+	 * @return <code>true</code> if {@link ManagedFunctionFlowType} instances are valid.
 	 */
-	private boolean isValidFlows(TaskType<?, ?, ?> taskType, int taskIndex,
+	private boolean isValidFlows(ManagedFunctionType<?, ?, ?> taskType, int taskIndex,
 			String taskName, Class<?> workSourceClass) {
 
 		// Validate the task flow types
-		TaskFlowType<?>[] flowTypes = taskType.getFlowTypes();
+		ManagedFunctionFlowType<?>[] flowTypes = taskType.getFlowTypes();
 		for (int i = 0; i < flowTypes.length; i++) {
-			TaskFlowType<?> flowType = flowTypes[i];
+			ManagedFunctionFlowType<?> flowType = flowTypes[i];
 
 			// Ensure no key on flow
 			Enum<?> key = flowType.getKey();
@@ -771,24 +771,24 @@ public class WorkLoaderImpl implements WorkLoader {
 	}
 
 	/**
-	 * Obtains the {@link Task} issue description.
+	 * Obtains the {@link ManagedFunction} issue description.
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param taskIndex
-	 *            Index of the {@link Task}.
+	 *            Index of the {@link ManagedFunction}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
-	 * @return {@link Task} issue description.
+	 *            {@link ManagedFunctionSource} class.
+	 * @return {@link ManagedFunction} issue description.
 	 */
 	private String getTaskIssueDescription(String issueDescription,
 			int taskIndex, String taskName, Class<?> workSourceClass) {
-		return issueDescription + " " + TaskType.class.getSimpleName()
+		return issueDescription + " " + ManagedFunctionType.class.getSimpleName()
 				+ " definition " + taskIndex
 				+ (taskName == null ? "" : " (" + taskName + ")") + " by "
-				+ WorkSource.class.getSimpleName() + " "
+				+ ManagedFunctionSource.class.getSimpleName() + " "
 				+ workSourceClass.getName();
 	}
 
@@ -798,11 +798,11 @@ public class WorkLoaderImpl implements WorkLoader {
 	 * @param issueDescription
 	 *            Description of the issue.
 	 * @param taskIndex
-	 *            Index of the {@link Task}.
+	 *            Index of the {@link ManagedFunction}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param workSourceClass
-	 *            {@link WorkSource} class.
+	 *            {@link ManagedFunctionSource} class.
 	 */
 	private void addTaskIssue(String issueDescription, int taskIndex,
 			String taskName, Class<?> workSourceClass) {

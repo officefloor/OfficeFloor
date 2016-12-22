@@ -22,15 +22,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.http.HttpResponse;
 
 /**
- * {@link WorkSource} to trigger sending the {@link HttpResponse}.
+ * {@link ManagedFunctionSource} to trigger sending the {@link HttpResponse}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -57,8 +57,8 @@ public class HttpResponseSenderWorkSource extends AbstractWorkSource<Work> {
 	}
 
 	@Override
-	public void sourceWork(WorkTypeBuilder<Work> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<Work> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the HTTP status (default negative to not set)
 		int httpStatus = Integer.parseInt(context.getProperty(

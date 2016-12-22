@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.integrate.stress;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
@@ -130,7 +130,7 @@ public class ProcessContextTeamStressTest extends
 	public class StaticWork {
 
 		/**
-		 * Static {@link Task} that all execution runs through.
+		 * Static {@link ManagedFunction} that all execution runs through.
 		 * 
 		 * @param parameter
 		 *            {@link ContextParameter}.
@@ -150,13 +150,13 @@ public class ProcessContextTeamStressTest extends
 	}
 
 	/**
-	 * {@link Work} requiring {@link Task} to be executed with a context
+	 * {@link Work} requiring {@link ManagedFunction} to be executed with a context
 	 * {@link Thread}.
 	 */
 	public class ContextWork extends Thread {
 
 		/**
-		 * {@link Task} to be executed with the context {@link Thread}.
+		 * {@link ManagedFunction} to be executed with the context {@link Thread}.
 		 * 
 		 * @param parameter
 		 *            {@link ContextParameter}.
@@ -184,14 +184,14 @@ public class ProcessContextTeamStressTest extends
 	private class ContextParameter extends Thread {
 
 		/**
-		 * Number of times to have the context {@link Task} invoked.
+		 * Number of times to have the context {@link ManagedFunction} invoked.
 		 */
 		private final int maxInvokeCount;
 
 		/**
-		 * Number of times that the {@link Task} has been invoked. This is not
+		 * Number of times that the {@link ManagedFunction} has been invoked. This is not
 		 * <code>volatile</code> as should always be the same {@link Thread}
-		 * executing the {@link Task}.
+		 * executing the {@link ManagedFunction}.
 		 */
 		private int invokeCount = 0;
 
@@ -209,7 +209,7 @@ public class ProcessContextTeamStressTest extends
 		 * Initiate.
 		 * 
 		 * @param maxInvokeCount
-		 *            Number of times to have the context {@link Task} invoked.
+		 *            Number of times to have the context {@link ManagedFunction} invoked.
 		 */
 		public ContextParameter(int maxInvokeCount) {
 			this.maxInvokeCount = maxInvokeCount;

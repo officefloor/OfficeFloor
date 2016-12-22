@@ -21,17 +21,17 @@ import java.util.Date;
 
 import javax.naming.Context;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.plugin.xml.XmlMarshallException;
@@ -59,11 +59,11 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 	public void testType() {
 
 		// Create the work
-		WorkTypeBuilder<JndiWork> work = WorkLoaderUtil
+		FunctionNamespaceBuilder<JndiWork> work = WorkLoaderUtil
 				.createWorkTypeBuilder(new JndiWorkFactory(null, null));
 
 		// Create the complex task
-		TaskTypeBuilder<Indexed, None> complexTask = work.addTaskType(
+		ManagedFunctionTypeBuilder<Indexed, None> complexTask = work.addManagedFunctionType(
 				"complexTask", new JndiObjectTaskFactory(null, false, null),
 				Indexed.class, None.class);
 		complexTask.addObject(Context.class).setLabel(Context.class.getName());
@@ -74,7 +74,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		complexTask.addEscalation(XmlMarshallException.class);
 
 		// Create the simple task
-		work.addTaskType("simpleTask",
+		work.addManagedFunctionType("simpleTask",
 				new JndiObjectTaskFactory(null, false, null), Indexed.class,
 				None.class).addObject(Context.class)
 				.setLabel(Context.class.getName());
@@ -92,11 +92,11 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 	public void testTypeWithAdapter() {
 
 		// Create the work
-		WorkTypeBuilder<JndiWork> work = WorkLoaderUtil
+		FunctionNamespaceBuilder<JndiWork> work = WorkLoaderUtil
 				.createWorkTypeBuilder(new JndiWorkFactory(null, null));
 
 		// Create the complex facade
-		TaskTypeBuilder<Indexed, None> complexTask = work.addTaskType(
+		ManagedFunctionTypeBuilder<Indexed, None> complexTask = work.addManagedFunctionType(
 				"complexFacade", new JndiFacadeTaskFactory(null, false, null),
 				Indexed.class, None.class);
 		complexTask.addObject(Context.class).setLabel(Context.class.getName());
@@ -106,19 +106,19 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		complexTask.addEscalation(Exception.class);
 
 		// Ensure override by name
-		work.addTaskType("complexTask",
+		work.addManagedFunctionType("complexTask",
 				new JndiFacadeTaskFactory(null, false, null), Indexed.class,
 				None.class).addObject(Context.class)
 				.setLabel(Context.class.getName());
 
 		// Create the simple facade
-		work.addTaskType("simpleFacade",
+		work.addManagedFunctionType("simpleFacade",
 				new JndiFacadeTaskFactory(null, false, null), Indexed.class,
 				None.class).addObject(Context.class)
 				.setLabel(Context.class.getName());
 
 		// Create the simple task
-		work.addTaskType("simpleTask",
+		work.addManagedFunctionType("simpleTask",
 				new JndiObjectTaskFactory(null, false, null), Indexed.class,
 				None.class).addObject(Context.class)
 				.setLabel(Context.class.getName());
@@ -133,7 +133,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensure can execute the JNDI Object {@link Task}.
+	 * Ensure can execute the JNDI Object {@link ManagedFunction}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testExecuteJndiObjectTask() throws Throwable {
@@ -155,7 +155,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		this.replayMockObjects();
 
 		// Load the work type
-		WorkType<JndiWork> work = WorkLoaderUtil.loadWorkType(
+		FunctionNamespaceType<JndiWork> work = WorkLoaderUtil.loadWorkType(
 				JndiWorkSource.class, JndiWorkSource.PROPERTY_JNDI_NAME,
 				JNDI_NAME, JndiWorkSource.PROPERTY_WORK_TYPE,
 				MockJndiObject.class.getName());
@@ -185,9 +185,9 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		WorkBuilder<JndiWork> workBuilder = this.constructWork("WORK",
 				work.getWorkFactory());
 		workBuilder.setInitialTask("TASK");
-		TaskFactory<JndiWork, ?, ?> taskFactory = work.getTaskTypes()[0]
-				.getTaskFactory();
-		TaskBuilder task = this.constructTask("TASK", taskFactory, "TEAM");
+		ManagedFunctionFactory<JndiWork, ?, ?> taskFactory = work.getManagedFunctionTypes()[0]
+				.getManagedFunctionFactory();
+		ManagedFunctionBuilder task = this.constructTask("TASK", taskFactory, "TEAM");
 		task.linkManagedObject(0, "CONTEXT_MO", Context.class);
 		task.linkManagedObject(1, "XML_MO", String.class);
 		task.linkManagedObject(2, "UNMARSHALLER_MO", XmlUnmarshaller.class);
@@ -200,7 +200,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensure can execute the facade {@link Task}.
+	 * Ensure can execute the facade {@link ManagedFunction}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testExecuteJndiFacadeTask() throws Throwable {
@@ -227,7 +227,7 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		this.replayMockObjects();
 
 		// Load the work type (with facade)
-		WorkType<JndiWork> work = WorkLoaderUtil.loadWorkType(
+		FunctionNamespaceType<JndiWork> work = WorkLoaderUtil.loadWorkType(
 				JndiWorkSource.class, JndiWorkSource.PROPERTY_JNDI_NAME,
 				JNDI_NAME, JndiWorkSource.PROPERTY_WORK_TYPE,
 				MockJndiObject.class.getName(),
@@ -258,9 +258,9 @@ public class JndiWorkSourceTest extends AbstractOfficeConstructTestCase {
 		WorkBuilder<JndiWork> workBuilder = this.constructWork("WORK",
 				work.getWorkFactory());
 		workBuilder.setInitialTask("TASK");
-		TaskFactory<JndiWork, ?, ?> taskFactory = work.getTaskTypes()[0]
-				.getTaskFactory();
-		TaskBuilder task = this.constructTask("TASK", taskFactory, "TEAM");
+		ManagedFunctionFactory<JndiWork, ?, ?> taskFactory = work.getManagedFunctionTypes()[0]
+				.getManagedFunctionFactory();
+		ManagedFunctionBuilder task = this.constructTask("TASK", taskFactory, "TEAM");
 		task.linkManagedObject(0, "CONTEXT_MO", Context.class);
 		task.linkManagedObject(1, "XML_MO", String.class);
 		task.linkManagedObject(2, "IDENTIFIER_MO", Integer.class);

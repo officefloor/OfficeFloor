@@ -27,10 +27,10 @@ import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.spi.TestSource;
@@ -518,7 +518,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	 * Loads the {@link AdministratorType}.
 	 * 
 	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the {@link WorkType}.
+	 *            Flag indicating if expecting to load the {@link FunctionNamespaceType}.
 	 * @param init
 	 *            {@link Init}.
 	 * @param propertyNameValuePairs

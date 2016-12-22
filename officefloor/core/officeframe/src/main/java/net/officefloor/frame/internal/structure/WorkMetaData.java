@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -28,6 +28,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // move to ManagedFunctionMetaData
 public interface WorkMetaData<W extends Work> {
 
 	/**
@@ -62,6 +63,7 @@ public interface WorkMetaData<W extends Work> {
 	 *         {@link Work} or <code>null</code> if no initial {@link Flow} for
 	 *         the {@link Work}.
 	 */
+	@Deprecated // Work to become namespace so initial task not necessary
 	FlowMetaData<W> getInitialFlowMetaData();
 
 	/**
@@ -83,12 +85,12 @@ public interface WorkMetaData<W extends Work> {
 	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
 
 	/**
-	 * Obtains the {@link TaskMetaData} for the {@link Task} instances of this
-	 * {@link Work}.
+	 * Obtains the {@link ManagedFunctionMetaData} for the {@link ManagedFunction}
+	 * instances of this {@link Work}.
 	 * 
-	 * @return {@link TaskMetaData} for the {@link Task} instances of this
-	 *         {@link Work}.
+	 * @return {@link ManagedFunctionMetaData} for the {@link ManagedFunction} instances of
+	 *         this {@link Work}.
 	 */
-	TaskMetaData<W, ?, ?>[] getTaskMetaData();
+	ManagedFunctionMetaData<W, ?, ?>[] getTaskMetaData();
 
 }

@@ -35,7 +35,7 @@ import net.officefloor.building.command.parameters.WorkNameOfficeFloorCommandPar
 import net.officefloor.building.manager.UploadArtifact;
 import net.officefloor.building.process.ManagedProcess;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -146,15 +146,15 @@ public class CommandLineBuilder {
 	}
 
 	/**
-	 * Adds invoking a {@link Task}.
+	 * Adds invoking a {@link ManagedFunction}.
 	 * 
 	 * @param officeName
 	 *            {@link Office} name.
 	 * @param workName
 	 *            {@link Work} name.
 	 * @param taskName
-	 *            {@link Task} name. May be <code>null</code> to use initial
-	 *            {@link Task} of {@link Work}.
+	 *            {@link ManagedFunction} name. May be <code>null</code> to use initial
+	 *            {@link ManagedFunction} of {@link Work}.
 	 * @param parameterValue
 	 *            Parameter value. May be <code>null</code>.
 	 */

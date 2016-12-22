@@ -17,12 +17,12 @@
  */
 package net.officefloor.frame.api.escalate;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * {@link Escalation} of a {@link Flow} not completing in the timeout of a
- * {@link Task} joining to it.
+ * {@link ManagedFunction} joining to it.
  * 
  * @author Daniel Sagenschneider
  */

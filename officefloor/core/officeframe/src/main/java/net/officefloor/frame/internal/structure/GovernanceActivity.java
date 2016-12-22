@@ -21,31 +21,22 @@ import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 
 /**
- * Activity regarding the {@link Governance}.
- * 
+ * Activity undertaken for {@link Governance}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface GovernanceActivity<I, F extends Enum<F>> {
+public interface GovernanceActivity<F extends Enum<F>> {
 
 	/**
-	 * Obtains the {@link GovernanceMetaData} for this
-	 * {@link GovernanceActivity}.
+	 * Undertakes the {@link Governance} activity.
 	 * 
-	 * @return {@link GovernanceMetaData} for this {@link GovernanceActivity}.
-	 */
-	GovernanceMetaData<I, F> getGovernanceMetaData();
-
-	/**
-	 * Undertakes an activity regarding the {@link Governance}.
-	 * 
-	 * @param governanceContext
-	 *            {@link GovernanceContext}
-	 * @param function
-	 *            {@link FunctionState}.
-	 * @return Optional {@link FunctionState} to undertake {@link Governance}.
+	 * @param context
+	 *            {@link GovernanceContext}.
+	 * @return Optional {@link FunctionState} to further execute for the
+	 *         {@link GovernanceActivity}.
 	 * @throws Throwable
 	 *             If activity fails.
 	 */
-	FunctionState doActivity(GovernanceContext<F> governanceContext, FunctionState function) throws Throwable;
+	FunctionState doActivity(GovernanceContext<F> context) throws Throwable;
 
 }

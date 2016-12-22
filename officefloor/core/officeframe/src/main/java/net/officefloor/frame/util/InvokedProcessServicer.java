@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.util;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -36,7 +36,7 @@ public interface InvokedProcessServicer {
 	 *            Index of the invoked {@link ProcessState}. Allows re-using the
 	 *            {@link InvokedProcessServicer} for multiple invocations.
 	 * @param parameter
-	 *            Parameter to the initial {@link Task} within the
+	 *            Parameter to the initial {@link ManagedFunction} within the
 	 *            {@link ProcessState}.
 	 * @param managedObject
 	 *            {@link ManagedObject} provided for the invoked

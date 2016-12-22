@@ -21,7 +21,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.type.TypeContext;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
  * {@link TaskObject} node.
@@ -41,10 +41,10 @@ public interface TaskObjectNode extends LinkObjectNode, TaskObject {
 	void initialise();
 
 	/**
-	 * Indicates if this {@link TaskObject} is a parameter to the {@link Task}.
+	 * Indicates if this {@link TaskObject} is a parameter to the {@link ManagedFunction}.
 	 * 
 	 * @return <code>true</code> if this {@link TaskObject} is a parameter to
-	 *         the {@link Task}.
+	 *         the {@link ManagedFunction}.
 	 */
 	boolean isParameter();
 

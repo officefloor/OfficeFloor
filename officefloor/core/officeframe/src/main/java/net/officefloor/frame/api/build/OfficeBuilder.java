@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -143,7 +143,7 @@ public interface OfficeBuilder {
 	 * <p>
 	 * Flags to manually manage the {@link Governance}.
 	 * <p>
-	 * WARNING: given the nuances of {@link Task} completion be wary of
+	 * WARNING: given the nuances of {@link ManagedFunction} completion be wary of
 	 * attempting to manually manage the {@link Governance}.
 	 * <p>
 	 * Manually managing however is useful for multi-threaded execution and
@@ -152,6 +152,7 @@ public interface OfficeBuilder {
 	 * @param isManuallyManage
 	 *            <code>true</code> to manually manage.
 	 */
+	@Deprecated // always allow manual management
 	void setManuallyManageGovernance(boolean isManuallyManage);
 
 	/**
@@ -196,6 +197,7 @@ public interface OfficeBuilder {
 	 *            {@link AdministratorSource} class.
 	 * @return {@link AdministratorBuilder} for the {@link Administrator}.
 	 */
+	@Deprecated // only allow thread bound administrators
 	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addProcessAdministrator(
 			String processAdministratorName, Class<AS> adminsistratorSource);
 
@@ -222,6 +224,7 @@ public interface OfficeBuilder {
 	 *            {@link AdministratorSource} class.
 	 * @return administratorBuilder Builder of the {@link Administrator}.
 	 */
+	@Deprecated // to become addAdministrator as always thread bound
 	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addThreadAdministrator(
 			String threadAdministratorName, Class<AS> adminsistratorSource);
 
@@ -236,6 +239,7 @@ public interface OfficeBuilder {
 	 *            {@link WorkFactory} to create the {@link Work}.
 	 * @return {@link WorkBuilder} to build the {@link Work}.
 	 */
+	@Deprecated // to become addManagedFunction
 	<W extends Work> WorkBuilder<W> addWork(String workName, WorkFactory<W> workFactory);
 
 	/**
@@ -257,21 +261,21 @@ public interface OfficeBuilder {
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
 	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link Task} on the {@link Work} to handle the
+	 *            Name of {@link ManagedFunction} on the {@link Work} to handle the
 	 *            {@link EscalationFlow}.
 	 */
 	void addEscalation(Class<? extends Throwable> typeOfCause, String workName, String taskName);
 
 	/**
-	 * Adds a {@link Task} to invoke on start up of the {@link Office}.
+	 * Adds a {@link ManagedFunction} to invoke on start up of the {@link Office}.
 	 * 
 	 * @param workName
-	 *            Name of {@link Work} containing the {@link Task}.
+	 *            Name of {@link Work} containing the {@link ManagedFunction}.
 	 * @param taskName
-	 *            Name of {@link Task} on the {@link Work}.
+	 *            Name of {@link ManagedFunction} on the {@link Work}.
 	 */
 	void addStartupTask(String workName, String taskName);
 

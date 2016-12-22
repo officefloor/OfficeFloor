@@ -23,6 +23,10 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -44,10 +48,6 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -1627,24 +1627,24 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * {@link WorkSource} that should not have its methods invoked.
+	 * {@link ManagedFunctionSource} that should not have its methods invoked.
 	 */
 	@TestSource
-	public static class NotUseWorkSource implements WorkSource<Work> {
+	public static class NotUseWorkSource implements ManagedFunctionSource<Work> {
 
 		/*
 		 * ================== WorkSource ====================================
 		 */
 
 		@Override
-		public WorkSourceSpecification getSpecification() {
+		public ManagedFunctionSourceSpecification getSpecification() {
 			fail("Should not use WorkSource");
 			return null;
 		}
 
 		@Override
-		public void sourceWork(WorkTypeBuilder<Work> workTypeBuilder,
-				WorkSourceContext context) throws Exception {
+		public void sourceManagedFunctions(FunctionNamespaceBuilder<Work> workTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
 			fail("Should not use WorkSource");
 		}
 	}

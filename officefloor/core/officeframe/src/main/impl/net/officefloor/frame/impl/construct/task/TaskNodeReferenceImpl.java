@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 
@@ -29,17 +29,17 @@ import net.officefloor.frame.internal.configuration.TaskNodeReference;
 public class TaskNodeReferenceImpl implements TaskNodeReference {
 
 	/**
-	 * Name identifying the {@link Work} containing the {@link Task}.
+	 * Name identifying the {@link Work} containing the {@link ManagedFunction}.
 	 */
 	private final String workName;
 
 	/**
-	 * Name of the {@link Task}.
+	 * Name of the {@link ManagedFunction}.
 	 */
 	private final String taskName;
 
 	/**
-	 * Type of argument to be passed to the referenced {@link Task}.
+	 * Type of argument to be passed to the referenced {@link ManagedFunction}.
 	 */
 	private final Class<?> argumentType;
 
@@ -47,11 +47,11 @@ public class TaskNodeReferenceImpl implements TaskNodeReference {
 	 * Initiate.
 	 * 
 	 * @param workName
-	 *            Name identifying the {@link Work} containing the {@link Task}.
+	 *            Name identifying the {@link Work} containing the {@link ManagedFunction}.
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param argumentType
-	 *            Type of argument to be passed to the referenced {@link Task}.
+	 *            Type of argument to be passed to the referenced {@link ManagedFunction}.
 	 */
 	public TaskNodeReferenceImpl(String workName, String taskName,
 			Class<?> argumentType) {
@@ -64,9 +64,9 @@ public class TaskNodeReferenceImpl implements TaskNodeReference {
 	 * Initiate.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link Task}.
+	 *            Name of the {@link ManagedFunction}.
 	 * @param argumentType
-	 *            Type of argument to be passed to the referenced {@link Task}.
+	 *            Type of argument to be passed to the referenced {@link ManagedFunction}.
 	 */
 	public TaskNodeReferenceImpl(String taskName, Class<?> argumentType) {
 		this(null, taskName, argumentType);

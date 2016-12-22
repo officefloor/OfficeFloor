@@ -18,8 +18,8 @@
 package net.officefloor.plugin.web.http.resource.source;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -48,11 +48,11 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 			.createMock(HttpResourceFactory.class);
 
 	/**
-	 * Mock {@link TaskContext}.
+	 * Mock {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskContext<HttpFileFactoryTask<Indexed>, DependencyKeys, Indexed> taskContext = this
-			.createMock(TaskContext.class);
+	private final ManagedFunctionContext<HttpFileFactoryTask<Indexed>, DependencyKeys, Indexed> taskContext = this
+			.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * Mock {@link ServerHttpConnection}.
@@ -137,7 +137,7 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 	 *            Indicates if directory.
 	 * @param file
 	 *            {@link HttpResource}.
-	 * @return {@link HttpResource} returned from {@link Task}.
+	 * @return {@link HttpResource} returned from {@link ManagedFunction}.
 	 */
 	private void doTaskTest(String requestUri, boolean isValidContext,
 			String filePath, boolean isDirectory, HttpResource file)
@@ -183,7 +183,7 @@ public class HttpFileFactoryTaskTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		HttpFileFactoryTask<Indexed> task = new HttpFileFactoryTask<Indexed>(
 				this.factory, this.creationListener);
-		HttpResource resource = (HttpResource) task.doTask(this.taskContext);
+		HttpResource resource = (HttpResource) task.execute(this.taskContext);
 		this.verifyMockObjects();
 		assertEquals("Incorrect returned HTTP file", file, resource);
 	}

@@ -20,8 +20,8 @@ package net.officefloor.plugin.servlet.route;
 import javax.servlet.Servlet;
 
 import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
@@ -30,7 +30,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
- * {@link Task} for routing {@link HttpRequest} to be serviced by a
+ * {@link ManagedFunction} for routing {@link HttpRequest} to be serviced by a
  * {@link Servlet}.
  * 
  * @author Daniel Sagenschneider
@@ -73,8 +73,8 @@ public class ServletRouteTask
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<ServletRouteTask, DependencyKeys, FlowKeys> context)
+	public Object execute(
+			ManagedFunctionContext<ServletRouteTask, DependencyKeys, FlowKeys> context)
 			throws Exception {
 
 		// Obtain the path being requested

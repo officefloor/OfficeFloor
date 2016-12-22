@@ -28,7 +28,7 @@ import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -75,7 +75,7 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -1221,7 +1221,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.recordReturn(workMetaData, workMetaData.getWorkName(), "WORK");
 		this.recordReturn(workMetaData, workMetaData.getTaskMetaData(),
-				new TaskMetaData[0]);
+				new ManagedFunctionMetaData[0]);
 		this.record_linkTasksForWork(rawWorkMetaData);
 		this.record_processContextListeners();
 		this.record_noProfiler();
@@ -1263,7 +1263,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				new TaskNodeReference[] { startupTaskReference });
 		this.recordReturn(workMetaData, workMetaData.getWorkName(), "WORK");
 		this.recordReturn(workMetaData, workMetaData.getTaskMetaData(),
-				new TaskMetaData[0]);
+				new ManagedFunctionMetaData[0]);
 		this.record_noOfficeEscalationHandler();
 		this.recordReturn(startupTaskReference,
 				startupTaskReference.getWorkName(), null); // no work name to
@@ -1294,8 +1294,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final RawWorkMetaData<?> rawWorkMetaData = this
 				.createMock(RawWorkMetaData.class);
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 		final TaskNodeReference startupTaskReference = this
 				.createMock(TaskNodeReference.class);
 
@@ -1310,8 +1310,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				new TaskNodeReference[] { startupTaskReference });
 		this.recordReturn(workMetaData, workMetaData.getWorkName(), "WORK");
 		this.recordReturn(workMetaData, workMetaData.getTaskMetaData(),
-				new TaskMetaData[] { taskMetaData });
-		this.recordReturn(taskMetaData, taskMetaData.getTaskName(), "TASK");
+				new ManagedFunctionMetaData[] { taskMetaData });
+		this.recordReturn(taskMetaData, taskMetaData.getFunctionName(), "TASK");
 		this.record_noOfficeEscalationHandler();
 		this.recordReturn(startupTaskReference,
 				startupTaskReference.getWorkName(), "WORK");
@@ -1403,7 +1403,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if unknown {@link Task} for {@link Office}
+	 * Ensure issue if unknown {@link ManagedFunction} for {@link Office}
 	 * {@link EscalationFlow}.
 	 */
 	public void testUnknownTaskForOfficeEscalation() {
@@ -1457,8 +1457,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		final TaskNodeReference escalationTaskReference = this
 				.createMock(TaskNodeReference.class);
 		final Class<?> typeOfCause = failure.getClass();
-		final TaskMetaData<?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record adding office escalation
 		this.record_enhanceOffice();
@@ -1468,8 +1468,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		WorkMetaData<?> workMetaData = this.record_work(rawWorkMetaData)[0];
 		this.recordReturn(workMetaData, workMetaData.getWorkName(), "WORK");
 		this.recordReturn(workMetaData, workMetaData.getTaskMetaData(),
-				new TaskMetaData[] { taskMetaData });
-		this.recordReturn(taskMetaData, taskMetaData.getTaskName(), "TASK");
+				new ManagedFunctionMetaData[] { taskMetaData });
+		this.recordReturn(taskMetaData, taskMetaData.getFunctionName(), "TASK");
 		this.record_noOfficeStartupTasks();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalationConfiguration(),
@@ -1521,11 +1521,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		final AssetManager flowAssetManager = this
 				.createMock(AssetManager.class);
 		final Work work = this.createMock(Work.class);
-		final Task<Work, ?, ?> task = this.createMock(Task.class);
+		final ManagedFunction<Work, ?, ?> task = this.createMock(ManagedFunction.class);
 
 		final WorkMetaData<?> workMetaData = MetaDataTestInstanceFactory
 				.createWorkMetaData(work);
-		final TaskMetaData taskMetaData = MetaDataTestInstanceFactory
+		final ManagedFunctionMetaData taskMetaData = MetaDataTestInstanceFactory
 				.createTaskMetaData(task, workMetaData);
 
 		// Record creating a process
@@ -1571,11 +1571,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(FlowMetaData.class);
 		final AssetManager flowManager = this.createMock(AssetManager.class);
 		final Work work = this.createMock(Work.class);
-		final Task<?, ?, ?> task = this.createMock(Task.class);
+		final ManagedFunction<?, ?, ?> task = this.createMock(ManagedFunction.class);
 
 		final WorkMetaData<?> workMetaData = MetaDataTestInstanceFactory
 				.createWorkMetaData(work);
-		final TaskMetaData taskMetaData = MetaDataTestInstanceFactory
+		final ManagedFunctionMetaData taskMetaData = MetaDataTestInstanceFactory
 				.createTaskMetaData(task, workMetaData);
 
 		// Record registering Process Context Listener
@@ -1755,7 +1755,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records the {@link Governance} {@link Task} instances.
+	 * Records the {@link Governance} {@link ManagedFunction} instances.
 	 */
 	private void record_governanceTasks(String... governanceNames) {
 
@@ -2201,14 +2201,14 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Links the {@link Task} instances for the {@link Administrator} instances.
+	 * Links the {@link ManagedFunction} instances for the {@link Administrator} instances.
 	 * 
 	 * @param boundAdministrators
 	 *            {@link RawBoundAdministratorMetaData} instances by their bound
 	 *            names.
 	 * @param administratorNames
 	 *            Names of the {@link RawBoundAdministratorMetaData} to have
-	 *            their {@link Task} instances linked.
+	 *            their {@link ManagedFunction} instances linked.
 	 */
 	private void record_linkTasksForAdministrators(
 			Map<String, RawBoundAdministratorMetaData<?, ?>> boundAdministrators,
@@ -2323,7 +2323,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Links the {@link Task} instances for the {@link Work} instances.
+	 * Links the {@link ManagedFunction} instances for the {@link Work} instances.
 	 * 
 	 * @param rawWorkMetaDatas
 	 *            {@link RawWorkMetaData} instances.

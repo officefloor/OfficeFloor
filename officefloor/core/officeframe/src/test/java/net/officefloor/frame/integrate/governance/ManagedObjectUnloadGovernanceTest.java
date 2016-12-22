@@ -23,10 +23,10 @@ import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
@@ -65,12 +65,12 @@ public class ManagedObjectUnloadGovernanceTest extends
 			.createSynchronizedMock(TransactionalObject.class);
 
 	/**
-	 * Flag indicating whether to provide commit after {@link Task}.
+	 * Flag indicating whether to provide commit after {@link ManagedFunction}.
 	 */
 	private boolean isCommit = false;
 
 	/**
-	 * Flag indicating whether to rollback after {@link Task}.
+	 * Flag indicating whether to rollback after {@link ManagedFunction}.
 	 */
 	private boolean isRollback = false;
 
@@ -232,8 +232,8 @@ public class ManagedObjectUnloadGovernanceTest extends
 			AbstractManagedObjectSource<None, None> implements ManagedObject,
 			ExtensionInterfaceFactory<MockTransaction>,
 			WorkFactory<TransactionalManagedObjectSource>, Work,
-			TaskFactory<TransactionalManagedObjectSource, None, None>,
-			Task<TransactionalManagedObjectSource, None, None> {
+			ManagedFunctionFactory<TransactionalManagedObjectSource, None, None>,
+			ManagedFunction<TransactionalManagedObjectSource, None, None> {
 
 		/**
 		 * {@link TransactionalObject}.
@@ -301,7 +301,7 @@ public class ManagedObjectUnloadGovernanceTest extends
 		 */
 
 		@Override
-		public Task<TransactionalManagedObjectSource, None, None> createTask(
+		public ManagedFunction<TransactionalManagedObjectSource, None, None> createTask(
 				TransactionalManagedObjectSource work) {
 			return this;
 		}
@@ -311,8 +311,8 @@ public class ManagedObjectUnloadGovernanceTest extends
 		 */
 
 		@Override
-		public Object doTask(
-				TaskContext<TransactionalManagedObjectSource, None, None> context)
+		public Object execute(
+				ManagedFunctionContext<TransactionalManagedObjectSource, None, None> context)
 				throws Throwable {
 			// Flag recycling
 			object.recycled();
@@ -326,17 +326,17 @@ public class ManagedObjectUnloadGovernanceTest extends
 	public static class TransactionalWork {
 
 		/**
-		 * Indicates if the first {@link Task} was invoked.
+		 * Indicates if the first {@link ManagedFunction} was invoked.
 		 */
 		public volatile boolean isTaskOneInvoked = false;
 
 		/**
-		 * Indicates if the second {@link Task} was invoked.
+		 * Indicates if the second {@link ManagedFunction} was invoked.
 		 */
 		public volatile boolean isTaskTwoInvoked = false;
 
 		/**
-		 * {@link Task} one.
+		 * {@link ManagedFunction} one.
 		 */
 		public void doTaskOne(TransactionalObject object) {
 
@@ -348,7 +348,7 @@ public class ManagedObjectUnloadGovernanceTest extends
 		}
 
 		/**
-		 * {@link Task} two.
+		 * {@link ManagedFunction} two.
 		 */
 		public void doTaskTwo(TransactionalObject object) {
 

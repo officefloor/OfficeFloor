@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -41,7 +41,7 @@ public interface DutyConfiguration<A extends Enum<A>> {
 	 * Obtains the configuration for the {@link Flow} instances invoked by the
 	 * {@link Duty}.
 	 * 
-	 * @return {@link TaskNodeReference} specifying the first {@link Task} of
+	 * @return {@link TaskNodeReference} specifying the first {@link ManagedFunction} of
 	 *         the linked {@link Flow}.
 	 */
 	TaskNodeReference[] getLinkedProcessConfiguration();

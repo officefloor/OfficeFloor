@@ -19,17 +19,17 @@ package net.officefloor.plugin.web.http.security;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -57,10 +57,10 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 			this);
 
 	/**
-	 * {@link TaskContext}.
+	 * {@link ManagedFunctionContext}.
 	 */
 	@SuppressWarnings("rawtypes")
-	private final TaskContext taskContext = this.createMock(TaskContext.class);
+	private final ManagedFunctionContext taskContext = this.createMock(ManagedFunctionContext.class);
 
 	/**
 	 * {@link TaskAuthenticateContext}.
@@ -131,11 +131,11 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 				this.source, securityType);
 
 		// Create the expected type
-		WorkTypeBuilder<HttpSecurityWork> type = WorkLoaderUtil
+		FunctionNamespaceBuilder<HttpSecurityWork> type = WorkLoaderUtil
 				.createWorkTypeBuilder(new HttpSecurityWork(this.source));
 
 		// Managed Object Authentication task
-		TaskTypeBuilder<Indexed, None> moAuthenticateTask = type.addTaskType(
+		ManagedFunctionTypeBuilder<Indexed, None> moAuthenticateTask = type.addManagedFunctionType(
 				"MANAGED_OBJECT_AUTHENTICATE",
 				new ManagedObjectHttpAuthenticateTask(), Indexed.class,
 				None.class);
@@ -145,7 +145,7 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 				"DEPENDENCY_CREDENTIAL_STORE");
 
 		// Managed Object Logout task
-		TaskTypeBuilder<Indexed, None> moLogoutTask = type.addTaskType(
+		ManagedFunctionTypeBuilder<Indexed, None> moLogoutTask = type.addManagedFunctionType(
 				"MANAGED_OBJECT_LOGOUT", new ManagedObjectHttpLogoutTask(),
 				Indexed.class, None.class);
 		moLogoutTask.addObject(TaskLogoutContext.class).setLabel(
@@ -154,7 +154,7 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 				"DEPENDENCY_CREDENTIAL_STORE");
 
 		// Challenge task
-		TaskTypeBuilder<Indexed, Indexed> challengeTask = type.addTaskType(
+		ManagedFunctionTypeBuilder<Indexed, Indexed> challengeTask = type.addManagedFunctionType(
 				"CHALLENGE", new HttpChallengeTask(), Indexed.class,
 				Indexed.class);
 		challengeTask.addObject(HttpAuthenticationRequiredException.class)
@@ -166,18 +166,18 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 				"HTTP_REQUEST_STATE");
 		challengeTask.addObject(CredentialStore.class).setLabel(
 				"DEPENDENCY_CREDENTIAL_STORE");
-		TaskFlowTypeBuilder<Indexed> challengeFailureFlow = challengeTask
+		ManagedFunctionFlowTypeBuilder<Indexed> challengeFailureFlow = challengeTask
 				.addFlow();
 		challengeFailureFlow.setArgumentType(Throwable.class);
 		challengeFailureFlow.setLabel("FAILURE");
-		TaskFlowTypeBuilder<Indexed> challengeLoginFlow = challengeTask
+		ManagedFunctionFlowTypeBuilder<Indexed> challengeLoginFlow = challengeTask
 				.addFlow();
 		challengeLoginFlow.setArgumentType(Void.class);
 		challengeLoginFlow.setLabel("FLOW_FORM_LOGIN_PAGE");
 
 		// Start Application Authentication task
-		TaskTypeBuilder<StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows> startTask = type
-				.addTaskType(
+		ManagedFunctionTypeBuilder<StartApplicationHttpAuthenticateTask.Dependencies, StartApplicationHttpAuthenticateTask.Flows> startTask = type
+				.addManagedFunctionType(
 						"START_APPLICATION_AUTHENTICATE",
 						new StartApplicationHttpAuthenticateTask(),
 						StartApplicationHttpAuthenticateTask.Dependencies.class,
@@ -187,15 +187,15 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		startTask
 				.addObject(HttpAuthentication.class)
 				.setKey(StartApplicationHttpAuthenticateTask.Dependencies.HTTP_AUTHENTICATION);
-		TaskFlowTypeBuilder<StartApplicationHttpAuthenticateTask.Flows> startFailureFlow = startTask
+		ManagedFunctionFlowTypeBuilder<StartApplicationHttpAuthenticateTask.Flows> startFailureFlow = startTask
 				.addFlow();
 		startFailureFlow
 				.setKey(StartApplicationHttpAuthenticateTask.Flows.FAILURE);
 		startFailureFlow.setArgumentType(Throwable.class);
 
 		// Complete Application Authentication Task
-		TaskTypeBuilder<CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows> completeTask = type
-				.addTaskType(
+		ManagedFunctionTypeBuilder<CompleteApplicationHttpAuthenticateTask.Dependencies, CompleteApplicationHttpAuthenticateTask.Flows> completeTask = type
+				.addManagedFunctionType(
 						"COMPLETE_APPLICATION_AUTHENTICATE",
 						new CompleteApplicationHttpAuthenticateTask(),
 						CompleteApplicationHttpAuthenticateTask.Dependencies.class,
@@ -212,14 +212,14 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		completeTask
 				.addObject(HttpRequestState.class)
 				.setKey(CompleteApplicationHttpAuthenticateTask.Dependencies.REQUEST_STATE);
-		TaskFlowTypeBuilder<CompleteApplicationHttpAuthenticateTask.Flows> completeFailureFlow = completeTask
+		ManagedFunctionFlowTypeBuilder<CompleteApplicationHttpAuthenticateTask.Flows> completeFailureFlow = completeTask
 				.addFlow();
 		completeFailureFlow
 				.setKey(CompleteApplicationHttpAuthenticateTask.Flows.FAILURE);
 		completeFailureFlow.setArgumentType(Throwable.class);
 
 		// Validate type
-		WorkType<HttpSecurityWork> work = WorkLoaderUtil.validateWorkType(type,
+		FunctionNamespaceType<HttpSecurityWork> work = WorkLoaderUtil.validateWorkType(type,
 				HttpSecurityWorkSource.class,
 				HttpSecurityWorkSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
 		assertSame("Incorrect HTTP Security Source", this.source, work
@@ -280,9 +280,9 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	private void doManagedObjectAuthentication() {
 		this.replayMockObjects();
 		try {
-			Task<HttpSecurityWork, Dependencies, Flows> task = this
+			ManagedFunction<HttpSecurityWork, Dependencies, Flows> task = this
 					.createTask("MANAGED_OBJECT_AUTHENTICATE");
-			task.doTask(this.taskContext);
+			task.execute(this.taskContext);
 		} catch (Throwable ex) {
 			throw fail(ex);
 		}
@@ -291,7 +291,7 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records obtaining dependencies from the {@link TaskAuthenticateContext}
-	 * and {@link TaskContext}.
+	 * and {@link ManagedFunctionContext}.
 	 */
 	private void recordManagedObjectAuthenticationDependencies() {
 		this.recordReturn(this.taskContext, this.taskContext.getWork(),
@@ -424,9 +424,9 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		// Undertake challenge
 		this.replayMockObjects();
 		try {
-			Task<HttpSecurityWork, Dependencies, Flows> task = this
+			ManagedFunction<HttpSecurityWork, Dependencies, Flows> task = this
 					.createTask("CHALLENGE");
-			task.doTask(this.taskContext);
+			task.execute(this.taskContext);
 		} catch (Throwable ex) {
 			throw fail(ex);
 		}
@@ -511,9 +511,9 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		// Test
 		this.replayMockObjects();
 		try {
-			Task<HttpSecurityWork, Dependencies, Flows> task = this
+			ManagedFunction<HttpSecurityWork, Dependencies, Flows> task = this
 					.createTask("START_APPLICATION_AUTHENTICATE");
-			task.doTask(this.taskContext);
+			task.execute(this.taskContext);
 		} finally {
 			this.verifyMockObjects();
 		}
@@ -637,9 +637,9 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		HttpAuthenticationRequiredException exception = null;
 		this.replayMockObjects();
 		try {
-			Task<HttpSecurityWork, Dependencies, Flows> task = this
+			ManagedFunction<HttpSecurityWork, Dependencies, Flows> task = this
 					.createTask("COMPLETE_APPLICATION_AUTHENTICATE");
-			task.doTask(this.taskContext);
+			task.execute(this.taskContext);
 		} catch (HttpAuthenticationRequiredException ex) {
 			exception = ex;
 		} finally {
@@ -740,9 +740,9 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 		// Undertake challenge
 		this.replayMockObjects();
 		try {
-			Task<HttpSecurityWork, Dependencies, Flows> task = this
+			ManagedFunction<HttpSecurityWork, Dependencies, Flows> task = this
 					.createTask("MANAGED_OBJECT_LOGOUT");
-			task.doTask(this.taskContext);
+			task.execute(this.taskContext);
 		} catch (Throwable ex) {
 			throw fail(ex);
 		}
@@ -750,14 +750,14 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates the {@link Task}.
+	 * Creates the {@link ManagedFunction}.
 	 * 
 	 * @param taskName
-	 *            Name of the {@link Task} to create.
-	 * @return {@link Task}.
+	 *            Name of the {@link ManagedFunction} to create.
+	 * @return {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("unchecked")
-	private Task<HttpSecurityWork, Dependencies, Flows> createTask(
+	private ManagedFunction<HttpSecurityWork, Dependencies, Flows> createTask(
 			String taskName) {
 
 		// Register the HTTP security source
@@ -767,23 +767,23 @@ public class HttpSecurityWorkSourceTest extends OfficeFrameTestCase {
 				this.source, securityType);
 
 		// Load the work type
-		WorkType<HttpSecurityWork> work = WorkLoaderUtil.loadWorkType(
+		FunctionNamespaceType<HttpSecurityWork> work = WorkLoaderUtil.loadWorkType(
 				HttpSecurityWorkSource.class,
 				HttpSecurityWorkSource.PROPERTY_HTTP_SECURITY_SOURCE_KEY, key);
 
 		// Find the task type
-		TaskType<HttpSecurityWork, ?, ?> task = null;
-		for (TaskType<HttpSecurityWork, ?, ?> check : work.getTaskTypes()) {
-			if (taskName.equals(check.getTaskName())) {
+		ManagedFunctionType<HttpSecurityWork, ?, ?> task = null;
+		for (ManagedFunctionType<HttpSecurityWork, ?, ?> check : work.getManagedFunctionTypes()) {
+			if (taskName.equals(check.getFunctionName())) {
 				task = check;
 			}
 		}
 		assertNotNull("Should have task " + taskName, task);
 
 		// Create and return the task
-		return (Task<HttpSecurityWork, Dependencies, Flows>) task
-				.getTaskFactory()
-				.createTask(work.getWorkFactory().createWork());
+		return (ManagedFunction<HttpSecurityWork, Dependencies, Flows>) task
+				.getManagedFunctionFactory()
+				.createManagedFunction(work.getWorkFactory().createWork());
 	}
 
 	/**

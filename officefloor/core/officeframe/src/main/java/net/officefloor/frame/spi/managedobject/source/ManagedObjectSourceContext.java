@@ -19,7 +19,7 @@ package net.officefloor.frame.spi.managedobject.source;
 
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.Flow;
@@ -37,34 +37,34 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends
 
 	/**
 	 * <p>
-	 * Links in a {@link Flow} by specifying the first {@link Task} of
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 * <p>
-	 * The {@link Task} must be registered by this {@link ManagedObjectSource}.
+	 * The {@link ManagedFunction} must be registered by this {@link ManagedObjectSource}.
 	 * 
 	 * @param key
 	 *            Key identifying {@link Flow} being invoked by the
 	 *            {@link ManagedObjectSource}.
 	 * @param workName
-	 *            Name of the {@link Work} that the {@link Task} resides on.
+	 *            Name of the {@link Work} that the {@link ManagedFunction} resides on.
 	 * @param taskName
-	 *            Name of {@link Task}.
+	 *            Name of {@link ManagedFunction}.
 	 */
 	void linkProcess(F key, String workName, String taskName);
 
 	/**
 	 * <p>
-	 * Links in a {@link Flow} by specifying the first {@link Task} of
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 * <p>
-	 * The {@link Task} must be registered by this {@link ManagedObjectSource}.
+	 * The {@link ManagedFunction} must be registered by this {@link ManagedObjectSource}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the {@link Task} resides on.
+	 *            Name of the {@link Work} that the {@link ManagedFunction} resides on.
 	 * @param taskName
-	 *            Name of {@link Task}.
+	 *            Name of {@link ManagedFunction}.
 	 */
 	void linkProcess(int flowIndex, String workName, String taskName);
 
@@ -75,7 +75,7 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends
 	 * recycle functionality for the {@link ManagedObject} to be returned to a
 	 * {@link ManagedObjectPool}.
 	 * <p>
-	 * The initial {@link Task} will be used as the recycle starting point for
+	 * The initial {@link ManagedFunction} will be used as the recycle starting point for
 	 * this {@link ManagedObject}.
 	 *
 	 * @param <W>
@@ -104,14 +104,14 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends
 
 	/**
 	 * <p>
-	 * Adds a {@link Task} to invoke on start up of the {@link Office}.
+	 * Adds a {@link ManagedFunction} to invoke on start up of the {@link Office}.
 	 * <p>
-	 * The {@link Task} must be registered by this {@link ManagedObjectSource}.
+	 * The {@link ManagedFunction} must be registered by this {@link ManagedObjectSource}.
 	 * 
 	 * @param workName
-	 *            Name of {@link Work} containing the {@link Task}.
+	 *            Name of {@link Work} containing the {@link ManagedFunction}.
 	 * @param taskName
-	 *            Name of {@link Task} on the {@link Work}.
+	 *            Name of {@link ManagedFunction} on the {@link Work}.
 	 */
 	void addStartupTask(String workName, String taskName);
 

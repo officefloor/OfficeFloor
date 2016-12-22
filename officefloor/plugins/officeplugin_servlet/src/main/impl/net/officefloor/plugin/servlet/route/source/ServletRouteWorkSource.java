@@ -19,12 +19,12 @@ package net.officefloor.plugin.servlet.route.source;
 
 import javax.servlet.Servlet;
 
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.plugin.servlet.context.OfficeServletContext;
 import net.officefloor.plugin.servlet.route.ServletRouteTask;
 import net.officefloor.plugin.servlet.route.ServletRouteTask.DependencyKeys;
@@ -33,7 +33,7 @@ import net.officefloor.plugin.socket.server.http.HttpRequest;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 
 /**
- * {@link WorkSource} to route {@link HttpRequest} to a {@link Servlet}.
+ * {@link ManagedFunctionSource} to route {@link HttpRequest} to a {@link Servlet}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -41,7 +41,7 @@ public class ServletRouteWorkSource extends
 		AbstractWorkSource<ServletRouteTask> {
 
 	/**
-	 * Name of {@link Task} to route {@link HttpRequest}.
+	 * Name of {@link ManagedFunction} to route {@link HttpRequest}.
 	 */
 	public static final String TASK_ROUTE = "route";
 
@@ -55,8 +55,8 @@ public class ServletRouteWorkSource extends
 	}
 
 	@Override
-	public void sourceWork(WorkTypeBuilder<ServletRouteTask> workTypeBuilder,
-			WorkSourceContext context) throws Exception {
+	public void sourceManagedFunctions(FunctionNamespaceBuilder<ServletRouteTask> workTypeBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
 
 		// Create the factory (task)
 		ServletRouteTask factory = new ServletRouteTask();
@@ -65,8 +65,8 @@ public class ServletRouteWorkSource extends
 		workTypeBuilder.setWorkFactory(factory);
 
 		// Add task to route
-		TaskTypeBuilder<DependencyKeys, FlowKeys> task = workTypeBuilder
-				.addTaskType(TASK_ROUTE, factory, DependencyKeys.class,
+		ManagedFunctionTypeBuilder<DependencyKeys, FlowKeys> task = workTypeBuilder
+				.addManagedFunctionType(TASK_ROUTE, factory, DependencyKeys.class,
 						FlowKeys.class);
 		task.addObject(ServerHttpConnection.class).setKey(
 				DependencyKeys.HTTP_CONNECTION);

@@ -26,12 +26,12 @@ import java.util.Set;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
+import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.impl.execute.task.TaskJobNode;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
@@ -59,7 +59,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -78,12 +78,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		extends OfficeFrameTestCase {
 
 	/**
-	 * Name of the {@link Task}.
+	 * Name of the {@link ManagedFunction}.
 	 */
 	private static final String TASK_NAME = "TASK";
 
 	/**
-	 * Name of the {@link Work} containing the {@link Task}.
+	 * Name of the {@link Work} containing the {@link ManagedFunction}.
 	 */
 	private static final String DEFAULT_WORK_NAME = "DEFAULT_WORK_NAME";
 
@@ -108,11 +108,11 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 			.createMock(RawWorkMetaData.class);
 
 	/**
-	 * {@link TaskFactory}.
+	 * {@link ManagedFunctionFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskFactory<W, D, F> taskFactory = this
-			.createMock(TaskFactory.class);
+	private final ManagedFunctionFactory<W, D, F> taskFactory = this
+			.createMock(ManagedFunctionFactory.class);
 
 	/**
 	 * {@link RawOfficeMetaData}.
@@ -145,7 +145,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 			.createMock(OfficeMetaDataLocator.class);
 
 	/**
-	 * {@link OfficeMetaDataLocator} to find the {@link TaskMetaData}.
+	 * {@link OfficeMetaDataLocator} to find the {@link ManagedFunctionMetaData}.
 	 */
 	private final OfficeMetaDataLocator taskLocator = this
 			.createMock(OfficeMetaDataLocator.class);
@@ -157,7 +157,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 			.createMock(AssetManagerFactory.class);
 
 	/**
-	 * Ensure issue if not {@link Task} name.
+	 * Ensure issue if not {@link ManagedFunction} name.
 	 */
 	public void testNoTaskName() {
 
@@ -175,7 +175,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link TaskFactory}.
+	 * Ensure issue if no {@link ManagedFunctionFactory}.
 	 */
 	public void testNoTaskFactory() {
 
@@ -310,7 +310,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure {@link Task} name, {@link TaskFactory} and {@link Team} are
+	 * Ensure {@link ManagedFunction} name, {@link ManagedFunctionFactory} and {@link Team} are
 	 * available.
 	 */
 	public void testTaskInitialDetails() {
@@ -332,11 +332,11 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				metaData.getRawWorkMetaData());
 
 		// Verify initial details
-		TaskMetaData<?, ?, ?> taskMetaData = metaData.getTaskMetaData();
+		ManagedFunctionMetaData<?, ?, ?> taskMetaData = metaData.getTaskMetaData();
 		assertEquals("Incorrect job name", DEFAULT_WORK_NAME + "." + TASK_NAME,
 				taskMetaData.getFunctionName());
 		assertEquals("Incorect task factory", this.taskFactory,
-				taskMetaData.getTaskFactory());
+				taskMetaData.getManagedFunctionFactory());
 		assertNull("No differentiator", taskMetaData.getDifferentiator());
 		assertEquals("Incorrect team", this.responsibleTeam,
 				taskMetaData.getResponsibleTeam());
@@ -391,7 +391,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.replayMockObjects();
 		RawTaskMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
-		TaskMetaData<W, D, F> metaData = rawMetaData.getTaskMetaData();
+		ManagedFunctionMetaData<W, D, F> metaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have parameter
@@ -404,7 +404,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		ManagedObjectIndex parameterIndex = metaData
 				.translateManagedObjectIndexForWork(0);
 		assertEquals("Incorrect translation to parameter",
-				TaskJobNode.PARAMETER_INDEX,
+				ManagedFunctionImpl.PARAMETER_INDEX,
 				parameterIndex.getIndexOfManagedObjectWithinScope());
 		assertNull("Should not have scope for parameter index",
 				parameterIndex.getManagedObjectScope());
@@ -444,7 +444,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.replayMockObjects();
 		RawTaskMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
-		TaskMetaData<W, D, F> metaData = rawMetaData.getTaskMetaData();
+		ManagedFunctionMetaData<W, D, F> metaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have parameter
@@ -455,11 +455,11 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Ensure can translate to parameters
 		assertEquals("Incorrect translation to parameter one",
-				TaskJobNode.PARAMETER_INDEX, metaData
+				ManagedFunctionImpl.PARAMETER_INDEX, metaData
 						.translateManagedObjectIndexForWork(0)
 						.getIndexOfManagedObjectWithinScope());
 		assertEquals("Incorrect translation to parameter two",
-				TaskJobNode.PARAMETER_INDEX, metaData
+				ManagedFunctionImpl.PARAMETER_INDEX, metaData
 						.translateManagedObjectIndexForWork(1)
 						.getIndexOfManagedObjectWithinScope());
 	}
@@ -1007,7 +1007,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.replayMockObjects();
 		RawTaskMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
-		TaskMetaData<W, D, F> taskMetaData = rawMetaData.getTaskMetaData();
+		ManagedFunctionMetaData<W, D, F> taskMetaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have duty
@@ -1091,7 +1091,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.replayMockObjects();
 		RawTaskMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
-		TaskMetaData<W, D, F> taskMetaData = rawMetaData.getTaskMetaData();
+		ManagedFunctionMetaData<W, D, F> taskMetaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have duty
@@ -1146,7 +1146,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link Flow} {@link Task} name.
+	 * Ensure issue if no {@link Flow} {@link ManagedFunction} name.
 	 */
 	public void testNoFlowTaskName() {
 
@@ -1182,7 +1182,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Ensure issue if unknown {@link Work} containing the {@link Flow}
-	 * {@link Task}.
+	 * {@link ManagedFunction}.
 	 */
 	public void testUnknownFlowWork() {
 
@@ -1219,7 +1219,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if unknown {@link Flow} {@link Task}.
+	 * Ensure issue if unknown {@link Flow} {@link ManagedFunction}.
 	 */
 	public void testUnknownFlowTask() {
 
@@ -1268,8 +1268,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.createMock(TaskFlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> flowTaskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> flowTaskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record incompatible flow argument
 		this.record_taskNameFactoryTeam();
@@ -1316,8 +1316,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.createMock(TaskFlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> flowTaskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> flowTaskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record no instigation strategy
 		this.record_taskNameFactoryTeam();
@@ -1383,8 +1383,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.createMock(TaskFlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> flowTaskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> flowTaskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);
 
 		// Record construct flow
@@ -1445,7 +1445,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no next {@link Task} name.
+	 * Ensure issue if no next {@link ManagedFunction} name.
 	 */
 	public void testNoNextTaskName() {
 
@@ -1475,14 +1475,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if argument to next {@link Task} is incompatible.
+	 * Ensure issue if argument to next {@link ManagedFunction} is incompatible.
 	 */
 	public void testIncompatibleNextTaskArgument() {
 
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> nextTaskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> nextTaskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record construct next task (which is on another work)
 		this.record_taskNameFactoryTeam();
@@ -1518,14 +1518,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure able to construct next {@link TaskMetaData}.
+	 * Ensure able to construct next {@link ManagedFunctionMetaData}.
 	 */
 	public void testConstructNextTask() {
 
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> nextTaskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> nextTaskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record construct next task (which is on another work)
 		this.record_taskNameFactoryTeam();
@@ -1556,8 +1556,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.verifyMockObjects();
 
 		// Verify constructed next task
-		TaskMetaData<?, ?, ?> nextTask = metaData.getTaskMetaData()
-				.getNextTaskInFlow();
+		ManagedFunctionMetaData<?, ?, ?> nextTask = metaData.getTaskMetaData()
+				.getNextManagedFunctionContainerMetaData();
 		assertEquals("Incorrect next task meta-data", nextTaskMetaData,
 				nextTask);
 	}
@@ -1623,7 +1623,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link Task} name for {@link EscalationFlow}.
+	 * Ensure issue if no {@link ManagedFunction} name for {@link EscalationFlow}.
 	 */
 	public void testNoEscalationTaskName() {
 
@@ -1669,8 +1669,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.createMock(TaskEscalationConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> escalationTaskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> escalationTaskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record construct escalation
 		this.record_taskNameFactoryTeam();
@@ -1720,8 +1720,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 				.createMock(TaskEscalationConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?> escalationTaskMetaData = this
-				.createMock(TaskMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> escalationTaskMetaData = this
+				.createMock(ManagedFunctionMetaData.class);
 
 		// Record construct escalation
 		this.record_taskNameFactoryTeam();
@@ -1904,7 +1904,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 	/**
 	 * Flagged to be manual {@link Governance} however {@link Governance}
-	 * configured for the {@link Task}.
+	 * configured for the {@link ManagedFunction}.
 	 */
 	public void testGovernanceButFlaggedManual() {
 
@@ -1972,7 +1972,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Records obtaining {@link Task} name, {@link TaskFactory} and responsible
+	 * Records obtaining {@link ManagedFunction} name, {@link ManagedFunctionFactory} and responsible
 	 * {@link Team}.
 	 */
 	private void record_taskNameFactoryTeam() {
@@ -2007,7 +2007,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Records no {@link Administrator} {@link Duty} instances for {@link Task}.
+	 * Records no {@link Administrator} {@link Duty} instances for {@link ManagedFunction}.
 	 */
 	private void record_NoAdministration() {
 		this.recordReturn(this.configuration,
@@ -2026,7 +2026,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Records no {@link Governance} instances for the {@link Task}.
+	 * Records no {@link Governance} instances for the {@link ManagedFunction}.
 	 */
 	private void record_NoGovernance() {
 		final Map<?, ?> governances = this.createMock(Map.class);
@@ -2177,7 +2177,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Records no next {@link Task}.
+	 * Records no next {@link ManagedFunction}.
 	 */
 	private void record_NoNextTask() {
 		this.recordReturn(this.configuration,
@@ -2194,7 +2194,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Records an issue on the {@link OfficeFloorIssues} about the {@link Task}.
+	 * Records an issue on the {@link OfficeFloorIssues} about the {@link ManagedFunction}.
 	 * 
 	 * @param issueDescription
 	 *            Issue description expected.

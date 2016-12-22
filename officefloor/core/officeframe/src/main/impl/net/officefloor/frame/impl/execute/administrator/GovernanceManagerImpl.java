@@ -17,8 +17,10 @@
  */
 package net.officefloor.frame.impl.execute.administrator;
 
+import java.util.List;
+
 import net.officefloor.frame.internal.structure.AdministratorContext;
-import net.officefloor.frame.internal.structure.ContainerContext;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.GovernanceManager;
@@ -42,9 +44,9 @@ public class GovernanceManagerImpl implements GovernanceManager {
 	private final int governanceIndex;
 
 	/**
-	 * {@link ContainerContext}.
+	 * Listing of the actioned {@link Governance}.
 	 */
-	private final ContainerContext containerContext;
+	private final List<FunctionState> actionedGovernances;
 
 	/**
 	 * Initiate.
@@ -53,14 +55,14 @@ public class GovernanceManagerImpl implements GovernanceManager {
 	 *            {@link AdministratorContext}. {@link GovernanceContainer}.
 	 * @param governanceIndex
 	 *            Index of {@link Governance} within the {@link ThreadState}.
-	 * @param containerContext
-	 *            {@link ContainerContext}.
+	 * @param actionedGovernances
+	 *            Listing of the actioned {@link Governance}.
 	 */
-	public GovernanceManagerImpl(AdministratorContext adminContext,
-			int governanceIndex, ContainerContext containerContext) {
+	public GovernanceManagerImpl(AdministratorContext adminContext, int governanceIndex,
+			List<FunctionState> actionedGovernances) {
 		this.adminContext = adminContext;
 		this.governanceIndex = governanceIndex;
-		this.containerContext = containerContext;
+		this.actionedGovernances = actionedGovernances;
 	}
 
 	/*
@@ -69,18 +71,21 @@ public class GovernanceManagerImpl implements GovernanceManager {
 
 	@Override
 	public void activateGovernance() {
-		this.getGovernanceContainer().activateGovernance(this.containerContext);
+		FunctionState activate = this.getGovernanceContainer().activateGovernance();
+		this.actionedGovernances.add(activate);
 	}
 
 	@Override
 	public void enforceGovernance() {
-		this.getGovernanceContainer().enforceGovernance(this.containerContext);
+		FunctionState enforce = this.getGovernanceContainer().enforceGovernance();
+		this.actionedGovernances.add(enforce);
 	}
 
 	@Override
 	public void disregardGovernance() {
-		this.getGovernanceContainer()
-				.disregardGovernance(this.containerContext);
+		FunctionState disregard = this.getGovernanceContainer().disregardGovernance();
+		this.actionedGovernances.add(disregard);
+
 	}
 
 	/**
@@ -91,10 +96,11 @@ public class GovernanceManagerImpl implements GovernanceManager {
 	private GovernanceContainer<?, ?> getGovernanceContainer() {
 
 		// Obtain the governance container
-		GovernanceContainer<?, ?> container = this.adminContext
-				.getThreadState().getGovernanceContainer(this.governanceIndex);
+		GovernanceContainer<?, ?> container = this.adminContext.getThreadState()
+				.getGovernanceContainer(this.governanceIndex);
 
 		// Return the governance container
 		return container;
 	}
+
 }

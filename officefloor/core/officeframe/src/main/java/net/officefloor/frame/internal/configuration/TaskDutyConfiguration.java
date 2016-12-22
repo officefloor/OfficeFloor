@@ -17,13 +17,13 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
- * Configuration of a {@link Administrator} {@link Duty} for a {@link Task}.
+ * Configuration of a {@link Administrator} {@link Duty} for a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */

@@ -24,7 +24,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.text.DecimalFormat;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -66,7 +66,7 @@ public abstract class AbstractTcpServerTestCase extends
 	 *            Name of {@link Work} to process the
 	 *            {@link ServerTcpConnection}.
 	 * @param taskName
-	 *            Name of {@link Task} to process the
+	 *            Name of {@link ManagedFunction} to process the
 	 *            {@link ServerTcpConnection}.
 	 */
 	protected abstract void registerManagedObjectSource(int port,

@@ -18,9 +18,9 @@
 package net.officefloor.compile.spi.section;
 
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -43,7 +43,7 @@ public interface SectionWork extends PropertyConfigurable {
 	 * @param taskName
 	 *            Name of the {@link SectionTask}.
 	 * @param taskTypeName
-	 *            Name of the {@link TaskType} on the {@link WorkType}.
+	 *            Name of the {@link ManagedFunctionType} on the {@link FunctionNamespaceType}.
 	 * @return {@link SectionTask}.
 	 */
 	SectionTask addSectionTask(String taskName, String taskTypeName);

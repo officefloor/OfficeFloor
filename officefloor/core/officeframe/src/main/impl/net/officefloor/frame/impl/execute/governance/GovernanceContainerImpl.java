@@ -17,37 +17,36 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.internal.structure.ActiveGovernance;
-import net.officefloor.frame.internal.structure.ActiveGovernanceManager;
-import net.officefloor.frame.internal.structure.ContainerContext;
+import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
-import net.officefloor.frame.internal.structure.GovernanceControl;
+import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.LinkedListSet;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainerContext;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.RegisteredGovernance;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link GovernanceContainer} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceContainerImpl<I, F extends Enum<F>> implements
-		GovernanceContainer<I, F>, GovernanceControl<I, F> {
+public class GovernanceContainerImpl<I, F extends Enum<F>> implements GovernanceContainer<I> {
 
 	/**
 	 * {@link GovernanceMetaData}.
@@ -55,20 +54,19 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	private final GovernanceMetaData<I, F> metaData;
 
 	/**
-	 * {@link ThreadState}.
+	 * {@link ThreadState} this {@link Governance} resides within.
 	 */
 	private final ThreadState threadState;
 
 	/**
-	 * Index of this {@link Governance} registered within the
-	 * {@link ProcessState}.
+	 * {@link RegisteredGovernance} instances.
 	 */
-	private final int registeredIndex;
-
-	/**
-	 * {@link ActiveGovernanceManager} instances.
-	 */
-	private final List<ActiveGovernanceManager<I, F>> activeGovernances = new LinkedList<ActiveGovernanceManager<I, F>>();
+	private final LinkedListSet<RegisteredGovernanceImpl, GovernanceContainer<I>> registeredGovernances = new StrictLinkedListSet<RegisteredGovernanceImpl, GovernanceContainer<I>>() {
+		@Override
+		protected GovernanceContainer<I> getOwner() {
+			return GovernanceContainerImpl.this;
+		}
+	};
 
 	/**
 	 * {@link Governance}.
@@ -82,276 +80,313 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements
 	 *            {@link GovernanceMetaData}.
 	 * @param threadState
 	 *            {@link ThreadState}.
-	 * @param registeredIndex
-	 *            Index of this {@link Governance} registered within the
-	 *            {@link ProcessState}.
 	 */
-	public GovernanceContainerImpl(GovernanceMetaData<I, F> metaData,
-			ThreadState threadState, int registeredIndex) {
+	public GovernanceContainerImpl(GovernanceMetaData<I, F> metaData, ThreadState threadState) {
 		this.metaData = metaData;
 		this.threadState = threadState;
-		this.registeredIndex = registeredIndex;
 	}
 
 	/**
-	 * Unregisters the {@link Governance}.
+	 * Undertakes the {@link GovernanceActivity}.
 	 * 
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
-	 * @param currentTeam
-	 *            {@link TeamIdentifier} of the current {@link Team}
-	 *            unregistering the {@link Governance}.
+	 * @param activity
+	 *            {@link GovernanceActivity}.
+	 * @return {@link FunctionState} to undertake the
+	 *         {@link GovernanceActivity}.
 	 */
-	private void unregisterGovernance(JobNodeActivateSet activateSet,
-			TeamIdentifier currentTeam) {
+	private FunctionState doGovernanceActivity(GovernanceActivity<F> activity) {
+		return new GovernanceOperation() {
+			@Override
+			public FunctionState execute() {
+				// Easy access to container
+				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
 
-		// Unregister managed objects from governance
-		for (ActiveGovernanceManager<I, F> activeGovernance : this.activeGovernances) {
-			activeGovernance.unregisterManagedObject(activateSet, currentTeam);
-		}
-
-		// Unregister the Governance from Process
-		this.threadState.governanceComplete(this);
-
-		// Disregard the governance
-		this.governance = null;
+				// Create the governance in its own flow
+				Flow flow = container.threadState.createFlow();
+				return new GovernanceFunction(flow, activity);
+			}
+		};
 	}
 
 	/*
 	 * ==================== GovernanceContainer =========================
-	 * 
-	 * All methods are invoked from WorkContainer with a ProcessState lock so no
-	 * need to synchronise access on these methods as already thread safe.
 	 */
 
 	@Override
-	public int getProcessRegisteredIndex() {
-		return this.registeredIndex;
-	}
-
-	@Override
-	public boolean isActive() {
-
-		// Access Point: Work
-		// Locks: ThreadState, ProcessState
-
-		return (this.governance != null);
-	}
-
-	@Override
-	public ActiveGovernance<I, F> createActiveGovernance(I extensionInterface,
-			ManagedObjectContainer managedobjectContainer,
-			int managedObjectContainerRegisteredIndex,
-			WorkContainer<?> workContainer) {
-
-		// Access Point: Work
-		// Locks: ThreadState, ProcessState
-
-		// Ensure governance active
-		if (this.governance == null) {
-			throw new IllegalStateException("Can only create "
-					+ ActiveGovernance.class.getSimpleName() + " for active "
-					+ Governance.class.getSimpleName());
-		}
-
-		// Create the active governance
-		ActiveGovernanceManager<I, F> activeGovernance = this.metaData
-				.createActiveGovernance(this, this, extensionInterface,
-						managedobjectContainer, workContainer,
-						managedObjectContainerRegisteredIndex);
-
-		// Register the active governance
-		this.activeGovernances.add(activeGovernance);
-
-		// Return the active governance
-		return activeGovernance.getActiveGovernance();
-	}
-
-	@Override
-	public void activateGovernance(ContainerContext context) {
-		GovernanceActivity<I, F> activity = this.metaData
-				.createActivateActivity(this);
-		context.addGovernanceActivity(activity);
-	}
-
-	@Override
-	public void enforceGovernance(ContainerContext context) {
-		GovernanceActivity<I, F> activity = this.metaData
-				.createEnforceActivity(this);
-		context.addGovernanceActivity(activity);
-	}
-
-	@Override
-	public void disregardGovernance(ContainerContext context) {
-		GovernanceActivity<I, F> activity = this.metaData
-				.createDisregardActivity(this);
-		context.addGovernanceActivity(activity);
-	}
-
-	/*
-	 * ==================== GovernanceControl =========================
-	 */
-
-	@Override
-	public boolean activateGovernance(GovernanceContext<F> governanceContext,
-			JobContext jobContext, FunctionState jobNode,
-			JobNodeActivateSet activateSet, ContainerContext context)
-			throws Throwable {
-
-		// Access Point: Job
-		// Locks: ThreadState
-
-		// Determine if already active governance
-		if (this.isActive()) {
-			return true; // already active governance
-		}
-
-		// Create the governance
-		GovernanceFactory<? super I, F> factory = this.metaData
-				.getGovernanceFactory();
-		this.governance = factory.createGovernance();
-
-		// Successfully activated the governance
-		return true;
-	}
-
-	@Override
-	public boolean governManagedObject(I extension,
-			ActiveGovernanceManager<I, F> governanceManager,
-			GovernanceContext<F> governanceContext, JobContext jobContext,
-			FunctionState jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context) throws Throwable {
-
-		// Access Point: Job
-		// Locks: ThreadState
-
-		// Must lock to check if managed object ready
-		ProcessState processState = this.threadState.getProcessState();
-		synchronized (processState.getProcessLock()) {
-
-			// Ensure managed object is ready
-			if (!governanceManager.isManagedObjectReady(jobContext, jobNode,
-					activateSet, context)) {
-				return false; // not ready to govern
-			}
-
-			// Govern the managed object
-			this.governance.governManagedObject(extension, governanceContext);
-		}
-
-		// Managed object successfully under governance
-		return true;
-	}
-
-	@Override
-	public boolean enforceGovernance(GovernanceContext<F> governanceContext,
-			JobContext jobContext, FunctionState jobNode,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
-			ContainerContext context) throws Throwable {
-
-		// Access Point: Job
-		// Locks: ThreadState
-
-		// Must lock to check if managed objects ready
-		ProcessState processState = this.threadState.getProcessState();
-		synchronized (processState.getProcessLock()) {
-
-			// Determine if active.
-			// As Managed Object triggers creation, may not always be active.
-			boolean isActive = this.isActive();
-
-			// Ensure managed objects are ready
-			if (isActive) {
-				if (!this.isManagedObjectsReady(jobContext, jobNode,
-						activateSet, context)) {
-					return false; // not ready to enforce
-				}
-			}
-
-			try {
-				// Enforce the governance (if activated)
-				if (isActive) {
-					this.governance.enforceGovernance(governanceContext);
-				}
-
-			} finally {
-				// Governance enforced (as best), so now unregister
-				this.unregisterGovernance(activateSet, currentTeam);
-			}
-		}
-
-		// Governance successfully enforced
-		return true;
-	}
-
-	@Override
-	public boolean disregardGovernance(GovernanceContext<F> governanceContext,
-			JobContext jobContext, FunctionState jobNode,
-			JobNodeActivateSet activateSet, TeamIdentifier currentTeam,
-			ContainerContext context) throws Throwable {
-
-		// Access Point: Job
-		// Locks: ThreadState
-
-		// Must lock to check if managed objects ready
-		ProcessState processState = this.threadState.getProcessState();
-		synchronized (processState.getProcessLock()) {
-
-			// Determine if active.
-			// As Managed Object triggers creation, may not always be active.
-			boolean isActive = this.isActive();
-
-			// Ensure managed objects are ready
-			if (isActive) {
-				if (!this.isManagedObjectsReady(jobContext, jobNode,
-						activateSet, context)) {
-					return false; // not ready to disregard
-				}
-			}
-
-			try {
-				// Disregard the governance (if activated)
-				if (isActive) {
-					this.governance.disregardGovernance(governanceContext);
-				}
-
-			} finally {
-				// Governance disregarded (as best), so now unregister
-				this.unregisterGovernance(activateSet, currentTeam);
-			}
-		}
-
-		// Governance successfully disregarded
-		return true;
+	public RegisteredGovernance registerManagedObject(I managedObjectExtension,
+			ManagedObjectContainer managedobjectContainer) {
+		RegisteredGovernanceImpl registeredGovernance = new RegisteredGovernanceImpl(managedObjectExtension,
+				managedobjectContainer);
+		return registeredGovernance;
 	}
 
 	/**
-	 * Indicates if the {@link ManagedObject} instances are ready.
-	 * 
-	 * @param jobContext
-	 *            {@link JobContext}.
-	 * @param jobNode
-	 *            {@link FunctionState}.
-	 * @param activateSet
-	 *            {@link JobNodeActivateSet}.
-	 * @param context
-	 *            {@link ContainerContext}.
-	 * @return <code>true</code> if {@link ManagedObject} instances are ready.
+	 * {@link RegisteredGovernance}.
 	 */
-	private boolean isManagedObjectsReady(JobContext jobContext,
-			FunctionState jobNode, JobNodeActivateSet activateSet,
-			ContainerContext context) {
+	private class RegisteredGovernanceImpl
+			extends AbstractLinkedListSetEntry<RegisteredGovernanceImpl, GovernanceContainer<I>>
+			implements RegisteredGovernance {
 
-		// Ensure managed objects are ready
-		for (ActiveGovernanceManager<I, F> governance : this.activeGovernances) {
-			if (!governance.isManagedObjectReady(jobContext, jobNode,
-					activateSet, context)) {
-				return false; // not ready for governance action
-			}
+		/**
+		 * Extension to the {@link ManagedObject} to enable {@link Governance}.
+		 */
+		private final I managedObjectExtension;
+
+		/**
+		 * {@link ManagedObjectContainer}.
+		 */
+		private final ManagedObjectContainer managedObjectContainer;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param managedObjectExtension
+		 *            Extension to the {@link ManagedObject} to enable
+		 *            {@link Governance}.
+		 * @param managedObjectContainer
+		 *            {@link ManagedObjectContainer} for the
+		 *            {@link ManagedObject}.
+		 */
+		public RegisteredGovernanceImpl(I managedObjectExtension, ManagedObjectContainer managedObjectContainer) {
+			this.managedObjectExtension = managedObjectExtension;
+			this.managedObjectContainer = managedObjectContainer;
 		}
 
-		// Ready for governance action
-		return true;
+		/*
+		 * ====================== LinkedListSetEntry =========================
+		 */
+
+		@Override
+		public GovernanceContainer<I> getLinkedListSetOwner() {
+			return GovernanceContainerImpl.this;
+		}
+
+		/*
+		 * ==================== RegisteredGovernance ==========================
+		 */
+
+		@Override
+		public FunctionState unregisterManagedObject() {
+
+		}
+
+		/*
+		 * ======================= FunctionState ===============================
+		 */
+
+		@Override
+		public TeamManagement getResponsibleTeam() {
+			return GovernanceContainerImpl.this.metaData.getResponsibleTeam();
+		}
+
+		@Override
+		public ThreadState getThreadState() {
+			return GovernanceContainerImpl.this.threadState;
+		}
+
+		@Override
+		public FunctionState execute() {
+
+			// Easy access to container
+			GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
+
+			// Register the governance
+			container.registeredGovernances.addEntry(this);
+
+			// Determine if must be activated in existing governance
+			if (container.governance == null) {
+				return null; // not active governance
+			}
+
+			// Must activate managed object with governance
+			return container.doGovernanceActivity(new GovernanceActivity<F>() {
+
+			});
+		}
+	}
+
+	@Override
+	public FunctionState activateGovernance() {
+		return this.doGovernanceActivity(new GovernanceActivity<F>() {
+			@Override
+			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
+				// Easy access to container
+				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
+				try {
+					// Ensure have governance
+					if (container.governance == null) {
+						container.governance = container.metaData.getGovernanceFactory().createGovernance();
+					}
+
+					// Activate governance for each registered managed object
+					RegisteredGovernanceImpl registered = container.registeredGovernances.getHead();
+					while (registered != null) {
+						container.governance.governManagedObject(registered.managedObjectExtension, context);
+						registered = registered.getNext();
+					}
+
+				} catch (Throwable ex) {
+					container.governance = null;
+					return new FailGovernanceOperation(ex);
+				}
+
+				// Governance activated
+				return null;
+			}
+		});
+	}
+
+	@Override
+	public FunctionState enforceGovernance() {
+		return this.doGovernanceActivity(new GovernanceActivity<F>() {
+			@Override
+			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
+				// Easy access to container
+				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
+				try {
+
+					// Enforce the governance
+					container.governance.enforceGovernance(context);
+
+				} catch (Throwable ex) {
+					return new FailGovernanceOperation(ex);
+				}
+
+				// Governance enforced
+				container.governance = null;
+				return null;
+			}
+		});
+	}
+
+	@Override
+	public FunctionState disregardGovernance() {
+		return this.doGovernanceActivity(new GovernanceActivity<F>() {
+			@Override
+			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
+				// Easy access to container
+				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
+				try {
+
+					// Disregard the governance
+					container.governance.disregardGovernance(context);
+
+				} catch (Throwable ex) {
+					return new FailGovernanceOperation(ex);
+				}
+
+				// Governance disregarded
+				container.governance = null;
+				return null;
+			}
+		});
+	}
+
+	/**
+	 * {@link FunctionState} to fail the {@link Governance}.
+	 */
+	private class FailGovernanceOperation extends GovernanceOperation {
+
+		/**
+		 * Cause of the failure.
+		 */
+		private final Throwable failure;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param failure
+		 *            Cause of the failure.
+		 */
+		public FailGovernanceOperation(Throwable failure) {
+			this.failure = failure;
+		}
+
+		@Override
+		public FunctionState execute() {
+			GovernanceContainerImpl.this.threadState.setFailure(this.failure);
+			GovernanceContainerImpl.this.governance = null;
+			return null;
+		}
+	}
+
+	/**
+	 * {@link Governance} operation.
+	 */
+	private abstract class GovernanceOperation implements FunctionState {
+
+		@Override
+		public TeamManagement getResponsibleTeam() {
+			return GovernanceContainerImpl.this.metaData.getResponsibleTeam();
+		}
+
+		@Override
+		public ThreadState getThreadState() {
+			return GovernanceContainerImpl.this.threadState;
+		}
+	}
+
+	/**
+	 * {@link ManagedFunctionContainer} to undertake the
+	 * {@link GovernanceActivity}.
+	 * 
+	 * @param <W>
+	 *            {@link Work} type.
+	 */
+	private class GovernanceFunction extends AbstractManagedFunctionContainer<Work, GovernanceMetaData<I, F>>
+			implements GovernanceContext<F> {
+
+		/**
+		 * {@link GovernanceActivity}.
+		 */
+		private final GovernanceActivity<F> activity;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param flow
+		 *            {@link Flow}.
+		 * @param workContainer
+		 *            {@link WorkContainer}.
+		 * @param governanceMetaData
+		 *            {@link GovernanceMetaData}.
+		 * @param activity
+		 *            {@link GovernanceActivity}.
+		 */
+		public GovernanceFunction(Flow flow, GovernanceActivity<F> activity) {
+			super(flow, new GovernanceWork(), GovernanceContainerImpl.this.metaData, null, null, null,
+					GovernanceDeactivationStrategy.DISREGARD);
+			this.activity = activity;
+		}
+
+		/*
+		 * ================ ManagedFunctionContainer =======================
+		 */
+
+		@Override
+		protected Object executeFunction(ManagedFunctionContainerContext context) throws Throwable {
+			context.next(this.activity.doActivity(this));
+			return null;
+		}
+
+		/*
+		 * ================== GovernanceContext ==========================
+		 */
+
+		@Override
+		public void doFlow(F key, Object parameter, FlowCallback callback) {
+			this.doFlow(key.ordinal(), parameter, callback);
+		}
+
+		@Override
+		public void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
+
+			// Obtain the flow meta-data
+			FlowMetaData<?> flowMetaData = this.functionContainerMetaData.getFlow(flowIndex);
+
+			// Undertake the flow
+			this.doFlow(flowMetaData, parameter, callback);
+		}
 	}
 
 }

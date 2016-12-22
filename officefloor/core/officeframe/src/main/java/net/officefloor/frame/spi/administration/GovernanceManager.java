@@ -17,8 +17,7 @@
  */
 package net.officefloor.frame.spi.administration;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
@@ -29,32 +28,23 @@ import net.officefloor.frame.spi.governance.Governance;
 public interface GovernanceManager {
 
 	/**
-	 * <p>
-	 * Triggers activating the {@link Governance}.
-	 * <p>
-	 * The activation may not have completed on the return of this method. The
-	 * {@link Governance} will however be active before the next {@link Task} is
-	 * executed.
+	 * Activates the {@link Governance}.
+	 * 
+	 * @return {@link FunctionState} to activate the {@link Governance}.
 	 */
 	void activateGovernance();
 
 	/**
-	 * <p>
-	 * Triggers enforcing the {@link Governance}.
-	 * <p>
-	 * The enforcement may not have completed on the return of this method. The
-	 * {@link Governance} will however be enforced before the next {@link Task}
-	 * is executed or end of {@link ProcessState}.
+	 * Enforces the {@link Governance}.
+	 * 
+	 * @return {@link FunctionState} to enforce the {@link Governance}.
 	 */
 	void enforceGovernance();
 
 	/**
-	 * <p>
-	 * Triggers disregarding the {@link Governance}.
-	 * <p>
-	 * The {@link Governance} may not have been disregarded on the return of
-	 * this method. The {@link Governance} will however be disregarded before
-	 * the next {@link Task} is executed or end of {@link ProcessState}.
+	 * Disregarding the {@link Governance}.
+	 * 
+	 * @return {@link FunctionState} to disregard the {@link Governance}.
 	 */
 	void disregardGovernance();
 

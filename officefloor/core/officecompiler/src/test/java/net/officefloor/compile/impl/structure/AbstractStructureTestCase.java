@@ -35,12 +35,24 @@ import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionEscalationTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
@@ -69,22 +81,10 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
-import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
-import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -302,13 +302,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates a mock {@link TaskFactory}.
+	 * Creates a mock {@link ManagedFunctionFactory}.
 	 * 
-	 * @return Mock {@link TaskFactory}.
+	 * @return Mock {@link ManagedFunctionFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected TaskFactory<Work, ?, ?> createMockTaskFactory() {
-		return this.createMock(TaskFactory.class);
+	protected ManagedFunctionFactory<Work, ?, ?> createMockTaskFactory() {
+		return this.createMock(ManagedFunctionFactory.class);
 	}
 
 	/**
@@ -709,14 +709,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 * @param taskName
 		 *            Name of the {@link SectionTask}.
 		 * @param taskFactory
-		 *            {@link TaskFactory}.
+		 *            {@link ManagedFunctionFactory}.
 		 * @param taskMaker
 		 *            {@link TaskMaker} for the {@link SectionTask}.
 		 * @return {@link SectionTask}.
 		 */
 		<W extends Work> SectionTask addTask(String workName,
 				WorkFactory<W> workFactory, String taskName,
-				TaskFactory<W, ?, ?> taskFactory, TaskMaker taskMaker);
+				ManagedFunctionFactory<W, ?, ?> taskFactory, TaskMaker taskMaker);
 
 		/**
 		 * Adds a {@link TaskFlow}.
@@ -729,16 +729,16 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 * @param taskName
 		 *            Name of the {@link SectionTask}.
 		 * @param taskFactory
-		 *            {@link TaskFactory}.
+		 *            {@link ManagedFunctionFactory}.
 		 * @param flowName
-		 *            Name of the {@link TaskFlowType}.
+		 *            Name of the {@link ManagedFunctionFlowType}.
 		 * @param argumentType
 		 *            Argument type.
 		 * @return {@link TaskFlow}.
 		 */
 		<W extends Work> TaskFlow addTaskFlow(String workName,
 				WorkFactory<W> workFactory, String taskName,
-				TaskFactory<W, ?, ?> taskFactory, String flowName,
+				ManagedFunctionFactory<W, ?, ?> taskFactory, String flowName,
 				Class<?> argumentType);
 
 		/**
@@ -752,9 +752,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 * @param taskName
 		 *            Name of the {@link SectionTask}.
 		 * @param taskFactory
-		 *            {@link TaskFactory}.
+		 *            {@link ManagedFunctionFactory}.
 		 * @param objectName
-		 *            Name of the {@link TaskObjectType}.
+		 *            Name of the {@link ManagedFunctionObjectType}.
 		 * @param objectType
 		 *            Object type.
 		 * @param typeQualifier
@@ -763,11 +763,11 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 */
 		<W extends Work> TaskObject addTaskObject(String workName,
 				WorkFactory<W> workFactory, String taskName,
-				TaskFactory<W, ?, ?> taskFactory, String objectName,
+				ManagedFunctionFactory<W, ?, ?> taskFactory, String objectName,
 				Class<?> objectType, String typeQualifier);
 
 		/**
-		 * Adds a {@link TaskFlow} for a {@link TaskEscalationType}.
+		 * Adds a {@link TaskFlow} for a {@link ManagedFunctionEscalationType}.
 		 * 
 		 * @param workName
 		 *            Name of the {@link SectionWork} for the
@@ -777,16 +777,16 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 * @param taskName
 		 *            Name of the {@link SectionTask}.
 		 * @param taskFactory
-		 *            {@link TaskFactory}.
+		 *            {@link ManagedFunctionFactory}.
 		 * @param escalationName
-		 *            Name of the {@link TaskEscalationType}.
+		 *            Name of the {@link ManagedFunctionEscalationType}.
 		 * @param escalationType
 		 *            Escalation type.
 		 * @return {@link TaskFlow}.
 		 */
 		<E extends Throwable, W extends Work> TaskFlow addTaskEscalation(
 				String workName, WorkFactory<W> workFactory, String taskName,
-				TaskFactory<W, ?, ?> taskFactory, String escalationName,
+				ManagedFunctionFactory<W, ?, ?> taskFactory, String escalationName,
 				Class<E> escalationType);
 	}
 
@@ -949,7 +949,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@Override
 		public <W extends Work> SectionTask addTask(String workName,
 				WorkFactory<W> workFactory, final String taskName,
-				final TaskFactory<W, ?, ?> taskFactory,
+				final ManagedFunctionFactory<W, ?, ?> taskFactory,
 				final TaskMaker taskMaker) {
 			// Create the section work containing the single task type
 			WorkMaker workMaker = new WorkMaker() {
@@ -972,7 +972,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@Override
 		public <W extends Work> TaskFlow addTaskFlow(String workName,
 				WorkFactory<W> workFactory, String taskName,
-				TaskFactory<W, ?, ?> taskFactory, final String flowName,
+				ManagedFunctionFactory<W, ?, ?> taskFactory, final String flowName,
 				final Class<?> argumentType) {
 			// Create the section task containing of a single flow
 			TaskMaker taskMaker = new TaskMaker() {
@@ -992,7 +992,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@Override
 		public <W extends Work> TaskObject addTaskObject(String workName,
 				WorkFactory<W> workFactory, String taskName,
-				TaskFactory<W, ?, ?> taskFactory, final String objectName,
+				ManagedFunctionFactory<W, ?, ?> taskFactory, final String objectName,
 				final Class<?> objectType, final String typeQualifier) {
 			// Create the section task containing of a single object
 			TaskMaker taskMaker = new TaskMaker() {
@@ -1012,7 +1012,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@Override
 		public <E extends Throwable, W extends Work> TaskFlow addTaskEscalation(
 				String workName, WorkFactory<W> workFactory, String taskName,
-				TaskFactory<W, ?, ?> taskFactory, final String escalationName,
+				ManagedFunctionFactory<W, ?, ?> taskFactory, final String escalationName,
 				final Class<E> escalationType) {
 			// Create the section task containing of a single escalation
 			TaskMaker taskMaker = new TaskMaker() {
@@ -1297,18 +1297,18 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	protected static interface WorkMakerContext {
 
 		/**
-		 * Obtains the {@link WorkTypeBuilder}.
+		 * Obtains the {@link FunctionNamespaceBuilder}.
 		 * 
-		 * @return {@link WorkTypeBuilder}.
+		 * @return {@link FunctionNamespaceBuilder}.
 		 */
-		WorkTypeBuilder<Work> getBuilder();
+		FunctionNamespaceBuilder<Work> getBuilder();
 
 		/**
-		 * Obtains the {@link WorkSourceContext}.
+		 * Obtains the {@link ManagedFunctionSourceContext}.
 		 * 
-		 * @return {@link WorkSourceContext}.
+		 * @return {@link ManagedFunctionSourceContext}.
 		 */
-		WorkSourceContext getContext();
+		ManagedFunctionSourceContext getContext();
 
 		/**
 		 * Obtains the {@link WorkFactory} used for the {@link SectionWork}.
@@ -1318,25 +1318,25 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		WorkFactory<Work> getWorkFactory();
 
 		/**
-		 * Adds a {@link TaskType}.
+		 * Adds a {@link ManagedFunctionType}.
 		 * 
 		 * @param taskTypeName
-		 *            Name of the {@link TaskType}.
+		 *            Name of the {@link ManagedFunctionType}.
 		 * @param taskFactory
-		 *            {@link TaskFactory}.
-		 * @return {@link TaskTypeMaker} to make the {@link TaskType}.
+		 *            {@link ManagedFunctionFactory}.
+		 * @return {@link TaskTypeMaker} to make the {@link ManagedFunctionType}.
 		 */
 		<W extends Work> TaskTypeMaker addTask(String taskTypeName,
-				TaskFactory<W, ?, ?> taskFactory);
+				ManagedFunctionFactory<W, ?, ?> taskFactory);
 	}
 
 	/**
-	 * Makes the {@link TaskType}.
+	 * Makes the {@link ManagedFunctionType}.
 	 */
 	protected static interface TaskMaker {
 
 		/**
-		 * Makes the {@link TaskType}.
+		 * Makes the {@link ManagedFunctionType}.
 		 * 
 		 * @param maker
 		 *            {@link TaskTypeMaker}.
@@ -1350,48 +1350,48 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	protected static interface TaskTypeMaker {
 
 		/**
-		 * Adds a {@link TaskFlowType}.
+		 * Adds a {@link ManagedFunctionFlowType}.
 		 * 
 		 * @param flowName
-		 *            Name of the {@link TaskFlowType}.
+		 *            Name of the {@link ManagedFunctionFlowType}.
 		 * @param argumentType
 		 *            Argument type.
-		 * @return {@link TaskFlowTypeBuilder}.
+		 * @return {@link ManagedFunctionFlowTypeBuilder}.
 		 */
-		TaskFlowTypeBuilder<?> addFlow(String flowName, Class<?> argumentType);
+		ManagedFunctionFlowTypeBuilder<?> addFlow(String flowName, Class<?> argumentType);
 
 		/**
-		 * Adds a {@link TaskObjectType}.
+		 * Adds a {@link ManagedFunctionObjectType}.
 		 * 
 		 * @param objectName
-		 *            Name of the {@link TaskObjectType}.
+		 *            Name of the {@link ManagedFunctionObjectType}.
 		 * @param objectType
 		 *            Object type.
 		 * @param typeQualifier
 		 *            Type qualifier.
-		 * @return {@link TaskObjectTypeBuilder}.
+		 * @return {@link ManagedFunctionObjectTypeBuilder}.
 		 */
-		TaskObjectTypeBuilder<?> addObject(String objectName,
+		ManagedFunctionObjectTypeBuilder<?> addObject(String objectName,
 				Class<?> objectType, String typeQualifier);
 
 		/**
-		 * Adds a {@link TaskEscalationTypeBuilder}.
+		 * Adds a {@link ManagedFunctionEscalationTypeBuilder}.
 		 * 
 		 * @param escalationName
-		 *            Name of the {@link TaskEscalationType}.
+		 *            Name of the {@link ManagedFunctionEscalationType}.
 		 * @param escalationType
 		 *            Escalation type.
-		 * @return {@link TaskEscalationTypeBuilder}.
+		 * @return {@link ManagedFunctionEscalationTypeBuilder}.
 		 */
-		<E extends Throwable> TaskEscalationTypeBuilder addEscalation(
+		<E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(
 				String escalationName, Class<E> escalationType);
 	}
 
 	/**
-	 * Maker {@link WorkSource}.
+	 * Maker {@link ManagedFunctionSource}.
 	 */
 	@TestSource
-	public static class MakerWorkSource implements WorkSource<Work>,
+	public static class MakerWorkSource implements ManagedFunctionSource<Work>,
 			WorkMakerContext {
 
 		/**
@@ -1456,30 +1456,30 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		private WorkFactory workFactory;
 
 		/**
-		 * {@link WorkTypeBuilder}.
+		 * {@link FunctionNamespaceBuilder}.
 		 */
 		@SuppressWarnings("rawtypes")
-		private WorkTypeBuilder builder;
+		private FunctionNamespaceBuilder builder;
 
 		/**
-		 * {@link WorkSourceContext}.
+		 * {@link ManagedFunctionSourceContext}.
 		 */
-		private WorkSourceContext context;
+		private ManagedFunctionSourceContext context;
 
 		/*
 		 * ==================== WorkSource ==============================
 		 */
 
 		@Override
-		public WorkSourceSpecification getSpecification() {
+		public ManagedFunctionSourceSpecification getSpecification() {
 			fail("Should not require specification");
 			return null;
 		}
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public void sourceWork(WorkTypeBuilder<Work> workTypeBuilder,
-				WorkSourceContext context) throws Exception {
+		public void sourceManagedFunctions(FunctionNamespaceBuilder<Work> workTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
 
 			// Obtain the work maker
 			String identifier = context
@@ -1504,12 +1504,12 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public WorkTypeBuilder<Work> getBuilder() {
+		public FunctionNamespaceBuilder<Work> getBuilder() {
 			return this.builder;
 		}
 
 		@Override
-		public WorkSourceContext getContext() {
+		public ManagedFunctionSourceContext getContext() {
 			return this.context;
 		}
 
@@ -1521,7 +1521,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public TaskTypeMaker addTask(String taskName, TaskFactory taskFactory) {
+		public TaskTypeMaker addTask(String taskName, ManagedFunctionFactory taskFactory) {
 			// Create and return the task type maker
 			return new TaskTypeMakerImpl(taskName, taskFactory, this.builder);
 		}
@@ -1534,13 +1534,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			/**
 			 * {@link TaskFactoryManufacturer}.
 			 */
-			private final TaskFactory<Work, ?, ?> taskFactory;
+			private final ManagedFunctionFactory<Work, ?, ?> taskFactory;
 
 			/**
-			 * {@link TaskTypeBuilder}.
+			 * {@link ManagedFunctionTypeBuilder}.
 			 */
 			@SuppressWarnings("rawtypes")
-			private final TaskTypeBuilder taskTypeBuilder;
+			private final ManagedFunctionTypeBuilder taskTypeBuilder;
 
 			/**
 			 * Initiate.
@@ -1548,17 +1548,17 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			 * @param taskName
 			 *            Name of the {@link SectionTask}.
 			 * @param taskFactory
-			 *            {@link TaskFactory}.
+			 *            {@link ManagedFunctionFactory}.
 			 * @param workTypeBuilder
-			 *            {@link WorkTypeBuilder}.
+			 *            {@link FunctionNamespaceBuilder}.
 			 */
 			public TaskTypeMakerImpl(String taskName,
-					TaskFactory<Work, ?, ?> taskFactory,
-					WorkTypeBuilder<Work> workTypeBuilder) {
+					ManagedFunctionFactory<Work, ?, ?> taskFactory,
+					FunctionNamespaceBuilder<Work> workTypeBuilder) {
 				this.taskFactory = taskFactory;
 
 				// Create the task type builder
-				this.taskTypeBuilder = workTypeBuilder.addTaskType(taskName,
+				this.taskTypeBuilder = workTypeBuilder.addManagedFunctionType(taskName,
 						this.taskFactory, null, null);
 			}
 
@@ -1567,10 +1567,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			 */
 
 			@Override
-			public TaskFlowTypeBuilder<?> addFlow(String flowName,
+			public ManagedFunctionFlowTypeBuilder<?> addFlow(String flowName,
 					Class<?> argumentType) {
 				// Create and return the task flow type builder
-				TaskFlowTypeBuilder<?> flowBuilder = this.taskTypeBuilder
+				ManagedFunctionFlowTypeBuilder<?> flowBuilder = this.taskTypeBuilder
 						.addFlow();
 				flowBuilder.setArgumentType(argumentType);
 				flowBuilder.setLabel(flowName);
@@ -1579,10 +1579,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 			@Override
 			@SuppressWarnings("unchecked")
-			public TaskObjectTypeBuilder<?> addObject(String objectName,
+			public ManagedFunctionObjectTypeBuilder<?> addObject(String objectName,
 					Class<?> objectType, String typeQualifier) {
 				// Create and return the task object type builder
-				TaskObjectTypeBuilder<?> objectBuilder = this.taskTypeBuilder
+				ManagedFunctionObjectTypeBuilder<?> objectBuilder = this.taskTypeBuilder
 						.addObject(objectType);
 				objectBuilder.setLabel(objectName);
 				if (typeQualifier != null) {
@@ -1593,10 +1593,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 			@Override
 			@SuppressWarnings("unchecked")
-			public <E extends Throwable> TaskEscalationTypeBuilder addEscalation(
+			public <E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(
 					String escalationName, Class<E> escalationType) {
 				// Create and return the task escalation type builder
-				TaskEscalationTypeBuilder escalationBuilder = this.taskTypeBuilder
+				ManagedFunctionEscalationTypeBuilder escalationBuilder = this.taskTypeBuilder
 						.addEscalation(escalationType);
 				escalationBuilder.setLabel(escalationName);
 				return escalationBuilder;

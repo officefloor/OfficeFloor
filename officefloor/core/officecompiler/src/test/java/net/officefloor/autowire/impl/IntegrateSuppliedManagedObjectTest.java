@@ -43,7 +43,7 @@ import net.officefloor.autowire.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.governance.Governance;
@@ -133,7 +133,7 @@ public class IntegrateSuppliedManagedObjectTest extends OfficeFrameTestCase {
 	public static class MockSection {
 
 		/**
-		 * {@link Task} to be invoked by the
+		 * {@link ManagedFunction} to be invoked by the
 		 * {@link MockInputManagedObjectSource}.
 		 * 
 		 * @param parameter
