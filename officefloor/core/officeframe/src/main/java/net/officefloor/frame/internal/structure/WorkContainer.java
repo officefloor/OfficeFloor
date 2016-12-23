@@ -46,12 +46,14 @@ public interface WorkContainer<W extends Work> {
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances to be loaded.
 	 * @param managedJobNode
-	 *            {@link ManagedFunctionContainer} requiring the {@link ManagedObject}.
-	 * @return {@link FunctionState} for next {@link Job}. May be <code>null</code> to
-	 *         indicate no further {@link FunctionState} instances are required to
-	 *         load {@link ManagedObject} instances.
+	 *            {@link ManagedFunctionContainer} requiring the
+	 *            {@link ManagedObject}.
+	 * @return {@link FunctionState} for next {@link Job}. May be
+	 *         <code>null</code> to indicate no further {@link FunctionState}
+	 *         instances are required to load {@link ManagedObject} instances.
 	 */
-	FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunctionContainer managedJobNode);
+	FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
+			ManagedFunctionContainer managedJobNode);
 
 	/**
 	 * Obtains the {@link ManagedObjectContainer} for the
@@ -66,21 +68,13 @@ public interface WorkContainer<W extends Work> {
 	ManagedObjectContainer getManagedObjectContainer(ManagedObjectIndex managedObjectIndex);
 
 	/**
-	 * Administers the {@link ManagedObject} instances as per the input
-	 * {@link TaskDutyAssociation}.
+	 * Obtains the {@link AdministratorContainer}.
 	 * 
-	 * @param duty
-	 *            {@link TaskDutyAssociation} specifying the administration to
-	 *            be undertaken.
-	 * @param adminContext
-	 *            {@link AdministratorContext}.
-	 * @throws Throwable
-	 *             If fails to administer the {@link ManagedObject} instances.
-	 * @return {@link FunctionState} for next {@link Job}. May be <code>null</code> to
-	 *         indicate no further {@link FunctionState} instances are required to
-	 *         load {@link ManagedObject} instances.
+	 * @param adminIndex
+	 *            Index of the {@link AdministratorContainer}.
+	 * @return {@link AdministratorContainer}.
 	 */
-	FunctionState administerManagedObjects(TaskDutyAssociation<?> duty, AdministratorContext adminContext) throws Throwable;
+	AdministratorContainer<?, ?> getAdministratorContainer(int adminIndex);
 
 	/**
 	 * Obtains the Object of the particular {@link ManagedObject}.

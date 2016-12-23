@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.process;
 
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.ManagedFunction;
@@ -37,10 +37,10 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -63,10 +63,10 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	private static final ManagedObjectIndex[] REQUIRED_MANAGED_OBJECTS = new ManagedObjectIndex[0];
 
 	/**
-	 * NO {@link TaskDutyAssociation} instances for
+	 * NO {@link ManagedFunctionDutyAssociation} instances for
 	 * {@link EscalationHandlerTask}.
 	 */
-	private static final TaskDutyAssociation<?>[] TASK_DUTY_ASSOCIATIONS = new TaskDutyAssociation[0];
+	private static final ManagedFunctionDutyAssociation<?>[] TASK_DUTY_ASSOCIATIONS = new ManagedFunctionDutyAssociation[0];
 
 	/**
 	 * No {@link FlowMetaData} instnaces for {@link EscalationHandlerTask}.
@@ -101,7 +101,8 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	 */
 	static {
 		// Specify dependency on parameter for escalation to handle
-		MANGED_OBJECT_DEPENDENCIES[EscalationKey.EXCEPTION.ordinal()] = ManagedFunctionImpl.PARAMETER_MANAGED_OBJECT_INDEX;
+		MANGED_OBJECT_DEPENDENCIES[EscalationKey.EXCEPTION
+				.ordinal()] = ManagedFunctionImpl.PARAMETER_MANAGED_OBJECT_INDEX;
 	}
 
 	/**
@@ -116,7 +117,8 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	private final TeamManagement responsibleTeam;
 
 	/**
-	 * {@link ManagedFunctionMetaData} for the {@link EscalationHandler} {@link ManagedFunction}.
+	 * {@link ManagedFunctionMetaData} for the {@link EscalationHandler}
+	 * {@link ManagedFunction}.
 	 */
 	private final ManagedFunctionMetaData<EscalationHandlerTask, EscalationKey, None> taskMetaData;
 
@@ -152,7 +154,8 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	}
 
 	/**
-	 * Creates the {@link ManagedFunctionMetaData} for the {@link EscalationHandlerTask}.
+	 * Creates the {@link ManagedFunctionMetaData} for the
+	 * {@link EscalationHandlerTask}.
 	 * 
 	 * @param requiredGovernance
 	 *            Required {@link Governance} to execute the
@@ -161,10 +164,11 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 	 *            executing the {@link ManagedFunction}.
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
-	 * @return {@link ManagedFunctionMetaData} for the {@link EscalationHandlerTask}.
+	 * @return {@link ManagedFunctionMetaData} for the
+	 *         {@link EscalationHandlerTask}.
 	 */
-	private ManagedFunctionMetaData<EscalationHandlerTask, EscalationKey, None> createTaskMetaData(boolean[] requiredGovernance,
-			FunctionLoop functionLoop) {
+	private ManagedFunctionMetaData<EscalationHandlerTask, EscalationKey, None> createTaskMetaData(
+			boolean[] requiredGovernance, FunctionLoop functionLoop) {
 
 		// Create the escalation task
 		EscalationHandlerTask task = new EscalationHandlerTask(this.escalationHandler);
@@ -223,7 +227,8 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<EscalationHandlerTask, EscalationKey, None> context) throws Throwable {
+		public Object execute(ManagedFunctionContext<EscalationHandlerTask, EscalationKey, None> context)
+				throws Throwable {
 
 			// Obtain the exception
 			Throwable exception = (Throwable) context.getObject(EscalationKey.EXCEPTION);
@@ -238,14 +243,15 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 
 	/**
 	 * <p>
-	 * {@link ManagedFunctionMetaData} for the {@link EscalationHandlerTask} to ensure
-	 * deactivate any active {@link Governance} before execution.
+	 * {@link ManagedFunctionMetaData} for the {@link EscalationHandlerTask} to
+	 * ensure deactivate any active {@link Governance} before execution.
 	 * <p>
 	 * The {@link ManagedFunctionMetaData} used by the actual executing
 	 * {@link EscalationHandlerTask} is dynamic to the {@link Governance} for
 	 * the particular {@link Office}.
 	 */
-	private static class EscalationTaskMetaData extends ManagedFunctionMetaDataImpl<EscalationHandlerTask, EscalationKey, None> {
+	private static class EscalationTaskMetaData
+			extends ManagedFunctionMetaDataImpl<EscalationHandlerTask, EscalationKey, None> {
 
 		/**
 		 * Initiate.
@@ -262,9 +268,9 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 		 */
 		public EscalationTaskMetaData(ManagedFunctionFactory<EscalationHandlerTask, EscalationKey, None> taskFactory,
 				TeamManagement responsibleTeam, boolean[] requiredGovernance, FunctionLoop functionLoop) {
-			super("Escalation Handler Task", "Escalation Handler Task", taskFactory, null, Throwable.class,
-					responsibleTeam, REQUIRED_MANAGED_OBJECTS, MANGED_OBJECT_DEPENDENCIES, requiredGovernance,
-					TASK_DUTY_ASSOCIATIONS, TASK_DUTY_ASSOCIATIONS, functionLoop);
+			super("Escalation Handler Task", taskFactory, null, Throwable.class, responsibleTeam,
+					REQUIRED_MANAGED_OBJECTS, MANGED_OBJECT_DEPENDENCIES, requiredGovernance, TASK_DUTY_ASSOCIATIONS,
+					TASK_DUTY_ASSOCIATIONS, functionLoop);
 			this.loadRemainingState(WORK_META_DATA, FLOW_META_DATA, null, FURTHER_ESCALATION_PROCEDURE);
 		}
 
@@ -273,9 +279,9 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 		 */
 
 		@Override
-		public ManagedFunctionContainer createManagedFunctionContainer(Flow flow, WorkContainer<EscalationHandlerTask> workContainer,
-				ManagedFunctionContainer parallelJobNodeOwner, Object parameter,
-				GovernanceDeactivationStrategy governanceDeactivationStrategy) {
+		public ManagedFunctionContainer createManagedFunctionContainer(Flow flow,
+				WorkContainer<EscalationHandlerTask> workContainer, ManagedFunctionContainer parallelJobNodeOwner,
+				Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy) {
 
 			// Create required Governance to deactivate all governance
 			int requiredGovernanceCount = flow.getThreadState().getThreadMetaData().getGovernanceMetaData().length;
@@ -289,8 +295,8 @@ public class EscalationHandlerEscalation implements EscalationFlow {
 					this.getResponsibleTeam(), requiredGovernance, this.getFunctionLoop());
 
 			// Create and return the job node
-			return new ManagedFunctionImpl<EscalationHandlerTask, EscalationKey, None>(flow, workContainer, taskMetaData,
-					governanceDeactivationStrategy, parallelJobNodeOwner, parameter);
+			return new ManagedFunctionImpl<EscalationHandlerTask, EscalationKey, None>(flow, workContainer,
+					taskMetaData, governanceDeactivationStrategy, parallelJobNodeOwner, parameter);
 		}
 	}
 

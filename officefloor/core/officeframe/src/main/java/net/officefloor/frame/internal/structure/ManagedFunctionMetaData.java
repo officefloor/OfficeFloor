@@ -139,7 +139,7 @@ public interface ManagedFunctionMetaData<W extends Work, D extends Enum<D>, F ex
 	 * @return Listing of the {@link Duty} instances to undertake before
 	 *         executing the {@link ManagedFunction}.
 	 */
-	TaskDutyAssociation<?>[] getPreAdministrationMetaData();
+	ManagedFunctionDutyAssociation<?>[] getPreAdministrationMetaData();
 
 	/**
 	 * Meta-data of the {@link Administrator} to undertake after executing the
@@ -148,6 +148,6 @@ public interface ManagedFunctionMetaData<W extends Work, D extends Enum<D>, F ex
 	 * @return Listing the {@link Duty} instances to undertake after executing
 	 *         the {@link ManagedFunction}.
 	 */
-	TaskDutyAssociation<?>[] getPostAdministrationMetaData();
+	ManagedFunctionDutyAssociation<?>[] getPostAdministrationMetaData();
 
 }

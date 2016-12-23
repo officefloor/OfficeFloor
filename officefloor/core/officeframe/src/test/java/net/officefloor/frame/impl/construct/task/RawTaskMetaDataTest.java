@@ -58,7 +58,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
+import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -956,7 +956,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure able to construct pre {@link TaskDutyAssociation}.
+	 * Ensure able to construct pre {@link ManagedFunctionDutyAssociation}.
 	 */
 	public void testConstructPreAdministratorDuty() {
 
@@ -1013,7 +1013,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Ensure have duty
 		assertEquals("Should have duty", 1,
 				taskMetaData.getPreAdministrationMetaData().length);
-		TaskDutyAssociation<?> taskDuty = taskMetaData
+		ManagedFunctionDutyAssociation<?> taskDuty = taskMetaData
 				.getPreAdministrationMetaData()[0];
 		assertEquals("Incorrect administrator index", adminIndex,
 				taskDuty.getAdministratorIndex());
@@ -1097,7 +1097,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Ensure have duty
 		assertEquals("Should have post task duty", 1,
 				taskMetaData.getPostAdministrationMetaData().length);
-		TaskDutyAssociation<?> taskDuty = taskMetaData
+		ManagedFunctionDutyAssociation<?> taskDuty = taskMetaData
 				.getPostAdministrationMetaData()[0];
 		assertEquals("Incorrect administrator index", adminIndex,
 				taskDuty.getAdministratorIndex());

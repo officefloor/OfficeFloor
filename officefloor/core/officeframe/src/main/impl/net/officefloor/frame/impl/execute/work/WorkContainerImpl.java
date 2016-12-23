@@ -17,23 +17,15 @@
  */
 package net.officefloor.frame.impl.execute.work;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
-import net.officefloor.frame.internal.structure.AdministratorContext;
-import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.AdministratorScope;
-import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.Promise;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -173,81 +165,14 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public FunctionState administerManagedObjects(TaskDutyAssociation<?> duty, AdministratorContext adminContext)
-			throws Throwable {
-
-		// Obtain the index identifying the administrator
-		AdministratorIndex adminIndex = duty.getAdministratorIndex();
-		AdministratorScope adminScope = adminIndex.getAdministratorScope();
-		int adminScopeIndex = adminIndex.getIndexOfAdministratorWithinScope();
-
-		// Obtain the administrator container
-		AdministratorContainer adminContainer;
-		switch (adminScope) {
-		case WORK:
-			// Lazy create the administrator container. This is safe to lazy
-			// create as work containers are not shared between threads and
-			// this operates within the thread and process lock.
-			adminContainer = this.administrators[adminScopeIndex];
-			if (adminContainer == null) {
-				adminContainer = this.workMetaData.getAdministratorMetaData()[adminScopeIndex]
-						.createAdministratorContainer(adminContext.getThreadState());
-				this.administrators[adminScopeIndex] = adminContainer;
-			}
-			break;
-
-		case THREAD:
-			adminContainer = this.threadState.getAdministratorContainer(adminScopeIndex);
-			break;
-
-		case PROCESS:
-			adminContainer = this.threadState.getProcessState().getAdministratorContainer(adminScopeIndex);
-			break;
-
-		default:
-			throw new IllegalStateException("Unknown administrator scope " + adminIndex.getAdministratorScope());
+	public AdministratorContainer<?, ?> getAdministratorContainer(int adminIndex) {
+		AdministratorContainer<?, ?> container = this.administrators[adminIndex];
+		if (container == null) {
+			container = this.workMetaData.getAdministratorMetaData()[adminIndex]
+					.createAdministratorContainer(this.threadState);
+			this.administrators[adminIndex] = container;
 		}
-
-		// Obtain the extension interfaces to be managed
-		ExtensionInterfaceMetaData<?>[] eiMetaDatas = adminContainer.getExtensionInterfaceMetaData(adminContext);
-		List extensionInterfaces = new ArrayList(eiMetaDatas.length);
-		for (int i = 0; i < eiMetaDatas.length; i++) {
-			ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
-
-			// Obtain the index of managed object to administer
-			ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
-
-			// Obtain the managed object container
-			ManagedObjectContainer container;
-			int moScopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
-			switch (moIndex.getManagedObjectScope()) {
-			case WORK:
-				container = this.managedObjects[moScopeIndex];
-				break;
-
-			case THREAD:
-				container = this.threadState.getManagedObjectContainer(moScopeIndex);
-				break;
-
-			case PROCESS:
-				container = this.threadState.getProcessState().getManagedObjectContainer(moScopeIndex);
-				break;
-
-			default:
-				throw new IllegalStateException("Unknown managed object scope " + moIndex.getManagedObjectScope());
-			}
-
-			// Extract the extension interface
-			Object extensionInterface = container
-					.extractExtensionInterface(eiMetaData.getExtensionInterfaceExtractor());
-
-			// Load the extension interface for administration
-			extensionInterfaces.add(extensionInterface);
-		}
-
-		// Administer the managed objects
-		return adminContainer.doDuty(duty, extensionInterfaces, adminContext);
+		return container;
 	}
 
 	@Override

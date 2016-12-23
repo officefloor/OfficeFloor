@@ -29,13 +29,12 @@ import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.TaskManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
@@ -45,8 +44,8 @@ import net.officefloor.frame.spi.team.source.ProcessContextListener;
  * {@link Work} via the {@link WorkManager}.
  * <p>
  * To enable the invoking {@link Thread} to be available for executing
- * {@link ManagedFunction} instances of the {@link ProcessState}, the {@link Work} by the
- * {@link WorkManager} needs to be invoked with the
+ * {@link ManagedFunction} instances of the {@link ProcessState}, the
+ * {@link Work} by the {@link WorkManager} needs to be invoked with the
  * {@link #doWork(WorkManager, Object)} method.
  * <p>
  * As the typical focus of this {@link Team} is to integration with Application
@@ -72,50 +71,21 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 	/**
 	 * <p>
-	 * Wrap invoking {@link Work} on the {@link WorkManager} to allow the
-	 * {@link Thread} to be available to execute the {@link ManagedFunction} instances of
-	 * the {@link ProcessState}.
-	 * <p>
-	 * This method blocks until the invoked {@link ProcessState} of the invoked
-	 * {@link Work} is complete.
-	 * 
-	 * @param workManager
-	 *            {@link WorkManager} managing the {@link Work} to invoked.
-	 * @param parameter
-	 *            Parameter for the initial {@link ManagedFunction} of the {@link Work}.
-	 * @throws NoInitialTaskException
-	 *             If {@link Work} of the {@link WorkManager} has no initial
-	 *             {@link ManagedFunction}.
-	 * @throws InvalidParameterTypeException
-	 *             Should the parameter type be invalid for the {@link ManagedFunction}.
-	 * @throws InterruptedException
-	 *             Should this blocking call be interrupted.
-	 */
-	public static void doWork(final WorkManager workManager, final Object parameter)
-			throws NoInitialTaskException, InvalidParameterTypeException, InterruptedException {
-		doProcess(new InvokeProcessState() {
-			@Override
-			public ProcessFuture invokeProcessState() throws NoInitialTaskException, InvalidParameterTypeException {
-				return workManager.invokeWork(parameter);
-			}
-		});
-	}
-
-	/**
-	 * <p>
-	 * Wrap invoking {@link ManagedFunction} on the {@link TaskManager} to allow the
-	 * {@link Thread} to be available to execute the {@link ManagedFunction} instances of
-	 * the {@link ProcessState}.
+	 * Wrap invoking {@link ManagedFunction} on the {@link TaskManager} to allow
+	 * the {@link Thread} to be available to execute the {@link ManagedFunction}
+	 * instances of the {@link ProcessState}.
 	 * <p>
 	 * This method blocks until the invoked {@link ProcessState} of the invoked
 	 * {@link ManagedFunction} is complete.
 	 * 
 	 * @param taskManager
-	 *            {@link TaskManager} managing the {@link ManagedFunction} to invoked.
+	 *            {@link TaskManager} managing the {@link ManagedFunction} to
+	 *            invoked.
 	 * @param parameter
 	 *            Parameter for the {@link ManagedFunction}.
 	 * @throws InvalidParameterTypeException
-	 *             Should the parameter type be invalid for the {@link ManagedFunction}.
+	 *             Should the parameter type be invalid for the
+	 *             {@link ManagedFunction}.
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
@@ -124,8 +94,9 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		try {
 			doProcess(new InvokeProcessState() {
 				@Override
-				public ProcessFuture invokeProcessState() throws InvalidParameterTypeException {
-					return taskManager.invokeTask(parameter);
+				public void invokeProcessState(ProcessCompletionListener completionListener)
+						throws InvalidParameterTypeException {
+					taskManager.invokeTask(parameter, completionListener);
 				}
 			});
 		} catch (NoInitialTaskException ex) {
@@ -191,8 +162,9 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		try {
 			doProcess(new InvokeProcessState() {
 				@Override
-				public ProcessFuture invokeProcessState() {
-					return executeContext.invokeProcess(flowIndex, parameter, managedObject, 0, escalationHandler);
+				public void invokeProcessState(ProcessCompletionListener completionListener) {
+					executeContext.invokeProcess(flowIndex, parameter, managedObject, 0, escalationHandler,
+							completionListener);
 				}
 			});
 		} catch (NoInitialTaskException ex) {
@@ -210,21 +182,25 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		/**
 		 * Invokes the {@link ProcessState}.
 		 * 
+		 * @param completionListener
+		 *            {@link ProcessCompletionListener}.
 		 * @return {@link ProcessFuture} for the {@link ProcessState}.
 		 * @throws NoInitialTaskException
 		 *             If {@link Work} of the {@link WorkManager} has no initial
 		 *             {@link ManagedFunction}.
 		 * @throws InvalidParameterTypeException
-		 *             Should the parameter type be invalid for {@link ManagedFunction}.
+		 *             Should the parameter type be invalid for
+		 *             {@link ManagedFunction}.
 		 */
-		ProcessFuture invokeProcessState() throws NoInitialTaskException, InvalidParameterTypeException;
+		void invokeProcessState(ProcessCompletionListener completionListener)
+				throws NoInitialTaskException, InvalidParameterTypeException;
 	}
 
 	/**
 	 * <p>
 	 * Wrap invoking {@link ProcessState} on the {@link InvokeProcessState} to
-	 * allow the {@link Thread} to be available to execute the {@link ManagedFunction}
-	 * instances of the {@link ProcessState}.
+	 * allow the {@link Thread} to be available to execute the
+	 * {@link ManagedFunction} instances of the {@link ProcessState}.
 	 * <p>
 	 * This method blocks until the invoked {@link ProcessState} is complete.
 	 * 
@@ -234,7 +210,8 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 *             If {@link Work} of the {@link WorkManager} has no initial
 	 *             {@link ManagedFunction}.
 	 * @throws InvalidParameterTypeException
-	 *             Should the parameter type be invalid for the {@link ManagedFunction}.
+	 *             Should the parameter type be invalid for the
+	 *             {@link ManagedFunction}.
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
@@ -242,7 +219,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 			throws NoInitialTaskException, InvalidParameterTypeException, InterruptedException {
 
 		// Obtain the current Thread
-		Thread currentThread = Thread.currentThread();
+		final Thread currentThread = Thread.currentThread();
 		try {
 
 			// Register the Job Queue Executor for the Thread.
@@ -252,11 +229,20 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 				threadToExecutor.put(currentThread, executor);
 			}
 
+			// Completion listener
+			ProcessCompletionListener completionListener = new ProcessCompletionListener() {
+				@Override
+				public void processComplete() {
+					threadToExecutor.remove(currentThread);
+					executor.isProcessComplete = true;
+				}
+			};
+
 			// Invoke the process
-			ProcessFuture future = invoker.invokeProcessState();
+			invoker.invokeProcessState(completionListener);
 
 			// Blocking call to execute the Jobs
-			executor.executeJobs(future);
+			executor.executeJobs();
 
 		} finally {
 			// Ensure unregister current Thread (no further Jobs registered)
@@ -287,11 +273,6 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	}
 
 	/**
-	 * {@link TeamIdentifier} of this {@link Team}.
-	 */
-	private final TeamIdentifier teamIdentifier;
-
-	/**
 	 * {@link JobExecutor} to be used if no context {@link Thread} available.
 	 */
 	// TODO as passive, should pass previous team
@@ -303,21 +284,6 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	private final Map<Object, Thread> processContextThreads = new HashMap<Object, Thread>(
 			CONTEXT_THREAD_INITIAL_CAPACITY);
 
-	/**
-	 * Flag indicating whether to continue execution of {@link Job} instances.
-	 */
-	private volatile boolean isContinueExecution = true;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param teamIdentifier
-	 *            {@link TeamIdentifier} of this {@link Team}.
-	 */
-	public ProcessContextTeam(TeamIdentifier teamIdentifier) {
-		this.teamIdentifier = teamIdentifier;
-	}
-
 	/*
 	 * ========================== Team ====================================
 	 */
@@ -328,7 +294,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	}
 
 	@Override
-	public void assignJob(Job job, TeamIdentifier assignerTeam) {
+	public void assignJob(Job job) {
 
 		// Obtain the process identifier
 		Object processIdentifier = job.getProcessIdentifier();
@@ -361,9 +327,6 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 	@Override
 	public void stopWorking() {
-		// Flag to stop executing
-		this.isContinueExecution = false;
-
 		// Ensure all assigned jobs are completed
 		synchronized (threadToExecutor) {
 			try {
@@ -435,6 +398,11 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		private ProcessContextTeam instance;
 
 		/**
+		 * Flag indicating if the {@link ProcessState} is complete.
+		 */
+		private volatile boolean isProcessComplete = false;
+
+		/**
 		 * <p>
 		 * {@link JobQueue}. Initial instance until {@link ProcessFuture}
 		 * instance becomes available.
@@ -473,14 +441,14 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		 * @param future
 		 *            {@link ProcessFuture}.
 		 */
-		public void executeJobs(ProcessFuture future) {
+		public void executeJobs() {
 
 			// Ensure coordinate with assigning Jobs
 			JobExecutor executor;
 			synchronized (this) {
 
 				// Create queue and load existing Jobs
-				JobQueue queue = new JobQueue(future);
+				JobQueue queue = new JobQueue();
 				for (Job job = this.jobQueue.dequeue(); job != null; job = this.jobQueue.dequeue()) {
 					queue.enqueue(job);
 				}
@@ -489,7 +457,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 				this.jobQueue = queue;
 
 				// Wait until the Team instance available or Process complete
-				while ((this.instance == null) && (!future.isComplete())) {
+				while ((this.instance == null) && (!this.isProcessComplete)) {
 					try {
 						this.wait(100);
 					} catch (InterruptedException ex) {
@@ -502,7 +470,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 			}
 
 			// Execute Jobs until Process complete
-			while (!future.isComplete()) {
+			while (!this.isProcessComplete) {
 				Job job = this.jobQueue.dequeue(100);
 				if (job != null) {
 					executor.doJob(job);
@@ -514,17 +482,12 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	/**
 	 * Executes {@link Job} instances.
 	 */
-	private static class JobExecutor implements JobContext {
+	private static class JobExecutor {
 
 		/**
 		 * {@link ProcessContextTeam}.
 		 */
 		private final ProcessContextTeam instance;
-
-		/**
-		 * Cached time.
-		 */
-		private long time = -1;
 
 		/**
 		 * Initiate.
@@ -543,37 +506,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		 *            {@link Job} to be executed.
 		 */
 		public void doJob(Job job) {
-			// Reset time
-			this.time = -1;
-
-			// Execute the job
-			job.doJob(this);
-		}
-
-		/*
-		 * ==================== JobContext ===========================
-		 */
-
-		@Override
-		public long getTime() {
-
-			// Ensure have the time
-			if (this.time < 0) {
-				this.time = System.currentTimeMillis();
-			}
-
-			// Return the time
-			return this.time;
-		}
-
-		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return this.instance.teamIdentifier;
-		}
-
-		@Override
-		public boolean continueExecution() {
-			return this.instance.isContinueExecution;
+			job.run();
 		}
 	}
 

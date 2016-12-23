@@ -17,8 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import java.util.List;
-
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -41,35 +39,22 @@ public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
 	ThreadState getResponsibleThreadState();
 
 	/**
-	 * Obtains the {@link ExtensionInterfaceMetaData} to obtain the
-	 * {@link ManagedObject} extension interfaces to provide to the {@link Duty}
-	 * .
+	 * Administers the {@link ManagedObject} instances for the
+	 * {@link ManagedFunctionContainer}.
 	 * 
-	 * @param context
-	 *            {@link AdministratorContext} for the {@link Administrator} to
-	 *            administer within.
-	 * @return {@link ExtensionInterfaceMetaData} to obtain the
-	 *         {@link ManagedObject} extension interfaces to provide to the
-	 *         {@link Duty}.
-	 */
-	ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData(AdministratorContext context);
-
-	/**
-	 * Executes the {@link Duty}.
-	 * 
-	 * @param taskDutyAssociation
-	 *            {@link TaskDutyAssociation} of {@link Duty} to execute for the
+	 * @param functionDutyAssociation
+	 *            {@link ManagedFunctionDutyAssociation}.
+	 * @param flow
+	 *            {@link Flow}.
+	 * @param managedFunctionMetaData
+	 *            {@link ManagedFunctionMetaData} of the
 	 *            {@link ManagedFunction}.
-	 * @param extensionInterfaces
-	 *            Extension interfaces to be administered.
-	 * @param context
-	 *            {@link AdministratorContext} for the {@link Duty} be executed
-	 *            within.
-	 * @return {@link FunctionState} to undertake the {@link Duty}.
-	 * @throws Throwable
-	 *             If {@link Duty} fails.
+	 * @param workContainer
+	 *            {@link WorkContainer}.
+	 * @return {@link ManagedFunctionContainer} to administer the
+	 *         {@link ManagedObject} instances.
 	 */
-	FunctionState doDuty(TaskDutyAssociation<A> taskDutyAssociation, List<I> extensionInterfaces,
-			AdministratorContext context) throws Throwable;
+	ManagedFunctionContainer administerManagedObjects(ManagedFunctionDutyAssociation<A> functionDutyAssociation,
+			Flow flow, ManagedFunctionMetaData<?, ?, ?> managedFunctionMetaData, WorkContainer<?> workContainer);
 
 }

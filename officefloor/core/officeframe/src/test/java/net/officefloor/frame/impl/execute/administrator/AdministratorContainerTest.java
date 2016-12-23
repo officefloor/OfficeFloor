@@ -27,7 +27,7 @@ import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
+import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -60,11 +60,11 @@ public class AdministratorContainerTest<I, A extends Enum<A>, F extends Enum<F>,
 			this.metaData);
 
 	/**
-	 * {@link TaskDutyAssociation}.
+	 * {@link ManagedFunctionDutyAssociation}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskDutyAssociation<A> taskDuty = this
-			.createMock(TaskDutyAssociation.class);
+	private final ManagedFunctionDutyAssociation<A> taskDuty = this
+			.createMock(ManagedFunctionDutyAssociation.class);
 
 	/**
 	 * Extension interfaces.

@@ -119,7 +119,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * {@link GovernanceContainer} instances for the {@link ProcessState}.
 	 */
-	private final GovernanceContainer<?, ?>[] governanceContainers;
+	private final GovernanceContainer<?>[] governanceContainers;
 
 	/**
 	 * {@link AdministratorContainer} instances for this {@link ThreadState}.
@@ -279,7 +279,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			case ENFORCE:
 				// Enforce any active governance
 				for (int i = 0; i < this.governanceContainers.length; i++) {
-					GovernanceContainer<?, ?> container = this.governanceContainers[i];
+					GovernanceContainer<?> container = this.governanceContainers[i];
 					if (container != null) {
 						FunctionState enforceJobNode = container.enforceGovernance();
 						if (enforceJobNode != null) {
@@ -292,7 +292,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			case DISREGARD:
 				// Disregard any active governance
 				for (int i = 0; i < this.governanceContainers.length; i++) {
-					GovernanceContainer<?, ?> container = this.governanceContainers[i];
+					GovernanceContainer<?> container = this.governanceContainers[i];
 					if (container != null) {
 						FunctionState disregardJobNode = container.disregardGovernance();
 						if (disregardJobNode != null) {
@@ -348,28 +348,20 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public boolean isGovernanceActive(int index) {
-		// Determine if container is active (not created is not active).
-		GovernanceContainer<?, ?> container = this.governanceContainers[index];
-		return (container != null) && (container.isActive());
-	}
-
-	@Override
-	public GovernanceContainer<?, ?> getGovernanceContainer(int index) {
+	public GovernanceContainer<?> getGovernanceContainer(int index) {
 		// Lazy load the Governance Container
-		GovernanceContainer<?, ?> container = this.governanceContainers[index];
+		GovernanceContainer<?> container = this.governanceContainers[index];
 		if (container == null) {
-			container = this.threadMetaData.getGovernanceMetaData()[index].createGovernanceContainer(this, index);
+			container = this.threadMetaData.getGovernanceMetaData()[index].createGovernanceContainer(this);
 			this.governanceContainers[index] = container;
 		}
 		return container;
 	}
 
 	@Override
-	public void governanceComplete(GovernanceContainer<?, ?> governanceContainer) {
-		// Unregister the governance
-		int index = governanceContainer.getProcessRegisteredIndex();
-		this.governanceContainers[index] = null;
+	public boolean isGovernanceActive(int index) {
+		GovernanceContainer<?> container = this.governanceContainers[index];
+		return (container != null) ? container.isGovernanceActive() : false;
 	}
 
 	@Override

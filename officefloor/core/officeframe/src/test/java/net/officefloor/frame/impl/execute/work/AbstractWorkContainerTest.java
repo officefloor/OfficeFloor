@@ -43,7 +43,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
+import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -301,10 +301,10 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			.createMock(TeamIdentifier.class);
 
 	/**
-	 * {@link TaskDutyAssociation}.
+	 * {@link ManagedFunctionDutyAssociation}.
 	 */
-	private final TaskDutyAssociation<?> taskDutyAssociation = this
-			.createMock(TaskDutyAssociation.class);
+	private final ManagedFunctionDutyAssociation<?> taskDutyAssociation = this
+			.createMock(ManagedFunctionDutyAssociation.class);
 
 	/**
 	 * {@link AdministratorContext}.

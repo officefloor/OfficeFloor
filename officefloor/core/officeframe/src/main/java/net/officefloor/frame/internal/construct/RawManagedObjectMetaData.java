@@ -18,11 +18,13 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
@@ -81,6 +83,14 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> 
 	Class<?> getObjectType();
 
 	/**
+	 * Obtains the {@link TeamManagement} responsible for {@link Escalation}
+	 * handling by this {@link ManagedObject}.
+	 * 
+	 * @return {@link TeamManagement}.
+	 */
+	TeamManagement getEscalationResponsibleTeam();
+
+	/**
 	 * Obtains the {@link RawManagingOfficeMetaData} of the {@link Office}
 	 * managing this {@link ManagedObject}.
 	 * 
@@ -113,11 +123,9 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> 
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link ManagedObjectMetaData}.
 	 */
-	ManagedObjectMetaData<D> createManagedObjectMetaData(
-			RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
-			RawBoundManagedObjectInstanceMetaData<D> boundInstanceMetaData,
-			ManagedObjectIndex[] dependencyMappings,
-			ManagedObjectGovernanceMetaData<?>[] governanceMetaData,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
+	ManagedObjectMetaData<D> createManagedObjectMetaData(RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
+			RawBoundManagedObjectInstanceMetaData<D> boundInstanceMetaData, ManagedObjectIndex[] dependencyMappings,
+			ManagedObjectGovernanceMetaData<?>[] governanceMetaData, AssetManagerFactory assetManagerFactory,
+			OfficeFloorIssues issues);
 
 }

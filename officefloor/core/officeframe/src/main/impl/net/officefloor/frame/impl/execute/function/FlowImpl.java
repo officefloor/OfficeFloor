@@ -18,10 +18,11 @@
 package net.officefloor.frame.impl.execute.function;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.impl.execute.duty.DutyJob;
+import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl.DutyFunction;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.work.WorkContainerProxy;
+import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
@@ -31,8 +32,8 @@ import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -47,7 +48,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	/**
 	 * Activate {@link FunctionState} instances for this {@link Flow}.
 	 */
-	private final LinkedListSet<ManagedFunctionContainer, Flow> activeJobNodes = new StrictLinkedListSet<ManagedFunctionContainer, Flow>() {
+	private final LinkedListSet<ManagedFunctionContainer, Flow> activeFunctions = new StrictLinkedListSet<ManagedFunctionContainer, Flow>() {
 		@Override
 		protected Flow getOwner() {
 			return FlowImpl.this;
@@ -95,8 +96,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		WorkContainer workContainer = workMetaData.createWorkContainer(this.threadState);
 
 		// Obtain the administration meta-data to determine if require proxy
-		TaskDutyAssociation[] preTaskDuties = managedFunctionMetaData.getPreAdministrationMetaData();
-		TaskDutyAssociation[] postTaskDuties = managedFunctionMetaData.getPostAdministrationMetaData();
+		ManagedFunctionDutyAssociation[] preTaskDuties = managedFunctionMetaData.getPreAdministrationMetaData();
+		ManagedFunctionDutyAssociation[] postTaskDuties = managedFunctionMetaData.getPostAdministrationMetaData();
 
 		// Create the work container proxy (if required)
 		WorkContainerProxy proxyWorkContainer = null;
@@ -118,7 +119,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		// Create and register the managed function
 		ManagedFunctionContainer managedFunction = managedFunctionMetaData.createManagedFunctionContainer(this,
 				workContainer, parallelFunctionOwner, parameter, governanceDeactivationStrategy);
-		this.activeJobNodes.addEntry(managedFunction);
+		this.activeFunctions.addEntry(managedFunction);
 
 		// Load the task job
 		this.loadJob(firstLastJobs, managedFunction);
@@ -135,22 +136,23 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	public <F extends Enum<F>> ManagedFunctionContainer createGovernanceFunction(
 			GovernanceActivity<F> governanceActivity, GovernanceMetaData<?, F> governanceMetaData) {
 
-		// Create and register the governance function
-		ManagedFunctionContainer governanceFunction = governanceMetaData.createGovernanceFunction(governanceActivity);
-		this.activeJobNodes.addEntry(governanceFunction);
+		// Create the governance function
+		ManagedFunctionContainer governanceFunction = governanceMetaData.createGovernanceFunction(governanceActivity,
+				this);
+		this.activeFunctions.addEntry(governanceFunction);
 
 		// Return the governance function
 		return governanceFunction;
 	}
 
 	/**
-	 * Loads the {@link DutyJob} instances.
+	 * Loads the {@link DutyFunction} instances.
 	 * 
 	 * @param firstLastJobs
 	 *            First and last {@link ManagedFunctionContainer} instances.
 	 * @param taskDutyAssociations
-	 *            {@link TaskDutyAssociation} instances for the {@link DutyJob}
-	 *            instances.
+	 *            {@link ManagedFunctionDutyAssociation} instances for the
+	 *            {@link DutyFunction} instances.
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
 	 * @param actualWorkContainer
@@ -163,14 +165,14 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction}
 	 *            being administered.
 	 */
-	private void loadDutyJobs(ManagedFunctionContainer[] firstLastJobs, TaskDutyAssociation<?>[] taskDutyAssociations,
-			WorkMetaData<?> workMetaData, WorkContainer<?> actualWorkContainer,
-			WorkContainerProxy<?> proxyWorkContainer, ManagedFunctionContainer parallelNodeOwner,
-			ManagedFunctionMetaData<?, ?, ?> administeringTaskMetaData) {
+	private void loadDutyJobs(ManagedFunctionContainer[] firstLastJobs,
+			ManagedFunctionDutyAssociation<?>[] taskDutyAssociations, WorkMetaData<?> workMetaData,
+			WorkContainer<?> actualWorkContainer, WorkContainerProxy<?> proxyWorkContainer,
+			ManagedFunctionContainer parallelNodeOwner, ManagedFunctionMetaData<?, ?, ?> administeringTaskMetaData) {
 
 		// Load the duty jobs
 		for (int i = 0; i < taskDutyAssociations.length; i++) {
-			TaskDutyAssociation<?> taskDutyAssociation = taskDutyAssociations[i];
+			ManagedFunctionDutyAssociation<?> taskDutyAssociation = taskDutyAssociations[i];
 
 			// Obtain the associated administrator meta-data
 			AdministratorMetaData<?, ?> adminMetaData;
@@ -201,13 +203,33 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 				workContainer = (i == (taskDutyAssociations.length - 1)) ? actualWorkContainer : proxyWorkContainer;
 			}
 
+			// Obtain the administrator container
+			int adminScopeIndex = adminIndex.getIndexOfAdministratorWithinScope();
+			AdministratorContainer adminContainer;
+			switch (adminIndex.getAdministratorScope()) {
+			case WORK:
+				adminContainer = workContainer.getAdministratorContainer(adminScopeIndex);
+				break;
+
+			case THREAD:
+				adminContainer = this.threadState.getAdministratorContainer(adminScopeIndex);
+				break;
+
+			case PROCESS:
+				adminContainer = this.threadState.getProcessState().getAdministratorContainer(adminScopeIndex);
+				break;
+
+			default:
+				throw new IllegalStateException("Unknown administrator scope " + adminIndex.getAdministratorScope());
+			}
+
 			// Create and register the active duty job
-			ManagedFunctionContainer dutyJob = adminMetaData.createDutyNode(administeringTaskMetaData, workContainer,
-					this, taskDutyAssociation, parallelNodeOwner);
-			this.activeJobNodes.addEntry(dutyJob);
+			ManagedFunctionContainer dutyFunction = adminContainer.administerManagedObjects(taskDutyAssociation, this,
+					administeringTaskMetaData, workContainer);
+			this.activeFunctions.addEntry(dutyFunction);
 
 			// Load the duty job
-			this.loadJob(firstLastJobs, dutyJob);
+			this.loadJob(firstLastJobs, dutyFunction);
 		}
 	}
 
@@ -234,11 +256,11 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	@Override
-	public FunctionState managedJobNodeComplete(ManagedFunctionContainer jobNode) {
+	public FunctionState managedFunctionComplete(ManagedFunctionContainer function) {
 
-		// Remove JobNode from active JobNode listing
-		if (this.activeJobNodes.removeEntry(jobNode)) {
-			// Last active JobNode so flow is now complete
+		// Remove function from active function listing
+		if (this.activeFunctions.removeEntry(function)) {
+			// Last active function so flow is now complete
 			return this.threadState.flowComplete(this);
 		}
 

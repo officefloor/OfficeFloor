@@ -43,7 +43,7 @@ import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
+import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkContainer;
@@ -368,13 +368,13 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public TaskDutyAssociation<?>[] getPreAdministrationMetaData() {
-		return new TaskDutyAssociation[0];
+	public ManagedFunctionDutyAssociation<?>[] getPreAdministrationMetaData() {
+		return new ManagedFunctionDutyAssociation[0];
 	}
 
 	@Override
-	public TaskDutyAssociation<?>[] getPostAdministrationMetaData() {
-		return new TaskDutyAssociation[0];
+	public ManagedFunctionDutyAssociation<?>[] getPostAdministrationMetaData() {
+		return new ManagedFunctionDutyAssociation[0];
 	}
 
 	@Override

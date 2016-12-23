@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import java.util.List;
+
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
@@ -586,7 +588,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	}
 
 	@Override
-	public FunctionState createCheckReadyFunction(final ManagedObjectReadyCheck check) {
+	public FunctionState checkReady(final ManagedObjectReadyCheck check) {
 		return new ManagedObjectOperation() {
 			@Override
 			public FunctionState execute() {
@@ -626,6 +628,25 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		throw new PropagateEscalationError(
 				new FailedToSourceManagedObjectEscalation(this.metaData.getObjectType(), new IllegalStateException(
 						"ManagedObject in incorrect state " + this.containerState + " to obtain Object")));
+	}
+
+	@Override
+	public <I> FunctionState extractExtensionInterface(final ExtensionInterfaceExtractor<I> extractor,
+			final List<I> managedObjectExtensions) {
+		return new ManagedObjectOperation() {
+			@Override
+			public FunctionState execute() {
+
+				// Easy access to the container
+				ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+				I extension = extractor.extractExtensionInterface(container.managedObject, container.metaData);
+				managedObjectExtensions.add(extension);
+
+				// Nothing further to administer
+				return null;
+			}
+		};
 	}
 
 	@Override

@@ -126,16 +126,6 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	ManagedObjectContainer getManagedObjectContainer(int index);
 
 	/**
-	 * Enables checking if the {@link Governance} is active (without having to
-	 * create the {@link GovernanceContainer}).
-	 * 
-	 * @param index
-	 *            Index of the {@link GovernanceContainer}.
-	 * @return <code>true</code> if the {@link Governance} is active.
-	 */
-	boolean isGovernanceActive(int index);
-
-	/**
 	 * Obtains the {@link GovernanceContainer} for the input index.
 	 * 
 	 * @param index
@@ -146,15 +136,13 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	GovernanceContainer<?> getGovernanceContainer(int index);
 
 	/**
-	 * Creates a new {@link ManagedFunctionContainer} contained in this
-	 * {@link ThreadState} for the {@link GovernanceActivity}.
+	 * Indicates if the {@link Governance} is active.
 	 * 
-	 * @param governanceActivity
-	 *            {@link GovernanceActivity}.
-	 * @return New {@link ManagedFunctionContainer}.
+	 * @param index
+	 *            Index of the {@link Governance} to check active.
+	 * @return <code>true</code> if the {@link Governance} is active.
 	 */
-	<F extends Enum<F>> ManagedFunctionContainer createGovernanceFunction(GovernanceActivity<F> governanceActivity,
-			GovernanceMetaData<?, F> governanceMetaData);
+	boolean isGovernanceActive(int index);
 
 	/**
 	 * Obtains the {@link AdministratorContainer} for the input index.

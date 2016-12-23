@@ -60,6 +60,8 @@ public interface FunctionState {
 	 * 
 	 * @return {@link ThreadState} for this {@link FunctionState}.
 	 */
+	@Deprecated // use getFlow and have flow have handleFailure(Throwable) with
+				// execute() throws Throwable
 	ThreadState getThreadState();
 
 	/**

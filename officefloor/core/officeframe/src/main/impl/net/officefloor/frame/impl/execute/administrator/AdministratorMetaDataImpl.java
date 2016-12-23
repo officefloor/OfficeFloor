@@ -19,21 +19,16 @@ package net.officefloor.frame.impl.execute.administrator;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.duty.DutyJob;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -118,14 +113,37 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>> impl
 	}
 
 	/*
-	 * ================= AdministratorMetaData ===============================
+	 * ================= ManagedFunctionContainerMetaData =================
 	 */
 
 	@Override
 	public String getFunctionName() {
-		// TODO provide information of duty
 		return Administrator.class.getSimpleName() + "-" + this.administratorSource.getClass().getName();
 	}
+
+	@Override
+	public TeamManagement getResponsibleTeam() {
+		return this.responsibleTeam;
+	}
+
+	@Override
+	public FunctionLoop getFunctionLoop() {
+		return this.functionLoop;
+	}
+
+	@Override
+	public ManagedFunctionMetaData<?, ?, ?> getNextManagedFunctionMetaData() {
+		return null; // no next function
+	}
+
+	@Override
+	public EscalationProcedure getEscalationProcedure() {
+		return this.escalationProcedure;
+	}
+
+	/*
+	 * ================= AdministratorMetaData ============================
+	 */
 
 	@Override
 	public AdministratorContainer<I, A> createAdministratorContainer(ThreadState threadState) {
@@ -145,36 +163,6 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>> impl
 	@Override
 	public DutyMetaData getDutyMetaData(DutyKey<A> dutyKey) {
 		return this.dutyMetaData[dutyKey.getIndex()];
-	}
-
-	@Override
-	public TeamManagement getResponsibleTeam() {
-		return this.responsibleTeam;
-	}
-
-	@Override
-	public FunctionLoop getFunctionLoop() {
-		return this.functionLoop;
-	}
-
-	@Override
-	public EscalationProcedure getEscalationProcedure() {
-		return this.escalationProcedure;
-	}
-
-	@Override
-	public ManagedFunctionMetaData<?, ?, ?> getNextManagedFunctionContainerMetaData() {
-		// Never a next task for an administrator duty
-		return null;
-	}
-
-	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedFunctionContainer createDutyNode(ManagedFunctionMetaData<?, ?, ?> administeringTaskMetaData,
-			WorkContainer<?> administeringWorkContainer, Flow flow, TaskDutyAssociation<?> taskDutyAssociation,
-			ManagedFunctionContainer parallelJobNodeOwner) {
-		return new DutyJob(flow, administeringWorkContainer, this, taskDutyAssociation, parallelJobNodeOwner,
-				administeringTaskMetaData);
 	}
 
 }

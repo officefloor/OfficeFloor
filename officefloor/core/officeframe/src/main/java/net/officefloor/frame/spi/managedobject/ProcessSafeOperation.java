@@ -15,26 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.structure;
+package net.officefloor.frame.spi.managedobject;
 
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
+import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
- * Activity undertaken for {@link Governance}.
+ * {@link ProcessState} safe operation.
  *
  * @author Daniel Sagenschneider
  */
-public interface GovernanceActivity<F extends Enum<F>> {
+public interface ProcessSafeOperation<R, E extends Throwable> {
 
 	/**
-	 * Undertakes the {@link Governance} activity.
+	 * Contains the logic requiring {@link ProcessState} safety.
 	 * 
-	 * @param context
-	 *            {@link GovernanceContext}.
-	 * @return Optional {@link FunctionState} to further execute for the
-	 *         {@link GovernanceActivity}.
+	 * @return Optional return value from operation.
+	 * @throws E
+	 *             Possible {@link Throwable}.
 	 */
-	FunctionState doActivity(GovernanceContext<F> context);
+	R run() throws E;
 
 }

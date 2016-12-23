@@ -51,6 +51,19 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends ManagedFunctio
 	GovernanceContainer<I> createGovernanceContainer(ThreadState threadState);
 
 	/**
+	 * Creates the {@link ManagedFunctionContainer} for the
+	 * {@link GovernanceActivity}.
+	 * 
+	 * @param activity
+	 *            {@link GovernanceActivity}.
+	 * @param flow
+	 *            {@link Flow}.
+	 * @return {@link ManagedFunctionContainer} for the
+	 *         {@link GovernanceActivity}.
+	 */
+	ManagedFunctionContainer createGovernanceFunction(GovernanceActivity<F> activity, Flow flow);
+
+	/**
 	 * Obtains the {@link FlowMetaData} for the specified index.
 	 * 
 	 * @param flowIndex

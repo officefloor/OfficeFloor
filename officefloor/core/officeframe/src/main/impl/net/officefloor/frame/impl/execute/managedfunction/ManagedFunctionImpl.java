@@ -33,10 +33,10 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainerContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
@@ -112,17 +112,6 @@ public class ManagedFunctionImpl<W extends Work, D extends Enum<D>, F extends En
 	/*
 	 * ====================== ManagedFunction ==========================
 	 */
-
-	@Override
-	protected void loadJobName(StringBuilder message) {
-		message.append("Task ");
-		message.append(this.functionContainerMetaData.getFunctionName());
-		message.append("(");
-		message.append(this.parameter);
-		message.append(")");
-		message.append(" of Work ");
-		message.append(this.functionContainerMetaData.getWorkMetaData().getWorkName());
-	}
 
 	@Override
 	protected Object executeFunction(ManagedFunctionContainerContext context) throws Throwable {

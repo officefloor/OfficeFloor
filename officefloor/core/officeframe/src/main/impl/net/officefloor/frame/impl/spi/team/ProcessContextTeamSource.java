@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
@@ -42,11 +41,8 @@ public class ProcessContextTeamSource extends AbstractTeamSource {
 	@Override
 	public Team createTeam(TeamSourceContext context) throws Exception {
 
-		// Obtain the team identifier
-		TeamIdentifier teamIdentifier = context.getTeamIdentifier();
-
 		// Create the team
-		ProcessContextTeam team = new ProcessContextTeam(teamIdentifier);
+		ProcessContextTeam team = new ProcessContextTeam();
 
 		// Register for process context listening
 		context.registerProcessContextListener(team);

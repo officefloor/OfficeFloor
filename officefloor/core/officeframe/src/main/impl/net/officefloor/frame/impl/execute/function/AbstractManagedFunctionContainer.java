@@ -259,7 +259,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 	}
 
 	@Override
-	public final FunctionState execute() {
+	public FunctionState execute() {
 
 		// Obtain the thread and process state (as used throughout method)
 		ThreadState threadState = this.flow.getThreadState();
@@ -300,16 +300,16 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 							// Incorrect state, so correct
 							if (isGovernanceRequired) {
 								// Activate the governance
-								return governance.activateGovernance(this.flow, this.workContainer).then(this);
+								return governance.activateGovernance().then(this);
 
 							} else {
 								// De-activate the governance
 								switch (this.governanceDeactivationStrategy) {
 								case ENFORCE:
-									return governance.enforceGovernance(this.flow, this.workContainer).then(this);
+									return governance.enforceGovernance().then(this);
 
 								case DISREGARD:
-									return governance.disregardGovernance(this.flow, this.workContainer).then(this);
+									return governance.disregardGovernance().then(this);
 
 								default:
 									// Unknown de-activation strategy
@@ -789,7 +789,7 @@ public abstract class AbstractManagedFunctionContainer<W extends Work, N extends
 		}
 
 		// Clean up job node
-		FunctionState flowJob = this.flow.managedJobNodeComplete(this);
+		FunctionState flowJob = this.flow.managedFunctionComplete(this);
 		if (flowJob != null) {
 			return flowJob.then(this);
 		}

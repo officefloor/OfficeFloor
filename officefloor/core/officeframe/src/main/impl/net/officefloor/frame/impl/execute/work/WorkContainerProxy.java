@@ -18,12 +18,11 @@
 package net.officefloor.frame.impl.execute.work;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.AdministratorContext;
+import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 
@@ -69,7 +68,8 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes, ManagedFunctionContainer managedJobNode) {
+	public FunctionState loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
+			ManagedFunctionContainer managedJobNode) {
 		return this.delegate.loadManagedObjects(managedObjectIndexes, managedJobNode);
 	}
 
@@ -79,9 +79,8 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public FunctionState administerManagedObjects(TaskDutyAssociation<?> duty, AdministratorContext adminContext)
-			throws Throwable {
-		return this.administerManagedObjects(duty, adminContext);
+	public AdministratorContainer<?, ?> getAdministratorContainer(int adminIndex) {
+		return this.delegate.getAdministratorContainer(adminIndex);
 	}
 
 	@Override

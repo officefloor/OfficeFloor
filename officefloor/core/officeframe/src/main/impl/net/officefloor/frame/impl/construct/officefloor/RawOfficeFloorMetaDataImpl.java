@@ -312,7 +312,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			ManagedObjectSourceInstance mosInstance = new ManagedObjectSourceInstanceImpl(
 					rawMoMetaData.getManagedObjectSource(),
 					rawMoMetaData.getRawManagingOfficeMetaData().getManagedObjectExecuteContextFactory(),
-					rawMoMetaData.getManagedObjectPool());
+					rawMoMetaData.getManagedObjectPool(), rawMoMetaData.getEscalationResponsibleTeam());
 			mosInstances.add(mosInstance);
 		}
 

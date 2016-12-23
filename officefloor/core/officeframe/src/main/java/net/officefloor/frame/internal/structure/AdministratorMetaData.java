@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyKey;
@@ -68,24 +67,5 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> exte
 	 *         {@link DutyKey}.
 	 */
 	DutyMetaData getDutyMetaData(DutyKey<A> dutyKey);
-
-	/**
-	 * Creates the {@link ManagedFunctionContainer} for the {@link Duty}.
-	 * 
-	 * @param administeringTaskMetaData
-	 *            {@link ManagedFunctionMetaData} of the administered {@link ManagedFunction}.
-	 * @param administeringWorkContainer
-	 *            {@link WorkContainer} of the administered {@link ManagedFunction}.
-	 * @param flow
-	 *            {@link Flow}.
-	 * @param taskDutyAssociation
-	 *            {@link TaskDutyAssociation}.
-	 * @param parallelJobNodeOwner
-	 *            Paralllel {@link ManagedFunctionContainer} owner.
-	 * @return {@link ManagedFunctionContainer} for the {@link Duty}.
-	 */
-	ManagedFunctionContainer createDutyNode(ManagedFunctionMetaData<?, ?, ?> administeringTaskMetaData,
-			WorkContainer<?> administeringWorkContainer, Flow flow, TaskDutyAssociation<?> taskDutyAssociation,
-			ManagedFunctionContainer parallelJobNodeOwner);
 
 }

@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import java.util.List;
+
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -36,7 +38,7 @@ public interface ManagedObjectContainer {
 	ThreadState getResponsibleThreadState();
 
 	/**
-	 * Loads the {@link ManagedObject}.
+	 * Creates a {@link FunctionState} to load the {@link ManagedObject}.
 	 * 
 	 * @param managedJobNode
 	 *            {@link ManagedFunctionContainer} requiring the
@@ -55,16 +57,33 @@ public interface ManagedObjectContainer {
 	 * Creates a {@link FunctionState} to check if the {@link ManagedObject}
 	 * contained within this {@link ManagedObjectContainer} is ready.
 	 * <p>
-	 * Should the {@link ManagedObject} not be ready, then will latch the
-	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to
-	 * be ready.
+	 * Should the {@link ManagedObject} not be ready, then will latch to wait
+	 * for the {@link ManagedObject} to be ready.
 	 * 
 	 * @param check
 	 *            {@link ManagedObjectReadyCheck}.
 	 * @return {@link FunctionState} to check if the {@link ManagedObject}
 	 *         contained within this {@link ManagedObjectContainer} is ready.
 	 */
-	FunctionState createCheckReadyFunction(ManagedObjectReadyCheck check);
+	FunctionState checkReady(ManagedObjectReadyCheck check);
+
+	/**
+	 * <p>
+	 * Extracts the {@link ManagedObject} extension from the
+	 * {@link ManagedObject} contained in this {@link ManagedObjectContainer}.
+	 * <p>
+	 * Should the {@link ManagedObject} not be loaded, then no
+	 * {@link ManagedObject} extension will be loaded.
+	 * 
+	 * @param extractor
+	 *            {@link ExtensionInterfaceExtractor}.
+	 * @param managedObjectExtensions
+	 *            {@link List} to load the {@link ManagedObject} extension.
+	 * @return {@link FunctionState} to load the {@link ManagedObject}
+	 *         extension.
+	 */
+	<I> FunctionState extractExtensionInterface(ExtensionInterfaceExtractor<I> extractor,
+			List<I> managedObjectExtensions);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
@@ -74,7 +93,7 @@ public interface ManagedObjectContainer {
 	Object getObject();
 
 	/**
-	 * Unloads the {@link ManagedObject}.
+	 * Creates a {@link FunctionState} to unload the {@link ManagedObject}.
 	 * 
 	 * @return {@link FunctionState} to unload the {@link ManagedObject}.
 	 */

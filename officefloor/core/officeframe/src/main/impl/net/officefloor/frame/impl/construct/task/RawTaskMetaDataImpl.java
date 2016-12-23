@@ -28,14 +28,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.duty.TaskDutyAssociationImpl;
+import net.officefloor.frame.impl.execute.duty.ManagedFunctionDutyAssociationImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionImpl;
@@ -64,9 +64,9 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.ManagedObjectIndex;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.DutyKey;
@@ -152,13 +152,14 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			return null; // no task name
 		}
 
-		// Create the job name
-		String jobName = rawWorkMetaData.getWorkName() + "." + taskName;
+		// Create the function name
+		String functionName = rawWorkMetaData.getWorkName() + "." + taskName;
 
 		// Obtain the task factory
 		ManagedFunctionFactory<w, ?, ?> taskFactory = configuration.getTaskFactory();
 		if (taskFactory == null) {
-			issues.addIssue(AssetType.TASK, taskName, "No " + ManagedFunctionFactory.class.getSimpleName() + " provided");
+			issues.addIssue(AssetType.TASK, taskName,
+					"No " + ManagedFunctionFactory.class.getSimpleName() + " provided");
 			return null; // no task factory
 		}
 
@@ -269,10 +270,10 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		}
 
 		// Obtain the duties for this task
-		TaskDutyAssociation<?>[] preTaskDuties = this.createTaskDutyAssociations(
+		ManagedFunctionDutyAssociation<?>[] preTaskDuties = this.createTaskDutyAssociations(
 				configuration.getPreTaskAdministratorDutyConfiguration(), rawWorkMetaData, issues, taskName, true,
 				requiredManagedObjects);
-		TaskDutyAssociation<?>[] postTaskDuties = this.createTaskDutyAssociations(
+		ManagedFunctionDutyAssociation<?>[] postTaskDuties = this.createTaskDutyAssociations(
 				configuration.getPostTaskAdministratorDutyConfiguration(), rawWorkMetaData, issues, taskName, false,
 				requiredManagedObjects);
 
@@ -357,8 +358,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		}
 
 		// Create the task meta-data
-		ManagedFunctionMetaDataImpl<w, ?, ?> taskMetaData = new ManagedFunctionMetaDataImpl(jobName, taskName, taskFactory, differentiator,
-				parameterType, responsibleTeam, requiredManagedObjectIndexes, taskToWorkMoTranslations,
+		ManagedFunctionMetaDataImpl<w, ?, ?> taskMetaData = new ManagedFunctionMetaDataImpl(functionName, taskFactory,
+				differentiator, parameterType, responsibleTeam, requiredManagedObjectIndexes, taskToWorkMoTranslations,
 				requiredGovernance, preTaskDuties, postTaskDuties, functionLoop);
 
 		// Return the raw task meta-data
@@ -403,7 +404,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Creates the {@link TaskDutyAssociation} instances.
+	 * Creates the {@link ManagedFunctionDutyAssociation} instances.
 	 * 
 	 * @param configurations
 	 *            {@link TaskDutyConfiguration} instances.
@@ -417,15 +418,15 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 *            Mapping of the required {@link ManagedObjectIndex} instances
 	 *            by the {@link ManagedFunction} to their respective
 	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @return {@link TaskDutyAssociation} instances.
+	 * @return {@link ManagedFunctionDutyAssociation} instances.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private TaskDutyAssociation<?>[] createTaskDutyAssociations(TaskDutyConfiguration<?>[] configurations,
+	private ManagedFunctionDutyAssociation<?>[] createTaskDutyAssociations(TaskDutyConfiguration<?>[] configurations,
 			RawWorkMetaData<?> rawWorkMetaData, OfficeFloorIssues issues, String taskName, boolean isPreNotPost,
 			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects) {
 
 		// Create the listing of task duty associations
-		List<TaskDutyAssociation<?>> taskDuties = new LinkedList<TaskDutyAssociation<?>>();
+		List<ManagedFunctionDutyAssociation<?>> taskDuties = new LinkedList<ManagedFunctionDutyAssociation<?>>();
 		for (TaskDutyConfiguration<?> duty : configurations) {
 
 			// Obtain the scope administrator name
@@ -482,20 +483,20 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			}
 
 			// Create and add the task duty association
-			TaskDutyAssociation<?> taskDutyAssociation = new TaskDutyAssociationImpl(adminIndex, dutyKey);
+			ManagedFunctionDutyAssociation<?> taskDutyAssociation = new ManagedFunctionDutyAssociationImpl(adminIndex, dutyKey);
 			taskDuties.add(taskDutyAssociation);
 		}
 
 		// Return the task duty associations
-		return taskDuties.toArray(new TaskDutyAssociation[0]);
+		return taskDuties.toArray(new ManagedFunctionDutyAssociation[0]);
 	}
 
 	/**
 	 * <p>
 	 * Sorts the required {@link ManagedObjectIndex} instances for the
-	 * {@link ManagedFunction} so that dependency {@link ManagedObject} instances are
-	 * before the {@link ManagedObject} instances using them. In essence this is
-	 * a topological sort so that dependencies are first.
+	 * {@link ManagedFunction} so that dependency {@link ManagedObject}
+	 * instances are before the {@link ManagedObject} instances using them. In
+	 * essence this is a topological sort so that dependencies are first.
 	 * <p>
 	 * This is necessary for coordinating so that dependencies are coordinated
 	 * before the {@link ManagedObject} instances using them are coordinated.
@@ -676,8 +677,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			}
 
 			// Obtain the task meta-data
-			ManagedFunctionMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskNodeReference, taskLocator, issues,
-					AssetType.TASK, this.getTaskName(), "flow index " + i, false);
+			ManagedFunctionMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskNodeReference,
+					taskLocator, issues, AssetType.TASK, this.getTaskName(), "flow index " + i, false);
 			if (taskMetaData == null) {
 				continue; // no initial task for flow
 			}

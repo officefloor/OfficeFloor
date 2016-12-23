@@ -51,14 +51,25 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 			GovernanceDeactivationStrategy governanceDeactivationStrategy);
 
 	/**
+	 * Creates a new {@link ManagedFunctionContainer} contained in this
+	 * {@link Flow} for the {@link GovernanceActivity}.
+	 * 
+	 * @param governanceActivity
+	 *            {@link GovernanceActivity}.
+	 * @return New {@link ManagedFunctionContainer}.
+	 */
+	<F extends Enum<F>> ManagedFunctionContainer createGovernanceFunction(GovernanceActivity<F> governanceActivity,
+			GovernanceMetaData<?, F> governanceMetaData);
+
+	/**
 	 * Flags that the input {@link ManagedFunctionContainer} has completed.
 	 * 
-	 * @param jobNode
+	 * @param function
 	 *            {@link ManagedFunctionContainer} that has completed.
 	 * @return Optional {@link FunctionState} to handle completion of the
 	 *         {@link ManagedFunctionContainer}.
 	 */
-	FunctionState managedJobNodeComplete(ManagedFunctionContainer jobNode);
+	FunctionState managedFunctionComplete(ManagedFunctionContainer function);
 
 	/**
 	 * Obtains the {@link ThreadState} containing this {@link Flow}.

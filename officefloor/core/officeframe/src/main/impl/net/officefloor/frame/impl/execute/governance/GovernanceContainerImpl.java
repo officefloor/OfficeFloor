@@ -17,26 +17,18 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
-import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.LinkedListSet;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainerContext;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -101,9 +93,9 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 				// Easy access to container
 				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
 
-				// Create the governance in its own flow
+				// Create the governance activity in its own flow
 				Flow flow = container.threadState.createFlow();
-				return new GovernanceFunction(flow, activity);
+				return flow.createGovernanceFunction(activity, container.metaData);
 			}
 		};
 	}
@@ -111,6 +103,11 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 	/*
 	 * ==================== GovernanceContainer =========================
 	 */
+
+	@Override
+	public boolean isGovernanceActive() {
+		return (this.governance != null);
+	}
 
 	@Override
 	public RegisteredGovernance registerManagedObject(I managedObjectExtension,
@@ -167,7 +164,32 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 
 		@Override
 		public FunctionState unregisterManagedObject() {
+			return new GovernanceOperation() {
+				@Override
+				public FunctionState execute() {
 
+					// Easy access to container
+					GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
+
+					// Remove from registration
+					container.registeredGovernances.removeEntry(RegisteredGovernanceImpl.this);
+
+					// Determine if have governance
+					if (container.governance != null) {
+						return container.doGovernanceActivity(new GovernanceActivity<F>() {
+							@Override
+							public FunctionState doActivity(GovernanceContext<F> context) {
+								// TODO what to handle here
+								return new FailGovernanceOperation(new UnsupportedOperationException(
+										"TODO how to handle unregistering managed object from governance"));
+							}
+						});
+					}
+
+					// No governance, so nothing to unregister
+					return null;
+				}
+			};
 		}
 
 		/*
@@ -200,7 +222,16 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 
 			// Must activate managed object with governance
 			return container.doGovernanceActivity(new GovernanceActivity<F>() {
-
+				@Override
+				public FunctionState doActivity(GovernanceContext<F> context) {
+					try {
+						container.governance.governManagedObject(RegisteredGovernanceImpl.this.managedObjectExtension,
+								context);
+						return null;
+					} catch (Throwable ex) {
+						return new FailGovernanceOperation(ex);
+					}
+				}
 			});
 		}
 	}
@@ -209,7 +240,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 	public FunctionState activateGovernance() {
 		return this.doGovernanceActivity(new GovernanceActivity<F>() {
 			@Override
-			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
+			public FunctionState doActivity(GovernanceContext<F> context) {
 				// Easy access to container
 				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
 				try {
@@ -240,7 +271,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 	public FunctionState enforceGovernance() {
 		return this.doGovernanceActivity(new GovernanceActivity<F>() {
 			@Override
-			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
+			public FunctionState doActivity(GovernanceContext<F> context) {
 				// Easy access to container
 				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
 				try {
@@ -263,7 +294,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 	public FunctionState disregardGovernance() {
 		return this.doGovernanceActivity(new GovernanceActivity<F>() {
 			@Override
-			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
+			public FunctionState doActivity(GovernanceContext<F> context) {
 				// Easy access to container
 				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
 				try {
@@ -323,69 +354,6 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 		@Override
 		public ThreadState getThreadState() {
 			return GovernanceContainerImpl.this.threadState;
-		}
-	}
-
-	/**
-	 * {@link ManagedFunctionContainer} to undertake the
-	 * {@link GovernanceActivity}.
-	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 */
-	private class GovernanceFunction extends AbstractManagedFunctionContainer<Work, GovernanceMetaData<I, F>>
-			implements GovernanceContext<F> {
-
-		/**
-		 * {@link GovernanceActivity}.
-		 */
-		private final GovernanceActivity<F> activity;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param flow
-		 *            {@link Flow}.
-		 * @param workContainer
-		 *            {@link WorkContainer}.
-		 * @param governanceMetaData
-		 *            {@link GovernanceMetaData}.
-		 * @param activity
-		 *            {@link GovernanceActivity}.
-		 */
-		public GovernanceFunction(Flow flow, GovernanceActivity<F> activity) {
-			super(flow, new GovernanceWork(), GovernanceContainerImpl.this.metaData, null, null, null,
-					GovernanceDeactivationStrategy.DISREGARD);
-			this.activity = activity;
-		}
-
-		/*
-		 * ================ ManagedFunctionContainer =======================
-		 */
-
-		@Override
-		protected Object executeFunction(ManagedFunctionContainerContext context) throws Throwable {
-			context.next(this.activity.doActivity(this));
-			return null;
-		}
-
-		/*
-		 * ================== GovernanceContext ==========================
-		 */
-
-		@Override
-		public void doFlow(F key, Object parameter, FlowCallback callback) {
-			this.doFlow(key.ordinal(), parameter, callback);
-		}
-
-		@Override
-		public void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
-
-			// Obtain the flow meta-data
-			FlowMetaData<?> flowMetaData = this.functionContainerMetaData.getFlow(flowIndex);
-
-			// Undertake the flow
-			this.doFlow(flowMetaData, parameter, callback);
 		}
 	}
 

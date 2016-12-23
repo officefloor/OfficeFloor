@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
+import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -104,8 +104,8 @@ public class MetaDataTestInstanceFactory {
 				jobName, taskName, taskFactory, "TEST_DIFFERENTIATOR",
 				Object.class, teamManagement, teamManagement.getTeam(),
 				new ManagedObjectIndex[0], new ManagedObjectIndex[0],
-				new boolean[0], new TaskDutyAssociation<?>[0],
-				new TaskDutyAssociation<?>[0]);
+				new boolean[0], new ManagedFunctionDutyAssociation<?>[0],
+				new ManagedFunctionDutyAssociation<?>[0]);
 		metaData.loadRemainingState((WorkMetaData<W>) workMetaData,
 				new FlowMetaData<?>[0], null, new EscalationProcedureImpl());
 

@@ -33,6 +33,14 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface GovernanceContainer<I> {
 
 	/**
+	 * Indicates if {@link Governance} within this {@link GovernanceContainer}
+	 * is active.
+	 * 
+	 * @return <code>true</code> if the {@link Governance} is active.
+	 */
+	boolean isGovernanceActive();
+
+	/**
 	 * Registers the {@link ManagedObject} for {@link Governance}.
 	 * 
 	 * @param managedObjectExtension
