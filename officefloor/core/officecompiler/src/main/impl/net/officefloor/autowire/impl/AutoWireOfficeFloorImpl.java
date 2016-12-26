@@ -24,7 +24,7 @@ import net.officefloor.autowire.AutoWireManagementMBean;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.ProcessContextTeam;
 
@@ -96,7 +96,7 @@ public class AutoWireOfficeFloorImpl implements AutoWireOfficeFloor {
 		// Obtain the Task
 		Office office = this.officeFloor.getOffice(this.officeName);
 		WorkManager workManager = office.getWorkManager(workName);
-		TaskManager taskManager = workManager.getTaskManager(taskName);
+		FunctionManager taskManager = workManager.getTaskManager(taskName);
 
 		// Invoke the task
 		ProcessContextTeam.doTask(taskManager, parameter);

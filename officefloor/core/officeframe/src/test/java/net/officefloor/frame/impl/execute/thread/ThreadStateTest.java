@@ -38,7 +38,7 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainerMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
@@ -88,7 +88,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 				.createMock(AdministratorContainer.class);
 		final ThreadProfiler threadProfiler = this
 				.createMock(ThreadProfiler.class);
-		final ManagedFunctionContainerMetaData jobMetaData = this.createMock(ManagedFunctionContainerMetaData.class);
+		final ManagedFunctionLogicMetaData jobMetaData = this.createMock(ManagedFunctionLogicMetaData.class);
 
 		// Record creating the ThreadState
 		this.recordReturn(this.threadMetaData,
@@ -190,7 +190,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 */
 	public void testNotProfile() {
 
-		final ManagedFunctionContainerMetaData jobMetaData = this.createMock(ManagedFunctionContainerMetaData.class);
+		final ManagedFunctionLogicMetaData jobMetaData = this.createMock(ManagedFunctionLogicMetaData.class);
 
 		// Record creating and completing the ThreadState
 		this.record_ThreadState_init();

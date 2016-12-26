@@ -17,42 +17,46 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * Allows for a {@link FunctionState} to be run in a different {@link ThreadState}.
+ * Allows for a {@link FunctionState} to be run in a different
+ * {@link ThreadState}.
  *
  * @author Daniel Sagenschneider
  */
-public class RunInThreadStateJobNode implements FunctionState {
+public class RunInThreadStateFunctionLogic implements FunctionLogic {
 
 	/**
 	 * {@link FunctionState} to run in a different {@link ThreadState}.
 	 */
-	private final FunctionState jobNode;
+	private final FunctionState function;
 
 	/**
-	 * {@link ThreadState} to run the {@link FunctionState} within.
+	 * {@link Flow} to run the {@link FunctionState} within.
 	 */
-	private final ThreadState threadState;
+	private final Flow flow;
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param jobNode
-	 *            {@link FunctionState} to run in a different {@link ThreadState}.
+	 *            {@link FunctionState} to run in a different
+	 *            {@link ThreadState}.
 	 * @param threadState
 	 *            {@link ThreadState} to run the {@link FunctionState} within.
 	 */
-	public RunInThreadStateJobNode(FunctionState jobNode, ThreadState threadState) {
-		this.jobNode = jobNode;
-		this.threadState = threadState;
+	public RunInThreadStateFunctionLogic(FunctionState function, ThreadState threadState) {
+		this.function = function;
+		this.flow = threadState.createFlow(null);
 	}
 
 	/*
-	 * ======================== JobNode ================================
+	 * ======================== FunctionLogic ================================
 	 */
 
 	@Override
@@ -72,7 +76,7 @@ public class RunInThreadStateJobNode implements FunctionState {
 		FunctionState nextJobNode = this.jobNode.execute();
 
 		// Continue job node execution in the different thread state
-		return (nextJobNode != null) ? new RunInThreadStateJobNode(nextJobNode, this.threadState) : null;
+		return (nextJobNode != null) ? new RunInThreadStateFunctionLogic(nextJobNode, this.threadState) : null;
 	}
 
 }

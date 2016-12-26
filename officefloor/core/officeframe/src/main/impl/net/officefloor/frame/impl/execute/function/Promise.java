@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.structure;
+package net.officefloor.frame.impl.execute.function;
 
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -59,27 +60,28 @@ public class Promise {
 	 * State is passed between {@link FunctionState} instances via
 	 * {@link ManagedObject} instances, so no parameter is provided.
 	 * 
-	 * @param jobNode
+	 * @param function
 	 *            {@link FunctionState} to execute it and its sequence of
-	 *            {@link FunctionState} instances.
+	 *            {@link FunctionState} instances. May be <code>null</code>.
 	 * @param thenJobNode
 	 *            {@link FunctionState} to then continue after the first input
-	 *            {@link FunctionState} sequence completes.
+	 *            {@link FunctionState} sequence completes. May be
+	 *            <code>null</code>.
 	 * @return Next {@link FunctionState} to undertake the {@link FunctionState}
 	 *         sequence and then continue {@link FunctionState} sequence.
 	 */
-	public static FunctionState then(FunctionState jobNode, FunctionState thenJobNode) {
-		if (jobNode == null) {
-			// No initial job node, so just continue
+	public static FunctionState then(FunctionState function, FunctionState thenJobNode) {
+		if (function == null) {
+			// No initial function, so just continue
 			return thenJobNode;
 
 		} else if (thenJobNode != null) {
 			// Create continue link
-			return new ThenFunction(jobNode, thenJobNode);
+			return new ThenFunction(function, thenJobNode);
 		}
 
-		// Only the initial job node
-		return jobNode;
+		// Only the initial function
+		return function;
 	}
 
 	/**
@@ -91,17 +93,12 @@ public class Promise {
 	/**
 	 * Then {@link FunctionState}.
 	 */
-	private static class ThenFunction implements FunctionState {
+	private static class ThenFunction extends AbstractDelegateFunctionState {
 
 		/**
-		 * Delegate {@link FunctionState}.
+		 * Then {@link FunctionState}.
 		 */
-		private final FunctionState delegate;
-
-		/**
-		 * Continue {@link FunctionState}.
-		 */
-		private final FunctionState continueFunction;
+		private final FunctionState thenFunction;
 
 		/**
 		 * Creation by static methods.
@@ -110,31 +107,26 @@ public class Promise {
 		 *            Delegate {@link FunctionState} to complete it and all
 		 *            produced {@link FunctionState} instances before
 		 *            continuing.
-		 * @param continueJobNode
-		 *            Continue {@link FunctionState}.
+		 * @param thenFunction
+		 *            Then {@link FunctionState}.
 		 */
-		private ThenFunction(FunctionState delegate, FunctionState continueFunction) {
-			this.delegate = delegate;
-			this.continueFunction = continueFunction;
+		private ThenFunction(FunctionState delegate, FunctionState thenFunction) {
+			super(delegate);
+			this.thenFunction = thenFunction;
 		}
 
 		/*
-		 * =================== JobNode ==============================
+		 * =================== FunctionState ==============================
 		 */
 
 		@Override
-		public FunctionState execute() {
-			return Promise.then(this.delegate.execute(), this.continueFunction);
+		public FunctionState execute() throws Throwable {
+			return Promise.then(this.delegate.execute(), this.thenFunction);
 		}
 
 		@Override
-		public TeamManagement getResponsibleTeam() {
-			return this.delegate.getResponsibleTeam();
-		}
-
-		@Override
-		public ThreadState getThreadState() {
-			return this.delegate.getThreadState();
+		public FunctionState cancel(Throwable cause) {
+			return Promise.then(this.delegate.cancel(cause), this.thenFunction.cancel(cause));
 		}
 	}
 

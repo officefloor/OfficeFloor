@@ -17,28 +17,24 @@
  */
 package net.officefloor.frame.api.execute;
 
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionState;
-
 /**
- * Managed {@link FunctionState}.
+ * Managed function.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunction<W extends Work, D extends Enum<D>, F extends Enum<F>> {
+public interface ManagedFunction<O extends Enum<O>, F extends Enum<F>> {
 
 	/**
-	 * Executes the {@link FunctionState}.
+	 * Executes the function.
 	 * 
 	 * @param context
 	 *            {@link ManagedFunctionContext} for the
 	 *            {@link ManagedFunction}.
 	 * @return Parameter for the next {@link ManagedFunction}. This allows
-	 *         stringing {@link ManagedFunction} instances together into a
-	 *         {@link Flow}.
+	 *         stringing {@link ManagedFunction} instances together.
 	 * @throws Throwable
 	 *             Indicating failure of the {@link ManagedFunction}.
 	 */
-	Object execute(ManagedFunctionContext<W, D, F> context) throws Throwable;
+	Object execute(ManagedFunctionContext<O, F> context) throws Throwable;
 
 }

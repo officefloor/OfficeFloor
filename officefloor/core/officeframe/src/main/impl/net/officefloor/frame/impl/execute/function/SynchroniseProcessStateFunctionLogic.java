@@ -17,42 +17,19 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * {@link FunctionState} to synchronise the {@link ProcessState} with the current
- * {@link ThreadState}.
+ * {@link FunctionState} to synchronise the {@link ProcessState} with the
+ * current {@link ThreadState}.
  *
  * @author Daniel Sagenschneider
  */
-public class SynchroniseProcessStateJobNode implements FunctionState {
-
-	/**
-	 * Current {@link ThreadState}.
-	 */
-	private ThreadState currentThreadState;
-
-	/**
-	 * Instantiate.
-	 * 
-	 * @param currentThreadState
-	 *            Current {@link ThreadState} to have the {@link ProcessState}
-	 *            synchronised into it.
-	 */
-	public SynchroniseProcessStateJobNode(ThreadState currentThreadState) {
-		this.currentThreadState = currentThreadState;
-	}
-
-	/*
-	 * ======================== JobNode =================================
-	 */
-
-	@Override
-	public ThreadState getThreadState() {
-		return this.currentThreadState;
-	}
+public class SynchroniseProcessStateFunctionLogic implements FunctionLogic {
 
 	@Override
 	public boolean isRequireThreadStateSafety() {
@@ -61,10 +38,10 @@ public class SynchroniseProcessStateJobNode implements FunctionState {
 	}
 
 	@Override
-	public FunctionState execute() {
+	public FunctionState execute(Flow flow) {
 
 		// Synchronise process state (always undertaken via main thread state)
-		synchronized (this.currentThreadState.getProcessState().getMainThreadState()) {
+		synchronized (flow.getThreadState().getProcessState().getMainThreadState()) {
 		}
 
 		// Synchronized

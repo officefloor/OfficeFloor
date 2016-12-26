@@ -18,12 +18,12 @@
 package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
- * Tests the {@link AbstractManagedFunctionContainer} invoking asynchronous {@link Flow}
+ * Tests the {@link ManagedFunctionContainerImpl} invoking asynchronous {@link Flow}
  * instances.
  * 
  * @author Daniel Sagenschneider

@@ -17,23 +17,23 @@
  */
 package net.officefloor.frame.impl.execute.thread;
 
-import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.impl.execute.function.FlowImpl;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowCallbackFactory;
+import net.officefloor.frame.internal.structure.FlowCompletion;
+import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.LinkedListSet;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainerMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
@@ -57,7 +57,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * Active {@link ThreadState}.
 	 */
-	public static class ActiveThreadState {
+	private static class ActiveThreadState {
 
 		/**
 		 * {@link ThreadState}.
@@ -71,6 +71,13 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		public final boolean isThreadStateSafe;
 
 		/**
+		 * Previous {@link ActiveThreadState}. This enables
+		 * {@link FunctionLogic} to be executed within the context of another
+		 * {@link FunctionLogic}.
+		 */
+		private final ActiveThreadState previousActiveThreadState;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param threadState
@@ -79,21 +86,37 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 *            Flag indicating if the {@link ThreadState} is safe on the
 		 *            current {@link Thread}.
 		 */
-		public ActiveThreadState(ThreadState threadState, boolean isThreadStateSafe) {
+		public ActiveThreadState(ThreadState threadState, boolean isThreadStateSafe,
+				ActiveThreadState previousActiveThreadState) {
 			this.threadState = threadState;
 			this.isThreadStateSafe = isThreadStateSafe;
+			this.previousActiveThreadState = previousActiveThreadState;
 		}
 	}
 
 	/**
-	 * Obtains the active {@link ThreadState} on the current {@link Thread}.
+	 * Attaches the {@link ThreadState} to the {@link Thread}.
 	 * 
-	 * @return Active {@link ThreadState} on the current {@link Thread}. May be
-	 *         <code>null</code> if no active {@link ThreadState} on
-	 *         {@link Thread}.
+	 * @param threadState
+	 *            {@link ThreadState} to attached to the {@link Thread}.
+	 * @param isThreadStateSafe
+	 *            Indicates if the execution is {@link ThreadState} safe.
 	 */
-	public static ActiveThreadState getActiveThreadState() {
-		return activeThreadState.get();
+	public static void attachThreadStateToThread(ThreadState threadState, boolean isThreadStateSafe) {
+		ActiveThreadState previous = activeThreadState.get();
+		activeThreadState.set(new ActiveThreadState(threadState, isThreadStateSafe, previous));
+	}
+
+	/**
+	 * Detaches the {@link ThreadState} from the {@link Thread}.
+	 */
+	public static void detachThreadStateFromThread() {
+		ActiveThreadState active = activeThreadState.get();
+		if (active == null) {
+			throw new IllegalStateException(
+					"No " + ThreadState.class.getSimpleName() + " attached to " + Thread.class.getSimpleName());
+		}
+		activeThreadState.set(active.previousActiveThreadState);
 	}
 
 	/**
@@ -124,7 +147,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * {@link AdministratorContainer} instances for this {@link ThreadState}.
 	 */
-	private final AdministratorContainer<?, ?>[] administratorContainers;
+	private final AdministratorContainer<?>[] administratorContainers;
 
 	/**
 	 * {@link ProcessState} for this {@link ThreadState}.
@@ -137,29 +160,14 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private final AssetManager assetManager;
 
 	/**
-	 * {@link FlowCallbackFactory}.
+	 * {@link FlowCompletion}.
 	 */
-	private final FlowCallbackFactory callbackFactory;
+	private final FlowCompletion completion;
 
 	/**
 	 * {@link ThreadProfiler}.
 	 */
 	private final ThreadProfiler profiler;
-
-	/**
-	 * Flag indicating that looking for {@link EscalationFlow}.
-	 */
-	private boolean isEscalating = false;
-
-	/**
-	 * Failure of the {@link ThreadState}.
-	 */
-	private Throwable failure = null;
-
-	/**
-	 * {@link EscalationLevel} for this {@link ThreadState}.
-	 */
-	private EscalationLevel escalationLevel = EscalationLevel.FLOW;
 
 	/**
 	 * Initiate.
@@ -168,21 +176,19 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 *            {@link ThreadMetaData} for this {@link ThreadState}.
 	 * @param assetManager
 	 *            {@link AssetManager} for this {@link ThreadState}.
-	 * @param callbackFactory
-	 *            {@link FlowCallbackFactory} to create the {@link FlowCallback}
-	 *            on completion of this {@link ThreadState}. May be
-	 *            <code>null</code>.
+	 * @param completion
+	 *            {@link FlowCompletion} for this {@link ThreadState}.
 	 * @param processState
 	 *            {@link ProcessState} for this {@link ThreadState}.
 	 * @param processProfiler
 	 *            {@link ProcessProfiler}. May be <code>null</code>.
 	 */
-	public ThreadStateImpl(ThreadMetaData threadMetaData, AssetManager assetManager,
-			FlowCallbackFactory callbackFactory, ProcessState processState, ProcessProfiler processProfiler) {
+	public ThreadStateImpl(ThreadMetaData threadMetaData, AssetManager assetManager, FlowCompletion completion,
+			ProcessState processState, ProcessProfiler processProfiler) {
 		this.threadMetaData = threadMetaData;
 		this.processState = processState;
 		this.assetManager = assetManager;
-		this.callbackFactory = callbackFactory;
+		this.completion = completion;
 
 		// Create array to reference the managed objects
 		ManagedObjectMetaData<?>[] moMetaData = this.threadMetaData.getManagedObjectMetaData();
@@ -214,11 +220,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 */
 
 	@Override
-	public void attachThreadStateToThread(boolean isThreadStateSafe) {
-		activeThreadState.set(new ActiveThreadState(this, isThreadStateSafe));
-	}
-
-	@Override
 	public boolean isAttachedToThread() {
 		ActiveThreadState active = activeThreadState.get();
 		return (active != null) && (active.threadState == this);
@@ -231,30 +232,15 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public void detachThreadStateFromThread() {
-		activeThreadState.set(null);
-	}
-
-	@Override
 	public ThreadMetaData getThreadMetaData() {
 		return this.threadMetaData;
 	}
 
 	@Override
-	public Throwable getFailure() {
-		return this.failure;
-	}
-
-	@Override
-	public void setFailure(Throwable cause) {
-		this.failure = cause;
-	}
-
-	@Override
-	public Flow createFlow() {
+	public Flow createFlow(FlowCompletion completion) {
 
 		// Create and register the activate flow
-		Flow flow = new FlowImpl(this);
+		Flow flow = new FlowImpl(completion, this);
 		this.activeFlows.addEntry(flow);
 
 		// Return the flow
@@ -262,17 +248,89 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public FunctionState flowComplete(Flow flow) {
+	public FunctionState handleEscalation(Throwable escalation) {
 
-		// Remove Job Sequence from active Job Sequence listing
-		if (this.activeFlows.removeEntry(flow)) {
+		// Clean up functions
+		FunctionState cleanUpFunctions = null;
 
-			// Do nothing if searching for escalation
-			if (this.isEscalating) {
-				return null;
+		// Deactivate any active governance
+		for (int i = 0; i < this.governanceContainers.length; i++) {
+			GovernanceContainer<?> container = this.governanceContainers[i];
+			if ((container != null) && (container.isGovernanceActive())) {
+				cleanUpFunctions = Promise.then(cleanUpFunctions, container.disregardGovernance());
+			}
+		}
+
+		// Cancel all flows
+		Flow flow = this.activeFlows.purgeEntries();
+		while (flow != null) {
+			cleanUpFunctions = Promise.then(cleanUpFunctions, flow.cancel(escalation));
+			flow = flow.getNext();
+		}
+
+		// Unload managed objects (some may not have been used)
+		for (int i = 0; i < this.managedObjectContainers.length; i++) {
+			ManagedObjectContainer container = this.managedObjectContainers[i];
+			if (container != null) {
+				cleanUpFunctions = Promise.then(cleanUpFunctions, container.unloadManagedObject());
+			}
+		}
+
+		// Determine if handle by completion
+		if (this.completion != null) {
+			EscalationFlow escalationFlow = this.completion.getFlowEscalationProcedure().getEscalation(escalation);
+			if (escalationFlow != null) {
+				// Undertake escalation (that escalates to main thread)
+				return Promise.then(cleanUpFunctions, this.processState
+						.spawnThreadState(escalationFlow.getManagedFunctionMetaData(), escalation, null));
 			}
 
-			// Deactivate governance
+		}
+
+		// Not handled by completion so handle by thread escalation procedures
+		// Determine if require a global escalation
+		if (escalationNode == null) {
+			// No escalation, so use global escalation
+			EscalationFlow globalEscalation = null;
+			switch (threadState.getEscalationLevel()) {
+			case OFFICE:
+				// Tried office, now at invocation
+				globalEscalation = processState.getInvocationEscalation();
+				if (globalEscalation != null) {
+					threadState.setEscalationLevel(EscalationLevel.INVOCATION_HANDLER);
+					break;
+				}
+
+			case OFFICE_FLOOR:
+				// Should not be escalating at office floor.
+				// Allow stderr failure to pick up issue.
+				throw escalationCause;
+
+			default:
+				throw new IllegalStateException("Should not be in state " + threadState.getEscalationLevel());
+			}
+
+			// Create the global escalation
+			escalationNode = this.createEscalationFunction(globalEscalation.getManagedFunctionMetaData(),
+					escalationCause, null);
+		}
+
+		// Activate escalation node
+		return escalationNode;
+	}
+
+	@Override
+	public FunctionState flowComplete(Flow flow) {
+
+		// Clean up functions
+		FunctionState cleanUpFunctions = null;
+
+		// Remove flow from active flow listing
+		if (this.activeFlows.removeEntry(flow)) {
+
+			// Last flow, so thread state is now complete
+
+			// Deactivate any active governance
 			GovernanceDeactivationStrategy deactivationStrategy = this.threadMetaData
 					.getGovernanceDeactivationStrategy();
 			switch (deactivationStrategy) {
@@ -280,11 +338,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				// Enforce any active governance
 				for (int i = 0; i < this.governanceContainers.length; i++) {
 					GovernanceContainer<?> container = this.governanceContainers[i];
-					if (container != null) {
-						FunctionState enforceJobNode = container.enforceGovernance();
-						if (enforceJobNode != null) {
-							return enforceJobNode;
-						}
+					if ((container != null) && (container.isGovernanceActive())) {
+						cleanUpFunctions = Promise.then(cleanUpFunctions, container.enforceGovernance());
 					}
 				}
 				break;
@@ -293,11 +348,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				// Disregard any active governance
 				for (int i = 0; i < this.governanceContainers.length; i++) {
 					GovernanceContainer<?> container = this.governanceContainers[i];
-					if (container != null) {
-						FunctionState disregardJobNode = container.disregardGovernance();
-						if (disregardJobNode != null) {
-							return disregardJobNode;
-						}
+					if ((container != null) && (container.isGovernanceActive())) {
+						cleanUpFunctions = Promise.then(cleanUpFunctions, container.disregardGovernance());
 					}
 				}
 				break;
@@ -311,20 +363,17 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			for (int i = 0; i < this.managedObjectContainers.length; i++) {
 				ManagedObjectContainer container = this.managedObjectContainers[i];
 				if (container != null) {
-					FunctionState unloadJobNode = container.unloadManagedObject();
-					if (unloadJobNode != null) {
-						return unloadJobNode;
-					}
+					cleanUpFunctions = Promise.then(cleanUpFunctions, container.unloadManagedObject());
 				}
 			}
 
-			// Activate all jobs waiting on this thread permanently
-			if (this.callbackFactory != null) {
-				return this.callbackFactory.createFunction(null);
+			// Notify completion of thread state
+			if (this.completion != null) {
+				cleanUpFunctions = Promise.then(cleanUpFunctions, this.completion.getFlowCompletionFunction());
 			}
 
 			// Thread complete
-			return this.processState.threadComplete(this);
+			return Promise.then(cleanUpFunctions, this.processState.threadComplete(this));
 		}
 
 		// Thread complete
@@ -365,9 +414,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
+	public AdministratorContainer<?> getAdministratorContainer(int index) {
 		// Lazy load the Administrator Container
-		AdministratorContainer<?, ?> container = this.administratorContainers[index];
+		AdministratorContainer<?> container = this.administratorContainers[index];
 		if (container == null) {
 			container = this.threadMetaData.getAdministratorMetaData()[index].createAdministratorContainer(this);
 			this.administratorContainers[index] = container;
@@ -376,27 +425,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public void escalationStart(FunctionState currentTaskNode) {
-		this.isEscalating = true;
-	}
-
-	@Override
-	public void escalationComplete(FunctionState currentTaskNode) {
-		this.isEscalating = false;
-	}
-
-	@Override
-	public EscalationLevel getEscalationLevel() {
-		return this.escalationLevel;
-	}
-
-	@Override
-	public void setEscalationLevel(EscalationLevel escalationLevel) {
-		this.escalationLevel = escalationLevel;
-	}
-
-	@Override
-	public void profile(ManagedFunctionContainerMetaData jobMetaData) {
+	public void profile(ManagedFunctionLogicMetaData jobMetaData) {
 
 		// Only profile if have profiler
 		if (this.profiler == null) {

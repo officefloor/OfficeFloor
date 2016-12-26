@@ -15,41 +15,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.escalate;
+package net.officefloor.frame.api.manage;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * {@link Escalation} of a {@link Flow} not completing in the timeout of a
- * {@link ManagedFunction} joining to it.
+ * Indicates an unknown {@link ManagedFunction} was requested.
  * 
  * @author Daniel Sagenschneider
  */
-public class FlowJoinTimedOutEscalation extends Escalation {
+public class UnknownFunctionException extends Exception {
 
 	/**
-	 * Token provided to the join on the {@link Flow}.
+	 * Name of the unknown {@link ManagedFunction}.
 	 */
-	private final Object token;
+	private final String unknownFunctionName;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param token
-	 *            Token provided to the join on the {@link Flow}.
+	 * @param unknownFunctionName
+	 *            Name of the unknown {@link ManagedFunction}.
 	 */
-	public FlowJoinTimedOutEscalation(Object token) {
-		this.token = token;
+	public UnknownFunctionException(String unknownFunctionName) {
+		super("Unknown Function '" + unknownFunctionName + "'");
+		this.unknownFunctionName = unknownFunctionName;
 	}
 
 	/**
-	 * Obtains the token provided to the join on the {@link Flow}.
+	 * Obtains the name of the unknown {@link ManagedFunction}.
 	 * 
-	 * @return Token provided to the join on the {@link Flow}.
+	 * @return Name of the unknown {@link ManagedFunction}.
 	 */
-	public Object getToken() {
-		return this.token;
+	public String getUnknownFunctionName() {
+		return this.unknownFunctionName;
 	}
 
 }

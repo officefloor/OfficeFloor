@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.office;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -28,11 +28,11 @@ import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 
 /**
- * {@link TaskManager} implementation.
+ * {@link FunctionManager} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskManagerImpl implements TaskManager {
+public class TaskManagerImpl implements FunctionManager {
 
 	/**
 	 * {@link ManagedFunctionMetaData}.
@@ -45,7 +45,7 @@ public class TaskManagerImpl implements TaskManager {
 	private final OfficeMetaData officeMetaData;
 
 	/**
-	 * {@link FlowMetaData} for this {@link TaskManager}.
+	 * {@link FlowMetaData} for this {@link FunctionManager}.
 	 */
 	private final FlowMetaData<?> flowMetaData = new TaskManagerFlowMetaData();
 
@@ -77,7 +77,7 @@ public class TaskManagerImpl implements TaskManager {
 	}
 
 	@Override
-	public void invokeTask(Object parameter, ProcessCompletionListener completionListener)
+	public void invokeFunction(Object parameter, ProcessCompletionListener completionListener)
 			throws InvalidParameterTypeException {
 		// Invoke the process for the task
 		OfficeMetaDataImpl.invokeProcess(this.officeMetaData, this.flowMetaData, parameter, completionListener);
@@ -85,7 +85,7 @@ public class TaskManagerImpl implements TaskManager {
 
 	/**
 	 * {@link FlowMetaData} for invoking a {@link ManagedFunction} by this
-	 * {@link TaskManager}.
+	 * {@link FunctionManager}.
 	 */
 	@SuppressWarnings("rawtypes")
 	private class TaskManagerFlowMetaData implements FlowMetaData {

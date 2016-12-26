@@ -23,7 +23,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBui
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
@@ -75,7 +75,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 		task.addEscalation(HttpRequestTokeniseException.class);
 		task.addEscalation(IOException.class);
 		task.addEscalation(UnknownWorkException.class);
-		task.addEscalation(UnknownTaskException.class);
+		task.addEscalation(UnknownFunctionException.class);
 		task.addEscalation(InvalidParameterTypeException.class);
 
 		// Validate the expected type

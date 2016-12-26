@@ -19,10 +19,9 @@ package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
-import net.officefloor.frame.impl.execute.thread.ThreadStateImpl.ActiveThreadState;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -100,51 +99,48 @@ public class FunctionLoopImpl implements FunctionLoop {
 	private FunctionState executeThreadStateJobNodeLoop(FunctionState headFunction, boolean isThreadStateSafe,
 			TeamIdentifier currentTeam) {
 
-		// Obtain existing active thread state
-		ActiveThreadState existingThreadState = ThreadStateImpl.getActiveThreadState();
-
 		// Obtain the thread state for loop
-		ThreadState threadState = headFunction.getThreadState();
+		ThreadState threadState = headFunction.getFlow().getThreadState();
 		try {
 			// Attach thread state to thread
-			threadState.attachThreadStateToThread(isThreadStateSafe);
+			ThreadStateImpl.attachThreadStateToThread(threadState, isThreadStateSafe);
 
 			// Run function loop for the current thread state and team
 			FunctionState nextFunction = headFunction;
 			do {
+				try {
+					// Ensure appropriate thread state
+					if (nextFunction.getFlow().getThreadState() != this) {
+						// Other thread state to undertake function loop
+						return nextFunction;
+					}
 
-				// Ensure appropriate thread state
-				if (nextFunction.getThreadState() != this) {
-					// Other thread state to undertake function loop
-					return nextFunction;
+					// Ensure appropriate team undertakes the function
+					TeamManagement responsible = nextFunction.getResponsibleTeam();
+					if ((responsible != null) && (currentTeam != responsible.getIdentifier())) {
+						// Different responsible team
+						return nextFunction;
+					}
+
+					// Ensure providing appropriate thread state safety
+					if ((!isThreadStateSafe) && (nextFunction.isRequireThreadStateSafety())) {
+						// Exit loop to obtain thread state safety
+						return nextFunction;
+					}
+
+					// Required team, thread state and safety, so execute
+					nextFunction = nextFunction.execute();
+
+				} catch (Throwable ex) {
+					// Handle failure
+					nextFunction = nextFunction.handleEscalation(ex);
 				}
-
-				// Ensure appropriate team undertakes the function
-				TeamManagement responsible = nextFunction.getResponsibleTeam();
-				if ((responsible != null) && (currentTeam != responsible.getIdentifier())) {
-					// Different responsible team
-					return nextFunction;
-				}
-
-				// Ensure providing appropriate thread state safety
-				if ((!isThreadStateSafe) && (nextFunction.isRequireThreadStateSafety())) {
-					// Exit loop to obtain thread state safety
-					return nextFunction;
-				}
-
-				// Required team, thread state and safety, so execute
-				nextFunction = nextFunction.execute();
 
 			} while (nextFunction != null);
 
 		} finally {
 			// Detach thread state from the thread
-			threadState.detachThreadStateFromThread();
-
-			// Re-attach possible previous thread state
-			if (existingThreadState != null) {
-				existingThreadState.threadState.attachThreadStateToThread(existingThreadState.isThreadStateSafe);
-			}
+			ThreadStateImpl.detachThreadStateFromThread();
 		}
 
 		// No further functions to execute
@@ -203,7 +199,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 				boolean isRequireThreadStateSafety) {
 			if (isRequireThreadStateSafety) {
 				// Execute loop with thread state safety
-				synchronized (headFunction.getThreadState()) {
+				synchronized (headFunction.getFlow().getThreadState()) {
 					return FunctionLoopImpl.this.executeThreadStateJobNodeLoop(headFunction, true, this.currentTeam);
 				}
 			} else {
@@ -225,7 +221,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 		protected void assignFunction(FunctionState function, TeamManagement responsibleTeam) {
 
 			// First assigning, so must synchronise thread state
-			synchronized (function.getThreadState()) {
+			synchronized (function.getFlow().getThreadState()) {
 			}
 
 			// Assign the function to the responsible team
@@ -238,7 +234,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 
 		@Override
 		public Object getProcessIdentifier() {
-			return this.initialFunction.getThreadState().getProcessState().getProcessIdentifier();
+			return this.initialFunction.getFlow().getThreadState().getProcessState().getProcessIdentifier();
 		}
 
 		@Override
@@ -260,6 +256,25 @@ public class FunctionLoopImpl implements FunctionLoop {
 				nextFunction = this.doThreadStateFunctionLoop(nextFunction, nextFunction.isRequireThreadStateSafety());
 
 			} while (nextFunction != null);
+		}
+
+		@Override
+		public void cancel(Throwable cause) {
+
+			// Cancel the job
+			FunctionState thenFunction;
+			try {
+				// Handle cancellation of the job
+				thenFunction = this.initialFunction.cancel(cause);
+
+			} catch (Throwable escalation) {
+				thenFunction = this.initialFunction.handleEscalation(escalation);
+			}
+
+			// Undertake canceling of the job
+			if (thenFunction != null) {
+				new SafeLoop(thenFunction, this.currentTeam).run();
+			}
 		}
 	}
 

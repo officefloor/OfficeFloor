@@ -25,29 +25,30 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // obtain directly from Office
 public interface WorkManager {
 
 	/**
 	 * <p>
-	 * Obtains the names of the {@link TaskManager} instances managed by this
+	 * Obtains the names of the {@link FunctionManager} instances managed by this
 	 * {@link WorkManager}.
 	 * <p>
 	 * This allows to dynamically manage this {@link WorkManager}.
 	 * 
-	 * @return Names of the {@link TaskManager} instances managed by this
+	 * @return Names of the {@link FunctionManager} instances managed by this
 	 *         {@link WorkManager}.
 	 */
 	String[] getTaskNames();
 
 	/**
-	 * Obtains the {@link TaskManager} for the named {@link ManagedFunction}.
+	 * Obtains the {@link FunctionManager} for the named {@link ManagedFunction}.
 	 * 
 	 * @param taskName
 	 *            Name of the {@link ManagedFunction}.
-	 * @return {@link TaskManager} for the named {@link ManagedFunction}.
-	 * @throws UnknownTaskException
+	 * @return {@link FunctionManager} for the named {@link ManagedFunction}.
+	 * @throws UnknownFunctionException
 	 *             If unknown {@link ManagedFunction} name.
 	 */
-	TaskManager getTaskManager(String taskName) throws UnknownTaskException;
+	FunctionManager getTaskManager(String taskName) throws UnknownFunctionException;
 
 }

@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.managedobject;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
@@ -33,7 +34,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.Promise;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;

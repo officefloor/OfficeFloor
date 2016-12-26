@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.impl.execute.function.FailThreadStateJobNode;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
@@ -27,7 +28,6 @@ import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.OfficeClock;
-import net.officefloor.frame.internal.structure.Promise;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**

@@ -29,7 +29,7 @@ import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
-import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
@@ -66,7 +66,7 @@ import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Abstract functionality to test execution of {@link AbstractManagedFunctionContainer}.
+ * Abstract functionality to test execution of {@link ManagedFunctionContainerImpl}.
  * 
  * @author Daniel Sagenschneider
  */

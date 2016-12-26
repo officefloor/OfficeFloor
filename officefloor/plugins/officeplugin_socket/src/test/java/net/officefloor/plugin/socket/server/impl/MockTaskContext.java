@@ -24,7 +24,7 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 
 /**
@@ -83,7 +83,7 @@ public class MockTaskContext implements ManagedFunctionContext<Work, None, None>
 
 	@Override
 	public void doFlow(String workName, String taskName, Object parameter)
-			throws UnknownWorkException, UnknownTaskException,
+			throws UnknownWorkException, UnknownFunctionException,
 			InvalidParameterTypeException {
 		TestCase.fail("Should not be invoked");
 	}

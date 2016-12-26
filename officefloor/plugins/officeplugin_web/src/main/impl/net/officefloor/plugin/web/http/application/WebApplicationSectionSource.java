@@ -33,7 +33,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.socket.server.http.HttpRequest;
@@ -178,7 +178,7 @@ public class WebApplicationSectionSource extends AbstractSectionSource {
 		linkEscalation(routeTask, IOException.class, designer, escalations);
 		linkEscalation(routeTask, UnknownWorkException.class, designer,
 				escalations);
-		linkEscalation(routeTask, UnknownTaskException.class, designer,
+		linkEscalation(routeTask, UnknownFunctionException.class, designer,
 				escalations);
 		linkEscalation(routeTask, InvalidParameterTypeException.class,
 				designer, escalations);

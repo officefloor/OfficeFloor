@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceMetaData<I, F extends Enum<F>> extends ManagedFunctionContainerMetaData {
+public interface GovernanceMetaData<I, F extends Enum<F>> extends ManagedFunctionLogicMetaData {
 
 	/**
 	 * Obtains the name of the {@link Governance}.

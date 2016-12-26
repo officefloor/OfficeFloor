@@ -26,8 +26,8 @@ import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuild
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.TaskManager;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 import net.officefloor.plugin.web.http.application.HttpRequestState;
@@ -46,7 +46,7 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniseException;
  * <p>
  * Configuration of what to secure is determined by
  * {@link HttpUrlContinuationDifferentiator} on the {@link Office}
- * {@link TaskManager} instances.
+ * {@link FunctionManager} instances.
  * 
  * @author Daniel Sagenschneider
  */
@@ -92,7 +92,7 @@ public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 		task.addEscalation(HttpRequestTokeniseException.class);
 		task.addEscalation(IOException.class);
 		task.addEscalation(UnknownWorkException.class);
-		task.addEscalation(UnknownTaskException.class);
+		task.addEscalation(UnknownFunctionException.class);
 		task.addEscalation(InvalidParameterTypeException.class);
 	}
 

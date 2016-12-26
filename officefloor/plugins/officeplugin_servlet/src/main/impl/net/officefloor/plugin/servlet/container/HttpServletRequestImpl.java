@@ -56,7 +56,7 @@ import javax.servlet.http.Part;
 
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.plugin.servlet.security.HttpServletSecurity;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -347,7 +347,7 @@ public class HttpServletRequestImpl implements HttpServletRequest,
 
 		} catch (UnknownWorkException ex) {
 			throw new ServletException(ex);
-		} catch (UnknownTaskException ex) {
+		} catch (UnknownFunctionException ex) {
 			throw new ServletException(ex);
 		} catch (InvalidParameterTypeException ex) {
 			throw new ServletException(ex);

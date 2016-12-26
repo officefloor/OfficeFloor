@@ -18,25 +18,38 @@
 package net.officefloor.frame.internal.structure;
 
 /**
- * Managed {@link FunctionState}.
+ * Container of {@link ManagedFunctionLogic}.
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionContainer extends FunctionState, LinkedListSetEntry<ManagedFunctionContainer, Flow> {
+public interface ManagedFunctionContainer extends FunctionState {
 
 	/**
-	 * Obtains the {@link Flow} that this {@link ManagedFunctionContainer} is within.
+	 * Specifies a {@link ManagedFunctionContainer} to be sequentially executed
+	 * after this {@link ManagedFunctionContainer}.
 	 * 
-	 * @return {@link Flow} that this {@link ManagedFunctionContainer} is within.
+	 * @param container
+	 *            {@link ManagedFunctionContainer} to be sequentially executed
+	 *            after this {@link ManagedFunctionContainer}.
 	 */
-	Flow getFlow();
+	void setNextManagedFunctionContainer(ManagedFunctionContainer container);
 
 	/**
-	 * Enables specify the next sequential {@link ManagedFunctionContainer}.
+	 * Obtains the {@link ManagedObjectContainer}.
 	 * 
-	 * @param nextFunction
-	 *            Next sequential {@link ManagedFunctionContainer}.
+	 * @param index
+	 *            Index of the {@link ManagedFunctionContainer}.
+	 * @return {@link ManagedObjectContainer}.
 	 */
-	void setNextManagedFunction(ManagedFunctionContainer nextFunction);
+	ManagedObjectContainer getManagedObjectContainer(int index);
+
+	/**
+	 * Obtains the {@link AdministratorContainer}.
+	 * 
+	 * @param adminIndex
+	 *            Index of the {@link AdministratorContainer}.
+	 * @return {@link AdministratorContainer}.
+	 */
+	AdministratorContainer<?> getAdministratorContainer(int adminIndex);
 
 }

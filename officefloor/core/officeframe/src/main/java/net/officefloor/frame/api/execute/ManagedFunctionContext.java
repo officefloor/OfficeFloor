@@ -20,19 +20,16 @@ package net.officefloor.frame.api.execute;
 import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.UnknownTaskException;
-import net.officefloor.frame.api.manage.UnknownWorkException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Context in which the {@link ManagedFunction} is done.
  * 
- * @param W
- *            Specific {@link Work}.
- * @param D
- *            Type providing the keys for the dependencies. Dependencies may
- *            either be:
+ * @param O
+ *            Type providing the keys for the dependency {@link ManagedObject}
+ *            instances. Dependencies may either be:
  *            <ol>
  *            <li>{@link Object} of a {@link ManagedObject}</li>
  *            <li>Parameter for the {@link ManagedFunction}</li>
@@ -43,15 +40,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionContext<W extends Work, D extends Enum<D>, F extends Enum<F>> {
-
-	/**
-	 * Obtains the {@link Work} of the {@link ManagedFunction}.
-	 * 
-	 * @return {@link Work} of the {@link ManagedFunction}.
-	 */
-	@Deprecated // state to be obtained from managed object
-	W getWork();
+public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the dependency object.
@@ -60,7 +49,7 @@ public interface ManagedFunctionContext<W extends Work, D extends Enum<D>, F ext
 	 *            Key identifying the dependency.
 	 * @return Dependency object.
 	 */
-	Object getObject(D key);
+	Object getObject(O key);
 
 	/**
 	 * <p>
@@ -119,31 +108,24 @@ public interface ManagedFunctionContext<W extends Work, D extends Enum<D>, F ext
 	 * provides the similar functionality as per reflection - powerful yet
 	 * compile unsafe.
 	 * <p>
-	 * The {@link Work} and {@link ManagedFunction} reflective meta-data may be
-	 * obtained from the {@link Office} made available via the
-	 * {@link OfficeAwareWorkFactory}.
+	 * The {@link ManagedFunction} reflective meta-data may be obtained from the
+	 * {@link Office} made available via the {@link OfficeAwareWorkFactory}.
 	 * 
-	 * @param workName
-	 *            Name of {@link Work} containing the {@link ManagedFunction}.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of {@link ManagedFunction} within the {@link Work}.
 	 * @param parameter
 	 *            Parameter to the task. May be <code>null</code>.
 	 * @param callback
 	 *            Optional {@link FlowCallback} that is invoked on completion of
 	 *            the {@link Flow}.
-	 * @throws UnknownWorkException
-	 *             Should no {@link Work} be known by the name.
-	 * @throws UnknownTaskException
-	 *             Should no {@link ManagedFunction} by the name be contained
-	 *             under the {@link Work}.
+	 * @throws UnknownFunctionException
+	 *             Should no {@link ManagedFunction} be in the {@link Office} by
+	 *             the name.
 	 * @throws InvalidParameterTypeException
 	 *             Should the parameter be an invalid type for the
 	 *             {@link ManagedFunction}.
-	 * 
-	 * @see OfficeAwareWorkFactory
 	 */
-	void doFlow(String workName, String taskName, Object parameter, FlowCallback callback)
-			throws UnknownWorkException, UnknownTaskException, InvalidParameterTypeException;
+	void doFlow(String functionkName, Object parameter, FlowCallback callback)
+			throws UnknownFunctionException, InvalidParameterTypeException;
 
 }

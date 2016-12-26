@@ -17,13 +17,13 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.UnknownTaskException;
-import net.officefloor.frame.api.manage.UnknownWorkException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 
 /**
  * <p>
@@ -64,41 +64,42 @@ public interface ProcessState {
 	ThreadState getMainThreadState();
 
 	/**
-	 * Obtains the {@link ManagedFunctionMetaData} for the {@link Work} and {@link ManagedFunction}
-	 * within the {@link Office} containing this {@link ProcessState}.
+	 * Obtains the {@link ManagedFunctionMetaData} for the
+	 * {@link ManagedFunction} within the {@link Office} containing this
+	 * {@link ProcessState}.
 	 * 
-	 * @param workName
-	 *            {@link Work} name containing the {@link ManagedFunction}.
-	 * @param taskName
-	 *            {@link ManagedFunction} name within the {@link Work}.
-	 * @return {@link ManagedFunctionMetaData}.
-	 * @throws UnknownWorkException
-	 *             If no {@link Work} by name within the {@link Office}.
-	 * @throws UnknownTaskException
-	 *             If no {@link ManagedFunction} by name within the {@link Work}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionMetaData} for the {@link ManagedFunction}.
+	 * @throws UnknownFunctionException
+	 *             If no {@link ManagedFunction} by name within the
+	 *             {@link Office}.
 	 */
-	ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
-			throws UnknownWorkException, UnknownTaskException;
+	ManagedFunctionMetaData<?, ?> getFunctionMetaData(String functionName) throws UnknownFunctionException;
 
 	/**
-	 * Creates a new {@link ThreadState} contained in this {@link ProcessState}.
+	 * Spawns a new {@link ThreadState} contained in this {@link ProcessState}.
 	 * 
-	 * @param assetManager
-	 *            {@link AssetManager} for the {@link ThreadState}.
-	 * @param callbackFactory
-	 *            Optional {@link FlowCallbackFactory} to create a
-	 *            {@link FunctionState} to be instigating on completion of the created
+	 * @param managedFunctionMetaData
+	 *            {@link ManagedFunctionMetaData} of the initial
+	 *            {@link ManagedFunction} within the spawned
 	 *            {@link ThreadState}.
+	 * @param parameter
+	 *            Parameter for the initial {@link ManagedFunction}.
+	 * @param callback
+	 *            Optional {@link FlowCallback} to handle {@link Escalation}
+	 *            from the spawned {@link ThreadState}.
 	 * @return New {@link ThreadState} contained in this {@link ProcessState}.
 	 */
-	ThreadState createThread(AssetManager assetManager, FlowCallbackFactory callbackFactory);
+	FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
+			FlowCallback callback);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.
 	 * 
 	 * @param thread
 	 *            {@link ThreadState} that has completed.
-	 * @return Optional {@link FunctionState} to complete the {@link ThreadState}.
+	 * @return {@link FunctionState} to complete the {@link ThreadState}.
 	 */
 	FunctionState threadComplete(ThreadState thread);
 
@@ -118,7 +119,7 @@ public interface ProcessState {
 	 *            Index of the {@link AdministratorContainer} to be returned.
 	 * @return {@link AdministratorContainer} for the index.
 	 */
-	AdministratorContainer<?, ?> getAdministratorContainer(int index);
+	AdministratorContainer<?> getAdministratorContainer(int index);
 
 	/**
 	 * Obtains the {@link EscalationFlow} for the {@link EscalationHandler}
@@ -127,6 +128,7 @@ public interface ProcessState {
 	 * @return {@link EscalationFlow} or <code>null</code> if the invoker did
 	 *         not provide a {@link EscalationHandler}.
 	 */
+	@Deprecated // use FlowCallback
 	EscalationFlow getInvocationEscalation();
 
 	/**
@@ -134,6 +136,7 @@ public interface ProcessState {
 	 * 
 	 * @return {@link EscalationProcedure} for the {@link Office}.
 	 */
+	@Deprecated // part of handleEscalation of ThreadMetaData
 	EscalationProcedure getOfficeEscalationProcedure();
 
 	/**
@@ -141,6 +144,7 @@ public interface ProcessState {
 	 * 
 	 * @return Catch all {@link EscalationFlow} for the {@link OfficeFloor}.
 	 */
+	@Deprecated // part of handleEscalation of ThreadMetaData
 	EscalationFlow getOfficeFloorEscalation();
 
 	/**

@@ -36,7 +36,7 @@ public class EscalationFlowImpl implements EscalationFlow {
 	 * {@link ManagedFunctionMetaData} determine the actions for this
 	 * {@link EscalationFlow}.
 	 */
-	private final ManagedFunctionMetaData<?, ?, ?> taskMetaData;
+	private final ManagedFunctionMetaData<?, ?> taskMetaData;
 
 	/**
 	 * Initiate.
@@ -47,8 +47,7 @@ public class EscalationFlowImpl implements EscalationFlow {
 	 *            {@link ManagedFunctionMetaData} determine the actions for this
 	 *            {@link EscalationFlow}.
 	 */
-	public EscalationFlowImpl(Class<? extends Throwable> typeOfCause,
-			ManagedFunctionMetaData<?, ?, ?> taskMetaData) {
+	public EscalationFlowImpl(Class<? extends Throwable> typeOfCause, ManagedFunctionMetaData<?, ?> taskMetaData) {
 		this.typeOfCause = typeOfCause;
 		this.taskMetaData = taskMetaData;
 	}
@@ -63,7 +62,7 @@ public class EscalationFlowImpl implements EscalationFlow {
 	}
 
 	@Override
-	public ManagedFunctionMetaData<?, ?, ?> getTaskMetaData() {
+	public ManagedFunctionMetaData<?, ?> getManagedFunctionMetaData() {
 		return this.taskMetaData;
 	}
 

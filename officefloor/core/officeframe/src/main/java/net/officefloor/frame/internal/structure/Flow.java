@@ -17,59 +17,90 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 
 /**
- * Represents a sub-graph of the {@link ManagedFunctionContainer} graph making
- * up the {@link ThreadState}. This enables knowing when to undertake the
- * {@link FlowCallback} on completion of all {@link ManagedFunctionContainer}
- * instances of the {@link Flow}.
+ * Represents a sub-graph of the {@link ManagedFunctionContainerImpl} graph
+ * making up the {@link ThreadState}. This enables knowing when to undertake the
+ * {@link FlowCallback} on completion of all
+ * {@link ManagedFunctionContainerImpl} instances of the {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 
 	/**
+	 * Creates a {@link FunctionState} within this {@link Flow} for the
+	 * {@link FunctionLogic}.
+	 * 
+	 * @param logic
+	 *            {@link FunctionLogic}.
+	 * @return {@link FunctionState} for the {@link FunctionLogic}.
+	 */
+	FunctionState createFunction(FunctionLogic logic);
+
+	/**
 	 * Creates a new managed {@link ManagedFunctionContainer} contained in this
 	 * {@link Flow} for the {@link ManagedFunction}.
 	 * 
-	 * @param functionMetaData
+	 * @param managedFunctionMetaData
 	 *            {@link ManagedFunctionMetaData} for the new
-	 *            {@link ManagedFunctionContainer}.
+	 *            {@link ManagedFunction}.
 	 * @param parallelFunctionOwner
 	 *            {@link ManagedFunctionContainer} that is the parallel owner of
-	 *            the new {@link ManagedFunctionContainer}.
+	 *            the new {@link ManagedFunction}.
 	 * @param parameter
-	 *            Parameter for the {@link ManagedFunctionContainer}.
+	 *            Parameter for the {@link ManagedFunction}.
 	 * @param governanceDeactivationStrategy
 	 *            {@link GovernanceDeactivationStrategy}.
-	 * @return New {@link ManagedFunctionContainer}.
+	 * @return New {@link FunctionState}.
 	 */
-	ManagedFunctionContainer createManagedFunction(ManagedFunctionMetaData<?, ?, ?> functionMetaData,
-			ManagedFunctionContainer parallelFunctionOwner, Object parameter,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy);
+	<O extends Enum<O>, F extends Enum<F>> ManagedFunctionContainer createManagedFunction(
+			ManagedFunctionMetaData<O, F> managedFunctionMetaData, ManagedFunctionContainer parallelFunctionOwner,
+			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy);
 
 	/**
-	 * Creates a new {@link ManagedFunctionContainer} contained in this
+	 * Creates a new {@link ManagedFunctionContainerImpl} contained in this
 	 * {@link Flow} for the {@link GovernanceActivity}.
 	 * 
 	 * @param governanceActivity
 	 *            {@link GovernanceActivity}.
-	 * @return New {@link ManagedFunctionContainer}.
+	 * @return New {@link ManagedFunctionContainerImpl}.
 	 */
-	<F extends Enum<F>> ManagedFunctionContainer createGovernanceFunction(GovernanceActivity<F> governanceActivity,
+	<F extends Enum<F>> FunctionState createGovernanceFunction(GovernanceActivity<F> governanceActivity,
 			GovernanceMetaData<?, F> governanceMetaData);
 
 	/**
-	 * Flags that the input {@link ManagedFunctionContainer} has completed.
+	 * Flags that the input {@link FunctionState} has completed.
 	 * 
 	 * @param function
-	 *            {@link ManagedFunctionContainer} that has completed.
+	 *            {@link FunctionState} that has completed.
 	 * @return Optional {@link FunctionState} to handle completion of the
-	 *         {@link ManagedFunctionContainer}.
+	 *         {@link FunctionState}.
 	 */
-	FunctionState managedFunctionComplete(ManagedFunctionContainer function);
+	FunctionState managedFunctionComplete(FunctionState function);
+
+	/**
+	 * Handles the {@link Escalation} from a {@link FunctionState} of this
+	 * {@link Flow}.
+	 * 
+	 * @param escalation
+	 *            {@link Escalation}.
+	 * @return {@link FunctionState} to handle the {@link Escalation}.
+	 */
+	FunctionState handleEscalation(Throwable escalation);
+
+	/**
+	 * Cancels this {@link Flow}.
+	 * 
+	 * @param escalation
+	 *            Reason for canceling this {@link Flow}.
+	 * @return {@link FunctionState} to clean up this {@link Flow}.
+	 */
+	FunctionState cancel(Throwable escalation);
 
 	/**
 	 * Obtains the {@link ThreadState} containing this {@link Flow}.

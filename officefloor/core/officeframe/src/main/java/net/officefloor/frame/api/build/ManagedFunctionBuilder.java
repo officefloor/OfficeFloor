@@ -21,7 +21,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -43,7 +43,7 @@ public interface ManagedFunctionBuilder<W extends Work, D extends Enum<D>, F ext
 	 * <p>
 	 * Specifies the differentiator for this {@link ManagedFunction}.
 	 * <p>
-	 * This is exposed as is on the {@link TaskManager} interface for this
+	 * This is exposed as is on the {@link FunctionManager} interface for this
 	 * {@link ManagedFunction} to allow reflective:
 	 * <ol>
 	 * <li>identification of this {@link ManagedFunction} (e.g. can check on

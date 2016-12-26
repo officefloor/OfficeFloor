@@ -17,23 +17,26 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.FlowCallback;
-
 /**
- * Factory to create the {@link FlowCallback} {@link FunctionState}.
+ * Handler for the completion of the {@link Flow}.
  *
  * @author Daniel Sagenschneider
  */
-public interface FlowCallbackFactory {
+public interface FlowCompletion extends LinkedListSetEntry<FlowCompletion, ManagedFunctionContainer> {
 
 	/**
-	 * Creates the {@link FlowCallback} {@link FunctionState}.
+	 * Obtains the optional {@link FunctionState} to complete the {@link Flow}.
 	 * 
-	 * @param exception
-	 *            Possible {@link Throwable} from the {@link Flow}. May be
-	 *            <code>null</code>.
-	 * @return {@link FlowCallback} {@link FunctionState}.
+	 * @return Optional {@link FunctionState} to complete the {@link Flow}. May
+	 *         be <code>null</code>.
 	 */
-	FunctionState createFunction(Throwable exception);
+	FunctionState getFlowCompletionFunction();
+
+	/**
+	 * Obtains the {@link EscalationProcedure} for the {@link Flow}.
+	 * 
+	 * @return {@link EscalationProcedure} for the {@link Flow}.
+	 */
+	EscalationProcedure getFlowEscalationProcedure();
 
 }

@@ -40,7 +40,7 @@ public interface ManagedObjectContainer {
 	/**
 	 * Creates a {@link FunctionState} to load the {@link ManagedObject}.
 	 * 
-	 * @param managedJobNode
+	 * @param managedFunctionContainer
 	 *            {@link ManagedFunctionContainer} requiring the
 	 *            {@link ManagedObject}.
 	 * @return Optional {@link FunctionState} to load the {@link ManagedObject}.
@@ -50,7 +50,7 @@ public interface ManagedObjectContainer {
 	 *         {@link ManagedFunctionContainer} when the {@link ManagedObject}
 	 *         is loaded.
 	 */
-	FunctionState loadManagedObject(ManagedFunctionContainer managedJobNode, WorkContainer<?> workContainer);
+	FunctionState loadManagedObject(ManagedFunctionContainer managedFunctionContainer);
 
 	/**
 	 * <p>

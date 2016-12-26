@@ -48,4 +48,13 @@ public interface Job extends Runnable {
 	 */
 	Object getProcessIdentifier();
 
+	/**
+	 * Enables a {@link Team} to cancel the {@link Job} should it be overloaded
+	 * with {@link Job} instances.
+	 * 
+	 * @param cause
+	 *            Reason by {@link Team} for cancelling the {@link Job}.
+	 */
+	void cancel(Throwable cause);
+
 }

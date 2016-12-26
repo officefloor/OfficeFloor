@@ -20,7 +20,7 @@ package net.officefloor.frame.impl.execute.governance;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.impl.execute.work.WorkContainerImpl;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
@@ -31,7 +31,7 @@ import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainerContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -158,7 +158,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	@Override
-	public ManagedFunctionContainer createGovernanceFunction(GovernanceActivity<F> activity, Flow flow) {
+	public ManagedFunctionContainerImpl createGovernanceFunction(GovernanceActivity<F> activity, Flow flow) {
 		return new GovernanceFunction(flow, activity);
 	}
 
@@ -173,13 +173,13 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	/**
-	 * {@link ManagedFunctionContainer} to undertake the
+	 * {@link ManagedFunctionContainerImpl} to undertake the
 	 * {@link GovernanceActivity}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 */
-	private class GovernanceFunction extends AbstractManagedFunctionContainer<Work, GovernanceMetaData<I, F>>
+	private class GovernanceFunction extends ManagedFunctionContainerImpl<Work, GovernanceMetaData<I, F>>
 			implements GovernanceContext<F> {
 
 		/**
@@ -210,7 +210,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 		 */
 
 		@Override
-		protected Object executeFunction(ManagedFunctionContainerContext context) throws Throwable {
+		protected Object executeFunction(ManagedFunctionLogicContext context) throws Throwable {
 			context.next(this.activity.doActivity(this));
 			return null;
 		}

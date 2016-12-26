@@ -38,7 +38,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.WorkManager;
 
 /**
@@ -174,7 +174,7 @@ public class OfficeFloorManager implements ManagedProcess,
 					for (String taskName : work.getTaskNames()) {
 
 						// Obtain parameter of task
-						TaskManager task = work.getTaskManager(taskName);
+						FunctionManager task = work.getTaskManager(taskName);
 						Class<?> parameterType = task.getParameterType();
 						String parameterTypeName = parameterType == null ? null
 								: parameterType.getName();

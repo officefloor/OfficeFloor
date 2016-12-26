@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.work;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -25,7 +26,6 @@ import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.Promise;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -129,36 +129,6 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	@Override
 	public ManagedObjectContainer getManagedObjectContainer(ManagedObjectIndex managedObjectIndex) {
 
-		// Obtain the index of managed object within scope
-		int scopeIndex = managedObjectIndex.getIndexOfManagedObjectWithinScope();
-
-		// Obtain the managed object container
-		ManagedObjectContainer container;
-		switch (managedObjectIndex.getManagedObjectScope()) {
-		case WORK:
-			// Lazy load the container
-			container = this.managedObjects[scopeIndex];
-			if (container == null) {
-				container = this.workMetaData.getManagedObjectMetaData()[scopeIndex]
-						.createManagedObjectContainer(this.threadState);
-				this.managedObjects[scopeIndex] = container;
-			}
-			break;
-
-		case THREAD:
-			// Obtain the container from the thread state
-			container = this.threadState.getManagedObjectContainer(scopeIndex);
-			break;
-
-		case PROCESS:
-			// Obtain the container from the process state
-			container = this.threadState.getProcessState().getManagedObjectContainer(scopeIndex);
-			break;
-
-		default:
-			throw new IllegalStateException(
-					"Unknown managed object scope " + managedObjectIndex.getManagedObjectScope());
-		}
 
 		// Return the container
 		return container;

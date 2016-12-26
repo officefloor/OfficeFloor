@@ -17,6 +17,9 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -24,7 +27,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionContainerMetaData {
+public interface ManagedFunctionLogicMetaData {
 
 	/**
 	 * Obtains the name of the {@link FunctionState}.
@@ -51,16 +54,34 @@ public interface ManagedFunctionContainerMetaData {
 	FunctionLoop getFunctionLoop();
 
 	/**
+	 * Obtains the meta-data of the {@link ManagedObject} instances bound to the
+	 * {@link ManagedFunction}.
+	 * 
+	 * @return Meta-data of the {@link ManagedObject} instances bound to the
+	 *         {@link ManagedFunction}.
+	 */
+	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
+
+	/**
+	 * Obtains the meta-data of the {@link Administrator} instances for the
+	 * {@link ManagedFunction}.
+	 * 
+	 * @return Meta-data of the {@link Administrator} instances for the
+	 *         {@link ManagedFunction}.
+	 */
+	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
+
+	/**
 	 * Obtains the {@link ManagedFunctionMetaData} of the next
 	 * {@link FunctionState}.
 	 * 
 	 * @return {@link ManagedFunctionMetaData} of next {@link FunctionState}.
 	 */
-	ManagedFunctionMetaData<?, ?, ?> getNextManagedFunctionMetaData();
+	ManagedFunctionMetaData<?, ?> getNextManagedFunctionMetaData();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for the {@link FunctionState} of
-	 * this {@link ManagedFunctionContainerMetaData}.
+	 * this {@link ManagedFunctionLogicMetaData}.
 	 * 
 	 * @return {@link EscalationProcedure}.
 	 */

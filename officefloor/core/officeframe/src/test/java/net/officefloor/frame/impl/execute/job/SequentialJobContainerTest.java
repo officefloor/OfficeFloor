@@ -17,13 +17,13 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests the {@link AbstractManagedFunctionContainer} invoking sequential
+ * Tests the {@link ManagedFunctionContainerImpl} invoking sequential
  * {@link Flow} instances.
  * 
  * @author Daniel Sagenschneider

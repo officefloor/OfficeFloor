@@ -36,13 +36,13 @@ public interface FlowCallback {
 	/**
 	 * Invoked on completion of the {@link Flow}.
 	 * 
-	 * @param exception
+	 * @param escalation
 	 *            Possible {@link Throwable} from the {@link Flow}.
 	 *            <code>null</code> indicates all {@link Escalation} instances
 	 *            handled within {@link Flow}.
 	 * @throws Throwable
-	 *             Enable failure within the callback logic.
+	 *             {@link Escalation} within the callback logic.
 	 */
-	void run(Throwable exception) throws Throwable;
+	void run(Throwable escalation) throws Throwable;
 
 }

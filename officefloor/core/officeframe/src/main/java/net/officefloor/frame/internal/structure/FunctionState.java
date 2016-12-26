@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -24,20 +26,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface FunctionState {
-
-	/**
-	 * Enable {@link Promise} like functionality.
-	 * 
-	 * @param thenFunction
-	 *            {@link FunctionState} to execute after this
-	 *            {@link FunctionState} chain is complete.
-	 * @return {@link FunctionState} to execute the current
-	 *         {@link FunctionState} then the input {@link FunctionState}.
-	 */
-	default FunctionState then(FunctionState thenFunction) {
-		return Promise.then(this, thenFunction);
-	}
+public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 
 	/**
 	 * <p>
@@ -51,18 +40,18 @@ public interface FunctionState {
 	 *         {@link FunctionState}. May be <code>null</code> to indicate any
 	 *         {@link Team} may execute the {@link FunctionState}.
 	 */
-	default TeamManagement getResponsibleTeam() {
-		return null;
-	}
+	TeamManagement getResponsibleTeam();
 
 	/**
-	 * Obtains the {@link ThreadState} for this {@link FunctionState}.
+	 * <p>
+	 * Obtains the {@link Flow} for this {@link FunctionState}.
+	 * <p>
+	 * This provides access to the {@link ThreadState} that this
+	 * {@link FunctionState} resides within.
 	 * 
-	 * @return {@link ThreadState} for this {@link FunctionState}.
+	 * @return {@link Flow} for this {@link FunctionState}.
 	 */
-	@Deprecated // use getFlow and have flow have handleFailure(Throwable) with
-				// execute() throws Throwable
-	ThreadState getThreadState();
+	Flow getFlow();
 
 	/**
 	 * Indicates if the {@link FunctionState} requires {@link ThreadState}
@@ -71,9 +60,7 @@ public interface FunctionState {
 	 * @return <code>true</code> should {@link FunctionState} require
 	 *         {@link ThreadState} safety.
 	 */
-	default boolean isRequireThreadStateSafety() {
-		return false;
-	}
+	boolean isRequireThreadStateSafety();
 
 	/**
 	 * Executes the {@link FunctionState}.
@@ -81,7 +68,33 @@ public interface FunctionState {
 	 * @return Next {@link FunctionState} to be executed. May be
 	 *         <code>null</code> to indicate no further {@link FunctionState}
 	 *         instances to execute.
+	 * @throws Throwable
+	 *             Possible failure of {@link FunctionState} logic.
 	 */
-	FunctionState execute();
+	FunctionState execute() throws Throwable;
+
+	/**
+	 * Cancels this {@link FunctionState} returning an optional
+	 * {@link FunctionState} to clean up this {@link FunctionState}.
+	 * 
+	 * @param cause
+	 *            {@link Throwable} identifying the reason for cancel.
+	 * @return Optional clean up {@link FunctionState}. May be
+	 *         <code>null</code>.
+	 */
+	default FunctionState cancel(Throwable cause) {
+		return this.handleEscalation(cause);
+	}
+
+	/**
+	 * Handles {@link Escalation} from the {@link ManagedFunction}.
+	 * 
+	 * @param escalation
+	 *            {@link Escalation}.
+	 * @return Optional {@link FunctionState} to handle the {@link Escalation}.
+	 */
+	default FunctionState handleEscalation(Throwable escalation) {
+		return this.getFlow().handleEscalation(escalation);
+	}
 
 }

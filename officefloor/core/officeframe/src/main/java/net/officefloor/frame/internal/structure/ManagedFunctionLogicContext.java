@@ -17,31 +17,36 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
- * Instigation strategies of a {@link Flow}.
- * 
+ * Context for the execution of a {@link ManagedFunction}.
+ *
  * @author Daniel Sagenschneider
  */
-@Deprecated // determine instigation strategy of sequential/parallel with input
-			// of FlowCallback. This just leaves isSpawn to indicate whether to
-			// spawn a thread state.
-public enum FlowInstigationStrategyEnum {
+public interface ManagedFunctionLogicContext {
 
 	/**
-	 * Asynchronous invocation of the {@link Job} within a {@link ThreadState}.
+	 * Specifies the next {@link FunctionLogic} to be executed before the next
+	 * {@link ManagedFunctionLogic}.
+	 * 
+	 * @param function
+	 *            Next {@link FunctionLogic}.
 	 */
-	ASYNCHRONOUS,
+	void next(FunctionLogic function);
 
 	/**
-	 * Parallel invocation of the {@link Job}.
+	 * Invokes a {@link Flow}.
+	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData}.
+	 * @param parameter
+	 *            Parameter for the initial {@link ManagedFunction} of the
+	 *            {@link Flow}.
+	 * @param callback
+	 *            Optional {@link FlowCallback}. May be <code>null</code>.
 	 */
-	PARALLEL,
-
-	/**
-	 * Sequential invocation of the {@link Job}..
-	 */
-	SEQUENTIAL
+	void doFlow(FlowMetaData flowMetaData, Object parameter, FlowCallback callback);
 
 }

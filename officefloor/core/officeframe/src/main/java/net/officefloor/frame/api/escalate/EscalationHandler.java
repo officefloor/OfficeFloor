@@ -19,7 +19,6 @@ package net.officefloor.frame.api.escalate;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -40,10 +39,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * Note that this does not just handle {@link Escalation} instances but any type
  * of {@link Throwable}.
  * 
- * @see EscalationLevel
- * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // use FlowCallback
 public interface EscalationHandler {
 
 	/**

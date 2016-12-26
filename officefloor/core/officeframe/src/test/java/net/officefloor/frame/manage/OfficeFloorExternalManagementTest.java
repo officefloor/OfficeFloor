@@ -27,9 +27,9 @@ import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.ProcessFuture;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -282,7 +282,7 @@ public class OfficeFloorExternalManagementTest extends
 	 * Ensure able to obtain {@link ManagedFunction} listing.
 	 */
 	public void testTaskListing() throws UnknownOfficeException,
-			UnknownWorkException, UnknownTaskException {
+			UnknownWorkException, UnknownFunctionException {
 
 		// Obtain the Work
 		WorkManager work = this.officeFloor.getOffice(this.officeName)
@@ -293,12 +293,12 @@ public class OfficeFloorExternalManagementTest extends
 		this.assertNames(taskNames, "initialTask", "anotherTask");
 
 		// Ensure able to obtain TaskManager
-		TaskManager task = work.getTaskManager("anotherTask");
+		FunctionManager task = work.getTaskManager("anotherTask");
 		assertNotNull("Must have TaskManager", task);
 	}
 
 	/**
-	 * Ensures throws exception on unknown {@link TaskManager}.
+	 * Ensures throws exception on unknown {@link FunctionManager}.
 	 */
 	public void testUnknownTask() throws UnknownOfficeException,
 			UnknownWorkException {
@@ -311,7 +311,7 @@ public class OfficeFloorExternalManagementTest extends
 		try {
 			work.getTaskManager(unknownTaskName);
 			fail("Should not be able to obtain unknown TaskManager");
-		} catch (UnknownTaskException ex) {
+		} catch (UnknownFunctionException ex) {
 			assertEquals("Incorrect task", unknownTaskName, ex
 					.getUnknownTaskName());
 			assertEquals("Incorrect cause", "Unknown Task '" + unknownTaskName
@@ -323,10 +323,10 @@ public class OfficeFloorExternalManagementTest extends
 	 * Ensure able to obtain {@link ManagedFunction} differentiator.
 	 */
 	public void testTaskDifferentiator() throws UnknownOfficeException,
-			UnknownWorkException, UnknownTaskException {
+			UnknownWorkException, UnknownFunctionException {
 
 		// Obtain the Task Manager
-		TaskManager task = this.officeFloor.getOffice(this.officeName)
+		FunctionManager task = this.officeFloor.getOffice(this.officeName)
 				.getWorkManager(this.workName).getTaskManager("initialTask");
 
 		// Ensure correct differentiator
@@ -338,10 +338,10 @@ public class OfficeFloorExternalManagementTest extends
 	 * Ensure able to obtain {@link ManagedFunction} parameter type.
 	 */
 	public void testTaskParameterType() throws UnknownOfficeException,
-			UnknownWorkException, UnknownTaskException {
+			UnknownWorkException, UnknownFunctionException {
 
 		// Obtain the Task Manager
-		TaskManager task = this.officeFloor.getOffice(this.officeName)
+		FunctionManager task = this.officeFloor.getOffice(this.officeName)
 				.getWorkManager(this.workName).getTaskManager("initialTask");
 
 		// Ensure correct parameter type
@@ -353,11 +353,11 @@ public class OfficeFloorExternalManagementTest extends
 	 * Ensure able to invoke the {@link ManagedFunction}.
 	 */
 	public void testInvokeTask() throws UnknownOfficeException,
-			UnknownWorkException, UnknownTaskException,
+			UnknownWorkException, UnknownFunctionException,
 			InvalidParameterTypeException {
 
 		// Obtain the Task Manager
-		TaskManager task = this.officeFloor.getOffice(this.officeName)
+		FunctionManager task = this.officeFloor.getOffice(this.officeName)
 				.getWorkManager(this.workName).getTaskManager("initialTask");
 
 		// Invoke the Task
@@ -375,10 +375,10 @@ public class OfficeFloorExternalManagementTest extends
 	 */
 	public void testFailInvokeTaskAsInvalidParameterType()
 			throws UnknownOfficeException, UnknownWorkException,
-			UnknownTaskException {
+			UnknownFunctionException {
 
 		// Obtain the Task Manager
-		TaskManager task = this.officeFloor.getOffice(this.officeName)
+		FunctionManager task = this.officeFloor.getOffice(this.officeName)
 				.getWorkManager(this.workName).getTaskManager("initialTask");
 
 		// Ensure fail on invalid parameter

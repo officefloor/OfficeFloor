@@ -18,21 +18,22 @@
 package net.officefloor.frame.api.manage;
 
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 
 /**
  * Interface to manage a particular {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskManager {
+public interface FunctionManager {
 
 	/**
 	 * Obtains the differentiator for this {@link ManagedFunction}.
 	 * 
-	 * @return Differentiator for this {@link ManagedFunction}. May be <code>null</code> if
-	 *         no differentiator for {@link ManagedFunction}.
+	 * @return Differentiator for this {@link ManagedFunction}. May be
+	 *         <code>null</code> if no differentiator for
+	 *         {@link ManagedFunction}.
 	 * 
 	 * @see ManagedFunctionBuilder#setDifferentiator(Object)
 	 */
@@ -47,17 +48,17 @@ public interface TaskManager {
 	Class<?> getParameterType();
 
 	/**
-	 * Invokes the {@link ManagedFunction} which is done within the {@link Office}.
+	 * Invokes the {@link ManagedFunction} which is executed within the
+	 * {@link Office}.
 	 * 
 	 * @param parameter
 	 *            Parameter for the {@link ManagedFunction}.
-	 * @param completionListener
-	 *            {@link ProcessCompletionListener}.
+	 * @param callback
+	 *            Optional {@link FlowCallback}. May be <code>null</code>.
 	 * @throws InvalidParameterTypeException
 	 *             Should the parameter be of incorrect type for the
 	 *             {@link ManagedFunction}.
 	 */
-	void invokeTask(Object parameter, ProcessCompletionListener completionListener)
-			throws InvalidParameterTypeException;
+	void invokeFunction(Object parameter, FlowCallback callback) throws InvalidParameterTypeException;
 
 }

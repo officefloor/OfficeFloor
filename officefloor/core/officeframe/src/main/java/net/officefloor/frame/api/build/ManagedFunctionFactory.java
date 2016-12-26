@@ -18,22 +18,19 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 
 /**
  * Creates the {@link ManagedFunction} to be done.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionFactory<W extends Work, D extends Enum<D>, F extends Enum<F>> {
+public interface ManagedFunctionFactory<O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * Creates the {@link ManagedFunction}.
 	 * 
-	 * @param work
-	 *            {@link Work} for the {@link ManagedFunction}.
-	 * @return {@link ManagedFunction} to be done for the {@link Work}.
+	 * @return {@link ManagedFunction}.
 	 */
-	ManagedFunction<W, D, F> createManagedFunction(W work);
+	ManagedFunction<O, F> createManagedFunction();
 
 }

@@ -15,39 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.manage;
+package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
- * Indicates an unknown {@link ManagedFunction} was requested.
- * 
+ * Managed {@link FunctionLogic}.
+ *
  * @author Daniel Sagenschneider
  */
-public class UnknownTaskException extends Exception {
+public interface ManagedFunctionLogic {
 
 	/**
-	 * Name of the unknown {@link ManagedFunction}.
-	 */
-	private final String unknownTaskName;
-
-	/**
-	 * Initiate.
+	 * Indicates if {@link ThreadState} safety is required for this
+	 * {@link ManagedFunctionLogic}.
 	 * 
-	 * @param unknownTaskName
-	 *            Name of the unknown {@link ManagedFunction}.
+	 * @return <code>true</code> should {@link ThreadState} safety be required
+	 *         for this {@link ManagedFunctionLogic}.
 	 */
-	public UnknownTaskException(String unknownTaskName) {
-		super("Unknown Task '" + unknownTaskName + "'");
-		this.unknownTaskName = unknownTaskName;
+	default boolean isRequireThreadStateSafety() {
+		return false;
 	}
 
 	/**
-	 * Obtains the name of the unknown {@link ManagedFunction}.
+	 * Executes the {@link ManagedFunctionLogic}.
 	 * 
-	 * @return Name of the unknown {@link ManagedFunction}.
+	 * @param context
+	 *            {@link ManagedFunctionLogicContext}.
+	 * @return Parameter for the next {@link ManagedFunction}.
+	 * @throws Throwable
+	 *             Failure of logic.
 	 */
-	public String getUnknownTaskName() {
-		return this.unknownTaskName;
-	}
+	Object execute(ManagedFunctionLogicContext context) throws Throwable;
+
 }

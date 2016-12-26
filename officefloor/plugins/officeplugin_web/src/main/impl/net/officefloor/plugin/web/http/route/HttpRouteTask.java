@@ -26,8 +26,8 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.TaskManager;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.util.AbstractSingleTask;
@@ -147,7 +147,7 @@ public class HttpRouteTask
 		for (String workName : office.getWorkNames()) {
 			WorkManager work = office.getWorkManager(workName);
 			for (String taskName : work.getTaskNames()) {
-				TaskManager task = work.getTaskManager(taskName);
+				FunctionManager task = work.getTaskManager(taskName);
 
 				// Determine if secure URI differentiator
 				Object differentiator = task.getDifferentiator();
@@ -199,7 +199,7 @@ public class HttpRouteTask
 			ManagedFunctionContext<HttpRouteTask, HttpRouteTaskDependencies, HttpRouteTaskFlows> context)
 			throws InvalidHttpRequestUriException,
 			HttpRequestTokeniseException, IOException, UnknownWorkException,
-			UnknownTaskException, InvalidParameterTypeException {
+			UnknownFunctionException, InvalidParameterTypeException {
 
 		// Obtain the dependencies
 		ServerHttpConnection connection = (ServerHttpConnection) context

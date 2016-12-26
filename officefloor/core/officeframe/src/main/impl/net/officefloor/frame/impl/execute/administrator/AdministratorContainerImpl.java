@@ -23,7 +23,8 @@ import java.util.List;
 import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.function.FailThreadStateJobNode;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
@@ -35,12 +36,11 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainerContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
-import net.officefloor.frame.internal.structure.Promise;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -98,7 +98,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedFunctionContainer administerManagedObjects(final ManagedFunctionDutyAssociation<A> duty, Flow flow,
+	public ManagedFunctionContainerImpl administerManagedObjects(final ManagedFunctionDutyAssociation<A> duty, Flow flow,
 			ManagedFunctionMetaData<?, ?, ?> managedFunctionMetaData, final WorkContainer<?> workContainer) {
 
 		// Obtain the extension interfaces to be managed
@@ -128,7 +128,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	}
 
 	/**
-	 * {@link ManagedFunctionContainer} to administer the {@link FunctionState}
+	 * {@link ManagedFunctionContainerImpl} to administer the {@link FunctionState}
 	 * instances for administration.
 	 * 
 	 * @param <W>
@@ -136,7 +136,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 */
 	@Deprecated // FunctionState to always be returned
 	private class AdministerFunction<W extends Work>
-			extends AbstractManagedFunctionContainer<W, AdministratorMetaData<I, A>> {
+			extends ManagedFunctionContainerImpl<W, AdministratorMetaData<I, A>> {
 
 		private final FunctionState administer;
 
@@ -154,19 +154,19 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		}
 
 		@Override
-		protected Object executeFunction(ManagedFunctionContainerContext context) throws Throwable {
+		protected Object executeFunction(ManagedFunctionLogicContext context) throws Throwable {
 			// Not invoked
 			return null;
 		}
 	}
 
 	/**
-	 * {@link Duty} implementation for a {@link ManagedFunctionContainer}.
+	 * {@link Duty} implementation for a {@link ManagedFunctionContainerImpl}.
 	 * 
 	 * @param <W>
 	 *            {@link Work} type.
 	 */
-	public class DutyFunction<W extends Work> extends AbstractManagedFunctionContainer<W, AdministratorMetaData<I, A>> {
+	public class DutyFunction<W extends Work> extends ManagedFunctionContainerImpl<W, AdministratorMetaData<I, A>> {
 
 		/**
 		 * {@link ManagedFunctionDutyAssociation}.
@@ -214,7 +214,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		 */
 
 		@Override
-		protected Object executeFunction(ManagedFunctionContainerContext context) throws Throwable {
+		protected Object executeFunction(ManagedFunctionLogicContext context) throws Throwable {
 
 			// Easy access to the container
 			AdministratorContainerImpl<I, A, F, G> container = AdministratorContainerImpl.this;

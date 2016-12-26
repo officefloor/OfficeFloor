@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
@@ -38,15 +39,6 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	ThreadMetaData getThreadMetaData();
 
 	/**
-	 * Attaches this {@link ThreadState} to the current {@link Thread}.
-	 * 
-	 * @param isThreadStateSafe
-	 *            Flag indicating if changes to the {@link ThreadState} are safe
-	 *            on the current {@link Thread}.
-	 */
-	void attachThreadStateToThread(boolean isThreadStateSafe);
-
-	/**
 	 * Indicates if this {@link ThreadState} is attached to the current
 	 * {@link Thread}.
 	 * 
@@ -65,38 +57,24 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	boolean isThreadStateSafe();
 
 	/**
-	 * Detaches this {@link ThreadState} from the current {@link Thread}.
-	 */
-	void detachThreadStateFromThread();
-
-	/**
-	 * <p>
-	 * Returns a {@link Throwable} indicating that there has been a failure for
-	 * {@link ThreadState}.
-	 * <p>
-	 * Note that this is similar in concept to the C <code>errno</code>.
-	 * 
-	 * @return {@link Throwable} indicating that there has been a failure for
-	 *         {@link ThreadState}. <code>null</code> indicating
-	 *         {@link ThreadState} still going fine.
-	 */
-	Throwable getFailure();
-
-	/**
-	 * Sets the {@link Throwable} cause to indicate failure in the
-	 * {@link ThreadState}.
-	 * 
-	 * @param cause
-	 *            {@link ThreadState} failure.
-	 */
-	void setFailure(Throwable cause);
-
-	/**
 	 * Creates a {@link Flow} contained in this {@link ThreadState}.
 	 * 
+	 * @param completion
+	 *            Optional {@link FlowCompletion} to handle completion of the
+	 *            {@link Flow}. May be <code>null</code>.
 	 * @return New {@link Flow}.
 	 */
-	Flow createFlow();
+	Flow createFlow(FlowCompletion completion);
+
+	/**
+	 * Handles the {@link Escalation} from a {@link Flow} of this
+	 * {@link ThreadState}.
+	 * 
+	 * @param escalation
+	 *            {@link Escalation}.
+	 * @return {@link FunctionState} to handle the {@link Escalation}.
+	 */
+	FunctionState handleEscalation(Throwable escalation);
 
 	/**
 	 * Flags that the input {@link Flow} has completed.
@@ -151,51 +129,15 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 *            Index of the {@link AdministratorContainer} to be returned.
 	 * @return {@link AdministratorContainer} for the index.
 	 */
-	AdministratorContainer<?, ?> getAdministratorContainer(int index);
-
-	/**
-	 * <p>
-	 * Flags that escalation is about to happen on this {@link ThreadState}.
-	 * <p>
-	 * This allows the {@link ThreadState} to know not to clean up should all
-	 * its {@link Flow} instances be closed and a new one will be created for
-	 * the {@link EscalationFlow}.
-	 * 
-	 * @param currentJobNode
-	 *            Current {@link FunctionState} being executed.
-	 */
-	void escalationStart(FunctionState currentJobNode);
-
-	/**
-	 * Flags that escalation has complete on this {@link ThreadState}.
-	 * 
-	 * @param currentJobNode
-	 *            Current {@link FunctionState} being executed.
-	 */
-	void escalationComplete(FunctionState currentJobNode);
-
-	/**
-	 * Obtains the {@link EscalationLevel} of this {@link ThreadState}.
-	 * 
-	 * @return {@link EscalationLevel} of this {@link ThreadState}.
-	 */
-	EscalationLevel getEscalationLevel();
-
-	/**
-	 * Specifies the {@link EscalationLevel} for this {@link ThreadState}.
-	 * 
-	 * @param escalationLevel
-	 *            {@link EscalationLevel}.
-	 */
-	void setEscalationLevel(EscalationLevel escalationLevel);
+	AdministratorContainer<?> getAdministratorContainer(int index);
 
 	/**
 	 * Profiles that {@link ManagedObjectContainer} is being executed.
 	 * 
 	 * @param functionMetaData
-	 *            {@link ManagedFunctionContainerMetaData} of the
+	 *            {@link ManagedFunctionLogicMetaData} of the
 	 *            {@link ManagedFunctionContainer} being executed.
 	 */
-	void profile(ManagedFunctionContainerMetaData functionMetaData);
+	void profile(ManagedFunctionLogicMetaData functionMetaData);
 
 }

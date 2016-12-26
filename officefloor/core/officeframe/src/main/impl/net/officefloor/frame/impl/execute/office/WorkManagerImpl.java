@@ -19,8 +19,8 @@ package net.officefloor.frame.impl.execute.office;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.TaskManager;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -76,7 +76,7 @@ public class WorkManagerImpl implements WorkManager {
 	}
 
 	@Override
-	public TaskManager getTaskManager(String taskName) throws UnknownTaskException {
+	public FunctionManager getTaskManager(String taskName) throws UnknownFunctionException {
 
 		// Obtain the task meta-data for the task
 		for (ManagedFunctionMetaData<?, ?, ?> taskMetaData : this.workMetaData.getTaskMetaData()) {
@@ -87,7 +87,7 @@ public class WorkManagerImpl implements WorkManager {
 		}
 
 		// Unknown task if at this point
-		throw new UnknownTaskException(taskName);
+		throw new UnknownFunctionException(taskName);
 	}
 
 }

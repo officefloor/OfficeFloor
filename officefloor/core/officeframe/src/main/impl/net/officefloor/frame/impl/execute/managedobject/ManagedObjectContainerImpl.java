@@ -24,6 +24,7 @@ import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalati
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.impl.execute.function.FailThreadStateJobNode;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
@@ -37,7 +38,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.Promise;
 import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;

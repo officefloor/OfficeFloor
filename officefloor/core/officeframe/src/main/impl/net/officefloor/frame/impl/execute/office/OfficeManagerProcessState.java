@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
@@ -111,7 +111,7 @@ public class OfficeManagerProcessState implements ProcessState {
 
 	@Override
 	public ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
-			throws UnknownWorkException, UnknownTaskException {
+			throws UnknownWorkException, UnknownFunctionException {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " should be be involved in specific tasks");
 	}
 

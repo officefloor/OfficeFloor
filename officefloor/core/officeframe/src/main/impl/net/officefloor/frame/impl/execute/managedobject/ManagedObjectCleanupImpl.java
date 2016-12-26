@@ -22,7 +22,7 @@ import java.util.List;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.impl.execute.function.RunInThreadStateJobNode;
+import net.officefloor.frame.impl.execute.function.RunInThreadStateFunctionLogic;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
@@ -100,7 +100,7 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 							.createProcess(recycleFlowMetaData, parameter, parameter, escalationResponsibleTeam, parameter);
 
 					// Run recycle job node in main thread state
-					return new RunInThreadStateJobNode(recycleFunction,
+					return new RunInThreadStateFunctionLogic(recycleFunction,
 							ManagedObjectCleanupImpl.this.processState.getMainThreadState());
 				}
 			}

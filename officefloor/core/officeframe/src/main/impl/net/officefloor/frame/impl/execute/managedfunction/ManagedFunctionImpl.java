@@ -22,9 +22,9 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
@@ -32,7 +32,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainerContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -47,7 +47,7 @@ import net.officefloor.frame.spi.team.Job;
  * @author Daniel Sagenschneider
  */
 public class ManagedFunctionImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		extends AbstractManagedFunctionContainer<W, ManagedFunctionMetaData<W, D, F>> {
+		extends ManagedFunctionContainerImpl<W, ManagedFunctionMetaData<W, D, F>> {
 
 	/**
 	 * <p>
@@ -93,12 +93,12 @@ public class ManagedFunctionImpl<W extends Work, D extends Enum<D>, F extends En
 	 * @param governanceDeactivationStrategy
 	 *            {@link GovernanceDeactivationStrategy}.
 	 * @param parallelOwner
-	 *            Parallel owning {@link ManagedFunctionContainer}.
+	 *            Parallel owning {@link ManagedFunctionContainerImpl}.
 	 * @param parameter
 	 *            Parameter for the {@link ManagedFunction}.
 	 */
 	public ManagedFunctionImpl(Flow flow, WorkContainer<W> workContainer, ManagedFunctionMetaData<W, D, F> taskMetaData,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy, ManagedFunctionContainer parallelOwner,
+			GovernanceDeactivationStrategy governanceDeactivationStrategy, ManagedFunctionContainerImpl parallelOwner,
 			Object parameter) {
 		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData.getRequiredManagedObjects(),
 				taskMetaData.getRequiredGovernance(), governanceDeactivationStrategy);
@@ -114,7 +114,7 @@ public class ManagedFunctionImpl<W extends Work, D extends Enum<D>, F extends En
 	 */
 
 	@Override
-	protected Object executeFunction(ManagedFunctionContainerContext context) throws Throwable {
+	protected Object executeFunction(ManagedFunctionLogicContext context) throws Throwable {
 		return this.function.execute(this.taskContextToken);
 	}
 
@@ -175,7 +175,7 @@ public class ManagedFunctionImpl<W extends Work, D extends Enum<D>, F extends En
 		@Override
 		@SuppressWarnings("rawtypes")
 		public void doFlow(String workName, String taskName, Object parameter, FlowCallback callback)
-				throws UnknownWorkException, UnknownTaskException, InvalidParameterTypeException {
+				throws UnknownWorkException, UnknownFunctionException, InvalidParameterTypeException {
 
 			// Obtain the Process State
 			ProcessState processState = ManagedFunctionImpl.this.flow.getThreadState().getProcessState();

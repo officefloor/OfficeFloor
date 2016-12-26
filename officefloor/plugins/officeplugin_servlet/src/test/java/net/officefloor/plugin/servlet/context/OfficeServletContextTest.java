@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
@@ -198,7 +198,7 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 	public void testRequestDispatcher() throws Exception {
 
 		final WorkManager workManager = this.createMock(WorkManager.class);
-		final TaskManager taskManager = this.createMock(TaskManager.class);
+		final FunctionManager taskManager = this.createMock(FunctionManager.class);
 		final HttpServletServicer differentiator = this
 				.createMock(HttpServletServicer.class);
 		final HttpServletRequest request = this
@@ -304,7 +304,7 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 	public void testNamedDispatcher() throws Exception {
 
 		final WorkManager workManager = this.createMock(WorkManager.class);
-		final TaskManager taskManager = this.createMock(TaskManager.class);
+		final FunctionManager taskManager = this.createMock(FunctionManager.class);
 		final HttpServletServicer differentiator = this
 				.createMock(HttpServletServicer.class);
 		final HttpServletRequest request = this
@@ -404,7 +404,7 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 	public void testExtensionDispatcher() throws Exception {
 
 		final WorkManager workManager = this.createMock(WorkManager.class);
-		final TaskManager taskManager = this.createMock(TaskManager.class);
+		final FunctionManager taskManager = this.createMock(FunctionManager.class);
 		final HttpServletServicer differentiator = this
 				.createMock(HttpServletServicer.class);
 		final HttpServletRequest request = this
@@ -495,7 +495,7 @@ public class OfficeServletContextTest extends OfficeFrameTestCase {
 	public void testMapPath() throws Exception {
 
 		final WorkManager workManager = this.createMock(WorkManager.class);
-		final TaskManager taskManager = this.createMock(TaskManager.class);
+		final FunctionManager taskManager = this.createMock(FunctionManager.class);
 		final HttpServletServicer differentiator = this
 				.createMock(HttpServletServicer.class);
 		final String WORK_NAME = "WORK";

@@ -23,7 +23,7 @@ import java.util.List;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ContainerContext;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -35,12 +35,12 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainerMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainerContext;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -58,7 +58,7 @@ import org.easymock.AbstractMatcher;
 import org.easymock.internal.AlwaysMatcher;
 
 /**
- * Contains functionality for testing the {@link AbstractManagedFunctionContainer}.
+ * Contains functionality for testing the {@link ManagedFunctionContainerImpl}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -100,9 +100,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	private final Flow flow = this.createMock(Flow.class);
 
 	/**
-	 * {@link ManagedFunctionContainerMetaData}.
+	 * {@link ManagedFunctionLogicMetaData}.
 	 */
-	private final ManagedFunctionContainerMetaData jobMetaData = this.createMock(ManagedFunctionContainerMetaData.class);
+	private final ManagedFunctionLogicMetaData jobMetaData = this.createMock(ManagedFunctionLogicMetaData.class);
 
 	/**
 	 * {@link ParallelOwnerJob}.
@@ -232,7 +232,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * </ol>
 	 * <p>
 	 * This is always the first steps of executing a
-	 * {@link AbstractManagedFunctionContainer}.
+	 * {@link ManagedFunctionContainerImpl}.
 	 * 
 	 * @param job
 	 *            {@link Job}.
@@ -646,7 +646,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 						GovernanceDeactivationStrategy.ENFORCE),
 				this.asynchronousJob);
 		this.asynchronousJob
-				.activateJob(AbstractManagedFunctionContainer.ASYNCHRONOUS_FLOW_TEAM_IDENTIFIER);
+				.activateJob(ManagedFunctionContainerImpl.ASYNCHRONOUS_FLOW_TEAM_IDENTIFIER);
 		this.recordReturn(this.asynchronousFlow,
 				this.asynchronousFlow.getThreadState(),
 				this.asynchronousThreadState);
@@ -1042,7 +1042,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * functionality.
 	 */
 	protected class FunctionalityJob extends
-			AbstractManagedFunctionContainer<Work, ManagedFunctionContainerMetaData> implements
+			ManagedFunctionContainerImpl<Work, ManagedFunctionLogicMetaData> implements
 			JobFunctionalityContext {
 
 		/**
@@ -1117,7 +1117,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		protected Object executeJob(ManagedFunctionContainerContext context,
+		protected Object executeJob(ManagedFunctionLogicContext context,
 				JobContext jobContext, JobNodeActivateSet activateSet)
 				throws Throwable {
 			// Indicate the job is executed

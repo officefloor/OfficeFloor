@@ -27,7 +27,7 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.HttpHeader;
@@ -467,7 +467,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records the URL continuation {@link TaskManager} configuration.
+	 * Records the URL continuation {@link FunctionManager} configuration.
 	 * 
 	 * @param taskNameThenUriPathThenIsSecureGroupings
 	 *            Listing of the following sequence grouping of values:
@@ -495,7 +495,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 			Boolean isSecure = (Boolean) taskNameThenUriPathThenIsSecureGroupings[i + 2];
 
 			// Create the URL Servicer
-			TaskManager taskManager = this.createMock(TaskManager.class);
+			FunctionManager taskManager = this.createMock(FunctionManager.class);
 			UrlServicer urlServicer = new UrlServicer(taskManager,
 					applicationUriPath, isSecure);
 
@@ -529,7 +529,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 							OTHER_DIFFERENTIATOR_TASK_NAME, taskName });
 
 			// Record the non URL continuation task
-			TaskManager taskManager = this.createMock(TaskManager.class);
+			FunctionManager taskManager = this.createMock(FunctionManager.class);
 			this.recordReturn(workManager,
 					workManager.getTaskManager(NON_URL_CONTINUATION_TASK_NAME),
 					taskManager);
@@ -566,9 +566,9 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	private static class UrlServicer {
 
 		/**
-		 * {@link TaskManager}.
+		 * {@link FunctionManager}.
 		 */
-		public final TaskManager taskManager;
+		public final FunctionManager taskManager;
 
 		/**
 		 * Application URI path.
@@ -584,13 +584,13 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 		 * Initiate.
 		 * 
 		 * @param taskManager
-		 *            {@link TaskManager}.
+		 *            {@link FunctionManager}.
 		 * @param applicationUriPath
 		 *            Application URI path.
 		 * @param isSecure
 		 *            Indicates if secure.
 		 */
-		public UrlServicer(TaskManager taskManager, String applicationUriPath,
+		public UrlServicer(FunctionManager taskManager, String applicationUriPath,
 				Boolean isSecure) {
 			this.taskManager = taskManager;
 			this.applicationUriPath = applicationUriPath;

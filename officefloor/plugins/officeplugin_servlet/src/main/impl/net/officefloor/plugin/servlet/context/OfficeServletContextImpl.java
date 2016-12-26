@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.plugin.servlet.container.HttpServletServicer;
 import net.officefloor.plugin.servlet.container.IteratorEnumeration;
@@ -169,7 +169,7 @@ public class OfficeServletContextImpl implements OfficeServletContext {
 
 						// Iterate over tasks of the Office
 						for (String taskName : work.getTaskNames()) {
-							TaskManager task = work.getTaskManager(taskName);
+							FunctionManager task = work.getTaskManager(taskName);
 
 							// Load task if Servicer
 							Object differentiator = task.getDifferentiator();

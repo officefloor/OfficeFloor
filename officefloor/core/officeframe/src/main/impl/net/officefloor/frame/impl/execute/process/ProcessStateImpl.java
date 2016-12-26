@@ -20,7 +20,7 @@ package net.officefloor.frame.impl.execute.process;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectCleanupImpl;
@@ -271,7 +271,7 @@ public class ProcessStateImpl implements ProcessState {
 
 	@Override
 	public ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
-			throws UnknownWorkException, UnknownTaskException {
+			throws UnknownWorkException, UnknownFunctionException {
 
 		// Look for work
 		for (WorkMetaData<?> work : this.officeMetaData.getWorkMetaData()) {
@@ -286,7 +286,7 @@ public class ProcessStateImpl implements ProcessState {
 				}
 
 				// Task not found on matching work
-				throw new UnknownTaskException(taskName);
+				throw new UnknownFunctionException(taskName);
 			}
 		}
 

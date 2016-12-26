@@ -36,7 +36,7 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.UnknownTaskException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
@@ -566,7 +566,7 @@ public class SocketListener extends
 
 		@Override
 		public void doFlow(String workName, String taskName, Object parameter)
-				throws UnknownWorkException, UnknownTaskException,
+				throws UnknownWorkException, UnknownFunctionException,
 				InvalidParameterTypeException {
 			throw new IllegalStateException(
 					"No flow should be required for close Selector");

@@ -26,7 +26,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.ProcessFuture;
-import net.officefloor.frame.api.manage.TaskManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
@@ -71,7 +71,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 	/**
 	 * <p>
-	 * Wrap invoking {@link ManagedFunction} on the {@link TaskManager} to allow
+	 * Wrap invoking {@link ManagedFunction} on the {@link FunctionManager} to allow
 	 * the {@link Thread} to be available to execute the {@link ManagedFunction}
 	 * instances of the {@link ProcessState}.
 	 * <p>
@@ -79,7 +79,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * {@link ManagedFunction} is complete.
 	 * 
 	 * @param taskManager
-	 *            {@link TaskManager} managing the {@link ManagedFunction} to
+	 *            {@link FunctionManager} managing the {@link ManagedFunction} to
 	 *            invoked.
 	 * @param parameter
 	 *            Parameter for the {@link ManagedFunction}.
@@ -89,14 +89,14 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
-	public static void doTask(final TaskManager taskManager, final Object parameter)
+	public static void doTask(final FunctionManager taskManager, final Object parameter)
 			throws InvalidParameterTypeException, InterruptedException {
 		try {
 			doProcess(new InvokeProcessState() {
 				@Override
 				public void invokeProcessState(ProcessCompletionListener completionListener)
 						throws InvalidParameterTypeException {
-					taskManager.invokeTask(parameter, completionListener);
+					taskManager.invokeFunction(parameter, completionListener);
 				}
 			});
 		} catch (NoInitialTaskException ex) {

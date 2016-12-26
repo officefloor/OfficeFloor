@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministratorMetaData<I extends Object, A extends Enum<A>> extends ManagedFunctionContainerMetaData {
+public interface AdministratorMetaData<I extends Object, A extends Enum<A>> extends ManagedFunctionLogicMetaData {
 
 	/**
 	 * Creates a new {@link AdministratorContainer} from this

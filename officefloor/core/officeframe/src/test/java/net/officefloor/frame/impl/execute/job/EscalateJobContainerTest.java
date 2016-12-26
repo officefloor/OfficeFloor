@@ -20,14 +20,14 @@ package net.officefloor.frame.impl.execute.job;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.execute.function.AbstractManagedFunctionContainer;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests {@link AbstractManagedFunctionContainer} handling escalations.
+ * Tests {@link ManagedFunctionContainerImpl} handling escalations.
  * 
  * @author Daniel Sagenschneider
  */

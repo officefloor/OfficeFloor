@@ -18,30 +18,31 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 
 /**
  * Meta-data of a {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface FlowMetaData<W extends Work> {
+public interface FlowMetaData {
 
 	/**
-	 * Obtains the {@link FlowInstigationStrategyEnum} for the {@link Flow}.
+	 * Indicates whether the {@link Flow} should be instigated within a spawned
+	 * {@link ThreadState}.
 	 * 
-	 * @return {@link FlowInstigationStrategyEnum} for the {@link Flow}.
+	 * @return <code>true</code> to execute the {@link Flow} within a spawned
+	 *         {@link ThreadState}.
 	 */
-	FlowInstigationStrategyEnum getInstigationStrategy();
+	boolean isSpawnThreadState();
 
 	/**
-	 * Obtains the {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} within the
-	 * {@link Flow}.
+	 * Obtains the {@link ManagedFunctionMetaData} of the initial
+	 * {@link ManagedFunction} within the {@link Flow}.
 	 * 
-	 * @return {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} within the
-	 *         {@link Flow}.
+	 * @return {@link ManagedFunctionMetaData} of the initial
+	 *         {@link ManagedFunction} within the {@link Flow}.
 	 */
-	ManagedFunctionMetaData<W, ?, ?> getInitialTaskMetaData();
+	ManagedFunctionMetaData<?, ?> getInitialFunctionMetaData();
 
 	/**
 	 * Obtains the {@link AssetManager} to managed this {@link Flow}.

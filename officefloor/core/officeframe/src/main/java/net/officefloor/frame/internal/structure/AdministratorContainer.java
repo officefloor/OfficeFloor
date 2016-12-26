@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
+public interface AdministratorContainer<A extends Enum<A>> {
 
 	/**
 	 * Obtains the {@link ThreadState} responsible for changes to this
@@ -44,17 +44,15 @@ public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
 	 * 
 	 * @param functionDutyAssociation
 	 *            {@link ManagedFunctionDutyAssociation}.
-	 * @param flow
-	 *            {@link Flow}.
+	 * @param managedFunctionContainer
+	 *            {@link ManagedFunctionContainer}.
 	 * @param managedFunctionMetaData
 	 *            {@link ManagedFunctionMetaData} of the
 	 *            {@link ManagedFunction}.
-	 * @param workContainer
-	 *            {@link WorkContainer}.
 	 * @return {@link ManagedFunctionContainer} to administer the
 	 *         {@link ManagedObject} instances.
 	 */
 	ManagedFunctionContainer administerManagedObjects(ManagedFunctionDutyAssociation<A> functionDutyAssociation,
-			Flow flow, ManagedFunctionMetaData<?, ?, ?> managedFunctionMetaData, WorkContainer<?> workContainer);
+			ManagedFunctionContainer managedFunctionContainer, ManagedFunctionMetaData<?, ?> managedFunctionMetaData);
 
 }
