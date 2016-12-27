@@ -30,9 +30,9 @@ public interface ProcessAwareContext {
 	 * @param operation
 	 *            {@link ProcessSafeOperation}.
 	 * @return Return value.
-	 * @throws E
+	 * @throws T
 	 *             Possible {@link Throwable}.
 	 */
-	<R, E extends Throwable> R run(ProcessSafeOperation<R, E> operation) throws E;
+	<R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T;
 
 }

@@ -15,30 +15,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.structure;
+package net.officefloor.frame.api.profile;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Startup task for an {@link Office}.
+ * Profiled execution of a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeStartupTask {
+public interface ProfiledManagedFunction {
 
 	/**
-	 * Obtains the {@link FlowMetaData} for the startup task.
+	 * Obtains the name of the {@link ManagedFunction}.
 	 * 
-	 * @return {@link FlowMetaData} for the startup task.
+	 * @return Name of the {@link ManagedFunction}.
 	 */
-	FlowMetaData<?> getFlowMetaData();
+	String getFunctionName();
 
 	/**
-	 * Obtains the parameter to invoke the startup {@link ManagedFunction} with.
+	 * Obtains the timestamp in nanoseconds when the {@link ManagedFunction} was
+	 * started.
 	 * 
-	 * @return Parameter for the startup {@link ManagedFunction}.
+	 * @return Timestamp in nanoseconds when the {@link ManagedFunction} was
+	 *         started.
 	 */
-	Object getParameter();
+	long getStartTimestamp();
+
+	/**
+	 * Obtains the name of the executing {@link Thread}.
+	 * 
+	 * @return Name of the executing {@link Thread}.
+	 */
+	String getExecutingThreadName();
 
 }

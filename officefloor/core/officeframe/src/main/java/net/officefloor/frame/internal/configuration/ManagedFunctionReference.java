@@ -15,40 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.manage;
+package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.FunctionState;
 
 /**
- * Interface to manage a particular {@link Work}.
+ * Reference to a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-@Deprecated // obtain directly from Office
-public interface WorkManager {
+public interface ManagedFunctionReference {
 
 	/**
-	 * <p>
-	 * Obtains the names of the {@link FunctionManager} instances managed by this
-	 * {@link WorkManager}.
-	 * <p>
-	 * This allows to dynamically manage this {@link WorkManager}.
+	 * Obtains the name of the {@link ManagedFunction}.
 	 * 
-	 * @return Names of the {@link FunctionManager} instances managed by this
-	 *         {@link WorkManager}.
+	 * @return Name of the {@link ManagedFunction}.
 	 */
-	String[] getTaskNames();
+	String getFunctionName();
 
 	/**
-	 * Obtains the {@link FunctionManager} for the named {@link ManagedFunction}.
+	 * Obtains the type of argument to be passed to the referenced
+	 * {@link ManagedFunction}.
 	 * 
-	 * @param taskName
-	 *            Name of the {@link ManagedFunction}.
-	 * @return {@link FunctionManager} for the named {@link ManagedFunction}.
-	 * @throws UnknownFunctionException
-	 *             If unknown {@link ManagedFunction} name.
+	 * @return Type of argument to be passed to the referenced
+	 *         {@link ManagedFunction}.
 	 */
-	FunctionManager getTaskManager(String taskName) throws UnknownFunctionException;
+	Class<?> getArgumentType();
 
 }

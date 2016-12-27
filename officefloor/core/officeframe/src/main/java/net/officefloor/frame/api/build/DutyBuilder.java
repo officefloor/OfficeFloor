@@ -18,7 +18,6 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.governance.Governance;
@@ -34,42 +33,34 @@ import net.officefloor.frame.spi.governance.Governance;
 public interface DutyBuilder {
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
-	 * the {@link Flow}.
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
+	 * of the {@link Flow}.
 	 * 
 	 * @param <F>
 	 *            Flow key type.
 	 * @param key
 	 *            Key identifying the {@link Flow}.
-	 * @param workName
-	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
-	 *            {@link Flow} resides on.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} that resides on the {@link Work}.
+	 * @param functionName
+	 *            Name of {@link ManagedFunction}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link Flow}.
-	 *            May be <code>null</code> to indicate no argument.
+	 *            Type of argument passed to the instigated {@link Flow}. May be
+	 *            <code>null</code> to indicate no argument.
 	 */
-	<F extends Enum<F>> void linkFlow(F key, String workName, String taskName,
-			Class<?> argumentType);
+	<F extends Enum<F>> void linkFlow(F key, String functionName, Class<?> argumentType);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
-	 * the {@link Flow}.
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
+	 * of the {@link Flow}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow}.
-	 * @param workName
-	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
-	 *            {@link Flow} resides on.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} that resides on the {@link Work}.
+	 * @param functionName
+	 *            Name of {@link ManagedFunction}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link Flow}.
-	 *            May be <code>null</code> to indicate no argument.
+	 *            Type of argument passed to the instigated {@link Flow}. May be
+	 *            <code>null</code> to indicate no argument.
 	 */
-	void linkFlow(int flowIndex, String workName, String taskName,
-			Class<?> argumentType);
+	void linkFlow(int flowIndex, String functionName, Class<?> argumentType);
 
 	/**
 	 * Links a {@link Governance}.

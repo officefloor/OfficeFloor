@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.construct.governance;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -44,7 +44,7 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements
 	/**
 	 * Reference to the initial {@link ManagedFunction} of this {@link Flow}.
 	 */
-	private final TaskNodeReference taskNodeRef;
+	private final ManagedFunctionReference taskNodeRef;
 
 	/**
 	 * Index of the {@link Flow}.
@@ -73,7 +73,7 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements
 	 */
 	public GovernanceFlowConfigurationImpl(String flowName,
 			FlowInstigationStrategyEnum strategy,
-			TaskNodeReference taskNodeRef, int index, F key) {
+			ManagedFunctionReference taskNodeRef, int index, F key) {
 		this.flowName = flowName;
 		this.strategy = strategy;
 		this.taskNodeRef = taskNodeRef;
@@ -96,7 +96,7 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements
 	}
 
 	@Override
-	public TaskNodeReference getInitialTask() {
+	public ManagedFunctionReference getInitialTask() {
 		return this.taskNodeRef;
 	}
 

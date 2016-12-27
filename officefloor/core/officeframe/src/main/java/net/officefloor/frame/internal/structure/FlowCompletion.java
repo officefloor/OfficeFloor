@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.escalate.Escalation;
+
 /**
  * Handler for the completion of the {@link Flow}.
  *
@@ -25,18 +27,15 @@ package net.officefloor.frame.internal.structure;
 public interface FlowCompletion extends LinkedListSetEntry<FlowCompletion, ManagedFunctionContainer> {
 
 	/**
-	 * Obtains the optional {@link FunctionState} to complete the {@link Flow}.
+	 * Obtains the {@link FunctionState} to notify completion of the
+	 * {@link Flow}.
 	 * 
-	 * @return Optional {@link FunctionState} to complete the {@link Flow}. May
-	 *         be <code>null</code>.
+	 * @param escalation
+	 *            Possible {@link Escalation} from the {@link Flow}. Will be
+	 *            <code>null</code> if {@link Flow} completed without
+	 *            {@link Escalation}.
+	 * @return {@link FunctionState} to notify completion of the {@link Flow}.
 	 */
-	FunctionState getFlowCompletionFunction();
-
-	/**
-	 * Obtains the {@link EscalationProcedure} for the {@link Flow}.
-	 * 
-	 * @return {@link EscalationProcedure} for the {@link Flow}.
-	 */
-	EscalationProcedure getFlowEscalationProcedure();
+	FunctionState complete(Throwable escalation);
 
 }

@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
  * Office within the {@link OfficeFloor}.
@@ -28,25 +28,26 @@ public interface Office {
 
 	/**
 	 * <p>
-	 * Obtains the names of the {@link WorkManager} instances within this
+	 * Obtains the names of the {@link FunctionManager} instances within this
 	 * {@link Office}.
 	 * <p>
 	 * This allows to dynamically manage this {@link Office}.
 	 * 
-	 * @return Names of the {@link WorkManager} instances within this
+	 * @return Names of the {@link FunctionManager} instances within this
 	 *         {@link Office}.
 	 */
-	String[] getWorkNames();
+	String[] getFunctionNames();
 
 	/**
-	 * Obtains the {@link WorkManager} for the named {@link Work}.
+	 * Obtains the {@link FunctionManager} for the named
+	 * {@link ManagedFunction}.
 	 * 
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @return {@link WorkManager} for the named {@link Work}.
-	 * @throws UnknownWorkException
-	 *             If unknown {@link Work} name.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @return {@link FunctionManager} for the named {@link ManagedFunction}.
+	 * @throws UnknownFunctionException
+	 *             If unknown {@link ManagedFunction} name.
 	 */
-	WorkManager getWorkManager(String workName) throws UnknownWorkException;
+	FunctionManager getFunctionManager(String functionName) throws UnknownFunctionException;
 
 }

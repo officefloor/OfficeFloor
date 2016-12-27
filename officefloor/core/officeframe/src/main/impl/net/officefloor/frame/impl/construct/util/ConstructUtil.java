@@ -26,9 +26,9 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -168,9 +168,9 @@ public class ConstructUtil {
 	 * {@link OfficeFloorIssues}.
 	 * 
 	 * @param taskNodeReference
-	 *            {@link TaskNodeReference}.
+	 *            {@link ManagedFunctionReference}.
 	 * @param taskLocator
-	 *            {@link OfficeMetaDataLocator} to use to locate the
+	 *            {@link ManagedFunctionLocator} to use to locate the
 	 *            {@link ManagedFunctionMetaData}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
@@ -184,14 +184,14 @@ public class ConstructUtil {
 	 * @param isWorkNameRequired
 	 *            Flags indicating if {@link Work} name is required.
 	 *            <code>false</code> indicates that the
-	 *            {@link OfficeMetaDataLocator} has a default {@link Work} to
+	 *            {@link ManagedFunctionLocator} has a default {@link Work} to
 	 *            find {@link ManagedFunctionMetaData}.
 	 * @return {@link ManagedFunctionMetaData} or <code>null</code> if not found with
 	 *         issues reported to the {@link OfficeFloorIssues}.
 	 */
 	public static ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(
-			TaskNodeReference taskNodeReference,
-			OfficeMetaDataLocator taskLocator, OfficeFloorIssues issues,
+			ManagedFunctionReference taskNodeReference,
+			ManagedFunctionLocator taskLocator, OfficeFloorIssues issues,
 			AssetType assetType, String assetName, String forItemDescription,
 			boolean isWorkNameRequired) {
 

@@ -24,6 +24,7 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // always enforce (unless disregard when handling escalation)
 public enum GovernanceDeactivationStrategy {
 
 	/**

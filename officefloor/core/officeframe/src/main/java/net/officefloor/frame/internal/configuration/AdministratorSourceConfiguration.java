@@ -60,7 +60,8 @@ public interface AdministratorSourceConfiguration<A extends Enum<A>, AS extends 
 	 * responsible for completing the {@link Duty} instances of this
 	 * {@link Administrator}.
 	 * 
-	 * @return {@link Office} name of the {@link Team}.
+	 * @return {@link Office} name of the {@link Team}. May be <code>null</code>
+	 *         to use any {@link Team}.
 	 */
 	String getOfficeTeamName();
 

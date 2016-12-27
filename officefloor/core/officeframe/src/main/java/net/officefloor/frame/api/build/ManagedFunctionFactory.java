@@ -20,7 +20,7 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
- * Creates the {@link ManagedFunction} to be done.
+ * Creates the {@link ManagedFunction} to be executed.
  * 
  * @author Daniel Sagenschneider
  */

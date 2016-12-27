@@ -32,22 +32,22 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.internal.configuration.TaskConfiguration;
-import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
-import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
-import net.officefloor.frame.internal.configuration.TaskGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
-import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
-import net.officefloor.frame.internal.construct.RawTaskMetaData;
+import net.officefloor.frame.internal.construct.RawManagedFunctionMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AssetManager;
@@ -88,11 +88,11 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	private static final String DEFAULT_WORK_NAME = "DEFAULT_WORK_NAME";
 
 	/**
-	 * {@link TaskConfiguration}.
+	 * {@link ManagedFunctionConfiguration}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskConfiguration<W, D, F> configuration = this
-			.createMock(TaskConfiguration.class);
+	private final ManagedFunctionConfiguration<W, D, F> configuration = this
+			.createMock(ManagedFunctionConfiguration.class);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -139,16 +139,16 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 			.createMock(WorkMetaData.class);
 
 	/**
-	 * {@link OfficeMetaDataLocator}.
+	 * {@link ManagedFunctionLocator}.
 	 */
-	private final OfficeMetaDataLocator inputTaskMetaDataLocator = this
-			.createMock(OfficeMetaDataLocator.class);
+	private final ManagedFunctionLocator inputTaskMetaDataLocator = this
+			.createMock(ManagedFunctionLocator.class);
 
 	/**
-	 * {@link OfficeMetaDataLocator} to find the {@link ManagedFunctionMetaData}.
+	 * {@link ManagedFunctionLocator} to find the {@link ManagedFunctionMetaData}.
 	 */
-	private final OfficeMetaDataLocator taskLocator = this
-			.createMock(OfficeMetaDataLocator.class);
+	private final ManagedFunctionLocator taskLocator = this
+			.createMock(ManagedFunctionLocator.class);
 
 	/**
 	 * {@link AssetManagerFactory}.
@@ -227,7 +227,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Verify differentiator
@@ -248,7 +248,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Verify no differentiator
@@ -323,7 +323,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Verify initial raw details
@@ -347,14 +347,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoObjectType() {
 
-		final TaskObjectConfiguration<?> moConfiguration = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 
 		// Record no managed object name
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { moConfiguration });
+				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				null);
 		this.record_taskIssue("No type for object at index 0");
@@ -373,14 +373,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	public void testParameter() {
 
 		final Class<?> parameterType = Connection.class;
-		final TaskObjectConfiguration<?> moConfiguration = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 
 		// Record parameter
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { moConfiguration });
+				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				parameterType);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), true);
@@ -389,7 +389,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> rawMetaData = this
+		RawManagedFunctionMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
 		ManagedFunctionMetaData<W, D, F> metaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
@@ -419,18 +419,18 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Parameter will be Connection but can be passed as Object
 		final Class<?> paramTypeOne = Connection.class;
-		final TaskObjectConfiguration<?> paramConfigOne = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> paramConfigOne = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 		final Class<?> paramTypeTwo = Object.class;
-		final TaskObjectConfiguration<?> paramConfigTwo = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> paramConfigTwo = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 
 		// Record parameter used twice
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(
 				this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { paramConfigOne, paramConfigTwo });
+				new ManagedFunctionObjectConfiguration[] { paramConfigOne, paramConfigTwo });
 		this.recordReturn(paramConfigOne, paramConfigOne.getObjectType(),
 				paramTypeOne);
 		this.recordReturn(paramConfigOne, paramConfigOne.isParameter(), true);
@@ -442,7 +442,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> rawMetaData = this
+		RawManagedFunctionMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
 		ManagedFunctionMetaData<W, D, F> metaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
@@ -471,18 +471,18 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Parameter types are incompatible
 		final Class<?> paramTypeOne = Integer.class;
-		final TaskObjectConfiguration<?> paramConfigOne = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> paramConfigOne = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 		final Class<?> paramTypeTwo = String.class;
-		final TaskObjectConfiguration<?> paramConfigTwo = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> paramConfigTwo = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 
 		// Record parameters incompatible
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(
 				this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { paramConfigOne, paramConfigTwo });
+				new ManagedFunctionObjectConfiguration[] { paramConfigOne, paramConfigTwo });
 		this.recordReturn(paramConfigOne, paramConfigOne.getObjectType(),
 				paramTypeOne);
 		this.recordReturn(paramConfigOne, paramConfigOne.isParameter(), true);
@@ -509,7 +509,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { null });
+				new ManagedFunctionObjectConfiguration[] { null });
 		this.record_taskIssue("No object configuration at index 0");
 		this.record_NoAdministration();
 		this.record_NoGovernance();
@@ -525,14 +525,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoScopeManagedObjectName() {
 
-		final TaskObjectConfiguration<?> moConfiguration = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 
 		// Record no managed object name
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { moConfiguration });
+				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Object.class);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
@@ -553,14 +553,14 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testUnknownManagedObject() {
 
-		final TaskObjectConfiguration<?> moConfiguration = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 
 		// Record unknown managed object
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { moConfiguration });
+				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Object.class);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
@@ -574,7 +574,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure no managed objects
@@ -588,8 +588,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testIncompatibleManagedObject() {
 
-		final TaskObjectConfiguration<?> moConfiguration = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 		final RawBoundManagedObjectMetaData rawWorkMo = this
 				.createMock(RawBoundManagedObjectMetaData.class);
 		final RawBoundManagedObjectInstanceMetaData<?> rawWorkMoInstance = this
@@ -601,7 +601,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { moConfiguration });
+				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Connection.class); // require Connection but Integer
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
@@ -626,7 +626,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure no managed objects
@@ -640,8 +640,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testManagedObject() {
 
-		final TaskObjectConfiguration<?> moConfiguration = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 
 		// Work required Managed Object
 		final RawBoundManagedObjectMetaData rawMo = this
@@ -657,7 +657,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { moConfiguration });
+				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Object.class);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
@@ -678,7 +678,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure have the required managed object
@@ -700,8 +700,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testManagedObjectDependencyOrdering() {
 
-		final TaskObjectConfiguration<?> moConfiguration = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 
 		// Work required Managed Object
 		final RawBoundManagedObjectMetaData rawWorkMo = this
@@ -733,7 +733,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { moConfiguration });
+				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Object.class);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
@@ -763,7 +763,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure have managed objects with dependency first
@@ -789,8 +789,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testManagedObjectCyclicDependency() {
 
-		final TaskObjectConfiguration<?> moConfiguration = this
-				.createMock(TaskObjectConfiguration.class);
+		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
 		final RawBoundManagedObjectMetaData rawMoA = this
 				.createMock(RawBoundManagedObjectMetaData.class);
 		final RawBoundManagedObjectInstanceMetaData<?> rawMoAInstance = this
@@ -810,7 +810,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[] { moConfiguration });
+				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
 				Object.class);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
@@ -848,26 +848,26 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoAdministratorName() {
 
-		final TaskDutyConfiguration<?> dutyConfiguration = this
-				.createMock(TaskDutyConfiguration.class);
+		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
+				.createMock(ManagedFunctionDutyConfiguration.class);
 
 		// Record no administrator name
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.recordReturn(this.configuration,
 				this.configuration.getPreTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[] { dutyConfiguration });
+				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration,
 				dutyConfiguration.getScopeAdministratorName(), null);
 		this.record_taskIssue("No administrator name for pre-task at index 0");
 		this.recordReturn(this.configuration,
 				this.configuration.getPostTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[0]);
+				new ManagedFunctionDutyConfiguration[0]);
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// No duties
@@ -880,15 +880,15 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testUnknownAdministrator() {
 
-		final TaskDutyConfiguration<?> dutyConfiguration = this
-				.createMock(TaskDutyConfiguration.class);
+		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
+				.createMock(ManagedFunctionDutyConfiguration.class);
 
 		// Record unknown administrator
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.recordReturn(this.configuration,
 				this.configuration.getPreTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[] { dutyConfiguration });
+				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration,
 				dutyConfiguration.getScopeAdministratorName(), "ADMIN");
 		this.recordReturn(this.rawWorkMetaData,
@@ -897,12 +897,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskIssue("Can not find scope administrator 'ADMIN'");
 		this.recordReturn(this.configuration,
 				this.configuration.getPostTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[0]);
+				new ManagedFunctionDutyConfiguration[0]);
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// No duties
@@ -915,8 +915,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoDutyName() {
 
-		final TaskDutyConfiguration<?> dutyConfiguration = this
-				.createMock(TaskDutyConfiguration.class);
+		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
+				.createMock(ManagedFunctionDutyConfiguration.class);
 		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this
 				.createMock(RawBoundAdministratorMetaData.class);
 		final AdministratorIndex adminIndex = this
@@ -927,7 +927,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoManagedObjects();
 		this.recordReturn(this.configuration,
 				this.configuration.getPreTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[] { dutyConfiguration });
+				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration,
 				dutyConfiguration.getScopeAdministratorName(), "ADMIN");
 		this.recordReturn(this.rawWorkMetaData,
@@ -942,12 +942,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_taskIssue("No duty name/key for pre-task at index 0");
 		this.recordReturn(this.configuration,
 				this.configuration.getPostTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[0]);
+				new ManagedFunctionDutyConfiguration[0]);
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// No duties
@@ -960,8 +960,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testConstructPreAdministratorDuty() {
 
-		final TaskDutyConfiguration<?> dutyConfiguration = this
-				.createMock(TaskDutyConfiguration.class);
+		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
+				.createMock(ManagedFunctionDutyConfiguration.class);
 		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this
 				.createMock(RawBoundAdministratorMetaData.class);
 		final AdministratorIndex adminIndex = this
@@ -980,7 +980,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoManagedObjects();
 		this.recordReturn(this.configuration,
 				this.configuration.getPreTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[] { dutyConfiguration });
+				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration,
 				dutyConfiguration.getScopeAdministratorName(), "ADMIN");
 		this.recordReturn(this.rawWorkMetaData,
@@ -999,13 +999,13 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_loadDependencies(moLinked);
 		this.recordReturn(this.configuration,
 				this.configuration.getPostTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[0]);
+				new ManagedFunctionDutyConfiguration[0]);
 		this.record_dependencySortingForCoordination(moLinked);
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> rawMetaData = this
+		RawManagedFunctionMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
 		ManagedFunctionMetaData<W, D, F> taskMetaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
@@ -1033,8 +1033,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testPostTaskDutyWithAdministeredManagedObjectDependency() {
 
-		final TaskDutyConfiguration<?> dutyConfiguration = this
-				.createMock(TaskDutyConfiguration.class);
+		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
+				.createMock(ManagedFunctionDutyConfiguration.class);
 		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this
 				.createMock(RawBoundAdministratorMetaData.class);
 		final AdministratorIndex adminIndex = this
@@ -1059,10 +1059,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoManagedObjects();
 		this.recordReturn(this.configuration,
 				this.configuration.getPreTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[0]);
+				new ManagedFunctionDutyConfiguration[0]);
 		this.recordReturn(this.configuration,
 				this.configuration.getPostTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[] { dutyConfiguration });
+				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration,
 				dutyConfiguration.getScopeAdministratorName(), "ADMIN");
 		this.recordReturn(this.rawWorkMetaData,
@@ -1089,7 +1089,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> rawMetaData = this
+		RawManagedFunctionMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
 		ManagedFunctionMetaData<W, D, F> taskMetaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
@@ -1117,12 +1117,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link Flow} {@link TaskNodeReference}.
+	 * Ensure issue if no {@link Flow} {@link ManagedFunctionReference}.
 	 */
 	public void testNoFlowTaskNodeReference() {
 
-		final TaskFlowConfiguration<?> flowConfiguration = this
-				.createMock(TaskFlowConfiguration.class);
+		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
+				.createMock(ManagedFunctionFlowConfiguration.class);
 
 		// Record no task node reference
 		this.record_taskNameFactoryTeam();
@@ -1132,7 +1132,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
-				new TaskFlowConfiguration[] { flowConfiguration });
+				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), null);
 		this.record_taskIssue("No task referenced for flow index 0");
@@ -1150,10 +1150,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoFlowTaskName() {
 
-		final TaskFlowConfiguration<?> flowConfiguration = this
-				.createMock(TaskFlowConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
+				.createMock(ManagedFunctionFlowConfiguration.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record no task name
 		this.record_taskNameFactoryTeam();
@@ -1163,7 +1163,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
-				new TaskFlowConfiguration[] { flowConfiguration });
+				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -1186,10 +1186,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testUnknownFlowWork() {
 
-		final TaskFlowConfiguration<?> flowConfiguration = this
-				.createMock(TaskFlowConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
+				.createMock(ManagedFunctionFlowConfiguration.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record unknown work
 		this.record_taskNameFactoryTeam();
@@ -1199,7 +1199,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
-				new TaskFlowConfiguration[] { flowConfiguration });
+				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -1223,10 +1223,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testUnknownFlowTask() {
 
-		final TaskFlowConfiguration<?> flowConfiguration = this
-				.createMock(TaskFlowConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
+				.createMock(ManagedFunctionFlowConfiguration.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record unknown task
 		this.record_taskNameFactoryTeam();
@@ -1236,7 +1236,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
-				new TaskFlowConfiguration[] { flowConfiguration });
+				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -1264,10 +1264,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testIncompatibleFlowArgument() {
 
-		final TaskFlowConfiguration<?> flowConfiguration = this
-				.createMock(TaskFlowConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
+				.createMock(ManagedFunctionFlowConfiguration.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> flowTaskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 
@@ -1279,7 +1279,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
-				new TaskFlowConfiguration[] { flowConfiguration });
+				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -1312,10 +1312,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoFlowInstigationStrategy() {
 
-		final TaskFlowConfiguration<?> flowConfiguration = this
-				.createMock(TaskFlowConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
+				.createMock(ManagedFunctionFlowConfiguration.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> flowTaskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 
@@ -1327,7 +1327,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
-				new TaskFlowConfiguration[] { flowConfiguration });
+				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -1379,10 +1379,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	public void doConstructFlowTest(
 			FlowInstigationStrategyEnum instigationStrategy) {
 
-		final TaskFlowConfiguration<?> flowConfiguration = this
-				.createMock(TaskFlowConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
+				.createMock(ManagedFunctionFlowConfiguration.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> flowTaskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);
@@ -1395,7 +1395,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
-				new TaskFlowConfiguration[] { flowConfiguration });
+				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -1421,7 +1421,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this
+		RawManagedFunctionMetaData<W, D, F> metaData = this
 				.fullyConstructRawTaskMetaData();
 		this.verifyMockObjects();
 
@@ -1449,8 +1449,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoNextTaskName() {
 
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record no next task name
 		this.record_taskNameFactoryTeam();
@@ -1479,8 +1479,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testIncompatibleNextTaskArgument() {
 
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> nextTaskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 
@@ -1522,8 +1522,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testConstructNextTask() {
 
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> nextTaskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 
@@ -1551,7 +1551,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this
+		RawManagedFunctionMetaData<W, D, F> metaData = this
 				.fullyConstructRawTaskMetaData();
 		this.verifyMockObjects();
 
@@ -1567,8 +1567,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoEscalationType() {
 
-		final TaskEscalationConfiguration escalationConfiguration = this
-				.createMock(TaskEscalationConfiguration.class);
+		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
+				.createMock(ManagedFunctionEscalationConfiguration.class);
 
 		// Record no escalation type
 		this.record_taskNameFactoryTeam();
@@ -1580,7 +1580,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoNextTask();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalations(),
-				new TaskEscalationConfiguration[] { escalationConfiguration });
+				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration,
 				escalationConfiguration.getTypeOfCause(), null);
 		this.record_taskIssue("No escalation type for escalation index 0");
@@ -1592,12 +1592,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link TaskNodeReference} for {@link EscalationFlow}.
+	 * Ensure issue if no {@link ManagedFunctionReference} for {@link EscalationFlow}.
 	 */
 	public void testNoEscalationTaskNodeReference() {
 
-		final TaskEscalationConfiguration escalationConfiguration = this
-				.createMock(TaskEscalationConfiguration.class);
+		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
+				.createMock(ManagedFunctionEscalationConfiguration.class);
 
 		// Record no task referenced
 		this.record_taskNameFactoryTeam();
@@ -1609,7 +1609,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoNextTask();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalations(),
-				new TaskEscalationConfiguration[] { escalationConfiguration });
+				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration,
 				escalationConfiguration.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration,
@@ -1627,10 +1627,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoEscalationTaskName() {
 
-		final TaskEscalationConfiguration escalationConfiguration = this
-				.createMock(TaskEscalationConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
+				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record no escalation task name
 		this.record_taskNameFactoryTeam();
@@ -1642,7 +1642,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoNextTask();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalations(),
-				new TaskEscalationConfiguration[] { escalationConfiguration });
+				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration,
 				escalationConfiguration.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration,
@@ -1665,10 +1665,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testIncompatibleEscalation() {
 
-		final TaskEscalationConfiguration escalationConfiguration = this
-				.createMock(TaskEscalationConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
+				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> escalationTaskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 
@@ -1682,7 +1682,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoNextTask();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalations(),
-				new TaskEscalationConfiguration[] { escalationConfiguration });
+				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration,
 				escalationConfiguration.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration,
@@ -1716,10 +1716,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testConstructEscalation() {
 
-		final TaskEscalationConfiguration escalationConfiguration = this
-				.createMock(TaskEscalationConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
+				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> escalationTaskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 
@@ -1733,7 +1733,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoNextTask();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalations(),
-				new TaskEscalationConfiguration[] { escalationConfiguration });
+				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration,
 				escalationConfiguration.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration,
@@ -1754,7 +1754,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this
+		RawManagedFunctionMetaData<W, D, F> metaData = this
 				.fullyConstructRawTaskMetaData();
 		this.verifyMockObjects();
 
@@ -1774,8 +1774,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoGovernanceName() {
 
-		final TaskGovernanceConfiguration gov = this
-				.createMock(TaskGovernanceConfiguration.class);
+		final ManagedFunctionGovernanceConfiguration gov = this
+				.createMock(ManagedFunctionGovernanceConfiguration.class);
 		final Map<String, RawGovernanceMetaData<?, ?>> governances = new HashMap<String, RawGovernanceMetaData<?, ?>>();
 
 		// Record construct governance
@@ -1786,7 +1786,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record configuring governance
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceConfiguration(),
-				new TaskGovernanceConfiguration[] { gov });
+				new ManagedFunctionGovernanceConfiguration[] { gov });
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.isManuallyManageGovernance(), false);
 		this.recordReturn(this.rawOfficeMetaData,
@@ -1810,8 +1810,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testUnknownGovernance() {
 
-		final TaskGovernanceConfiguration gov = this
-				.createMock(TaskGovernanceConfiguration.class);
+		final ManagedFunctionGovernanceConfiguration gov = this
+				.createMock(ManagedFunctionGovernanceConfiguration.class);
 		final Map<String, RawGovernanceMetaData<?, ?>> governances = new HashMap<String, RawGovernanceMetaData<?, ?>>();
 
 		// Record construct governance
@@ -1822,7 +1822,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record configuring governance
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceConfiguration(),
-				new TaskGovernanceConfiguration[] { gov });
+				new ManagedFunctionGovernanceConfiguration[] { gov });
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.isManuallyManageGovernance(), false);
 		this.recordReturn(this.rawOfficeMetaData,
@@ -1846,12 +1846,12 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testGovernance() {
 
-		final TaskGovernanceConfiguration govOne = this
-				.createMock(TaskGovernanceConfiguration.class);
+		final ManagedFunctionGovernanceConfiguration govOne = this
+				.createMock(ManagedFunctionGovernanceConfiguration.class);
 		final RawGovernanceMetaData<?, ?> rawGovOne = this
 				.createMock(RawGovernanceMetaData.class);
-		final TaskGovernanceConfiguration govTwo = this
-				.createMock(TaskGovernanceConfiguration.class);
+		final ManagedFunctionGovernanceConfiguration govTwo = this
+				.createMock(ManagedFunctionGovernanceConfiguration.class);
 		final RawGovernanceMetaData<?, ?> rawGovTwo = this
 				.createMock(RawGovernanceMetaData.class);
 		final Map<String, RawGovernanceMetaData<?, ?>> governances = new HashMap<String, RawGovernanceMetaData<?, ?>>();
@@ -1870,7 +1870,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record configuring governance
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceConfiguration(),
-				new TaskGovernanceConfiguration[] { govOne, govTwo });
+				new ManagedFunctionGovernanceConfiguration[] { govOne, govTwo });
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.isManuallyManageGovernance(), false);
 		this.recordReturn(this.rawOfficeMetaData,
@@ -1887,7 +1887,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this
+		RawManagedFunctionMetaData<W, D, F> metaData = this
 				.fullyConstructRawTaskMetaData();
 		this.verifyMockObjects();
 
@@ -1908,8 +1908,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testGovernanceButFlaggedManual() {
 
-		final TaskGovernanceConfiguration gov = this
-				.createMock(TaskGovernanceConfiguration.class);
+		final ManagedFunctionGovernanceConfiguration gov = this
+				.createMock(ManagedFunctionGovernanceConfiguration.class);
 
 		// Record construct governance
 		this.record_taskNameFactoryTeam();
@@ -1919,7 +1919,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record configuring governance
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceConfiguration(),
-				new TaskGovernanceConfiguration[] { gov });
+				new ManagedFunctionGovernanceConfiguration[] { gov });
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.isManuallyManageGovernance(), true);
 		this.record_taskIssue("Manually manage Governance but Governance configured for OfficeFloor management");
@@ -1949,7 +1949,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Record configuring governance
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceConfiguration(),
-				new TaskGovernanceConfiguration[0]);
+				new ManagedFunctionGovernanceConfiguration[0]);
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.isManuallyManageGovernance(), true);
 
@@ -1960,7 +1960,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<W, D, F> metaData = this
+		RawManagedFunctionMetaData<W, D, F> metaData = this
 				.fullyConstructRawTaskMetaData();
 		this.verifyMockObjects();
 
@@ -2003,7 +2003,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	private void record_NoManagedObjects() {
 		this.recordReturn(this.configuration,
 				this.configuration.getObjectConfiguration(),
-				new TaskObjectConfiguration[0]);
+				new ManagedFunctionObjectConfiguration[0]);
 	}
 
 	/**
@@ -2012,10 +2012,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	private void record_NoAdministration() {
 		this.recordReturn(this.configuration,
 				this.configuration.getPreTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[0]);
+				new ManagedFunctionDutyConfiguration[0]);
 		this.recordReturn(this.configuration,
 				this.configuration.getPostTaskAdministratorDutyConfiguration(),
-				new TaskDutyConfiguration[0]);
+				new ManagedFunctionDutyConfiguration[0]);
 	}
 
 	/**
@@ -2032,7 +2032,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		final Map<?, ?> governances = this.createMock(Map.class);
 		this.recordReturn(this.configuration,
 				this.configuration.getGovernanceConfiguration(),
-				new TaskGovernanceConfiguration[0]);
+				new ManagedFunctionGovernanceConfiguration[0]);
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.isManuallyManageGovernance(), false);
 		this.recordReturn(this.rawOfficeMetaData,
@@ -2041,7 +2041,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Records obtaining the {@link OfficeMetaDataLocator}.
+	 * Records obtaining the {@link ManagedFunctionLocator}.
 	 */
 	private void record_createWorkSpecificTaskMetaDataLocator() {
 		this.recordReturn(
@@ -2173,7 +2173,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	private void record_NoFlows() {
 		this.recordReturn(this.configuration,
 				this.configuration.getFlowConfiguration(),
-				new TaskFlowConfiguration[0]);
+				new ManagedFunctionFlowConfiguration[0]);
 	}
 
 	/**
@@ -2190,7 +2190,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	private void record_NoEscalations() {
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalations(),
-				new TaskEscalationConfiguration[0]);
+				new ManagedFunctionEscalationConfiguration[0]);
 	}
 
 	/**
@@ -2204,18 +2204,18 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Constructs the {@link RawTaskMetaData}.
+	 * Constructs the {@link RawManagedFunctionMetaData}.
 	 * 
 	 * @param isExpectConstruct
 	 *            If expected to be constructed.
-	 * @return {@link RawTaskMetaData}.
+	 * @return {@link RawManagedFunctionMetaData}.
 	 */
 	@SuppressWarnings("unchecked")
-	private RawTaskMetaData<W, D, F> constructRawTaskMetaData(
+	private RawManagedFunctionMetaData<W, D, F> constructRawTaskMetaData(
 			boolean isExpectConstruct) {
 
 		// Construct the raw task meta-data
-		RawTaskMetaData<W, ?, ?> metaData = RawTaskMetaDataImpl.getFactory()
+		RawManagedFunctionMetaData<W, ?, ?> metaData = RawTaskMetaDataImpl.getFactory()
 				.constructRawTaskMetaData(this.configuration, this.issues,
 						this.rawWorkMetaData);
 		if (isExpectConstruct) {
@@ -2225,19 +2225,19 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		}
 
 		// Return the meta-data
-		return (RawTaskMetaData<W, D, F>) metaData;
+		return (RawManagedFunctionMetaData<W, D, F>) metaData;
 	}
 
 	/**
-	 * Fully constructs the {@link RawTaskMetaData} by ensuring remaining state
-	 * is loaded. Will always expect to construct the {@link RawTaskMetaData}.
+	 * Fully constructs the {@link RawManagedFunctionMetaData} by ensuring remaining state
+	 * is loaded. Will always expect to construct the {@link RawManagedFunctionMetaData}.
 	 * 
-	 * @return {@link RawTaskMetaData}.
+	 * @return {@link RawManagedFunctionMetaData}.
 	 */
-	private RawTaskMetaData<W, D, F> fullyConstructRawTaskMetaData() {
+	private RawManagedFunctionMetaData<W, D, F> fullyConstructRawTaskMetaData() {
 
 		// Construct the raw task meta-data
-		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
+		RawManagedFunctionMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 
 		// Other tasks and work expected to be constructed between these steps
 

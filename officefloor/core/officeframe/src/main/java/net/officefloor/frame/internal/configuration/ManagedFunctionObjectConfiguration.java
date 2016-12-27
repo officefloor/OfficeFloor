@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskObjectConfiguration<D> {
+public interface ManagedFunctionObjectConfiguration<D> {
 
 	/**
 	 * Indicates if this dependent {@link Object} is the argument passed to the

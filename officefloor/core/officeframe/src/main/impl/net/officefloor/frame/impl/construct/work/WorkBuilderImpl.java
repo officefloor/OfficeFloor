@@ -33,7 +33,7 @@ import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuild
 import net.officefloor.frame.impl.construct.task.TaskBuilderImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
-import net.officefloor.frame.internal.configuration.TaskConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -73,7 +73,7 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	private String initialTaskName;
 
 	/**
-	 * Listing of {@link TaskConfiguration}.
+	 * Listing of {@link ManagedFunctionConfiguration}.
 	 */
 	private final List<TaskBuilderImpl<W, ?, ?>> tasks = new LinkedList<TaskBuilderImpl<W, ?, ?>>();
 
@@ -183,8 +183,8 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <D extends Enum<D>, F extends Enum<F>> TaskConfiguration<W, D, F>[] getTaskConfiguration() {
-		return this.tasks.toArray(new TaskConfiguration[0]);
+	public <D extends Enum<D>, F extends Enum<F>> ManagedFunctionConfiguration<W, D, F>[] getTaskConfiguration() {
+		return this.tasks.toArray(new ManagedFunctionConfiguration[0]);
 	}
 
 }

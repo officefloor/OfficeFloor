@@ -21,9 +21,9 @@ import java.util.List;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.profile.ProfiledJob;
-import net.officefloor.frame.api.profile.ProfiledProcess;
-import net.officefloor.frame.api.profile.ProfiledThread;
+import net.officefloor.frame.api.profile.ProfiledManagedFunction;
+import net.officefloor.frame.api.profile.ProfiledProcessState;
+import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -52,10 +52,10 @@ public class ProfilerIntegrationTest extends AbstractOfficeConstructTestCase {
 		builder.buildTask("taskTwo", "TEAM");
 
 		// Provide the profiler
-		final ProfiledProcess[] profiledProcess = new ProfiledProcess[1];
+		final ProfiledProcessState[] profiledProcess = new ProfiledProcessState[1];
 		this.getOfficeBuilder().setProfiler(new Profiler() {
 			@Override
-			public void profileProcess(ProfiledProcess process) {
+			public void profileProcess(ProfiledProcessState process) {
 				profiledProcess[0] = process;
 			}
 		});
@@ -65,9 +65,9 @@ public class ProfilerIntegrationTest extends AbstractOfficeConstructTestCase {
 
 		// Ensure correct profiling
 		assertNotNull("Ensure have profiled process", profiledProcess[0]);
-		List<ProfiledThread> threads = profiledProcess[0].getProfiledThreads();
+		List<ProfiledThreadState> threads = profiledProcess[0].getProfiledThreads();
 		assertEquals("Incorrect number of threads", 1, threads.size());
-		List<ProfiledJob> jobs = threads.get(0).getProfiledJobs();
+		List<ProfiledManagedFunction> jobs = threads.get(0).getProfiledJobs();
 		assertEquals("Incorrect number of jobs", 2, jobs.size());
 		assertEquals("Incorrect first job", "WORK.taskOne", jobs.get(0)
 				.getJobName());

@@ -17,26 +17,21 @@
  */
 package net.officefloor.frame.spi.team.source;
 
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * <p>
  * Listener of a {@link ProcessState} to allow associating state to the context
- * of the {@link ProcessState}.
- * <p>
- * The {@link Thread} creating the {@link ProcessState} will be the same
- * {@link Thread} invoking the {@link #processCreated(Object)} method.
+ * of the {@link ProcessState}. The {@link Thread} creating the
+ * {@link ProcessState} will be the same {@link Thread} invoking the
+ * {@link #processCreated(Object)} method.
  * <p>
  * An example use is for embedding {@link OfficeFloor} within an Application
- * Server and associating the {@link Thread} invoking {@link Work} with the
- * resulting created {@link ProcessState} to execute the {@link Work}.
+ * Server and associating the {@link Thread} invoking {@link ProcessState} for
+ * {@link ThreadLocal} instances of the Application Server.
  * <p>
  * The {@link #processCompleted(Object)} may be invoked by any {@link Thread}.
- * 
- * @see Job
  * 
  * @author Daniel Sagenschneider
  */

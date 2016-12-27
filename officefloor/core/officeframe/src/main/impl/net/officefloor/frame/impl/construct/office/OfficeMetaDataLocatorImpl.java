@@ -22,17 +22,17 @@ import java.util.Map;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
- * {@link OfficeMetaDataLocator} implementation.
+ * {@link ManagedFunctionLocator} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
+public class OfficeMetaDataLocatorImpl implements ManagedFunctionLocator {
 
 	/**
 	 * Listing of all {@link WorkMetaData} within the {@link Office}.
@@ -104,7 +104,7 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 	}
 
 	@Override
-	public OfficeMetaDataLocator createWorkSpecificOfficeMetaDataLocator(WorkMetaData<?> workMetaData) {
+	public ManagedFunctionLocator createWorkSpecificOfficeMetaDataLocator(WorkMetaData<?> workMetaData) {
 		return new OfficeMetaDataLocatorImpl(this.allWorkMetaData, workMetaData);
 	}
 

@@ -24,13 +24,12 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMet
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectDependencyMetaDataImpl<D extends Enum<D>> implements
-		ManagedObjectDependencyMetaData<D> {
+public class ManagedObjectDependencyMetaDataImpl<O extends Enum<O>> implements ManagedObjectDependencyMetaData<O> {
 
 	/**
 	 * Key identifying the dependency.
 	 */
-	private final D key;
+	private final O key;
 
 	/**
 	 * Type of dependency required.
@@ -55,7 +54,7 @@ public class ManagedObjectDependencyMetaDataImpl<D extends Enum<D>> implements
 	 * @param type
 	 *            Type of dependency.
 	 */
-	public ManagedObjectDependencyMetaDataImpl(D key, Class<?> type) {
+	public ManagedObjectDependencyMetaDataImpl(O key, Class<?> type) {
 		this.key = key;
 		this.type = type;
 	}
@@ -85,7 +84,7 @@ public class ManagedObjectDependencyMetaDataImpl<D extends Enum<D>> implements
 	 */
 
 	@Override
-	public D getKey() {
+	public O getKey() {
 		return this.key;
 	}
 

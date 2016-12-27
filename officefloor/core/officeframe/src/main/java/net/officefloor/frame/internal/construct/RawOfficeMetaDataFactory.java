@@ -50,7 +50,7 @@ public interface RawOfficeMetaDataFactory {
 	 * @param rawWorkFactory
 	 *            {@link RawWorkMetaDataFactory}.
 	 * @param rawTaskFactory
-	 *            {@link RawTaskMetaDataFactory}.
+	 *            {@link RawManagedFunctionMetaDataFactory}.
 	 * @return {@link RawOfficeMetaData}.
 	 */
 	RawOfficeMetaData constructRawOfficeMetaData(OfficeConfiguration configuration, SourceContext sourceContext,
@@ -59,6 +59,6 @@ public interface RawOfficeMetaDataFactory {
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawGovernanceMetaDataFactory rawGovernanceMetaDataFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory, RawWorkMetaDataFactory rawWorkFactory,
-			RawTaskMetaDataFactory rawTaskFactory);
+			RawManagedFunctionMetaDataFactory rawTaskFactory);
 
 }

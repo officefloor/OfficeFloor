@@ -17,15 +17,15 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
-import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 
 /**
- * Implementation of the {@link TaskEscalationConfiguration}.
+ * Implementation of the {@link ManagedFunctionEscalationConfiguration}.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskEscalationConfigurationImpl implements TaskEscalationConfiguration {
+public class TaskEscalationConfigurationImpl implements ManagedFunctionEscalationConfiguration {
 
 	/**
 	 * Type of cause.
@@ -33,9 +33,9 @@ public class TaskEscalationConfigurationImpl implements TaskEscalationConfigurat
 	private final Class<? extends Throwable> typeOfCause;
 
 	/**
-	 * {@link TaskNodeReference}.
+	 * {@link ManagedFunctionReference}.
 	 */
-	private final TaskNodeReference taskNodeReference;
+	private final ManagedFunctionReference taskNodeReference;
 
 	/**
 	 * Initiate.
@@ -43,10 +43,10 @@ public class TaskEscalationConfigurationImpl implements TaskEscalationConfigurat
 	 * @param typeOfCause
 	 *            Type of cause.
 	 * @param taskNodeReference
-	 *            {@link TaskNodeReference}.
+	 *            {@link ManagedFunctionReference}.
 	 */
 	public TaskEscalationConfigurationImpl(Class<? extends Throwable> typeOfCause,
-			TaskNodeReference taskNodeReference) {
+			ManagedFunctionReference taskNodeReference) {
 		this.typeOfCause = typeOfCause;
 		this.taskNodeReference = taskNodeReference;
 	}
@@ -61,7 +61,7 @@ public class TaskEscalationConfigurationImpl implements TaskEscalationConfigurat
 	}
 
 	@Override
-	public TaskNodeReference getTaskNodeReference() {
+	public ManagedFunctionReference getTaskNodeReference() {
 		return this.taskNodeReference;
 	}
 

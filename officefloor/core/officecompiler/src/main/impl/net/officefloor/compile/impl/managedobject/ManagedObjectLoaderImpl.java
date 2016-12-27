@@ -50,9 +50,9 @@ import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.configuration.TaskConfiguration;
-import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
@@ -554,7 +554,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			// Obtain details of task being linked too
 			String linkLabel = "linked process " + index + " (key="
 					+ (key != null ? key.toString() : "<indexed>");
-			TaskNodeReference link = linkedFlow.getTaskNodeReference();
+			ManagedFunctionReference link = linkedFlow.getTaskNodeReference();
 			String linkWorkName = (link != null ? link.getWorkName() : null);
 			String linkTaskName = (link != null ? link.getTaskName() : null);
 
@@ -609,10 +609,10 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		// Obtain the flows instigated by the tasks
 		List<ManagedObjectFlowType<?>> taskFlows = new LinkedList<ManagedObjectFlowType<?>>();
 		for (WorkConfiguration<?> work : office.getWorkConfiguration()) {
-			for (TaskConfiguration<?, ?, ?> task : work.getTaskConfiguration()) {
-				TaskFlowConfiguration<?>[] flows = task.getFlowConfiguration();
+			for (ManagedFunctionConfiguration<?, ?, ?> task : work.getTaskConfiguration()) {
+				ManagedFunctionFlowConfiguration<?>[] flows = task.getFlowConfiguration();
 				for (int i = 0; i < flows.length; i++) {
-					TaskFlowConfiguration<?> flow = flows[i];
+					ManagedFunctionFlowConfiguration<?> flow = flows[i];
 
 					// Obtain the flow details
 					String workName = work.getWorkName();
@@ -629,7 +629,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 					}
 
 					// Obtain linked task details
-					TaskNodeReference link = flow.getInitialTask();
+					ManagedFunctionReference link = flow.getInitialTask();
 					String linkWorkName = (link == null ? null : link
 							.getWorkName());
 					String linkTaskName = (link == null ? null : link
@@ -704,14 +704,14 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			}
 
 			// Ensure have tasks for the work
-			TaskConfiguration[] tasks = work.getTaskConfiguration();
+			ManagedFunctionConfiguration[] tasks = work.getTaskConfiguration();
 			if (tasks.length == 0) {
 				this.addIssue("No tasks added for work (work=" + workName + ")");
 				return null; // must have at least one task
 			}
 
 			// Ensure the tasks are valid
-			for (TaskConfiguration<?, ?, ?> task : tasks) {
+			for (ManagedFunctionConfiguration<?, ?, ?> task : tasks) {
 
 				// Ensure have task name
 				String taskName = task.getTaskName();
@@ -763,7 +763,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		// Determine if the task is added to the office
 		for (WorkConfiguration<?> work : office.getWorkConfiguration()) {
 			if (workName.equals(work.getWorkName())) {
-				for (TaskConfiguration<?, ?, ?> task : work
+				for (ManagedFunctionConfiguration<?, ?, ?> task : work
 						.getTaskConfiguration()) {
 					if (taskName.equals(task.getTaskName())) {
 						// Task added to office

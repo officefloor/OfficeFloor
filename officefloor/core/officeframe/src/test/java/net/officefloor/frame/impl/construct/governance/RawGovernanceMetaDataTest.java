@@ -35,9 +35,9 @@ import net.officefloor.frame.impl.execute.governance.GovernGovernanceActivity;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.RegisteredGovernance;
@@ -116,10 +116,10 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	private Team continueTeam = this.createMock(Team.class);
 
 	/**
-	 * {@link OfficeMetaDataLocator}.
+	 * {@link ManagedFunctionLocator}.
 	 */
-	private final OfficeMetaDataLocator officeMetaDataLocator = this
-			.createMock(OfficeMetaDataLocator.class);
+	private final ManagedFunctionLocator officeMetaDataLocator = this
+			.createMock(ManagedFunctionLocator.class);
 
 	/**
 	 * {@link AssetManagerFactory}.
@@ -298,8 +298,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		final GovernanceFlowConfiguration<?> flowConfiguration = this
 				.createMock(GovernanceFlowConfiguration.class);
-		final TaskNodeReference taskNode = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNode = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record initiate
 		this.record_initGovernance();
@@ -332,8 +332,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		final GovernanceFlowConfiguration<?> flowConfiguration = this
 				.createMock(GovernanceFlowConfiguration.class);
-		final TaskNodeReference taskNode = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNode = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record initiate
 		this.record_initGovernance();
@@ -367,8 +367,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		final GovernanceFlowConfiguration<?> flowConfiguration = this
 				.createMock(GovernanceFlowConfiguration.class);
-		final TaskNodeReference taskNode = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNode = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record initiate
 		this.record_initGovernance();
@@ -405,8 +405,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		final GovernanceFlowConfiguration<?> flowConfiguration = this
 				.createMock(GovernanceFlowConfiguration.class);
-		final TaskNodeReference taskNode = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNode = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 
@@ -452,8 +452,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		final GovernanceFlowConfiguration<?> flowConfiguration = this
 				.createMock(GovernanceFlowConfiguration.class);
-		final TaskNodeReference taskNode = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNode = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 
@@ -578,8 +578,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		final GovernanceEscalationConfiguration escalation = this
 				.createMock(GovernanceEscalationConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record simple governance
 		this.record_initGovernance();
@@ -611,8 +611,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		final GovernanceEscalationConfiguration escalation = this
 				.createMock(GovernanceEscalationConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 		final String WORK_NAME = "WORK";
 
 		// Record simple governance
@@ -647,8 +647,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		final GovernanceEscalationConfiguration escalation = this
 				.createMock(GovernanceEscalationConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 		final String WORK_NAME = "WORK";
 		final String TASK_NAME = "TASK";
 
@@ -689,8 +689,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		final GovernanceEscalationConfiguration escalation = this
 				.createMock(GovernanceEscalationConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskNodeReference = this
+				.createMock(ManagedFunctionReference.class);
 		final String WORK_NAME = "WORK";
 		final String TASK_NAME = "TASK";
 		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
@@ -802,12 +802,12 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Create the listing of mocks
 		final GovernanceFlowConfiguration<?>[] flowConfigurations = new GovernanceFlowConfiguration<?>[instigationStrategies.length];
-		final TaskNodeReference[] taskNodes = new TaskNodeReference[instigationStrategies.length];
+		final ManagedFunctionReference[] taskNodes = new ManagedFunctionReference[instigationStrategies.length];
 		final ManagedFunctionMetaData<?, ?, ?>[] taskMetaDatas = new ManagedFunctionMetaData<?, ?, ?>[instigationStrategies.length];
 		for (int i = 0; i < instigationStrategies.length; i++) {
 			flowConfigurations[i] = this
 					.createMock(GovernanceFlowConfiguration.class);
-			taskNodes[i] = this.createMock(TaskNodeReference.class);
+			taskNodes[i] = this.createMock(ManagedFunctionReference.class);
 			taskMetaDatas[i] = this.createMock(ManagedFunctionMetaData.class);
 		}
 
@@ -818,7 +818,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record configuring each flow
 		for (int i = 0; i < instigationStrategies.length; i++) {
 			GovernanceFlowConfiguration<?> flowConfiguration = flowConfigurations[i];
-			TaskNodeReference taskNode = taskNodes[i];
+			ManagedFunctionReference taskNode = taskNodes[i];
 			ManagedFunctionMetaData<?, ?, ?> taskMetaData = taskMetaDatas[i];
 			FlowInstigationStrategyEnum instigationStrategy = instigationStrategies[i];
 
@@ -884,8 +884,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 			GovernanceEscalationConfiguration escalation = escalations[i];
 			ManagedFunctionMetaData<?, ?, ?> taskMetaData = taskMetaDatas[i];
 
-			final TaskNodeReference taskNodeReference = this
-					.createMock(TaskNodeReference.class);
+			final ManagedFunctionReference taskNodeReference = this
+					.createMock(ManagedFunctionReference.class);
 			final String WORK_NAME = "WORK" + i;
 			final String TASK_NAME = "TASK" + i;
 

@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface RawGovernanceMetaData<I, F extends Enum<F>> {
+public interface RawGovernanceMetaData<E, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -43,7 +43,7 @@ public interface RawGovernanceMetaData<I, F extends Enum<F>> {
 	 * 
 	 * @return Extension interface type used by the {@link Governance}.
 	 */
-	Class<I> getExtensionInterfaceType();
+	Class<E> getExtensionInterfaceType();
 
 	/**
 	 * Obtains the index to obtain the {@link Governance} from the
@@ -55,24 +55,24 @@ public interface RawGovernanceMetaData<I, F extends Enum<F>> {
 	int getGovernanceIndex();
 
 	/**
-	 * Links the {@link ManagedFunctionMetaData} instances to enable {@link Flow} of
-	 * execution.
+	 * Links the {@link ManagedFunctionMetaData} instances to enable
+	 * {@link Flow} of execution.
 	 * 
 	 * @param taskLocator
-	 *            {@link OfficeMetaDataLocator}.
+	 *            {@link ManagedFunctionLocator}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkOfficeMetaData(OfficeMetaDataLocator taskLocator,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
+	void linkOfficeMetaData(ManagedFunctionLocator taskLocator, AssetManagerFactory assetManagerFactory,
+			OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link GovernanceMetaData}.
 	 * 
 	 * @return {@link GovernanceMetaData}.
 	 */
-	GovernanceMetaData<I, F> getGovernanceMetaData();
+	GovernanceMetaData<E, F> getGovernanceMetaData();
 
 }

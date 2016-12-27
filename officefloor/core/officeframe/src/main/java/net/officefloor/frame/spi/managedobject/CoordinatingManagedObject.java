@@ -29,8 +29,7 @@ package net.officefloor.frame.spi.managedobject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface CoordinatingManagedObject<D extends Enum<D>> extends
-		ManagedObject {
+public interface CoordinatingManagedObject<O extends Enum<O>> extends ManagedObject {
 
 	/**
 	 * <p>
@@ -47,6 +46,6 @@ public interface CoordinatingManagedObject<D extends Enum<D>> extends
 	 *             Should this {@link CoordinatingManagedObject} fail to load
 	 *             the {@link ManagedObject}.
 	 */
-	void loadObjects(ObjectRegistry<D> registry) throws Throwable;
+	void loadObjects(ObjectRegistry<O> registry) throws Throwable;
 
 }

@@ -18,32 +18,36 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
-import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Raw meta-data of {@link Work}.
+ * Raw meta-data for a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface RawWorkMetaData<W extends Work> {
+public interface RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 
 	/**
-	 * Obtains the name of the {@link Work}.
+	 * Obtains the name of the {@link ManagedFunction}.
 	 * 
-	 * @return Name of the {@link Work}.
+	 * @return Name of the {@link ManagedFunction}.
 	 */
-	String getWorkName();
+	String getFunctionName();
+
+	/**
+	 * Obtains the {@link ManagedFunctionMetaData}.
+	 * 
+	 * @return {@link ManagedFunctionMetaData}.
+	 */
+	ManagedFunctionMetaData<O, F> getManagedFunctionMetaData();
 
 	/**
 	 * Obtains the {@link RawOfficeMetaData} of the {@link Office} containing
@@ -55,7 +59,7 @@ public interface RawWorkMetaData<W extends Work> {
 
 	/**
 	 * Constructs the {@link RawBoundManagedObjectMetaData} for the
-	 * {@link ManagedObject} of the {@link Work}.
+	 * {@link ManagedObject} of the {@link ManagedFunction}.
 	 * 
 	 * @param scopeManagedObjectName
 	 *            Name of the {@link ManagedObject} within the
@@ -66,7 +70,7 @@ public interface RawWorkMetaData<W extends Work> {
 	RawBoundManagedObjectMetaData getScopeManagedObjectMetaData(String scopeManagedObjectName);
 
 	/**
-	 * Obtains the {@link AdministratorIndex} for the {@link Work}
+	 * Obtains the {@link AdministratorIndex} for the {@link ManagedFunction}
 	 * {@link Administrator} name.
 	 * 
 	 * @param scopeAdministratorName
@@ -78,27 +82,18 @@ public interface RawWorkMetaData<W extends Work> {
 	RawBoundAdministratorMetaData<?, ?> getScopeAdministratorMetaData(String scopeAdministratorName);
 
 	/**
-	 * Links the {@link ManagedFunctionMetaData} instances to enable {@link Flow} of
-	 * execution. Also links the {@link Governance} for any possible associated
-	 * {@link Duty}.
+	 * Links the {@link ManagedFunctionMetaData} instances to create
+	 * {@link Flow} of execution.
 	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param taskLocator
-	 *            {@link OfficeMetaDataLocator}.
+	 * @param functionLocator
+	 *            {@link ManagedFunctionLocator}.
 	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
+	 *            {@link AssetManagerFactory} to create the {@link AssetManager}
+	 *            instances that manage {@link Flow} instances.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkOfficeMetaData(OfficeMetaData officeMetaData, OfficeMetaDataLocator taskLocator,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
-
-	/**
-	 * Obtains the {@link WorkMetaData} for this {@link RawWorkMetaData}.
-	 * 
-	 * @return {@link WorkMetaData}.
-	 */
-	WorkMetaData<W> getWorkMetaData();
+	void linkFunctions(ManagedFunctionLocator functionLocator, AssetManagerFactory assetManagerFactory,
+			OfficeFloorIssues issues);
 
 }

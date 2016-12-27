@@ -29,10 +29,11 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * This enables:
  * <ol>
  * <li>linking in the {@link ManagedFunction} instances created by the
- * {@link ManagedObjectSource} to other {@link ManagedFunction} instances within the
- * {@link Office}</li>
+ * {@link ManagedObjectSource} to other {@link ManagedFunction} instances within
+ * the {@link Office}</li>
  * <li>linking the {@link Flow} instances instigated by the
- * {@link ManagedObjectSource} to a {@link ManagedFunction} within the {@link Office}</li>
+ * {@link ManagedObjectSource} to a {@link ManagedFunction} instances within the
+ * {@link Office}</li>
  * </ol>
  * 
  * @author Daniel Sagenschneider

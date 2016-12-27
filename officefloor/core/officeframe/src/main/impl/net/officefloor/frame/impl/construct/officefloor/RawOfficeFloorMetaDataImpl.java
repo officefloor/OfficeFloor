@@ -50,7 +50,7 @@ import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
@@ -141,7 +141,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			RawManagedObjectMetaDataFactory rawMosFactory, RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
 			RawGovernanceMetaDataFactory rawGovernanceFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdminFactory, RawOfficeMetaDataFactory rawOfficeFactory,
-			RawWorkMetaDataFactory rawWorkFactory, RawTaskMetaDataFactory rawTaskFactory) {
+			RawWorkMetaDataFactory rawWorkFactory, RawManagedFunctionMetaDataFactory rawTaskFactory) {
 
 		// Name of office floor for reporting issues
 		String officeFloorName = configuration.getOfficeFloorName();

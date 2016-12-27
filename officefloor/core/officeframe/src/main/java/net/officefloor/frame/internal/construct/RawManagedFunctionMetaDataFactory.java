@@ -18,35 +18,28 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.configuration.TaskConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 
 /**
- * Factory to construct {@link RawTaskMetaData}.
+ * Factory to construct {@link RawManagedFunctionMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface RawTaskMetaDataFactory {
+public interface RawManagedFunctionMetaDataFactory {
 
 	/**
-	 * Constructs the {@link RawTaskMetaData}.
+	 * Constructs the {@link RawManagedFunctionMetaData}.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
 	 * @param configuration
-	 *            {@link TaskConfiguration}.
+	 *            {@link ManagedFunctionConfiguration}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @param rawWorkMetaData
-	 *            {@link RawWorkMetaData} of the {@link Work} containing this
-	 *            {@link ManagedFunction}.
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
-	 * @return {@link RawTaskMetaData}.
+	 * @return {@link RawManagedFunctionMetaData}.
 	 */
-	<W extends Work> RawTaskMetaData<W, ?, ?> constructRawTaskMetaData(TaskConfiguration<W, ?, ?> configuration,
-			OfficeFloorIssues issues, RawWorkMetaData<W> rawWorkMetaData, FunctionLoop functionLoop);
+	RawManagedFunctionMetaData<?, ?> constructRawTaskMetaData(ManagedFunctionConfiguration<?, ?> configuration,
+			OfficeFloorIssues issues, FunctionLoop functionLoop);
 
 }

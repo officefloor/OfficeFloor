@@ -17,7 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.thread;
 
-import net.officefloor.frame.impl.execute.function.FlowImpl;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
@@ -48,6 +52,11 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * @author Daniel Sagenschneider
  */
 public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, ProcessState> implements ThreadState {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(ThreadState.class.getName());
 
 	/**
 	 * {@link ActiveThreadState} for the executing {@link Thread}.
@@ -170,6 +179,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private final ThreadProfiler profiler;
 
 	/**
+	 * {@link EscalationLevel} of this {@link ThreadState}.
+	 */
+	private EscalationLevel escalationLevel = EscalationLevel.OFFICE;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param threadMetaData
@@ -232,11 +246,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public ThreadMetaData getThreadMetaData() {
-		return this.threadMetaData;
-	}
-
-	@Override
 	public Flow createFlow(FlowCompletion completion) {
 
 		// Create and register the activate flow
@@ -253,14 +262,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		// Clean up functions
 		FunctionState cleanUpFunctions = null;
 
-		// Deactivate any active governance
-		for (int i = 0; i < this.governanceContainers.length; i++) {
-			GovernanceContainer<?> container = this.governanceContainers[i];
-			if ((container != null) && (container.isGovernanceActive())) {
-				cleanUpFunctions = Promise.then(cleanUpFunctions, container.disregardGovernance());
-			}
-		}
-
 		// Cancel all flows
 		Flow flow = this.activeFlows.purgeEntries();
 		while (flow != null) {
@@ -268,55 +269,64 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			flow = flow.getNext();
 		}
 
-		// Unload managed objects (some may not have been used)
-		for (int i = 0; i < this.managedObjectContainers.length; i++) {
-			ManagedObjectContainer container = this.managedObjectContainers[i];
-			if (container != null) {
-				cleanUpFunctions = Promise.then(cleanUpFunctions, container.unloadManagedObject());
-			}
-		}
-
-		// Determine if handle by completion
-		if (this.completion != null) {
-			EscalationFlow escalationFlow = this.completion.getFlowEscalationProcedure().getEscalation(escalation);
+		// Handle based on escalation level
+		switch (this.escalationLevel) {
+		case OFFICE:
+			EscalationFlow escalationFlow = this.threadMetaData.getOfficeEscalationProcedure()
+					.getEscalation(escalation);
 			if (escalationFlow != null) {
-				// Undertake escalation (that escalates to main thread)
-				return Promise.then(cleanUpFunctions, this.processState
-						.spawnThreadState(escalationFlow.getManagedFunctionMetaData(), escalation, null));
+				flow = this.createFlow(null);
+				return Promise.then(cleanUpFunctions,
+						flow.createManagedFunction(escalationFlow.getManagedFunctionMetaData(), null, escalation,
+								GovernanceDeactivationStrategy.ENFORCE));
 			}
 
-		}
+			// No office escalation procedure, so escalate to flow completion
+			this.escalationLevel = EscalationLevel.FLOW_COMPLETION;
+		case FLOW_COMPLETION:
+			// Outside normal handling, so clean up thread state
 
-		// Not handled by completion so handle by thread escalation procedures
-		// Determine if require a global escalation
-		if (escalationNode == null) {
-			// No escalation, so use global escalation
-			EscalationFlow globalEscalation = null;
-			switch (threadState.getEscalationLevel()) {
-			case OFFICE:
-				// Tried office, now at invocation
-				globalEscalation = processState.getInvocationEscalation();
-				if (globalEscalation != null) {
-					threadState.setEscalationLevel(EscalationLevel.INVOCATION_HANDLER);
-					break;
+			// Deactivate any active governance
+			for (int i = 0; i < this.governanceContainers.length; i++) {
+				GovernanceContainer<?> container = this.governanceContainers[i];
+				if ((container != null) && (container.isGovernanceActive())) {
+					cleanUpFunctions = Promise.then(cleanUpFunctions, container.disregardGovernance());
 				}
-
-			case OFFICE_FLOOR:
-				// Should not be escalating at office floor.
-				// Allow stderr failure to pick up issue.
-				throw escalationCause;
-
-			default:
-				throw new IllegalStateException("Should not be in state " + threadState.getEscalationLevel());
 			}
 
-			// Create the global escalation
-			escalationNode = this.createEscalationFunction(globalEscalation.getManagedFunctionMetaData(),
-					escalationCause, null);
+			// Unload managed objects (some may not have been used)
+			for (int i = 0; i < this.managedObjectContainers.length; i++) {
+				ManagedObjectContainer container = this.managedObjectContainers[i];
+				if (container != null) {
+					cleanUpFunctions = Promise.then(cleanUpFunctions, container.unloadManagedObject());
+				}
+			}
+
+			// Notify flow completion (if provided)
+			if (this.completion != null) {
+				// Flow completion to handle escalation
+				return Promise.then(cleanUpFunctions, this.completion.complete(escalation));
+			}
+
+			// No flow completion, escalate to OfficeFloor
+			this.escalationLevel = EscalationLevel.OFFICE_FLOOR;
+		case OFFICE_FLOOR:
+			escalationFlow = this.threadMetaData.getOfficeFloorEscalation();
+			if (escalationFlow != null) {
+				flow = this.createFlow(null);
+				return Promise.then(cleanUpFunctions,
+						flow.createManagedFunction(escalationFlow.getManagedFunctionMetaData(), null, escalation,
+								GovernanceDeactivationStrategy.ENFORCE));
+			}
+
+			// Any further failure, just log (not happen for most applications)
+			this.escalationLevel = escalationLevel.LOG;
+		case LOG:
+			LOGGER.log(Level.SEVERE, "Unhandle escalation", escalation);
 		}
 
-		// Activate escalation node
-		return escalationNode;
+		// Logged error
+		return cleanUpFunctions;
 	}
 
 	@Override
@@ -369,7 +379,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 			// Notify completion of thread state
 			if (this.completion != null) {
-				cleanUpFunctions = Promise.then(cleanUpFunctions, this.completion.getFlowCompletionFunction());
+				cleanUpFunctions = Promise.then(cleanUpFunctions, this.completion.complete(null));
 			}
 
 			// Thread complete
@@ -434,6 +444,13 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		// Profile the job execution
 		this.profiler.profileJob(jobMetaData);
+	}
+
+	/**
+	 * {@link Escalation} level of a {@link ThreadState}.
+	 */
+	private static enum EscalationLevel {
+		OFFICE, FLOW_COMPLETION, OFFICE_FLOOR, LOG
 	}
 
 }

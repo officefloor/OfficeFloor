@@ -18,29 +18,40 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 
 /**
- * Configuration for the {@link EscalationFlow}.
+ * Configuration of a {@link Administrator} {@link Duty} for a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskEscalationConfiguration {
+public interface ManagedFunctionDutyConfiguration<A extends Enum<A>> {
 
 	/**
-	 * Obtains the type of cause handled by this {@link EscalationFlow}.
+	 * Obtains the name of the {@link Administrator} within the
+	 * {@link AdministratorScope}.
 	 * 
-	 * @return Type of cause handled by this {@link EscalationFlow}.
+	 * @return Name of the {@link Administrator} within the
+	 *         {@link AdministratorScope}.
 	 */
-	Class<? extends Throwable> getTypeOfCause();
+	String getScopeAdministratorName();
 
 	/**
-	 * Obtains the {@link TaskNodeReference} for the {@link ManagedFunction} handling the
-	 * escalation.
+	 * Obtains the name identifying the {@link Duty}.
 	 * 
-	 * @return {@link TaskNodeReference} for the {@link ManagedFunction} handling the
-	 *         escalation.
+	 * @return Name of the {@link Duty} or <code>null</code> if identified by
+	 *         key.
 	 */
-	TaskNodeReference getTaskNodeReference();
-	
+	String getDutyName();
+
+	/**
+	 * Obtains the key identifying the {@link Duty}.
+	 * 
+	 * @return Key identifying the {@link Duty} or <code>null</code> if
+	 *         identified by name.
+	 */
+	A getDutyKey();
+
 }

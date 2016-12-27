@@ -32,13 +32,6 @@ import net.officefloor.frame.spi.governance.Governance;
 public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessState> {
 
 	/**
-	 * Obtains the {@link ThreadMetaData} for this {@link ThreadState}.
-	 * 
-	 * @return {@link ThreadMetaData} for this {@link ThreadState}.
-	 */
-	ThreadMetaData getThreadMetaData();
-
-	/**
 	 * Indicates if this {@link ThreadState} is attached to the current
 	 * {@link Thread}.
 	 * 
@@ -104,6 +97,15 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	ManagedObjectContainer getManagedObjectContainer(int index);
 
 	/**
+	 * Obtains the {@link AdministratorContainer} for the input index.
+	 * 
+	 * @param index
+	 *            Index of the {@link AdministratorContainer} to be returned.
+	 * @return {@link AdministratorContainer} for the index.
+	 */
+	AdministratorContainer<?> getAdministratorContainer(int index);
+
+	/**
 	 * Obtains the {@link GovernanceContainer} for the input index.
 	 * 
 	 * @param index
@@ -121,15 +123,6 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * @return <code>true</code> if the {@link Governance} is active.
 	 */
 	boolean isGovernanceActive(int index);
-
-	/**
-	 * Obtains the {@link AdministratorContainer} for the input index.
-	 * 
-	 * @param index
-	 *            Index of the {@link AdministratorContainer} to be returned.
-	 * @return {@link AdministratorContainer} for the index.
-	 */
-	AdministratorContainer<?> getAdministratorContainer(int index);
 
 	/**
 	 * Profiles that {@link ManagedObjectContainer} is being executed.

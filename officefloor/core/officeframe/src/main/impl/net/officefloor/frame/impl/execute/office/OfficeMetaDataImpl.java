@@ -40,7 +40,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
@@ -141,9 +141,9 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final ProcessContextListener[] processContextListeners;
 
 	/**
-	 * {@link OfficeStartupTask} instances.
+	 * {@link OfficeStartupFunction} instances.
 	 */
-	private final OfficeStartupTask[] startupTasks;
+	private final OfficeStartupFunction[] startupTasks;
 
 	/**
 	 * {@link EscalationProcedure} for the {@link Office}.
@@ -186,7 +186,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param processContextListeners
 	 *            {@link ProcessContextListener} instances.
 	 * @param startupTasks
-	 *            {@link OfficeStartupTask} instances.
+	 *            {@link OfficeStartupFunction} instances.
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure} for the {@link Office}.
 	 * @param officeFloorEscalation
@@ -196,7 +196,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager, OfficeClock officeClock,
 			FunctionLoop functionLoop, WorkMetaData<?>[] workMetaDatas, ProcessMetaData processMetaData,
-			ProcessContextListener[] processContextListeners, OfficeStartupTask[] startupTasks,
+			ProcessContextListener[] processContextListeners, OfficeStartupFunction[] startupTasks,
 			EscalationProcedure escalationProcedure, EscalationFlow officeFloorEscalation, Profiler profiler) {
 		this.officeName = officeName;
 		this.officeClock = officeClock;
@@ -259,7 +259,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
-	public OfficeStartupTask[] getStartupTasks() {
+	public OfficeStartupFunction[] getStartupTasks() {
 		return this.startupTasks;
 	}
 

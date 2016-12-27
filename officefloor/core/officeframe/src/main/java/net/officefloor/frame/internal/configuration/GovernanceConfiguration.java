@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceConfiguration<I, F extends Enum<F>> {
+public interface GovernanceConfiguration<E, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -43,7 +43,7 @@ public interface GovernanceConfiguration<I, F extends Enum<F>> {
 	 * 
 	 * @return {@link GovernanceFactory}.
 	 */
-	GovernanceFactory<? super I, F> getGovernanceFactory();
+	GovernanceFactory<? super E, F> getGovernanceFactory();
 
 	/**
 	 * Obtains the extension interface type for {@link ManagedObject} to provide
@@ -52,13 +52,14 @@ public interface GovernanceConfiguration<I, F extends Enum<F>> {
 	 * @return Extension interface type for {@link ManagedObject} to provide to
 	 *         enable {@link Governance}.
 	 */
-	Class<I> getExtensionInterface();
+	Class<E> getExtensionInterface();
 
 	/**
 	 * Obtains the name of the {@link Team} to execute the
 	 * {@link GovernanceActivity} instances for {@link Governance}.
 	 * 
-	 * @return Name of {@link Team}.
+	 * @return Name of {@link Team}. May be <code>null</code> to use any
+	 *         {@link Team}.
 	 */
 	String getTeamName();
 

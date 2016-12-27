@@ -31,7 +31,7 @@ import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -102,7 +102,7 @@ public class JpaEntityManagerManagedObjectSource extends
 		CloseEntityManagerTask closeTask = new CloseEntityManagerTask();
 		ManagedObjectWorkBuilder<CloseEntityManagerTask> recycleWork = mosContext
 				.getRecycleWork(closeTask);
-		ManagedObjectTaskBuilder<CloseEntityManagerDependencies, None> recycleTask = recycleWork
+		ManagedObjectFunctionBuilder<CloseEntityManagerDependencies, None> recycleTask = recycleWork
 				.addTask("CLOSE", closeTask);
 		recycleTask.linkParameter(
 				CloseEntityManagerDependencies.MANAGED_OBJECT,

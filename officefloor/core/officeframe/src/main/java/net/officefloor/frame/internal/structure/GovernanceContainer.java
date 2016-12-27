@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceContainer<I> {
+public interface GovernanceContainer<E> {
 
 	/**
 	 * Indicates if {@link Governance} within this {@link GovernanceContainer}
@@ -55,7 +55,7 @@ public interface GovernanceContainer<I> {
 	 *            {@link WorkContainer}.
 	 * @return {@link RegisteredGovernance}.
 	 */
-	RegisteredGovernance registerManagedObject(I managedObjectExtension, ManagedObjectContainer managedObjectContainer);
+	RegisteredGovernance registerManagedObject(E managedObjectExtension, ManagedObjectContainer managedObjectContainer);
 
 	/**
 	 * Activates the {@link Governance}.

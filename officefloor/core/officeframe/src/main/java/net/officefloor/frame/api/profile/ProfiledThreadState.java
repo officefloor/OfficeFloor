@@ -15,24 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.spi.managedobject.source;
+package net.officefloor.frame.api.profile;
+
+import java.util.List;
+
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * Critical section.
- *
+ * Profiled {@link ThreadState}.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface CriticalSection<R, S, E extends Throwable> {
+public interface ProfiledThreadState {
 
 	/**
-	 * Undertakes the {@link CriticalSection}.
+	 * Obtains the start time stamp.
 	 * 
-	 * @param state
-	 *            Optional state for the {@link CriticalSection}.
-	 * @return Enables a value to be returned from the {@link CriticalSection}.
-	 * @throws E
-	 *             Should there be a failure in the {@link CriticalSection}.
+	 * @return Start time stamp in nanoseconds.
 	 */
-	R doCriticalSection(S state) throws E;
+	long getStartTimestamp();
+
+	/**
+	 * Obtains the {@link ProfiledManagedFunction} instances.
+	 * 
+	 * @return {@link ProfiledManagedFunction} instances.
+	 */
+	List<ProfiledManagedFunction> getProfiledManagedFunctions();
 
 }

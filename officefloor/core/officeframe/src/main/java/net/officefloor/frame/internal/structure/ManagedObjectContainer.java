@@ -82,8 +82,8 @@ public interface ManagedObjectContainer {
 	 * @return {@link FunctionState} to load the {@link ManagedObject}
 	 *         extension.
 	 */
-	<I> FunctionState extractExtensionInterface(ExtensionInterfaceExtractor<I> extractor,
-			List<I> managedObjectExtensions);
+	<E> FunctionState extractExtensionInterface(ExtensionInterfaceExtractor<E> extractor,
+			List<E> managedObjectExtensions);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.

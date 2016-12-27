@@ -24,8 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.officefloor.frame.api.build.NameAwareWorkFactory;
-import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
+import net.officefloor.frame.api.build.NameAwareManagedFunctionFactory;
+import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
@@ -36,7 +36,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -144,14 +144,14 @@ public class OfficeFloorImpl implements OfficeFloor {
 				WorkFactory<?> workFactory = workMetaData.getWorkFactory();
 
 				// Handle if name aware
-				if (workFactory instanceof NameAwareWorkFactory<?>) {
-					NameAwareWorkFactory<?> nameAwareWorkFactory = (NameAwareWorkFactory<?>) workFactory;
+				if (workFactory instanceof NameAwareManagedFunctionFactory<?>) {
+					NameAwareManagedFunctionFactory<?> nameAwareWorkFactory = (NameAwareManagedFunctionFactory<?>) workFactory;
 					nameAwareWorkFactory.setBoundWorkName(workMetaData.getWorkName());
 				}
 
 				// Handle if Office aware
-				if (workFactory instanceof OfficeAwareWorkFactory<?>) {
-					OfficeAwareWorkFactory<?> officeAwareWorkFactory = (OfficeAwareWorkFactory<?>) workFactory;
+				if (workFactory instanceof OfficeAwareManagedFunctionFactory<?>) {
+					OfficeAwareManagedFunctionFactory<?> officeAwareWorkFactory = (OfficeAwareManagedFunctionFactory<?>) workFactory;
 					officeAwareWorkFactory.setOffice(office);
 				}
 			}
@@ -177,7 +177,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 		// Invoke the startup tasks for each office
 		for (OfficeMetaData officeMetaData : officeMetaDatas) {
-			for (OfficeStartupTask officeStartupTask : officeMetaData.getStartupTasks()) {
+			for (OfficeStartupFunction officeStartupTask : officeMetaData.getStartupTasks()) {
 
 				// Ensure have startup task
 				if (officeStartupTask == null) {

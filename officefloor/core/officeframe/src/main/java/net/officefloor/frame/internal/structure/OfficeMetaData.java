@@ -19,6 +19,7 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -69,12 +70,12 @@ public interface OfficeMetaData {
 	ProcessMetaData getProcessMetaData();
 
 	/**
-	 * Obtains the {@link WorkMetaData} of the {@link Work} that may be done
-	 * within this {@link Office}.
+	 * Obtains the {@link ManagedFunctionMetaData} of the
+	 * {@link ManagedFunction} that may be done within this {@link Office}.
 	 * 
-	 * @return {@link WorkMetaData} instances of this {@link Office}.
+	 * @return {@link ManagedFunctionMetaData} instances of this {@link Office}.
 	 */
-	WorkMetaData<?>[] getWorkMetaData();
+	ManagedFunctionMetaData<?, ?>[] getManagedFunctionMetaData();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for this {@link Office}. This is
@@ -86,11 +87,11 @@ public interface OfficeMetaData {
 	EscalationProcedure getEscalationProcedure();
 
 	/**
-	 * Obtains the {@link OfficeStartupTask} instances for this {@link Office}.
+	 * Obtains the {@link OfficeStartupFunction} instances for this {@link Office}.
 	 * 
-	 * @return {@link OfficeStartupTask} instances for this {@link Office}.
+	 * @return {@link OfficeStartupFunction} instances for this {@link Office}.
 	 */
-	OfficeStartupTask[] getStartupTasks();
+	OfficeStartupFunction[] getStartupTasks();
 
 	/**
 	 * Creates a new {@link ProcessState}.
@@ -102,22 +103,13 @@ public interface OfficeMetaData {
 	 *            the {@link ProcessState}.
 	 * @param parameter
 	 *            Parameter to the starting {@link FunctionState}.
-	 * @param invocationEscalationHandler
-	 *            Potential {@link EscalationHandler} provided by the invoker.
-	 *            May be <code>null</code> to just use the default
-	 *            {@link Office} {@link EscalationProcedure}.
-	 * @param escalationResponsibleTeam
-	 *            {@link TeamManagement} of {@link Team} responsible for the
-	 *            {@link Escalation} handling.
-	 * @param completionListener
-	 *            Optional {@link ProcessCompletionListener}. May be
-	 *            <code>null</code>.
+	 * @param completion
+	 *            Optional {@link FlowCompletion} of the {@link ProcessState}.
+	 *            May be <code>null</code>.
 	 * @return {@link ManagedFunctionContainer} to start processing the
 	 *         {@link ProcessState}.
 	 */
-	<W extends Work> ManagedFunctionContainer createProcess(FlowMetaData<W> flowMetaData, Object parameter,
-			EscalationHandler invocationEscalationHandler, TeamManagement escalationResponsibleTeam,
-			ProcessCompletionListener completionListener);
+	ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCompletion completion);
 
 	/**
 	 * Creates a new {@link ProcessState} triggered by a
@@ -131,13 +123,9 @@ public interface OfficeMetaData {
 	 *            the {@link ProcessState}.
 	 * @param parameter
 	 *            Parameter to the starting {@link FunctionState}.
-	 * @param invocationEscalationHandler
-	 *            Potential {@link EscalationHandler} provided by the invoker.
-	 *            May be <code>null</code> to just use the default
-	 *            {@link Office} {@link EscalationProcedure}.
-	 * @param escalationResponsibleTeam
-	 *            {@link TeamManagement} of {@link Team} responsible for the
-	 *            {@link Escalation} handling.
+	 * @param completion
+	 *            Optional {@link FlowCompletion} of the {@link ProcessState}.
+	 *            May be <code>null</code>.
 	 * @param inputManagedObject
 	 *            {@link ManagedObject} that possibly invoked the new
 	 *            {@link ProcessState}. This may be <code>null</code> and if so
@@ -151,15 +139,11 @@ public interface OfficeMetaData {
 	 *            Index of the {@link ManagedObject} within the
 	 *            {@link ProcessState}. Ignored if {@link ManagedObject} passed
 	 *            in is <code>null</code>.
-	 * @param invokedCompletionListener
-	 *            Additional {@link ProcessCompletionListener} instance for the
-	 *            created {@link ProcessState}. May be <code>null</code>.
 	 * @return {@link ManagedFunctionContainer} to start processing the
 	 *         {@link ProcessState}.
 	 */
-	<W extends Work> ManagedFunctionContainer createProcess(FlowMetaData<W> flowMetaData, Object parameter,
-			EscalationHandler invocationEscalationHandler, TeamManagement escalationResponsibleTeam,
+	ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCompletion completion,
 			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
-			int processBoundIndexForInputManagedObject, ProcessCompletionListener invokedCompletionListener);
+			int processBoundIndexForInputManagedObject);
 
 }

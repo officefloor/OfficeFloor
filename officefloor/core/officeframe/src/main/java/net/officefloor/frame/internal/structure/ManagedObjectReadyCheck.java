@@ -28,18 +28,19 @@ public interface ManagedObjectReadyCheck {
 
 	/**
 	 * Obtains the {@link ManagedFunctionContainer} requiring the check on the
-	 * {@link ManagedFunctionContainer}.
+	 * {@link ManagedObject}.
 	 * 
 	 * @return {@link ManagedFunctionContainer} requiring the check on the
 	 *         {@link ManagedObject}.
 	 */
-	ManagedFunctionContainer getManagedJobNode();
+	ManagedFunctionContainer getManagedFunctionContainer();
 
 	/**
 	 * Flags that a {@link ManagedObject} or one of its dependency
 	 * {@link ManagedObject} instances is not ready.
 	 * 
-	 * @return {@link FunctionState} to flag the {@link ManagedObject} as not ready.
+	 * @return {@link FunctionState} to flag the {@link ManagedObject} as not
+	 *         ready.
 	 */
 	FunctionState setNotReady();
 

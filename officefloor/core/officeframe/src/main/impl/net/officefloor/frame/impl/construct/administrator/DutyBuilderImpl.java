@@ -26,7 +26,7 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.governance.Governance;
 
@@ -47,7 +47,7 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 	 * Registry of {@link ManagedFunction} instances that may be invoked from the
 	 * {@link Duty}.
 	 */
-	private final Map<Integer, TaskNodeReference> flows = new HashMap<Integer, TaskNodeReference>();
+	private final Map<Integer, ManagedFunctionReference> flows = new HashMap<Integer, ManagedFunctionReference>();
 
 	/**
 	 * Registry of {@link Governance} instances that may be invoked from the
@@ -119,7 +119,7 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 	}
 
 	@Override
-	public TaskNodeReference[] getLinkedProcessConfiguration() {
+	public ManagedFunctionReference[] getLinkedProcessConfiguration() {
 
 		// Obtain the array size from maximum index
 		int arraySize = -1;
@@ -132,9 +132,9 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 		arraySize += 1; // size is one up of max index
 
 		// Create the listing of task nodes
-		TaskNodeReference[] taskNodes = new TaskNodeReference[arraySize];
+		ManagedFunctionReference[] taskNodes = new ManagedFunctionReference[arraySize];
 		for (Integer key : this.flows.keySet()) {
-			TaskNodeReference reference = this.flows.get(key);
+			ManagedFunctionReference reference = this.flows.get(key);
 			taskNodes[key.intValue()] = reference;
 		}
 

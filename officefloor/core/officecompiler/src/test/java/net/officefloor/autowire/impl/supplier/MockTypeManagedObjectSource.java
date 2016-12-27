@@ -36,7 +36,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
@@ -195,7 +195,7 @@ public class MockTypeManagedObjectSource extends
 					.getManagedObjectSourceContext();
 			ManagedObjectWorkBuilder<Work> work = mosContext.addWork("WORK-"
 					+ teamName, this);
-			ManagedObjectTaskBuilder<Indexed, Indexed> task = work.addTask(
+			ManagedObjectFunctionBuilder<Indexed, Indexed> task = work.addTask(
 					"TASK-" + teamName, this);
 			task.setTeam(teamName);
 		}

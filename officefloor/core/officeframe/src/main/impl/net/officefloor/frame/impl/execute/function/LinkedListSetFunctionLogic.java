@@ -19,30 +19,32 @@ package net.officefloor.frame.impl.execute.function;
 
 import java.util.function.Function;
 
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSetItem;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * {@link FunctionState} to execute a {@link FunctionState} for each
+ * {@link FunctionLogic} to execute a {@link FunctionLogic} for each
  * {@link LinkedListSetItem} of a list.
  *
  * @author Daniel Sagenschneider
  */
-public class LinkedListSetJobNode<E> implements FunctionState {
+public class LinkedListSetFunctionLogic<E> implements FunctionLogic {
 
 	/**
-	 * Convenience constructor to create a {@link LinkedListSetJobNode} that
-	 * casts the {@link LinkedListSetItem} to a {@link Function}.
+	 * Convenience constructor to create a {@link LinkedListSetFunctionLogic}
+	 * that casts the {@link LinkedListSetItem} to a {@link Function}.
 	 * 
 	 * @param head
 	 *            {@link LinkedListSetItem} head of list.
-	 * @return {@link LinkedListSetJobNode}.
+	 * @return {@link LinkedListSetFunctionLogic}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <J extends FunctionState> LinkedListSetJobNode<J> createCastJobNode(LinkedListSetItem<J> head) {
-		return new LinkedListSetJobNode<>(null, head, head.getEntry(), CAST_JOB_NODE_FACTORY);
+	public static <J extends FunctionLogic> LinkedListSetFunctionLogic<J> createCastFunction(
+			LinkedListSetItem<J> head) {
+		return new LinkedListSetFunctionLogic<>(null, head, head.getEntry(), CAST_JOB_NODE_FACTORY);
 	}
 
 	/**
@@ -68,15 +70,15 @@ public class LinkedListSetJobNode<E> implements FunctionState {
 	private final LinkedListSetItem<E> head;
 
 	/**
-	 * Head {@link Function}.
+	 * Head {@link FunctionLogic}.
 	 */
-	private final FunctionState headFunction;
+	private final FunctionLogic headFunction;
 
 	/**
 	 * {@link Function} to transform the {@link LinkedListSetItem} to a
-	 * {@link FunctionState}.
+	 * {@link FunctionLogic}.
 	 */
-	private final Function<LinkedListSetItem<E>, FunctionState> functionFactory;
+	private final Function<LinkedListSetItem<E>, FunctionLogic> functionFactory;
 
 	/**
 	 * Under takes all {@link FunctionState} instances within the list.
@@ -85,11 +87,11 @@ public class LinkedListSetJobNode<E> implements FunctionState {
 	 *            Head {@link LinkedListSetItem} of the listing.
 	 * @param jobNodeFactory
 	 *            {@link Function} to transform the {@link LinkedListSetItem} to
-	 *            a {@link FunctionState}.
+	 *            a {@link FunctionLogic}.
 	 */
-	public LinkedListSetJobNode(LinkedListSetItem<E> head,
-			Function<LinkedListSetItem<E>, FunctionState> jobNodeFactory) {
-		this(null, head, jobNodeFactory.apply(head), jobNodeFactory);
+	public LinkedListSetFunctionLogic(LinkedListSetItem<E> head,
+			Function<LinkedListSetItem<E>, FunctionLogic> functionFactory) {
+		this(null, head, functionFactory.apply(head), functionFactory);
 	}
 
 	/**
@@ -106,11 +108,11 @@ public class LinkedListSetJobNode<E> implements FunctionState {
 	 *            {@link FunctionState} for head.
 	 * @param functionFactory
 	 *            {@link Function} to transform the {@link LinkedListSetItem} to
-	 *            a {@link FunctionState}.
+	 *            a {@link FunctionLogic}.
 	 */
-	private LinkedListSetJobNode(FunctionState previousFunction, LinkedListSetItem<E> head, FunctionState headFunction,
-			Function<LinkedListSetItem<E>, FunctionState> functionFactory) {
-		this.previousFunction = null;
+	private LinkedListSetFunctionLogic(FunctionState previousFunction, LinkedListSetItem<E> head,
+			FunctionLogic headFunction, Function<LinkedListSetItem<E>, FunctionLogic> functionFactory) {
+		this.previousFunction = previousFunction;
 		this.head = head;
 		this.headFunction = headFunction;
 		this.functionFactory = functionFactory;
@@ -127,33 +129,29 @@ public class LinkedListSetJobNode<E> implements FunctionState {
 	}
 
 	@Override
-	public ThreadState getThreadState() {
-		return (this.previousFunction != null) ? this.previousFunction.getThreadState()
-				: this.headFunction.getThreadState();
-	}
-
-	@Override
-	public FunctionState execute() {
+	public FunctionState execute(Flow flow) throws Throwable {
 
 		// Determine if previous chain of functions to complete
 		if (this.previousFunction != null) {
 			FunctionState nextFunction = this.previousFunction.execute();
 			if (nextFunction != null) {
 				// Need to complete previous functions before next item in list
-				return new LinkedListSetJobNode<E>(nextFunction, this.head, this.headFunction, this.functionFactory);
+				return flow.createFunction(new LinkedListSetFunctionLogic<E>(nextFunction, this.head, this.headFunction,
+						this.functionFactory));
 			}
 		}
 
 		// Undertake the head function
-		FunctionState nextPreviousFunction = this.headFunction.execute();
+		FunctionState nextPreviousFunction = this.headFunction.execute(flow);
 		LinkedListSetItem<E> nextHead = this.head.getNext();
 		if (nextHead == null) {
 			// Nothing further in list, so complete last chain of functions
 			return nextPreviousFunction;
 		} else {
 			// Continue on for next item in the list
-			FunctionState nextHeadFunction = this.functionFactory.apply(nextHead);
-			return new LinkedListSetJobNode<>(nextPreviousFunction, nextHead, nextHeadFunction, this.functionFactory);
+			FunctionLogic nextHeadFunction = this.functionFactory.apply(nextHead);
+			return flow.createFunction(new LinkedListSetFunctionLogic<>(nextPreviousFunction, nextHead,
+					nextHeadFunction, this.functionFactory));
 		}
 	}
 

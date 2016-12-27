@@ -54,7 +54,7 @@ public interface OfficeFloorBuilder {
 	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
@@ -66,13 +66,13 @@ public interface OfficeFloorBuilder {
 	 *            Class of the {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
-	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> addManagedObject(
+	<O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> ManagedObjectBuilder<F> addManagedObject(
 			String managedObjectSourceName, Class<MS> managedObjectSourceClass);
 
 	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
@@ -82,13 +82,12 @@ public interface OfficeFloorBuilder {
 	 *            {@link ManagedObjectSource} instance to use.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
-	<D extends Enum<D>, F extends Enum<F>> ManagedObjectBuilder<F> addManagedObject(
-			String managedObjectSourceName,
-			ManagedObjectSource<D, F> managedObjectSource);
+	<O extends Enum<O>, F extends Enum<F>> ManagedObjectBuilder<F> addManagedObject(String managedObjectSourceName,
+			ManagedObjectSource<O, F> managedObjectSource);
 
 	/**
-	 * Adds a {@link Team} which will execute {@link FunctionState} instances within
-	 * this {@link OfficeFloor}.
+	 * Adds a {@link Team} which will execute {@link FunctionState} instances
+	 * within this {@link OfficeFloor}.
 	 * 
 	 * @param <TS>
 	 *            {@link TeamSource} type.
@@ -98,8 +97,7 @@ public interface OfficeFloorBuilder {
 	 *            {@link TeamSource} to source the {@link Team}.
 	 * @return {@link TeamBuilder} to build the {@link Team}.
 	 */
-	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName,
-			Class<TS> teamSourceClass);
+	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, Class<TS> teamSourceClass);
 
 	/**
 	 * Adds an {@link Office} on the {@link OfficeFloor}.

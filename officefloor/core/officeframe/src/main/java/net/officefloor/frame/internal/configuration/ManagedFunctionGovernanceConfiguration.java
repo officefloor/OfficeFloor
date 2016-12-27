@@ -15,31 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.profile;
+package net.officefloor.frame.internal.configuration;
 
-import java.util.List;
-
-import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
- * Profiled {@link ThreadState}.
+ * Configuration of a {@link Governance} for the {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ProfiledThread {
+public interface ManagedFunctionGovernanceConfiguration {
 
 	/**
-	 * Obtains the start time stamp.
+	 * Obtains the name of the {@link Governance}.
 	 * 
-	 * @return Start time stamp in nanoseconds.
+	 * @return Name of the {@link Governance}.
 	 */
-	long getStartTimestamp();
-
-	/**
-	 * Obtains the {@link ProfiledJob} instances.
-	 * 
-	 * @return {@link ProfiledJob} instances.
-	 */
-	List<ProfiledJob> getProfiledJobs();
+	String getGovernanceName();
 
 }

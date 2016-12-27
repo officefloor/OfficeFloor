@@ -18,29 +18,30 @@
 package net.officefloor.frame.impl.execute.flow;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Implementation of the {@link FlowMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
-public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
+public class FlowMetaDataImpl implements FlowMetaData {
 
 	/**
-	 * {@link FlowInstigationStrategyEnum}.
+	 * Indicates whether the {@link Flow} should be instigated in a spawned
+	 * {@link ThreadState}.
 	 */
-	private final FlowInstigationStrategyEnum strategy;
+	private final boolean isSpawnThreadState;
 
 	/**
-	 * {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} of the {@link Flow}.
+	 * {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} of
+	 * the {@link Flow}.
 	 */
-	private final ManagedFunctionMetaData<W, ?, ?> initialTaskMetaData;
+	private final ManagedFunctionMetaData<?, ?> initialFunctionMetaData;
 
 	/**
 	 * {@link AssetManager} to managed this {@link Flow}.
@@ -50,18 +51,19 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param strategy
-	 *            {@link FlowInstigationStrategyEnum}.
-	 * @param initialTaskMetaData
-	 *            {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} of the
-	 *            {@link Flow}.
+	 * @param isSpawnThreadState
+	 *            Indicates whether the {@link Flow} should be instigated in a
+	 *            spawned {@link ThreadState}.
+	 * @param initialFunctionMetaData
+	 *            {@link ManagedFunctionMetaData} of the initial
+	 *            {@link ManagedFunction} of the {@link Flow}.
 	 * @param flowManager
 	 *            {@link AssetManager} to managed this {@link Flow}.
 	 */
-	public FlowMetaDataImpl(FlowInstigationStrategyEnum strategy,
-			ManagedFunctionMetaData<W, ?, ?> initialTaskMetaData, AssetManager flowManager) {
-		this.strategy = strategy;
-		this.initialTaskMetaData = initialTaskMetaData;
+	public FlowMetaDataImpl(boolean isSpawnThreadState, ManagedFunctionMetaData<?, ?> initialFunctionMetaData,
+			AssetManager flowManager) {
+		this.isSpawnThreadState = isSpawnThreadState;
+		this.initialFunctionMetaData = initialFunctionMetaData;
 		this.flowManager = flowManager;
 	}
 
@@ -70,13 +72,13 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	 */
 
 	@Override
-	public FlowInstigationStrategyEnum getInstigationStrategy() {
-		return this.strategy;
+	public boolean isSpawnThreadState() {
+		return this.isSpawnThreadState;
 	}
 
 	@Override
-	public ManagedFunctionMetaData<W, ?, ?> getInitialTaskMetaData() {
-		return this.initialTaskMetaData;
+	public ManagedFunctionMetaData<?, ?> getInitialFunctionMetaData() {
+		return this.initialFunctionMetaData;
 	}
 
 	@Override

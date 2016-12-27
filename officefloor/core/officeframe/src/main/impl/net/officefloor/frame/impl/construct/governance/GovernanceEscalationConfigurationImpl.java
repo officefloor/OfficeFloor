@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.construct.governance;
 
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 
 /**
  * Implementation of the {@link GovernanceEscalationConfiguration}.
@@ -34,9 +34,9 @@ public class GovernanceEscalationConfigurationImpl implements
 	private final Class<? extends Throwable> typeOfCause;
 
 	/**
-	 * {@link TaskNodeReference}.
+	 * {@link ManagedFunctionReference}.
 	 */
-	private final TaskNodeReference taskNodeReference;
+	private final ManagedFunctionReference taskNodeReference;
 
 	/**
 	 * Initiate.
@@ -44,11 +44,11 @@ public class GovernanceEscalationConfigurationImpl implements
 	 * @param typeOfCause
 	 *            Type of cause.
 	 * @param taskNodeReference
-	 *            {@link TaskNodeReference}.
+	 *            {@link ManagedFunctionReference}.
 	 */
 	public GovernanceEscalationConfigurationImpl(
 			Class<? extends Throwable> typeOfCause,
-			TaskNodeReference taskNodeReference) {
+			ManagedFunctionReference taskNodeReference) {
 		this.typeOfCause = typeOfCause;
 		this.taskNodeReference = taskNodeReference;
 	}
@@ -63,7 +63,7 @@ public class GovernanceEscalationConfigurationImpl implements
 	}
 
 	@Override
-	public TaskNodeReference getTaskNodeReference() {
+	public ManagedFunctionReference getTaskNodeReference() {
 		return this.taskNodeReference;
 	}
 

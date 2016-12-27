@@ -31,7 +31,7 @@ public interface FunctionLogic {
 	 * {@link FunctionLogic}.
 	 * 
 	 * @return {@link TeamManagement} responsible for this
-	 *         {@link FunctionLogic}. May be <code>null</code> use any
+	 *         {@link FunctionLogic}. May be <code>null</code> to use any
 	 *         {@link Team}.
 	 */
 	default TeamManagement getResponsibleTeam() {

@@ -32,7 +32,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBui
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
+import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.execute.Work;
@@ -58,7 +58,7 @@ import net.officefloor.plugin.web.http.session.HttpSession;
 public class HttpServletTask
 		extends
 		AbstractSingleTask<HttpServletTask, HttpServletTask.DependencyKeys, None>
-		implements OfficeAwareWorkFactory<HttpServletTask>, HttpServletServicer {
+		implements OfficeAwareManagedFunctionFactory<HttpServletTask>, HttpServletServicer {
 
 	/**
 	 * Prefix of property for an initialisation parameter.

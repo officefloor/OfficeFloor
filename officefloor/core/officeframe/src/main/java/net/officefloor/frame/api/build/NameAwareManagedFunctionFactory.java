@@ -17,32 +17,23 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
- * <p>
- * {@link Office} aware {@link WorkFactory}.
- * <p>
- * This allows the {@link WorkFactory} to:
- * <ol>
- * <li>obtain the dynamic meta-data of its containing {@link Office}</li>
- * <li>ability to spawn {@link ProcessState} instances</li>
- * </ol>
+ * Name aware {@link ManagedFunctionFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeAwareWorkFactory<W extends Work> extends WorkFactory<W> {
+public interface NameAwareManagedFunctionFactory<O extends Enum<O>, F extends Enum<F>>
+		extends ManagedFunctionFactory<O, F> {
 
 	/**
-	 * Provides the {@link WorkFactory} its containing {@link Office}.
+	 * Provides the {@link ManagedFunctionFactory} the bound name for its
+	 * created {@link ManagedFunction} instances.
 	 * 
-	 * @param office
-	 *            {@link Office} containing this {@link WorkFactory}.
-	 * @throws Exception
-	 *             If fails to use the {@link Office}.
+	 * @param boundFunctionName
+	 *            Bound name for the created {@link ManagedFunction}.
 	 */
-	void setOffice(Office office) throws Exception;
+	void setBoundWorkName(String boundFunctionName);
 
 }

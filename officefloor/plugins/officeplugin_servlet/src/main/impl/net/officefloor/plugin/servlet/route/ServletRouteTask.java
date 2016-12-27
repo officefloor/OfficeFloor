@@ -19,7 +19,7 @@ package net.officefloor.plugin.servlet.route;
 
 import javax.servlet.Servlet;
 
-import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
+import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
@@ -38,7 +38,7 @@ import net.officefloor.plugin.socket.server.http.ServerHttpConnection;
 public class ServletRouteTask
 		extends
 		AbstractSingleTask<ServletRouteTask, ServletRouteTask.DependencyKeys, ServletRouteTask.FlowKeys>
-		implements OfficeAwareWorkFactory<ServletRouteTask> {
+		implements OfficeAwareManagedFunctionFactory<ServletRouteTask> {
 
 	/**
 	 * Dependency keys.

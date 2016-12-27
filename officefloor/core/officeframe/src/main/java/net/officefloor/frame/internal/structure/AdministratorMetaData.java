@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministratorMetaData<I extends Object, A extends Enum<A>> extends ManagedFunctionLogicMetaData {
+public interface AdministratorMetaData<E extends Object, A extends Enum<A>> extends ManagedFunctionLogicMetaData {
 
 	/**
 	 * Creates a new {@link AdministratorContainer} from this
@@ -39,14 +39,14 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> exte
 	 *            {@link AdministratorContainer}.
 	 * @return New {@link AdministratorContainer}.
 	 */
-	AdministratorContainer<I, A> createAdministratorContainer(ThreadState threadState);
+	AdministratorContainer<A> createAdministratorContainer(ThreadState threadState);
 
 	/**
 	 * Obtains the {@link AdministratorSource}.
 	 * 
 	 * @return {@link AdministratorSource}.
 	 */
-	AdministratorSource<I, A> getAdministratorSource();
+	AdministratorSource<E, A> getAdministratorSource();
 
 	/**
 	 * Obtains the {@link ExtensionInterfaceMetaData} over the
@@ -56,7 +56,7 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> exte
 	 * @return {@link ExtensionInterfaceMetaData} over the {@link ManagedObject}
 	 *         instances to be administered by this {@link Administrator}.
 	 */
-	ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData();
+	ExtensionInterfaceMetaData<E>[] getExtensionInterfaceMetaData();
 
 	/**
 	 * Obtains the {@link DutyMetaData} for the input {@link DutyKey}.

@@ -24,15 +24,15 @@ import net.officefloor.frame.internal.structure.ProcessState;
  *
  * @author Daniel Sagenschneider
  */
-public interface ProcessSafeOperation<R, E extends Throwable> {
+public interface ProcessSafeOperation<R, T extends Throwable> {
 
 	/**
 	 * Contains the logic requiring {@link ProcessState} safety.
 	 * 
 	 * @return Optional return value from operation.
-	 * @throws E
+	 * @throws T
 	 *             Possible {@link Throwable}.
 	 */
-	R run() throws E;
+	R run() throws T;
 
 }

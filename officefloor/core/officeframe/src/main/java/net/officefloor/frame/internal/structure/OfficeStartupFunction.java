@@ -15,14 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.execute;
+package net.officefloor.frame.internal.structure;
+
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.manage.Office;
 
 /**
- * Work that is to be done.
+ * Startup task for an {@link Office}.
  * 
  * @author Daniel Sagenschneider
  */
-@Deprecated // use managed object for state
-public interface Work {
+public interface OfficeStartupFunction {
+
+	/**
+	 * Obtains the {@link FlowMetaData} for the startup task.
+	 * 
+	 * @return {@link FlowMetaData} for the startup task.
+	 */
+	FlowMetaData getFlowMetaData();
+
+	/**
+	 * Obtains the parameter to invoke the startup {@link ManagedFunction} with.
+	 * 
+	 * @return Parameter for the startup {@link ManagedFunction}.
+	 */
+	Object getParameter();
 
 }

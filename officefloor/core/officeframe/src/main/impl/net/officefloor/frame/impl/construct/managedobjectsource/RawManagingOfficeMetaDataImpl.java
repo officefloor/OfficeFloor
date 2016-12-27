@@ -33,9 +33,9 @@ import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteContex
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
@@ -213,7 +213,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 
 	@Override
 	public void manageByOffice(RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
-			OfficeMetaData officeMetaData, OfficeMetaDataLocator metaDataLocator,
+			OfficeMetaData officeMetaData, ManagedFunctionLocator metaDataLocator,
 			Map<String, TeamManagement> officeTeams, AssetManagerFactory assetManagerFactory,
 			OfficeFloorIssues issues) {
 
@@ -375,8 +375,8 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 
 			// Create the task node reference for the task.
 			// Override argument type as managed object knows better.
-			TaskNodeReference configurationTaskReference = flowConfiguration.getTaskNodeReference();
-			TaskNodeReference flowTaskReference = new TaskNodeReferenceImpl(configurationTaskReference.getWorkName(),
+			ManagedFunctionReference configurationTaskReference = flowConfiguration.getTaskNodeReference();
+			ManagedFunctionReference flowTaskReference = new TaskNodeReferenceImpl(configurationTaskReference.getWorkName(),
 					configurationTaskReference.getTaskName(), argumentType);
 
 			// Obtain the task meta-data of flow meta-data

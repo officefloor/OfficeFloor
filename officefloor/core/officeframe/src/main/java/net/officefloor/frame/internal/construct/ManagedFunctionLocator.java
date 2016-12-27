@@ -15,38 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.configuration;
+package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
- * Reference to a {@link FunctionState}.
+ * Locates a {@link ManagedFunctionMetaData} within the {@link Office}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskNodeReference {
+public interface ManagedFunctionLocator {
 
 	/**
-	 * Obtains the name of the {@link Work} containing the {@link ManagedFunction}.
+	 * Obtains the {@link ManagedFunctionMetaData}.
 	 * 
-	 * @return Name of the {@link Work} containing the {@link ManagedFunction}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionMetaData} or <code>null</code> if not
+	 *         found.
 	 */
-	String getWorkName();
-
-	/**
-	 * Obtains the name of the {@link ManagedFunction}.
-	 * 
-	 * @return Name of the {@link ManagedFunction}.
-	 */
-	String getTaskName();
-
-	/**
-	 * Obtains the type of argument to be passed to the referenced {@link ManagedFunction}.
-	 * 
-	 * @return Type of argument to be passed to the referenced {@link ManagedFunction}.
-	 */
-	Class<?> getArgumentType();
+	ManagedFunctionMetaData<?, ?> getManagedFunctionMetaData(String functionName);
 
 }

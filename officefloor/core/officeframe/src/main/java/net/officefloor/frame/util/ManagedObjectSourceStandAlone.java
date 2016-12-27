@@ -24,14 +24,13 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -83,7 +82,7 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Instantiates and initialises the {@link ManagedObjectSource}.
 	 * 
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
@@ -96,7 +95,7 @@ public class ManagedObjectSourceStandAlone {
 	 *             If fails to initialise {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> MS initManagedObjectSource(
+	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> MS initManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Create a new instance of the managed object source
@@ -124,7 +123,7 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Starts the {@link ManagedObjectSource}.
 	 *
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
@@ -136,7 +135,7 @@ public class ManagedObjectSourceStandAlone {
 	 *             If fails to start the {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void startManagedObjectSource(
+	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> void startManagedObjectSource(
 			MS managedObjectSource) throws Exception {
 		// Start the managed object source
 		managedObjectSource.start(new LoadExecuteContext());
@@ -145,7 +144,7 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Loads (init and start) the {@link ManagedObjectSource}.
 	 *
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
@@ -157,7 +156,7 @@ public class ManagedObjectSourceStandAlone {
 	 * @throws Exception
 	 *             If fails to init and start the {@link ManagedObjectSource}.
 	 */
-	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> MS loadManagedObjectSource(
+	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> MS loadManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Initialise the managed object source
@@ -171,35 +170,41 @@ public class ManagedObjectSourceStandAlone {
 	}
 
 	/**
-	 * Registers the initial {@link ManagedFunction} for the invoked {@link ProcessState}.
+	 * Registers the initial {@link ManagedFunction} for the invoked
+	 * {@link ProcessState}.
 	 * 
 	 * @param processKey
 	 *            Key of the {@link ProcessState}.
-	 * @param task
+	 * @param function
 	 *            Initial {@link ManagedFunction} for the {@link ProcessState}.
-	 * @param taskContext
-	 *            {@link ManagedFunctionContext} for the {@link ManagedFunction}. Allows for mocking
-	 *            the {@link ManagedFunctionContext} to validate functionality for the
-	 *            {@link ManagedFunction}.
+	 * @param functionContext
+	 *            {@link ManagedFunctionContext} for the
+	 *            {@link ManagedFunction}. Allows for mocking the
+	 *            {@link ManagedFunctionContext} to validate functionality for
+	 *            the {@link ManagedFunction}.
 	 */
-	public void registerInvokeProcessTask(Enum<?> processKey, ManagedFunction<?, ?, ?> task, ManagedFunctionContext<?, ?, ?> taskContext) {
-		this.registerInvokeProcessTask(processKey.ordinal(), task, taskContext);
+	public void registerInvokeProcessFunction(Enum<?> processKey, ManagedFunction<?, ?> function,
+			ManagedFunctionContext<?, ?> functionContext) {
+		this.registerInvokeProcessFunction(processKey.ordinal(), function, functionContext);
 	}
 
 	/**
-	 * Registers the initial {@link ManagedFunction} for the invoked {@link ProcessState}.
+	 * Registers the initial {@link ManagedFunction} for the invoked
+	 * {@link ProcessState}.
 	 * 
 	 * @param processIndex
 	 *            Index of the {@link ProcessState}.
 	 * @param task
 	 *            Initial {@link ManagedFunction} for the {@link ProcessState}.
 	 * @param taskContext
-	 *            {@link ManagedFunctionContext} for the {@link ManagedFunction}. Allows for mocking
-	 *            the {@link ManagedFunctionContext} to validate functionality for the
-	 *            {@link ManagedFunction}.
+	 *            {@link ManagedFunctionContext} for the
+	 *            {@link ManagedFunction}. Allows for mocking the
+	 *            {@link ManagedFunctionContext} to validate functionality for
+	 *            the {@link ManagedFunction}.
 	 */
-	public void registerInvokeProcessTask(int processIndex, ManagedFunction<?, ?, ?> task, ManagedFunctionContext<?, ?, ?> taskContext) {
-		this.registerInvokeProcessServicer(processIndex, new TaskInvokedProcessServicer(task, taskContext));
+	public void registerInvokeProcessFunction(int processIndex, ManagedFunction<?, ?> function,
+			ManagedFunctionContext<?, ?> functionContext) {
+		this.registerInvokeProcessServicer(processIndex, new FunctionInvokedProcessServicer(function, functionContext));
 	}
 
 	/**
@@ -230,31 +235,33 @@ public class ManagedObjectSourceStandAlone {
 
 	/**
 	 * {@link InvokedProcessServicer} containing the details for the initial
-	 * {@link ManagedFunction} to be executed for the invoked {@link ProcessState}.
+	 * {@link ManagedFunction} to be executed for the invoked
+	 * {@link ProcessState}.
 	 */
-	private class TaskInvokedProcessServicer implements InvokedProcessServicer {
+	private class FunctionInvokedProcessServicer implements InvokedProcessServicer {
 
 		/**
 		 * {@link ManagedFunction}.
 		 */
-		public final ManagedFunction<?, ?, ?> task;
+		public final ManagedFunction<?, ?> function;
 
 		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		public final ManagedFunctionContext<?, ?, ?> taskContext;
+		public final ManagedFunctionContext<?, ?> functionContext;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param task
+		 * @param function
 		 *            {@link ManagedFunction}.
-		 * @param taskContext
+		 * @param functionContext
 		 *            {@link ManagedFunctionContext}.
 		 */
-		public TaskInvokedProcessServicer(ManagedFunction<?, ?, ?> task, ManagedFunctionContext<?, ?, ?> taskContext) {
-			this.task = task;
-			this.taskContext = taskContext;
+		public FunctionInvokedProcessServicer(ManagedFunction<?, ?> function,
+				ManagedFunctionContext<?, ?> functionContext) {
+			this.function = function;
+			this.functionContext = functionContext;
 		}
 
 		/*
@@ -264,7 +271,7 @@ public class ManagedObjectSourceStandAlone {
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void service(int processIndex, Object parameter, ManagedObject managedObject) throws Throwable {
-			this.task.execute((ManagedFunctionContext) this.taskContext);
+			this.function.execute((ManagedFunctionContext) this.functionContext);
 		}
 	}
 
@@ -274,24 +281,23 @@ public class ManagedObjectSourceStandAlone {
 	private class LoadExecuteContext<F extends Enum<F>> implements ManagedObjectExecuteContext<F> {
 
 		/**
-		 * Processes the {@link ManagedFunction} for the invoked {@link ProcessState}.
+		 * Processes the {@link ManagedFunction} for the invoked
+		 * {@link ProcessState}.
 		 * 
 		 * @param processIndex
 		 *            Index of the {@link ProcessState} to invoke.
-		 * @param escalationHandler
-		 *            {@link EscalationHandler}. May be <code>null</code>.
-		 * @param delay
-		 *            Delay to invoke {@link ProcessState}.
 		 * @param parameter
-		 *            Parameter to initial {@link ManagedFunction} of the invoked
-		 *            {@link ProcessState}.
+		 *            Parameter to initial {@link ManagedFunction} of the
+		 *            invoked {@link ProcessState}.
 		 * @param managedObject
 		 *            {@link ManagedObject} for the {@link ProcessState}.
-		 * @param completionListener
-		 *            {@link ProcessCompletionListener}.
+		 * @param delay
+		 *            Delay to invoke {@link ProcessState}.
+		 * @param callback
+		 *            {@link FlowCallback}.
 		 */
-		private void process(int processIndex, EscalationHandler escalationHandler, long delay, Object parameter,
-				ManagedObject managedObject, ProcessCompletionListener completionListener) {
+		private void process(int processIndex, Object parameter, ManagedObject managedObject, long delay,
+				FlowCallback callback) {
 
 			// Ignore delay and execute immediately
 
@@ -300,7 +306,7 @@ public class ManagedObjectSourceStandAlone {
 					.get(new Integer(processIndex));
 			if (servicer == null) {
 				throw new UnsupportedOperationException(
-						"No task configured for process invocation index " + processIndex);
+						"No function configured for process invocation index " + processIndex);
 			}
 
 			try {
@@ -308,15 +314,15 @@ public class ManagedObjectSourceStandAlone {
 					// Service the invoked process
 					servicer.service(processIndex, parameter, managedObject);
 
-					// Complete possible completion listener
-					if (completionListener != null) {
-						completionListener.processComplete();
+					// Process complete
+					if (callback != null) {
+						callback.run(null);
 					}
 
 				} catch (Throwable ex) {
 					// Determine if handle
-					if (escalationHandler != null) {
-						escalationHandler.handleEscalation(ex);
+					if (callback != null) {
+						callback.run(ex);
 					} else {
 						throw ex; // not handled so propagate
 					}
@@ -340,26 +346,14 @@ public class ManagedObjectSourceStandAlone {
 
 		@Override
 		public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
-				ProcessCompletionListener completionListener) {
-			this.process(key.ordinal(), null, delay, parameter, managedObject, completionListener);
+				FlowCallback callback) {
+			this.process(key.ordinal(), parameter, managedObject, delay, callback);
 		}
 
 		@Override
 		public void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
-				ProcessCompletionListener completionListener) {
-			this.process(flowIndex, null, delay, parameter, managedObject, completionListener);
-		}
-
-		@Override
-		public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
-				EscalationHandler escalationHandler, ProcessCompletionListener completionListener) {
-			this.process(key.ordinal(), escalationHandler, delay, parameter, managedObject, completionListener);
-		}
-
-		@Override
-		public void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
-				EscalationHandler escalationHandler, ProcessCompletionListener completionListener) {
-			this.process(flowIndex, escalationHandler, delay, parameter, managedObject, completionListener);
+				FlowCallback callback) {
+			this.process(flowIndex, parameter, managedObject, delay, callback);
 		}
 	}
 

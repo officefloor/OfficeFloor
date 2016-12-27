@@ -18,8 +18,8 @@
 package net.officefloor.frame.impl.execute.officefloor;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.NameAwareWorkFactory;
-import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
+import net.officefloor.frame.api.build.NameAwareManagedFunctionFactory;
+import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
@@ -158,8 +158,8 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectPool.class);
 		final TeamManagement teamManagement = this
 				.createMock(TeamManagement.class);
-		final OfficeStartupTask startupTask = this
-				.createMock(OfficeStartupTask.class);
+		final OfficeStartupFunction startupTask = this
+				.createMock(OfficeStartupFunction.class);
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
 		final Object parameter = new Object();
@@ -206,7 +206,7 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 		this.team.startWorking();
 		this.recordReturn(this.officeMetaData,
 				this.officeMetaData.getStartupTasks(),
-				new OfficeStartupTask[] { startupTask });
+				new OfficeStartupFunction[] { startupTask });
 		this.recordReturn(startupTask, startupTask.getFlowMetaData(),
 				flowMetaData);
 		this.recordReturn(startupTask, startupTask.getParameter(), parameter);
@@ -220,7 +220,7 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 	 * {@link WorkFactory} for testing ensure appropriate notification at open.
 	 */
 	private static interface MockWorkFactory extends
-			NameAwareWorkFactory<Work>, OfficeAwareWorkFactory<Work> {
+			NameAwareManagedFunctionFactory<Work>, OfficeAwareManagedFunctionFactory<Work> {
 	}
 
 }

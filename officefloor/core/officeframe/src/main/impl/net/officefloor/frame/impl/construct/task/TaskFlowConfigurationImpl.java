@@ -18,18 +18,18 @@
 package net.officefloor.frame.impl.construct.task;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
- * {@link TaskFlowConfiguration} implementation.
+ * {@link ManagedFunctionFlowConfiguration} implementation.
  * 
  * @author Daniel Sagenschneider
  */
 public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
-		TaskFlowConfiguration<F> {
+		ManagedFunctionFlowConfiguration<F> {
 
 	/**
 	 * Name of the {@link Flow}.
@@ -44,7 +44,7 @@ public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
 	/**
 	 * Reference to the initial {@link ManagedFunction} of this {@link Flow}.
 	 */
-	private final TaskNodeReference taskNodeRef;
+	private final ManagedFunctionReference taskNodeRef;
 
 	/**
 	 * Index of the {@link Flow}.
@@ -72,7 +72,7 @@ public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
 	 */
 	public TaskFlowConfigurationImpl(String flowName,
 			FlowInstigationStrategyEnum strategy,
-			TaskNodeReference taskNodeRef, int index, F key) {
+			ManagedFunctionReference taskNodeRef, int index, F key) {
 		this.flowName = flowName;
 		this.strategy = strategy;
 		this.taskNodeRef = taskNodeRef;
@@ -95,7 +95,7 @@ public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
 	}
 
 	@Override
-	public TaskNodeReference getInitialTask() {
+	public ManagedFunctionReference getInitialTask() {
 		return this.taskNodeRef;
 	}
 

@@ -25,18 +25,18 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInte
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectExtensionInterfaceMetaDataImpl<I extends Object>
-		implements ManagedObjectExtensionInterfaceMetaData<I> {
+public class ManagedObjectExtensionInterfaceMetaDataImpl<E extends Object>
+		implements ManagedObjectExtensionInterfaceMetaData<E> {
 
 	/**
 	 * Extension interface type.
 	 */
-	private final Class<I> type;
+	private final Class<E> type;
 
 	/**
 	 * {@link ExtensionInterfaceFactory}.
 	 */
-	private final ExtensionInterfaceFactory<I> factory;
+	private final ExtensionInterfaceFactory<E> factory;
 
 	/**
 	 * Initiate.
@@ -46,8 +46,7 @@ public class ManagedObjectExtensionInterfaceMetaDataImpl<I extends Object>
 	 * @param factory
 	 *            {@link ExtensionInterfaceFactory}.
 	 */
-	public ManagedObjectExtensionInterfaceMetaDataImpl(Class<I> type,
-			ExtensionInterfaceFactory<I> factory) {
+	public ManagedObjectExtensionInterfaceMetaDataImpl(Class<E> type, ExtensionInterfaceFactory<E> factory) {
 		this.type = type;
 		this.factory = factory;
 	}
@@ -57,12 +56,12 @@ public class ManagedObjectExtensionInterfaceMetaDataImpl<I extends Object>
 	 */
 
 	@Override
-	public Class<I> getExtensionInterfaceType() {
+	public Class<E> getExtensionInterfaceType() {
 		return this.type;
 	}
 
 	@Override
-	public ExtensionInterfaceFactory<I> getExtensionInterfaceFactory() {
+	public ExtensionInterfaceFactory<E> getExtensionInterfaceFactory() {
 		return this.factory;
 	}
 

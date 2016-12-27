@@ -40,11 +40,11 @@ import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceCon
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
@@ -56,7 +56,7 @@ import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
-import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
@@ -72,7 +72,7 @@ import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -189,10 +189,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			.createMock(RawWorkMetaDataFactory.class);
 
 	/**
-	 * {@link RawTaskMetaDataFactory}.
+	 * {@link RawManagedFunctionMetaDataFactory}.
 	 */
-	private final RawTaskMetaDataFactory rawTaskMetaDataFactory = this
-			.createMock(RawTaskMetaDataFactory.class);
+	private final RawManagedFunctionMetaDataFactory rawTaskMetaDataFactory = this
+			.createMock(RawManagedFunctionMetaDataFactory.class);
 
 	/**
 	 * Continue {@link TeamManagement}.
@@ -818,7 +818,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 						.get("OFFICE_MO_0");
 				assertEquals("Incorrect bound meta-data",
 						expectedBoundMetaData, boundMetaData[0]);
-				OfficeMetaDataLocator metaDataLocator = (OfficeMetaDataLocator) actual[1];
+				ManagedFunctionLocator metaDataLocator = (ManagedFunctionLocator) actual[1];
 				assertEquals("Incorrect meta-data locator", OFFICE_NAME,
 						metaDataLocator.getOfficeMetaData().getOfficeName());
 				assertEquals("Incorrect responsible teams",
@@ -1243,14 +1243,14 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Enable issue if {@link OfficeStartupTask} not found.
+	 * Enable issue if {@link OfficeStartupFunction} not found.
 	 */
 	public void testUnknownStartupTask() {
 
 		final RawWorkMetaData<?> rawWorkMetaData = this
 				.createMock(RawWorkMetaData.class);
-		final TaskNodeReference startupTaskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference startupTaskReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record adding startup task
 		this.record_enhanceOffice();
@@ -1260,7 +1260,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		WorkMetaData<?> workMetaData = this.record_work(rawWorkMetaData)[0];
 		this.recordReturn(this.configuration,
 				this.configuration.getStartupTasks(),
-				new TaskNodeReference[] { startupTaskReference });
+				new ManagedFunctionReference[] { startupTaskReference });
 		this.recordReturn(workMetaData, workMetaData.getWorkName(), "WORK");
 		this.recordReturn(workMetaData, workMetaData.getTaskMetaData(),
 				new ManagedFunctionMetaData[0]);
@@ -1281,14 +1281,14 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Verify startup task not loaded
-		OfficeStartupTask[] startupTasks = officeMetaData.getStartupTasks();
+		OfficeStartupFunction[] startupTasks = officeMetaData.getStartupTasks();
 		assertEquals("Incorrect number of startup task entries", 1,
 				startupTasks.length);
 		assertNull("Should not have startup task loaded", startupTasks[0]);
 	}
 
 	/**
-	 * Enable able to link in an {@link OfficeStartupTask}.
+	 * Enable able to link in an {@link OfficeStartupFunction}.
 	 */
 	public void testConstructStartupTask() {
 
@@ -1296,8 +1296,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(RawWorkMetaData.class);
 		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
-		final TaskNodeReference startupTaskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference startupTaskReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record adding startup task
 		this.record_enhanceOffice();
@@ -1307,7 +1307,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		WorkMetaData<?> workMetaData = this.record_work(rawWorkMetaData)[0];
 		this.recordReturn(this.configuration,
 				this.configuration.getStartupTasks(),
-				new TaskNodeReference[] { startupTaskReference });
+				new ManagedFunctionReference[] { startupTaskReference });
 		this.recordReturn(workMetaData, workMetaData.getWorkName(), "WORK");
 		this.recordReturn(workMetaData, workMetaData.getTaskMetaData(),
 				new ManagedFunctionMetaData[] { taskMetaData });
@@ -1332,7 +1332,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Verify startup task loaded
-		OfficeStartupTask[] startupTasks = officeMetaData.getStartupTasks();
+		OfficeStartupFunction[] startupTasks = officeMetaData.getStartupTasks();
 		assertEquals("Incorrect number of startup tasks", 1,
 				startupTasks.length);
 		assertEquals("Incorrect startup task meta-data", taskMetaData,
@@ -1374,8 +1374,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoTypeOfCauseForOfficeEscalation() {
 
-		final TaskEscalationConfiguration escalationConfiguration = this
-				.createMock(TaskEscalationConfiguration.class);
+		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
+				.createMock(ManagedFunctionEscalationConfiguration.class);
 
 		// Record no type of cause
 		this.record_enhanceOffice();
@@ -1386,7 +1386,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupTasks();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalationConfiguration(),
-				new TaskEscalationConfiguration[] { escalationConfiguration });
+				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(this.rawOfficeFloorMetaData,
 				this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
@@ -1408,10 +1408,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testUnknownTaskForOfficeEscalation() {
 
-		final TaskEscalationConfiguration escalationConfiguration = this
-				.createMock(TaskEscalationConfiguration.class);
-		final TaskNodeReference taskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
+				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final ManagedFunctionReference taskReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record unknown escalation task
 		this.record_enhanceOffice();
@@ -1422,7 +1422,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupTasks();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalationConfiguration(),
-				new TaskEscalationConfiguration[] { escalationConfiguration });
+				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(this.rawOfficeFloorMetaData,
 				this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
@@ -1452,10 +1452,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final RawWorkMetaData<?> rawWorkMetaData = this
 				.createMock(RawWorkMetaData.class);
-		final TaskEscalationConfiguration escalationConfiguration = this
-				.createMock(TaskEscalationConfiguration.class);
-		final TaskNodeReference escalationTaskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
+				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final ManagedFunctionReference escalationTaskReference = this
+				.createMock(ManagedFunctionReference.class);
 		final Class<?> typeOfCause = failure.getClass();
 		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
@@ -1473,7 +1473,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupTasks();
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalationConfiguration(),
-				new TaskEscalationConfiguration[] { escalationConfiguration });
+				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(this.rawOfficeFloorMetaData,
 				this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
@@ -1773,7 +1773,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			rawGovernanceMetaData.linkOfficeMetaData(null, null, this.issues);
 			this.control(rawGovernanceMetaData)
 					.setMatcher(
-							new TypeMatcher(OfficeMetaDataLocator.class,
+							new TypeMatcher(ManagedFunctionLocator.class,
 									AssetManagerFactory.class,
 									OfficeFloorIssues.class));
 		}
@@ -2219,7 +2219,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			rawBoundAdmin.linkOfficeMetaData(null, null, this.issues);
 			this.control(rawBoundAdmin)
 					.setMatcher(
-							new TypeMatcher(OfficeMetaDataLocator.class,
+							new TypeMatcher(ManagedFunctionLocator.class,
 									AssetManagerFactory.class,
 									OfficeFloorIssues.class));
 		}
@@ -2333,14 +2333,14 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			rawWorkMetaDatas[i].linkOfficeMetaData(null, null, this.issues);
 			this.control(rawWorkMetaDatas[i])
 					.setMatcher(
-							new TypeMatcher(OfficeMetaDataLocator.class,
+							new TypeMatcher(ManagedFunctionLocator.class,
 									AssetManagerFactory.class,
 									OfficeFloorIssues.class));
 		}
 	}
 
 	/**
-	 * Records no {@link OfficeStartupTask} instances.
+	 * Records no {@link OfficeStartupFunction} instances.
 	 */
 	private void record_noOfficeStartupTasks() {
 		this.recordReturn(this.configuration,
@@ -2353,7 +2353,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	private void record_noOfficeEscalationHandler() {
 		this.recordReturn(this.configuration,
 				this.configuration.getEscalationConfiguration(),
-				new TaskEscalationConfiguration[0]);
+				new ManagedFunctionEscalationConfiguration[0]);
 		this.recordReturn(this.rawOfficeFloorMetaData,
 				this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);

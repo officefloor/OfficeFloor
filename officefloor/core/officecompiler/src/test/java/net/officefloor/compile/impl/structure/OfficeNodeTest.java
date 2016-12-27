@@ -56,7 +56,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.model.impl.section.SectionModelSectionSource;
 import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
@@ -1323,7 +1323,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 												.getContext()
 												.getManagedObjectSourceContext()
 												.addWork("WORK", workFactory);
-										ManagedObjectTaskBuilder<None, None> task = work
+										ManagedObjectFunctionBuilder<None, None> task = work
 												.addTask("TASK", taskFactory);
 										task.setTeam("TEAM");
 									}

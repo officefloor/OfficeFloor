@@ -20,9 +20,9 @@ package net.officefloor.frame.impl.execute.profile;
 import java.util.List;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.profile.ProfiledJob;
-import net.officefloor.frame.api.profile.ProfiledProcess;
-import net.officefloor.frame.api.profile.ProfiledThread;
+import net.officefloor.frame.api.profile.ProfiledManagedFunction;
+import net.officefloor.frame.api.profile.ProfiledProcessState;
+import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.integrate.jobnode.AbstractTaskNodeTestCase;
 import net.officefloor.frame.spi.team.Job;
@@ -66,7 +66,7 @@ public class OfficeFrameProfileTest extends AbstractTaskNodeTestCase<Work> {
 	public static class ValidateProfiler implements Profiler {
 
 		/**
-		 * Names of the expected {@link ProfiledJob} instances.
+		 * Names of the expected {@link ProfiledManagedFunction} instances.
 		 */
 		private String[] jobNames;
 
@@ -76,15 +76,15 @@ public class OfficeFrameProfileTest extends AbstractTaskNodeTestCase<Work> {
 		private long startTime = System.nanoTime();
 
 		/**
-		 * {@link ProfiledProcess}.
+		 * {@link ProfiledProcessState}.
 		 */
-		private ProfiledProcess process = null;
+		private ProfiledProcessState process = null;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param jobNames
-		 *            Names of the expected {@link ProfiledJob} instances.
+		 *            Names of the expected {@link ProfiledManagedFunction} instances.
 		 */
 		public ValidateProfiler(String... jobNames) {
 			this.jobNames = jobNames;
@@ -96,19 +96,19 @@ public class OfficeFrameProfileTest extends AbstractTaskNodeTestCase<Work> {
 		public void validateProfiled() {
 
 			// Ensure just one thread
-			List<ProfiledThread> threads = this.process.getProfiledThreads();
+			List<ProfiledThreadState> threads = this.process.getProfiledThreads();
 			assertEquals("Should just be the one thread", 1, threads.size());
-			ProfiledThread thread = threads.get(0);
+			ProfiledThreadState thread = threads.get(0);
 
 			// Validate the jobs
-			List<ProfiledJob> jobs = thread.getProfiledJobs();
+			List<ProfiledManagedFunction> jobs = thread.getProfiledJobs();
 			assertEquals("Incorrect number of jobs", this.jobNames.length,
 					jobs.size());
 			for (int i = 0; i < this.jobNames.length; i++) {
 
 				// Validate the job
 				String jobName = this.jobNames[i];
-				ProfiledJob job = jobs.get(i);
+				ProfiledManagedFunction job = jobs.get(i);
 				assertEquals("Incorrect job name", jobName, job.getJobName());
 
 				// Ensure job executed after start time
@@ -127,7 +127,7 @@ public class OfficeFrameProfileTest extends AbstractTaskNodeTestCase<Work> {
 		 */
 
 		@Override
-		public void profileProcess(ProfiledProcess process) {
+		public void profileProcess(ProfiledProcessState process) {
 			assertNull("Should only profile one process", this.process);
 			this.process = process;
 		}

@@ -26,7 +26,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext;
@@ -142,7 +142,7 @@ public class SslCommunicationProtocol implements CommunicationProtocolSource,
 		SslTaskWork sslTaskExecution = new SslTaskWork();
 		ManagedObjectWorkBuilder<SslTaskWork> work = mosContext.addWork(
 				"SSL_TASK_EXECUTOR", sslTaskExecution);
-		ManagedObjectTaskBuilder<SslTaskDependencies, None> task = work
+		ManagedObjectFunctionBuilder<SslTaskDependencies, None> task = work
 				.addTask("SSL_TASK_EXECUTOR", sslTaskExecution);
 		task.linkParameter(SslTaskDependencies.TASK, Runnable.class);
 		task.setTeam("SSL_TASKS");

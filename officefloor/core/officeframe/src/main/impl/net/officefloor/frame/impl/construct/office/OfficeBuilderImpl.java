@@ -47,8 +47,8 @@ import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceCon
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -153,12 +153,12 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * Listing of the {@link EscalationFlow} instances.
 	 */
-	private final List<TaskEscalationConfiguration> escalations = new LinkedList<TaskEscalationConfiguration>();
+	private final List<ManagedFunctionEscalationConfiguration> escalations = new LinkedList<ManagedFunctionEscalationConfiguration>();
 
 	/**
 	 * List of start up {@link ManagedFunction} instances for the {@link Office}.
 	 */
-	private final List<TaskNodeReference> startupTasks = new LinkedList<TaskNodeReference>();
+	private final List<ManagedFunctionReference> startupTasks = new LinkedList<ManagedFunctionReference>();
 
 	/**
 	 * Interval in milli-seconds to monitor the {@link Office}. Default is 1
@@ -374,8 +374,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public TaskEscalationConfiguration[] getEscalationConfiguration() {
-		return this.escalations.toArray(new TaskEscalationConfiguration[0]);
+	public ManagedFunctionEscalationConfiguration[] getEscalationConfiguration() {
+		return this.escalations.toArray(new ManagedFunctionEscalationConfiguration[0]);
 	}
 
 	@Override
@@ -398,8 +398,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public TaskNodeReference[] getStartupTasks() {
-		return this.startupTasks.toArray(new TaskNodeReference[0]);
+	public ManagedFunctionReference[] getStartupTasks() {
+		return this.startupTasks.toArray(new ManagedFunctionReference[0]);
 	}
 
 	@Override

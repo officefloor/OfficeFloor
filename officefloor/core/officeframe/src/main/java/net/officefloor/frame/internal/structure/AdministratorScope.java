@@ -27,9 +27,9 @@ import net.officefloor.frame.spi.administration.Administrator;
 public enum AdministratorScope {
 
 	/**
-	 * {@link Administrator} bound to {@link WorkContainer}.
+	 * {@link Administrator} bound to {@link ManagedFunctionContainer}.
 	 */
-	WORK,
+	FUNCTION,
 
 	/**
 	 * {@link Administrator} bound to {@link ThreadState}.

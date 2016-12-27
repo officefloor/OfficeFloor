@@ -42,9 +42,12 @@ public interface AdministratorBuilder<A extends Enum<A>> {
 	void addProperty(String name, String value);
 
 	/**
+	 * <p>
 	 * Name of the {@link Team} linked to the {@link Office} of this
 	 * {@link Administrator} which is responsible for doing to the {@link Duty}
 	 * instances of this {@link Administrator}.
+	 * <p>
+	 * If not specified, any {@link Team} will be used.
 	 * 
 	 * @param officeTeamName
 	 *            Name of {@link Team} within the {@link Office} for this

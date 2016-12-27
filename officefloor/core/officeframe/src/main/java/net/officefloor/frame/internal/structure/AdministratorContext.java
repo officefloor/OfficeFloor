@@ -37,18 +37,18 @@ public interface AdministratorContext {
 	ThreadState getThreadState();
 
 	/**
-	 * Instigates a flow to be run.
+	 * Instigates a {@link Flow} to be run.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} of the {@link Flow} to instigate.
 	 * @param parameter
 	 *            Parameter that will be available from the
-	 *            {@link ManagedFunctionContext#getObject(int)} of the first {@link ManagedFunction}
-	 *            of the flow to be run.
+	 *            {@link ManagedFunctionContext#getObject(int)} of the first
+	 *            {@link ManagedFunction} of the flow to be run.
 	 * @param callback
 	 *            {@link FlowCallback} to be invoked once the {@link Flow}
 	 *            completes.
 	 */
-	void doFlow(FlowMetaData<?> flowMetaData, Object parameter, FlowCallback callback);
+	void doFlow(FlowMetaData flowMetaData, Object parameter, FlowCallback callback);
 
 }

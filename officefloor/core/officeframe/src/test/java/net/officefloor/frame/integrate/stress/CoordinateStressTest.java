@@ -37,7 +37,7 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -417,7 +417,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 			// Register task to active object
 			ManagedObjectWorkBuilder<DependencyManagedObjectSource> workBuilder = mosContext
 					.addWork("WORK", this);
-			ManagedObjectTaskBuilder<Indexed, None> taskBuilder = workBuilder
+			ManagedObjectFunctionBuilder<Indexed, None> taskBuilder = workBuilder
 					.addTask("TASK", this);
 			taskBuilder.linkParameter(0, DependencyManagedObject.class);
 			taskBuilder.setTeam("MO_TEAM");

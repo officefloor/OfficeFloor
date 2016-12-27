@@ -32,7 +32,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectSource<D extends Enum<D>, F extends Enum<F>> {
+public interface ManagedObjectSource<O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * <p>
@@ -70,7 +70,7 @@ public interface ManagedObjectSource<D extends Enum<D>, F extends Enum<F>> {
 	 * 
 	 * @return Meta-data to describe this.
 	 */
-	ManagedObjectSourceMetaData<D, F> getMetaData();
+	ManagedObjectSourceMetaData<O, F> getMetaData();
 
 	/**
 	 * <p>

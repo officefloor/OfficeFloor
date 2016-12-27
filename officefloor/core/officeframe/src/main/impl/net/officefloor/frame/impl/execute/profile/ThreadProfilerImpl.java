@@ -20,8 +20,8 @@ package net.officefloor.frame.impl.execute.profile;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.officefloor.frame.api.profile.ProfiledJob;
-import net.officefloor.frame.api.profile.ProfiledThread;
+import net.officefloor.frame.api.profile.ProfiledManagedFunction;
+import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
 import net.officefloor.frame.internal.structure.ThreadProfiler;
 import net.officefloor.frame.spi.team.Job;
@@ -31,7 +31,7 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThread {
+public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThreadState {
 
 	/**
 	 * Start time stamp.
@@ -39,9 +39,9 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThread {
 	private final long startTimestamp;
 
 	/**
-	 * {@link ProfiledJob} instances.
+	 * {@link ProfiledManagedFunction} instances.
 	 */
-	private final List<ProfiledJob> jobs = new ArrayList<ProfiledJob>(32);
+	private final List<ProfiledManagedFunction> jobs = new ArrayList<ProfiledManagedFunction>(32);
 
 	/**
 	 * Initiate.
@@ -84,14 +84,14 @@ public class ThreadProfilerImpl implements ThreadProfiler, ProfiledThread {
 	}
 
 	@Override
-	public List<ProfiledJob> getProfiledJobs() {
+	public List<ProfiledManagedFunction> getProfiledJobs() {
 		return this.jobs;
 	}
 
 	/**
-	 * {@link ProfiledJob} implementation.
+	 * {@link ProfiledManagedFunction} implementation.
 	 */
-	private static class ProfiledJobImpl implements ProfiledJob {
+	private static class ProfiledJobImpl implements ProfiledManagedFunction {
 
 		/**
 		 * {@link Job} name.

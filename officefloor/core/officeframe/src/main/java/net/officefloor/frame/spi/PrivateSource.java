@@ -23,6 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -32,9 +33,9 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * dynamically &quot;discovered&quot; for use in configuration.
  * <p>
  * Typically source instances are always available but in some circumstances,
- * for example, there may be specific {@link Work} or {@link ManagedObject}
- * sources that are built specific to the section (and make no sense using
- * outside the section).
+ * for example, there may be specific {@link ManagedFunction} or
+ * {@link ManagedObject} sources that are built specific to the section (and
+ * make no sense using outside the section).
  * 
  * @author Daniel Sagenschneider
  */

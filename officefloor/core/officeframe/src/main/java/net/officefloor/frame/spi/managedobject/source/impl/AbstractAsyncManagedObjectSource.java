@@ -42,8 +42,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F extends Enum<F>>
-		implements ManagedObjectSource<D, F> {
+public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F extends Enum<F>>
+		implements ManagedObjectSource<O, F> {
 
 	/*
 	 * ================ ManagedObjectSource ===========================
@@ -103,8 +103,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 	/**
 	 * Specification for this {@link ManagedObjectSource}.
 	 */
-	private class Specification implements SpecificationContext,
-			ManagedObjectSourceSpecification {
+	private class Specification implements SpecificationContext, ManagedObjectSourceSpecification {
 
 		/**
 		 * Properties for the specification.
@@ -117,14 +116,12 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		@Override
 		public void addProperty(String name) {
-			this.properties
-					.add(new ManagedObjectSourcePropertyImpl(name, name));
+			this.properties.add(new ManagedObjectSourcePropertyImpl(name, name));
 		}
 
 		@Override
 		public void addProperty(String name, String label) {
-			this.properties
-					.add(new ManagedObjectSourcePropertyImpl(name, label));
+			this.properties.add(new ManagedObjectSourcePropertyImpl(name, label));
 		}
 
 		@Override
@@ -165,13 +162,12 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 	 * @throws Exception
 	 *             If fails to load the meta-data.
 	 */
-	protected abstract void loadMetaData(MetaDataContext<D, F> context)
-			throws Exception;
+	protected abstract void loadMetaData(MetaDataContext<O, F> context) throws Exception;
 
 	/**
 	 * Context for the {@link ManagedObjectSource#getMetaData()}.
 	 */
-	public static interface MetaDataContext<D extends Enum<D>, F extends Enum<F>> {
+	public static interface MetaDataContext<O extends Enum<O>, F extends Enum<F>> {
 
 		/**
 		 * Obtains the {@link ManagedObjectSourceContext}.
@@ -195,8 +191,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		 * @param managedObjectClass
 		 *            {@link ManagedObject} type.
 		 */
-		void setManagedObjectClass(
-				Class<? extends ManagedObject> managedObjectClass);
+		void setManagedObjectClass(Class<? extends ManagedObject> managedObjectClass);
 
 		/**
 		 * Adds a required dependency identified by the key.
@@ -208,7 +203,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		 * @return {@link DependencyLabeller} to possibly label the required
 		 *         dependency.
 		 */
-		DependencyLabeller addDependency(D key, Class<?> dependencyType);
+		DependencyLabeller addDependency(O key, Class<?> dependencyType);
 
 		/**
 		 * Adds a required dependency identified by an index into the order the
@@ -233,8 +228,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link Flow} identified by an index into the
-		 * order the {@link Flow} was added.
+		 * Adds a required {@link Flow} identified by an index into the order
+		 * the {@link Flow} was added.
 		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link Flow}.
@@ -245,7 +240,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		/**
 		 * Adds a {@link ManagedObjectExtensionInterfaceMetaData} instance.
 		 * 
-		 * @param <I>
+		 * @param <E>
 		 *            Extension interface type.
 		 * @param interfaceType
 		 *            Type of the extension interface supported by the
@@ -253,8 +248,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		 * @param extensionInterfaceFactory
 		 *            {@link ExtensionInterfaceFactory}.
 		 */
-		<I> void addManagedObjectExtensionInterface(Class<I> interfaceType,
-				ExtensionInterfaceFactory<I> extensionInterfaceFactory);
+		<E> void addManagedObjectExtensionInterface(Class<E> interfaceType,
+				ExtensionInterfaceFactory<E> extensionInterfaceFactory);
 	}
 
 	/**
@@ -275,8 +270,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 	}
 
 	/**
-	 * Provides the ability to label the required dependency or
-	 * {@link Flow}.
+	 * Provides the ability to label the required dependency or {@link Flow}.
 	 */
 	public static interface Labeller {
 
@@ -300,8 +294,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 	/**
 	 * Meta-data for the {@link ManagedObjectSource}.
 	 */
-	private class MetaData implements MetaDataContext<D, F>,
-			ManagedObjectSourceMetaData<D, F> {
+	private class MetaData implements MetaDataContext<O, F>, ManagedObjectSourceMetaData<O, F> {
 
 		/**
 		 * {@link ManagedObjectSourceContext}.
@@ -322,7 +315,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		/**
 		 * {@link ManagedObjectDependencyMetaData} instances.
 		 */
-		private Map<Integer, ManagedObjectDependencyMetaData<D>> dependencies = new HashMap<Integer, ManagedObjectDependencyMetaData<D>>();
+		private Map<Integer, ManagedObjectDependencyMetaData<O>> dependencies = new HashMap<Integer, ManagedObjectDependencyMetaData<O>>();
 
 		/**
 		 * {@link ManagedObjectFlowMetaData} instances.
@@ -359,13 +352,12 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		}
 
 		@Override
-		public void setManagedObjectClass(
-				Class<? extends ManagedObject> managedObjectClass) {
+		public void setManagedObjectClass(Class<? extends ManagedObject> managedObjectClass) {
 			this.managedObjectClass = managedObjectClass;
 		}
 
 		@Override
-		public DependencyLabeller addDependency(D key, Class<?> dependencyType) {
+		public DependencyLabeller addDependency(O key, Class<?> dependencyType) {
 			// Use ordinal of key to index the dependency
 			return this.addDependency(key.ordinal(), key, dependencyType);
 		}
@@ -373,8 +365,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		@Override
 		public DependencyLabeller addDependency(Class<?> dependencyType) {
 			// Indexed, so use next index (size will increase with indexing)
-			return this.addDependency(this.dependencies.size(), null,
-					dependencyType);
+			return this.addDependency(this.dependencies.size(), null, dependencyType);
 		}
 
 		/**
@@ -388,12 +379,11 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		 *            Type of dependency.
 		 * @return {@link Labeller} for the dependency.
 		 */
-		private DependencyLabeller addDependency(final int index, D key,
-				Class<?> dependencyType) {
+		private DependencyLabeller addDependency(final int index, O key, Class<?> dependencyType) {
 
 			// Create the dependency meta-data
-			final ManagedObjectDependencyMetaDataImpl<D> dependency = new ManagedObjectDependencyMetaDataImpl<D>(
-					key, dependencyType);
+			final ManagedObjectDependencyMetaDataImpl<O> dependency = new ManagedObjectDependencyMetaDataImpl<O>(key,
+					dependencyType);
 
 			// Register the dependency at the index
 			this.dependencies.put(new Integer(index), dependency);
@@ -445,8 +435,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		private Labeller addFlow(final int index, F key, Class<?> argumentType) {
 
 			// Create the flow meta-data
-			final ManagedObjectFlowMetaDataImpl<F> flow = new ManagedObjectFlowMetaDataImpl<F>(
-					key, argumentType);
+			final ManagedObjectFlowMetaDataImpl<F> flow = new ManagedObjectFlowMetaDataImpl<F>(key, argumentType);
 
 			// Register the flow at the index
 			this.flows.put(new Integer(index), flow);
@@ -467,12 +456,10 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		}
 
 		@Override
-		public <I> void addManagedObjectExtensionInterface(
-				Class<I> interfaceType,
-				ExtensionInterfaceFactory<I> extensionInterfaceFactory) {
+		public <E> void addManagedObjectExtensionInterface(Class<E> interfaceType,
+				ExtensionInterfaceFactory<E> extensionInterfaceFactory) {
 			this.externsionInterfaces
-					.add(new ManagedObjectExtensionInterfaceMetaDataImpl<I>(
-							interfaceType, extensionInterfaceFactory));
+					.add(new ManagedObjectExtensionInterfaceMetaDataImpl<E>(interfaceType, extensionInterfaceFactory));
 		}
 
 		/*
@@ -490,26 +477,23 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		}
 
 		@Override
-		public ManagedObjectDependencyMetaData<D>[] getDependencyMetaData() {
-			return ConstructUtil.toArray(this.dependencies,
-					new ManagedObjectDependencyMetaData[0]);
+		public ManagedObjectDependencyMetaData<O>[] getDependencyMetaData() {
+			return ConstructUtil.toArray(this.dependencies, new ManagedObjectDependencyMetaData[0]);
 		}
 
 		@Override
 		public ManagedObjectFlowMetaData<F>[] getFlowMetaData() {
-			return ConstructUtil.toArray(this.flows,
-					new ManagedObjectFlowMetaData[0]);
+			return ConstructUtil.toArray(this.flows, new ManagedObjectFlowMetaData[0]);
 		}
 
 		@Override
 		public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
-			return this.externsionInterfaces
-					.toArray(new ManagedObjectExtensionInterfaceMetaData[0]);
+			return this.externsionInterfaces.toArray(new ManagedObjectExtensionInterfaceMetaData[0]);
 		}
 	}
 
 	@Override
-	public ManagedObjectSourceMetaData<D, F> getMetaData() {
+	public ManagedObjectSourceMetaData<O, F> getMetaData() {
 		return this.metaData;
 	}
 

@@ -35,12 +35,12 @@ public interface GovernanceEscalationConfiguration {
 	Class<? extends Throwable> getTypeOfCause();
 
 	/**
-	 * Obtains the {@link TaskNodeReference} for the {@link ManagedFunction} handling the
+	 * Obtains the {@link ManagedFunctionReference} for the {@link ManagedFunction} handling the
 	 * escalation.
 	 * 
-	 * @return {@link TaskNodeReference} for the {@link ManagedFunction} handling the
+	 * @return {@link ManagedFunctionReference} for the {@link ManagedFunction} handling the
 	 *         escalation.
 	 */
-	TaskNodeReference getTaskNodeReference();
+	ManagedFunctionReference getTaskNodeReference();
 	
 }

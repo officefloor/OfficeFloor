@@ -15,24 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.build;
+package net.officefloor.frame.api.profile;
 
-import net.officefloor.frame.api.execute.Work;
+import java.util.List;
+
+import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
- * Name aware {@link WorkFactory}.
+ * Profiled {@link ProcessState}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface NameAwareWorkFactory<W extends Work> extends WorkFactory<W> {
+public interface ProfiledProcessState {
 
 	/**
-	 * Provides the {@link WorkFactory} the bound name for its created
-	 * {@link Work}.
+	 * Obtains the start time stamp.
 	 * 
-	 * @param boundWorkName
-	 *            Bound name for the created {@link Work}.
+	 * @return Start time stamp in nanoseconds.
 	 */
-	void setBoundWorkName(String boundWorkName);
+	long getStartTimestamp();
+
+	/**
+	 * Obtains the {@link ProfiledThreadState} instances.
+	 * 
+	 * @return {@link ProfiledThreadState} instances.
+	 */
+	List<ProfiledThreadState> getProfiledThreadStates();
 
 }

@@ -57,13 +57,6 @@ public interface RawOfficeMetaData {
 	Map<String, TeamManagement> getTeams();
 
 	/**
-	 * Indicates whether the {@link Governance} is going to be manually managed.
-	 * 
-	 * @return <code>true</code> to manually manage {@link Governance}.
-	 */
-	boolean isManuallyManageGovernance();
-
-	/**
 	 * Obtains the {@link RawGovernanceMetaData} by their {@link Office}
 	 * registered names.
 	 * 

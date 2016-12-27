@@ -32,9 +32,9 @@ import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
@@ -187,10 +187,10 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 			.createMock(AdministratorSourceMetaData.class);
 
 	/**
-	 * {@link OfficeMetaDataLocator}.
+	 * {@link ManagedFunctionLocator}.
 	 */
-	private final OfficeMetaDataLocator taskMetaDataLocator = this
-			.createMock(OfficeMetaDataLocator.class);
+	private final ManagedFunctionLocator taskMetaDataLocator = this
+			.createMock(ManagedFunctionLocator.class);
 
 	/**
 	 * {@link AssetManagerFactory}.
@@ -816,7 +816,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link TaskNodeReference} instances for {@link Duty}.
+	 * Ensure issue if no {@link ManagedFunctionReference} instances for {@link Duty}.
 	 */
 	public void testNoTaskReferencesForDuty() {
 
@@ -928,8 +928,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		final AdministratorDutyMetaData<?, ?> dutyMetaData = this
 				.createMock(AdministratorDutyMetaData.class);
 
-		final TaskNodeReference taskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record construction of bound administrator meta-data
 		this.record_init();
@@ -950,7 +950,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				this.dutyOneConfiguration.getDutyName(), DutyKey.ONE.name());
 		this.recordReturn(this.dutyOneConfiguration,
 				this.dutyOneConfiguration.getLinkedProcessConfiguration(),
-				new TaskNodeReference[] { taskReference });
+				new ManagedFunctionReference[] { taskReference });
 		this.recordReturn(taskReference, taskReference.getWorkName(), "WORK");
 		this.recordReturn(taskReference, taskReference.getTaskName(), "TASK");
 		this.recordReturn(this.taskMetaDataLocator,
@@ -974,8 +974,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		final AdministratorDutyMetaData<?, ?> dutyTwoMetaData = this
 				.createMock(AdministratorDutyMetaData.class);
 
-		final TaskNodeReference taskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 
@@ -1012,12 +1012,12 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				this.dutyOneConfiguration.getDutyName(), DutyKey.ONE.name());
 		this.recordReturn(this.dutyOneConfiguration,
 				this.dutyOneConfiguration.getLinkedProcessConfiguration(),
-				new TaskNodeReference[] { taskReference });
+				new ManagedFunctionReference[] { taskReference });
 		this.recordReturn(this.dutyTwoConfiguration,
 				this.dutyTwoConfiguration.getDutyName(), DutyKey.TWO.name());
 		this.recordReturn(this.dutyTwoConfiguration,
 				this.dutyTwoConfiguration.getLinkedProcessConfiguration(),
-				new TaskNodeReference[0]);
+				new ManagedFunctionReference[0]);
 		this.recordReturn(taskReference, taskReference.getWorkName(), "WORK");
 		this.recordReturn(taskReference, taskReference.getTaskName(), "TASK");
 		this.recordReturn(taskReference, taskReference.getArgumentType(),
@@ -1124,7 +1124,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				this.dutyOneConfiguration.getDutyName(), "DUTY");
 		this.recordReturn(this.dutyOneConfiguration,
 				this.dutyOneConfiguration.getLinkedProcessConfiguration(),
-				new TaskNodeReference[0]);
+				new ManagedFunctionReference[0]);
 
 		// Record governance configuration
 		this.recordReturn(
@@ -1211,7 +1211,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				this.dutyOneConfiguration.getDutyName(), "DUTY");
 		this.recordReturn(this.dutyOneConfiguration,
 				this.dutyOneConfiguration.getLinkedProcessConfiguration(),
-				new TaskNodeReference[0]);
+				new ManagedFunctionReference[0]);
 
 		// Record governance configuration
 		this.recordReturn(

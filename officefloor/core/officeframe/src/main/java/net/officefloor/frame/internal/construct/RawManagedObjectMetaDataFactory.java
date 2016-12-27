@@ -35,7 +35,7 @@ public interface RawManagedObjectMetaDataFactory {
 	/**
 	 * Creates the {@link RawManagedObjectMetaDataImpl}.
 	 * 
-	 * @param <D>
+	 * @param <O>
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
@@ -53,9 +53,8 @@ public interface RawManagedObjectMetaDataFactory {
 	 * @return {@link RawManagedObjectMetaDataImpl} or <code>null</code> if
 	 *         issue.
 	 */
-	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> RawManagedObjectMetaData<D, F> constructRawManagedObjectMetaData(
-			ManagedObjectSourceConfiguration<F, MS> configuration,
-			SourceContext sourceContext, OfficeFloorIssues issues,
-			OfficeFloorConfiguration officeFloorConfiguration);
+	<O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> RawManagedObjectMetaData<O, F> constructRawManagedObjectMetaData(
+			ManagedObjectSourceConfiguration<F, MS> configuration, SourceContext sourceContext,
+			OfficeFloorIssues issues, OfficeFloorConfiguration officeFloorConfiguration);
 
 }

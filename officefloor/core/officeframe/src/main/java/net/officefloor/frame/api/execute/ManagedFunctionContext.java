@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.execute;
 
-import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
+import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
@@ -109,7 +109,7 @@ public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> {
 	 * compile unsafe.
 	 * <p>
 	 * The {@link ManagedFunction} reflective meta-data may be obtained from the
-	 * {@link Office} made available via the {@link OfficeAwareWorkFactory}.
+	 * {@link Office} made available via the {@link OfficeAwareManagedFunctionFactory}.
 	 * 
 	 * @param functionName
 	 *            Name of {@link ManagedFunction} within the {@link Work}.

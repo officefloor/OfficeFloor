@@ -56,7 +56,7 @@ public class AdministratorSourceStandAlone {
 	/**
 	 * Loads the {@link AdministratorSource}.
 	 * 
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type of {@link ManagedObject}.
 	 * @param <A>
 	 *            {@link Duty} key type.
@@ -68,19 +68,17 @@ public class AdministratorSourceStandAlone {
 	 * @throws Exception
 	 *             If fails to initialise {@link AdministratorSource}.
 	 */
-	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AS loadAdministratorSource(
+	public <E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AS loadAdministratorSource(
 			Class<AS> administratorSourceClass) throws Exception {
 
 		// Create a new instance of the administrator source
 		AS administratorSource = administratorSourceClass.newInstance();
 
 		// Create the source context
-		SourceContext sourceContext = new SourceContextImpl(false, Thread
-				.currentThread().getContextClassLoader());
+		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
 
 		// Initialise the administrator source
-		AdministratorSourceContext context = new AdministratorSourceContextImpl(
-				false, this.properties, sourceContext);
+		AdministratorSourceContext context = new AdministratorSourceContextImpl(false, this.properties, sourceContext);
 		administratorSource.init(context);
 
 		// Return the initialised administrator source
@@ -90,7 +88,7 @@ public class AdministratorSourceStandAlone {
 	/**
 	 * Obtains the {@link Duty} from the {@link Administrator}.
 	 * 
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type of {@link ManagedObject}.
 	 * @param <A>
 	 *            {@link Duty} key type.
@@ -100,15 +98,14 @@ public class AdministratorSourceStandAlone {
 	 *            Key identifying the {@link Duty}.
 	 * @return {@link Duty} for the key.
 	 */
-	public <I, A extends Enum<A>> Duty<I, ?, ?> getDuty(
-			Administrator<I, A> administrator, A dutyKey) {
+	public <E, A extends Enum<A>> Duty<E, ?, ?> getDuty(Administrator<E, A> administrator, A dutyKey) {
 		return administrator.getDuty(new DutyKeyImpl<A>(dutyKey));
 	}
 
 	/**
 	 * Obtains the {@link Duty} from the {@link Administrator}.
 	 *
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type of {@link ManagedObject}.
 	 * @param administrator
 	 *            {@link Administrator}.
@@ -117,8 +114,7 @@ public class AdministratorSourceStandAlone {
 	 * @return {@link Duty} for the index.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <I> Duty<I, ?, ?> getDuty(Administrator<I, ?> administrator,
-			int dutyIndex) {
+	public <E> Duty<E, ?, ?> getDuty(Administrator<E, ?> administrator, int dutyIndex) {
 		return administrator.getDuty(new DutyKeyImpl(dutyIndex));
 	}
 }

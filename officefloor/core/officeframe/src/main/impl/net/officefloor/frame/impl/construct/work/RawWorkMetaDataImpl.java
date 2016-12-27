@@ -30,18 +30,18 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
-import net.officefloor.frame.internal.configuration.TaskConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
-import net.officefloor.frame.internal.construct.RawTaskMetaData;
-import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawManagedFunctionMetaData;
+import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
@@ -110,9 +110,9 @@ public class RawWorkMetaDataImpl<W extends Work> implements RawWorkMetaDataFacto
 	private final Map<String, RawBoundAdministratorMetaData<?, ?>> scopeAdministrators;
 
 	/**
-	 * {@link RawTaskMetaData} instances of this {@link Work}.
+	 * {@link RawManagedFunctionMetaData} instances of this {@link Work}.
 	 */
-	private List<RawTaskMetaData<W, ?, ?>> rawTaskMetaDatas = null;
+	private List<RawManagedFunctionMetaData<W, ?, ?>> rawTaskMetaDatas = null;
 
 	/**
 	 * {@link WorkMetaData}.
@@ -160,7 +160,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements RawWorkMetaDataFacto
 	public <w extends Work> RawWorkMetaData<w> constructRawWorkMetaData(WorkConfiguration<w> configuration,
 			SourceContext sourceContext, OfficeFloorIssues issues, RawOfficeMetaData rawOfficeMetaData,
 			AssetManagerFactory assetManagerFactory, RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory, RawTaskMetaDataFactory rawTaskFactory,
+			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory, RawManagedFunctionMetaDataFactory rawTaskFactory,
 			FunctionLoop functionLoop) {
 
 		// Obtain the work name
@@ -230,12 +230,12 @@ public class RawWorkMetaDataImpl<W extends Work> implements RawWorkMetaDataFacto
 		ManagedFunctionMetaData<w, ?, ?> initialTaskMetaData = null;
 
 		// Construct the task meta-data of this work (also find initial task)
-		rawWorkMetaData.rawTaskMetaDatas = new LinkedList<RawTaskMetaData<w, ?, ?>>();
+		rawWorkMetaData.rawTaskMetaDatas = new LinkedList<RawManagedFunctionMetaData<w, ?, ?>>();
 		List<ManagedFunctionMetaData<w, ?, ?>> taskMetaDatas = new LinkedList<ManagedFunctionMetaData<w, ?, ?>>();
-		for (TaskConfiguration<w, ?, ?> taskConfiguration : configuration.getTaskConfiguration()) {
+		for (ManagedFunctionConfiguration<w, ?, ?> taskConfiguration : configuration.getTaskConfiguration()) {
 
 			// Construct and register the raw task meta-data
-			RawTaskMetaData<w, ?, ?> rawTaskMetaData = rawTaskFactory.constructRawTaskMetaData(taskConfiguration,
+			RawManagedFunctionMetaData<w, ?, ?> rawTaskMetaData = rawTaskFactory.constructRawTaskMetaData(taskConfiguration,
 					issues, rawWorkMetaData, functionLoop);
 			if (rawTaskMetaData == null) {
 				continue; // failed to construct the task
@@ -332,7 +332,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements RawWorkMetaDataFacto
 	}
 
 	@Override
-	public void linkOfficeMetaData(OfficeMetaData officeMetaData, OfficeMetaDataLocator taskMetaDataLocator,
+	public void linkOfficeMetaData(OfficeMetaData officeMetaData, ManagedFunctionLocator taskMetaDataLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Link tasks of work bound administrators
@@ -341,7 +341,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements RawWorkMetaDataFacto
 		}
 
 		// Link the tasks of this work
-		for (RawTaskMetaData<W, ?, ?> rawTaskMetaData : this.rawTaskMetaDatas) {
+		for (RawManagedFunctionMetaData<W, ?, ?> rawTaskMetaData : this.rawTaskMetaDatas) {
 			rawTaskMetaData.linkTasks(taskMetaDataLocator, this.workMetaData, assetManagerFactory, issues);
 		}
 	}

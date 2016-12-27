@@ -37,7 +37,7 @@ import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFacto
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.jms.JmsAdminObjectFactory;
 import net.officefloor.plugin.jms.JmsUtil;
@@ -176,7 +176,7 @@ public class JmsServerManagedObjectSource
 		mosContext
 				.linkProcess(JmsServerFlows.ON_MESSAGE, "server", "onmessage");
 		OnMessageTask onMessageTask = new OnMessageTask();
-		ManagedObjectTaskBuilder<OnMessageDependencies, OnMessageFlows> taskBuilder = mosContext
+		ManagedObjectFunctionBuilder<OnMessageDependencies, OnMessageFlows> taskBuilder = mosContext
 				.addWork("server", onMessageTask).addTask("onmessage",
 						onMessageTask);
 		taskBuilder.linkParameter(

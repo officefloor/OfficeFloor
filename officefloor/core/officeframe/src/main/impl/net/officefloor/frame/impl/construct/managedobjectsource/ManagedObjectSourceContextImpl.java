@@ -31,7 +31,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
@@ -219,7 +219,7 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 		 */
 
 		@Override
-		public <d extends Enum<d>, f extends Enum<f>> ManagedObjectTaskBuilder<d, f> addTask(
+		public <d extends Enum<d>, f extends Enum<f>> ManagedObjectFunctionBuilder<d, f> addTask(
 				String taskName, ManagedFunctionFactory<W, d, f> taskFactory) {
 
 			// Create and initialise the task
@@ -238,10 +238,10 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 	}
 
 	/**
-	 * {@link ManagedObjectTaskBuilder} implementation.
+	 * {@link ManagedObjectFunctionBuilder} implementation.
 	 */
 	private class ManagedObjectTaskBuilderImpl<d extends Enum<d>, f extends Enum<f>>
-			implements ManagedObjectTaskBuilder<d, f> {
+			implements ManagedObjectFunctionBuilder<d, f> {
 
 		/**
 		 * {@link ManagedFunctionBuilder}.

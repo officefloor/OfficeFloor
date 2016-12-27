@@ -35,7 +35,7 @@ import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -147,7 +147,7 @@ public class CleanupManagedObjectEscalationTest extends
 			ManagedObjectSourceContext<None> mos = context
 					.getManagedObjectSourceContext();
 			ManagedObjectWorkBuilder<Work> cleanup = mos.getRecycleWork(this);
-			ManagedObjectTaskBuilder<Indexed, None> recycleTask = cleanup
+			ManagedObjectFunctionBuilder<Indexed, None> recycleTask = cleanup
 					.addTask("cleanup", this);
 			recycleTask.linkParameter(0, RecycleManagedObjectParameter.class);
 		}

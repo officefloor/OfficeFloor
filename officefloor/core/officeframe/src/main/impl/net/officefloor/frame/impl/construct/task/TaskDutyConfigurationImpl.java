@@ -17,18 +17,18 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
-import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 
 /**
- * {@link TaskDutyConfiguration} implementation.
+ * {@link ManagedFunctionDutyConfiguration} implementation.
  * 
  * @author Daniel Sagenschneider
  */
 public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
-		TaskDutyConfiguration<A> {
+		ManagedFunctionDutyConfiguration<A> {
 
 	/**
 	 * Name of the {@link Administrator} within the {@link AdministratorScope}.

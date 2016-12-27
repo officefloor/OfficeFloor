@@ -26,14 +26,14 @@ import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFacto
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectExtensionInterfaceMetaData<I> {
+public interface ManagedObjectExtensionInterfaceMetaData<E> {
 
 	/**
 	 * Obtains the type of extension interface.
 	 * 
 	 * @return {@link Class} representing the type of extension interface.
 	 */
-	Class<I> getExtensionInterfaceType();
+	Class<E> getExtensionInterfaceType();
 
 	/**
 	 * Obtains the {@link ExtensionInterfaceFactory} to create the extension
@@ -42,6 +42,6 @@ public interface ManagedObjectExtensionInterfaceMetaData<I> {
 	 * @return {@link ExtensionInterfaceFactory} to create the extension
 	 *         interface for the {@link ManagedObject}.
 	 */
-	ExtensionInterfaceFactory<I> getExtensionInterfaceFactory();
+	ExtensionInterfaceFactory<E> getExtensionInterfaceFactory();
 
 }

@@ -17,26 +17,28 @@
  */
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.ManagedFunction;
 
 /**
- * Office floor where {@link Work} is done within {@link Office} instances.
+ * {@link OfficeFloor} where {@link ManagedFunction} instances are executed
+ * within {@link Office} instances.
  * 
  * @author Daniel Sagenschneider
  */
 public interface OfficeFloor {
 
 	/**
-	 * Opens the floor and starts all {@link Work}.
+	 * Opens the OfficeFloor and starts necessary {@link ManagedFunction}
+	 * instances.
 	 * 
 	 * @throws Exception
-	 *             If fails to open the floor.
+	 *             If fails to open the OfficeFloor.
 	 */
 	void openOfficeFloor() throws Exception;
 
 	/**
-	 * Closes the floor. This stops all {@link Work} within the {@link Office}
-	 * instances and releases all resources.
+	 * Closes the OfficeFloor. This stops all {@link ManagedFunction} instances
+	 * executing within the {@link Office} instances and releases all resources.
 	 */
 	void closeOfficeFloor();
 

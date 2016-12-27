@@ -28,10 +28,10 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
-import net.officefloor.frame.internal.configuration.TaskConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
@@ -40,8 +40,8 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFac
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
-import net.officefloor.frame.internal.construct.RawTaskMetaData;
-import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawManagedFunctionMetaData;
+import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
@@ -136,10 +136,10 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			.createMock(AssetManagerFactory.class);
 
 	/**
-	 * {@link RawTaskMetaDataFactory}.
+	 * {@link RawManagedFunctionMetaDataFactory}.
 	 */
-	private final RawTaskMetaDataFactory rawTaskMetaDataFactory = this
-			.createMock(RawTaskMetaDataFactory.class);
+	private final RawManagedFunctionMetaDataFactory rawTaskMetaDataFactory = this
+			.createMock(RawManagedFunctionMetaDataFactory.class);
 
 	/**
 	 * Continue {@link Team}.
@@ -559,8 +559,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		final AdministratorMetaData<?, ?> adminMetaData = this
 				.createMock(AdministratorMetaData.class);
 		final RecordedTask task = new RecordedTask("TASK");
-		final OfficeMetaDataLocator taskLocator = this
-				.createMock(OfficeMetaDataLocator.class);
+		final ManagedFunctionLocator taskLocator = this
+				.createMock(ManagedFunctionLocator.class);
 
 		// Record a linking tasks
 		this.record_workNameFactory();
@@ -761,9 +761,9 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 				this.configuration.getInitialTaskName(), initialTaskName);
 
 		// Create a task configuration for each task
-		TaskConfiguration<?, ?, ?>[] taskConfigurations = new TaskConfiguration[tasks.length];
+		ManagedFunctionConfiguration<?, ?, ?>[] taskConfigurations = new ManagedFunctionConfiguration[tasks.length];
 		for (int i = 0; i < taskConfigurations.length; i++) {
-			taskConfigurations[i] = this.createMock(TaskConfiguration.class);
+			taskConfigurations[i] = this.createMock(ManagedFunctionConfiguration.class);
 		}
 
 		// Record obtaining the task configuration
@@ -772,7 +772,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		for (int i = 0; i < taskConfigurations.length; i++) {
 
 			// Make available to use in matcher
-			final TaskConfiguration<?, ?, ?> taskConfiguration = taskConfigurations[i];
+			final ManagedFunctionConfiguration<?, ?, ?> taskConfiguration = taskConfigurations[i];
 			final RecordedTask task = tasks[i];
 
 			// Record constructing the raw task meta-data
@@ -837,10 +837,10 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		public final String taskName;
 
 		/**
-		 * {@link RawTaskMetaData}.
+		 * {@link RawManagedFunctionMetaData}.
 		 */
-		public final RawTaskMetaData<?, ?, ?> rawTaskMetaData = RawWorkMetaDataTest.this
-				.createMock(RawTaskMetaData.class);
+		public final RawManagedFunctionMetaData<?, ?, ?> rawTaskMetaData = RawWorkMetaDataTest.this
+				.createMock(RawManagedFunctionMetaData.class);
 
 		/**
 		 * {@link ManagedFunctionMetaData}.
@@ -849,7 +849,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 				.createMock(ManagedFunctionMetaData.class);
 
 		/**
-		 * {@link TaskConfiguration} that is run on {@link ManagedFunction} creation.
+		 * {@link ManagedFunctionConfiguration} that is run on {@link ManagedFunction} creation.
 		 */
 		public final TaskConstruction taskConstruction;
 
@@ -878,7 +878,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Provides construction of {@link RawTaskMetaData}.
+	 * Provides construction of {@link RawManagedFunctionMetaData}.
 	 */
 	private interface TaskConstruction {
 

@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface Administrator<I, A extends Enum<A>> {
+public interface Administrator<E, A extends Enum<A>> {
 
 	/**
 	 * {@link Duty} to be undertaken on the {@link ManagedObject} extension
@@ -34,6 +34,6 @@ public interface Administrator<I, A extends Enum<A>> {
 	 *            {@link DutyKey} identifying the {@link Duty}.
 	 * @return {@link Duty}.
 	 */
-	Duty<I, ?, ?> getDuty(DutyKey<A> dutyKey);
+	Duty<E, ?, ?> getDuty(DutyKey<A> dutyKey);
 
 }

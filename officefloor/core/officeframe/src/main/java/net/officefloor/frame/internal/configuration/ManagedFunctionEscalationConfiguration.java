@@ -15,36 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.profile;
+package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
- * Profiled execution of a {@link Job}.
+ * Configuration for the {@link EscalationFlow}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ProfiledJob {
+public interface ManagedFunctionEscalationConfiguration {
 
 	/**
-	 * Obtains the name of the {@link Job}.
+	 * Obtains the type of cause handled by this {@link EscalationFlow}.
 	 * 
-	 * @return Name of the {@link Job}.
+	 * @return Type of cause handled by this {@link EscalationFlow}.
 	 */
-	String getJobName();
+	Class<? extends Throwable> getTypeOfCause();
 
 	/**
-	 * Obtains the timestamp in nanoseconds when the {@link Job} was started.
+	 * Obtains the {@link ManagedFunctionReference} for the
+	 * {@link ManagedFunction} handling the {@link Escalation}.
 	 * 
-	 * @return Timestamp in nanoseconds when the {@link Job} was started.
+	 * @return {@link ManagedFunctionReference} for the {@link ManagedFunction}
+	 *         handling the {@link Escalation}.
 	 */
-	long getStartTimestamp();
-
-	/**
-	 * Obtains the name of the executing {@link Thread}.
-	 * 
-	 * @return Name of the executing {@link Thread}.
-	 */
-	String getExecutingThreadName();
+	ManagedFunctionReference getTaskNodeReference();
 
 }

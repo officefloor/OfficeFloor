@@ -36,7 +36,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaDat
  * 
  * @author Daniel Sagenschneider
  */
-public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> {
+public interface RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject}.
@@ -57,14 +57,14 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> 
 	 * 
 	 * @return {@link ManagedObjectSource}.
 	 */
-	ManagedObjectSource<D, F> getManagedObjectSource();
+	ManagedObjectSource<O, F> getManagedObjectSource();
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceMetaData}.
 	 * 
 	 * @return {@link ManagedObjectSourceMetaData}.
 	 */
-	ManagedObjectSourceMetaData<D, F> getManagedObjectSourceMetaData();
+	ManagedObjectSourceMetaData<O, F> getManagedObjectSourceMetaData();
 
 	/**
 	 * Obtains the {@link ManagedObjectPool}.
@@ -123,8 +123,8 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> 
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link ManagedObjectMetaData}.
 	 */
-	ManagedObjectMetaData<D> createManagedObjectMetaData(RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
-			RawBoundManagedObjectInstanceMetaData<D> boundInstanceMetaData, ManagedObjectIndex[] dependencyMappings,
+	ManagedObjectMetaData<O> createManagedObjectMetaData(RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
+			RawBoundManagedObjectInstanceMetaData<O> boundInstanceMetaData, ManagedObjectIndex[] dependencyMappings,
 			ManagedObjectGovernanceMetaData<?>[] governanceMetaData, AssetManagerFactory assetManagerFactory,
 			OfficeFloorIssues issues);
 

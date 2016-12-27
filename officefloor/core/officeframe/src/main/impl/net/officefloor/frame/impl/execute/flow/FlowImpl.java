@@ -15,15 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.function;
+package net.officefloor.frame.impl.execute.flow;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl.DutyFunction;
+import net.officefloor.frame.impl.execute.function.AbstractFunctionState;
+import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
-import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionLogic;
@@ -32,7 +33,6 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.LinkedListSet;
-import net.officefloor.frame.internal.structure.LinkedListSetItem;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -228,7 +228,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	@Override
-	public FunctionState handleEscalation(Throwable escalation) {
+	public FunctionState cancel(Throwable escalation) {
 
 		// Clean up the functions of this flow
 		FunctionState cleanUpFunctions = null;
@@ -238,20 +238,25 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			flowFunctions = flowFunctions.getNext();
 		}
 
-		// Attempt handling by flow completion
-		EscalationFlow escalationFlow = (this.completion != null)
-				? this.completion.getFlowEscalationProcedure().getEscalation(escalation) : null;
-		if (escalationFlow != null) {
-			// Handle by flow escalation within new flow
-			Flow flow = this.threadState.createFlow(null); // escalate to thread
-			return Promise.then(cleanUpFunctions,
-					flow.createManagedFunction(escalationFlow.getManagedFunctionMetaData(), null, escalation,
-							GovernanceDeactivationStrategy.DISREGARD));
+		// Return clean up of the flow
+		return cleanUpFunctions;
+	}
 
-		} else {
-			// No flow escalation, so handle by thread state
-			return Promise.then(cleanUpFunctions, this.threadState.handleEscalation(escalation));
+	@Override
+	public FunctionState handleEscalation(Throwable escalation) {
+
+		// Cancel this flow
+		FunctionState cleanUpFunctions = this.cancel(escalation);
+
+		// Attempt handling by flow completion
+		if (this.completion != null) {
+			// Handle by flow completion
+			return Promise.then(cleanUpFunctions, this.completion.complete(escalation));
+
 		}
+
+		// No flow completion, so handle by thread state
+		return Promise.then(cleanUpFunctions, this.threadState.handleEscalation(escalation));
 	}
 
 	@Override
@@ -259,8 +264,15 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 		// Remove function from active function listing
 		if (this.activeFunctions.removeEntry(function)) {
+
+			// Determine if flow completion
+			FunctionState flowCompletion = null;
+			if (this.completion != null) {
+				flowCompletion = this.completion.complete(null);
+			}
+
 			// Last active function so flow is now complete
-			return this.threadState.flowComplete(this);
+			return Promise.then(flowCompletion, this.threadState.flowComplete(this));
 		}
 
 		// Flow still active

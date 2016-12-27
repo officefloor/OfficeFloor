@@ -25,11 +25,11 @@ package net.officefloor.frame.spi.managedobject;
  * Registry providing the dependent Object instances for a
  * {@link CoordinatingManagedObject} instance.
  * <p>
- * This is provided by the Office Floor implementation.
+ * This is provided by the OfficeFloor implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ObjectRegistry<D extends Enum<D>> {
+public interface ObjectRegistry<O extends Enum<O>> {
 
 	/**
 	 * Obtains the dependency {@link Object} for the dependency key.
@@ -38,7 +38,7 @@ public interface ObjectRegistry<D extends Enum<D>> {
 	 *            Key identifying the dependency {@link Object}.
 	 * @return Dependency {@link Object} for the key.
 	 */
-	Object getObject(D key);
+	Object getObject(O key);
 
 	/**
 	 * <p>

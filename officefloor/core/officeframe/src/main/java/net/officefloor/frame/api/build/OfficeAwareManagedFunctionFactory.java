@@ -15,31 +15,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.profile;
+package net.officefloor.frame.api.build;
 
-import java.util.List;
-
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
- * Profiled {@link ProcessState}.
+ * <p>
+ * {@link Office} aware {@link ManagedFunctionFactory}.
+ * <p>
+ * This allows the {@link ManagedFunctionFactory} to:
+ * <ol>
+ * <li>obtain the dynamic meta-data of its containing {@link Office}</li>
+ * <li>ability to spawn {@link ProcessState} instances</li>
+ * </ol>
  * 
  * @author Daniel Sagenschneider
  */
-public interface ProfiledProcess {
+public interface OfficeAwareManagedFunctionFactory<O extends Enum<O>, F extends Enum<F>>
+		extends ManagedFunctionFactory<O, F> {
 
 	/**
-	 * Obtains the start time stamp.
+	 * Provides the {@link ManagedFunctionFactory} its containing
+	 * {@link Office}.
 	 * 
-	 * @return Start time stamp in nanoseconds.
+	 * @param office
+	 *            {@link Office} containing this {@link ManagedFunctionFactory}.
+	 * @throws Exception
+	 *             If fails to use the {@link Office}.
 	 */
-	long getStartTimestamp();
-
-	/**
-	 * Obtains the {@link ProfiledThread} instances.
-	 * 
-	 * @return {@link ProfiledThread} instances.
-	 */
-	List<ProfiledThread> getProfiledThreads();
+	void setOffice(Office office) throws Exception;
 
 }

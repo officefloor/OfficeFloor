@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceMetaData<I, F extends Enum<F>> extends ManagedFunctionLogicMetaData {
+public interface GovernanceMetaData<E, F extends Enum<F>> extends ManagedFunctionLogicMetaData {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -39,7 +39,7 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends ManagedFunctio
 	 * 
 	 * @return {@link GovernanceFactory}.
 	 */
-	GovernanceFactory<? super I, F> getGovernanceFactory();
+	GovernanceFactory<? super E, F> getGovernanceFactory();
 
 	/**
 	 * Creates the {@link GovernanceContainer}.
@@ -48,7 +48,7 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends ManagedFunctio
 	 *            {@link ThreadState}.
 	 * @return {@link GovernanceContainer}.
 	 */
-	GovernanceContainer<I> createGovernanceContainer(ThreadState threadState);
+	GovernanceContainer<E> createGovernanceContainer(ThreadState threadState);
 
 	/**
 	 * Creates the {@link ManagedFunctionContainer} for the
@@ -70,6 +70,6 @@ public interface GovernanceMetaData<I, F extends Enum<F>> extends ManagedFunctio
 	 *            Index of the {@link FlowMetaData}.
 	 * @return {@link FlowMetaData} for the specified index.
 	 */
-	FlowMetaData<?> getFlow(int flowIndex);
+	FlowMetaData getFlow(int flowIndex);
 
 }

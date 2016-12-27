@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface DutyContext<I extends Object, F extends Enum<F>, G extends Enum<G>> {
+public interface DutyContext<E extends Object, F extends Enum<F>, G extends Enum<G>> {
 
 	/**
 	 * Obtains the particular extension interfaces.
@@ -37,7 +37,7 @@ public interface DutyContext<I extends Object, F extends Enum<F>, G extends Enum
 	 * @return Extension interfaces for the {@link ManagedObject} instances to
 	 *         be administered.
 	 */
-	List<I> getExtensionInterfaces();
+	List<E> getExtensionInterfaces();
 
 	/**
 	 * Instigates a {@link Flow} to be run in parallel to the {@link ManagedFunction} being

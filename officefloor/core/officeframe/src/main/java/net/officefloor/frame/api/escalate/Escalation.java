@@ -17,25 +17,17 @@
  */
 package net.officefloor.frame.api.escalate;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * <p>
- * An escalation is &quot;thrown&quot; (escalated) on processing of {@link ManagedFunction}
- * and {@link Duty} instances.
+ * Internal failures within the {@link OfficeFrame} extend {@link Escalation}.
  * <p>
- * They are not &quot;thrown&quot; in the sense of a java {@link Throwable}
- * though act similar by the execution path looking upwards in the {@link Flow}
- * for an {@link EscalationFlow}/{@link EscalationHandler} to handle it.
- * <p>
- * Typically they are escalated on timing out of processing.
- * <p>
- * {@link Escalation} extends {@link Throwable} so that generic handlers can be
- * written to handle all types of failures - rather than having to have separate
- * handling for {@link Throwable} and {@link Escalation}.
+ * However, all {@link Throwable} instances thrown from {@link ManagedObject}
+ * instances are considered to follow the {@link Escalation} paradigm. This is
+ * that the invoking {@link ManagedObject} need not deal with {@link Escalation}
+ * instances, and these are handled by other {@link ManagedObject} instances.
  * 
  * @author Daniel Sagenschneider
  */

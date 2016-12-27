@@ -33,8 +33,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractManagedObjectSource<D extends Enum<D>, F extends Enum<F>>
-		extends AbstractAsyncManagedObjectSource<D, F> {
+public abstract class AbstractManagedObjectSource<O extends Enum<O>, F extends Enum<F>>
+		extends AbstractAsyncManagedObjectSource<O, F> {
 
 	/*
 	 * ============= ManagedObjectSource ===================================

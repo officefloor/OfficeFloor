@@ -18,13 +18,10 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -53,7 +50,7 @@ public interface OfficeBuilder {
 	void setMonitorOfficeInterval(long monitorOfficeInterval);
 
 	/**
-	 * Registers a {@link Team} which will execute {@link FunctionState}
+	 * Registers a {@link Team} which will execute {@link ManagedFunction}
 	 * instances within this {@link Office}.
 	 * 
 	 * @param officeTeamName
@@ -72,7 +69,7 @@ public interface OfficeBuilder {
 	 *            Name of the {@link Team} within this {@link Office} to use as
 	 *            default {@link Team}.
 	 */
-	void setDefaultTeamName(String officeTeamName);
+	void setDefaultTeam(String officeTeamName);
 
 	/**
 	 * Registers the {@link ManagedObject} within this {@link Office}.
@@ -109,7 +106,8 @@ public interface OfficeBuilder {
 	 * </ol>
 	 * 
 	 * @param processManagedObjectName
-	 *            Name to link the {@link ManagedObject} into {@link Work}.
+	 *            Name to link the {@link ManagedObject} for
+	 *            {@link ManagedFunction} instances.
 	 * @param officeManagedObjectName
 	 *            Name of the {@link ManagedObject} registered within this
 	 *            {@link Office}.
@@ -130,7 +128,8 @@ public interface OfficeBuilder {
 	 * </ol>
 	 * 
 	 * @param threadManagedObjectName
-	 *            Name to link the {@link ManagedObject} into {@link Work}.
+	 *            Name to link the {@link ManagedObject} for
+	 *            {@link ManagedFunction} instances.
 	 * @param officeManagedObjectName
 	 *            Name of the{@link ManagedObject} registered within this
 	 *            {@link Office}.
@@ -140,39 +139,23 @@ public interface OfficeBuilder {
 	DependencyMappingBuilder addThreadManagedObject(String threadManagedObjectName, String officeManagedObjectName);
 
 	/**
-	 * <p>
-	 * Flags to manually manage the {@link Governance}.
-	 * <p>
-	 * WARNING: given the nuances of {@link ManagedFunction} completion be wary of
-	 * attempting to manually manage the {@link Governance}.
-	 * <p>
-	 * Manually managing however is useful for multi-threaded execution and
-	 * managing {@link Governance}.
-	 * 
-	 * @param isManuallyManage
-	 *            <code>true</code> to manually manage.
-	 */
-	@Deprecated // always allow manual management
-	void setManuallyManageGovernance(boolean isManuallyManage);
-
-	/**
 	 * Adds {@link Governance} within the {@link Office}.
 	 * 
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type.
 	 * @param <F>
 	 *            Flow key type.
 	 * @param governanceName
 	 *            Name of the {@link Governance} to be referenced locally by
 	 *            this {@link Office}.
-	 * @param governanceFactory
-	 *            {@link GovernanceFactory} class.
 	 * @param extensionInterface
 	 *            Extension interface.
+	 * @param governanceFactory
+	 *            {@link GovernanceFactory} class.
 	 * @return {@link GovernanceBuilder}.
 	 */
-	<I, F extends Enum<F>> GovernanceBuilder<F> addGovernance(String governanceName,
-			GovernanceFactory<? super I, F> governanceFactory, Class<I> extensionInterface);
+	<E, F extends Enum<F>> GovernanceBuilder<F> addGovernance(String governanceName, Class<E> extensionInterface,
+			GovernanceFactory<? super E, F> governanceFactory);
 
 	/**
 	 * <p>
@@ -185,20 +168,20 @@ public interface OfficeBuilder {
 	 * </ol>
 	 * 
 	 * 
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type.
 	 * @param <A>
 	 *            {@link Administrator} key type.
 	 * @param <AS>
 	 *            {@link AdministratorSource} type.
 	 * @param processAdministratorName
-	 *            Name to link the {@link Administrator} into {@link Work}.
+	 *            Name to link the {@link Administrator} for the
+	 *            {@link ManagedFunction} instances.
 	 * @param adminsistratorSource
 	 *            {@link AdministratorSource} class.
 	 * @return {@link AdministratorBuilder} for the {@link Administrator}.
 	 */
-	@Deprecated // only allow thread bound administrators
-	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addProcessAdministrator(
+	<E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministratorBuilder<A> addProcessAdministrator(
 			String processAdministratorName, Class<AS> adminsistratorSource);
 
 	/**
@@ -212,35 +195,38 @@ public interface OfficeBuilder {
 	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
 	 * </ol>
 	 * 
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type.
 	 * @param <A>
 	 *            {@link Administrator} key type.
 	 * @param <AS>
 	 *            {@link AdministratorSource} type.
 	 * @param threadAdministratorName
-	 *            Name to link the {@link Administrator} into {@link Work}.
+	 *            Name to link the {@link Administrator} for the
+	 *            {@link ManagedFunction} instances.
 	 * @param adminsistratorSource
 	 *            {@link AdministratorSource} class.
 	 * @return administratorBuilder Builder of the {@link Administrator}.
 	 */
-	@Deprecated // to become addAdministrator as always thread bound
-	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addThreadAdministrator(
+	<E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministratorBuilder<A> addThreadAdministrator(
 			String threadAdministratorName, Class<AS> adminsistratorSource);
 
 	/**
-	 * Adds {@link Work} to be done within this {@link Office}.
+	 * Adds a {@link ManagedFunction} to be executed within the {@link Office}.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workName
-	 *            Name identifying the {@link Work}.
-	 * @param workFactory
-	 *            {@link WorkFactory} to create the {@link Work}.
-	 * @return {@link WorkBuilder} to build the {@link Work}.
+	 * @param <O>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @param mangedFunctionFactory
+	 *            {@link ManagedFunctionFactory} to create the
+	 *            {@link ManagedFunction}.
+	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
 	 */
-	@Deprecated // to become addManagedFunction
-	<W extends Work> WorkBuilder<W> addWork(String workName, WorkFactory<W> workFactory);
+	<O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> addManagedFunction(String functionName,
+			ManagedFunctionFactory<O, F> mangedFunctionFactory);
 
 	/**
 	 * <p>
@@ -255,29 +241,25 @@ public interface OfficeBuilder {
 	void addOfficeEnhancer(OfficeEnhancer officeEnhancer);
 
 	/**
-	 * Adds an {@link EscalationFlow} for issues not handled by the {@link Flow}
-	 * of the {@link Office}.
+	 * Adds an {@link EscalationFlow} for issues not handled within the
+	 * {@link Office}.
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
-	 * @param workName
-	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
-	 *            {@link Flow} resides on.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} on the {@link Work} to handle the
+	 * @param functionName
+	 *            Name of {@link ManagedFunction} to handle the
 	 *            {@link EscalationFlow}.
 	 */
-	void addEscalation(Class<? extends Throwable> typeOfCause, String workName, String taskName);
+	void addEscalation(Class<? extends Throwable> typeOfCause, String functionName);
 
 	/**
-	 * Adds a {@link ManagedFunction} to invoke on start up of the {@link Office}.
+	 * Adds a {@link ManagedFunction} to invoke on start up of the
+	 * {@link Office}.
 	 * 
-	 * @param workName
-	 *            Name of {@link Work} containing the {@link ManagedFunction}.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} on the {@link Work}.
+	 * @param functionName
+	 *            Name of {@link ManagedFunction}.
 	 */
-	void addStartupTask(String workName, String taskName);
+	void addStartupFunction(String functionName);
 
 	/**
 	 * Allows to optionally specify a {@link Profiler} that listens in on

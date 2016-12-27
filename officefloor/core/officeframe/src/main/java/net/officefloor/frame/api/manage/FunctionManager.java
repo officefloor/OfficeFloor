@@ -20,6 +20,7 @@ package net.officefloor.frame.api.manage;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
  * Interface to manage a particular {@link ManagedFunction}.
@@ -48,8 +49,8 @@ public interface FunctionManager {
 	Class<?> getParameterType();
 
 	/**
-	 * Invokes the {@link ManagedFunction} which is executed within the
-	 * {@link Office}.
+	 * Invokes the {@link ManagedFunction} which is executed within a new
+	 * {@link ProcessState} of the {@link Office}.
 	 * 
 	 * @param parameter
 	 *            Parameter for the {@link ManagedFunction}.
@@ -59,6 +60,6 @@ public interface FunctionManager {
 	 *             Should the parameter be of incorrect type for the
 	 *             {@link ManagedFunction}.
 	 */
-	void invokeFunction(Object parameter, FlowCallback callback) throws InvalidParameterTypeException;
+	void invokeProcess(Object parameter, FlowCallback callback) throws InvalidParameterTypeException;
 
 }

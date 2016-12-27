@@ -17,12 +17,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 
 /**
@@ -43,13 +39,6 @@ public interface ProcessState {
 	 * @return Identifier for this {@link ProcessState}.
 	 */
 	Object getProcessIdentifier();
-
-	/**
-	 * Obtains the {@link ProcessMetaData} for this {@link ProcessState}.
-	 * 
-	 * @return {@link ProcessMetaData} for this {@link ProcessState}.
-	 */
-	ProcessMetaData getProcessMetaData();
 
 	/**
 	 * <p>
@@ -87,12 +76,14 @@ public interface ProcessState {
 	 * @param parameter
 	 *            Parameter for the initial {@link ManagedFunction}.
 	 * @param callback
-	 *            Optional {@link FlowCallback} to handle {@link Escalation}
-	 *            from the spawned {@link ThreadState}.
-	 * @return New {@link ThreadState} contained in this {@link ProcessState}.
+	 *            Optional {@link FlowCompletion} to be notified of completion
+	 *            of the spawned {@link ThreadState}.
+	 * @param flowAssetManager
+	 *            {@link AssetManager} for the {@link Flow}.
+	 * @return {@link FunctionState} to spawn the {@link ThreadState}.
 	 */
 	FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
-			FlowCallback callback);
+			FlowCompletion completion, AssetManager flowAssetManager);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.
@@ -120,32 +111,6 @@ public interface ProcessState {
 	 * @return {@link AdministratorContainer} for the index.
 	 */
 	AdministratorContainer<?> getAdministratorContainer(int index);
-
-	/**
-	 * Obtains the {@link EscalationFlow} for the {@link EscalationHandler}
-	 * provided by the invocation of this {@link ProcessState}.
-	 * 
-	 * @return {@link EscalationFlow} or <code>null</code> if the invoker did
-	 *         not provide a {@link EscalationHandler}.
-	 */
-	@Deprecated // use FlowCallback
-	EscalationFlow getInvocationEscalation();
-
-	/**
-	 * Obtains the {@link EscalationProcedure} for the {@link Office}.
-	 * 
-	 * @return {@link EscalationProcedure} for the {@link Office}.
-	 */
-	@Deprecated // part of handleEscalation of ThreadMetaData
-	EscalationProcedure getOfficeEscalationProcedure();
-
-	/**
-	 * Obtains the catch all {@link EscalationFlow} for the {@link OfficeFloor}.
-	 * 
-	 * @return Catch all {@link EscalationFlow} for the {@link OfficeFloor}.
-	 */
-	@Deprecated // part of handleEscalation of ThreadMetaData
-	EscalationFlow getOfficeFloorEscalation();
 
 	/**
 	 * Obtains the {@link ManagedObjectCleanup} for this {@link ProcessState}.

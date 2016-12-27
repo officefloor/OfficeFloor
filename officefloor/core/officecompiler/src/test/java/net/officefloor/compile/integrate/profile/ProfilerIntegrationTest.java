@@ -23,9 +23,9 @@ import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.profile.ProfiledJob;
-import net.officefloor.frame.api.profile.ProfiledProcess;
-import net.officefloor.frame.api.profile.ProfiledThread;
+import net.officefloor.frame.api.profile.ProfiledManagedFunction;
+import net.officefloor.frame.api.profile.ProfiledProcessState;
+import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -48,10 +48,10 @@ public class ProfilerIntegrationTest extends OfficeFrameTestCase {
 				ProfiledWork.class.getName());
 
 		// Configure the profiler
-		final ProfiledProcess[] profiledProcess = new ProfiledProcess[1];
+		final ProfiledProcessState[] profiledProcess = new ProfiledProcessState[1];
 		source.setProfiler(new Profiler() {
 			@Override
-			public void profileProcess(ProfiledProcess process) {
+			public void profileProcess(ProfiledProcessState process) {
 				profiledProcess[0] = process;
 			}
 		});
@@ -63,11 +63,11 @@ public class ProfilerIntegrationTest extends OfficeFrameTestCase {
 
 		// Ensure profiled
 		assertNotNull("Should be profiling office", profiledProcess[0]);
-		List<ProfiledThread> threads = profiledProcess[0].getProfiledThreads();
+		List<ProfiledThreadState> threads = profiledProcess[0].getProfiledThreads();
 		assertEquals("Should have one thread profiled", 1, threads.size());
-		List<ProfiledJob> jobs = threads.get(0).getProfiledJobs();
+		List<ProfiledManagedFunction> jobs = threads.get(0).getProfiledJobs();
 		assertEquals("Should just be one job profiled", 1, jobs.size());
-		ProfiledJob job = jobs.get(0);
+		ProfiledManagedFunction job = jobs.get(0);
 		assertEquals("Incorrect profiled job", "SECTION.WORK.task",
 				job.getJobName());
 	}

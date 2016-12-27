@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  *
  * @author Daniel Sagenschneider
  */
-public interface RawBoundManagedObjectInstanceMetaData<D extends Enum<D>> {
+public interface RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 
 	/**
 	 * Obtains the {@link RawBoundManagedObjectMetaData} instances of the
@@ -44,13 +44,13 @@ public interface RawBoundManagedObjectInstanceMetaData<D extends Enum<D>> {
 	 *
 	 * @return {@link RawManagedObjectMetaData}.
 	 */
-	RawManagedObjectMetaData<D, ?> getRawManagedObjectMetaData();
+	RawManagedObjectMetaData<O, ?> getRawManagedObjectMetaData();
 
 	/**
 	 * Obtains the {@link ManagedObjectMetaData}.
 	 *
 	 * @return {@link ManagedObjectMetaData}.
 	 */
-	ManagedObjectMetaData<D> getManagedObjectMetaData();
+	ManagedObjectMetaData<O> getManagedObjectMetaData();
 
 }

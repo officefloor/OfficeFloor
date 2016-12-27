@@ -36,8 +36,7 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecif
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
-		implements AdministratorSource<I, A> {
+public abstract class AbstractAdministratorSource<E, A extends Enum<A>> implements AdministratorSource<E, A> {
 
 	/*
 	 * ==================== AdministratorSource ==============================
@@ -96,8 +95,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	/**
 	 * Specification for this {@link AdministratorSource}.
 	 */
-	private class Specification implements SpecificationContext,
-			AdministratorSourceSpecification {
+	private class Specification implements SpecificationContext, AdministratorSourceSpecification {
 
 		/**
 		 * Properties for the specification.
@@ -110,14 +108,12 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		@Override
 		public void addProperty(String name) {
-			this.properties
-					.add(new AdministratorSourcePropertyImpl(name, name));
+			this.properties.add(new AdministratorSourcePropertyImpl(name, name));
 		}
 
 		@Override
 		public void addProperty(String name, String label) {
-			this.properties
-					.add(new AdministratorSourcePropertyImpl(name, label));
+			this.properties.add(new AdministratorSourcePropertyImpl(name, label));
 		}
 
 		@Override
@@ -155,13 +151,12 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	 * @throws Exception
 	 *             If fails to load the meta-data.
 	 */
-	protected abstract void loadMetaData(MetaDataContext<I, A> context)
-			throws Exception;
+	protected abstract void loadMetaData(MetaDataContext<E, A> context) throws Exception;
 
 	/**
 	 * Context for the {@link AdministratorSource#getMetaData()}.
 	 */
-	public static interface MetaDataContext<I, A> {
+	public static interface MetaDataContext<E, A> {
 
 		/**
 		 * Obtains the {@link AdministratorSourceContext}.
@@ -176,7 +171,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		 * @param extensionInterface
 		 *            Extension interface.
 		 */
-		void setExtensionInterface(Class<I> extensionInterface);
+		void setExtensionInterface(Class<E> extensionInterface);
 
 		/**
 		 * Adds meta-data for a {@link Duty} identifying by the key. The name of
@@ -242,8 +237,8 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		<F extends Enum<F>> Labeller addFlow(F key, Class<?> argumentType);
 
 		/**
-		 * Adds a required {@link Flow} identified by an index into the
-		 * order the {@link Flow} was added.
+		 * Adds a required {@link Flow} identified by an index into the order
+		 * the {@link Flow} was added.
 		 * 
 		 * @param argumentType
 		 *            Type of argument passed to the {@link Flow}.
@@ -255,8 +250,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	/**
 	 * Meta-data of the {@link AdministratorSource}.
 	 */
-	private class MetaData implements MetaDataContext<I, A>,
-			AdministratorSourceMetaData<I, A> {
+	private class MetaData implements MetaDataContext<E, A>, AdministratorSourceMetaData<E, A> {
 
 		/**
 		 * {@link AdministratorSourceContext}.
@@ -271,7 +265,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		/**
 		 * Extension interface.
 		 */
-		private Class<I> extensionInterface;
+		private Class<E> extensionInterface;
 
 		/**
 		 * Initiate.
@@ -293,7 +287,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		}
 
 		@Override
-		public void setExtensionInterface(Class<I> extensionInterface) {
+		public void setExtensionInterface(Class<E> extensionInterface) {
 			this.extensionInterface = extensionInterface;
 		}
 
@@ -316,7 +310,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		 */
 
 		@Override
-		public Class<I> getExtensionInterface() {
+		public Class<E> getExtensionInterface() {
 			return this.extensionInterface;
 		}
 
@@ -330,8 +324,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	/**
 	 * {@link AdministratorDutyMetaData} implementation.
 	 */
-	private class DutyMetaData<F extends Enum<F>> implements
-			DutyMetaDataContext, AdministratorDutyMetaData<A, F> {
+	private class DutyMetaData<F extends Enum<F>> implements DutyMetaDataContext, AdministratorDutyMetaData<A, F> {
 
 		/**
 		 * Name of the {@link Duty}.
@@ -396,16 +389,14 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 
 		@Override
 		public <f extends Enum<f>> Labeller addFlow(f key, Class<?> argumentType) {
-			DutyFlowMetaData<f> flow = new DutyFlowMetaData<f>(key,
-					argumentType, key.ordinal());
+			DutyFlowMetaData<f> flow = new DutyFlowMetaData<f>(key, argumentType, key.ordinal());
 			this.flows.add(flow);
 			return flow;
 		}
 
 		@Override
 		public Labeller addFlow(Class<?> argumentType) {
-			DutyFlowMetaData<Indexed> flow = new DutyFlowMetaData<Indexed>(
-					null, argumentType, this.flows.size());
+			DutyFlowMetaData<Indexed> flow = new DutyFlowMetaData<Indexed>(null, argumentType, this.flows.size());
 			this.flows.add(flow);
 			return flow;
 		}
@@ -414,8 +405,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	/**
 	 * {@link AdministratorDutyFlowMetaData} implementation.
 	 */
-	private static class DutyFlowMetaData<F extends Enum<F>> implements
-			Labeller, AdministratorDutyFlowMetaData<F> {
+	private static class DutyFlowMetaData<F extends Enum<F>> implements Labeller, AdministratorDutyFlowMetaData<F> {
 
 		/**
 		 * Key identifying this {@link Flow}.
@@ -489,7 +479,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	}
 
 	@Override
-	public AdministratorSourceMetaData<I, A> getMetaData() {
+	public AdministratorSourceMetaData<E, A> getMetaData() {
 		// Return the meta data
 		return this.metaData;
 	}

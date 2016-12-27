@@ -18,11 +18,10 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
@@ -63,7 +62,8 @@ public interface OfficeConfiguration {
 	 * Obtains the default {@link Team} name for the {@link Office}.
 	 * 
 	 * @return Default {@link Team} name for the {@link Office}. May be
-	 *         <code>null</code> to use the existing {@link Thread}.
+	 *         <code>null</code> to use any {@link Team} (typically the invoking
+	 *         {@link Thread}).
 	 */
 	String getOfficeDefaultTeamName();
 
@@ -123,13 +123,6 @@ public interface OfficeConfiguration {
 	ManagedObjectConfiguration<?>[] getThreadManagedObjectConfiguration();
 
 	/**
-	 * Flags whether the {@link Governance} is to be manually managed.
-	 * 
-	 * @return <code>true</code> to manually manage the {@link Governance}.
-	 */
-	boolean isManuallyManageGovernance();
-
-	/**
 	 * Obtains the {@link GovernanceConfiguration}.
 	 * 
 	 * @return {@link GovernanceConfiguration}.
@@ -155,13 +148,11 @@ public interface OfficeConfiguration {
 	AdministratorSourceConfiguration<?, ?>[] getThreadAdministratorSourceConfiguration();
 
 	/**
-	 * Obtains the configuration of the {@link Work} instances.
+	 * Obtains the configuration for the {@link ManagedFunction} instances.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @return {@link Work} configuration for the input name.
+	 * @return Configuration for the {@link ManagedFunction} instances.
 	 */
-	<W extends Work> WorkConfiguration<W>[] getWorkConfiguration();
+	ManagedFunctionConfiguration<?, ?>[] getManagedFunctionConfiguration();
 
 	/**
 	 * Obtains the {@link OfficeEnhancer} instances for this {@link Office}.
@@ -171,39 +162,38 @@ public interface OfficeConfiguration {
 	OfficeEnhancer[] getOfficeEnhancers();
 
 	/**
-	 * Obtains the {@link TaskEscalationConfiguration} instances for the
-	 * {@link Office}.
+	 * Obtains the {@link ManagedFunctionEscalationConfiguration} instances for
+	 * the {@link Office}.
 	 * 
-	 * @return {@link TaskEscalationConfiguration} instances for the
+	 * @return {@link ManagedFunctionEscalationConfiguration} instances for the
 	 *         {@link Office}.
 	 */
-	TaskEscalationConfiguration[] getEscalationConfiguration();
+	ManagedFunctionEscalationConfiguration[] getEscalationConfiguration();
 
 	/**
 	 * <p>
 	 * Obtains a {@link FlowNodeBuilder} registered with this
 	 * {@link OfficeBuilder}.
 	 * <p>
-	 * This enables addition configuration of {@link ManagedFunction} instances registered
-	 * by a {@link ManagedObjectSource}.
+	 * This enables addition configuration of {@link ManagedFunction} instances
+	 * registered by a {@link ManagedObjectSource}.
 	 * 
 	 * @param namespace
 	 *            Namespace. Likely the {@link ManagedObjectSource} name.
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
 	 * @return {@link ManagedFunctionBuilder}.
 	 */
-	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String workName, String taskName);
+	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String functionName);
 
 	/**
-	 * Obtains the list of {@link TaskNodeReference} instances referencing the
-	 * {@link ManagedFunction} instances to invoke on Office start up.
+	 * Obtains the list of {@link ManagedFunctionReference} instances
+	 * referencing the {@link ManagedFunction} instances to invoke on
+	 * {@link Office} start up.
 	 * 
-	 * @return List of start up {@link TaskNodeReference} references.
+	 * @return List of start up {@link ManagedFunctionReference} references.
 	 */
-	TaskNodeReference[] getStartupTasks();
+	ManagedFunctionReference[] getStartupFunction();
 
 	/**
 	 * Obtains the {@link Profiler} for the {@link Office}.

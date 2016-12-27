@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface Governance<I, F extends Enum<F>> {
+public interface Governance<E, F extends Enum<F>> {
 
 	/**
 	 * Registers the {@link ManagedObject} for {@link Governance}.
@@ -41,7 +41,7 @@ public interface Governance<I, F extends Enum<F>> {
 	 * @throws Throwable
 	 *             If fails to govern the {@link ManagedObject}.
 	 */
-	void governManagedObject(I managedObjectExtension, GovernanceContext<F> context) throws Throwable;
+	void governManagedObject(E managedObjectExtension, GovernanceContext<F> context) throws Throwable;
 
 	/**
 	 * Enforces the {@link Governance} of the {@link ManagedObject} instances

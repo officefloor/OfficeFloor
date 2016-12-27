@@ -31,9 +31,9 @@ import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteContex
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
@@ -111,10 +111,10 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 			.createMock(InputManagedObjectConfiguration.class);
 
 	/**
-	 * {@link OfficeMetaDataLocator}.
+	 * {@link ManagedFunctionLocator}.
 	 */
-	private final OfficeMetaDataLocator metaDataLocator = this
-			.createMock(OfficeMetaDataLocator.class);
+	private final ManagedFunctionLocator metaDataLocator = this
+			.createMock(ManagedFunctionLocator.class);
 
 	/**
 	 * {@link Office} {@link TeamManagement} instances.
@@ -566,8 +566,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowMetaData.class);
 		final ManagedObjectFlowConfiguration<?> flowConfiguration = this
 				.createMock(ManagedObjectFlowConfiguration.class);
-		final TaskNodeReference taskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskReference = this
+				.createMock(ManagedFunctionReference.class);
 
 		// Record no flow task
 		this.record_managedObjectSourceName();
@@ -604,8 +604,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowMetaData.class);
 		final ManagedObjectFlowConfiguration<?> flowConfiguration = this
 				.createMock(ManagedObjectFlowConfiguration.class);
-		final TaskNodeReference taskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 
@@ -651,8 +651,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowMetaData.class);
 		final ManagedObjectFlowConfiguration<?> flowConfigurationOne = this
 				.createMock(ManagedObjectFlowConfiguration.class);
-		final TaskNodeReference taskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);
@@ -703,8 +703,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowMetaData.class);
 		final ManagedObjectFlowConfiguration<?> flowConfiguration = this
 				.createMock(ManagedObjectFlowConfiguration.class);
-		final TaskNodeReference taskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);
@@ -826,8 +826,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowMetaData.class);
 		final ManagedObjectFlowConfiguration<?> flowConfiguration = this
 				.createMock(ManagedObjectFlowConfiguration.class);
-		final TaskNodeReference taskReference = this
-				.createMock(TaskNodeReference.class);
+		final ManagedFunctionReference taskReference = this
+				.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
 				.createMock(ManagedFunctionMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);

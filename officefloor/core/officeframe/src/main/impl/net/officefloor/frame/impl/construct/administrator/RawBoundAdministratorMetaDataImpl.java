@@ -38,9 +38,9 @@ import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
@@ -492,7 +492,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 */
 
 	@Override
-	public void linkOfficeMetaData(OfficeMetaData officeMetaData, OfficeMetaDataLocator taskLocator,
+	public void linkOfficeMetaData(OfficeMetaData officeMetaData, ManagedFunctionLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Create the set of required duties to ensure they are configured
@@ -521,7 +521,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 			requiredDuties.remove(dutyKey);
 
 			// Obtain the task node references
-			TaskNodeReference[] dutyTaskReferences = dutyConfiguration.getLinkedProcessConfiguration();
+			ManagedFunctionReference[] dutyTaskReferences = dutyConfiguration.getLinkedProcessConfiguration();
 			if (dutyTaskReferences == null) {
 				issues.addIssue(AssetType.ADMINISTRATOR, this.boundAdministratorName,
 						"Task references not provided for duty " + dutyName);
@@ -531,7 +531,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 			// Obtain the flows for the duty
 			FlowMetaData<?>[] dutyFlows = new FlowMetaData[dutyTaskReferences.length];
 			for (int i = 0; i < dutyFlows.length; i++) {
-				TaskNodeReference taskReference = dutyTaskReferences[i];
+				ManagedFunctionReference taskReference = dutyTaskReferences[i];
 
 				// Obtain the task meta-data for the flow
 				ManagedFunctionMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskReference, taskLocator, issues,

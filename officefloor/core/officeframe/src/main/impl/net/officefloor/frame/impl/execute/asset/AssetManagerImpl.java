@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.execute.function.LinkedListSetJobNode;
+import net.officefloor.frame.impl.execute.function.LinkedListSetFunctionLogic;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
@@ -136,7 +136,7 @@ public class AssetManagerImpl implements AssetManager {
 		}
 
 		// Undertake checks for each of the latches
-		return LinkedListSetJobNode.createCastJobNode(head);
+		return LinkedListSetFunctionLogic.createCastJobNode(head);
 	}
 
 }

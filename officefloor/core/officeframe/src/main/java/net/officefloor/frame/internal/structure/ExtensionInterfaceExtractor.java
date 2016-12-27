@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ExtensionInterfaceExtractor<I> {
+public interface ExtensionInterfaceExtractor<E> {
 
 	/**
 	 * Extracts the extension interface from the {@link ManagedObject}.
@@ -37,7 +37,6 @@ public interface ExtensionInterfaceExtractor<I> {
 	 *            aid in extracting the extension interface.
 	 * @return Extension Interface.
 	 */
-	I extractExtensionInterface(ManagedObject managedObject,
-			ManagedObjectMetaData<?> managedObjectMetaData);
+	E extractExtensionInterface(ManagedObject managedObject, ManagedObjectMetaData<?> managedObjectMetaData);
 
 }

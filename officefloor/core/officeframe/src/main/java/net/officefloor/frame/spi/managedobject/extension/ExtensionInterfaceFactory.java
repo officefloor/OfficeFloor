@@ -24,7 +24,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  *
  * @author Daniel Sagenschneider
  */
-public interface ExtensionInterfaceFactory<I> {
+public interface ExtensionInterfaceFactory<E> {
 
 	/**
 	 * Creates the specific extension interface for the {@link ManagedObject}.
@@ -34,6 +34,6 @@ public interface ExtensionInterfaceFactory<I> {
 	 *            created for it.
 	 * @return Extension interface for the input {@link ManagedObject}.
 	 */
-	I createExtensionInterface(ManagedObject managedObject);
+	E createExtensionInterface(ManagedObject managedObject);
 
 }

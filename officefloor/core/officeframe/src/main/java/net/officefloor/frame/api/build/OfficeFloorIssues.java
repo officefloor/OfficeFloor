@@ -31,7 +31,7 @@ public interface OfficeFloorIssues {
 	 * issues in construction.
 	 */
 	public static enum AssetType {
-		OFFICE_FLOOR, OFFICE, TEAM, MANAGED_OBJECT, MANAGED_OBJECT_POOL, GOVERNANCE, PROCESS, THREAD, ADMINISTRATOR, DUTY, WORK, TASK
+		OFFICE_FLOOR, OFFICE, TEAM, MANAGED_OBJECT, MANAGED_OBJECT_POOL, GOVERNANCE, ADMINISTRATOR, DUTY, PROCESS, THREAD, FUNCTION
 	}
 
 	/**
@@ -58,7 +58,6 @@ public interface OfficeFloorIssues {
 	 * @param cause
 	 *            Cause of the issue.
 	 */
-	void addIssue(AssetType asset, String assetName, String issueDescription,
-			Throwable cause);
+	void addIssue(AssetType asset, String assetName, String issueDescription, Throwable cause);
 
 }

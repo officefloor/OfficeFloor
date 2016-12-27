@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectGovernanceMetaData<I> {
+public interface ManagedObjectGovernanceMetaData<E> {
 
 	/**
 	 * Obtains the index for the {@link Governance} within the
@@ -41,6 +41,6 @@ public interface ManagedObjectGovernanceMetaData<I> {
 	 * 
 	 * @return {@link ExtensionInterfaceExtractor}.
 	 */
-	ExtensionInterfaceExtractor<I> getExtensionInterfaceExtractor();
+	ExtensionInterfaceExtractor<E> getExtensionInterfaceExtractor();
 
 }

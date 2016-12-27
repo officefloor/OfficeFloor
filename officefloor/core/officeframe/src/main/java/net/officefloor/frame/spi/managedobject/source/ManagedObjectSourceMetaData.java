@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectSourceMetaData<D extends Enum<D>, F extends Enum<F>> {
+public interface ManagedObjectSourceMetaData<O extends Enum<O>, F extends Enum<F>> {
 
 	/**
 	 * <p>
@@ -71,7 +71,7 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, F extends Enum<F
 	 * @return Meta-data of the required dependencies for this
 	 *         {@link ManagedObjectSource}.
 	 */
-	ManagedObjectDependencyMetaData<D>[] getDependencyMetaData();
+	ManagedObjectDependencyMetaData<O>[] getDependencyMetaData();
 
 	/**
 	 * Obtains the list of {@link ManagedObjectFlowMetaData} instances should

@@ -34,7 +34,7 @@ public interface DutyMetaData {
 	 *            Index of the {@link Flow}.
 	 * @return {@link FlowMetaData} of the specified {@link Flow}.
 	 */
-	FlowMetaData<?> getFlow(int flowIndex);
+	FlowMetaData getFlow(int flowIndex);
 
 	/**
 	 * Translates the {@link Duty} {@link Governance} index to the

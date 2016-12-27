@@ -15,26 +15,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.manage;
+package net.officefloor.frame.spi.managedobject.source;
 
+import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 
 /**
- * Indicates there is no initial {@link ManagedFunction} for a {@link Work}.
+ * Builds the {@link ManagedFunction} necessary for the
+ * {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NoInitialTaskException extends Exception {
+public interface ManagedObjectFunctionBuilder<O extends Enum<O>, F extends Enum<F>> extends FlowNodeBuilder<F> {
 
 	/**
-	 * Initiate.
+	 * Links in the parameter for this {@link ManagedFunction}.
 	 * 
-	 * @param message
-	 *            Message.
+	 * @param key
+	 *            Key identifying the parameter.
+	 * @param parameterType
+	 *            Type of the parameter.
 	 */
-	public NoInitialTaskException(String message) {
-		super(message);
-	}
+	void linkParameter(O key, Class<?> parameterType);
+
+	/**
+	 * Links in the parameter for this {@link ManagedFunction}.
+	 * 
+	 * @param index
+	 *            Index identifying the parameter.
+	 * @param parameterType
+	 *            Type of the parameter.
+	 */
+	void linkParameter(int index, Class<?> parameterType);
 
 }

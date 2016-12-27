@@ -42,7 +42,7 @@ import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
@@ -135,10 +135,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			.createMock(RawWorkMetaDataFactory.class);
 
 	/**
-	 * {@link RawTaskMetaDataFactory}.
+	 * {@link RawManagedFunctionMetaDataFactory}.
 	 */
-	private final RawTaskMetaDataFactory rawTaskMetaDataFactory = this
-			.createMock(RawTaskMetaDataFactory.class);
+	private final RawManagedFunctionMetaDataFactory rawTaskMetaDataFactory = this
+			.createMock(RawManagedFunctionMetaDataFactory.class);
 
 	/**
 	 * Listing of the constructed {@link RawManagedObjectMetaData} instances.

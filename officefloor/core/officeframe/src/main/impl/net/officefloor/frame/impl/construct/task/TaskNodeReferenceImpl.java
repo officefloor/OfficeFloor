@@ -19,14 +19,14 @@ package net.officefloor.frame.impl.construct.task;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 
 /**
- * {@link TaskNodeReference} implementation.
+ * {@link ManagedFunctionReference} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskNodeReferenceImpl implements TaskNodeReference {
+public class TaskNodeReferenceImpl implements ManagedFunctionReference {
 
 	/**
 	 * Name identifying the {@link Work} containing the {@link ManagedFunction}.

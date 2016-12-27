@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.administration.Administrator;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministratorSource<I, A extends Enum<A>> {
+public interface AdministratorSource<E, A extends Enum<A>> {
 
 	/**
 	 * <p>
@@ -66,7 +66,7 @@ public interface AdministratorSource<I, A extends Enum<A>> {
 	 * 
 	 * @return Meta-data to describe this.
 	 */
-	AdministratorSourceMetaData<I, A> getMetaData();
+	AdministratorSourceMetaData<E, A> getMetaData();
 
 	/**
 	 * <p>
@@ -76,6 +76,6 @@ public interface AdministratorSource<I, A extends Enum<A>> {
 	 * @throws Throwable
 	 *             If fails to create the {@link Administrator}.
 	 */
-	Administrator<I, A> createAdministrator() throws Throwable;
+	Administrator<E, A> createAdministrator() throws Throwable;
 
 }

@@ -48,7 +48,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -413,7 +413,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		// Create the office meta-data
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl("TEST", null,
 				null, processMetaData, new ProcessContextListener[0],
-				new OfficeStartupTask[0], new EscalationProcedureImpl(), null,
+				new OfficeStartupFunction[0], new EscalationProcedureImpl(), null,
 				this.profiler);
 
 		// Create Flow for executing

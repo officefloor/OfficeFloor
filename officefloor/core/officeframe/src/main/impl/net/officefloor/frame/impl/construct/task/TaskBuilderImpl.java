@@ -28,13 +28,13 @@ import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
-import net.officefloor.frame.internal.configuration.TaskConfiguration;
-import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
-import net.officefloor.frame.internal.configuration.TaskGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
-import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -50,7 +50,7 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		implements ManagedFunctionBuilder<W, D, F>, TaskConfiguration<W, D, F> {
+		implements ManagedFunctionBuilder<W, D, F>, ManagedFunctionConfiguration<W, D, F> {
 
 	/**
 	 * Name of this {@link ManagedFunction}.
@@ -75,7 +75,7 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	/**
 	 * {@link Governance} instances to be active for this {@link ManagedFunction}.
 	 */
-	private final List<TaskGovernanceConfiguration> governances = new LinkedList<TaskGovernanceConfiguration>();
+	private final List<ManagedFunctionGovernanceConfiguration> governances = new LinkedList<ManagedFunctionGovernanceConfiguration>();
 
 	/**
 	 * Differentiator.
@@ -90,7 +90,7 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	/**
 	 * Next {@link FunctionState} within the {@link Flow}.
 	 */
-	private TaskNodeReference nextTaskInFlow;
+	private ManagedFunctionReference nextTaskInFlow;
 
 	/**
 	 * Listing of task administration duties to do before executing the
@@ -105,11 +105,11 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	private final List<TaskDutyConfigurationImpl<?>> postTaskDuties = new LinkedList<TaskDutyConfigurationImpl<?>>();
 
 	/**
-	 * Listing of {@link TaskEscalationConfiguration} instances to form the
+	 * Listing of {@link ManagedFunctionEscalationConfiguration} instances to form the
 	 * {@link EscalationProcedure} for the resulting {@link ManagedFunction} of this
 	 * {@link ManagedFunctionBuilder}.
 	 */
-	private final List<TaskEscalationConfiguration> escalations = new LinkedList<TaskEscalationConfiguration>();
+	private final List<ManagedFunctionEscalationConfiguration> escalations = new LinkedList<ManagedFunctionEscalationConfiguration>();
 
 	/**
 	 * Initiate.
@@ -336,41 +336,41 @@ public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F
 	}
 
 	@Override
-	public TaskObjectConfiguration<D>[] getObjectConfiguration() {
+	public ManagedFunctionObjectConfiguration<D>[] getObjectConfiguration() {
 		return ConstructUtil.toArray(this.objects,
-				new TaskObjectConfiguration[0]);
+				new ManagedFunctionObjectConfiguration[0]);
 	}
 
 	@Override
-	public TaskGovernanceConfiguration[] getGovernanceConfiguration() {
+	public ManagedFunctionGovernanceConfiguration[] getGovernanceConfiguration() {
 		return this.governances
-				.toArray(new TaskGovernanceConfiguration[this.governances
+				.toArray(new ManagedFunctionGovernanceConfiguration[this.governances
 						.size()]);
 	}
 
 	@Override
-	public TaskNodeReference getNextTaskInFlow() {
+	public ManagedFunctionReference getNextTaskInFlow() {
 		return this.nextTaskInFlow;
 	}
 
 	@Override
-	public TaskFlowConfiguration<F>[] getFlowConfiguration() {
-		return ConstructUtil.toArray(this.flows, new TaskFlowConfiguration[0]);
+	public ManagedFunctionFlowConfiguration<F>[] getFlowConfiguration() {
+		return ConstructUtil.toArray(this.flows, new ManagedFunctionFlowConfiguration[0]);
 	}
 
 	@Override
-	public TaskDutyConfiguration<?>[] getPreTaskAdministratorDutyConfiguration() {
-		return this.preTaskDuties.toArray(new TaskDutyConfiguration[0]);
+	public ManagedFunctionDutyConfiguration<?>[] getPreTaskAdministratorDutyConfiguration() {
+		return this.preTaskDuties.toArray(new ManagedFunctionDutyConfiguration[0]);
 	}
 
 	@Override
-	public TaskDutyConfiguration<?>[] getPostTaskAdministratorDutyConfiguration() {
-		return this.postTaskDuties.toArray(new TaskDutyConfiguration[0]);
+	public ManagedFunctionDutyConfiguration<?>[] getPostTaskAdministratorDutyConfiguration() {
+		return this.postTaskDuties.toArray(new ManagedFunctionDutyConfiguration[0]);
 	}
 
 	@Override
-	public TaskEscalationConfiguration[] getEscalations() {
-		return this.escalations.toArray(new TaskEscalationConfiguration[0]);
+	public ManagedFunctionEscalationConfiguration[] getEscalations() {
+		return this.escalations.toArray(new ManagedFunctionEscalationConfiguration[0]);
 	}
 
 }

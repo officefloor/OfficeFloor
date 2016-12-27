@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.integrate.work;
 
-import net.officefloor.frame.api.build.NameAwareWorkFactory;
-import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
+import net.officefloor.frame.api.build.NameAwareManagedFunctionFactory;
+import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -57,14 +57,14 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure name aware functionality is provided for the
-	 * {@link NameAwareWorkFactory}.
+	 * {@link NameAwareManagedFunctionFactory}.
 	 */
 	public void testNameAwareWorkFactory() throws Exception {
 
 		// Mock
 		final String WORK_NAME = "WORK";
-		final NameAwareWorkFactory<?> workFactory = this
-				.createMock(NameAwareWorkFactory.class);
+		final NameAwareManagedFunctionFactory<?> workFactory = this
+				.createMock(NameAwareManagedFunctionFactory.class);
 
 		// Record providing bound work name
 		workFactory.setBoundWorkName(WORK_NAME);
@@ -81,14 +81,14 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure {@link Office} aware functionality is provided for the
-	 * {@link OfficeAwareWorkFactory}.
+	 * {@link OfficeAwareManagedFunctionFactory}.
 	 */
 	public void testOfficeAwareWorkFactory() throws Exception {
 
 		// Mock
 		final String WORK_NAME = "WORK";
-		final OfficeAwareWorkFactory<?> workFactory = this
-				.createMock(OfficeAwareWorkFactory.class);
+		final OfficeAwareManagedFunctionFactory<?> workFactory = this
+				.createMock(OfficeAwareManagedFunctionFactory.class);
 
 		// Record providing Office
 		workFactory.setOffice(null);
@@ -158,10 +158,10 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Interface for mock objects that implements both
-	 * {@link NameAwareWorkFactory} and {@link OfficeAwareWorkFactory}.
+	 * {@link NameAwareManagedFunctionFactory} and {@link OfficeAwareManagedFunctionFactory}.
 	 */
 	public static interface MockNameAndOfficeAwareWorkFactory extends
-			NameAwareWorkFactory<Work>, OfficeAwareWorkFactory<Work> {
+			NameAwareManagedFunctionFactory<Work>, OfficeAwareManagedFunctionFactory<Work> {
 	}
 
 }

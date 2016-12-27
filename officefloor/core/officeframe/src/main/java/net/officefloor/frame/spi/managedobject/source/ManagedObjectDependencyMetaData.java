@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectDependencyMetaData<D extends Enum<D>> {
+public interface ManagedObjectDependencyMetaData<O extends Enum<O>> {
 
 	/**
 	 * Obtains the {@link Enum} key identifying this dependency. If
@@ -35,7 +35,7 @@ public interface ManagedObjectDependencyMetaData<D extends Enum<D>> {
 	 * @return {@link Enum} key identifying the dependency or <code>null</code>
 	 *         indicating identified by an index.
 	 */
-	D getKey();
+	O getKey();
 
 	/**
 	 * Obtains the {@link Class} that the dependent object must

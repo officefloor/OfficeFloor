@@ -19,14 +19,14 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Configuration for a {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface TaskFlowConfiguration<F extends Enum<F>> {
+public interface ManagedFunctionFlowConfiguration<F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of this {@link Flow}.
@@ -36,18 +36,21 @@ public interface TaskFlowConfiguration<F extends Enum<F>> {
 	String getFlowName();
 
 	/**
-	 * Obtains the strategy to instigate this {@link Flow}.
+	 * Obtains the reference to the initial {@link ManagedFunction} of this
+	 * {@link Flow}.
 	 * 
-	 * @return Strategy to instigate this {@link Flow}.
+	 * @return Reference to the initial {@link ManagedFunction} of this
+	 *         {@link Flow}.
 	 */
-	FlowInstigationStrategyEnum getInstigationStrategy();
+	ManagedFunctionReference getInitialFunction();
 
 	/**
-	 * Obtains the reference to the initial {@link ManagedFunction} of this {@link Flow}.
+	 * Indicates whether to spawn a {@link ThreadState} for the {@link Flow}.
 	 * 
-	 * @return Reference to the initial {@link ManagedFunction} of this {@link Flow}.
+	 * @return <code>true</code> to spawn a {@link ThreadState} for the
+	 *         {@link Flow}.
 	 */
-	TaskNodeReference getInitialTask();
+	boolean isSpawnThreadState();
 
 	/**
 	 * Obtains the index identifying this {@link Flow}.

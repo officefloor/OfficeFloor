@@ -35,7 +35,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
+public interface RawBoundAdministratorMetaData<E, A extends Enum<A>> {
 
 	/**
 	 * Obtains the name the {@link Administrator} is bound under.
@@ -65,7 +65,7 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	 * 
 	 * @return {@link AdministratorMetaData} for this {@link Administrator}.
 	 */
-	AdministratorMetaData<I, A> getAdministratorMetaData();
+	AdministratorMetaData<E, A> getAdministratorMetaData();
 
 	/**
 	 * Obtains the {@link DutyKey} for the key identifying a {@link Duty}.
@@ -90,19 +90,19 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	DutyKey<A> getDutyKey(String dutyName);
 
 	/**
-	 * Links the {@link ManagedFunctionMetaData} instances to create {@link Flow} of
-	 * execution, along with the {@link Governance}.
+	 * Links the {@link ManagedFunctionMetaData} instances to create
+	 * {@link Flow} of execution, along with the {@link Governance}.
 	 * 
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
-	 * @param taskMetaDataLocator
-	 *            {@link OfficeMetaDataLocator}.
+	 * @param functionLocator
+	 *            {@link ManagedFunctionLocator}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkOfficeMetaData(OfficeMetaData officeMetaData, OfficeMetaDataLocator taskMetaDataLocator,
+	void linkOfficeMetaData(OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 }

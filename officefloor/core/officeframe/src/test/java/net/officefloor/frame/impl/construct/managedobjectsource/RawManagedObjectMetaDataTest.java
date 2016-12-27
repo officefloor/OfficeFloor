@@ -62,7 +62,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -1277,7 +1277,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			// Add a task
 			if (addWorkName != null) {
 				// Add work and task that should have name spaced names
-				ManagedObjectTaskBuilder<?, ?> taskBuilder = context.addWork(
+				ManagedObjectFunctionBuilder<?, ?> taskBuilder = context.addWork(
 						addWorkName, workFactory).addTask(addTaskName,
 						taskFactory);
 

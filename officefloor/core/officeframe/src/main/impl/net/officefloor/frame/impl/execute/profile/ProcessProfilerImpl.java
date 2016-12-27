@@ -20,8 +20,8 @@ package net.officefloor.frame.impl.execute.profile;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.officefloor.frame.api.profile.ProfiledProcess;
-import net.officefloor.frame.api.profile.ProfiledThread;
+import net.officefloor.frame.api.profile.ProfiledProcessState;
+import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -33,7 +33,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
+public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcessState {
 
 	/**
 	 * {@link Profiler}.
@@ -47,11 +47,11 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
 
 	/**
 	 * <p>
-	 * {@link ProfiledThread} instances for this {@link ProcessProfiler}.
+	 * {@link ProfiledThreadState} instances for this {@link ProcessProfiler}.
 	 * <p>
 	 * Typically only one {@link ThreadState} per {@link ProcessState}.
 	 */
-	private final List<ProfiledThread> threads = new ArrayList<ProfiledThread>(
+	private final List<ProfiledThreadState> threads = new ArrayList<ProfiledThreadState>(
 			1);
 
 	/**
@@ -95,7 +95,7 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcess {
 	}
 
 	@Override
-	public List<ProfiledThread> getProfiledThreads() {
+	public List<ProfiledThreadState> getProfiledThreads() {
 		return this.threads;
 	}
 

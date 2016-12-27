@@ -17,16 +17,16 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
-import net.officefloor.frame.internal.configuration.TaskGovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
 import net.officefloor.frame.spi.governance.Governance;
 
 /**
- * {@link TaskGovernanceConfiguration} implementation.
+ * {@link ManagedFunctionGovernanceConfiguration} implementation.
  * 
  * @author Daniel Sagenschneider
  */
 public class TaskGovernanceConfigurationImpl implements
-		TaskGovernanceConfiguration {
+		ManagedFunctionGovernanceConfiguration {
 
 	/**
 	 * {@link Governance} name.

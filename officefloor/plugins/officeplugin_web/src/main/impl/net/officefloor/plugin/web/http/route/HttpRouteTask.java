@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.build.OfficeAwareWorkFactory;
+import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
@@ -57,7 +57,7 @@ import net.officefloor.plugin.web.http.tokenise.HttpRequestTokeniserImpl;
 public class HttpRouteTask
 		extends
 		AbstractSingleTask<HttpRouteTask, HttpRouteTask.HttpRouteTaskDependencies, HttpRouteTask.HttpRouteTaskFlows>
-		implements OfficeAwareWorkFactory<HttpRouteTask> {
+		implements OfficeAwareManagedFunctionFactory<HttpRouteTask> {
 
 	/**
 	 * <p>

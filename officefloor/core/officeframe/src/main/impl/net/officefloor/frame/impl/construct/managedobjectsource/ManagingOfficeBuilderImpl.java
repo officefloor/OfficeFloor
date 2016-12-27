@@ -31,7 +31,7 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -158,9 +158,9 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 		private final String flowName;
 
 		/**
-		 * {@link TaskNodeReference}.
+		 * {@link ManagedFunctionReference}.
 		 */
-		public TaskNodeReference taskNodeReference;
+		public ManagedFunctionReference taskNodeReference;
 
 		/**
 		 * Initiate with flow key.
@@ -170,10 +170,10 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 		 * @param flowName
 		 *            Name of flow.
 		 * @param taskNodeReference
-		 *            {@link TaskNodeReference}.
+		 *            {@link ManagedFunctionReference}.
 		 */
 		public ManagedObjectFlowConfigurationImpl(F flowKey, String flowName,
-				TaskNodeReference taskNodeReference) {
+				ManagedFunctionReference taskNodeReference) {
 			this.flowKey = flowKey;
 			this.flowName = flowName;
 			this.taskNodeReference = taskNodeReference;
@@ -194,7 +194,7 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 		}
 
 		@Override
-		public TaskNodeReference getTaskNodeReference() {
+		public ManagedFunctionReference getTaskNodeReference() {
 			return this.taskNodeReference;
 		}
 	}

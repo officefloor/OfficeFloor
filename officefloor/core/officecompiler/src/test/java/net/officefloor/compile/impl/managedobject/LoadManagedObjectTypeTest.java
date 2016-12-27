@@ -54,7 +54,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.team.Team;
@@ -1231,7 +1231,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void init(ManagedObjectSourceContext<None> context,
 					InitUtil util) {
-				ManagedObjectTaskBuilder task = context.addWork("WORK",
+				ManagedObjectFunctionBuilder task = context.addWork("WORK",
 						util.getWorkFactory()).addTask("TASK",
 						util.getTaskFactory());
 				task.setTeam("TEAM");
@@ -1257,7 +1257,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void init(ManagedObjectSourceContext<None> context,
 					InitUtil util) {
-				ManagedObjectTaskBuilder task = context.addWork("WORK",
+				ManagedObjectFunctionBuilder task = context.addWork("WORK",
 						util.getWorkFactory()).addTask("TASK",
 						util.getTaskFactory());
 				task.setTeam("TEAM");
@@ -1284,7 +1284,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			public void init(ManagedObjectSourceContext<None> context,
 					InitUtil util) {
-				ManagedObjectTaskBuilder task = context.addWork("WORK",
+				ManagedObjectFunctionBuilder task = context.addWork("WORK",
 						util.getWorkFactory()).addTask("TASK",
 						util.getTaskFactory());
 				task.setTeam("TEAM");
@@ -1311,7 +1311,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 					public void init(ManagedObjectSourceContext<None> context,
 							InitUtil util) {
 						// Add task that links to other task
-						ManagedObjectTaskBuilder linkTask = context.addWork(
+						ManagedObjectFunctionBuilder linkTask = context.addWork(
 								"WORK", util.getWorkFactory()).addTask("TASK",
 								util.getTaskFactory());
 						linkTask.setTeam("TEAM");
@@ -1319,7 +1319,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 								FlowInstigationStrategyEnum.SEQUENTIAL, null);
 
 						// Add task being linked too
-						ManagedObjectTaskBuilder targetTask = context.addWork(
+						ManagedObjectFunctionBuilder targetTask = context.addWork(
 								"LINK_WORK", util.getWorkFactory()).addTask(
 								"LINK_TASK", util.getTaskFactory());
 						targetTask.setTeam("TEAM");
@@ -1350,7 +1350,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 					public void init(ManagedObjectSourceContext<None> context,
 							InitUtil util) {
 						// Add task that links to other task
-						ManagedObjectTaskBuilder linkTask = context.addWork(
+						ManagedObjectFunctionBuilder linkTask = context.addWork(
 								"WORK", util.getWorkFactory()).addTask("TASK",
 								util.getTaskFactory());
 						linkTask.setTeam("TEAM");

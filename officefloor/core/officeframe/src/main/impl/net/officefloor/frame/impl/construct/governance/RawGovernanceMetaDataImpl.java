@@ -29,9 +29,9 @@ import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -200,7 +200,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 	}
 
 	@Override
-	public void linkOfficeMetaData(OfficeMetaDataLocator taskLocator, AssetManagerFactory assetManagerFactory,
+	public void linkOfficeMetaData(ManagedFunctionLocator taskLocator, AssetManagerFactory assetManagerFactory,
 			OfficeFloorIssues issues) {
 
 		// Obtain the listing of flow meta-data
@@ -215,7 +215,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 			}
 
 			// Obtain the task reference
-			TaskNodeReference taskNodeReference = flowConfiguration.getInitialTask();
+			ManagedFunctionReference taskNodeReference = flowConfiguration.getInitialTask();
 			if (taskNodeReference == null) {
 				issues.addIssue(AssetType.GOVERNANCE, this.governanceName, "No task referenced for flow index " + i);
 				continue; // no reference task for flow
@@ -256,7 +256,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 			}
 
 			// Obtain the escalation handler
-			TaskNodeReference escalationReference = escalationConfiguration.getTaskNodeReference();
+			ManagedFunctionReference escalationReference = escalationConfiguration.getTaskNodeReference();
 			if (escalationReference == null) {
 				issues.addIssue(AssetType.GOVERNANCE, this.getGovernanceName(),
 						"No task referenced for escalation index " + i);

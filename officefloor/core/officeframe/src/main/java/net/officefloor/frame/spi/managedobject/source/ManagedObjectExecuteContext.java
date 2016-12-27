@@ -18,9 +18,11 @@
 package net.officefloor.frame.spi.managedobject.source;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -63,13 +65,12 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *            Delay in milliseconds before the {@link Flow} is invoked. A
 	 *            <code>0</code> or negative value invokes the {@link Flow}
 	 *            immediately.
-	 * @param completionListener
-	 *            Optional {@link ProcessCompletionListener}.
+	 * @param callback
+	 *            {@link FlowCallback} on completion of the {@link Flow}.
 	 * 
 	 * @see ManagedObjectExecuteContext
 	 */
-	void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
-			ProcessCompletionListener completionListener);
+	void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback);
 
 	/**
 	 * Instigates a {@link Flow}.
@@ -86,72 +87,11 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *            Delay in milliseconds before the {@link Flow} is invoked. A
 	 *            <code>0</code> or negative value invokes the {@link Flow}
 	 *            immediately.
-	 * @param completionListener
-	 *            Optional {@link ProcessCompletionListener}.
+	 * @param callback
+	 *            {@link FlowCallback} on completion of the {@link Flow}.
 	 * 
 	 * @see ManagedObjectExecuteContext
 	 */
-	void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
-			ProcessCompletionListener completionListener);
-
-	/**
-	 * <p>
-	 * Instigates a {@link Flow} providing an {@link EscalationHandler} to
-	 * handle {@link EscalationFlow} from the {@link Flow}.
-	 * <p>
-	 * An example of using this would be a HTTP server socket that sends status
-	 * 500 on {@link EscalationFlow} from {@link Flow}.
-	 * 
-	 * @param key
-	 *            Key identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter to the first {@link ManagedFunction} of the
-	 *            {@link Flow} .
-	 * @param managedObject
-	 *            {@link ManagedObject} for the {@link ProcessState} of the
-	 *            {@link Flow}.
-	 * @param delay
-	 *            Delay in milliseconds before the {@link Flow} is invoked. A
-	 *            <code>0</code> or negative value invokes the {@link Flow}
-	 *            immediately.
-	 * @param escalationHandler
-	 *            {@link EscalationHandler}.
-	 * @param completionListener
-	 *            Optional {@link ProcessCompletionListener}.
-	 * 
-	 * @see ManagedObjectExecuteContext
-	 */
-	void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
-			EscalationHandler escalationHandler, ProcessCompletionListener completionListener);
-
-	/**
-	 * <p>
-	 * Instigates a {@link Flow} providing an {@link EscalationHandler} to
-	 * handle {@link EscalationFlow} from the {@link Flow}.
-	 * <p>
-	 * An example of using this would be a HTTP server socket that sends status
-	 * 500 on {@link EscalationFlow} from {@link Flow}.
-	 * 
-	 * @param flowIndex
-	 *            Index identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter to first {@link ManagedFunction} of the
-	 *            {@link Flow}.
-	 * @param managedObject
-	 *            {@link ManagedObject} for the {@link ProcessState} of the
-	 *            {@link Flow}.
-	 * @param delay
-	 *            Delay in milliseconds before the {@link Flow} is invoked. A
-	 *            <code>0</code> or negative value invokes the {@link Flow}
-	 *            immediately.
-	 * @param escalationHandler
-	 *            {@link EscalationHandler}.
-	 * @param completionListener
-	 *            Optional {@link ProcessCompletionListener}.
-	 * 
-	 * @see ManagedObjectExecuteContext
-	 */
-	void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
-			EscalationHandler escalationHandler, ProcessCompletionListener completionListener);
+	void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback);
 
 }

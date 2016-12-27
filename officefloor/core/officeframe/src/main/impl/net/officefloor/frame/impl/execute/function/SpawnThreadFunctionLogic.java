@@ -17,15 +17,13 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
-import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLogic;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -48,14 +46,9 @@ public class SpawnThreadFunctionLogic implements FunctionLogic {
 	private final Object parameter;
 
 	/**
-	 * {@link FlowCallback}.
+	 * {@link FlowCompletion}.
 	 */
-	private final FlowCallback callback;
-
-	/**
-	 * {@link FunctionLoop}.
-	 */
-	private final FunctionLoop functionLoop;
+	private final FlowCompletion completion;
 
 	/**
 	 * Instantiate.
@@ -65,17 +58,13 @@ public class SpawnThreadFunctionLogic implements FunctionLogic {
 	 * @param parameter
 	 *            Parameter for the initial {@link ManagedFunction} of the
 	 *            {@link Flow}.
-	 * @param callback
-	 *            Optional {@link FlowCallback}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
+	 * @param completion
+	 *            Optional {@link FlowCompletion}.
 	 */
-	public SpawnThreadFunctionLogic(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
-			FunctionLoop functionLoop) {
+	public SpawnThreadFunctionLogic(FlowMetaData flowMetaData, Object parameter, FlowCompletion completion) {
 		this.flowMetaData = flowMetaData;
 		this.parameter = parameter;
-		this.callback = callback;
-		this.functionLoop = functionLoop;
+		this.completion = completion;
 	}
 
 	/*
@@ -84,13 +73,13 @@ public class SpawnThreadFunctionLogic implements FunctionLogic {
 
 	@Override
 	public boolean isRequireThreadStateSafety() {
-		return true; // must synchronise on thread state to spawn thread state
+		return true; // must synchronise on thread state to keep threads safe
 	}
 
 	@Override
 	public FunctionState execute(Flow flow) {
 
-		// Obtain the task meta-data for instigating the flow
+		// Obtain the meta-data for the initial function of the flow
 		ManagedFunctionMetaData<?, ?> initialFunctionMetaData = this.flowMetaData.getInitialFunctionMetaData();
 
 		// Obtain the process state
@@ -98,18 +87,11 @@ public class SpawnThreadFunctionLogic implements FunctionLogic {
 
 		// Create thread to execute asynchronously
 		AssetManager flowAssetManager = this.flowMetaData.getFlowManager();
-		ThreadState spawnedThreadState = processState.createThread(flowAssetManager, this.callback);
+		FunctionState spawnFunction = processState.spawnThreadState(initialFunctionMetaData, this.parameter,
+				this.completion, flowAssetManager);
 
-		// Create initial function for execution
-		Flow spawnedFlow = spawnedThreadState.createFlow(null);
-		FunctionState function = spawnedFlow.createManagedFunction(initialFunctionMetaData, null, this.parameter,
-				GovernanceDeactivationStrategy.ENFORCE);
-
-		// Delegate the new thead to be executed
-		this.functionLoop.delegateFunction(function);
-
-		// Thread spawned
-		return null;
+		// Return the function to spawn the thread state
+		return spawnFunction;
 	}
 
 }

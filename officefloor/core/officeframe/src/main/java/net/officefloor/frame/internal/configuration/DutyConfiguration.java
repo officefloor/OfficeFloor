@@ -41,10 +41,10 @@ public interface DutyConfiguration<A extends Enum<A>> {
 	 * Obtains the configuration for the {@link Flow} instances invoked by the
 	 * {@link Duty}.
 	 * 
-	 * @return {@link TaskNodeReference} specifying the first {@link ManagedFunction} of
+	 * @return {@link ManagedFunctionReference} specifying the first {@link ManagedFunction} of
 	 *         the linked {@link Flow}.
 	 */
-	TaskNodeReference[] getLinkedProcessConfiguration();
+	ManagedFunctionReference[] getLinkedProcessConfiguration();
 
 	/**
 	 * Obtains the configuration for the linked {@link Governance}.

@@ -17,18 +17,12 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -36,6 +30,7 @@ import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
+import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
@@ -61,9 +56,14 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		extends AbstractLinkedListSetEntry<FunctionState, Flow> implements ManagedFunctionContainer {
 
 	/**
-	 * Provide logging of {@link OfficeFloor} framework failures.
+	 * Awaiting {@link FlowCompletion} instances.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(OfficeFloor.class.getName());
+	private final LinkedListSet<FlowCompletion, ManagedFunctionContainer> awaitingFlowCompletions = new StrictLinkedListSet<FlowCompletion, ManagedFunctionContainer>() {
+		@Override
+		protected ManagedFunctionContainer getOwner() {
+			return ManagedFunctionContainerImpl.this;
+		}
+	};
 
 	/**
 	 * {@link Flow}.
@@ -76,23 +76,25 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private final M functionLogicMetaData;
 
 	/**
-	 * {@link work} {@link ManagedObjectIndex} instances to the
-	 * {@link ManagedObject} instances that must be loaded before the
-	 * {@link ManagedFunction} may be executed.
-	 */
-	private final ManagedObjectIndex[] requiredManagedObjects;
-
-	/**
 	 * {@link ManagedObjectContainer} instances for the respective
-	 * {@link ManagedObject} instances bound to this {@link Work}.
+	 * {@link ManagedObject} instances bound to this
+	 * {@link ManagedFunctionContainer}.
 	 */
 	private final ManagedObjectContainer[] managedObjects;
 
 	/**
 	 * {@link AdministratorContainer} instances for the respective
-	 * {@link Administrator} instances bound to this {@link Work}.
+	 * {@link Administrator} instances bound to this
+	 * {@link ManagedFunctionContainer}.
 	 */
-	private final AdministratorContainer<?, ?>[] administrators;
+	private final AdministratorContainer<?>[] administrators;
+
+	/**
+	 * {@link ManagedFunctionContainer} {@link ManagedObjectIndex} instances to
+	 * the {@link ManagedObject} instances that must be loaded before the
+	 * {@link ManagedFunction} may be executed.
+	 */
+	private final ManagedObjectIndex[] requiredManagedObjects;
 
 	/**
 	 * <p>
@@ -155,16 +157,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private ManagedFunctionContainerImpl<?> sequentialFunction = null;
 
 	/**
-	 * Parameter for the next {@link ManagedFunction}.
-	 */
-	private Object nextManagedFunctionParameter;
-
-	/**
-	 * Flag indicating if a sequential {@link FunctionState} was invoked.
-	 */
-	private boolean isSequentialFunctionInvoked = false;
-
-	/**
 	 * Optional next {@link FunctionLogic} to be executed once the
 	 * {@link ManagedFunction} has executed.
 	 */
@@ -174,6 +166,16 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * Spawn {@link ThreadState} {@link FunctionState}.
 	 */
 	private FunctionState spawnThreadStateFunction = null;
+
+	/**
+	 * Flag indicating if a sequential {@link FunctionState} was invoked.
+	 */
+	private boolean isSequentialFunctionInvoked = false;
+
+	/**
+	 * Parameter for the next {@link ManagedFunction}.
+	 */
+	private Object nextManagedFunctionParameter;
 
 	/**
 	 * Initiate.
@@ -212,7 +214,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 		// Create the container arrays
 		this.managedObjects = new ManagedObjectContainer[this.functionLogicMetaData.getManagedObjectMetaData().length];
-		this.administrators = new AdministratorContainer<?, ?>[this.functionLogicMetaData
+		this.administrators = new AdministratorContainer<?>[this.functionLogicMetaData
 				.getAdministratorMetaData().length];
 	}
 
@@ -230,6 +232,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 */
 
 	@Override
+	public void setNextManagedFunctionContainer(ManagedFunctionContainer container) {
+		this.sequentialFunction = (ManagedFunctionContainerImpl<?>) container;
+	}
+
+	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
 
 		// Lazy load the container
@@ -243,10 +250,10 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	@Override
-	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
+	public AdministratorContainer<?> getAdministratorContainer(int index) {
 
 		// Lazy load the container
-		AdministratorContainer<?, ?> container = this.administrators[index];
+		AdministratorContainer<?> container = this.administrators[index];
 		if (container == null) {
 			container = this.functionLogicMetaData.getAdministratorMetaData()[index]
 					.createAdministratorContainer(this.flow.getThreadState());
@@ -306,12 +313,12 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 					case THREAD:
 						// Obtain the container from the thread state
-						container = this.flow.getThreadState().getManagedObjectContainer(scopeIndex);
+						container = threadState.getManagedObjectContainer(scopeIndex);
 						break;
 
 					case PROCESS:
 						// Obtain the container from the process state
-						container = this.flow.getThreadState().getProcessState().getManagedObjectContainer(scopeIndex);
+						container = processState.getManagedObjectContainer(scopeIndex);
 						break;
 
 					default:
@@ -384,11 +391,15 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			this.nextManagedFunctionParameter = this.managedFunctionLogic
 					.execute(new ManagedFunctionLogicContextImpl());
 
-			// Function executed, so now to activate the next function
-			this.containerState = ManagedFunctionState.ACTIVATE_NEXT_FUNCTION;
+			// Function executed, so now await flow completions
+			this.containerState = ManagedFunctionState.AWAIT_FLOW_COMPLETIONS;
+
+		case AWAIT_FLOW_COMPLETIONS:
+
+			// Undertake execute functions (may be invoked by callback)
 			FunctionState executeFunctions = null;
 
-			// Spawn any threads
+			// Spawn any thread states
 			if (this.spawnThreadStateFunction != null) {
 				FunctionState spawn = this.spawnThreadStateFunction;
 				this.spawnThreadStateFunction = null;
@@ -403,9 +414,16 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Undertake execute functions
 			if (executeFunctions != null) {
 				// Additional functions, active next when executing again
-				this.containerState = ManagedFunctionState.ACTIVATE_NEXT_FUNCTION;
 				return Promise.then(executeFunctions, this);
 			}
+
+			// Determine if awaiting on callback
+			if (this.awaitingFlowCompletions.getHead() != null) {
+				return null; // callback will re-execute
+			}
+
+			// All callbacks completed
+			this.containerState = ManagedFunctionState.ACTIVATE_NEXT_FUNCTION;
 
 		case ACTIVATE_NEXT_FUNCTION:
 
@@ -459,9 +477,10 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 	@Override
 	public FunctionState handleEscalation(final Throwable escalation) {
-		return new AbstractFunctionState(this.flow) {
+		return new ManagedFunctionOperation() {
 			@Override
 			public FunctionState execute() throws Throwable {
+
 				// Easy access to container
 				ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
 
@@ -476,8 +495,12 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 						.getEscalation(escalation);
 				if (escalationFlow != null) {
 					// Escalation handled by this function
-					return Promise.then(clearFunctions, container.createEscalationFunction(
-							escalationFlow.getManagedFunctionMetaData(), escalation, container.parallelOwner));
+					ThreadState threadState = container.flow.getThreadState();
+					Flow parallelFlow = threadState.createFlow(null);
+					FunctionState escalationFunction = parallelFlow.createManagedFunction(
+							escalationFlow.getManagedFunctionMetaData(), container.parallelOwner, escalation,
+							GovernanceDeactivationStrategy.DISREGARD);
+					return Promise.then(clearFunctions, escalationFunction);
 				}
 
 				// Not handled by this function, so escalate to flow
@@ -559,23 +582,29 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
 
 			// Obtain the task meta-data for instigating the flow
+			@SuppressWarnings("rawtypes")
 			ManagedFunctionMetaData initialFunctionMetaData = flowMetaData.getInitialFunctionMetaData();
+
+			// Create the flow completion
+			FlowCompletion completion = null;
+			if (callback != null) {
+				completion = new FlowCompletionImpl(callback);
+				container.awaitingFlowCompletions.addEntry(completion);
+			}
 
 			// Determine if spawn thread
 			if (flowMetaData.isSpawnThreadState()) {
 				// Register to spawn the thread state
-				FunctionLogic spawnFunctionLogic = new SpawnThreadFunctionLogic(flowMetaData, parameter, callback,
-						container.functionLogicMetaData.getFunctionLoop());
+				FunctionLogic spawnFunctionLogic = new SpawnThreadFunctionLogic(flowMetaData, parameter, completion);
 				container.spawnThreadStateFunction = Promise.then(container.spawnThreadStateFunction,
 						container.flow.createFunction(spawnFunctionLogic));
 
 			} else if (callback != null) {
 				// Have callback, so execute in parallel in own flow
-				FlowCompletion completion = new FlowCompletionImpl(callback, container.functionLogicMetaData,
-						container);
 				Flow parallelFlow = container.flow.getThreadState().createFlow(completion);
 
 				// Create the function
+				@SuppressWarnings("unchecked")
 				ManagedFunctionContainerImpl<?> parallelFunction = (ManagedFunctionContainerImpl<?>) parallelFlow
 						.createManagedFunction(initialFunctionMetaData, container, parameter,
 								GovernanceDeactivationStrategy.ENFORCE);
@@ -588,6 +617,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				container.isSequentialFunctionInvoked = true;
 
 				// Create the function on the same flow as this function
+				@SuppressWarnings("unchecked")
 				ManagedFunctionContainerImpl<?> sequentialFunction = (ManagedFunctionContainerImpl<?>) container.flow
 						.createManagedFunction(initialFunctionMetaData, container.parallelOwner, parameter,
 								GovernanceDeactivationStrategy.ENFORCE);
@@ -595,6 +625,59 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				// Load the sequential function
 				container.loadSequentialFunction(sequentialFunction);
 			}
+		}
+	}
+
+	/**
+	 * {@link FlowCompletion} implementation.
+	 */
+	private class FlowCompletionImpl extends AbstractLinkedListSetEntry<FlowCompletion, ManagedFunctionContainer>
+			implements FlowCompletion {
+
+		/**
+		 * {@link FlowCallback}.
+		 */
+		private final FlowCallback callback;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param callback
+		 *            {@link FlowCallback}.
+		 */
+		public FlowCompletionImpl(FlowCallback callback) {
+			this.callback = callback;
+		}
+
+		/*
+		 * ================== LinkedListSetEntry =================
+		 */
+
+		@Override
+		public ManagedFunctionContainer getLinkedListSetOwner() {
+			return ManagedFunctionContainerImpl.this;
+		}
+
+		/*
+		 * =================== FlowCompletion =====================
+		 */
+
+		@Override
+		public FunctionState complete(final Throwable escalation) {
+			return new ManagedFunctionOperation() {
+				@Override
+				public FunctionState execute() throws Throwable {
+
+					// Remove callback
+					ManagedFunctionContainerImpl.this.awaitingFlowCompletions.removeEntry(FlowCompletionImpl.this);
+
+					// Undertake the callback
+					FlowCompletionImpl.this.callback.run(escalation);
+
+					// Continue execution of this managed function
+					return ManagedFunctionContainerImpl.this;
+				}
+			};
 		}
 	}
 
@@ -640,41 +723,13 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	/**
-	 * Creates an {@link EscalationFlow} {@link FunctionState} from the input
-	 * {@link ManagedFunctionMetaData}.
-	 * 
-	 * @param escalationMetaData
-	 *            {@link ManagedFunctionMetaData}.
-	 * @param parameter
-	 *            Parameter.
-	 * @param parallelOwner
-	 *            Parallel owner for the {@link EscalationFlow}
-	 *            {@link FunctionState}.
-	 * @return {@link FunctionState}.
-	 */
-	private final FunctionState createEscalationFunction(ManagedFunctionMetaData<?, ?> escalationMetaData,
-			Object parameter, ManagedFunctionContainerImpl<?> parallelOwner) {
-
-		// Create a new flow for escalation
-		ThreadState threadState = this.flow.getThreadState();
-		FlowCompletion completion = new FlowCompletionImpl<>(null, this.functionLogicMetaData, this);
-		Flow parallelFlow = threadState.createFlow(completion);
-
-		// Create the job node
-		FunctionState escalationJobNode = parallelFlow.createManagedFunction(escalationMetaData, parallelOwner,
-				parameter, GovernanceDeactivationStrategy.DISREGARD);
-
-		// Return the escalation job node
-		return escalationJobNode;
-	}
-
-	/**
 	 * Clears this {@link FunctionState}.
 	 */
 	private final FunctionState clearFunctions() {
-		return new AbstractFunctionState(this.flow) {
+		return new ManagedFunctionOperation() {
 			@Override
 			public FunctionState execute() throws Throwable {
+
 				// Easy access to container
 				final ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
 
@@ -701,9 +756,10 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * Completes this {@link FunctionState}.
 	 */
 	private FunctionState completeFunction() {
-		return new AbstractFunctionState(this.flow) {
+		return new ManagedFunctionOperation() {
 			@Override
 			public FunctionState execute() throws Throwable {
+
 				// Easy access to container
 				final ManagedFunctionContainerImpl<M> container = ManagedFunctionContainerImpl.this;
 
@@ -722,10 +778,10 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				}
 
 				// Complete this function
-				cleanUpFunctions = Promise.then(cleanUpFunctions, this.flow.managedFunctionComplete(this));
+				cleanUpFunctions = Promise.then(cleanUpFunctions, container.flow.managedFunctionComplete(this));
 
 				// Function complete
-				return Promise.then(cleanUpFunctions, new AbstractFunctionState(container.flow) {
+				return Promise.then(cleanUpFunctions, new ManagedFunctionOperation() {
 					@Override
 					public FunctionState execute() throws Throwable {
 						container.containerState = ManagedFunctionState.COMPLETED;
@@ -734,6 +790,43 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				});
 			}
 		};
+	}
+
+	/**
+	 * {@link ManagedFunction} operation.
+	 */
+	private abstract class ManagedFunctionOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
+			implements FunctionState {
+
+		@Override
+		public Flow getLinkedListSetOwner() {
+			return ManagedFunctionContainerImpl.this.getLinkedListSetOwner();
+		}
+
+		@Override
+		public TeamManagement getResponsibleTeam() {
+			return ManagedFunctionContainerImpl.this.getResponsibleTeam();
+		}
+
+		@Override
+		public Flow getFlow() {
+			return ManagedFunctionContainerImpl.this.getFlow();
+		}
+
+		@Override
+		public boolean isRequireThreadStateSafety() {
+			return ManagedFunctionContainerImpl.this.isRequireThreadStateSafety();
+		}
+
+		@Override
+		public FunctionState cancel(Throwable cause) {
+			return ManagedFunctionContainerImpl.this.cancel(cause);
+		}
+
+		@Override
+		public FunctionState handleEscalation(Throwable escalation) {
+			return ManagedFunctionContainerImpl.this.handleEscalation(escalation);
+		}
 	}
 
 	/**
@@ -764,6 +857,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		 * Indicates the {@link ManagedFunctionLogic} is to be executed.
 		 */
 		EXECUTE_FUNCTION,
+
+		/**
+		 * Waiting on the {@link FlowCompletion} instances to be completed.
+		 */
+		AWAIT_FLOW_COMPLETIONS,
 
 		/**
 		 * Indicates to activate the next {@link ManagedFunctionLogic}.

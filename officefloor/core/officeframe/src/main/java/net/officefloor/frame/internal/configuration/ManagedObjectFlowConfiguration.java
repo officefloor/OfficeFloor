@@ -44,10 +44,10 @@ public interface ManagedObjectFlowConfiguration<F extends Enum<F>> {
 	F getFlowKey();
 
 	/**
-	 * Obtains the {@link TaskNodeReference} for this {@link Flow}.
+	 * Obtains the {@link ManagedFunctionReference} for this {@link Flow}.
 	 * 
-	 * @return {@link TaskNodeReference} to the {@link Flow}.
+	 * @return {@link ManagedFunctionReference} to the {@link Flow}.
 	 */
-	TaskNodeReference getTaskNodeReference();
+	ManagedFunctionReference getManagedFunctionReference();
 
 }

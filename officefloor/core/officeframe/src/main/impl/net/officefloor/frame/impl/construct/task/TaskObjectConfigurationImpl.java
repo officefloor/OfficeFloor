@@ -18,17 +18,17 @@
 package net.officefloor.frame.impl.construct.task;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link TaskObjectConfiguration} implementation.
+ * {@link ManagedFunctionObjectConfiguration} implementation.
  * 
  * @author Daniel Sagenschneider
  */
 public class TaskObjectConfigurationImpl<D extends Enum<D>> implements
-		TaskObjectConfiguration<D> {
+		ManagedFunctionObjectConfiguration<D> {
 
 	/**
 	 * Flag indicating if this is a parameter.

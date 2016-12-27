@@ -37,7 +37,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.util.AbstractSingleTask;
@@ -187,7 +187,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 
 				// Register the listening of connections
 				String listenerName = "listener-" + i;
-				ManagedObjectTaskBuilder listenerTask = mosContext.addWork(
+				ManagedObjectFunctionBuilder listenerTask = mosContext.addWork(
 						listenerName, socketListener).addTask(listenerName,
 						socketListener);
 				listenerTask.setTeam(listenerTeamName);
@@ -203,7 +203,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 
 			// Configure the connection manager for heart beat
 			String heartBeatName = "heartbeat";
-			ManagedObjectTaskBuilder heartBeatTask = mosContext.addWork(
+			ManagedObjectFunctionBuilder heartBeatTask = mosContext.addWork(
 					heartBeatName, connectionManager).addTask(heartBeatName,
 					connectionManager);
 			heartBeatTask.setTeam(listenerTeamName);
@@ -397,7 +397,7 @@ public abstract class AbstractServerSocketManagedObjectSource extends
 		this.serverSocketAccepter = new ServerSocketAccepter(
 				new InetSocketAddress(port), this.communicationProtocol,
 				connectionManager, serverSocketBackLog);
-		ManagedObjectTaskBuilder<None, None> accepterTask = mosContext.addWork(
+		ManagedObjectFunctionBuilder<None, None> accepterTask = mosContext.addWork(
 				"accepter", this.serverSocketAccepter).addTask("accepter",
 				this.serverSocketAccepter);
 		accepterTask.setTeam("accepter");

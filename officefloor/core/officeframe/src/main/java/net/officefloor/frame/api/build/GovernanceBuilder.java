@@ -18,11 +18,11 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
@@ -34,8 +34,12 @@ import net.officefloor.frame.spi.team.Team;
 public interface GovernanceBuilder<F extends Enum<F>> {
 
 	/**
-	 * Specifies the name of the {@link Team} responsible for executing the
-	 * {@link Governance} {@link ManagedFunction} instances.
+	 * <p>
+	 * Specifies the name of the {@link Team} within the {@link Office}
+	 * responsible for executing the {@link Governance} {@link ManagedFunction}
+	 * instances.
+	 * <p>
+	 * Should this not be specified, any {@link Team} will be used.
 	 * 
 	 * @param teamName
 	 *            {@link Team} name.
@@ -43,46 +47,38 @@ public interface GovernanceBuilder<F extends Enum<F>> {
 	void setTeam(String teamName);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
-	 * the {@link Flow}.
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
+	 * of the {@link Flow}.
 	 * 
 	 * @param key
 	 *            Key identifying the {@link Flow}.
-	 * @param workName
-	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
-	 *            {@link Flow} resides on.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} that resides on a different {@link Work}
-	 *            as this {@link ManagedFunction}.
-	 * @param strategy
-	 *            Strategy to instigate the {@link Flow}.
+	 * @param functionName
+	 *            Name of initial {@link ManagedFunction} for the {@link Flow}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link Flow}.
-	 *            May be <code>null</code> to indicate no argument.
+	 *            Type of argument passed to the instigated {@link Flow}. May be
+	 *            <code>null</code> to indicate no argument.
+	 * @param isSpawnThreadState
+	 *            <code>true</code> to instigate the {@link Flow} on a spawned
+	 *            {@link ThreadState}.
 	 */
-	void linkFlow(F key, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
+	void linkFlow(F key, String functionName, Class<?> argumentType, boolean isSpawnThreadState);
 
 	/**
-	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction} of
-	 * the {@link Flow}.
+	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
+	 * of the {@link Flow}.
 	 * 
 	 * @param flowIndex
 	 *            Index identifying the {@link Flow}.
-	 * @param workName
-	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
-	 *            {@link Flow} resides on.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} that resides on a different {@link Work}
-	 *            as this {@link ManagedFunction}.
-	 * @param strategy
-	 *            Strategy to instigate the {@link Flow}.
+	 * @param functionName
+	 *            Name of initial {@link ManagedFunction} for the {@link Flow}.
 	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link Flow}.
-	 *            May be <code>null</code> to indicate no argument.
+	 *            Type of argument passed to the instigated {@link Flow}. May be
+	 *            <code>null</code> to indicate no argument.
+	 * @param isSpawnThreadState
+	 *            <code>true</code> to instigate the {@link Flow} on a spawned
+	 *            {@link ThreadState}.
 	 */
-	void linkFlow(int flowIndex, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
+	void linkFlow(int flowIndex, String functionName, Class<?> argumentType, boolean isSpawnThreadState);
 
 	/**
 	 * Adds an {@link EscalationFlow} to the {@link EscalationProcedure} for the
@@ -90,13 +86,9 @@ public interface GovernanceBuilder<F extends Enum<F>> {
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link EscalationFlow}.
-	 * @param workName
-	 *            Name of the {@link Work} that the first {@link ManagedFunction} of the
-	 *            {@link Flow} resides on.
-	 * @param taskName
-	 *            Name of {@link ManagedFunction} on the {@link Work}.
+	 * @param functionName
+	 *            Name of {@link ManagedFunction}.
 	 */
-	void addEscalation(Class<? extends Throwable> typeOfCause, String workName,
-			String taskName);
+	void addEscalation(Class<? extends Throwable> typeOfCause, String functionName);
 
 }

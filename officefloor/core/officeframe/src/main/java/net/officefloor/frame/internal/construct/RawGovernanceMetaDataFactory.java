@@ -38,7 +38,7 @@ public interface RawGovernanceMetaDataFactory {
 	/**
 	 * Creates the {@link RawGovernanceMetaData}.
 	 * 
-	 * @param <I>
+	 * @param <E>
 	 *            Extension interface type.
 	 * @param <F>
 	 *            Flow key type.
@@ -59,8 +59,8 @@ public interface RawGovernanceMetaDataFactory {
 	 *            {@link FunctionLoop}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
-	<I, F extends Enum<F>> RawGovernanceMetaData<I, F> createRawGovernanceMetaData(
-			GovernanceConfiguration<I, F> configuration, int governanceIndex, SourceContext sourceContext,
+	<E, F extends Enum<F>> RawGovernanceMetaData<E, F> createRawGovernanceMetaData(
+			GovernanceConfiguration<E, F> configuration, int governanceIndex, SourceContext sourceContext,
 			Map<String, TeamManagement> officeTeams, String officeName, OfficeFloorIssues issues,
 			FunctionLoop functionLoop);
 

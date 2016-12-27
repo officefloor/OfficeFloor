@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -26,14 +25,13 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Meta-data of a {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectMetaData<D extends Enum<D>> {
+public interface ManagedObjectMetaData<O extends Enum<O>> {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject} bound within the
@@ -60,8 +58,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * <p>
 	 * {@link ManagedObjectSource} instances that invoke {@link ProcessState}
 	 * instances with the same type of Object may all be bound to the same
-	 * {@link ManagedObjectIndex}. Allows similar {@link Job} processing of the
-	 * {@link ManagedObject} instances.
+	 * {@link ManagedObjectIndex}.
 	 * 
 	 * @return Instance index of the {@link ManagedObject} bound to the
 	 *         {@link ManagedObjectIndex}.
@@ -83,7 +80,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * 
 	 * @return {@link FunctionLoop} for the {@link ManagedObject}.
 	 */
-	FunctionLoop getJobNodeLoop();
+	FunctionLoop getFunctionLoop();
 
 	/**
 	 * Obtains the {@link AssetManager} that manages the sourcing of the
@@ -178,7 +175,8 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * {@link ManagedObject} are ready.
 	 * <p>
 	 * Should a {@link ManagedObject} not be ready, then will latch the
-	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to be ready.
+	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to
+	 * be ready.
 	 * 
 	 * @param check
 	 *            {@link ManagedObjectReadyCheck}.
@@ -187,26 +185,19 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link ManagedObjectContainer} for this
 	 *            {@link ManagedObjectMetaData} in ready check. May be
 	 *            <code>null</code> to not include.
-	 * @return {@link FunctionState} instances to check if the dependencies of this
-	 *         {@link ManagedObject} are ready.
+	 * @return {@link FunctionState} instances to check if the dependencies of
+	 *         this {@link ManagedObject} are ready.
 	 */
-	FunctionState createReadyCheckJobNode(ManagedObjectReadyCheck check, WorkContainer<?> workContainer,
-			ManagedObjectContainer currentContainer);
+	FunctionState checkReady(ManagedObjectReadyCheck check, ManagedObjectContainer currentContainer);
 
 	/**
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.
 	 *
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param workContainer
-	 *            {@link WorkContainer} to obtain the coordinating
-	 *            {@link ManagedObject} instances.
-	 * @param threadState
-	 *            {@link ThreadState} to provide access to the
-	 *            {@link ProcessState} bound {@link ManagedObject} instances.
+	 * @param currentContainer
+	 *            {@link ManagedFunctionContainer}.
 	 * @return {@link ObjectRegistry}.
 	 */
-	<W extends Work> ObjectRegistry<D> createObjectRegistry(WorkContainer<W> workContainer, ThreadState threadState);
+	ObjectRegistry<O> createObjectRegistry(ManagedFunctionContainer currentContainer);
 
 	/**
 	 * Creates the {@link FunctionState} for the recycling of the
@@ -217,10 +208,10 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link RecycleManagedObjectParameter#getManagedObject()}.
 	 * @param cleanupSequence
 	 *            {@link ManagedObjectCleanup}.
-	 * @return {@link FunctionState} for the recycling this {@link ManagedObject} or
-	 *         <code>null</code> if no recycling is required for this
-	 *         {@link ManagedObject}.
+	 * @return {@link FunctionState} for the recycling this
+	 *         {@link ManagedObject} or <code>null</code> if no recycling is
+	 *         required for this {@link ManagedObject}.
 	 */
-	FunctionState createRecycleJobNode(ManagedObject managedObject, ManagedObjectCleanup cleanupSequence);
+	FunctionState recycle(ManagedObject managedObject, ManagedObjectCleanup cleanupSequence);
 
 }
