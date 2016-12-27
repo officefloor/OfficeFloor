@@ -17,14 +17,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Meta-data for the {@link Office}.
@@ -87,7 +83,8 @@ public interface OfficeMetaData {
 	EscalationProcedure getEscalationProcedure();
 
 	/**
-	 * Obtains the {@link OfficeStartupFunction} instances for this {@link Office}.
+	 * Obtains the {@link OfficeStartupFunction} instances for this
+	 * {@link Office}.
 	 * 
 	 * @return {@link OfficeStartupFunction} instances for this {@link Office}.
 	 */
@@ -96,8 +93,6 @@ public interface OfficeMetaData {
 	/**
 	 * Creates a new {@link ProcessState}.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} of the starting {@link FunctionState} for
 	 *            the {@link ProcessState}.
@@ -116,8 +111,6 @@ public interface OfficeMetaData {
 	 * {@link ManagedObjectSource} within the {@link Office} returning the
 	 * starting {@link FunctionState} to be executed.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} of the starting {@link FunctionState} for
 	 *            the {@link ProcessState}.

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.construct.task;
+package net.officefloor.frame.impl.construct.function;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -78,13 +78,13 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		implements RawManagedFunctionMetaDataFactory, RawManagedFunctionMetaData<W, D, F> {
+public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
+		implements RawManagedFunctionMetaDataFactory, RawManagedFunctionMetaData<D, F> {
 
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(RawTaskMetaDataImpl.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(RawFunctionMetaDataImpl.class.getName());
 
 	/**
 	 * Obtains the {@link RawManagedFunctionMetaDataFactory}.
@@ -93,28 +93,23 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static RawManagedFunctionMetaDataFactory getFactory() {
-		return new RawTaskMetaDataImpl(null, null, null, null);
+		return new RawFunctionMetaDataImpl(null, null, null);
 	}
 
 	/**
 	 * Name of the {@link ManagedFunction} within the {@link Work}.
 	 */
-	private final String taskName;
+	private final String functionName;
 
 	/**
 	 * {@link ManagedFunctionConfiguration}.
 	 */
-	private final ManagedFunctionConfiguration<W, D, F> configuration;
+	private final ManagedFunctionConfiguration<O, F> configuration;
 
 	/**
 	 * {@link ManagedFunctionMetaDataImpl}.
 	 */
-	private final ManagedFunctionMetaDataImpl<W, D, F> taskMetaData;
-
-	/**
-	 * {@link RawWorkMetaData}.
-	 */
-	private final RawWorkMetaData<W> rawWorkMetaData;
+	private final ManagedFunctionMetaDataImpl<O, F> functionMetaData;
 
 	/**
 	 * Initiate.
@@ -128,7 +123,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 * @param rawWorkMetaData
 	 *            {@link RawWorkMetaData}.
 	 */
-	private RawTaskMetaDataImpl(String taskName, ManagedFunctionConfiguration<W, D, F> configuration,
+	private RawFunctionMetaDataImpl(String taskName, ManagedFunctionConfiguration<W, D, F> configuration,
 			ManagedFunctionMetaDataImpl<W, D, F> taskMetaData, RawWorkMetaData<W> rawWorkMetaData) {
 		this.taskName = taskName;
 		this.configuration = configuration;
@@ -142,8 +137,9 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <w extends Work> RawManagedFunctionMetaData<w, ?, ?> constructRawTaskMetaData(ManagedFunctionConfiguration<w, ?, ?> configuration,
-			OfficeFloorIssues issues, final RawWorkMetaData<w> rawWorkMetaData, FunctionLoop functionLoop) {
+	public <w extends Work> RawManagedFunctionMetaData<w, ?, ?> constructRawTaskMetaData(
+			ManagedFunctionConfiguration<w, ?, ?> configuration, OfficeFloorIssues issues,
+			final RawWorkMetaData<w> rawWorkMetaData, FunctionLoop functionLoop) {
 
 		// Obtain the task name
 		String taskName = configuration.getTaskName();
@@ -363,7 +359,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 				requiredGovernance, preTaskDuties, postTaskDuties, functionLoop);
 
 		// Return the raw task meta-data
-		return new RawTaskMetaDataImpl(taskName, configuration, taskMetaData, rawWorkMetaData);
+		return new RawFunctionMetaDataImpl(taskName, configuration, taskMetaData, rawWorkMetaData);
 	}
 
 	/**
@@ -421,8 +417,9 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 	 * @return {@link ManagedFunctionDutyAssociation} instances.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private ManagedFunctionDutyAssociation<?>[] createTaskDutyAssociations(ManagedFunctionDutyConfiguration<?>[] configurations,
-			RawWorkMetaData<?> rawWorkMetaData, OfficeFloorIssues issues, String taskName, boolean isPreNotPost,
+	private ManagedFunctionDutyAssociation<?>[] createTaskDutyAssociations(
+			ManagedFunctionDutyConfiguration<?>[] configurations, RawWorkMetaData<?> rawWorkMetaData,
+			OfficeFloorIssues issues, String taskName, boolean isPreNotPost,
 			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects) {
 
 		// Create the listing of task duty associations
@@ -483,7 +480,8 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 			}
 
 			// Create and add the task duty association
-			ManagedFunctionDutyAssociation<?> taskDutyAssociation = new ManagedFunctionDutyAssociationImpl(adminIndex, dutyKey);
+			ManagedFunctionDutyAssociation<?> taskDutyAssociation = new ManagedFunctionDutyAssociationImpl(adminIndex,
+					dutyKey);
 			taskDuties.add(taskDutyAssociation);
 		}
 

@@ -24,16 +24,16 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
+import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteContextFactoryImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
@@ -41,15 +41,13 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
@@ -83,9 +81,9 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 	private final String managingOfficeName;
 
 	/**
-	 * Name of the {@link Work} to recycle the {@link ManagedObject}.
+	 * Name of the {@link ManagedFunction} to recycle the {@link ManagedObject}.
 	 */
-	private final String recycleWorkName;
+	private final String recycleFunctionName;
 
 	/**
 	 * {@link InputManagedObjectConfiguration} to configure binding the input
@@ -123,7 +121,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 	/**
 	 * {@link FlowMetaData} of the recycle {@link Flow}.
 	 */
-	private FlowMetaData<?> recycleFlowMetaData = null;
+	private FlowMetaData recycleFlowMetaData = null;
 
 	/**
 	 * {@link ManagedObjectExecuteContextFactory}.
@@ -135,8 +133,9 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 	 * 
 	 * @param managingOfficeName
 	 *            Name of the managing {@link Office}.
-	 * @param recycleWorkName
-	 *            Name of the {@link Work} to recycle the {@link ManagedObject}.
+	 * @param recycleFunctionName
+	 *            Name of the {@link ManagedFunction} to recycle the
+	 *            {@link ManagedObject}.
 	 * @param inputConfiguration
 	 *            {@link InputManagedObjectConfiguration} to configure binding
 	 *            the input {@link ManagedObject} to the {@link ProcessState}.
@@ -146,11 +145,11 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 	 * @param managingOfficeConfiguration
 	 *            {@link ManagingOfficeConfiguration}.
 	 */
-	public RawManagingOfficeMetaDataImpl(String managingOfficeName, String recycleWorkName,
+	public RawManagingOfficeMetaDataImpl(String managingOfficeName, String recycleFunctionName,
 			InputManagedObjectConfiguration<?> inputConfiguration, ManagedObjectFlowMetaData<F>[] flowMetaDatas,
 			ManagingOfficeConfiguration<F> managingOfficeConfiguration) {
 		this.managingOfficeName = managingOfficeName;
-		this.recycleWorkName = recycleWorkName;
+		this.recycleFunctionName = recycleFunctionName;
 		this.inputConfiguration = inputConfiguration;
 		this.flowMetaDatas = flowMetaDatas;
 		this.managingOfficeConfiguration = managingOfficeConfiguration;
@@ -213,7 +212,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 
 	@Override
 	public void manageByOffice(RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
-			OfficeMetaData officeMetaData, ManagedFunctionLocator metaDataLocator,
+			OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
 			Map<String, TeamManagement> officeTeams, AssetManagerFactory assetManagerFactory,
 			OfficeFloorIssues issues) {
 
@@ -225,37 +224,33 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 		// -----------------------------------------------------------
 
 		// Obtain the recycle task meta-data
-		FlowMetaData<?> recycleFlowMetaData = null;
-		if (this.recycleWorkName != null) {
+		FlowMetaData recycleFlowMetaData = null;
+		if (this.recycleFunctionName != null) {
 
-			// Locate the work meta-data
-			WorkMetaData<?> workMetaData = metaDataLocator.getWorkMetaData(this.recycleWorkName);
-			if (workMetaData == null) {
+			// Locate the function meta-data
+			ManagedFunctionMetaData<?, ?> recycleFunctionMetaData = functionLocator
+					.getManagedFunctionMetaData(this.recycleFunctionName);
+			if (recycleFunctionMetaData == null) {
 				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-						"Recycle work '" + this.recycleWorkName + "' not found");
-				return; // must obtain recycle work
+						"Recycle function '" + this.recycleFunctionName + "' not found");
+				return; // must obtain recycle function
 			}
 
-			// Obtain the initial flow of work as recycle flow
-			recycleFlowMetaData = workMetaData.getInitialFlowMetaData();
-			if (recycleFlowMetaData == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-						"No initial flow on work " + this.recycleWorkName + " for recycle task");
-				return; // must obtain recycle task
-			}
-
-			// Obtain the parameter type for the recycle task
-			ManagedFunctionMetaData<?, ?, ?> recycleTaskMetaData = recycleFlowMetaData.getInitialTaskMetaData();
-			Class<?> parameterType = recycleTaskMetaData.getParameterType();
+			// Obtain the parameter type for the recycle function
+			Class<?> parameterType = recycleFunctionMetaData.getParameterType();
 			if (parameterType != null) {
 				if (!parameterType.isAssignableFrom(RecycleManagedObjectParameter.class)) {
 					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-							"Incompatible parameter type for recycle task (parameter=" + parameterType.getName()
-									+ ", required type=" + RecycleManagedObjectParameter.class.getName() + ", work="
-									+ this.recycleWorkName + ", task=" + recycleTaskMetaData.getFunctionName() + ")");
-					return; // can not be used as recycle task
+							"Incompatible parameter type for recycle function (parameter=" + parameterType.getName()
+									+ ", required type=" + RecycleManagedObjectParameter.class.getName() + ", function="
+									+ this.recycleFunctionName + ")");
+					return; // can not be used as recycle function
 				}
 			}
+
+			// Obtain the initial flow of work as recycle flow
+			recycleFlowMetaData = ConstructUtil.newFlowMetaData(recycleFunctionMetaData, false, assetManagerFactory,
+					AssetType.FUNCTION, this.recycleFunctionName, "Recycle", issues);
 		}
 
 		// Load remaining state to existing managed object meta-data
@@ -346,7 +341,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 		}
 
 		// Create the flows
-		FlowMetaData<?>[] flows = new FlowMetaData[this.flowMetaDatas.length];
+		FlowMetaData[] flows = new FlowMetaData[this.flowMetaDatas.length];
 		for (int i = 0; i < flows.length; i++) {
 			ManagedObjectFlowMetaData<F> flowMetaData = this.flowMetaDatas[i];
 
@@ -375,20 +370,20 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 
 			// Create the task node reference for the task.
 			// Override argument type as managed object knows better.
-			ManagedFunctionReference configurationTaskReference = flowConfiguration.getTaskNodeReference();
-			ManagedFunctionReference flowTaskReference = new TaskNodeReferenceImpl(configurationTaskReference.getWorkName(),
-					configurationTaskReference.getTaskName(), argumentType);
+			ManagedFunctionReference configurationFunctionReference = flowConfiguration.getManagedFunctionReference();
+			ManagedFunctionReference flowTaskReference = new ManagedFunctionReferenceImpl(
+					configurationFunctionReference.getFunctionName(), argumentType);
 
-			// Obtain the task meta-data of flow meta-data
-			ManagedFunctionMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(flowTaskReference, metaDataLocator,
-					issues, AssetType.MANAGED_OBJECT, managedObjectSourceName, flowLabel, true);
-			if (taskMetaData == null) {
-				return; // can not find task of flow
+			// Obtain the function meta-data of flow meta-data
+			ManagedFunctionMetaData<?, ?> functionMetaData = ConstructUtil.getFunctionMetaData(flowTaskReference,
+					functionLocator, issues, AssetType.MANAGED_OBJECT, managedObjectSourceName, flowLabel);
+			if (functionMetaData == null) {
+				return; // can not find function of flow
 			}
 
 			// Create and specify the flow meta-data
-			flows[i] = ConstructUtil.newFlowMetaData(FlowInstigationStrategyEnum.ASYNCHRONOUS, taskMetaData,
-					assetManagerFactory, AssetType.MANAGED_OBJECT, managedObjectSourceName, flowLabel, issues);
+			flows[i] = ConstructUtil.newFlowMetaData(functionMetaData, false, assetManagerFactory,
+					AssetType.MANAGED_OBJECT, managedObjectSourceName, flowLabel, issues);
 		}
 
 		// Ensure no extra flow configurations

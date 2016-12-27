@@ -15,21 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.construct.task;
+package net.officefloor.frame.impl.construct.function;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link ManagedFunctionFlowConfiguration} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
-		ManagedFunctionFlowConfiguration<F> {
+public class TaskFlowConfigurationImpl<F extends Enum<F>> implements ManagedFunctionFlowConfiguration<F> {
 
 	/**
 	 * Name of the {@link Flow}.
@@ -37,14 +36,14 @@ public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
 	private final String flowName;
 
 	/**
-	 * {@link FlowInstigationStrategyEnum}.
-	 */
-	private final FlowInstigationStrategyEnum strategy;
-
-	/**
 	 * Reference to the initial {@link ManagedFunction} of this {@link Flow}.
 	 */
-	private final ManagedFunctionReference taskNodeRef;
+	private final ManagedFunctionReference functionReference;
+
+	/**
+	 * Indicates whether to spawn the {@link ThreadState}.
+	 */
+	private final boolean isSpawnThreadState;
 
 	/**
 	 * Index of the {@link Flow}.
@@ -61,21 +60,21 @@ public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
 	 * 
 	 * @param flowName
 	 *            Name of this {@link Flow}.
-	 * @param strategy
-	 *            {@link FlowInstigationStrategyEnum}.
-	 * @param taskNodeRef
-	 *            Reference to the initial {@link ManagedFunction} of this {@link Flow}.
+	 * @param functionReference
+	 *            Reference to the initial {@link ManagedFunction} of this
+	 *            {@link Flow}.
+	 * @param isSpawnThreadState
+	 *            Indicates whether to spawn the {@link ThreadState}.
 	 * @param index
 	 *            Index of this {@link Flow}.
 	 * @param key
 	 *            Key of the {@link Flow}.
 	 */
-	public TaskFlowConfigurationImpl(String flowName,
-			FlowInstigationStrategyEnum strategy,
-			ManagedFunctionReference taskNodeRef, int index, F key) {
+	public TaskFlowConfigurationImpl(String flowName, ManagedFunctionReference functionReference,
+			boolean isSpawnThreadState, int index, F key) {
 		this.flowName = flowName;
-		this.strategy = strategy;
-		this.taskNodeRef = taskNodeRef;
+		this.functionReference = functionReference;
+		this.isSpawnThreadState = isSpawnThreadState;
 		this.index = index;
 		this.key = key;
 	}
@@ -90,13 +89,13 @@ public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
 	}
 
 	@Override
-	public FlowInstigationStrategyEnum getInstigationStrategy() {
-		return this.strategy;
+	public ManagedFunctionReference getInitialFunction() {
+		return this.functionReference;
 	}
 
 	@Override
-	public ManagedFunctionReference getInitialTask() {
-		return this.taskNodeRef;
+	public boolean isSpawnThreadState() {
+		return this.isSpawnThreadState;
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class DutyMetaDataImpl implements DutyMetaData {
 	/**
 	 * Listing of {@link FlowMetaData}.
 	 */
-	private final FlowMetaData<?>[] flows;
+	private final FlowMetaData[] flows;
 
 	/**
 	 * Mapping of {@link Duty} {@link Governance} index to {@link ProcessState}
@@ -50,7 +50,7 @@ public class DutyMetaDataImpl implements DutyMetaData {
 	 *            Mapping of {@link Duty} {@link Governance} index to
 	 *            {@link ProcessState} {@link Governance} index.
 	 */
-	public DutyMetaDataImpl(FlowMetaData<?>[] flows, int[] governanceMapping) {
+	public DutyMetaDataImpl(FlowMetaData[] flows, int[] governanceMapping) {
 		this.flows = flows;
 		this.governanceMapping = governanceMapping;
 	}
@@ -60,7 +60,7 @@ public class DutyMetaDataImpl implements DutyMetaData {
 	 */
 
 	@Override
-	public FlowMetaData<?> getFlow(int flowIndex) {
+	public FlowMetaData getFlow(int flowIndex) {
 		return this.flows[flowIndex];
 	}
 

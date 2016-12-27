@@ -52,13 +52,12 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -492,7 +491,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 */
 
 	@Override
-	public void linkOfficeMetaData(OfficeMetaData officeMetaData, ManagedFunctionLocator taskLocator,
+	public void linkOfficeMetaData(OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Create the set of required duties to ensure they are configured
@@ -521,30 +520,29 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 			requiredDuties.remove(dutyKey);
 
 			// Obtain the task node references
-			ManagedFunctionReference[] dutyTaskReferences = dutyConfiguration.getLinkedProcessConfiguration();
-			if (dutyTaskReferences == null) {
+			ManagedFunctionReference[] dutyFunctionReferences = dutyConfiguration.getLinkedProcessConfiguration();
+			if (dutyFunctionReferences == null) {
 				issues.addIssue(AssetType.ADMINISTRATOR, this.boundAdministratorName,
 						"Task references not provided for duty " + dutyName);
 				return; // must have task references for duty
 			}
 
 			// Obtain the flows for the duty
-			FlowMetaData<?>[] dutyFlows = new FlowMetaData[dutyTaskReferences.length];
+			FlowMetaData[] dutyFlows = new FlowMetaData[dutyFunctionReferences.length];
 			for (int i = 0; i < dutyFlows.length; i++) {
-				ManagedFunctionReference taskReference = dutyTaskReferences[i];
+				ManagedFunctionReference functionReference = dutyFunctionReferences[i];
 
-				// Obtain the task meta-data for the flow
-				ManagedFunctionMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskReference, taskLocator, issues,
-						AssetType.ADMINISTRATOR, this.boundAdministratorName, "Duty " + dutyName + " Flow " + i, true);
-				if (taskMetaData == null) {
-					return; // no task
+				// Obtain the function meta-data for the flow
+				ManagedFunctionMetaData<?, ?> functionMetaData = ConstructUtil.getFunctionMetaData(functionReference,
+						functionLocator, issues, AssetType.ADMINISTRATOR, this.boundAdministratorName,
+						"Duty " + dutyName + " Flow " + i);
+				if (functionMetaData == null) {
+					return; // no function
 				}
 
 				// Create and register the flow for the duty.
-				// All direct duty flows are invoked in parallel.
-				dutyFlows[i] = ConstructUtil.newFlowMetaData(FlowInstigationStrategyEnum.PARALLEL, taskMetaData,
-						assetManagerFactory, AssetType.ADMINISTRATOR, this.boundAdministratorName,
-						"Duty " + dutyKey + " Flow " + i, issues);
+				dutyFlows[i] = ConstructUtil.newFlowMetaData(functionMetaData, false, assetManagerFactory,
+						AssetType.ADMINISTRATOR, this.boundAdministratorName, "Duty " + dutyKey + " Flow " + i, issues);
 			}
 
 			// Obtain the governance mapping for the duty

@@ -29,6 +29,7 @@ import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataImpl;
+import net.officefloor.frame.impl.construct.function.RawFunctionMetaDataImpl;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBuilderImpl;
@@ -36,7 +37,6 @@ import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObject
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.impl.construct.task.RawTaskMetaDataImpl;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataImpl;
 import net.officefloor.frame.impl.construct.team.TeamBuilderImpl;
 import net.officefloor.frame.impl.construct.work.RawWorkMetaDataImpl;
@@ -182,7 +182,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 						RawBoundAdministratorMetaDataImpl.getFactory(),
 						RawOfficeMetaDataImpl.getFactory(),
 						RawWorkMetaDataImpl.getFactory(),
-						RawTaskMetaDataImpl.getFactory());
+						RawFunctionMetaDataImpl.getFactory());
 
 		// Obtain the office floor meta-data and return the office floor
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();

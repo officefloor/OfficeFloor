@@ -71,7 +71,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	/**
 	 * {@link FlowMetaData} instances.
 	 */
-	private FlowMetaData<?>[] flowMetaData;
+	private FlowMetaData[] flowMetaData;
 
 	/**
 	 * {@link EscalationProcedure} for the {@link GovernanceActivity} failures.
@@ -107,7 +107,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure}.
 	 */
-	public void loadRemainingState(FlowMetaData<?>[] flowMetaData, EscalationProcedure escalationProcedure) {
+	public void loadRemainingState(FlowMetaData[] flowMetaData, EscalationProcedure escalationProcedure) {
 		this.flowMetaData = flowMetaData;
 		this.escalationProcedure = escalationProcedure;
 	}

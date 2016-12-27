@@ -39,7 +39,7 @@ public interface RawManagedFunctionMetaDataFactory {
 	 *            {@link FunctionLoop}.
 	 * @return {@link RawManagedFunctionMetaData}.
 	 */
-	RawManagedFunctionMetaData<?, ?> constructRawTaskMetaData(ManagedFunctionConfiguration<?, ?> configuration,
-			OfficeFloorIssues issues, FunctionLoop functionLoop);
+	RawManagedFunctionMetaData<?, ?> constructRawManagedFunctionMetaData(
+			ManagedFunctionConfiguration<?, ?> configuration, OfficeFloorIssues issues, FunctionLoop functionLoop);
 
 }

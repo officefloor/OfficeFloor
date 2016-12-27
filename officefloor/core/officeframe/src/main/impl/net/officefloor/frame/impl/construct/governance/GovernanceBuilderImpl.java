@@ -25,14 +25,14 @@ import java.util.Map;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
+import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
@@ -41,8 +41,8 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
-		GovernanceBuilder<F>, GovernanceConfiguration<I, F> {
+public class GovernanceBuilderImpl<E, F extends Enum<F>>
+		implements GovernanceBuilder<F>, GovernanceConfiguration<E, F> {
 
 	/**
 	 * Name of the {@link Governance}.
@@ -50,14 +50,14 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	private final String governanceName;
 
 	/**
-	 * {@link GovernanceFactory}.
-	 */
-	private final GovernanceFactory<? super I, F> governanceFactory;
-
-	/**
 	 * Extension interface.
 	 */
-	private final Class<I> extensionInterface;
+	private final Class<E> extensionInterface;
+
+	/**
+	 * {@link GovernanceFactory}.
+	 */
+	private final GovernanceFactory<? super E, F> governanceFactory;
 
 	/**
 	 * {@link Team} name responsible to undertake the {@link Governance}
@@ -80,17 +80,16 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	 * 
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
-	 * @param governanceFactory
-	 *            {@link GovernanceFactory}.
 	 * @param extensionInterface
 	 *            Extension interface.
+	 * @param governanceFactory
+	 *            {@link GovernanceFactory}.
 	 */
-	public GovernanceBuilderImpl(String governanceName,
-			GovernanceFactory<? super I, F> governanceFactory,
-			Class<I> extensionInterface) {
+	public GovernanceBuilderImpl(String governanceName, Class<E> extensionInterface,
+			GovernanceFactory<? super E, F> governanceFactory) {
 		this.governanceName = governanceName;
-		this.governanceFactory = governanceFactory;
 		this.extensionInterface = extensionInterface;
+		this.governanceFactory = governanceFactory;
 	}
 
 	/*
@@ -103,17 +102,13 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public void linkFlow(F key, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
-		this.linkFlow(key.ordinal(), key, workName, taskName, strategy,
-				argumentType);
+	public void linkFlow(F key, String functionName, Class<?> argumentType, boolean isSpawnThreadState) {
+		this.linkFlow(key.ordinal(), key, functionName, argumentType, isSpawnThreadState);
 	}
 
 	@Override
-	public void linkFlow(int flowIndex, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
-		this.linkFlow(flowIndex, null, workName, taskName, strategy,
-				argumentType);
+	public void linkFlow(int flowIndex, String functionName, Class<?> argumentType, boolean isSpawnThreadState) {
+		this.linkFlow(flowIndex, null, functionName, argumentType, isSpawnThreadState);
 	}
 
 	/**
@@ -124,41 +119,34 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	 * @param flowKey
 	 *            Key of the {@link Flow}. Should be <code>null</code> if
 	 *            indexed.
-	 * @param workName
-	 *            Name of the {@link Work}.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
-	 * @param strategy
-	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param argumentType
 	 *            Type of argument passed to the instigated {@link Flow}.
+	 * @param isSpawnThreadState
+	 *            Indicates to spawn the {@link ThreadState}.
 	 */
-	private void linkFlow(int flowIndex, F flowKey, String workName,
-			String taskName, FlowInstigationStrategyEnum strategy,
-			Class<?> argumentType) {
+	private void linkFlow(int flowIndex, F flowKey, String functionName, Class<?> argumentType,
+			boolean isSpawnThreadState) {
 
 		// Determine the flow name
-		String flowName = (flowKey != null ? flowKey.name() : String
-				.valueOf(flowIndex));
+		String flowName = (flowKey != null ? flowKey.name() : String.valueOf(flowIndex));
 
-		// Create the task node reference
-		TaskNodeReferenceImpl taskNode = new TaskNodeReferenceImpl(workName,
-				taskName, argumentType);
+		// Create the function reference
+		ManagedFunctionReference functionReference = new ManagedFunctionReferenceImpl(functionName, argumentType);
 
 		// Create the flow configuration
-		GovernanceFlowConfigurationImpl<F> flow = new GovernanceFlowConfigurationImpl<F>(
-				flowName, strategy, taskNode, flowIndex, flowKey);
+		GovernanceFlowConfigurationImpl<F> flow = new GovernanceFlowConfigurationImpl<F>(flowName, isSpawnThreadState,
+				functionReference, flowIndex, flowKey);
 
 		// Register the flow
 		this.flows.put(new Integer(flowIndex), flow);
 	}
 
 	@Override
-	public void addEscalation(Class<? extends Throwable> typeOfCause,
-			String workName, String taskName) {
-		this.escalations.add(new GovernanceEscalationConfigurationImpl(
-				typeOfCause, new TaskNodeReferenceImpl(workName, taskName,
-						typeOfCause)));
+	public void addEscalation(Class<? extends Throwable> typeOfCause, String functionName) {
+		this.escalations.add(new GovernanceEscalationConfigurationImpl(typeOfCause,
+				new ManagedFunctionReferenceImpl(functionName, typeOfCause)));
 	}
 
 	/*
@@ -171,12 +159,12 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 	}
 
 	@Override
-	public GovernanceFactory<? super I, F> getGovernanceFactory() {
+	public GovernanceFactory<? super E, F> getGovernanceFactory() {
 		return this.governanceFactory;
 	}
 
 	@Override
-	public Class<I> getExtensionInterface() {
+	public Class<E> getExtensionInterface() {
 		return this.extensionInterface;
 	}
 
@@ -187,15 +175,12 @@ public class GovernanceBuilderImpl<I, F extends Enum<F>> implements
 
 	@Override
 	public GovernanceFlowConfiguration<F>[] getFlowConfiguration() {
-		return ConstructUtil.toArray(this.flows,
-				new GovernanceFlowConfiguration[0]);
+		return ConstructUtil.toArray(this.flows, new GovernanceFlowConfiguration[0]);
 	}
 
 	@Override
 	public GovernanceEscalationConfiguration[] getEscalations() {
-		return this.escalations
-				.toArray(new GovernanceEscalationConfiguration[this.escalations
-						.size()]);
+		return this.escalations.toArray(new GovernanceEscalationConfiguration[this.escalations.size()]);
 	}
 
 }

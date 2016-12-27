@@ -50,7 +50,7 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	/**
 	 * {@link FlowMetaData} in index order for the {@link ManagedObjectSource}.
 	 */
-	private final FlowMetaData<?>[] processLinks;
+	private final FlowMetaData[] processLinks;
 
 	/**
 	 * {@link OfficeMetaData} to create {@link ProcessState} instances.
@@ -73,7 +73,7 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	 *            instances.
 	 */
 	public ManagedObjectExecuteContextFactoryImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
-			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData) {
+			FlowMetaData[] processLinks, OfficeMetaData officeMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;

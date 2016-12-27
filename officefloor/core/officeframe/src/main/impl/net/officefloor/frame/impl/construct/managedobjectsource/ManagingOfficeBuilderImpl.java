@@ -23,15 +23,14 @@ import java.util.Map;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
-import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -41,8 +40,8 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  *
  * @author Daniel Sagenschneider
  */
-public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
-		ManagingOfficeBuilder<F>, ManagingOfficeConfiguration<F> {
+public class ManagingOfficeBuilderImpl<F extends Enum<F>>
+		implements ManagingOfficeBuilder<F>, ManagingOfficeConfiguration<F> {
 
 	/**
 	 * Name of the {@link Office} managing the {@link ManagedObject}.
@@ -76,22 +75,20 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public DependencyMappingBuilder setInputManagedObjectName(
-			String inputManagedObjectName) {
-		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(
-				inputManagedObjectName);
+	public DependencyMappingBuilder setInputManagedObjectName(String inputManagedObjectName) {
+		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(inputManagedObjectName);
 		this.inputManagedObjectConfiguration = builder;
 		return builder;
 	}
 
 	@Override
-	public void linkProcess(F key, String workName, String taskName) {
-		this.linkProcess(key.ordinal(), key, workName, taskName);
+	public void linkProcess(F key, String functionName) {
+		this.linkProcess(key.ordinal(), key, functionName);
 	}
 
 	@Override
-	public void linkProcess(int flowIndex, String workName, String taskName) {
-		this.linkProcess(flowIndex, null, workName, taskName);
+	public void linkProcess(int flowIndex, String functionName) {
+		this.linkProcess(flowIndex, null, functionName);
 	}
 
 	/**
@@ -101,16 +98,14 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 	 *            Index for the {@link Flow}.
 	 * @param key
 	 *            Key identifying the {@link Flow}. May be <code>null</code>.
-	 * @param workName
-	 *            Name of {@link Work}.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of {@link ManagedFunction}.
 	 */
-	private void linkProcess(int index, F key, String workName, String taskName) {
+	private void linkProcess(int index, F key, String functionName) {
 
 		// Create the managed object flow configuration
-		ManagedObjectFlowConfiguration<F> flow = new ManagedObjectFlowConfigurationImpl(
-				key, null, new TaskNodeReferenceImpl(workName, taskName, null));
+		ManagedObjectFlowConfiguration<F> flow = new ManagedObjectFlowConfigurationImpl(key, null,
+				new ManagedFunctionReferenceImpl(functionName, null));
 
 		// Register the flow at its index
 		this.flows.put(new Integer(index), flow);
@@ -137,15 +132,13 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 
 	@Override
 	public ManagedObjectFlowConfiguration<F>[] getFlowConfiguration() {
-		return ConstructUtil.toArray(this.flows,
-				new ManagedObjectFlowConfiguration[0]);
+		return ConstructUtil.toArray(this.flows, new ManagedObjectFlowConfiguration[0]);
 	}
 
 	/**
 	 * {@link ManagedObjectFlowConfiguration} implementation.
 	 */
-	private class ManagedObjectFlowConfigurationImpl implements
-			ManagedObjectFlowConfiguration<F> {
+	private class ManagedObjectFlowConfigurationImpl implements ManagedObjectFlowConfiguration<F> {
 
 		/**
 		 * Flow key.
@@ -160,7 +153,7 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 		/**
 		 * {@link ManagedFunctionReference}.
 		 */
-		public ManagedFunctionReference taskNodeReference;
+		public ManagedFunctionReference functionReference;
 
 		/**
 		 * Initiate with flow key.
@@ -169,14 +162,14 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 		 *            Flow key.
 		 * @param flowName
 		 *            Name of flow.
-		 * @param taskNodeReference
+		 * @param functionReference
 		 *            {@link ManagedFunctionReference}.
 		 */
 		public ManagedObjectFlowConfigurationImpl(F flowKey, String flowName,
-				ManagedFunctionReference taskNodeReference) {
+				ManagedFunctionReference functionReference) {
 			this.flowKey = flowKey;
 			this.flowName = flowName;
-			this.taskNodeReference = taskNodeReference;
+			this.functionReference = functionReference;
 		}
 
 		/*
@@ -194,8 +187,8 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>> implements
 		}
 
 		@Override
-		public ManagedFunctionReference getTaskNodeReference() {
-			return this.taskNodeReference;
+		public ManagedFunctionReference getManagedFunctionReference() {
+			return this.functionReference;
 		}
 	}
 

@@ -19,23 +19,25 @@ package net.officefloor.frame.impl.execute.managedfunction;
 
 import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
+import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
-import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.WorkContainer;
-import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -43,8 +45,8 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		implements ManagedFunctionMetaData<W, D, F> {
+public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
+		implements ManagedFunctionMetaData<O, F> {
 
 	/**
 	 * Name of the {@link ManagedFunction}.
@@ -55,7 +57,7 @@ public class ManagedFunctionMetaDataImpl<W extends Work, D extends Enum<D>, F ex
 	 * {@link ManagedFunctionFactory} to create the {@link ManagedFunction} of
 	 * the {@link ManagedFunctionMetaData}.
 	 */
-	private final ManagedFunctionFactory<W, D, F> functionFactory;
+	private final ManagedFunctionFactory<O, F> functionFactory;
 
 	/**
 	 * Differentiator.
@@ -81,27 +83,21 @@ public class ManagedFunctionMetaDataImpl<W extends Work, D extends Enum<D>, F ex
 	private final ManagedObjectIndex[] requiredManagedObjects;
 
 	/**
-	 * Translations of the {@link ManagedFunction} {@link ManagedObject} index
-	 * to the {@link Work} {@link ManagedObjectIndex}.
-	 */
-	private final ManagedObjectIndex[] taskToWorkMoTranslations;
-
-	/**
 	 * Required {@link Governance}.
 	 */
 	private final boolean[] requiredGovernance;
 
 	/**
-	 * {@link ManagedFunctionDutyAssociation} specifying the {@link Duty} instances to be
-	 * completed before executing the {@link ManagedFunction}.
+	 * {@link ManagedFunctionDutyAssociation} specifying the {@link Duty}
+	 * instances to be completed before executing the {@link ManagedFunction}.
 	 */
-	private final ManagedFunctionDutyAssociation<?>[] preTaskDuties;
+	private final ManagedFunctionDutyAssociation<?>[] preFunctionDuties;
 
 	/**
-	 * {@link ManagedFunctionDutyAssociation} specifying the {@link Duty} instances to be
-	 * completed after executing the {@link ManagedFunction}.
+	 * {@link ManagedFunctionDutyAssociation} specifying the {@link Duty}
+	 * instances to be completed after executing the {@link ManagedFunction}.
 	 */
-	private final ManagedFunctionDutyAssociation<?>[] postTaskDuties;
+	private final ManagedFunctionDutyAssociation<?>[] postFunctionDuties;
 
 	/**
 	 * {@link FunctionLoop}.
@@ -110,25 +106,17 @@ public class ManagedFunctionMetaDataImpl<W extends Work, D extends Enum<D>, F ex
 
 	/**
 	 * <p>
-	 * {@link WorkMetaData} for this {@link ManagedFunction}.
-	 * <p>
-	 * Acts as <code>final</code> but specified after constructor.
-	 */
-	private WorkMetaData<W> workMetaData;
-
-	/**
-	 * <p>
 	 * Meta-data of the available {@link Flow} instances from this
 	 * {@link ManagedFunction}.
 	 * <p>
 	 * Acts as <code>final</code> but specified after constructor.
 	 */
-	private FlowMetaData<?>[] flowMetaData;
+	private FlowMetaData[] flowMetaData;
 
 	/**
 	 * {@link ManagedFunctionMetaData} of the next {@link ManagedFunction}.
 	 */
-	private ManagedFunctionMetaData<?, ?, ?> nextFunctionMetaData;
+	private ManagedFunctionMetaData<?, ?> nextFunctionMetaData;
 
 	/**
 	 * {@link EscalationProcedure} for exceptions of the {@link ManagedFunction}
@@ -153,54 +141,43 @@ public class ManagedFunctionMetaDataImpl<W extends Work, D extends Enum<D>, F ex
 	 *            {@link TeamManagement} of the {@link Team} responsible for
 	 *            executing this {@link ManagedFunction}. May be
 	 *            <code>null</code>.
-	 * @param continueTeam
-	 *            {@link Team} to enable the worker ({@link Thread}) of the
-	 *            responsible {@link Team} to continue on to execute the next
-	 *            {@link Job}.
 	 * @param requiredManagedObjects
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances that must be loaded before the
 	 *            {@link ManagedFunction} may be executed.
 	 * @param requiredGovernance
 	 *            Required {@link Governance}.
-	 * @param taskToWorkMoTranslations
-	 *            Translations of the {@link ManagedFunction}
-	 *            {@link ManagedObject} index to the {@link Work}
-	 *            {@link ManagedObjectIndex}.
-	 * @param preTaskDuties
-	 *            {@link ManagedFunctionDutyAssociation} specifying the {@link Duty}
-	 *            instances to be completed before executing the
+	 * @param preFunctionDuties
+	 *            {@link ManagedFunctionDutyAssociation} specifying the
+	 *            {@link Duty} instances to be completed before executing the
 	 *            {@link ManagedFunction}.
-	 * @param postTaskDuties
-	 *            {@link ManagedFunctionDutyAssociation} specifying the {@link Duty}
-	 *            instances to be completed after executing the
+	 * @param postFunctionDuties
+	 *            {@link ManagedFunctionDutyAssociation} specifying the
+	 *            {@link Duty} instances to be completed after executing the
 	 *            {@link ManagedFunction}.
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
 	 */
-	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<W, D, F> functionFactory,
+	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory,
 			Object differentiator, Class<?> parameterType, TeamManagement responsibleTeam,
-			ManagedObjectIndex[] requiredManagedObjects, ManagedObjectIndex[] taskToWorkMoTranslations,
-			boolean[] requiredGovernance, ManagedFunctionDutyAssociation<?>[] preTaskDuties,
-			ManagedFunctionDutyAssociation<?>[] postTaskDuties, FunctionLoop functionLoop) {
+			ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance,
+			ManagedFunctionDutyAssociation<?>[] preFunctionDuties,
+			ManagedFunctionDutyAssociation<?>[] postFunctionDuties, FunctionLoop functionLoop) {
 		this.functionName = functionName;
 		this.functionFactory = functionFactory;
 		this.differentiator = differentiator;
 		this.parameterType = parameterType;
 		this.responsibleTeam = responsibleTeam;
 		this.requiredManagedObjects = requiredManagedObjects;
-		this.taskToWorkMoTranslations = taskToWorkMoTranslations;
 		this.requiredGovernance = requiredGovernance;
-		this.preTaskDuties = preTaskDuties;
-		this.postTaskDuties = postTaskDuties;
+		this.preFunctionDuties = preFunctionDuties;
+		this.postFunctionDuties = postFunctionDuties;
 		this.functionLoop = functionLoop;
 	}
 
 	/**
 	 * Loads the remaining state of this {@link ManagedFunctionMetaData}.
 	 * 
-	 * @param workMetaData
-	 *            {@link WorkMetaData} for this {@link ManagedFunction}.
 	 * @param flowMetaData
 	 *            Meta-data of the available {@link Flow} instances from this
 	 *            {@link ManagedFunction}.
@@ -212,9 +189,8 @@ public class ManagedFunctionMetaDataImpl<W extends Work, D extends Enum<D>, F ex
 	 *            {@link ManagedFunction} of this
 	 *            {@link ManagedFunctionMetaData}.
 	 */
-	public void loadRemainingState(WorkMetaData<W> workMetaData, FlowMetaData<?>[] flowMetaData,
-			ManagedFunctionMetaData<?, ?, ?> nextFunctionMetaData, EscalationProcedure escalationProcedure) {
-		this.workMetaData = workMetaData;
+	public void loadRemainingState(FlowMetaData[] flowMetaData, ManagedFunctionMetaData<?, ?> nextFunctionMetaData,
+			EscalationProcedure escalationProcedure) {
 		this.flowMetaData = flowMetaData;
 		this.nextFunctionMetaData = nextFunctionMetaData;
 		this.escalationProcedure = escalationProcedure;
@@ -230,7 +206,7 @@ public class ManagedFunctionMetaDataImpl<W extends Work, D extends Enum<D>, F ex
 	}
 
 	@Override
-	public ManagedFunctionFactory<W, D, F> getManagedFunctionFactory() {
+	public ManagedFunctionFactory<O, F> getManagedFunctionFactory() {
 		return this.functionFactory;
 	}
 
@@ -260,18 +236,8 @@ public class ManagedFunctionMetaDataImpl<W extends Work, D extends Enum<D>, F ex
 	}
 
 	@Override
-	public ManagedObjectIndex translateManagedObjectIndexForWork(int taskMoIndex) {
-		return this.taskToWorkMoTranslations[taskMoIndex];
-	}
-
-	@Override
-	public FlowMetaData<?> getFlow(int flowIndex) {
+	public FlowMetaData getFlow(int flowIndex) {
 		return this.flowMetaData[flowIndex];
-	}
-
-	@Override
-	public WorkMetaData<W> getWorkMetaData() {
-		return this.workMetaData;
 	}
 
 	@Override
@@ -280,18 +246,32 @@ public class ManagedFunctionMetaDataImpl<W extends Work, D extends Enum<D>, F ex
 	}
 
 	@Override
-	public ManagedFunctionMetaData<?, ?, ?> getNextManagedFunctionMetaData() {
+	public ManagedFunctionMetaData<?, ?> getNextManagedFunctionMetaData() {
 		return this.nextFunctionMetaData;
 	}
 
 	@Override
 	public ManagedFunctionDutyAssociation<?>[] getPreAdministrationMetaData() {
-		return this.preTaskDuties;
+		return this.preFunctionDuties;
 	}
 
 	@Override
 	public ManagedFunctionDutyAssociation<?>[] getPostAdministrationMetaData() {
-		return this.postTaskDuties;
+		return this.postFunctionDuties;
+	}
+
+	@Override
+	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {
+		// TODO implement ManagedFunctionLogicMetaData.getManagedObjectMetaData
+		throw new UnsupportedOperationException("TODO implement ManagedFunctionLogicMetaData.getManagedObjectMetaData");
+
+	}
+
+	@Override
+	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
+		// TODO implement ManagedFunctionLogicMetaData.getAdministratorMetaData
+		throw new UnsupportedOperationException("TODO implement ManagedFunctionLogicMetaData.getAdministratorMetaData");
+
 	}
 
 	@Override
@@ -300,11 +280,13 @@ public class ManagedFunctionMetaDataImpl<W extends Work, D extends Enum<D>, F ex
 	}
 
 	@Override
-	public ManagedFunctionContainer createManagedFunctionContainer(Flow flow, WorkContainer<W> workContainer,
+	public ManagedFunctionContainer createManagedFunctionContainer(Flow flow,
 			ManagedFunctionContainer parallelFunctionOwner, Object parameter,
 			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
-		return new ManagedFunctionImpl<W, D, F>(flow, workContainer, this, governanceDeactivationStrategy,
-				parallelFunctionOwner, parameter);
+		ProcessState processState = flow.getThreadState().getProcessState();
+		ManagedFunctionLogic functionLogic = new ManagedFunctionLogicImpl<>(this, parameter, processState);
+		return new ManagedFunctionContainerImpl<ManagedFunctionLogicMetaData>(flow, this, parallelFunctionOwner,
+				this.requiredManagedObjects, this.requiredGovernance, governanceDeactivationStrategy, functionLogic);
 	}
 
 }

@@ -80,7 +80,7 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 *         {@link ManagedObject}.
 	 */
 	<O extends Enum<O>, f extends Enum<f>> ManagedObjectFunctionBuilder<O, f> getRecycleFunction(
-			ManagedFunctionFactory<O, F> managedFunctionFactory);
+			ManagedFunctionFactory<O, f> managedFunctionFactory);
 
 	/**
 	 * Creates the {@link ManagedObjectFunctionBuilder} to build a
@@ -97,8 +97,8 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 *            {@link ManagedFunction}.
 	 * @return Specific {@link ManagedObjectFunctionBuilder}.
 	 */
-	<o extends Enum<o>, f extends Enum<f>> ManagedObjectFunctionBuilder<o, f> addManagedFunction(String functionName,
-			ManagedFunctionFactory<o, f> managedFunctionFactory);
+	<O extends Enum<O>, f extends Enum<f>> ManagedObjectFunctionBuilder<O, f> addManagedFunction(String functionName,
+			ManagedFunctionFactory<O, f> managedFunctionFactory);
 
 	/**
 	 * <p>

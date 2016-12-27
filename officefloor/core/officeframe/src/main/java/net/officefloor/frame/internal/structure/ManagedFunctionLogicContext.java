@@ -19,6 +19,7 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Context for the execution of a {@link ManagedFunction}.
@@ -35,6 +36,16 @@ public interface ManagedFunctionLogicContext {
 	 *            Next {@link FunctionLogic}.
 	 */
 	void next(FunctionLogic function);
+
+	/**
+	 * Obtains the {@link Object} from a {@link ManagedObject}.
+	 * 
+	 * @param index
+	 *            {@link ManagedObjectIndex} identifying the
+	 *            {@link ManagedObject}.
+	 * @return Object from the {@link ManagedObject}.
+	 */
+	Object getObject(ManagedObjectIndex index);
 
 	/**
 	 * Invokes a {@link Flow}.

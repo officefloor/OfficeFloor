@@ -23,7 +23,7 @@ import java.util.Map;
 import net.officefloor.frame.api.build.DutyBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
+import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
@@ -35,8 +35,7 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
-		DutyConfiguration<A> {
+public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder, DutyConfiguration<A> {
 
 	/**
 	 * Name identifying the {@link Duty}.
@@ -44,8 +43,8 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 	private final String dutyName;
 
 	/**
-	 * Registry of {@link ManagedFunction} instances that may be invoked from the
-	 * {@link Duty}.
+	 * Registry of {@link ManagedFunction} instances that may be invoked from
+	 * the {@link Duty}.
 	 */
 	private final Map<Integer, ManagedFunctionReference> flows = new HashMap<Integer, ManagedFunctionReference>();
 
@@ -70,16 +69,13 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 	 */
 
 	@Override
-	public <F extends Enum<F>> void linkFlow(F key, String workName,
-			String taskName, Class<?> argumentType) {
-		this.linkFlow(key.ordinal(), workName, taskName, argumentType);
+	public <F extends Enum<F>> void linkFlow(F key, String functionName, Class<?> argumentType) {
+		this.linkFlow(key.ordinal(), functionName, argumentType);
 	}
 
 	@Override
-	public void linkFlow(int flowIndex, String workName, String taskName,
-			Class<?> argumentType) {
-		this.flows.put(Integer.valueOf(flowIndex), new TaskNodeReferenceImpl(
-				workName, taskName, argumentType));
+	public void linkFlow(int flowIndex, String functionName, Class<?> argumentType) {
+		this.flows.put(Integer.valueOf(flowIndex), new ManagedFunctionReferenceImpl(functionName, argumentType));
 	}
 
 	@Override
@@ -102,11 +98,9 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 	 * @param governanceName
 	 *            Name of the {@link Governance} to link.
 	 */
-	private <G extends Enum<G>> void linkGovernance(G key, int governanceIndex,
-			String governanceName) {
+	private <G extends Enum<G>> void linkGovernance(G key, int governanceIndex, String governanceName) {
 		this.governances.put(Integer.valueOf(governanceIndex),
-				new DutyGovernanceConfigurationImpl<G>(governanceName,
-						governanceIndex));
+				new DutyGovernanceConfigurationImpl<G>(governanceName, governanceIndex));
 	}
 
 	/*
@@ -158,8 +152,7 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 		// Create the listing of governance
 		DutyGovernanceConfiguration<?>[] governanceList = new DutyGovernanceConfiguration[arraySize];
 		for (Integer key : this.governances.keySet()) {
-			DutyGovernanceConfiguration<?> governance = this.governances
-					.get(key);
+			DutyGovernanceConfiguration<?> governance = this.governances.get(key);
 			governanceList[key.intValue()] = governance;
 		}
 
@@ -170,8 +163,7 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 	/**
 	 * {@link DutyGovernanceConfiguration} implementation.
 	 */
-	private static class DutyGovernanceConfigurationImpl<G extends Enum<G>>
-			implements DutyGovernanceConfiguration<G> {
+	private static class DutyGovernanceConfigurationImpl<G extends Enum<G>> implements DutyGovernanceConfiguration<G> {
 
 		/**
 		 * Name of the {@link Governance}.
@@ -213,8 +205,7 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder,
 		@Override
 		public G getKey() {
 			// TODO implement DutyGovernanceConfiguration<G>.getKey
-			throw new UnsupportedOperationException(
-					"TODO implement DutyGovernanceConfiguration<G>.getKey");
+			throw new UnsupportedOperationException("TODO implement DutyGovernanceConfiguration<G>.getKey");
 		}
 	}
 

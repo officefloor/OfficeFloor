@@ -343,12 +343,12 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		// Obtain the managed object pool
 		ManagedObjectPool managedObjectPool = configuration.getManagedObjectPool();
 
-		// Obtain the recycle work name
-		String recycleWorkName = context.getRecycleWorkName();
+		// Obtain the recycle function name
+		String recycleFunctionName = context.getRecycleFunctionName();
 
 		// Create the raw managing office meta-data
 		RawManagingOfficeMetaDataImpl<h> rawManagingOfficeMetaData = new RawManagingOfficeMetaDataImpl<h>(officeName,
-				recycleWorkName, inputConfiguration, flowMetaDatas, managingOfficeConfiguration);
+				recycleFunctionName, inputConfiguration, flowMetaDatas, managingOfficeConfiguration);
 
 		// TODO enable specifying a team responsible for handling escalations
 		TeamManagement escalationResponsibleTeam = null;

@@ -18,11 +18,8 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
-import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
  * Locates a {@link ManagedFunctionMetaData} within the {@link Office}.

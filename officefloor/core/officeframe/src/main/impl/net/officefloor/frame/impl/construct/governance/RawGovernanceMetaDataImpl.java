@@ -36,12 +36,11 @@ import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.source.SourceContext;
@@ -200,12 +199,12 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 	}
 
 	@Override
-	public void linkOfficeMetaData(ManagedFunctionLocator taskLocator, AssetManagerFactory assetManagerFactory,
+	public void linkOfficeMetaData(ManagedFunctionLocator functionLocator, AssetManagerFactory assetManagerFactory,
 			OfficeFloorIssues issues) {
 
 		// Obtain the listing of flow meta-data
 		GovernanceFlowConfiguration<F>[] flowConfigurations = this.governanceConfiguration.getFlowConfiguration();
-		FlowMetaData<?>[] flowMetaDatas = new FlowMetaData[flowConfigurations.length];
+		FlowMetaData[] flowMetaDatas = new FlowMetaData[flowConfigurations.length];
 		for (int i = 0; i < flowMetaDatas.length; i++) {
 			GovernanceFlowConfiguration<F> flowConfiguration = flowConfigurations[i];
 
@@ -214,30 +213,26 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 				continue;
 			}
 
-			// Obtain the task reference
-			ManagedFunctionReference taskNodeReference = flowConfiguration.getInitialTask();
-			if (taskNodeReference == null) {
-				issues.addIssue(AssetType.GOVERNANCE, this.governanceName, "No task referenced for flow index " + i);
+			// Obtain the function reference
+			ManagedFunctionReference functionReference = flowConfiguration.getInitialFunction();
+			if (functionReference == null) {
+				issues.addIssue(AssetType.GOVERNANCE, this.governanceName,
+						"No function referenced for flow index " + i);
 				continue; // no reference task for flow
 			}
 
-			// Obtain the task meta-data
-			ManagedFunctionMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskNodeReference, taskLocator, issues,
-					AssetType.GOVERNANCE, this.governanceName, "flow index " + i, true);
-			if (taskMetaData == null) {
-				continue; // no initial task for flow
+			// Obtain the function meta-data
+			ManagedFunctionMetaData<?, ?> functionMetaData = ConstructUtil.getFunctionMetaData(functionReference,
+					functionLocator, issues, AssetType.GOVERNANCE, this.governanceName, "flow index " + i);
+			if (functionMetaData == null) {
+				continue; // no initial function for flow
 			}
 
-			// Obtain the flow instigation strategy
-			FlowInstigationStrategyEnum instigationStrategy = flowConfiguration.getInstigationStrategy();
-			if (instigationStrategy == null) {
-				issues.addIssue(AssetType.GOVERNANCE, this.governanceName,
-						"No instigation strategy provided for flow index " + i);
-				continue; // no instigation strategy
-			}
+			// Obtain whether to spawn thread state
+			boolean isSpawnThreadState = flowConfiguration.isSpawnThreadState();
 
 			// Create and add the flow meta-data
-			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(instigationStrategy, taskMetaData, assetManagerFactory,
+			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(functionMetaData, isSpawnThreadState, assetManagerFactory,
 					AssetType.GOVERNANCE, this.governanceName, "Flow" + i, issues);
 		}
 
@@ -262,14 +257,15 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 						"No task referenced for escalation index " + i);
 				continue; // no escalation handler referenced
 			}
-			ManagedFunctionMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil.getTaskMetaData(escalationReference,
-					taskLocator, issues, AssetType.GOVERNANCE, this.getGovernanceName(), "escalation index " + i, true);
-			if (escalationTaskMetaData == null) {
+			ManagedFunctionMetaData<?, ?> escalationFunctionMetaData = ConstructUtil.getFunctionMetaData(
+					escalationReference, functionLocator, issues, AssetType.GOVERNANCE, this.getGovernanceName(),
+					"escalation index " + i);
+			if (escalationFunctionMetaData == null) {
 				continue; // no escalation handler
 			}
 
 			// Create and add the escalation
-			escalations[i] = new EscalationFlowImpl(typeOfCause, escalationTaskMetaData);
+			escalations[i] = new EscalationFlowImpl(typeOfCause, escalationFunctionMetaData);
 		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalations);
 

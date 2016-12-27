@@ -30,7 +30,6 @@ import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -193,7 +192,7 @@ public interface OfficeConfiguration {
 	 * 
 	 * @return List of start up {@link ManagedFunctionReference} references.
 	 */
-	ManagedFunctionReference[] getStartupFunction();
+	ManagedFunctionReference[] getStartupFunctions();
 
 	/**
 	 * Obtains the {@link Profiler} for the {@link Office}.

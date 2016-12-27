@@ -19,7 +19,6 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**

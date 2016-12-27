@@ -140,7 +140,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	/**
 	 * {@link FlowMetaData} for the recycling of this {@link ManagedObject}.
 	 */
-	private FlowMetaData<?> recycleFlowMetaData;
+	private FlowMetaData recycleFlowMetaData;
 
 	/**
 	 * Initiate with meta-data of the {@link ManagedObject} to source specific
@@ -213,7 +213,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	 *            {@link FlowMetaData} for the recycling of this
 	 *            {@link ManagedObject}.
 	 */
-	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData<?> recycleFlowMetaData) {
+	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData recycleFlowMetaData) {
 		this.officeMetaData = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
 	}
@@ -283,7 +283,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	}
 
 	@Override
-	public FunctionLoop getJobNodeLoop() {
+	public FunctionLoop getFunctionLoop() {
 		return this.officeMetaData.getFunctionLoop();
 	}
 
@@ -308,8 +308,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 		FunctionState[] checkJobNodes = new FunctionState[this.dependencyMapping.length
 				+ ((currentContainer != null) ? 1 : 0)];
 		for (int i = 0; i < this.dependencyMapping.length; i++) {
-			checkJobNodes[i] = workContainer.getManagedObjectContainer(this.dependencyMapping[i])
-					.checkReady(wrapper);
+			checkJobNodes[i] = workContainer.getManagedObjectContainer(this.dependencyMapping[i]).checkReady(wrapper);
 		}
 		if (currentContainer != null) {
 			checkJobNodes[checkJobNodes.length - 1] = currentContainer.checkReady(wrapper);

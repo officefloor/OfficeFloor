@@ -17,22 +17,17 @@
  */
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
-import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.source.SourceContext;
 import net.officefloor.frame.spi.source.SourceProperties;
 
@@ -41,13 +36,13 @@ import net.officefloor.frame.spi.source.SourceProperties;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
-		SourceContextImpl implements ManagedObjectSourceContext<F> {
+public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceContextImpl
+		implements ManagedObjectSourceContext<F> {
 
 	/**
-	 * Name of the {@link Work} to recycle the {@link ManagedObject}.
+	 * Name of the recycle the {@link ManagedFunction}.
 	 */
-	public static final String MANAGED_OBJECT_RECYCLE_WORK_NAME = "#recycle#";
+	public static final String MANAGED_OBJECT_RECYCLE_FUNCTION_NAME = "#recycle#";
 
 	/**
 	 * Name of the {@link ManagedObject}.
@@ -66,9 +61,10 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 	private OfficeBuilder officeBuilder;
 
 	/**
-	 * Name of the {@link Work} to clean up this {@link ManagedObject}.
+	 * Name of the {@link ManagedFunction} to clean up this
+	 * {@link ManagedObject}.
 	 */
-	private String recycleWorkName = null;
+	private String recycleFunctionName = null;
 
 	/**
 	 * Initiate.
@@ -87,11 +83,8 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 	 *            {@link OfficeBuilder} for the office using the
 	 *            {@link ManagedObjectSource}.
 	 */
-	public ManagedObjectSourceContextImpl(boolean isLoadingType,
-			String managedObjectName, SourceProperties properties,
-			SourceContext sourceContext,
-			ManagingOfficeBuilder<F> managingOfficeBuilder,
-			OfficeBuilder officeBuilder) {
+	public ManagedObjectSourceContextImpl(boolean isLoadingType, String managedObjectName, SourceProperties properties,
+			SourceContext sourceContext, ManagingOfficeBuilder<F> managingOfficeBuilder, OfficeBuilder officeBuilder) {
 		super(isLoadingType, sourceContext, properties);
 		this.managedObjectName = managedObjectName;
 		this.managingOfficeBuilder = managingOfficeBuilder;
@@ -110,14 +103,15 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 	}
 
 	/**
-	 * Obtains the name of the {@link Work} to recycle this
+	 * Obtains the name of the {@link ManagedFunction} to recycle this
 	 * {@link ManagedObject}.
 	 * 
-	 * @return Name of the {@link Work} to recycle this {@link ManagedObject} or
-	 *         <code>null</code> if no recycling of this {@link ManagedObject}.
+	 * @return Name of the {@link ManagedFunction} to recycle this
+	 *         {@link ManagedObject} or <code>null</code> if no recycling of
+	 *         this {@link ManagedObject}.
 	 */
-	public String getRecycleWorkName() {
-		return this.recycleWorkName;
+	public String getRecycleFunctionName() {
+		return this.recycleFunctionName;
 	}
 
 	/*
@@ -125,54 +119,49 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 	 */
 
 	@Override
-	public <W extends Work> ManagedObjectWorkBuilder<W> addWork(
-			String workName, WorkFactory<W> workFactory) {
-
-		// Obtain the name of work
-		String namespacedWorkName = this.getNamespacedName(workName);
-
-		// Create the work
-		WorkBuilder<W> workBuilder = this.officeBuilder.addWork(
-				namespacedWorkName, workFactory);
-
-		// Return the managed object work builder
-		return new ManagedObjectWorkBuilderImpl<W>(workBuilder);
-	}
-
-	@Override
-	public <W extends Work> ManagedObjectWorkBuilder<W> getRecycleWork(
-			WorkFactory<W> workFactory) {
+	public <O extends Enum<O>, f extends Enum<f>> ManagedObjectFunctionBuilder<O, f> getRecycleFunction(
+			ManagedFunctionFactory<O, f> managedFunctionFactory) {
 
 		// Ensure not already created
-		if (this.recycleWorkName != null) {
-			throw new IllegalStateException(
-					"Only one clean up per Managed Object");
+		if (this.recycleFunctionName != null) {
+			throw new IllegalStateException("Only one clean up per Managed Object");
 		}
 
-		// Name the recycle work
-		this.recycleWorkName = this
-				.getNamespacedName(MANAGED_OBJECT_RECYCLE_WORK_NAME);
+		// Name the recycle function
+		this.recycleFunctionName = this.getNamespacedName(MANAGED_OBJECT_RECYCLE_FUNCTION_NAME);
 
-		// Add and return the recycle work
-		return this.addWork(MANAGED_OBJECT_RECYCLE_WORK_NAME, workFactory);
+		// Add and return the recycle function
+		return this.addManagedFunction(MANAGED_OBJECT_RECYCLE_FUNCTION_NAME, managedFunctionFactory);
 	}
 
 	@Override
-	public void linkProcess(F key, String workName, String taskName) {
-		this.managingOfficeBuilder.linkProcess(key,
-				this.getNamespacedName(workName), taskName);
+	public <o extends Enum<o>, f extends Enum<f>> ManagedObjectFunctionBuilder<o, f> addManagedFunction(
+			String functionName, ManagedFunctionFactory<o, f> managedFunctionFactory) {
+
+		// Obtain the name of the function
+		String namespacedFunctionName = this.getNamespacedName(functionName);
+
+		// Create the managed function
+		ManagedFunctionBuilder<o, f> functionBuilder = this.officeBuilder.addManagedFunction(namespacedFunctionName,
+				managedFunctionFactory);
+
+		// Return the managed object function builder
+		return new ManagedObjectFunctionBuilderImpl<o, f>(functionBuilder);
 	}
 
 	@Override
-	public void linkProcess(int flowIndex, String workName, String taskName) {
-		this.managingOfficeBuilder.linkProcess(flowIndex,
-				this.getNamespacedName(workName), taskName);
+	public void addStartupFunction(String functionName) {
+		this.officeBuilder.addStartupFunction(this.getNamespacedName(functionName));
 	}
 
 	@Override
-	public void addStartupTask(String workName, String taskName) {
-		this.officeBuilder.addStartupTask(this.getNamespacedName(workName),
-				taskName);
+	public void linkProcess(F key, String functionName) {
+		this.managingOfficeBuilder.linkProcess(key, this.getNamespacedName(functionName));
+	}
+
+	@Override
+	public void linkProcess(int flowIndex, String functionName) {
+		this.managingOfficeBuilder.linkProcess(flowIndex, this.getNamespacedName(functionName));
 	}
 
 	/**
@@ -184,78 +173,28 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 	 * @return Name including the name space.
 	 */
 	private String getNamespacedName(String name) {
-		return OfficeBuilderImpl
-				.getNamespacedName(this.managedObjectName, name);
-	}
-
-	/**
-	 * {@link ManagedObjectWorkBuilder} implementation.
-	 */
-	private class ManagedObjectWorkBuilderImpl<W extends Work> implements
-			ManagedObjectWorkBuilder<W> {
-
-		/**
-		 * {@link WorkBuilder}.
-		 */
-		private final WorkBuilder<W> workBuilder;
-
-		/**
-		 * Flag indicating if first {@link ManagedFunction} being added.
-		 */
-		private boolean isFirstTask = true;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param workBuilder
-		 *            Underlying {@link WorkBuilder}.
-		 */
-		public ManagedObjectWorkBuilderImpl(WorkBuilder<W> workBuilder) {
-			this.workBuilder = workBuilder;
-		}
-
-		/*
-		 * ============ ManagedObjectWorkBuilder =====================
-		 */
-
-		@Override
-		public <d extends Enum<d>, f extends Enum<f>> ManagedObjectFunctionBuilder<d, f> addTask(
-				String taskName, ManagedFunctionFactory<W, d, f> taskFactory) {
-
-			// Create and initialise the task
-			ManagedFunctionBuilder<W, d, f> taskBuilder = this.workBuilder.addManagedFunction(
-					taskName, taskFactory);
-
-			// Register as initial task of work if first task
-			if (this.isFirstTask) {
-				this.workBuilder.setInitialTask(taskName);
-				this.isFirstTask = false;
-			}
-
-			// Return the task builder for the managed object source
-			return new ManagedObjectTaskBuilderImpl<d, f>(taskBuilder);
-		}
+		return OfficeBuilderImpl.getNamespacedName(this.managedObjectName, name);
 	}
 
 	/**
 	 * {@link ManagedObjectFunctionBuilder} implementation.
 	 */
-	private class ManagedObjectTaskBuilderImpl<d extends Enum<d>, f extends Enum<f>>
-			implements ManagedObjectFunctionBuilder<d, f> {
+	private class ManagedObjectFunctionBuilderImpl<o extends Enum<o>, f extends Enum<f>>
+			implements ManagedObjectFunctionBuilder<o, f> {
 
 		/**
 		 * {@link ManagedFunctionBuilder}.
 		 */
-		private final ManagedFunctionBuilder<?, d, f> taskBuilder;
+		private final ManagedFunctionBuilder<o, f> functionBuilder;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param taskBuilder
+		 * @param functionBuilder
 		 *            {@link ManagedFunctionBuilder}.
 		 */
-		public ManagedObjectTaskBuilderImpl(ManagedFunctionBuilder<?, d, f> taskBuilder) {
-			this.taskBuilder = taskBuilder;
+		public ManagedObjectFunctionBuilderImpl(ManagedFunctionBuilder<o, f> functionBuilder) {
+			this.functionBuilder = functionBuilder;
 		}
 
 		/*
@@ -263,77 +202,43 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends
 		 */
 
 		@Override
-		public void linkParameter(d key, Class<?> parameterType) {
-			this.taskBuilder.linkParameter(key, parameterType);
+		public void linkParameter(o key, Class<?> parameterType) {
+			this.functionBuilder.linkParameter(key, parameterType);
 		}
 
 		@Override
 		public void linkParameter(int index, Class<?> parameterType) {
-			this.taskBuilder.linkParameter(index, parameterType);
+			this.functionBuilder.linkParameter(index, parameterType);
 		}
 
 		@Override
 		public void setTeam(String teamName) {
-			this.taskBuilder.setTeam(ManagedObjectSourceContextImpl.this
-					.getNamespacedName(teamName));
+			this.functionBuilder.setTeam(ManagedObjectSourceContextImpl.this.getNamespacedName(teamName));
 		}
 
 		@Override
-		public void setNextTaskInFlow(String taskName, Class<?> argumentType) {
-			this.taskBuilder.setNextTaskInFlow(taskName, argumentType);
-		}
-
-		@Override
-		public void setNextTaskInFlow(String workName, String taskName,
-				Class<?> argumentType) {
-			this.taskBuilder.setNextTaskInFlow(
-					ManagedObjectSourceContextImpl.this
-							.getNamespacedName(workName), taskName,
+		public void setNextFunction(String functionName, Class<?> argumentType) {
+			this.functionBuilder.setNextFunction(ManagedObjectSourceContextImpl.this.getNamespacedName(functionName),
 					argumentType);
 		}
 
 		@Override
-		public void linkFlow(f key, String taskName,
-				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
-			this.taskBuilder.linkFlow(key, taskName, strategy, argumentType);
+		public void linkFlow(f key, String functionName, Class<?> argumentType, boolean isSpawnThreadState) {
+			this.functionBuilder.linkFlow(key, ManagedObjectSourceContextImpl.this.getNamespacedName(functionName),
+					argumentType, isSpawnThreadState);
 		}
 
 		@Override
-		public void linkFlow(int flowIndex, String taskName,
-				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
-			this.taskBuilder.linkFlow(flowIndex, taskName, strategy,
-					argumentType);
+		public void linkFlow(int flowIndex, String functionName, Class<?> argumentType, boolean isSpawnThreadState) {
+			this.functionBuilder.linkFlow(flowIndex,
+					ManagedObjectSourceContextImpl.this.getNamespacedName(functionName), argumentType,
+					isSpawnThreadState);
 		}
 
 		@Override
-		public void linkFlow(f key, String workName, String taskName,
-				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
-			this.taskBuilder.linkFlow(key, ManagedObjectSourceContextImpl.this
-					.getNamespacedName(workName), taskName, strategy,
-					argumentType);
-		}
-
-		@Override
-		public void linkFlow(int flowIndex, String workName, String taskName,
-				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
-			this.taskBuilder.linkFlow(flowIndex,
-					ManagedObjectSourceContextImpl.this
-							.getNamespacedName(workName), taskName, strategy,
-					argumentType);
-		}
-
-		@Override
-		public void addEscalation(Class<? extends Throwable> typeOfCause,
-				String taskName) {
-			this.taskBuilder.addEscalation(typeOfCause, taskName);
-		}
-
-		@Override
-		public void addEscalation(Class<? extends Throwable> typeOfCause,
-				String workName, String taskName) {
-			this.taskBuilder.addEscalation(typeOfCause,
-					ManagedObjectSourceContextImpl.this
-							.getNamespacedName(workName), taskName);
+		public void addEscalation(Class<? extends Throwable> typeOfCause, String functionName) {
+			this.functionBuilder.addEscalation(typeOfCause,
+					ManagedObjectSourceContextImpl.this.getNamespacedName(functionName));
 		}
 	}
 

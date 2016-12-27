@@ -15,10 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.construct.task;
+package net.officefloor.frame.impl.construct.function;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 
 /**
@@ -26,17 +25,12 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskNodeReferenceImpl implements ManagedFunctionReference {
-
-	/**
-	 * Name identifying the {@link Work} containing the {@link ManagedFunction}.
-	 */
-	private final String workName;
+public class ManagedFunctionReferenceImpl implements ManagedFunctionReference {
 
 	/**
 	 * Name of the {@link ManagedFunction}.
 	 */
-	private final String taskName;
+	private final String functionName;
 
 	/**
 	 * Type of argument to be passed to the referenced {@link ManagedFunction}.
@@ -46,44 +40,24 @@ public class TaskNodeReferenceImpl implements ManagedFunctionReference {
 	/**
 	 * Initiate.
 	 * 
-	 * @param workName
-	 *            Name identifying the {@link Work} containing the {@link ManagedFunction}.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
 	 * @param argumentType
-	 *            Type of argument to be passed to the referenced {@link ManagedFunction}.
+	 *            Type of argument to be passed to the referenced
+	 *            {@link ManagedFunction}.
 	 */
-	public TaskNodeReferenceImpl(String workName, String taskName,
-			Class<?> argumentType) {
-		this.workName = workName;
-		this.taskName = taskName;
+	public ManagedFunctionReferenceImpl(String functionName, Class<?> argumentType) {
+		this.functionName = functionName;
 		this.argumentType = argumentType;
 	}
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param taskName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param argumentType
-	 *            Type of argument to be passed to the referenced {@link ManagedFunction}.
-	 */
-	public TaskNodeReferenceImpl(String taskName, Class<?> argumentType) {
-		this(null, taskName, argumentType);
-	}
-
 	/*
-	 * =================== TaskNodeReference ==============================
+	 * =================== ManagedFunctionReference ===================
 	 */
 
 	@Override
-	public String getWorkName() {
-		return this.workName;
-	}
-
-	@Override
-	public String getTaskName() {
-		return this.taskName;
+	public String getFunctionName() {
+		return this.functionName;
 	}
 
 	@Override

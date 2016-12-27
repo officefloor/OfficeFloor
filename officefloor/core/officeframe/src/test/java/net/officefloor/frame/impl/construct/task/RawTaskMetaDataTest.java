@@ -29,6 +29,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.construct.function.RawFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
@@ -70,7 +71,7 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link RawTaskMetaDataImpl}.
+ * Tests the {@link RawFunctionMetaDataImpl}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -2215,7 +2216,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 			boolean isExpectConstruct) {
 
 		// Construct the raw task meta-data
-		RawManagedFunctionMetaData<W, ?, ?> metaData = RawTaskMetaDataImpl.getFactory()
+		RawManagedFunctionMetaData<W, ?, ?> metaData = RawFunctionMetaDataImpl.getFactory()
 				.constructRawTaskMetaData(this.configuration, this.issues,
 						this.rawWorkMetaData);
 		if (isExpectConstruct) {

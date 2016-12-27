@@ -18,7 +18,6 @@
 package net.officefloor.frame.api.profile;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Profiled execution of a {@link ManagedFunction}.

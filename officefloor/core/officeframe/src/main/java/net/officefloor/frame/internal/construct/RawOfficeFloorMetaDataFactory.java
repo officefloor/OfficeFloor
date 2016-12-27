@@ -48,21 +48,15 @@ public interface RawOfficeFloorMetaDataFactory {
 	 *            {@link RawBoundAdministratorMetaDataFactory}.
 	 * @param rawOfficeFactory
 	 *            {@link RawOfficeMetaDataFactory}.
-	 * @param rawWorkFactory
-	 *            {@link RawWorkMetaDataFactory}.
-	 * @param rawTaskFactory
+	 * @param rawFunctionFactory
 	 *            {@link RawManagedFunctionMetaDataFactory}.
 	 * @return {@link RawOfficeFloorMetaData}.
 	 */
-	RawOfficeFloorMetaData constructRawOfficeFloorMetaData(
-			OfficeFloorConfiguration configuration, OfficeFloorIssues issues,
-			RawTeamMetaDataFactory rawTeamFactory,
-			RawManagedObjectMetaDataFactory rawMosFactory,
-			RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
+	RawOfficeFloorMetaData constructRawOfficeFloorMetaData(OfficeFloorConfiguration configuration,
+			OfficeFloorIssues issues, RawTeamMetaDataFactory rawTeamFactory,
+			RawManagedObjectMetaDataFactory rawMosFactory, RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
 			RawGovernanceMetaDataFactory rawGovernanceFactory,
-			RawBoundAdministratorMetaDataFactory rawBoundAdminFactory,
-			RawOfficeMetaDataFactory rawOfficeFactory,
-			RawWorkMetaDataFactory rawWorkFactory,
-			RawManagedFunctionMetaDataFactory rawTaskFactory);
+			RawBoundAdministratorMetaDataFactory rawBoundAdminFactory, RawOfficeMetaDataFactory rawOfficeFactory,
+			RawManagedFunctionMetaDataFactory rawFunctionFactory);
 
 }

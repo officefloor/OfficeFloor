@@ -23,7 +23,6 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
@@ -31,9 +30,10 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Utility class to aid in construction of the {@link OfficeFloor}.
@@ -77,9 +77,8 @@ public class ConstructUtil {
 	 *            {@link OfficeFloorIssues}.
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
-	public static <T, E> T newInstance(Class<T> clazz, Class<E> expectedType,
-			String creatingAssetName, AssetType assetType, String assetName,
-			OfficeFloorIssues issues) {
+	public static <T, E> T newInstance(Class<T> clazz, Class<E> expectedType, String creatingAssetName,
+			AssetType assetType, String assetName, OfficeFloorIssues issues) {
 		try {
 			// Create the instance
 			T instance = clazz.newInstance();
@@ -87,10 +86,8 @@ public class ConstructUtil {
 			// Ensure the instance is of the expected type
 			if (!expectedType.isInstance(instance)) {
 				// Indicate issue
-				issues.addIssue(assetType, assetName,
-						creatingAssetName + " class must implement "
-								+ expectedType.getSimpleName() + " (class="
-								+ clazz.getName() + ")");
+				issues.addIssue(assetType, assetName, creatingAssetName + " class must implement "
+						+ expectedType.getSimpleName() + " (class=" + clazz.getName() + ")");
 				return null; // instance not of type
 			}
 
@@ -99,8 +96,7 @@ public class ConstructUtil {
 
 		} catch (Throwable ex) {
 			// Indicate issue (catching exception from constructor)
-			issues.addIssue(assetType, assetName, "Failed to instantiate "
-					+ clazz.getName(), ex);
+			issues.addIssue(assetType, assetName, "Failed to instantiate " + clazz.getName(), ex);
 			return null; // no instance
 		}
 	}
@@ -131,8 +127,7 @@ public class ConstructUtil {
 		arraySize += 1; // size is one bigger than max index
 
 		// Instantiate the array
-		O[] array = (O[]) Array.newInstance(type.getClass().getComponentType(),
-				arraySize);
+		O[] array = (O[]) Array.newInstance(type.getClass().getComponentType(), arraySize);
 
 		// Load the array from the map
 		for (Integer key : map.keySet()) {
@@ -164,12 +159,12 @@ public class ConstructUtil {
 	}
 
 	/**
-	 * Obtains the {@link ManagedFunctionMetaData} reporting any failure to find to the
-	 * {@link OfficeFloorIssues}.
+	 * Obtains the {@link ManagedFunctionMetaData} reporting any failure to find
+	 * to the {@link OfficeFloorIssues}.
 	 * 
-	 * @param taskNodeReference
+	 * @param functionReference
 	 *            {@link ManagedFunctionReference}.
-	 * @param taskLocator
+	 * @param functionLocator
 	 *            {@link ManagedFunctionLocator} to use to locate the
 	 *            {@link ManagedFunctionMetaData}.
 	 * @param issues
@@ -181,88 +176,46 @@ public class ConstructUtil {
 	 * @param forItemDescription
 	 *            Description after &quot;for&quot; indicating what the
 	 *            {@link ManagedFunctionMetaData} is for.
-	 * @param isWorkNameRequired
-	 *            Flags indicating if {@link Work} name is required.
-	 *            <code>false</code> indicates that the
-	 *            {@link ManagedFunctionLocator} has a default {@link Work} to
-	 *            find {@link ManagedFunctionMetaData}.
-	 * @return {@link ManagedFunctionMetaData} or <code>null</code> if not found with
-	 *         issues reported to the {@link OfficeFloorIssues}.
+	 * @return {@link ManagedFunctionMetaData} or <code>null</code> if not found
+	 *         with issues reported to the {@link OfficeFloorIssues}.
 	 */
-	public static ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(
-			ManagedFunctionReference taskNodeReference,
-			ManagedFunctionLocator taskLocator, OfficeFloorIssues issues,
-			AssetType assetType, String assetName, String forItemDescription,
-			boolean isWorkNameRequired) {
+	public static ManagedFunctionMetaData<?, ?> getFunctionMetaData(ManagedFunctionReference functionReference,
+			ManagedFunctionLocator functionLocator, OfficeFloorIssues issues, AssetType assetType, String assetName,
+			String forItemDescription) {
 
-		// Obtain the work name
-		String workName = taskNodeReference.getWorkName();
-
-		// Determine if have the work name
-		boolean isHaveWorkName = !ConstructUtil.isBlank(workName);
-		if (isWorkNameRequired && (!isHaveWorkName)) {
-			issues.addIssue(assetType, assetName, "No work name provided for "
-					+ forItemDescription);
-			return null; // must have the work name
+		// Obtain the function name
+		String functionName = functionReference.getFunctionName();
+		if (ConstructUtil.isBlank(functionName)) {
+			issues.addIssue(assetType, assetName, "No function name provided for " + forItemDescription);
+			return null; // must have the function name
 		}
 
-		// Obtain the task name
-		String taskName = taskNodeReference.getTaskName();
-		if (ConstructUtil.isBlank(taskName)) {
-			issues.addIssue(assetType, assetName, "No task name provided for "
-					+ forItemDescription);
-			return null; // must have the task name
-		}
+		// Obtain the function meta-data
+		ManagedFunctionMetaData<?, ?> functionMetaData = functionLocator.getManagedFunctionMetaData(functionName);
 
-		// Obtain the task meta-data
-		ManagedFunctionMetaData<?, ?, ?> taskMetaData;
-		if (isHaveWorkName) {
-			taskMetaData = taskLocator.getTaskMetaData(workName, taskName);
-		} else {
-			taskMetaData = taskLocator.getTaskMetaData(taskName);
-		}
-
-		// Ensure have the task meta-data
-		if (taskMetaData == null) {
-
-			// Ensure have the name of the work being searched
-			if (!isHaveWorkName) {
-				workName = taskLocator.getDefaultWorkMetaData().getWorkName();
-			}
-
-			// Indicate issue as can not find meta-data
+		// Ensure have the function meta-data
+		if (functionMetaData == null) {
 			issues.addIssue(assetType, assetName,
-					"Can not find task meta-data (work=" + workName + ", task="
-							+ taskName + ") for " + forItemDescription);
+					"Can not find function meta-data " + functionName + " for " + forItemDescription);
 			return null; // must find the task meta-data
 		}
 
-		// Ensure correct argument type as parameter for the task
-		Class<?> argumentType = taskNodeReference.getArgumentType();
-		Class<?> parameterType = taskMetaData.getParameterType();
+		// Ensure correct argument type as parameter for the function
+		Class<?> argumentType = functionReference.getArgumentType();
+		Class<?> parameterType = functionMetaData.getParameterType();
 		if ((argumentType != null) && (parameterType != null)) {
 			// Ensure argument may be passed as a parameter to the task
 			if (!parameterType.isAssignableFrom(argumentType)) {
-
-				// Ensure have the name of the work being searched
-				if (!isHaveWorkName) {
-					workName = taskLocator.getDefaultWorkMetaData()
-							.getWorkName();
-				}
-
-				// Indicate issue that incompatible types
 				issues.addIssue(assetType, assetName,
-						"Argument is not compatible with task parameter (argument="
-								+ argumentType.getName() + ", parameter="
-								+ parameterType.getName() + ", work="
-								+ workName + ", task=" + taskName + ") for "
+						"Argument is not compatible with task parameter (argument=" + argumentType.getName()
+								+ ", parameter=" + parameterType.getName() + ", function=" + functionName + ") for "
 								+ forItemDescription);
 				return null; // must have compatible argument to parameter
 			}
 		}
 
-		// Return the task meta-data
-		return taskMetaData;
+		// Return the function meta-data
+		return functionMetaData;
 	}
 
 	/**
@@ -271,12 +224,11 @@ public class ConstructUtil {
 	 * <p>
 	 * This provides generic type safe creation.
 	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
-	 * @param taskMetaData
+	 * @param functionMetaData
 	 *            {@link ManagedFunctionMetaData}.
+	 * @param isSpawnThreadState
+	 *            <code>true</code> for {@link Flow} to spawn a
+	 *            {@link ThreadState}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param assetType
@@ -289,22 +241,18 @@ public class ConstructUtil {
 	 *            {@link OfficeFloorIssues}.
 	 * @return New {@link FlowMetaData}.
 	 */
-	public static <W extends Work> FlowMetaData<W> newFlowMetaData(
-			FlowInstigationStrategyEnum instigationStrategy,
-			ManagedFunctionMetaData<W, ?, ?> taskMetaData,
-			AssetManagerFactory assetManagerFactory, AssetType assetType,
-			String assetName, String responsibility, OfficeFloorIssues issues) {
+	public static FlowMetaData newFlowMetaData(ManagedFunctionMetaData<?, ?> functionMetaData,
+			boolean isSpawnThreadState, AssetManagerFactory assetManagerFactory, AssetType assetType, String assetName,
+			String responsibility, OfficeFloorIssues issues) {
 
-		// Only create the asset manager if asynchronous flow
+		// Only create the asset manager if spawning thead state
 		AssetManager flowAssetManager = null;
-		if (instigationStrategy == FlowInstigationStrategyEnum.ASYNCHRONOUS) {
-			flowAssetManager = assetManagerFactory.createAssetManager(
-					assetType, assetName, responsibility, issues);
+		if (isSpawnThreadState) {
+			flowAssetManager = assetManagerFactory.createAssetManager(assetType, assetName, responsibility, issues);
 		}
 
 		// Create and return the flow meta-data
-		return new FlowMetaDataImpl<W>(instigationStrategy, taskMetaData,
-				flowAssetManager);
+		return new FlowMetaDataImpl(isSpawnThreadState, functionMetaData, flowAssetManager);
 	}
 
 	/**

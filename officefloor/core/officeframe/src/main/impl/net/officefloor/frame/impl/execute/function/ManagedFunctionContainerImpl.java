@@ -576,6 +576,38 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		}
 
 		@Override
+		public Object getObject(ManagedObjectIndex index) {
+
+			// Easy access to container
+			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
+
+			// Obtain the managed object container
+			ManagedObjectContainer moContainer = null;
+			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
+			switch (index.getManagedObjectScope()) {
+			case FUNCTION:
+				moContainer = container.managedObjects[scopeIndex];
+				break;
+
+			case THREAD:
+				moContainer = container.getFlow().getThreadState().getManagedObjectContainer(scopeIndex);
+				break;
+
+			case PROCESS:
+				moContainer = container.getFlow().getThreadState().getProcessState()
+						.getManagedObjectContainer(scopeIndex);
+				break;
+
+			default:
+				throw new IllegalStateException(
+						"Unknown " + ManagedObject.class.getSimpleName() + " scope " + index.getManagedObjectScope());
+			}
+
+			// Return the object from the container
+			return moContainer.getObject();
+		}
+
+		@Override
 		public final void doFlow(FlowMetaData flowMetaData, Object parameter, FlowCallback callback) {
 
 			// Easy access to container
