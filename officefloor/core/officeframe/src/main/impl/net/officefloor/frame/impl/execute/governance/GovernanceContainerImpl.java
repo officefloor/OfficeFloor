@@ -38,12 +38,12 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceContainerImpl<I, F extends Enum<F>> implements GovernanceContainer<I> {
+public class GovernanceContainerImpl<E, F extends Enum<F>> implements GovernanceContainer<E> {
 
 	/**
 	 * {@link GovernanceMetaData}.
 	 */
-	private final GovernanceMetaData<I, F> metaData;
+	private final GovernanceMetaData<E, F> metaData;
 
 	/**
 	 * {@link ThreadState} this {@link Governance} resides within.
@@ -53,9 +53,9 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 	/**
 	 * {@link RegisteredGovernance} instances.
 	 */
-	private final LinkedListSet<RegisteredGovernanceImpl, GovernanceContainer<I>> registeredGovernances = new StrictLinkedListSet<RegisteredGovernanceImpl, GovernanceContainer<I>>() {
+	private final LinkedListSet<RegisteredGovernanceEntry, GovernanceContainer<E>> registeredGovernances = new StrictLinkedListSet<RegisteredGovernanceEntry, GovernanceContainer<E>>() {
 		@Override
-		protected GovernanceContainer<I> getOwner() {
+		protected GovernanceContainer<E> getOwner() {
 			return GovernanceContainerImpl.this;
 		}
 	};
@@ -63,7 +63,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 	/**
 	 * {@link Governance}.
 	 */
-	private Governance<? super I, F> governance = null;
+	private Governance<? super E, F> governance = null;
 
 	/**
 	 * Initiate.
@@ -73,7 +73,7 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 	 * @param threadState
 	 *            {@link ThreadState}.
 	 */
-	public GovernanceContainerImpl(GovernanceMetaData<I, F> metaData, ThreadState threadState) {
+	public GovernanceContainerImpl(GovernanceMetaData<E, F> metaData, ThreadState threadState) {
 		this.metaData = metaData;
 		this.threadState = threadState;
 	}
@@ -91,10 +91,10 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 			@Override
 			public FunctionState execute() {
 				// Easy access to container
-				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
+				GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;
 
 				// Create the governance activity in its own flow
-				Flow flow = container.threadState.createFlow();
+				Flow flow = container.threadState.createFlow(null);
 				return flow.createGovernanceFunction(activity, container.metaData);
 			}
 		};
@@ -110,24 +110,54 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 	}
 
 	@Override
-	public RegisteredGovernance registerManagedObject(I managedObjectExtension,
+	public RegisteredGovernance registerManagedObject(E managedObjectExtension,
 			ManagedObjectContainer managedobjectContainer) {
-		RegisteredGovernanceImpl registeredGovernance = new RegisteredGovernanceImpl(managedObjectExtension,
-				managedobjectContainer);
-		return registeredGovernance;
+		return new RegisteredGovernanceEntry(managedObjectExtension, managedobjectContainer).registeredGovernance;
 	}
 
 	/**
-	 * {@link RegisteredGovernance}.
+	 * {@link RegisteredGovernance} entry.
 	 */
-	private class RegisteredGovernanceImpl
-			extends AbstractLinkedListSetEntry<RegisteredGovernanceImpl, GovernanceContainer<I>>
+	private class RegisteredGovernanceEntry
+			extends AbstractLinkedListSetEntry<RegisteredGovernanceEntry, GovernanceContainer<E>> {
+
+		/**
+		 * {@link RegisteredGovernanceImpl}.
+		 */
+		private final RegisteredGovernanceImpl registeredGovernance;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param registeredGovernance
+		 *            {@link RegisteredGovernanceImpl}.
+		 */
+		public RegisteredGovernanceEntry(E managedObjectExtension, ManagedObjectContainer managedObjectContainer) {
+			this.registeredGovernance = new RegisteredGovernanceImpl(this, managedObjectExtension,
+					managedObjectContainer);
+		}
+
+		@Override
+		public GovernanceContainer<E> getLinkedListSetOwner() {
+			return GovernanceContainerImpl.this;
+		}
+	}
+
+	/**
+	 * {@link RegisteredGovernance} implementation.
+	 */
+	private class RegisteredGovernanceImpl extends AbstractLinkedListSetEntry<FunctionState, Flow>
 			implements RegisteredGovernance {
+
+		/**
+		 * {@link RegisteredGovernanceEntry}.
+		 */
+		private final RegisteredGovernanceEntry entry;
 
 		/**
 		 * Extension to the {@link ManagedObject} to enable {@link Governance}.
 		 */
-		private final I managedObjectExtension;
+		private final E managedObjectExtension;
 
 		/**
 		 * {@link ManagedObjectContainer}.
@@ -137,6 +167,8 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 		/**
 		 * Instantiate.
 		 * 
+		 * @param entry
+		 *            {@link RegisteredGovernanceEntry}.
 		 * @param managedObjectExtension
 		 *            Extension to the {@link ManagedObject} to enable
 		 *            {@link Governance}.
@@ -144,18 +176,11 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 		 *            {@link ManagedObjectContainer} for the
 		 *            {@link ManagedObject}.
 		 */
-		public RegisteredGovernanceImpl(I managedObjectExtension, ManagedObjectContainer managedObjectContainer) {
+		public RegisteredGovernanceImpl(RegisteredGovernanceEntry entry, E managedObjectExtension,
+				ManagedObjectContainer managedObjectContainer) {
+			this.entry = entry;
 			this.managedObjectExtension = managedObjectExtension;
 			this.managedObjectContainer = managedObjectContainer;
-		}
-
-		/*
-		 * ====================== LinkedListSetEntry =========================
-		 */
-
-		@Override
-		public GovernanceContainer<I> getLinkedListSetOwner() {
-			return GovernanceContainerImpl.this;
 		}
 
 		/*
@@ -169,19 +194,19 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 				public FunctionState execute() {
 
 					// Easy access to container
-					GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
+					GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;
 
 					// Remove from registration
-					container.registeredGovernances.removeEntry(RegisteredGovernanceImpl.this);
+					container.registeredGovernances.removeEntry(RegisteredGovernanceImpl.this.entry);
 
 					// Determine if have governance
 					if (container.governance != null) {
 						return container.doGovernanceActivity(new GovernanceActivity<F>() {
 							@Override
-							public FunctionState doActivity(GovernanceContext<F> context) {
+							public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
 								// TODO what to handle here
-								return new FailGovernanceOperation(new UnsupportedOperationException(
-										"TODO how to handle unregistering managed object from governance"));
+								throw new UnsupportedOperationException(
+										"TODO how to handle unregistering managed object from governance");
 							}
 						});
 					}
@@ -210,10 +235,10 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 		public FunctionState execute() {
 
 			// Easy access to container
-			GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
+			GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;
 
 			// Register the governance
-			container.registeredGovernances.addEntry(this);
+			container.registeredGovernances.addEntry(this.entry);
 
 			// Determine if must be activated in existing governance
 			if (container.governance == null) {
@@ -223,14 +248,10 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 			// Must activate managed object with governance
 			return container.doGovernanceActivity(new GovernanceActivity<F>() {
 				@Override
-				public FunctionState doActivity(GovernanceContext<F> context) {
-					try {
-						container.governance.governManagedObject(RegisteredGovernanceImpl.this.managedObjectExtension,
-								context);
-						return null;
-					} catch (Throwable ex) {
-						return new FailGovernanceOperation(ex);
-					}
+				public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
+					container.governance.governManagedObject(RegisteredGovernanceImpl.this.managedObjectExtension,
+							context);
+					return null;
 				}
 			});
 		}
@@ -240,25 +261,22 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 	public FunctionState activateGovernance() {
 		return this.doGovernanceActivity(new GovernanceActivity<F>() {
 			@Override
-			public FunctionState doActivity(GovernanceContext<F> context) {
+			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
+
 				// Easy access to container
-				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
-				try {
-					// Ensure have governance
-					if (container.governance == null) {
-						container.governance = container.metaData.getGovernanceFactory().createGovernance();
-					}
+				GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;
 
-					// Activate governance for each registered managed object
-					RegisteredGovernanceImpl registered = container.registeredGovernances.getHead();
-					while (registered != null) {
-						container.governance.governManagedObject(registered.managedObjectExtension, context);
-						registered = registered.getNext();
-					}
+				// Ensure have governance
+				if (container.governance == null) {
+					container.governance = container.metaData.getGovernanceFactory().createGovernance();
+				}
 
-				} catch (Throwable ex) {
-					container.governance = null;
-					return new FailGovernanceOperation(ex);
+				// Activate governance for each registered managed object
+				RegisteredGovernanceEntry registered = container.registeredGovernances.getHead();
+				while (registered != null) {
+					container.governance.governManagedObject(registered.registeredGovernance.managedObjectExtension,
+							context);
+					registered = registered.getNext();
 				}
 
 				// Governance activated
@@ -271,80 +289,48 @@ public class GovernanceContainerImpl<I, F extends Enum<F>> implements Governance
 	public FunctionState enforceGovernance() {
 		return this.doGovernanceActivity(new GovernanceActivity<F>() {
 			@Override
-			public FunctionState doActivity(GovernanceContext<F> context) {
+			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
+
 				// Easy access to container
-				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
-				try {
+				GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;
 
-					// Enforce the governance
-					container.governance.enforceGovernance(context);
-
-				} catch (Throwable ex) {
-					return new FailGovernanceOperation(ex);
-				}
+				// Enforce the governance
+				Governance<? super E, F> governance = container.governance;
+				container.governance = null;
+				governance.enforceGovernance(context);
 
 				// Governance enforced
-				container.governance = null;
 				return null;
 			}
 		});
+
 	}
 
 	@Override
 	public FunctionState disregardGovernance() {
 		return this.doGovernanceActivity(new GovernanceActivity<F>() {
 			@Override
-			public FunctionState doActivity(GovernanceContext<F> context) {
+			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
+
 				// Easy access to container
-				GovernanceContainerImpl<I, F> container = GovernanceContainerImpl.this;
-				try {
+				GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;
 
-					// Disregard the governance
-					container.governance.disregardGovernance(context);
-
-				} catch (Throwable ex) {
-					return new FailGovernanceOperation(ex);
-				}
+				// Disregard the governance
+				Governance<? super E, F> governance = container.governance;
+				container.governance = null;
+				governance.disregardGovernance(context);
 
 				// Governance disregarded
-				container.governance = null;
 				return null;
 			}
 		});
 	}
 
 	/**
-	 * {@link FunctionState} to fail the {@link Governance}.
-	 */
-	private class FailGovernanceOperation extends GovernanceOperation {
-
-		/**
-		 * Cause of the failure.
-		 */
-		private final Throwable failure;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param failure
-		 *            Cause of the failure.
-		 */
-		public FailGovernanceOperation(Throwable failure) {
-			this.failure = failure;
-		}
-
-		@Override
-		public FunctionState execute() {
-			GovernanceContainerImpl.this.threadState.setFailure(this.failure);
-			GovernanceContainerImpl.this.governance = null;
-			return null;
-		}
-	}
-
-	/**
 	 * {@link Governance} operation.
 	 */
-	private abstract class GovernanceOperation implements FunctionState {
+	private abstract class GovernanceOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
+			implements FunctionState {
 
 		@Override
 		public TeamManagement getResponsibleTeam() {

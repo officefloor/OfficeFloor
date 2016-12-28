@@ -31,17 +31,6 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface AdministratorMetaData<E extends Object, A extends Enum<A>> extends ManagedFunctionLogicMetaData {
 
 	/**
-	 * Creates a new {@link AdministratorContainer} from this
-	 * {@link AdministratorMetaData}.
-	 * 
-	 * @param threadState
-	 *            {@link ThreadState} responsible for managing this
-	 *            {@link AdministratorContainer}.
-	 * @return New {@link AdministratorContainer}.
-	 */
-	AdministratorContainer<A> createAdministratorContainer(ThreadState threadState);
-
-	/**
 	 * Obtains the {@link AdministratorSource}.
 	 * 
 	 * @return {@link AdministratorSource}.

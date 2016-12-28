@@ -283,8 +283,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 			}
 
 			// No flows, so provide empty execution context
-			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(null, -1, null,
-					officeMetaData);
+			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>();
 			return;
 		}
 

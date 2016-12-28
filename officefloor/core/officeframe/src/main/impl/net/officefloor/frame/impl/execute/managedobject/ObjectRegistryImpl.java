@@ -17,10 +17,9 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 
@@ -29,12 +28,13 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
  * 
  * @author Daniel Sagenschneider
  */
-public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> {
+public class ObjectRegistryImpl<O extends Enum<O>> implements ObjectRegistry<O> {
 
 	/**
-	 * {@link WorkContainer} to obtain the coordinating {@link ManagedObject}.
+	 * {@link ManagedFunctionContainer} to obtain the coordinating
+	 * {@link ManagedObject} instances.
 	 */
-	private final WorkContainer<?> workContainer;
+	private final ManagedFunctionContainer managedFunction;
 
 	/**
 	 * {@link ManagedObjectIndex} for the dependencies in the index order
@@ -43,30 +43,18 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 	private final ManagedObjectIndex[] dependencies;
 
 	/**
-	 * {@link ThreadState} requesting the coordinating of the
-	 * {@link ManagedObject}.
-	 */
-	private final ThreadState threadState;
-
-	/**
 	 * Initiate.
 	 * 
-	 * @param workContainer
-	 *            {@link WorkContainer} to obtain the coordinating
-	 *            {@link ManagedObject}.
+	 * @param managedFunction
+	 *            {@link ManagedFunctionContainer} to obtain the coordinating
+	 *            {@link ManagedObject} instances.
 	 * @param dependencies
 	 *            {@link ManagedObjectIndex} for the dependencies in the index
 	 *            order required.
-	 * @param threadState
-	 *            {@link ThreadState} requesting the coordinating of the
-	 *            {@link ManagedObject}. This is used to access the
-	 *            {@link ProcessState} bound {@link ManagedObject} instances.
 	 */
-	public ObjectRegistryImpl(WorkContainer<?> workContainer, ManagedObjectIndex[] dependencies,
-			ThreadState threadState) {
-		this.workContainer = workContainer;
+	public ObjectRegistryImpl(ManagedFunctionContainer managedFunction, ManagedObjectIndex[] dependencies) {
+		this.managedFunction = managedFunction;
 		this.dependencies = dependencies;
-		this.threadState = threadState;
 	}
 
 	/*
@@ -74,7 +62,7 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 	 */
 
 	@Override
-	public Object getObject(D key) {
+	public Object getObject(O key) {
 		return this.getObject(key.ordinal());
 	}
 
@@ -84,8 +72,12 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 		// Obtain the managed object index for the dependency
 		ManagedObjectIndex moIndex = this.dependencies[index];
 
+		// Obtain the managed object container
+		ManagedObjectContainer moContainer = ManagedObjectContainerImpl.getManagedObjectContainer(moIndex,
+				this.managedFunction);
+
 		// Obtain the dependency
-		Object dependency = this.workContainer.getObject(moIndex);
+		Object dependency = moContainer.getObject();
 
 		// Return the dependency
 		return dependency;

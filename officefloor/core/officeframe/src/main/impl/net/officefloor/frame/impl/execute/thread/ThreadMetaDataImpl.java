@@ -17,12 +17,14 @@
  */
 package net.officefloor.frame.impl.execute.thread;
 
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
+import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
-import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link ThreadMetaData} implementation.
@@ -47,9 +49,14 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	private final AdministratorMetaData<?, ?>[] administratorMetaData;
 
 	/**
-	 * {@link GovernanceDeactivationStrategy} on {@link ThreadState} completion.
+	 * {@link Office} {@link EscalationProcedure}.
 	 */
-	private final GovernanceDeactivationStrategy governanceDeactivationStrategy;
+	private final EscalationProcedure officeEscalationProcedure;
+
+	/**
+	 * {@link OfficeFloor} {@link EscalationFlow}.
+	 */
+	private final EscalationFlow officeFloorEscalation;
 
 	/**
 	 * Initiate.
@@ -60,18 +67,19 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	 *            {@link GovernanceMetaData} instances.
 	 * @param administratorMetaData
 	 *            {@link AdministratorMetaData} instances.
-	 * @param governanceDeactivationStrategy
-	 *            {@link GovernanceDeactivationStrategy} on {@link ThreadState}
-	 *            completion.
+	 * @param officeEscalationProcedure
+	 *            {@link Office} {@link EscalationProcedure}.
+	 * @param officeFloorEscalation
+	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 */
 	public ThreadMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
-			GovernanceMetaData<?, ?>[] governanceMetaData,
-			AdministratorMetaData<?, ?>[] administratorMetaData,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
+			GovernanceMetaData<?, ?>[] governanceMetaData, AdministratorMetaData<?, ?>[] administratorMetaData,
+			EscalationProcedure officeEscalationProcedure, EscalationFlow officeFloorEscalation) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.governanceMetaData = governanceMetaData;
 		this.administratorMetaData = administratorMetaData;
-		this.governanceDeactivationStrategy = governanceDeactivationStrategy;
+		this.officeEscalationProcedure = officeEscalationProcedure;
+		this.officeFloorEscalation = officeFloorEscalation;
 	}
 
 	/*
@@ -94,8 +102,13 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	}
 
 	@Override
-	public GovernanceDeactivationStrategy getGovernanceDeactivationStrategy() {
-		return this.governanceDeactivationStrategy;
+	public EscalationProcedure getOfficeEscalationProcedure() {
+		return this.officeEscalationProcedure;
+	}
+
+	@Override
+	public EscalationFlow getOfficeFloorEscalation() {
+		return this.officeFloorEscalation;
 	}
 
 }

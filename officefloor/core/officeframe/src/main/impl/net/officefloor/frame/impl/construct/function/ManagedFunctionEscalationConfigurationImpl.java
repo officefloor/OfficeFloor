@@ -25,7 +25,7 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskEscalationConfigurationImpl implements ManagedFunctionEscalationConfiguration {
+public class ManagedFunctionEscalationConfigurationImpl implements ManagedFunctionEscalationConfiguration {
 
 	/**
 	 * Type of cause.
@@ -45,7 +45,7 @@ public class TaskEscalationConfigurationImpl implements ManagedFunctionEscalatio
 	 * @param taskNodeReference
 	 *            {@link ManagedFunctionReference}.
 	 */
-	public TaskEscalationConfigurationImpl(Class<? extends Throwable> typeOfCause,
+	public ManagedFunctionEscalationConfigurationImpl(Class<? extends Throwable> typeOfCause,
 			ManagedFunctionReference taskNodeReference) {
 		this.typeOfCause = typeOfCause;
 		this.taskNodeReference = taskNodeReference;

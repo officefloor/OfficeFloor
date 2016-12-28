@@ -46,7 +46,7 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	 * 
 	 * @return {@link ManagedFunctionFactory}.
 	 */
-	ManagedFunctionFactory<O, F> getTaskFactory();
+	ManagedFunctionFactory<O, F> getManagedFunctionFactory();
 
 	/**
 	 * Obtains the differentiator for the {@link ManagedFunction}.
@@ -81,7 +81,7 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	 * @return Listing of {@link Administrator} configuration this
 	 *         {@link ManagedFunction}.
 	 */
-	AdministratorSourceConfiguration<?, ?>[] getAdministratorConfiguration();
+	AdministratorConfiguration<?, ?>[] getAdministratorConfiguration();
 
 	/**
 	 * Obtains the reference to the next {@link ManagedFunction}.

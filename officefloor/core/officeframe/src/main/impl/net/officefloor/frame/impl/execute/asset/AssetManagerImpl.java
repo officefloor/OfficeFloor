@@ -17,12 +17,18 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
+import java.util.function.Function;
+
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.LinkedListSetFunctionLogic;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -36,7 +42,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public class AssetManagerImpl implements AssetManager {
+public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, Flow> implements AssetManager {
 
 	/**
 	 * {@link ProcessState} that is managing the {@link Office}.
@@ -84,7 +90,7 @@ public class AssetManagerImpl implements AssetManager {
 	 * 
 	 * @return {@link FunctionLoop}.
 	 */
-	FunctionLoop getJobNodeLoop() {
+	FunctionLoop getFunctionLoop() {
 		return this.loop;
 	}
 
@@ -127,7 +133,7 @@ public class AssetManagerImpl implements AssetManager {
 	}
 
 	@Override
-	public FunctionState execute() {
+	public FunctionState execute() throws Throwable {
 
 		// Copy the list of latches
 		LinkedListSetItem<AssetLatchImpl> head = this.latches.copyEntries();
@@ -136,7 +142,19 @@ public class AssetManagerImpl implements AssetManager {
 		}
 
 		// Undertake checks for each of the latches
-		return LinkedListSetFunctionLogic.createCastJobNode(head);
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		FunctionLogic functionLogic = new LinkedListSetFunctionLogic(head, LATCH_TO_CHECK);
+		return functionLogic.execute(new FlowImpl(null, this.officeManagerProcess.getMainThreadState()));
 	}
+
+	/**
+	 * Obtains the check {@link FunctionState} for the {@link AssetLatch}.
+	 */
+	private static final Function<LinkedListSetItem<AssetLatchImpl>, FunctionState> LATCH_TO_CHECK = new Function<LinkedListSetItem<AssetLatchImpl>, FunctionState>() {
+		@Override
+		public FunctionState apply(LinkedListSetItem<AssetLatchImpl> latch) {
+			return latch.getEntry().check();
+		}
+	};
 
 }

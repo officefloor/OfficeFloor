@@ -28,6 +28,12 @@ import net.officefloor.frame.spi.team.Team;
  */
 public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 
+	@Override
+	default Flow getLinkedListSetOwner() {
+		throw new IllegalStateException(this.getClass().getName()
+				+ " must override getLinkedListSetOwner to be added to a " + LinkedListSet.class.getName());
+	}
+
 	/**
 	 * <p>
 	 * Obtains the {@link TeamManagement} responsible for this
@@ -40,18 +46,20 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	 *         {@link FunctionState}. May be <code>null</code> to indicate any
 	 *         {@link Team} may execute the {@link FunctionState}.
 	 */
-	TeamManagement getResponsibleTeam();
+	default TeamManagement getResponsibleTeam() {
+		return null; // any team by default
+	}
 
 	/**
 	 * <p>
-	 * Obtains the {@link Flow} for this {@link FunctionState}.
+	 * Obtains the {@link ThreadState} for this {@link FunctionState}.
 	 * <p>
 	 * This provides access to the {@link ThreadState} that this
 	 * {@link FunctionState} resides within.
 	 * 
-	 * @return {@link Flow} for this {@link FunctionState}.
+	 * @return {@link ThreadState} for this {@link FunctionState}.
 	 */
-	Flow getFlow();
+	ThreadState getThreadState();
 
 	/**
 	 * Indicates if the {@link FunctionState} requires {@link ThreadState}
@@ -60,7 +68,9 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	 * @return <code>true</code> should {@link FunctionState} require
 	 *         {@link ThreadState} safety.
 	 */
-	boolean isRequireThreadStateSafety();
+	default boolean isRequireThreadStateSafety() {
+		return false; // no thread safety required by default
+	}
 
 	/**
 	 * Executes the {@link FunctionState}.
@@ -94,7 +104,7 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	 * @return Optional {@link FunctionState} to handle the {@link Escalation}.
 	 */
 	default FunctionState handleEscalation(Throwable escalation) {
-		return this.getFlow().handleEscalation(escalation);
+		return this.getThreadState().handleEscalation(escalation);
 	}
 
 }

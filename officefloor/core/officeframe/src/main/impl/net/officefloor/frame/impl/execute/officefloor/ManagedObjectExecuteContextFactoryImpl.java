@@ -17,14 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
-import java.util.Timer;
-
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -58,6 +55,17 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	private final OfficeMetaData officeMetaData;
 
 	/**
+	 * Instantiate for {@link ManagedObjectExecuteContext} that has no
+	 * {@link FlowMetaData}.
+	 */
+	public ManagedObjectExecuteContextFactoryImpl() {
+		this.managedObjectMetaData = null;
+		this.processMoIndex = -1;
+		this.processLinks = new FlowMetaData[0];
+		this.officeMetaData = null;
+	}
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectMetaData
@@ -85,11 +93,9 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	 */
 
 	@Override
-	public ManagedObjectExecuteContext<F> createManagedObjectExecuteContext(Timer timer,
-			TeamManagement escalationResponsibleTeam) {
-		return new ManagedObjectExecuteContextImpl<F>(this.managedObjectMetaData, this.processMoIndex,
-				this.processLinks, this.officeMetaData, escalationResponsibleTeam,
-				this.officeMetaData.getFunctionLoop(), timer);
+	public ManagedObjectExecuteContext<F> createManagedObjectExecuteContext() {
+		return new ManagedObjectExecuteContextImpl<>(this.managedObjectMetaData, this.processMoIndex, this.processLinks,
+				this.officeMetaData);
 	}
 
 }

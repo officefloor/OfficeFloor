@@ -26,7 +26,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
@@ -688,7 +688,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.recordReturn(this.rawOfficeMetaData,
 				this.rawOfficeMetaData.getOfficeScopeAdministrators(),
 				this.officeScopeAdministrators);
-		AdministratorSourceConfiguration<?, ?>[] adminConfiguration = new AdministratorSourceConfiguration[adminCount];
+		AdministratorConfiguration<?, ?>[] adminConfiguration = new AdministratorConfiguration[adminCount];
 		this.recordReturn(this.configuration,
 				this.configuration.getAdministratorConfiguration(),
 				adminConfiguration);

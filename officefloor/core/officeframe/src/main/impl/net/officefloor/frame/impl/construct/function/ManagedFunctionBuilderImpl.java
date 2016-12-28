@@ -31,7 +31,7 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
@@ -56,7 +56,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
+public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 		implements ManagedFunctionBuilder<O, F>, ManagedFunctionConfiguration<O, F> {
 
 	/**
@@ -72,12 +72,12 @@ public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	/**
 	 * {@link Object} instances to be linked to this {@link ManagedFunction}.
 	 */
-	private final Map<Integer, TaskObjectConfigurationImpl<O>> objects = new HashMap<Integer, TaskObjectConfigurationImpl<O>>();
+	private final Map<Integer, ManagedFunctionObjectConfigurationImpl<O>> objects = new HashMap<Integer, ManagedFunctionObjectConfigurationImpl<O>>();
 
 	/**
 	 * {@link Flow} instances to be linked to this {@link ManagedFunction}.
 	 */
-	private final Map<Integer, TaskFlowConfigurationImpl<F>> flows = new HashMap<Integer, TaskFlowConfigurationImpl<F>>();
+	private final Map<Integer, ManagedFunctionFlowConfigurationImpl<F>> flows = new HashMap<Integer, ManagedFunctionFlowConfigurationImpl<F>>();
 
 	/**
 	 * {@link Governance} instances to be active for this
@@ -104,13 +104,13 @@ public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	 * Listing of task administration duties to do before executing the
 	 * {@link ManagedFunction}.
 	 */
-	private final List<TaskDutyConfigurationImpl<?>> preFunctionDuties = new LinkedList<TaskDutyConfigurationImpl<?>>();
+	private final List<ManagedFunctionDutyConfigurationImpl<?>> preFunctionDuties = new LinkedList<ManagedFunctionDutyConfigurationImpl<?>>();
 
 	/**
 	 * Listing of task administration duties to do after executing the
 	 * {@link ManagedFunction}.
 	 */
-	private final List<TaskDutyConfigurationImpl<?>> postFunctionDuties = new LinkedList<TaskDutyConfigurationImpl<?>>();
+	private final List<ManagedFunctionDutyConfigurationImpl<?>> postFunctionDuties = new LinkedList<ManagedFunctionDutyConfigurationImpl<?>>();
 
 	/**
 	 * Listing of {@link ManagedFunction} bound {@link ManagedObject}
@@ -122,7 +122,7 @@ public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	 * Listing of {@link ManagedFunction} bound {@link Administrator}
 	 * configuration.
 	 */
-	private final List<AdministratorSourceConfiguration<?, ?>> functionAdministrators = new LinkedList<AdministratorSourceConfiguration<?, ?>>();
+	private final List<AdministratorConfiguration<?, ?>> functionAdministrators = new LinkedList<AdministratorConfiguration<?, ?>>();
 
 	/**
 	 * Listing of {@link ManagedFunctionEscalationConfiguration} instances to
@@ -139,7 +139,7 @@ public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	 * @param functionFactory
 	 *            {@link ManagedFunctionFactory}.
 	 */
-	public TaskBuilderImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory) {
+	public ManagedFunctionBuilderImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory) {
 		this.functionName = functionName;
 		this.functionFactory = functionFactory;
 	}
@@ -202,28 +202,28 @@ public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	 */
 	private void linkObject(int objectIndex, O objectKey, boolean isParameter, String scopeManagedObjectName,
 			Class<?> objectType) {
-		this.objects.put(new Integer(objectIndex), new TaskObjectConfigurationImpl<O>(isParameter,
+		this.objects.put(new Integer(objectIndex), new ManagedFunctionObjectConfigurationImpl<O>(isParameter,
 				scopeManagedObjectName, objectType, objectIndex, objectKey));
 	}
 
 	@Override
 	public void linkPreFunctionAdministration(String scopeAdministratorName, String dutyName) {
-		this.preFunctionDuties.add(new TaskDutyConfigurationImpl<None>(scopeAdministratorName, dutyName));
+		this.preFunctionDuties.add(new ManagedFunctionDutyConfigurationImpl<None>(scopeAdministratorName, dutyName));
 	}
 
 	@Override
 	public <A extends Enum<A>> void linkPreFunctionAdministration(String scopeAdministratorName, A dutyKey) {
-		this.preFunctionDuties.add(new TaskDutyConfigurationImpl<A>(scopeAdministratorName, dutyKey));
+		this.preFunctionDuties.add(new ManagedFunctionDutyConfigurationImpl<A>(scopeAdministratorName, dutyKey));
 	}
 
 	@Override
 	public void linkPostFunctionAdministration(String scopeAdministratorName, String dutyName) {
-		this.postFunctionDuties.add(new TaskDutyConfigurationImpl<None>(scopeAdministratorName, dutyName));
+		this.postFunctionDuties.add(new ManagedFunctionDutyConfigurationImpl<None>(scopeAdministratorName, dutyName));
 	}
 
 	@Override
 	public <A extends Enum<A>> void linkPostFunctionAdministration(String scopeAdministratorName, A dutyKey) {
-		this.postFunctionDuties.add(new TaskDutyConfigurationImpl<A>(scopeAdministratorName, dutyKey));
+		this.postFunctionDuties.add(new ManagedFunctionDutyConfigurationImpl<A>(scopeAdministratorName, dutyKey));
 	}
 
 	@Override
@@ -261,7 +261,7 @@ public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 		ManagedFunctionReference functionReference = new ManagedFunctionReferenceImpl(functionName, argumentType);
 
 		// Create the flow configuration
-		TaskFlowConfigurationImpl<F> flow = new TaskFlowConfigurationImpl<F>(flowName, functionReference,
+		ManagedFunctionFlowConfigurationImpl<F> flow = new ManagedFunctionFlowConfigurationImpl<F>(flowName, functionReference,
 				isSpawnThreadState, flowIndex, flowKey);
 
 		// Register the flow
@@ -270,7 +270,7 @@ public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 
 	@Override
 	public void addEscalation(Class<? extends Throwable> typeOfCause, String functionName) {
-		this.escalations.add(new TaskEscalationConfigurationImpl(typeOfCause,
+		this.escalations.add(new ManagedFunctionEscalationConfigurationImpl(typeOfCause,
 				new ManagedFunctionReferenceImpl(functionName, typeOfCause)));
 	}
 
@@ -293,7 +293,7 @@ public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 
 	@Override
 	public void addGovernance(String governanceName) {
-		this.governances.add(new TaskGovernanceConfigurationImpl(governanceName));
+		this.governances.add(new ManagedFunctionGovernanceConfigurationImpl(governanceName));
 	}
 
 	/*
@@ -306,7 +306,7 @@ public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public ManagedFunctionFactory<O, F> getTaskFactory() {
+	public ManagedFunctionFactory<O, F> getManagedFunctionFactory() {
 		return this.functionFactory;
 	}
 
@@ -356,8 +356,8 @@ public class TaskBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public AdministratorSourceConfiguration<?, ?>[] getAdministratorConfiguration() {
-		return this.functionAdministrators.toArray(new AdministratorSourceConfiguration[0]);
+	public AdministratorConfiguration<?, ?>[] getAdministratorConfiguration() {
+		return this.functionAdministrators.toArray(new AdministratorConfiguration[0]);
 	}
 
 	@Override

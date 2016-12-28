@@ -547,7 +547,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure default escalation handler
-		EscalationHandlerEscalation officeFloorEscalation = (EscalationHandlerEscalation) metaData
+		EscalationHandlerEscalationFlow officeFloorEscalation = (EscalationHandlerEscalationFlow) metaData
 				.getOfficeFloorEscalation();
 		assertTrue(
 				"Must be default escalation handler",
@@ -577,7 +577,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure use provided escalation handler
-		EscalationHandlerEscalation officeFloorEscalation = (EscalationHandlerEscalation) metaData
+		EscalationHandlerEscalationFlow officeFloorEscalation = (EscalationHandlerEscalationFlow) metaData
 				.getOfficeFloorEscalation();
 		assertEquals("Must be able to provide escalation handler",
 				escalationHandler, officeFloorEscalation.getEscalationHandler());

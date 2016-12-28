@@ -25,6 +25,13 @@ package net.officefloor.frame.internal.structure;
 public interface ManagedFunctionContainer extends FunctionState {
 
 	/**
+	 * Obtains the {@link Flow} containing this {@link ManagedObjectContainer}.
+	 * 
+	 * @return {@link Flow} containing this {@link ManagedObjectContainer}.
+	 */
+	Flow getFlow();
+
+	/**
 	 * Specifies a {@link ManagedFunctionContainer} to be sequentially executed
 	 * after this {@link ManagedFunctionContainer}.
 	 * 
@@ -35,21 +42,14 @@ public interface ManagedFunctionContainer extends FunctionState {
 	void setNextManagedFunctionContainer(ManagedFunctionContainer container);
 
 	/**
-	 * Obtains the {@link ManagedObjectContainer}.
+	 * Obtains the {@link ManagedObjectContainer} bound to this
+	 * {@link ManagedFunctionContainer}.
 	 * 
 	 * @param index
-	 *            Index of the {@link ManagedFunctionContainer}.
-	 * @return {@link ManagedObjectContainer}.
+	 *            Index of the {@link ManagedObjectContainer}.
+	 * @return {@link ManagedObjectContainer} bound to this
+	 *         {@link ManagedFunctionContainer}.
 	 */
 	ManagedObjectContainer getManagedObjectContainer(int index);
-
-	/**
-	 * Obtains the {@link AdministratorContainer}.
-	 * 
-	 * @param adminIndex
-	 *            Index of the {@link AdministratorContainer}.
-	 * @return {@link AdministratorContainer}.
-	 */
-	AdministratorContainer<?> getAdministratorContainer(int adminIndex);
 
 }

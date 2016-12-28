@@ -29,7 +29,7 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
-import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
@@ -82,10 +82,10 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link AdministratorSourceConfiguration}.
+	 * {@link AdministratorConfiguration}.
 	 */
-	private final AdministratorSourceConfiguration<?, ?> configuration = this
-			.createMock(AdministratorSourceConfiguration.class);
+	private final AdministratorConfiguration<?, ?> configuration = this
+			.createMock(AdministratorConfiguration.class);
 
 	/**
 	 * {@link SourceContext}.
@@ -1451,12 +1451,12 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	 * @param expectedCreateCount
 	 *            Expected number to be created.
 	 * @param configuration
-	 *            {@link AdministratorSourceConfiguration} instances.
+	 *            {@link AdministratorConfiguration} instances.
 	 * @return {@link RawBoundAdministratorMetaData}.
 	 */
 	private RawBoundAdministratorMetaData<?, ?>[] constructRawAdministrator(
 			int expectedCreateCount,
-			AdministratorSourceConfiguration<?, ?>... configuration) {
+			AdministratorConfiguration<?, ?>... configuration) {
 
 		// Construct the meta-data
 		RawBoundAdministratorMetaData<?, ?>[] metaData = RawBoundAdministratorMetaDataImpl

@@ -58,10 +58,9 @@ public interface GovernanceMetaData<E, F extends Enum<F>> extends ManagedFunctio
 	 *            {@link GovernanceActivity}.
 	 * @param flow
 	 *            {@link Flow}.
-	 * @return {@link ManagedFunctionContainer} for the
-	 *         {@link GovernanceActivity}.
+	 * @return {@link ManagedFunctionLogic} for the {@link GovernanceActivity}.
 	 */
-	ManagedFunctionContainer createGovernanceFunction(GovernanceActivity<F> activity, Flow flow);
+	ManagedFunctionLogic createGovernanceFunctionLogic(GovernanceActivity<F> activity);
 
 	/**
 	 * Obtains the {@link FlowMetaData} for the specified index.

@@ -17,11 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.UnknownWorkException;
-import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
  * {@link Office} implementation.
@@ -50,32 +50,32 @@ public class OfficeImpl implements Office {
 	 */
 
 	@Override
-	public String[] getWorkNames() {
+	public String[] getFunctionNames() {
 
-		// Obtain the work names
-		WorkMetaData<?>[] workMetaData = this.metaData.getWorkMetaData();
-		String[] workNames = new String[workMetaData.length];
-		for (int i = 0; i < workNames.length; i++) {
-			workNames[i] = workMetaData[i].getWorkName();
+		// Obtain the function names
+		ManagedFunctionMetaData<?, ?>[] functionMetaData = this.metaData.getManagedFunctionMetaData();
+		String[] functionNames = new String[functionMetaData.length];
+		for (int i = 0; i < functionNames.length; i++) {
+			functionNames[i] = functionMetaData[i].getFunctionName();
 		}
 
-		// Return the work names
-		return workNames;
+		// Return the function names
+		return functionNames;
 	}
 
 	@Override
-	public WorkManager getWorkManager(String workName) throws UnknownWorkException {
+	public FunctionManager getFunctionManager(String functionName) throws UnknownFunctionException {
 
-		// Obtain the work meta-data for the work
-		for (WorkMetaData<?> workMetaData : this.metaData.getWorkMetaData()) {
-			if (workMetaData.getWorkName().equals(workName)) {
-				// Have the work meta-data, so return a work manager for it
-				return new WorkManagerImpl(workMetaData, this.metaData);
+		// Obtain the function meta-data for the function
+		for (ManagedFunctionMetaData<?, ?> functionMetaData : this.metaData.getManagedFunctionMetaData()) {
+			if (functionMetaData.getFunctionName().equals(functionName)) {
+				// Have function meta-data, so return function manager for it
+				return new FunctionManagerImpl(functionMetaData, this.metaData);
 			}
 		}
 
-		// Unknown work if at this point
-		throw new UnknownWorkException(workName);
+		// Unknown function if at this point
+		throw new UnknownFunctionException(functionName);
 	}
 
 }

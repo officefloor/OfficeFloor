@@ -20,16 +20,11 @@ package net.officefloor.frame.impl.spi.team;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.api.manage.NoInitialTaskException;
-import net.officefloor.frame.api.manage.ProcessFuture;
 import net.officefloor.frame.api.manage.FunctionManager;
-import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -41,12 +36,7 @@ import net.officefloor.frame.spi.team.source.ProcessContextListener;
  * <p>
  * {@link Team} to re-use the invoking {@link Thread} of the
  * {@link ProcessState}. Typically this will be the {@link Thread} invoking the
- * {@link Work} via the {@link WorkManager}.
- * <p>
- * To enable the invoking {@link Thread} to be available for executing
- * {@link ManagedFunction} instances of the {@link ProcessState}, the
- * {@link Work} by the {@link WorkManager} needs to be invoked with the
- * {@link #doWork(WorkManager, Object)} method.
+ * {@link ManagedFunction} via the {@link FunctionManager}.
  * <p>
  * As the typical focus of this {@link Team} is to integration with Application
  * Servers (using correct {@link Thread} for JNDI lookups), assigned {@link Job}
@@ -70,17 +60,13 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 			CONTEXT_THREAD_INITIAL_CAPACITY);
 
 	/**
-	 * <p>
-	 * Wrap invoking {@link ManagedFunction} on the {@link FunctionManager} to allow
-	 * the {@link Thread} to be available to execute the {@link ManagedFunction}
-	 * instances of the {@link ProcessState}.
-	 * <p>
+	 * Wrap invoking {@link ManagedFunction} on the {@link FunctionManager}.
 	 * This method blocks until the invoked {@link ProcessState} of the invoked
 	 * {@link ManagedFunction} is complete.
 	 * 
-	 * @param taskManager
-	 *            {@link FunctionManager} managing the {@link ManagedFunction} to
-	 *            invoked.
+	 * @param functionManager
+	 *            {@link FunctionManager} managing the {@link ManagedFunction}
+	 *            to invoked.
 	 * @param parameter
 	 *            Parameter for the {@link ManagedFunction}.
 	 * @throws InvalidParameterTypeException
@@ -89,29 +75,20 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
-	public static void doTask(final FunctionManager taskManager, final Object parameter)
+	public static void doFunction(final FunctionManager functionManager, final Object parameter)
 			throws InvalidParameterTypeException, InterruptedException {
-		try {
-			doProcess(new InvokeProcessState() {
-				@Override
-				public void invokeProcessState(ProcessCompletionListener completionListener)
-						throws InvalidParameterTypeException {
-					taskManager.invokeFunction(parameter, completionListener);
-				}
-			});
-		} catch (NoInitialTaskException ex) {
-			throw new IllegalStateException("Should not be able to throw this exception", ex);
-		}
+		doProcess(new InvokeProcessState() {
+			@Override
+			public void invokeProcessState(FlowCallback callback) throws InvalidParameterTypeException {
+				functionManager.invokeProcess(parameter, callback);
+			}
+		});
 	}
 
 	/**
-	 * <p>
 	 * Wrap invoking {@link ProcessState} on the
-	 * {@link ManagedObjectExecuteContext} to allow the {@link Thread} to be
-	 * available to execute the {@link ManagedFunction} instances of the
-	 * {@link ProcessState}.
-	 * <p>
-	 * This method blocks until the invoked {@link ProcessState} is complete.
+	 * {@link ManagedObjectExecuteContext}. This method blocks until the invoked
+	 * {@link ProcessState} is complete.
 	 * 
 	 * @param <F>
 	 *            Flow key type.
@@ -123,25 +100,18 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 *            Parameter for the initial {@link ManagedFunction}.
 	 * @param managedObject
 	 *            {@link ManagedObject}.
-	 * @param escalationHandler
-	 *            {@link EscalationHandler}. May be <code>null</code>.
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
 	public static <F extends Enum<F>> void doProcess(ManagedObjectExecuteContext<F> executeContext, F flowKey,
-			Object parameter, ManagedObject managedObject, EscalationHandler escalationHandler)
-			throws InterruptedException {
-		doProcess(executeContext, flowKey.ordinal(), parameter, managedObject, escalationHandler);
+			Object parameter, ManagedObject managedObject) throws InterruptedException {
+		doProcess(executeContext, flowKey.ordinal(), parameter, managedObject);
 	}
 
 	/**
-	 * <p>
 	 * Wrap invoking {@link ProcessState} on the
-	 * {@link ManagedObjectExecuteContext} to allow the {@link Thread} to be
-	 * available to execute the {@link ManagedFunction} instances of the
-	 * {@link ProcessState}.
-	 * <p>
-	 * This method blocks until the invoked {@link ProcessState} is complete.
+	 * {@link ManagedObjectExecuteContext}. This method blocks until the invoked
+	 * {@link ProcessState} is complete.
 	 * 
 	 * @param executeContext
 	 *            {@link ManagedObjectExecuteContext}.
@@ -151,24 +121,18 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 *            Parameter for the initial {@link ManagedFunction}.
 	 * @param managedObject
 	 *            {@link ManagedObject}.
-	 * @param escalationHandler
-	 *            {@link EscalationHandler}. May be <code>null</code>.
 	 * @throws InterruptedException
 	 *             Should this blocking call be interrupted.
 	 */
 	public static void doProcess(final ManagedObjectExecuteContext<?> executeContext, final int flowIndex,
-			final Object parameter, final ManagedObject managedObject, final EscalationHandler escalationHandler)
-			throws InterruptedException {
+			final Object parameter, final ManagedObject managedObject) throws InterruptedException {
 		try {
 			doProcess(new InvokeProcessState() {
 				@Override
-				public void invokeProcessState(ProcessCompletionListener completionListener) {
-					executeContext.invokeProcess(flowIndex, parameter, managedObject, 0, escalationHandler,
-							completionListener);
+				public void invokeProcessState(FlowCallback calback) {
+					executeContext.invokeProcess(flowIndex, parameter, managedObject, 0, calback);
 				}
 			});
-		} catch (NoInitialTaskException ex) {
-			throw new IllegalStateException("Should not be able to throw this exception", ex);
 		} catch (InvalidParameterTypeException ex) {
 			throw new IllegalStateException("Should not be able to throw this exception", ex);
 		}
@@ -182,18 +146,13 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		/**
 		 * Invokes the {@link ProcessState}.
 		 * 
-		 * @param completionListener
-		 *            {@link ProcessCompletionListener}.
-		 * @return {@link ProcessFuture} for the {@link ProcessState}.
-		 * @throws NoInitialTaskException
-		 *             If {@link Work} of the {@link WorkManager} has no initial
-		 *             {@link ManagedFunction}.
+		 * @param calback
+		 *            {@link FlowCallback}.
 		 * @throws InvalidParameterTypeException
 		 *             Should the parameter type be invalid for
 		 *             {@link ManagedFunction}.
 		 */
-		void invokeProcessState(ProcessCompletionListener completionListener)
-				throws NoInitialTaskException, InvalidParameterTypeException;
+		void invokeProcessState(FlowCallback calback) throws InvalidParameterTypeException;
 	}
 
 	/**
@@ -206,9 +165,6 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 * 
 	 * @param invoker
 	 *            {@link InvokeProcessState}.
-	 * @throws NoInitialTaskException
-	 *             If {@link Work} of the {@link WorkManager} has no initial
-	 *             {@link ManagedFunction}.
 	 * @throws InvalidParameterTypeException
 	 *             Should the parameter type be invalid for the
 	 *             {@link ManagedFunction}.
@@ -216,7 +172,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	 *             Should this blocking call be interrupted.
 	 */
 	private static void doProcess(InvokeProcessState invoker)
-			throws NoInitialTaskException, InvalidParameterTypeException, InterruptedException {
+			throws InvalidParameterTypeException, InterruptedException {
 
 		// Obtain the current Thread
 		final Thread currentThread = Thread.currentThread();
@@ -229,17 +185,17 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 				threadToExecutor.put(currentThread, executor);
 			}
 
-			// Completion listener
-			ProcessCompletionListener completionListener = new ProcessCompletionListener() {
+			// Flow callback for completion
+			FlowCallback callback = new FlowCallback() {
 				@Override
-				public void processComplete() {
+				public void run(Throwable escalation) throws Throwable {
 					threadToExecutor.remove(currentThread);
 					executor.isProcessComplete = true;
 				}
 			};
 
 			// Invoke the process
-			invoker.invokeProcessState(completionListener);
+			invoker.invokeProcessState(callback);
 
 			// Blocking call to execute the Jobs
 			executor.executeJobs();
@@ -275,7 +231,6 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 	/**
 	 * {@link JobExecutor} to be used if no context {@link Thread} available.
 	 */
-	// TODO as passive, should pass previous team
 	private final JobExecutor passiveJobExecutor = new JobExecutor(this);
 
 	/**
@@ -403,11 +358,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 		private volatile boolean isProcessComplete = false;
 
 		/**
-		 * <p>
-		 * {@link JobQueue}. Initial instance until {@link ProcessFuture}
-		 * instance becomes available.
-		 * <p>
-		 * Locking on <code>this</code> until {@link ProcessFuture} available.
+		 * {@link JobQueue}.
 		 */
 		private JobQueue jobQueue = new JobQueue(this);
 
@@ -436,10 +387,7 @@ public class ProcessContextTeam implements Team, ProcessContextListener {
 
 		/**
 		 * Blocking call to execute the {@link Job} instances until completion
-		 * of the {@link ProcessFuture}.
-		 * 
-		 * @param future
-		 *            {@link ProcessFuture}.
+		 * {@link ProcessState}.
 		 */
 		public void executeJobs() {
 

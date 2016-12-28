@@ -32,59 +32,68 @@ import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.duty.ManagedFunctionDutyAssociationImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
-import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionImpl;
+import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
+import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
+import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawManagedFunctionMetaData;
 import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawWorkMetaData;
+import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
+import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
-import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
-		implements RawManagedFunctionMetaDataFactory, RawManagedFunctionMetaData<D, F> {
+public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
+		implements RawManagedFunctionMetaDataFactory, RawManagedFunctionMetaData<O, F> {
 
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(RawFunctionMetaDataImpl.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(RawManagedFunctionMetaDataImpl.class.getName());
 
 	/**
 	 * Obtains the {@link RawManagedFunctionMetaDataFactory}.
@@ -93,11 +102,11 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static RawManagedFunctionMetaDataFactory getFactory() {
-		return new RawFunctionMetaDataImpl(null, null, null);
+		return new RawManagedFunctionMetaDataImpl(null, null, null);
 	}
 
 	/**
-	 * Name of the {@link ManagedFunction} within the {@link Work}.
+	 * Name of the {@link ManagedFunction}.
 	 */
 	private final String functionName;
 
@@ -114,95 +123,113 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	/**
 	 * Initiate.
 	 * 
-	 * @param taskName
-	 *            Name of the {@link ManagedFunction} within the {@link Work}.
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
 	 * @param configuration
 	 *            {@link ManagedFunctionConfiguration}.
 	 * @param taskMetaData
 	 *            {@link ManagedFunctionMetaDataImpl}.
-	 * @param rawWorkMetaData
-	 *            {@link RawWorkMetaData}.
 	 */
-	private RawFunctionMetaDataImpl(String taskName, ManagedFunctionConfiguration<W, D, F> configuration,
-			ManagedFunctionMetaDataImpl<W, D, F> taskMetaData, RawWorkMetaData<W> rawWorkMetaData) {
-		this.taskName = taskName;
+	private RawManagedFunctionMetaDataImpl(String functionName, ManagedFunctionConfiguration<O, F> configuration,
+			ManagedFunctionMetaDataImpl<O, F> functionMetaData) {
+		this.functionName = functionName;
 		this.configuration = configuration;
-		this.taskMetaData = taskMetaData;
-		this.rawWorkMetaData = rawWorkMetaData;
+		this.functionMetaData = functionMetaData;
 	}
 
 	/*
-	 * =============== RawTaskMetaDataFactory ==============================
+	 * ============ RawManagedFunctionMetaDataFactory ============
 	 */
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <w extends Work> RawManagedFunctionMetaData<w, ?, ?> constructRawTaskMetaData(
-			ManagedFunctionConfiguration<w, ?, ?> configuration, OfficeFloorIssues issues,
-			final RawWorkMetaData<w> rawWorkMetaData, FunctionLoop functionLoop) {
+	public RawManagedFunctionMetaData<?, ?> constructRawManagedFunctionMetaData(
+			ManagedFunctionConfiguration<?, ?> configuration, RawOfficeMetaData rawOfficeMetaData,
+			AssetManagerFactory assetManagerFactory, RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
+			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory, SourceContext sourceContext,
+			OfficeFloorIssues issues, FunctionLoop functionLoop) {
 
-		// Obtain the task name
-		String taskName = configuration.getTaskName();
-		if (ConstructUtil.isBlank(taskName)) {
-			issues.addIssue(AssetType.WORK, rawWorkMetaData.getWorkName(), "Task added without name");
+		// Obtain the function name
+		String functionName = configuration.getFunctionName();
+		if (ConstructUtil.isBlank(functionName)) {
+			issues.addIssue(AssetType.OFFICE, rawOfficeMetaData.getOfficeName(),
+					ManagedFunction.class.getSimpleName() + " added without name");
 			return null; // no task name
 		}
 
-		// Create the function name
-		String functionName = rawWorkMetaData.getWorkName() + "." + taskName;
-
-		// Obtain the task factory
-		ManagedFunctionFactory<w, ?, ?> taskFactory = configuration.getTaskFactory();
-		if (taskFactory == null) {
-			issues.addIssue(AssetType.TASK, taskName,
+		// Obtain the function factory
+		ManagedFunctionFactory<?, ?> functionFactory = configuration.getManagedFunctionFactory();
+		if (functionFactory == null) {
+			issues.addIssue(AssetType.FUNCTION, functionName,
 					"No " + ManagedFunctionFactory.class.getSimpleName() + " provided");
-			return null; // no task factory
+			return null; // no function factory
 		}
 
 		// Obtain the differentiator
 		Object differentiator = configuration.getDifferentiator();
 
-		// Obtain the team responsible for the task
+		// Obtain the team responsible for the function
+		TeamManagement responsibleTeam = null;
 		String officeTeamName = configuration.getOfficeTeamName();
-		if (ConstructUtil.isBlank(officeTeamName)) {
-			issues.addIssue(AssetType.TASK, taskName, "No team name provided for task");
-			return null; // no team name
+		if (!ConstructUtil.isBlank(officeTeamName)) {
+			responsibleTeam = rawOfficeMetaData.getTeams().get(officeTeamName);
+			if (responsibleTeam == null) {
+				issues.addIssue(AssetType.FUNCTION, functionName, "Unknown " + Team.class.getSimpleName() + " '"
+						+ officeTeamName + "' responsible for " + ManagedFunction.class.getSimpleName());
+				return null; // no team
+			}
 		}
-		RawOfficeMetaData rawOfficeMetaData = rawWorkMetaData.getRawOfficeMetaData();
-		TeamManagement responsibleTeam = rawOfficeMetaData.getTeams().get(officeTeamName);
-		if (responsibleTeam == null) {
-			issues.addIssue(AssetType.TASK, taskName, "Unknown team '" + officeTeamName + "' responsible for task");
-			return null; // no team
+
+		// Obtain the office scoped managed objects
+		Map<String, RawBoundManagedObjectMetaData> officeScopeMo = rawOfficeMetaData.getOfficeScopeManagedObjects();
+
+		// Obtain the function bound managed objects
+		ManagedObjectConfiguration<?>[] moConfiguration = configuration.getManagedObjectConfiguration();
+		RawBoundManagedObjectMetaData[] functionBoundMo;
+		if ((moConfiguration == null) || (moConfiguration.length == 0)) {
+			functionBoundMo = new RawBoundManagedObjectMetaData[0];
+		} else {
+			functionBoundMo = rawBoundManagedObjectFactory.constructBoundManagedObjectMetaData(moConfiguration, issues,
+					ManagedObjectScope.FUNCTION, AssetType.FUNCTION, functionName, assetManagerFactory,
+					rawOfficeMetaData.getManagedObjectMetaData(), officeScopeMo, null, null,
+					rawOfficeMetaData.getGovernanceMetaData());
+		}
+
+		// Create the function scope managed objects
+		Map<String, RawBoundManagedObjectMetaData> functionScopeMo = new HashMap<String, RawBoundManagedObjectMetaData>();
+		functionScopeMo.putAll(officeScopeMo); // include all office scoped
+		for (RawBoundManagedObjectMetaData mo : functionBoundMo) {
+			functionScopeMo.put(mo.getBoundManagedObjectName(), mo);
 		}
 
 		// Keep track of all the required managed objects
 		final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects = new HashMap<ManagedObjectIndex, RawBoundManagedObjectMetaData>();
 
-		// Obtain the managed objects used directly by this task.
+		// Obtain the managed objects used directly by this function.
 		// Also obtain the parameter type for the task if specified.
 		ManagedFunctionObjectConfiguration<?>[] objectConfigurations = configuration.getObjectConfiguration();
-		ManagedObjectIndex[] taskToWorkMoTranslations = new ManagedObjectIndex[objectConfigurations.length];
+		ManagedObjectIndex[] functionIndexedManagedObjects = new ManagedObjectIndex[objectConfigurations.length];
 		Class<?> parameterType = null;
 		NEXT_OBJECT: for (int i = 0; i < objectConfigurations.length; i++) {
 			ManagedFunctionObjectConfiguration<?> objectConfiguration = objectConfigurations[i];
 
 			// Ensure have configuration
 			if (objectConfiguration == null) {
-				issues.addIssue(AssetType.TASK, taskName, "No object configuration at index " + i);
+				issues.addIssue(AssetType.FUNCTION, functionName, "No object configuration at index " + i);
 				continue NEXT_OBJECT; // must have configuration
 			}
 
 			// Obtain the type of object required
 			Class<?> objectType = objectConfiguration.getObjectType();
 			if (objectType == null) {
-				issues.addIssue(AssetType.TASK, taskName, "No type for object at index " + i);
+				issues.addIssue(AssetType.FUNCTION, functionName, "No type for object at index " + i);
 				continue NEXT_OBJECT; // must have object type
 			}
 
 			// Determine if a parameter
 			if (objectConfiguration.isParameter()) {
 				// Parameter so use parameter index (note has no scope)
-				taskToWorkMoTranslations[i] = new ManagedObjectIndexImpl(null, ManagedFunctionImpl.PARAMETER_INDEX);
+				functionIndexedManagedObjects[i] = new ManagedObjectIndexImpl(null,
+						ManagedFunctionLogicImpl.PARAMETER_INDEX);
 
 				// Specify the parameter type
 				if (parameterType == null) {
@@ -218,7 +245,7 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 						// Existing parameter type is more specific
 					} else {
 						// Parameter use is incompatible
-						issues.addIssue(AssetType.TASK, taskName, "Incompatible parameter types ("
+						issues.addIssue(AssetType.FUNCTION, functionName, "Incompatible parameter types ("
 								+ parameterType.getName() + ", " + objectType.getName() + ")");
 					}
 				}
@@ -230,14 +257,16 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 			// Obtain the scope managed object name
 			String scopeMoName = objectConfiguration.getScopeManagedObjectName();
 			if (ConstructUtil.isBlank(scopeMoName)) {
-				issues.addIssue(AssetType.TASK, taskName, "No name for managed object at index " + i);
+				issues.addIssue(AssetType.FUNCTION, functionName,
+						"No name for " + ManagedObject.class.getSimpleName() + " at index " + i);
 				continue NEXT_OBJECT; // no managed object name
 			}
 
 			// Obtain the scope managed object
-			RawBoundManagedObjectMetaData scopeMo = rawWorkMetaData.getScopeManagedObjectMetaData(scopeMoName);
+			RawBoundManagedObjectMetaData scopeMo = functionScopeMo.get(scopeMoName);
 			if (scopeMo == null) {
-				issues.addIssue(AssetType.TASK, taskName, "Can not find scope managed object '" + scopeMoName + "'");
+				issues.addIssue(AssetType.FUNCTION, functionName,
+						"Can not find scope managed object '" + scopeMoName + "'");
 				continue NEXT_OBJECT; // no scope managed object
 			}
 
@@ -249,10 +278,11 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 				if (!objectType.isAssignableFrom(moObjectType)) {
 					// Incompatible managed object
 					isCompatibleIssue = true;
-					issues.addIssue(AssetType.TASK, taskName,
-							"Managed object " + scopeMoName + " is incompatible (require=" + objectType.getName()
-									+ ", object of managed object type=" + moObjectType.getName()
-									+ ", ManagedObjectSource="
+					issues.addIssue(AssetType.FUNCTION, functionName,
+							ManagedObject.class.getSimpleName() + " " + scopeMoName + " is incompatible (require="
+									+ objectType.getName() + ", object of " + ManagedObject.class.getSimpleName()
+									+ " type=" + moObjectType.getName() + ", "
+									+ ManagedObjectSource.class.getSimpleName() + "="
 									+ scopeMoInstance.getRawManagedObjectMetaData().getManagedObjectName() + ")");
 				}
 			}
@@ -261,17 +291,39 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 				continue NEXT_OBJECT;
 			}
 
-			// Specify index for task translation and load required indexes
-			taskToWorkMoTranslations[i] = this.loadRequiredManagedObjects(scopeMo, requiredManagedObjects);
+			// Specify index for function translated index
+			functionIndexedManagedObjects[i] = this.loadRequiredManagedObjects(scopeMo, requiredManagedObjects);
 		}
 
-		// Obtain the duties for this task
-		ManagedFunctionDutyAssociation<?>[] preTaskDuties = this.createTaskDutyAssociations(
-				configuration.getPreTaskAdministratorDutyConfiguration(), rawWorkMetaData, issues, taskName, true,
-				requiredManagedObjects);
-		ManagedFunctionDutyAssociation<?>[] postTaskDuties = this.createTaskDutyAssociations(
-				configuration.getPostTaskAdministratorDutyConfiguration(), rawWorkMetaData, issues, taskName, false,
-				requiredManagedObjects);
+		// Obtain the office scope administrators
+		Map<String, RawBoundAdministratorMetaData<?, ?>> officeScopeAdmin = rawOfficeMetaData
+				.getOfficeScopeAdministrators();
+
+		// Obtain the function bound administrators
+		AdministratorConfiguration<?, ?>[] adminConfiguration = configuration.getAdministratorConfiguration();
+		RawBoundAdministratorMetaData<?, ?>[] functionBoundAdmins;
+		if ((adminConfiguration == null) || (adminConfiguration.length == 0)) {
+			functionBoundAdmins = new RawBoundAdministratorMetaData[0];
+		} else {
+			functionBoundAdmins = rawBoundAdministratorFactory.constructRawBoundAdministratorMetaData(
+					adminConfiguration, sourceContext, issues, AdministratorScope.FUNCTION, AssetType.FUNCTION,
+					functionName, rawOfficeMetaData.getTeams(), functionScopeMo, functionLoop);
+		}
+
+		// Create the function scope administrators
+		Map<String, RawBoundAdministratorMetaData<?, ?>> functionScopeAdmin = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
+		functionScopeAdmin.putAll(officeScopeAdmin); // include office scoped
+		for (RawBoundAdministratorMetaData<?, ?> admin : functionBoundAdmins) {
+			functionScopeAdmin.put(admin.getBoundAdministratorName(), admin);
+		}
+
+		// Obtain the duties for this function
+		ManagedFunctionDutyAssociation<?>[] preFunctionDuties = this.createFunctionDutyAssociations(
+				configuration.getPreFunctionAdministratorDutyConfiguration(), functionScopeAdmin, issues, functionName,
+				true, requiredManagedObjects);
+		ManagedFunctionDutyAssociation<?>[] postFunctionDuties = this.createFunctionDutyAssociations(
+				configuration.getPostFunctionAdministratorDutyConfiguration(), functionScopeAdmin, issues, functionName,
+				false, requiredManagedObjects);
 
 		// Create the required managed object indexes
 		ManagedObjectIndex[] requiredManagedObjectIndexes = new ManagedObjectIndex[requiredManagedObjects.size()];
@@ -281,7 +333,8 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 		}
 
 		// Sort the required managed objects
-		if (!this.sortRequiredManagedObjects(requiredManagedObjectIndexes, requiredManagedObjects, taskName, issues)) {
+		if (!this.sortRequiredManagedObjects(requiredManagedObjectIndexes, requiredManagedObjects, functionName,
+				issues)) {
 			// Must be able to sort to allow coordination
 			return null;
 		}
@@ -293,7 +346,7 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 		if (isManuallyManageGovernance) {
 			// Ensure no governance is configured
 			if (governanceConfigurations.length > 0) {
-				issues.addIssue(AssetType.TASK, taskName,
+				issues.addIssue(AssetType.FUNCTION, functionName,
 						"Manually manage " + Governance.class.getSimpleName() + " but "
 								+ Governance.class.getSimpleName() + " configured for "
 								+ OfficeFloor.class.getSimpleName() + " management");
@@ -317,14 +370,16 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 				// Obtain the name of the governance
 				String governanceName = governanceConfiguration.getGovernanceName();
 				if (ConstructUtil.isBlank(governanceName)) {
-					issues.addIssue(AssetType.TASK, taskName, "No Governance name provided for Governance " + i);
+					issues.addIssue(AssetType.FUNCTION, functionName, "No " + Governance.class.getSimpleName()
+							+ " name provided for " + Governance.class.getSimpleName() + " " + i);
 					continue; // move on to next governance
 				}
 
 				// Obtain the raw governance meta-data
 				RawGovernanceMetaData<?, ?> rawGovernance = rawGovernances.get(governanceName);
 				if (rawGovernance == null) {
-					issues.addIssue(AssetType.TASK, taskName, "Unknown Governance '" + governanceName + "'");
+					issues.addIssue(AssetType.FUNCTION, functionName,
+							"Unknown " + Governance.class.getSimpleName() + " '" + governanceName + "'");
 					continue; // move on to next governance
 				}
 
@@ -334,13 +389,13 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 			}
 		}
 
-		// Provide details of each Task (to aid debugging application)
+		// Provide details of each Function (to aid debugging application)
 		Level logLevel = Level.FINE;
 		if (LOGGER.isLoggable(logLevel)) {
 			// Log ordering of dependencies for task
 			StringBuilder log = new StringBuilder();
-			log.append("TASK: " + rawWorkMetaData.getWorkName() + " . " + taskName + "("
-					+ (parameterType == null ? "" : parameterType.getName()) + ")\n");
+			log.append(
+					"FUNCTION: " + functionName + "(" + (parameterType == null ? "" : parameterType.getName()) + ")\n");
 			int sequence = 1;
 			log.append("  Dependency load order:\n");
 			for (ManagedObjectIndex index : requiredManagedObjectIndexes) {
@@ -353,13 +408,17 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 			}
 		}
 
-		// Create the task meta-data
-		ManagedFunctionMetaDataImpl<w, ?, ?> taskMetaData = new ManagedFunctionMetaDataImpl(functionName, taskFactory,
-				differentiator, parameterType, responsibleTeam, requiredManagedObjectIndexes, taskToWorkMoTranslations,
-				requiredGovernance, preTaskDuties, postTaskDuties, functionLoop);
+		// Create the function meta-data
+		ManagedFunctionMetaDataImpl<?, ?> functionMetaData = new ManagedFunctionMetaDataImpl<>(functionName,
+				functionFactory, differentiator, parameterType, responsibleTeam, functionIndexedManagedObjects,
+				(ManagedObjectMetaData[]) functionBoundMo, requiredManagedObjectIndexes, requiredGovernance,
+				(AdministratorMetaData[]) functionBoundAdmins, preFunctionDuties, postFunctionDuties, functionLoop);
 
-		// Return the raw task meta-data
-		return new RawFunctionMetaDataImpl(taskName, configuration, taskMetaData, rawWorkMetaData);
+		// Return the raw function meta-data
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		RawManagedFunctionMetaData rawFunctionMetaData = new RawManagedFunctionMetaDataImpl(functionName, configuration,
+				functionMetaData);
+		return rawFunctionMetaData;
 	}
 
 	/**
@@ -404,10 +463,13 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 * 
 	 * @param configurations
 	 *            {@link ManagedFunctionDutyConfiguration} instances.
-	 * @param rawWorkMetaData
-	 *            {@link RawWorkMetaData}.
+	 * @param functionScopeAdmin
+	 *            {@link ManagedFunction} scoped
+	 *            {@link RawBoundAdministratorMetaData}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
+	 * @param functionName
+	 *            {@link ManagedFunction} name.
 	 * @param isPreNotPost
 	 *            Flag indicating if pre {@link ManagedFunction}.
 	 * @param requiredManagedObjects
@@ -416,10 +478,10 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            {@link RawBoundManagedObjectMetaData}.
 	 * @return {@link ManagedFunctionDutyAssociation} instances.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private ManagedFunctionDutyAssociation<?>[] createTaskDutyAssociations(
-			ManagedFunctionDutyConfiguration<?>[] configurations, RawWorkMetaData<?> rawWorkMetaData,
-			OfficeFloorIssues issues, String taskName, boolean isPreNotPost,
+	private ManagedFunctionDutyAssociation<?>[] createFunctionDutyAssociations(
+			ManagedFunctionDutyConfiguration<?>[] configurations,
+			Map<String, RawBoundAdministratorMetaData<?, ?>> functionScopeAdmin, OfficeFloorIssues issues,
+			String functionName, boolean isPreNotPost,
 			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects) {
 
 		// Create the listing of task duty associations
@@ -429,16 +491,16 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 			// Obtain the scope administrator name
 			String scopeAdminName = duty.getScopeAdministratorName();
 			if (ConstructUtil.isBlank(scopeAdminName)) {
-				issues.addIssue(AssetType.TASK, taskName, "No administrator name for " + (isPreNotPost ? "pre" : "post")
-						+ "-task at index " + taskDuties.size());
+				issues.addIssue(AssetType.FUNCTION, functionName, "No " + Administrator.class.getSimpleName()
+						+ " name for " + (isPreNotPost ? "pre" : "post") + "-task at index " + taskDuties.size());
 				continue; // no administrator name
 			}
 
 			// Obtain the scope administrator
-			RawBoundAdministratorMetaData<?, ?> scopeAdmin = rawWorkMetaData
-					.getScopeAdministratorMetaData(scopeAdminName);
+			RawBoundAdministratorMetaData<?, ?> scopeAdmin = functionScopeAdmin.get(scopeAdminName);
 			if (scopeAdmin == null) {
-				issues.addIssue(AssetType.TASK, taskName, "Can not find scope administrator '" + scopeAdminName + "'");
+				issues.addIssue(AssetType.FUNCTION, functionName,
+						"Can not find scope " + Administrator.class.getSimpleName() + " '" + scopeAdminName + "'");
 				continue; // no administrator
 			}
 
@@ -452,23 +514,28 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 				dutyKey = scopeAdmin.getDutyKey(key);
 				if (dutyKey == null) {
 					// Must have duty key
-					issues.addIssue(AssetType.TASK, taskName, "No duty for " + (isPreNotPost ? "pre" : "post")
-							+ "-task at index " + taskDuties.size() + " (duty key=" + key + ")");
+					issues.addIssue(AssetType.FUNCTION, functionName,
+							"No " + Duty.class.getSimpleName() + " for " + (isPreNotPost ? "pre" : "post") + "-"
+									+ ManagedFunction.class.getSimpleName() + " at index " + taskDuties.size() + " ("
+									+ Duty.class.getSimpleName() + " key=" + key + ")");
 					continue; // no duty
 				}
 			} else {
 				// Ensure have duty name
 				String dutyName = duty.getDutyName();
 				if (ConstructUtil.isBlank(dutyName)) {
-					issues.addIssue(AssetType.TASK, taskName,
-							"No duty name/key for pre-task at index " + taskDuties.size());
+					issues.addIssue(AssetType.FUNCTION, functionName,
+							"No " + Duty.class.getSimpleName() + " name/key for pre-"
+									+ ManagedFunction.class.getSimpleName() + " at index " + taskDuties.size());
 					continue; // must have means to identify duty
 				}
 				dutyKey = scopeAdmin.getDutyKey(dutyName);
 				if (dutyKey == null) {
 					// Must have duty key
-					issues.addIssue(AssetType.TASK, taskName, "No duty for " + (isPreNotPost ? "pre" : "post")
-							+ "-task at index " + taskDuties.size() + " (duty name=" + dutyName + ")");
+					issues.addIssue(AssetType.FUNCTION, functionName,
+							"No " + Duty.class.getSimpleName() + " for " + (isPreNotPost ? "pre" : "post") + "-"
+									+ ManagedFunction.class.getSimpleName() + " at index " + taskDuties.size() + " ("
+									+ Duty.class.getSimpleName() + " name=" + dutyName + ")");
 					continue; // no duty
 				}
 			}
@@ -480,6 +547,7 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 			}
 
 			// Create and add the task duty association
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			ManagedFunctionDutyAssociation<?> taskDutyAssociation = new ManagedFunctionDutyAssociationImpl(adminIndex,
 					dutyKey);
 			taskDuties.add(taskDutyAssociation);
@@ -505,7 +573,7 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 * @param requiredManagedObjects
 	 *            Mapping of the {@link ManagedObjectIndex} to its
 	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param taskName
+	 * @param functionName
 	 *            Name of {@link ManagedFunction} to issues.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
@@ -514,7 +582,7 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *         cyclic dependencies.
 	 */
 	private boolean sortRequiredManagedObjects(ManagedObjectIndex[] requiredManagedObjectIndexes,
-			final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects, String taskName,
+			final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects, String functionName,
 			OfficeFloorIssues issues) {
 
 		// Initially sort by scope and index
@@ -600,7 +668,7 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 
 		} catch (CyclicDependencyException ex) {
 			// Register issue that cyclic dependency
-			issues.addIssue(AssetType.TASK, taskName, ex.getMessage());
+			issues.addIssue(AssetType.FUNCTION, functionName, ex.getMessage());
 
 			// Not sorted as cyclic dependency
 			return false;
@@ -627,38 +695,54 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	/*
-	 * ============== RawTaskMetaData ==================================
+	 * ============== RawManagedFunctionMetaData ==============
 	 */
 
 	@Override
-	public String getTaskName() {
-		return this.taskName;
+	public String getFunctionName() {
+		return this.functionName;
 	}
 
 	@Override
-	public RawWorkMetaData<W> getRawWorkMetaData() {
-		return this.rawWorkMetaData;
+	public ManagedFunctionMetaData<O, F> getManagedFunctionMetaData() {
+		return this.functionMetaData;
 	}
 
 	@Override
-	public ManagedFunctionMetaData<W, D, F> getTaskMetaData() {
-		return this.taskMetaData;
+	public RawOfficeMetaData getRawOfficeMetaData() {
+		// TODO implement RawManagedFunctionMetaData<O,F>.getRawOfficeMetaData
+		throw new UnsupportedOperationException("TODO implement RawManagedFunctionMetaData<O,F>.getRawOfficeMetaData");
+
 	}
 
 	@Override
-	public void linkTasks(ManagedFunctionLocator genericTaskLocator, WorkMetaData<W> workMetaData,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
+	public RawBoundManagedObjectMetaData getScopeManagedObjectMetaData(String scopeManagedObjectName) {
+		// TODO implement
+		// RawManagedFunctionMetaData<O,F>.getScopeManagedObjectMetaData
+		throw new UnsupportedOperationException(
+				"TODO implement RawManagedFunctionMetaData<O,F>.getScopeManagedObjectMetaData");
 
-		// Create the work specific meta-data locator
-		ManagedFunctionLocator taskLocator = genericTaskLocator.createWorkSpecificOfficeMetaDataLocator(workMetaData);
+	}
 
-		// Obtain the work name and create the asset name
-		String workName = workMetaData.getWorkName();
-		String assetName = workName + "." + this.getTaskName();
+	@Override
+	public RawBoundAdministratorMetaData<?, ?> getScopeAdministratorMetaData(String scopeAdministratorName) {
+		// TODO implement
+		// RawManagedFunctionMetaData<O,F>.getScopeAdministratorMetaData
+		throw new UnsupportedOperationException(
+				"TODO implement RawManagedFunctionMetaData<O,F>.getScopeAdministratorMetaData");
+
+	}
+
+	@Override
+	public void linkFunctions(ManagedFunctionLocator functionLocator, AssetManagerFactory assetManagerFactory,
+			OfficeFloorIssues issues) {
+
+		// Obtain the asset name
+		String assetName = this.functionName;
 
 		// Obtain the listing of flow meta-data
 		ManagedFunctionFlowConfiguration<F>[] flowConfigurations = this.configuration.getFlowConfiguration();
-		FlowMetaData<?>[] flowMetaDatas = new FlowMetaData[flowConfigurations.length];
+		FlowMetaData[] flowMetaDatas = new FlowMetaData[flowConfigurations.length];
 		for (int i = 0; i < flowMetaDatas.length; i++) {
 			ManagedFunctionFlowConfiguration<F> flowConfiguration = flowConfigurations[i];
 
@@ -667,39 +751,34 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 				continue;
 			}
 
-			// Obtain the task reference
-			ManagedFunctionReference taskNodeReference = flowConfiguration.getInitialTask();
-			if (taskNodeReference == null) {
-				issues.addIssue(AssetType.TASK, this.getTaskName(), "No task referenced for flow index " + i);
+			// Obtain the function reference
+			ManagedFunctionReference functionReference = flowConfiguration.getInitialFunction();
+			if (functionReference == null) {
+				issues.addIssue(AssetType.FUNCTION, this.functionName, "No function referenced for flow index " + i);
 				continue; // no reference task for flow
 			}
 
-			// Obtain the task meta-data
-			ManagedFunctionMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(taskNodeReference,
-					taskLocator, issues, AssetType.TASK, this.getTaskName(), "flow index " + i, false);
-			if (taskMetaData == null) {
-				continue; // no initial task for flow
+			// Obtain the function meta-data
+			ManagedFunctionMetaData<?, ?> functionMetaData = ConstructUtil.getFunctionMetaData(functionReference,
+					functionLocator, issues, AssetType.FUNCTION, this.functionName, "flow index " + i);
+			if (functionMetaData == null) {
+				continue; // no initial function for flow
 			}
 
-			// Obtain the flow instigation strategy
-			FlowInstigationStrategyEnum instigationStrategy = flowConfiguration.getInstigationStrategy();
-			if (instigationStrategy == null) {
-				issues.addIssue(AssetType.TASK, this.getTaskName(),
-						"No instigation strategy provided for flow index " + i);
-				continue; // no instigation strategy
-			}
+			// Obtain whether to spawn thread state
+			boolean isSpawnThreadState = flowConfiguration.isSpawnThreadState();
 
 			// Create and add the flow meta-data
-			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(instigationStrategy, taskMetaData, assetManagerFactory,
-					AssetType.TASK, assetName, "Flow" + i, issues);
+			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(functionMetaData, isSpawnThreadState, assetManagerFactory,
+					AssetType.FUNCTION, assetName, "Flow" + i, issues);
 		}
 
-		// Obtain the next task in flow
-		ManagedFunctionReference nextTaskNodeReference = this.configuration.getNextTaskInFlow();
-		ManagedFunctionMetaData<?, ?, ?> nextTaskInFlow = null;
-		if (nextTaskNodeReference != null) {
-			nextTaskInFlow = ConstructUtil.getTaskMetaData(nextTaskNodeReference, taskLocator, issues, AssetType.TASK,
-					this.getTaskName(), "next task", false);
+		// Obtain the next function
+		ManagedFunctionReference nextFunctionReference = this.configuration.getNextFunction();
+		ManagedFunctionMetaData<?, ?> nextFunction = null;
+		if (nextFunctionReference != null) {
+			nextFunction = ConstructUtil.getFunctionMetaData(nextFunctionReference, functionLocator, issues,
+					AssetType.FUNCTION, this.functionName, "next task");
 		}
 
 		// Create the escalation procedure
@@ -711,56 +790,59 @@ public class RawFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 			// Obtain the type of cause
 			Class<? extends Throwable> typeOfCause = escalationConfiguration.getTypeOfCause();
 			if (typeOfCause == null) {
-				issues.addIssue(AssetType.TASK, this.getTaskName(), "No escalation type for escalation index " + i);
+				issues.addIssue(AssetType.FUNCTION, this.functionName, "No escalation type for escalation index " + i);
 				continue; // no escalation type
 			}
 
 			// Obtain the escalation handler
 			ManagedFunctionReference escalationReference = escalationConfiguration.getTaskNodeReference();
 			if (escalationReference == null) {
-				issues.addIssue(AssetType.TASK, this.getTaskName(), "No task referenced for escalation index " + i);
+				issues.addIssue(AssetType.FUNCTION, this.functionName,
+						"No function referenced for escalation index " + i);
 				continue; // no escalation handler referenced
 			}
-			ManagedFunctionMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil.getTaskMetaData(escalationReference,
-					taskLocator, issues, AssetType.TASK, this.getTaskName(), "escalation index " + i, false);
-			if (escalationTaskMetaData == null) {
+			ManagedFunctionMetaData<?, ?> escalationFunctionMetaData = ConstructUtil.getFunctionMetaData(
+					escalationReference, functionLocator, issues, AssetType.FUNCTION, this.functionName,
+					"escalation index " + i);
+			if (escalationFunctionMetaData == null) {
 				continue; // no escalation handler
 			}
 
 			// Create and add the escalation
-			escalations[i] = new EscalationFlowImpl(typeOfCause, escalationTaskMetaData);
+			escalations[i] = new EscalationFlowImpl(typeOfCause, escalationFunctionMetaData);
 		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalations);
 
-		// Provide details of each Task (to aid debugging application)
+		// Provide details of each function (to aid debugging application)
 		Level logLevel = Level.FINE;
 		if (LOGGER.isLoggable(logLevel)) {
 			// Log ordering of dependencies for task
 			StringBuilder log = new StringBuilder();
-			log.append("TASK: " + this.taskMetaData.getFunctionName() + "\n");
+			log.append("TASK: " + this.functionMetaData.getFunctionName() + "\n");
 			int sequence = 1;
 			log.append("  Continuations:\n");
-			for (FlowMetaData<?> flow : flowMetaDatas) {
+			for (FlowMetaData flow : flowMetaDatas) {
 				log.append("   " + (sequence++) + ") ");
 				if (flow == null) {
 					log.append("<none>\n");
 				} else {
-					log.append(flow.getInitialTaskMetaData().getFunctionName() + " ["
-							+ flow.getInstigationStrategy().name() + "]\n");
+					log.append(flow.getInitialFunctionMetaData().getFunctionName()
+							+ (flow.isSpawnThreadState() ? " [spawn]" : "") + "\n");
 				}
 			}
-			if (nextTaskInFlow != null) {
-				log.append("   NEXT) " + nextTaskInFlow.getFunctionName() + "\n");
+			if (nextFunction != null) {
+				log.append("   NEXT) " + nextFunction.getFunctionName() + "\n");
 			}
 			sequence = 1;
 			for (EscalationFlow flow : escalations) {
-				log.append("   " + flow.getTypeOfCause().getName() + ") " + flow.getTaskMetaData().getFunctionName());
+				log.append("   " + flow.getTypeOfCause().getName() + ") "
+						+ flow.getManagedFunctionMetaData().getFunctionName());
 			}
 			LOGGER.log(logLevel, log.toString());
 		}
 
-		// Load the remaining state for the task meta-data
-		this.taskMetaData.loadRemainingState(workMetaData, flowMetaDatas, nextTaskInFlow, escalationProcedure);
+		// Load the remaining state for the function meta-data
+		this.functionMetaData.loadRemainingState(flowMetaDatas, nextFunction, escalationProcedure);
 	}
 
 }

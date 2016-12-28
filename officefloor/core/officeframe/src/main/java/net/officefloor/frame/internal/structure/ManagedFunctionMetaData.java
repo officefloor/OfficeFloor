@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -29,8 +30,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>>
-		extends ManagedFunctionLogicMetaData {
+public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> extends ManagedFunctionLogicMetaData {
 
 	/**
 	 * Obtains the {@link ManagedFunctionFactory} to create the
@@ -56,9 +56,14 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>>
 	Class<?> getParameterType();
 
 	/**
+	 * <p>
 	 * Obtains the {@link ManagedObjectIndex} instances identifying the
 	 * {@link ManagedObject} instances that must be loaded before the
 	 * {@link ManagedFunction} may be executed.
+	 * <p>
+	 * The order of the {@link ManagedObjectIndex} instances must be respected
+	 * as they are sorted to enable appropriate
+	 * {@link CoordinatingManagedObject} to co-ordinate with dependencies.
 	 * 
 	 * @return Listing of {@link ManagedObjectIndex} instances.
 	 */
@@ -74,6 +79,36 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>>
 	boolean[] getRequiredGovernance();
 
 	/**
+	 * Obtains the {@link ManagedObjectIndex} for the {@link ManagedFunction}
+	 * index.
+	 * 
+	 * @param managedObjectIndex
+	 *            {@link ManagedObjectIndex} for the {@link ManagedFunction}
+	 *            index.
+	 * @return {@link ManagedObjectIndex} to obtain the {@link ManagedObject}
+	 *         for the {@link ManagedFunction}.
+	 */
+	ManagedObjectIndex getManagedObject(int managedObjectIndex);
+
+	/**
+	 * Obtains the meta-data of the {@link ManagedObject} instances bound to the
+	 * {@link ManagedFunction}.
+	 * 
+	 * @return Meta-data of the {@link ManagedObject} instances bound to the
+	 *         {@link ManagedFunction}.
+	 */
+	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
+
+	/**
+	 * Obtains the meta-data of the {@link Administrator} instances for the
+	 * {@link ManagedFunction}.
+	 * 
+	 * @return Meta-data of the {@link Administrator} instances for the
+	 *         {@link ManagedFunction}.
+	 */
+	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
+
+	/**
 	 * Obtains the {@link FlowMetaData} of the specified {@link Flow}.
 	 * 
 	 * @param flowIndex
@@ -81,23 +116,6 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>>
 	 * @return {@link FlowMetaData} of the specified {@link Flow}.
 	 */
 	FlowMetaData getFlow(int flowIndex);
-
-	/**
-	 * Creates a {@link ManagedFunction}.
-	 * 
-	 * @param flow
-	 *            {@link Flow}.
-	 * @param parallelFunctionOwner
-	 *            Parallel {@link ManagedFunctionContainer} owner.
-	 * @param parameter
-	 *            Parameter.
-	 * @param governanceDeactivationStrategy
-	 *            {@link GovernanceDeactivationStrategy}.
-	 * @return {@link ManagedObjectContainer} containing the
-	 *         {@link ManagedFunction}.
-	 */
-	ManagedFunctionContainer createManagedFunctionContainer(Flow flow, ManagedFunctionContainer parallelFunctionOwner,
-			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy);
 
 	/**
 	 * Meta-data of the {@link Duty} to undertake before executing the

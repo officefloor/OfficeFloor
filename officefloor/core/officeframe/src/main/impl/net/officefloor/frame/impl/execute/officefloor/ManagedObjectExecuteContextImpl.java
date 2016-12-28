@@ -17,24 +17,17 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
-import java.util.Timer;
 import java.util.TimerTask;
 
-import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link ManagedObjectExecuteContext} implementation.
@@ -42,12 +35,6 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements ManagedObjectExecuteContext<F> {
-
-	/**
-	 * {@link TeamIdentifier} for invoking a {@link ProcessState}.
-	 */
-	public static final TeamIdentifier INVOKE_PROCESS_TEAM = new TeamIdentifier() {
-	};
 
 	/**
 	 * {@link ManagedObjectMetaData} of the {@link ManagedObject}.
@@ -62,28 +49,12 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	/**
 	 * {@link FlowMetaData} in index order for the {@link ManagedObjectSource}.
 	 */
-	private final FlowMetaData<?>[] processLinks;
+	private final FlowMetaData[] processLinks;
 
 	/**
 	 * {@link OfficeMetaData} to create {@link ProcessState} instances.
 	 */
 	private final OfficeMetaData officeMetaData;
-
-	/**
-	 * {@link TeamManagement} of the {@link Team} responsible for the
-	 * {@link ManagedObjectSource} {@link Escalation} handling.
-	 */
-	private final TeamManagement escalationResponsibleTeam;
-
-	/**
-	 * {@link FunctionLoop}.
-	 */
-	private final FunctionLoop functionLoop;
-
-	/**
-	 * {@link Timer}.
-	 */
-	private final Timer timer;
 
 	/**
 	 * Initiate.
@@ -99,24 +70,13 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData} to create {@link ProcessState}
 	 *            instances.
-	 * @param escalationResponsibleTeam
-	 *            {@link TeamManagement} of the {@link Team} responsible for the
-	 *            {@link ManagedObjectSource} {@link Escalation} handling.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
-	 * @param timer
-	 *            {@link Timer}.
 	 */
 	public ManagedObjectExecuteContextImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
-			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData, TeamManagement escalationResponsibleTeam,
-			FunctionLoop functionLoop, Timer timer) {
+			FlowMetaData[] processLinks, OfficeMetaData officeMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
 		this.officeMetaData = officeMetaData;
-		this.escalationResponsibleTeam = escalationResponsibleTeam;
-		this.functionLoop = functionLoop;
-		this.timer = timer;
 	}
 
 	/*
@@ -124,53 +84,40 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	 */
 
 	@Override
-	public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
-			ProcessCompletionListener completionListener) {
-		this.invokeProcess(key.ordinal(), parameter, managedObject, delay, null, completionListener);
+	public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback) {
+		this.invokeProcess(key.ordinal(), parameter, managedObject, delay, callback);
 	}
 
 	@Override
-	public void invokeProcess(int processIndex, Object parameter, ManagedObject managedObject, long delay,
-			ProcessCompletionListener completionListener) {
-		this.invokeProcess(processIndex, parameter, managedObject, delay, null, completionListener);
-	}
-
-	@Override
-	public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
-			EscalationHandler escalationHandler, ProcessCompletionListener completionListener) {
-		this.invokeProcess(key.ordinal(), parameter, managedObject, delay, escalationHandler, completionListener);
-	}
-
-	@Override
-	public void invokeProcess(int processIndex, Object parameter, ManagedObject managedObject, long delay,
-			EscalationHandler escalationHandler, ProcessCompletionListener completionListener) {
+	public void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
+			FlowCallback callback) {
 
 		// Obtain the flow meta-data
-		if ((processIndex < 0) || (processIndex >= this.processLinks.length)) {
+		if ((flowIndex < 0) || (flowIndex >= this.processLinks.length)) {
 			String validIndexes = (this.processLinks.length == 0 ? " [no processes linked]"
 					: " [valid only 0 to " + (this.processLinks.length - 1) + "]");
-			throw new IllegalArgumentException("Invalid process index " + processIndex + validIndexes);
+			throw new IllegalArgumentException("Invalid process index " + flowIndex + validIndexes);
 		}
-		FlowMetaData<?> flowMetaData = this.processLinks[processIndex];
+		FlowMetaData flowMetaData = this.processLinks[flowIndex];
 
 		// Create the function in a new process
-		final FunctionState function = this.officeMetaData.createProcess(flowMetaData, parameter, escalationHandler,
-				this.escalationResponsibleTeam, managedObject, this.managedObjectMetaData, this.processMoIndex,
-				completionListener);
+		final FunctionState function = this.officeMetaData.createProcess(flowMetaData, parameter, callback, null,
+				managedObject, this.managedObjectMetaData, this.processMoIndex);
 
 		// Trigger the process
 		if (delay > 0) {
 			// Delay execution of the process
-			this.timer.schedule(new TimerTask() {
+			ManagedObjectExecuteContextImpl.this.officeMetaData.getOfficeTimer().schedule(new TimerTask() {
 				@Override
 				public void run() {
-					ManagedObjectExecuteContextImpl.this.functionLoop.delegateFunction(function);
+					// Must delegate to not hold up timer thread
+					ManagedObjectExecuteContextImpl.this.officeMetaData.getFunctionLoop().delegateFunction(function);
 				}
 			}, delay);
 
 		} else {
-			// Execute the process immediately
-			this.functionLoop.executeFunction(function);
+			// Execute the process immediately on current thread
+			ManagedObjectExecuteContextImpl.this.officeMetaData.getFunctionLoop().executeFunction(function);
 		}
 	}
 

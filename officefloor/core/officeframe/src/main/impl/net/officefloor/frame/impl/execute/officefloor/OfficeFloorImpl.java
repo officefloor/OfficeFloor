@@ -24,22 +24,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.NameAwareManagedFunctionFactory;
 import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -140,19 +140,19 @@ public class OfficeFloorImpl implements OfficeFloor {
 			Office office = new OfficeImpl(officeMetaData);
 
 			// Iterate over Office meta-data providing additional functionality
-			for (WorkMetaData<?> workMetaData : officeMetaData.getWorkMetaData()) {
-				WorkFactory<?> workFactory = workMetaData.getWorkFactory();
+			for (ManagedFunctionMetaData<?, ?> functionMetaData : officeMetaData.getManagedFunctionMetaData()) {
+				ManagedFunctionFactory<?, ?> functionFactory = functionMetaData.getManagedFunctionFactory();
 
 				// Handle if name aware
-				if (workFactory instanceof NameAwareManagedFunctionFactory<?>) {
-					NameAwareManagedFunctionFactory<?> nameAwareWorkFactory = (NameAwareManagedFunctionFactory<?>) workFactory;
-					nameAwareWorkFactory.setBoundWorkName(workMetaData.getWorkName());
+				if (functionFactory instanceof NameAwareManagedFunctionFactory) {
+					NameAwareManagedFunctionFactory<?, ?> nameAwareFactory = (NameAwareManagedFunctionFactory<?, ?>) functionFactory;
+					nameAwareFactory.setBoundWorkName(functionMetaData.getFunctionName());
 				}
 
 				// Handle if Office aware
-				if (workFactory instanceof OfficeAwareManagedFunctionFactory<?>) {
-					OfficeAwareManagedFunctionFactory<?> officeAwareWorkFactory = (OfficeAwareManagedFunctionFactory<?>) workFactory;
-					officeAwareWorkFactory.setOffice(office);
+				if (functionFactory instanceof OfficeAwareManagedFunctionFactory) {
+					OfficeAwareManagedFunctionFactory<?, ?> officeAwareFactory = (OfficeAwareManagedFunctionFactory<?, ?>) functionFactory;
+					officeAwareFactory.setOffice(office);
 				}
 			}
 
@@ -175,18 +175,18 @@ public class OfficeFloorImpl implements OfficeFloor {
 			teamManagement.getTeam().startWorking();
 		}
 
-		// Invoke the startup tasks for each office
+		// Invoke the startup functions for each office
 		for (OfficeMetaData officeMetaData : officeMetaDatas) {
-			for (OfficeStartupFunction officeStartupTask : officeMetaData.getStartupTasks()) {
+			for (OfficeStartupFunction officeStartupTask : officeMetaData.getStartupFunctions()) {
 
 				// Ensure have startup task
 				if (officeStartupTask == null) {
 					continue; // failure in configuring startup task
 				}
 
-				// Create and activate the startup task
+				// Create and activate the startup functions
 				ManagedFunctionContainer startupTask = officeMetaData.createProcess(officeStartupTask.getFlowMetaData(),
-						officeStartupTask.getParameter(), null, null, null);
+						officeStartupTask.getParameter(), null, null);
 				officeMetaData.getFunctionLoop().delegateFunction(startupTask);
 			}
 		}
@@ -208,7 +208,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 		// Start the managed object source
 		ManagedObjectExecuteContext<F> executeContext = mosInstance.getManagedObjectExecuteContextFactory()
-				.createManagedObjectExecuteContext(this.timer, mosInstance.getResponsibleTeam());
+				.createManagedObjectExecuteContext();
 		mos.start(executeContext);
 
 		// Determine if pooled

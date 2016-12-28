@@ -22,7 +22,7 @@ import java.util.Map;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.FunctionLoop;
@@ -41,7 +41,7 @@ public interface RawBoundAdministratorMetaDataFactory {
 	 * Creates the {@link RawBoundAdministratorMetaData} instances.
 	 * 
 	 * @param configuration
-	 *            {@link AdministratorSourceConfiguration} instances.
+	 *            {@link AdministratorConfiguration} instances.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 * @param issues
@@ -65,7 +65,7 @@ public interface RawBoundAdministratorMetaDataFactory {
 	 * @return Constructed {@link RawBoundAdministratorMetaData} instances.
 	 */
 	RawBoundAdministratorMetaData<?, ?>[] constructRawBoundAdministratorMetaData(
-			AdministratorSourceConfiguration<?, ?>[] configuration, SourceContext sourceContext,
+			AdministratorConfiguration<?, ?>[] configuration, SourceContext sourceContext,
 			OfficeFloorIssues issues, AdministratorScope administratorScope, AssetType assetType, String assetName,
 			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
 			FunctionLoop functionLoop);

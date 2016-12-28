@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskObjectConfigurationImpl<D extends Enum<D>> implements
+public class ManagedFunctionObjectConfigurationImpl<D extends Enum<D>> implements
 		ManagedFunctionObjectConfiguration<D> {
 
 	/**
@@ -70,7 +70,7 @@ public class TaskObjectConfigurationImpl<D extends Enum<D>> implements
 	 * @param key
 	 *            Key of this {@link Object}.
 	 */
-	public TaskObjectConfigurationImpl(boolean isParameter,
+	public ManagedFunctionObjectConfigurationImpl(boolean isParameter,
 			String scopeManagedObjectName, Class<?> objectType, int index, D key) {
 		this.isParameter = isParameter;
 		this.scopeManagedObjectName = scopeManagedObjectName;

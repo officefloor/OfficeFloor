@@ -21,6 +21,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Represents a sub-graph of the {@link ManagedFunctionContainerImpl} graph
@@ -46,21 +47,22 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 	 * Creates a new managed {@link ManagedFunctionContainer} contained in this
 	 * {@link Flow} for the {@link ManagedFunction}.
 	 * 
+	 * @param parameter
+	 *            Parameter for the {@link ManagedFunction}.
 	 * @param managedFunctionMetaData
 	 *            {@link ManagedFunctionMetaData} for the new
 	 *            {@link ManagedFunction}.
+	 * @param isEnforceGovernance
+	 *            <code>true</code> to enforce {@link Governance} on
+	 *            deactivation.
 	 * @param parallelFunctionOwner
 	 *            {@link ManagedFunctionContainer} that is the parallel owner of
 	 *            the new {@link ManagedFunction}.
-	 * @param parameter
-	 *            Parameter for the {@link ManagedFunction}.
-	 * @param governanceDeactivationStrategy
-	 *            {@link GovernanceDeactivationStrategy}.
 	 * @return New {@link FunctionState}.
 	 */
-	<O extends Enum<O>, F extends Enum<F>> ManagedFunctionContainer createManagedFunction(
-			ManagedFunctionMetaData<O, F> managedFunctionMetaData, ManagedFunctionContainer parallelFunctionOwner,
-			Object parameter, GovernanceDeactivationStrategy governanceDeactivationStrategy);
+	<O extends Enum<O>, F extends Enum<F>> ManagedFunctionContainer createManagedFunction(Object parameter,
+			ManagedFunctionMetaData<O, F> managedFunctionMetaData, boolean isEnforceGovernance,
+			ManagedFunctionContainer parallelFunctionOwner);
 
 	/**
 	 * Creates a new {@link ManagedFunctionContainerImpl} contained in this

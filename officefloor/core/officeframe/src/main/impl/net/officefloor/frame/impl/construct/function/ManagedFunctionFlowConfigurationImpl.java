@@ -28,7 +28,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskFlowConfigurationImpl<F extends Enum<F>> implements ManagedFunctionFlowConfiguration<F> {
+public class ManagedFunctionFlowConfigurationImpl<F extends Enum<F>> implements ManagedFunctionFlowConfiguration<F> {
 
 	/**
 	 * Name of the {@link Flow}.
@@ -70,7 +70,7 @@ public class TaskFlowConfigurationImpl<F extends Enum<F>> implements ManagedFunc
 	 * @param key
 	 *            Key of the {@link Flow}.
 	 */
-	public TaskFlowConfigurationImpl(String flowName, ManagedFunctionReference functionReference,
+	public ManagedFunctionFlowConfigurationImpl(String flowName, ManagedFunctionReference functionReference,
 			boolean isSpawnThreadState, int index, F key) {
 		this.flowName = flowName;
 		this.functionReference = functionReference;

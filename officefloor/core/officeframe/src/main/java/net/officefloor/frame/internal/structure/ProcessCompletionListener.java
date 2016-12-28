@@ -22,6 +22,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated // use FlowCallback
 public interface ProcessCompletionListener {
 
 	/**

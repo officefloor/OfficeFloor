@@ -17,21 +17,18 @@
  */
 package net.officefloor.frame.impl.execute.process;
 
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
-import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectCleanupImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
-import net.officefloor.frame.internal.structure.AdministratorContainer;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -43,7 +40,6 @@ import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
@@ -96,11 +92,6 @@ public class ProcessStateImpl implements ProcessState {
 	private final ThreadState mainThreadState;
 
 	/**
-	 * {@link Flow} for {@link ProcessOperation} instances.
-	 */
-	private final Flow processOperationsFlow;
-
-	/**
 	 * {@link OfficeMetaData}.
 	 */
 	private final OfficeMetaData officeMetaData;
@@ -109,11 +100,6 @@ public class ProcessStateImpl implements ProcessState {
 	 * {@link ManagedObjectContainer} instances for the {@link ProcessState}.
 	 */
 	private final ManagedObjectContainer[] managedObjects;
-
-	/**
-	 * {@link AdministratorContainer} instances for the {@link ProcessState}.
-	 */
-	private final AdministratorContainer<?>[] administrators;
 
 	/**
 	 * {@link ProcessProfiler}.
@@ -129,18 +115,21 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link ProcessContextListener} instances.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
-	 * @param completion
-	 *            Optional {@link FlowCompletion}. May be <code>null</code>.
+	 * @param callback
+	 *            Optional {@link FlowCallback}. May be <code>null</code>.
+	 * @param callbackThreadState
+	 *            Optional {@link FlowCallback} {@link ThreadState}. May be
+	 *            <code>null</code>.
 	 * @param processProfiler
 	 *            Optional {@link ProcessProfiler}. May be <code>null</code>.
 	 * @param completionListeners
 	 *            {@link ProcessCompletionListener} instances.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
-			OfficeMetaData officeMetaData, FlowCompletion completion, ProcessProfiler processProfiler,
-			ProcessCompletionListener[] completionListeners) {
-		this(processMetaData, processContextListeners, officeMetaData, completion, processProfiler, completionListeners,
-				null, null, -1);
+			OfficeMetaData officeMetaData, FlowCallback callback, ThreadState callbackThreadState,
+			ProcessProfiler processProfiler, ProcessCompletionListener[] completionListeners) {
+		this(processMetaData, processContextListeners, officeMetaData, callback, callbackThreadState, processProfiler,
+				completionListeners, null, null, -1);
 	}
 
 	/**
@@ -152,8 +141,11 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link ProcessContextListener} instances.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
-	 * @param completion
-	 *            Optional {@link FlowCompletion}. May be <code>null</code>.
+	 * @param callback
+	 *            Optional {@link FlowCallback}. May be <code>null</code>.
+	 * @param callbackThreadState
+	 *            Optional {@link FlowCallback} {@link ThreadState}. May be
+	 *            <code>null</code>.
 	 * @param processProfiler
 	 *            Optional {@link ProcessProfiler}. May be <code>null</code>.
 	 * @param completionListeners
@@ -170,9 +162,10 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link ProcessState}.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
-			OfficeMetaData officeMetaData, FlowCompletion completion, ProcessProfiler processProfiler,
-			ProcessCompletionListener[] completionListeners, ManagedObject inputManagedObject,
-			ManagedObjectMetaData<?> inputManagedObjectMetaData, int inputManagedObjectIndex) {
+			OfficeMetaData officeMetaData, FlowCallback callback, ThreadState callbackThreadState,
+			ProcessProfiler processProfiler, ProcessCompletionListener[] completionListeners,
+			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
+			int inputManagedObjectIndex) {
 		this.processMetaData = processMetaData;
 		this.processContextListeners = processContextListeners;
 		this.officeMetaData = officeMetaData;
@@ -182,18 +175,14 @@ public class ProcessStateImpl implements ProcessState {
 		// Create the main thread state
 		AssetManager mainThreadAssetManager = this.processMetaData.getMainThreadAssetManager();
 		this.mainThreadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), mainThreadAssetManager,
-				completion, this, this.processProfiler);
+				callback, callbackThreadState, this, this.processProfiler);
 		this.activeThreads.addEntry(this.mainThreadState);
-
-		// Create the processs operations flow
-		// Note: should not stop the main thread from completing
-		this.processOperationsFlow = new FlowImpl(null, this.mainThreadState);
 
 		// Create all managed object containers (final for thread safety)
 		ManagedObjectMetaData<?>[] managedObjectMetaData = this.processMetaData.getManagedObjectMetaData();
 		ManagedObjectContainer[] managedObjectContainers = new ManagedObjectContainer[managedObjectMetaData.length];
 		for (int i = 0; i < managedObjectContainers.length; i++) {
-			managedObjectContainers[i] = managedObjectMetaData[i].createManagedObjectContainer(this.mainThreadState);
+			managedObjectContainers[i] = new ManagedObjectContainerImpl(managedObjectMetaData[i], this.mainThreadState);
 		}
 		if (inputManagedObject != null) {
 			// Overwrite the Container for the Input Managed Object
@@ -201,14 +190,6 @@ public class ProcessStateImpl implements ProcessState {
 					inputManagedObjectMetaData, this.mainThreadState);
 		}
 		this.managedObjects = managedObjectContainers;
-
-		// Create all admin containers (final for thread safety)
-		AdministratorMetaData<?, ?>[] administratorMetaData = this.processMetaData.getAdministratorMetaData();
-		AdministratorContainer<?>[] administratorContainers = new AdministratorContainer[administratorMetaData.length];
-		for (int i = 0; i < administratorContainers.length; i++) {
-			administratorContainers[i] = administratorMetaData[i].createAdministratorContainer(this.mainThreadState);
-		}
-		this.administrators = administratorContainers;
 
 		// Create the clean up
 		this.cleanup = new ManagedObjectCleanupImpl(this, this.officeMetaData);
@@ -268,8 +249,8 @@ public class ProcessStateImpl implements ProcessState {
 
 				// Create the function for spawned thread state
 				Flow flow = threadState.createFlow(null);
-				ManagedFunctionContainer function = flow.createManagedFunction(managedFunctionMetaData, null, parameter,
-						GovernanceDeactivationStrategy.ENFORCE);
+				ManagedFunctionContainer function = flow.createManagedFunction(parameter, managedFunctionMetaData, true,
+						null);
 
 				// Spawn the thread state
 				process.officeMetaData.getFunctionLoop().delegateFunction(function);
@@ -300,12 +281,10 @@ public class ProcessStateImpl implements ProcessState {
 					// Clean up process
 					FunctionState cleanUpFunctions = null;
 
-					// Unload managed objects (some may not have been used)
+					// Unload managed objects
 					for (int i = 0; i < process.managedObjects.length; i++) {
 						ManagedObjectContainer container = process.managedObjects[i];
-						if (container != null) {
-							cleanUpFunctions = Promise.then(cleanUpFunctions, container.unloadManagedObject());
-						}
+						cleanUpFunctions = Promise.then(cleanUpFunctions, container.unloadManagedObject());
 					}
 
 					// Clean up process state
@@ -340,40 +319,15 @@ public class ProcessStateImpl implements ProcessState {
 		return this.managedObjects[index];
 	}
 
-	@Override
-	public AdministratorContainer<?> getAdministratorContainer(int index) {
-		return this.administrators[index];
-	}
-
 	/**
 	 * {@link ProcessState} operation.
 	 */
 	private abstract class ProcessOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
 			implements FunctionState {
 
-		/*
-		 * ================= LinkedListSetEntry ============================
-		 */
-
 		@Override
-		public Flow getLinkedListSetOwner() {
-			return ProcessStateImpl.this.processOperationsFlow;
-		}
-
-		@Override
-		public TeamManagement getResponsibleTeam() {
-			return null; // any team
-		}
-
-		@Override
-		public Flow getFlow() {
-			return ProcessStateImpl.this.processOperationsFlow;
-		}
-
-		@Override
-		public boolean isRequireThreadStateSafety() {
-			// Initially all run on main thread so no need
-			return false;
+		public ThreadState getThreadState() {
+			return ProcessStateImpl.this.mainThreadState;
 		}
 	}
 

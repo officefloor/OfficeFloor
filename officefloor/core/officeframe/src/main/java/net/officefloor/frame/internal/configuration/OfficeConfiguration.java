@@ -29,7 +29,9 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -129,13 +131,12 @@ public interface OfficeConfiguration {
 	GovernanceConfiguration<?, ?>[] getGovernanceConfiguration();
 
 	/**
-	 * Obtains the configuration of the {@link AdministratorSource} instances
-	 * bound to the {@link ProcessState}.
+	 * Indicates if manually managing {@link Governance} via
+	 * {@link Administrator}.
 	 * 
-	 * @return {@link AdministratorSource} configuration of instances bound to
-	 *         the {@link ProcessState}.
+	 * @return <code>true</code> to manually managed {@link Governance}.
 	 */
-	AdministratorSourceConfiguration<?, ?>[] getProcessAdministratorSourceConfiguration();
+	boolean isManuallyManageGovernance();
 
 	/**
 	 * Obtains the configuration of the {@link AdministratorSource} instances
@@ -144,7 +145,7 @@ public interface OfficeConfiguration {
 	 * @return {@link AdministratorSource} configuration of instances bound to
 	 *         the {@link ThreadState}.
 	 */
-	AdministratorSourceConfiguration<?, ?>[] getThreadAdministratorSourceConfiguration();
+	AdministratorConfiguration<?, ?>[] getAdministratorConfiguration();
 
 	/**
 	 * Obtains the configuration for the {@link ManagedFunction} instances.

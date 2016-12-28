@@ -17,9 +17,6 @@
  */
 package net.officefloor.frame.impl.execute.administrator;
 
-import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -28,7 +25,6 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.DutyKey;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -39,17 +35,17 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>> implements AdministratorMetaData<I, A> {
+public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> implements AdministratorMetaData<E, A> {
 
 	/**
 	 * {@link AdministratorSource}.
 	 */
-	private final AdministratorSource<I, A> administratorSource;
+	private final AdministratorSource<E, A> administratorSource;
 
 	/**
 	 * {@link ExtensionInterfaceMetaData}.
 	 */
-	private final ExtensionInterfaceMetaData<I>[] eiMetaData;
+	private final ExtensionInterfaceMetaData<E>[] eiMetaData;
 
 	/**
 	 * {@link TeamManagement} of {@link Team} responsible for the
@@ -76,8 +72,7 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>> impl
 	protected DutyMetaData[] dutyMetaData;
 
 	/**
-	 * Initiate with meta-data of the {@link Administrator} scope to the
-	 * {@link Work}.
+	 * Instantiate.
 	 * 
 	 * @param administratorSource
 	 *            {@link AdministratorSource}.
@@ -91,8 +86,8 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>> impl
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
 	 */
-	public AdministratorMetaDataImpl(AdministratorSource<I, A> administratorSource,
-			ExtensionInterfaceMetaData<I>[] eiMetaData, TeamManagement responsibleTeam,
+	public AdministratorMetaDataImpl(AdministratorSource<E, A> administratorSource,
+			ExtensionInterfaceMetaData<E>[] eiMetaData, TeamManagement responsibleTeam,
 			EscalationProcedure escalationProcedure, FunctionLoop functionLoop) {
 		this.eiMetaData = eiMetaData;
 		this.administratorSource = administratorSource;
@@ -132,7 +127,7 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>> impl
 	}
 
 	@Override
-	public ManagedFunctionMetaData<?, ?, ?> getNextManagedFunctionMetaData() {
+	public ManagedFunctionMetaData<?, ?> getNextManagedFunctionMetaData() {
 		return null; // no next function
 	}
 
@@ -146,17 +141,12 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>> impl
 	 */
 
 	@Override
-	public AdministratorContainer<I, A> createAdministratorContainer(ThreadState threadState) {
-		return new AdministratorContainerImpl<I, A, None, None>(this, threadState);
-	}
-
-	@Override
-	public AdministratorSource<I, A> getAdministratorSource() {
+	public AdministratorSource<E, A> getAdministratorSource() {
 		return this.administratorSource;
 	}
 
 	@Override
-	public ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData() {
+	public ExtensionInterfaceMetaData<E>[] getExtensionInterfaceMetaData() {
 		return this.eiMetaData;
 	}
 

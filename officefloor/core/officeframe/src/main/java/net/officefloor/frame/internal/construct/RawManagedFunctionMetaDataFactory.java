@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.construct;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Factory to construct {@link RawManagedFunctionMetaData}.
@@ -33,6 +34,16 @@ public interface RawManagedFunctionMetaDataFactory {
 	 * 
 	 * @param configuration
 	 *            {@link ManagedFunctionConfiguration}.
+	 * @param rawOfficeMetaData
+	 *            {@link RawOfficeMetaData}.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
+	 * @param rawBoundManagedObjectFactory
+	 *            {@link RawBoundManagedObjectMetaDataFactory}.
+	 * @param rawBoundAdministratorFactory
+	 *            {@link RawBoundAdministratorMetaDataFactory}.
+	 * @param sourceContext
+	 *            {@link SourceContext}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @param functionLoop
@@ -40,6 +51,9 @@ public interface RawManagedFunctionMetaDataFactory {
 	 * @return {@link RawManagedFunctionMetaData}.
 	 */
 	RawManagedFunctionMetaData<?, ?> constructRawManagedFunctionMetaData(
-			ManagedFunctionConfiguration<?, ?> configuration, OfficeFloorIssues issues, FunctionLoop functionLoop);
+			ManagedFunctionConfiguration<?, ?> configuration, RawOfficeMetaData rawOfficeMetaData,
+			AssetManagerFactory assetManagerFactory, RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
+			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory, SourceContext sourceContext,
+			OfficeFloorIssues issues, FunctionLoop functionLoop);
 
 }

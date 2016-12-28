@@ -17,6 +17,9 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import java.util.Timer;
+
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -51,6 +54,13 @@ public interface OfficeMetaData {
 	OfficeClock getOfficeClock();
 
 	/**
+	 * Obtains the {@link Timer} for the {@link Office}.
+	 * 
+	 * @return {@link Timer} for the {@link Office}.
+	 */
+	Timer getOfficeTimer();
+
+	/**
 	 * Obtains the {@link FunctionLoop} for the {@link Office}.
 	 * 
 	 * @return {@link FunctionLoop} for the {@link Office}.
@@ -74,21 +84,12 @@ public interface OfficeMetaData {
 	ManagedFunctionMetaData<?, ?>[] getManagedFunctionMetaData();
 
 	/**
-	 * Obtains the {@link EscalationProcedure} for this {@link Office}. This is
-	 * used when the {@link EscalationProcedure} instances on the {@link Flow}
-	 * does not handle the escalation.
-	 * 
-	 * @return {@link EscalationProcedure} for this {@link Office}.
-	 */
-	EscalationProcedure getEscalationProcedure();
-
-	/**
 	 * Obtains the {@link OfficeStartupFunction} instances for this
 	 * {@link Office}.
 	 * 
 	 * @return {@link OfficeStartupFunction} instances for this {@link Office}.
 	 */
-	OfficeStartupFunction[] getStartupTasks();
+	OfficeStartupFunction[] getStartupFunctions();
 
 	/**
 	 * Creates a new {@link ProcessState}.
@@ -98,13 +99,17 @@ public interface OfficeMetaData {
 	 *            the {@link ProcessState}.
 	 * @param parameter
 	 *            Parameter to the starting {@link FunctionState}.
-	 * @param completion
-	 *            Optional {@link FlowCompletion} of the {@link ProcessState}.
-	 *            May be <code>null</code>.
+	 * @param callback
+	 *            Optional {@link FlowCallback} of the {@link ProcessState}. May
+	 *            be <code>null</code>.
+	 * @param callbackThreadState
+	 *            Optional {@link ThreadState} for the {@link FlowCallback}. May
+	 *            be <code>null</code>.
 	 * @return {@link ManagedFunctionContainer} to start processing the
 	 *         {@link ProcessState}.
 	 */
-	ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCompletion completion);
+	ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
+			ThreadState callbackThreadState);
 
 	/**
 	 * Creates a new {@link ProcessState} triggered by a
@@ -116,9 +121,12 @@ public interface OfficeMetaData {
 	 *            the {@link ProcessState}.
 	 * @param parameter
 	 *            Parameter to the starting {@link FunctionState}.
-	 * @param completion
-	 *            Optional {@link FlowCompletion} of the {@link ProcessState}.
-	 *            May be <code>null</code>.
+	 * @param callback
+	 *            Optional {@link FlowCallback} of the {@link ProcessState}. May
+	 *            be <code>null</code>.
+	 * @param callbackThreadState
+	 *            Optional {@link ThreadState} for the {@link FlowCallback}. May
+	 *            be <code>null</code>.
 	 * @param inputManagedObject
 	 *            {@link ManagedObject} that possibly invoked the new
 	 *            {@link ProcessState}. This may be <code>null</code> and if so
@@ -135,8 +143,8 @@ public interface OfficeMetaData {
 	 * @return {@link ManagedFunctionContainer} to start processing the
 	 *         {@link ProcessState}.
 	 */
-	ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCompletion completion,
-			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
-			int processBoundIndexForInputManagedObject);
+	ManagedFunctionContainer createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
+			ThreadState callbackThreadState, ManagedObject inputManagedObject,
+			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject);
 
 }

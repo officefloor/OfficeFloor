@@ -17,24 +17,39 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Strategy to de-activate the {@link Governance}.
- * 
+ * {@link Administration} that needs to be undertaken.
+ *
  * @author Daniel Sagenschneider
  */
-@Deprecated // always enforce (unless disregard when handling escalation)
-public enum GovernanceDeactivationStrategy {
+public interface Administration {
 
 	/**
-	 * Flags that the {@link Governance} should be enforced.
+	 * <p>
+	 * Setup for {@link Administration}.
+	 * <p>
+	 * This will typically involve extracting the extensions from the
+	 * {@link ManagedObject} instances.
+	 * 
+	 * @return Setup {@link FunctionLogic}.
 	 */
-	ENFORCE,
+	FunctionState getSetup();
 
 	/**
-	 * Flags that the {@link Governance} should be disregarded.
+	 * Obtains the {@link ManagedFunctionLogic} undertaking the {@link Duty}.
+	 * 
+	 * @return {@link ManagedFunctionLogic} undertaking the {@link Duty}.
 	 */
-	DISREGARD
+	ManagedFunctionLogic getDutyLogic();
+
+	/**
+	 * Obtains the {@link AdministratorMetaData}.
+	 * 
+	 * @return {@link AdministratorMetaData}.
+	 */
+	AdministratorMetaData<?, ?> getAdministratorMetaData();
 
 }

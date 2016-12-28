@@ -30,29 +30,19 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface AdministratorContainer<A extends Enum<A>> {
 
 	/**
-	 * Obtains the {@link ThreadState} responsible for changes to this
-	 * {@link AdministratorContainer}.
-	 * 
-	 * @return {@link ThreadState} responsible for changes to this
-	 *         {@link AdministratorContainer}.
-	 */
-	ThreadState getResponsibleThreadState();
-
-	/**
-	 * Administers the {@link ManagedObject} instances for the
-	 * {@link ManagedFunctionContainer}.
+	 * Administers the {@link ManagedObject} instances.
 	 * 
 	 * @param functionDutyAssociation
 	 *            {@link ManagedFunctionDutyAssociation}.
-	 * @param managedFunctionContainer
-	 *            {@link ManagedFunctionContainer}.
-	 * @param managedFunctionMetaData
-	 *            {@link ManagedFunctionMetaData} of the
+	 * @param functionBoundManagedObjects
+	 *            {@link ManagedFunctionContainer} instances bound to the
 	 *            {@link ManagedFunction}.
-	 * @return {@link ManagedFunctionContainer} to administer the
-	 *         {@link ManagedObject} instances.
+	 * @param threadState
+	 *            {@link ThreadState}.
+	 * @return {@link Administration} to administer the {@link ManagedObject}
+	 *         instances.
 	 */
-	ManagedFunctionContainer administerManagedObjects(ManagedFunctionDutyAssociation<A> functionDutyAssociation,
-			ManagedFunctionContainer managedFunctionContainer, ManagedFunctionMetaData<?, ?> managedFunctionMetaData);
+	Administration administerManagedObjects(ManagedFunctionDutyAssociation<A> functionDutyAssociation,
+			ManagedObjectContainer[] functionBoundManagedObjects, ThreadState threadState);
 
 }

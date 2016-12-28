@@ -139,6 +139,16 @@ public interface OfficeBuilder {
 	DependencyMappingBuilder addThreadManagedObject(String threadManagedObjectName, String officeManagedObjectName);
 
 	/**
+	 * Flags whether to manually manage {@link Governance} via
+	 * {@link Administrator} instances.
+	 * 
+	 * @param isManuallyManageGovernance
+	 *            <code>true</code> to manually manage {@link Governance} via
+	 *            {@link Administrator} instances.
+	 */
+	void setManuallyManageGovernance(boolean isManuallyManageGovernance);
+
+	/**
 	 * Adds {@link Governance} within the {@link Office}.
 	 * 
 	 * @param <E>
@@ -159,33 +169,6 @@ public interface OfficeBuilder {
 
 	/**
 	 * <p>
-	 * Adds a {@link ProcessState} bound {@link AdministratorSource} to this
-	 * {@link OfficeBuilder}.
-	 * <p>
-	 * Dependency scope for administered {@link ManagedObject} instances:
-	 * <ol>
-	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
-	 * </ol>
-	 * 
-	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link Administrator} key type.
-	 * @param <AS>
-	 *            {@link AdministratorSource} type.
-	 * @param processAdministratorName
-	 *            Name to link the {@link Administrator} for the
-	 *            {@link ManagedFunction} instances.
-	 * @param adminsistratorSource
-	 *            {@link AdministratorSource} class.
-	 * @return {@link AdministratorBuilder} for the {@link Administrator}.
-	 */
-	<E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministratorBuilder<A> addProcessAdministrator(
-			String processAdministratorName, Class<AS> adminsistratorSource);
-
-	/**
-	 * <p>
 	 * Adds a {@link ThreadState} bound {@link AdministratorSource} to this
 	 * {@link OfficeBuilder}.
 	 * <p>
@@ -201,15 +184,15 @@ public interface OfficeBuilder {
 	 *            {@link Administrator} key type.
 	 * @param <AS>
 	 *            {@link AdministratorSource} type.
-	 * @param threadAdministratorName
+	 * @param administratorName
 	 *            Name to link the {@link Administrator} for the
 	 *            {@link ManagedFunction} instances.
 	 * @param adminsistratorSource
 	 *            {@link AdministratorSource} class.
 	 * @return administratorBuilder Builder of the {@link Administrator}.
 	 */
-	<E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministratorBuilder<A> addThreadAdministrator(
-			String threadAdministratorName, Class<AS> adminsistratorSource);
+	<E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministratorBuilder<A> addAdministrator(
+			String administratorName, Class<AS> adminsistratorSource);
 
 	/**
 	 * Adds a {@link ManagedFunction} to be executed within the {@link Office}.

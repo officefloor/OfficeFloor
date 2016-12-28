@@ -23,7 +23,7 @@ import java.util.List;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DutyBuilder;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -39,7 +39,7 @@ import net.officefloor.frame.spi.team.Team;
  */
 public class AdministratorBuilderImpl<I, A extends Enum<A>, AS extends AdministratorSource<I, A>>
 		implements AdministratorBuilder<A>,
-		AdministratorSourceConfiguration<A, AS> {
+		AdministratorConfiguration<A, AS> {
 
 	/**
 	 * Name of this {@link Administrator}.

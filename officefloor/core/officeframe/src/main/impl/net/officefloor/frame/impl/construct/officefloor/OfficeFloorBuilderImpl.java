@@ -29,7 +29,7 @@ import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataImpl;
-import net.officefloor.frame.impl.construct.function.RawFunctionMetaDataImpl;
+import net.officefloor.frame.impl.construct.function.RawManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBuilderImpl;
@@ -39,7 +39,6 @@ import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataImpl;
 import net.officefloor.frame.impl.construct.team.TeamBuilderImpl;
-import net.officefloor.frame.impl.construct.work.RawWorkMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -58,8 +57,7 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
-		OfficeFloorConfiguration {
+public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorConfiguration {
 
 	/**
 	 * Name of the {@link OfficeFloor}.
@@ -124,16 +122,15 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> addManagedObject(
 			String managedObjectSourceName, Class<MS> managedObjectSourceClass) {
 		// Create, register and return the builder
-		ManagedObjectBuilderImpl<D, F, MS> builder = new ManagedObjectBuilderImpl<D, F, MS>(
-				managedObjectSourceName, managedObjectSourceClass);
+		ManagedObjectBuilderImpl<D, F, MS> builder = new ManagedObjectBuilderImpl<D, F, MS>(managedObjectSourceName,
+				managedObjectSourceClass);
 		this.mangedObjects.add(builder);
 		return builder;
 	}
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectBuilder<F> addManagedObject(
-			String managedObjectSourceName,
-			ManagedObjectSource<D, F> managedObjectSource) {
+			String managedObjectSourceName, ManagedObjectSource<D, F> managedObjectSource) {
 		// Create, register and return the builder
 		ManagedObjectBuilderImpl<D, F, ManagedObjectSource<D, F>> builder = new ManagedObjectBuilderImpl<D, F, ManagedObjectSource<D, F>>(
 				managedObjectSourceName, managedObjectSource);
@@ -142,11 +139,9 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	}
 
 	@Override
-	public <TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName,
-			Class<TS> teamSourceClass) {
+	public <TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, Class<TS> teamSourceClass) {
 		// Create, register and return the builder
-		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<TS>(teamName,
-				teamSourceClass);
+		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<TS>(teamName, teamSourceClass);
 		this.teams.add(builder);
 		return builder;
 	}
@@ -172,17 +167,12 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	@Override
 	public OfficeFloor buildOfficeFloor(OfficeFloorIssues issuesListener) {
 
-		// Build this office floor
-		RawOfficeFloorMetaData rawMetaData = RawOfficeFloorMetaDataImpl
-				.getFactory().constructRawOfficeFloorMetaData(this,
-						issuesListener, RawTeamMetaDataImpl.getFactory(),
-						RawManagedObjectMetaDataImpl.getFactory(),
-						RawBoundManagedObjectMetaDataImpl.getFactory(),
-						RawGovernanceMetaDataImpl.getFactory(),
-						RawBoundAdministratorMetaDataImpl.getFactory(),
-						RawOfficeMetaDataImpl.getFactory(),
-						RawWorkMetaDataImpl.getFactory(),
-						RawFunctionMetaDataImpl.getFactory());
+		// Build this OfficeFloor
+		RawOfficeFloorMetaData rawMetaData = RawOfficeFloorMetaDataImpl.getFactory().constructRawOfficeFloorMetaData(
+				this, issuesListener, RawTeamMetaDataImpl.getFactory(), RawManagedObjectMetaDataImpl.getFactory(),
+				RawBoundManagedObjectMetaDataImpl.getFactory(), RawGovernanceMetaDataImpl.getFactory(),
+				RawBoundAdministratorMetaDataImpl.getFactory(), RawOfficeMetaDataImpl.getFactory(),
+				RawManagedFunctionMetaDataImpl.getFactory());
 
 		// Obtain the office floor meta-data and return the office floor
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();
@@ -208,17 +198,13 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 		}
 
 		// Create and return the source context
-		return new SourceContextImpl(
-				false,
-				classLoader,
-				this.resourceSources
-						.toArray(new ResourceSource[this.resourceSources.size()]));
+		return new SourceContextImpl(false, classLoader,
+				this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
 	}
 
 	@Override
 	public ManagedObjectSourceConfiguration<?, ?>[] getManagedObjectSourceConfiguration() {
-		return this.mangedObjects
-				.toArray(new ManagedObjectSourceConfiguration[0]);
+		return this.mangedObjects.toArray(new ManagedObjectSourceConfiguration[0]);
 	}
 
 	@Override

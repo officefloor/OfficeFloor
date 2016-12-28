@@ -21,16 +21,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.impl.execute.function.RunInThreadStateFunctionLogic;
+import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
@@ -77,7 +78,7 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 	 */
 
 	@Override
-	public FunctionState createCleanUpJobNode(final FlowMetaData<?> recycleFlowMetaData, final Class<?> objectType,
+	public FunctionState createCleanUpJobNode(final FlowMetaData recycleFlowMetaData, final Class<?> objectType,
 			final ManagedObject managedObject, final ManagedObjectPool managedObjectPool) {
 		return new CleanupOperation() {
 			@Override
@@ -90,27 +91,71 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 					// Create the recycle managed object parameter
 					RecycleManagedObjectParameterImpl<ManagedObject> parameter = new RecycleManagedObjectParameterImpl<ManagedObject>(
 							objectType, managedObject, managedObjectPool);
-					
-					// Use the recycle function responsible team for escalations
-					ManagedFunctionMetaData<?, ?, ?> initialFunctionMetaData = recycleFlowMetaData.getInitialTaskMetaData();
-					TeamManagement escalationResponsibleTeam = initialFunctionMetaData.getResponsibleTeam();
+
+					// Obtain the recycle thread state
+					ThreadState recycleThreadState = ManagedObjectCleanupImpl.this.processState.getMainThreadState();
 
 					// Create the recycle function
 					FunctionState recycleFunction = ManagedObjectCleanupImpl.this.officeMetaData
-							.createProcess(recycleFlowMetaData, parameter, parameter, escalationResponsibleTeam, parameter);
+							.createProcess(recycleFlowMetaData, parameter, parameter, recycleThreadState);
 
-					// Run recycle job node in main thread state
-					return new RunInThreadStateFunctionLogic(recycleFunction,
-							ManagedObjectCleanupImpl.this.processState.getMainThreadState());
+					// Run recycle function in main thread state
+					return new RunInThreadStateFunctionState(recycleFunction, recycleThreadState);
 				}
 			}
 		};
 	}
 
 	/**
+	 * Runs the {@link FunctionState} and all its subsequent
+	 * {@link FunctionState} instances in the specified {@link ThreadState}.
+	 */
+	private class RunInThreadStateFunctionState extends AbstractDelegateFunctionState {
+
+		/**
+		 * Override {@link ThreadState}.
+		 */
+		private final ThreadState overrideThreadState;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param delegate
+		 *            Delegate {@link FunctionState}.
+		 * @param overrideThreadState
+		 *            Override {@link ThreadState}.
+		 */
+		public RunInThreadStateFunctionState(FunctionState delegate, ThreadState overrideThreadState) {
+			super(delegate);
+			this.overrideThreadState = overrideThreadState;
+		}
+
+		@Override
+		public ThreadState getThreadState() {
+			return this.overrideThreadState;
+		}
+
+		@Override
+		public FunctionState execute() throws Throwable {
+
+			// Execute the delegate
+			FunctionState next = this.delegate.execute();
+
+			// If same thread state, continue override
+			if (this.delegate.getThreadState() == next.getThreadState()) {
+				return new RunInThreadStateFunctionState(next, this.overrideThreadState);
+			}
+
+			// Spawned to different thread state, so no further override
+			return next;
+		}
+	}
+
+	/**
 	 * Clean up operation.
 	 */
-	private abstract class CleanupOperation implements FunctionState {
+	private abstract class CleanupOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
+			implements FunctionState {
 
 		@Override
 		public ThreadState getThreadState() {
@@ -122,7 +167,8 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 	 * Implementation of {@link RecycleManagedObjectParameter}.
 	 */
 	private class RecycleManagedObjectParameterImpl<MO extends ManagedObject>
-			implements RecycleManagedObjectParameter<MO>, EscalationHandler, ProcessCompletionListener {
+			extends AbstractLinkedListSetEntry<FlowCompletion, ManagedFunctionContainer>
+			implements RecycleManagedObjectParameter<MO>, FlowCallback {
 
 		/**
 		 * Type of the object for the {@link ManagedObject}.
@@ -161,6 +207,15 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		}
 
 		/*
+		 * ================= LinkedListSetEntry ==============================
+		 */
+
+		@Override
+		public ManagedFunctionContainer getLinkedListSetOwner() {
+			throw new IllegalStateException("Should never be added to a list");
+		}
+
+		/*
 		 * ============= RecycleManagedObjectParameter =======================
 		 */
 
@@ -188,21 +243,19 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		}
 
 		/*
-		 * ================== EscalationHandler ===============================
+		 * ==================== FlowCallback ================================
 		 */
 
 		@Override
-		public void handleEscalation(Throwable escalation) throws Throwable {
-			ManagedObjectCleanupImpl.this.cleanupEscalations
-					.add(new CleanupEscalationImpl(this.objectType, escalation));
-		}
+		public void run(Throwable escalation) throws Throwable {
 
-		/*
-		 * ============= ProcessCompletionListener ============================
-		 */
+			// Add possible escalation
+			if (escalation != null) {
+				ManagedObjectCleanupImpl.this.cleanupEscalations
+						.add(new CleanupEscalationImpl(this.objectType, escalation));
+			}
 
-		@Override
-		public void processComplete() {
+			// Recycle (if not already recycled)
 			if ((!this.isRecycled) && (this.pool != null)) {
 				// Not recycled, therefore lost to pool
 				this.pool.lostManagedObject(this.managedObject);

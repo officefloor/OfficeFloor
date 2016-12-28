@@ -17,10 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.function.Promise;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -34,9 +35,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -45,14 +44,13 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Meta-data of the {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObjectMetaData<D> {
+public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObjectMetaData<O> {
 
 	/**
 	 * Name of the {@link ManagedObject} bound within the
@@ -143,8 +141,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	private FlowMetaData recycleFlowMetaData;
 
 	/**
-	 * Initiate with meta-data of the {@link ManagedObject} to source specific
-	 * to the {@link Work}.
+	 * Instantiate.
 	 * 
 	 * @param boundManagedObjectName
 	 *            Name of the {@link ManagedObject} bound within the
@@ -238,11 +235,6 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	}
 
 	@Override
-	public ManagedObjectContainer createManagedObjectContainer(ThreadState threadState) {
-		return new ManagedObjectContainerImpl(this, threadState);
-	}
-
-	@Override
 	public AssetManager getSourcingManager() {
 		return this.sourcingManager;
 	}
@@ -293,7 +285,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	}
 
 	@Override
-	public FunctionState createReadyCheckJobNode(ManagedObjectReadyCheck check, WorkContainer<?> workContainer,
+	public FunctionState checkReady(ManagedFunctionContainer managedFunction, ManagedObjectReadyCheck check,
 			ManagedObjectContainer currentContainer) {
 
 		// Ensure there are dependencies
@@ -304,18 +296,24 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 		// Create the managed object ready check wrapper
 		ManagedObjectReadyCheckWrapper wrapper = new ManagedObjectReadyCheckWrapper(check);
 
-		// Create the array of check job nodes
-		FunctionState[] checkJobNodes = new FunctionState[this.dependencyMapping.length
+		// Create the array of check functions
+		FunctionState[] checkFunctions = new FunctionState[this.dependencyMapping.length
 				+ ((currentContainer != null) ? 1 : 0)];
 		for (int i = 0; i < this.dependencyMapping.length; i++) {
-			checkJobNodes[i] = workContainer.getManagedObjectContainer(this.dependencyMapping[i]).checkReady(wrapper);
+
+			// Obtain the dependent managed object container
+			ManagedObjectContainer dependency = ManagedObjectContainerImpl
+					.getManagedObjectContainer(this.dependencyMapping[i], managedFunction);
+
+			// Create check function for the dependency
+			checkFunctions[i] = dependency.checkReady(wrapper);
 		}
 		if (currentContainer != null) {
-			checkJobNodes[checkJobNodes.length - 1] = currentContainer.checkReady(wrapper);
+			checkFunctions[checkFunctions.length - 1] = currentContainer.checkReady(wrapper);
 		}
 
-		// Return job to check all managed objects are ready
-		return new CheckReadyJobNode(wrapper, checkJobNodes, 0);
+		// Return function to check all managed objects are ready
+		return new CheckReadyFunctionState(wrapper, checkFunctions, 0);
 	}
 
 	/**
@@ -349,8 +347,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 		 */
 
 		@Override
-		public ManagedFunctionContainer getManagedJobNode() {
-			return this.delegate.getManagedJobNode();
+		public ManagedFunctionContainer getManagedFunctionContainer() {
+			return this.delegate.getManagedFunctionContainer();
 		}
 
 		@Override
@@ -367,7 +365,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	/**
 	 * {@link FunctionState} to check {@link ManagedObject} is ready.
 	 */
-	private static class CheckReadyJobNode implements FunctionState {
+	private static class CheckReadyFunctionState extends AbstractLinkedListSetEntry<FunctionState, Flow>
+			implements FunctionState {
 
 		/**
 		 * {@link ManagedObjectReadyCheckWrapper}.
@@ -378,70 +377,69 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 		 * {@link FunctionState} instances to check the necessary
 		 * {@link ManagedObject} instances are ready.
 		 */
-		private final FunctionState[] checkJobNodes;
+		private final FunctionState[] checkFunctions;
 
 		/**
 		 * Index of the {@link FunctionState} to use for checking.
 		 */
-		private final int currentJobNodeIndex;
+		private final int currentFunctionIndex;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param readyCheck
 		 *            {@link ManagedObjectReadyCheckWrapper}.
-		 * @param checkJobNodes
+		 * @param checkFunctions
 		 *            {@link FunctionState} instances to check the necessary
 		 *            {@link ManagedObject} instances are ready.
-		 * @param currentJobNodeIndex
+		 * @param currentFunctionIndex
 		 *            Index of the {@link FunctionState} to use for checking.
 		 */
-		public CheckReadyJobNode(ManagedObjectReadyCheckWrapper readyCheck, FunctionState[] checkJobNodes,
-				int currentJobNodeIndex) {
+		public CheckReadyFunctionState(ManagedObjectReadyCheckWrapper readyCheck, FunctionState[] checkFunctions,
+				int currentFunctionIndex) {
 			this.readyCheck = readyCheck;
-			this.checkJobNodes = checkJobNodes;
-			this.currentJobNodeIndex = currentJobNodeIndex;
+			this.checkFunctions = checkFunctions;
+			this.currentFunctionIndex = currentFunctionIndex;
 		}
 
 		/*
-		 * ====================== JobNode ====================
+		 * ====================== FunctionState ====================
 		 */
 
 		@Override
 		public ThreadState getThreadState() {
-			return this.checkJobNodes[this.currentJobNodeIndex].getThreadState();
+			return this.checkFunctions[this.currentFunctionIndex].getThreadState();
 		}
 
 		@Override
-		public FunctionState execute() {
+		public FunctionState execute() throws Throwable {
 
-			// Undertake check for current job node
-			FunctionState currentJobNode = this.checkJobNodes[this.currentJobNodeIndex];
-			FunctionState nextJobNode = currentJobNode.execute();
+			// Undertake check for current function
+			FunctionState currentFunction = this.checkFunctions[this.currentFunctionIndex];
+			FunctionState nextFunction = currentFunction.execute();
 
-			// Determine if not ready (only single job checking)
+			// Determine if not ready (only single checking)
 			if (!this.readyCheck.isReady) {
 				// Not ready, so no further checking necessary
-				return nextJobNode;
+				return nextFunction;
 			}
 
 			// Determine if last check
-			int nextJobNodeIndex = this.currentJobNodeIndex + 1;
-			if (nextJobNodeIndex >= this.checkJobNodes.length) {
+			int nextFunctionIndex = this.currentFunctionIndex + 1;
+			if (nextFunctionIndex >= this.checkFunctions.length) {
 				// No further checks
-				return nextJobNode;
+				return nextFunction;
 			}
 
 			// Continue with check of next managed object
-			return Promise.then(nextJobNode,
-					new CheckReadyJobNode(this.readyCheck, this.checkJobNodes, nextJobNodeIndex));
+			return Promise.then(nextFunction,
+					new CheckReadyFunctionState(this.readyCheck, this.checkFunctions, nextFunctionIndex));
 		}
 	}
 
 	@Override
-	public <W extends Work> ObjectRegistry<D> createObjectRegistry(WorkContainer<W> workContainer,
-			ThreadState threadState) {
-		return new ObjectRegistryImpl<D>(workContainer, this.dependencyMapping, threadState);
+	public ObjectRegistry<O> createObjectRegistry(ManagedFunctionContainer currentContainer) {
+		return new ObjectRegistryImpl<O>(currentContainer, this.dependencyMapping);
 	}
 
 	@Override
@@ -450,7 +448,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements ManagedObje
 	}
 
 	@Override
-	public FunctionState createRecycleJobNode(ManagedObject managedObject, ManagedObjectCleanup cleanup) {
+	public FunctionState recycle(ManagedObject managedObject, ManagedObjectCleanup cleanup) {
 		return cleanup.createCleanUpJobNode(this.recycleFlowMetaData, this.objectType, managedObject, this.pool);
 	}
 

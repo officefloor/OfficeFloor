@@ -34,10 +34,6 @@ public enum AdministratorScope {
 	/**
 	 * {@link Administrator} bound to {@link ThreadState}.
 	 */
-	THREAD,
+	THREAD
 
-	/**
-	 * {@link Administrator} bound to {@link ProcessState}.
-	 */
-	PROCESS
 }

@@ -21,6 +21,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Abstract {@link FunctionState} that delegates functionality to a delegate
@@ -61,8 +62,8 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 	}
 
 	@Override
-	public Flow getFlow() {
-		return this.delegate.getFlow();
+	public ThreadState getThreadState() {
+		return this.delegate.getThreadState();
 	}
 
 	@Override

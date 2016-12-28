@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskGovernanceConfigurationImpl implements
+public class ManagedFunctionGovernanceConfigurationImpl implements
 		ManagedFunctionGovernanceConfiguration {
 
 	/**
@@ -39,7 +39,7 @@ public class TaskGovernanceConfigurationImpl implements
 	 * @param governanceName
 	 *            {@link Governance} name.
 	 */
-	public TaskGovernanceConfigurationImpl(String governanceName) {
+	public ManagedFunctionGovernanceConfigurationImpl(String governanceName) {
 		this.governanceName = governanceName;
 	}
 

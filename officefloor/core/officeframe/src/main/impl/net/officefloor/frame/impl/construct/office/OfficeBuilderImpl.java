@@ -34,12 +34,12 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
 import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
-import net.officefloor.frame.impl.construct.function.TaskBuilderImpl;
-import net.officefloor.frame.impl.construct.function.TaskEscalationConfigurationImpl;
+import net.officefloor.frame.impl.construct.function.ManagedFunctionBuilderImpl;
+import net.officefloor.frame.impl.construct.function.ManagedFunctionEscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
@@ -54,6 +54,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -114,6 +115,12 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<ManagedObjectConfiguration<?>> processManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
 
 	/**
+	 * Flags whether to manually manage {@link Governance} via
+	 * {@link Administrator} instances.
+	 */
+	private boolean isManuallyManageGovernance = false;
+
+	/**
 	 * Listing of {@link GovernanceConfiguration}.
 	 */
 	private final List<GovernanceConfiguration<?, ?>> governances = new LinkedList<GovernanceConfiguration<?, ?>>();
@@ -124,19 +131,14 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<ManagedObjectConfiguration<?>> threadManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
 
 	/**
-	 * Listing of {@link ProcessState} bound {@link Administrator}.
-	 */
-	private final List<AdministratorSourceConfiguration<?, ?>> processAdministrator = new LinkedList<AdministratorSourceConfiguration<?, ?>>();
-
-	/**
 	 * Listing of {@link ThreadState} bound {@link Administrator}.
 	 */
-	private final List<AdministratorSourceConfiguration<?, ?>> threadAdministrator = new LinkedList<AdministratorSourceConfiguration<?, ?>>();
+	private final List<AdministratorConfiguration<?, ?>> administrators = new LinkedList<AdministratorConfiguration<?, ?>>();
 
 	/**
 	 * Listing of {@link ManagedFunctionConfiguration}.
 	 */
-	private final List<TaskBuilderImpl<?, ?>> functions = new LinkedList<TaskBuilderImpl<?, ?>>();
+	private final List<ManagedFunctionBuilderImpl<?, ?>> functions = new LinkedList<ManagedFunctionBuilderImpl<?, ?>>();
 
 	/**
 	 * Listing of registered {@link OfficeEnhancer} instances.
@@ -227,6 +229,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
+	public void setManuallyManageGovernance(boolean isManuallyManageGovernance) {
+		this.isManuallyManageGovernance = isManuallyManageGovernance;
+	}
+
+	@Override
 	public <E, F extends Enum<F>> GovernanceBuilder<F> addGovernance(String governanceName, Class<E> extensionInterface,
 			GovernanceFactory<? super E, F> governanceFactory) {
 		GovernanceBuilderImpl<E, F> builder = new GovernanceBuilderImpl<E, F>(governanceName, extensionInterface,
@@ -236,27 +243,19 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addProcessAdministrator(
-			String processAdministratorName, Class<AS> adminsistratorSource) {
-		AdministratorBuilderImpl<I, A, AS> builder = new AdministratorBuilderImpl<I, A, AS>(processAdministratorName,
-				adminsistratorSource);
-		this.processAdministrator.add(builder);
-		return builder;
-	}
-
-	@Override
-	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addThreadAdministrator(
+	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addAdministrator(
 			String threadAdministratorName, Class<AS> adminsistratorSource) {
 		AdministratorBuilderImpl<I, A, AS> builder = new AdministratorBuilderImpl<I, A, AS>(threadAdministratorName,
 				adminsistratorSource);
-		this.threadAdministrator.add(builder);
+		this.administrators.add(builder);
 		return builder;
 	}
 
 	@Override
 	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> addManagedFunction(String functionName,
 			ManagedFunctionFactory<O, F> mangedFunctionFactory) {
-		TaskBuilderImpl<O, F> functionBuilder = new TaskBuilderImpl<>(functionName, mangedFunctionFactory);
+		ManagedFunctionBuilderImpl<O, F> functionBuilder = new ManagedFunctionBuilderImpl<>(functionName,
+				mangedFunctionFactory);
 		this.functions.add(functionBuilder);
 		return functionBuilder;
 	}
@@ -268,7 +267,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	@Override
 	public void addEscalation(Class<? extends Throwable> typeOfCause, String functionName) {
-		this.escalations.add(new TaskEscalationConfigurationImpl(typeOfCause,
+		this.escalations.add(new ManagedFunctionEscalationConfigurationImpl(typeOfCause,
 				new ManagedFunctionReferenceImpl(functionName, typeOfCause)));
 	}
 
@@ -333,18 +332,18 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
+	public boolean isManuallyManageGovernance() {
+		return this.isManuallyManageGovernance;
+	}
+
+	@Override
 	public GovernanceConfiguration<?, ?>[] getGovernanceConfiguration() {
 		return this.governances.toArray(new GovernanceConfiguration[this.governances.size()]);
 	}
 
 	@Override
-	public AdministratorSourceConfiguration<?, ?>[] getProcessAdministratorSourceConfiguration() {
-		return this.processAdministrator.toArray(new AdministratorSourceConfiguration[0]);
-	}
-
-	@Override
-	public AdministratorSourceConfiguration<?, ?>[] getThreadAdministratorSourceConfiguration() {
-		return this.threadAdministrator.toArray(new AdministratorSourceConfiguration[0]);
+	public AdministratorConfiguration<?, ?>[] getAdministratorConfiguration() {
+		return this.administrators.toArray(new AdministratorConfiguration[0]);
 	}
 
 	@Override
@@ -367,7 +366,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 		// Obtain the function builder
 		String namespacedFunctionName = getNamespacedName(namespace, functionName);
-		for (TaskBuilderImpl<?, ?> builder : this.functions) {
+		for (ManagedFunctionBuilderImpl<?, ?> builder : this.functions) {
 			if (namespacedFunctionName.equals(builder.getFunctionName())) {
 				return builder;
 			}

@@ -100,7 +100,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 			TeamIdentifier currentTeam) {
 
 		// Obtain the thread state for loop
-		ThreadState threadState = headFunction.getFlow().getThreadState();
+		ThreadState threadState = headFunction.getThreadState();
 		try {
 			// Attach thread state to thread
 			ThreadStateImpl.attachThreadStateToThread(threadState, isThreadStateSafe);
@@ -110,7 +110,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 			do {
 				try {
 					// Ensure appropriate thread state
-					if (nextFunction.getFlow().getThreadState() != this) {
+					if (nextFunction.getThreadState() != this) {
 						// Other thread state to undertake function loop
 						return nextFunction;
 					}
@@ -199,7 +199,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 				boolean isRequireThreadStateSafety) {
 			if (isRequireThreadStateSafety) {
 				// Execute loop with thread state safety
-				synchronized (headFunction.getFlow().getThreadState()) {
+				synchronized (headFunction.getThreadState()) {
 					return FunctionLoopImpl.this.executeThreadStateJobNodeLoop(headFunction, true, this.currentTeam);
 				}
 			} else {
@@ -221,7 +221,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 		protected void assignFunction(FunctionState function, TeamManagement responsibleTeam) {
 
 			// First assigning, so must synchronise thread state
-			synchronized (function.getFlow().getThreadState()) {
+			synchronized (function.getThreadState()) {
 			}
 
 			// Assign the function to the responsible team
@@ -234,7 +234,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 
 		@Override
 		public Object getProcessIdentifier() {
-			return this.initialFunction.getFlow().getThreadState().getProcessState().getProcessIdentifier();
+			return this.initialFunction.getThreadState().getProcessState().getProcessIdentifier();
 		}
 
 		@Override

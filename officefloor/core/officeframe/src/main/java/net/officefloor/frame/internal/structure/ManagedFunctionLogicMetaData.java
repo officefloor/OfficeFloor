@@ -17,9 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -52,24 +49,6 @@ public interface ManagedFunctionLogicMetaData {
 	 * @return {@link FunctionLoop}.
 	 */
 	FunctionLoop getFunctionLoop();
-
-	/**
-	 * Obtains the meta-data of the {@link ManagedObject} instances bound to the
-	 * {@link ManagedFunction}.
-	 * 
-	 * @return Meta-data of the {@link ManagedObject} instances bound to the
-	 *         {@link ManagedFunction}.
-	 */
-	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
-
-	/**
-	 * Obtains the meta-data of the {@link Administrator} instances for the
-	 * {@link ManagedFunction}.
-	 * 
-	 * @return Meta-data of the {@link Administrator} instances for the
-	 *         {@link ManagedFunction}.
-	 */
-	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
 
 	/**
 	 * Obtains the {@link ManagedFunctionMetaData} of the next

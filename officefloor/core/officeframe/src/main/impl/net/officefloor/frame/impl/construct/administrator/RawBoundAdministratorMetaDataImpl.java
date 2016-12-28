@@ -35,7 +35,7 @@ import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDa
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.impl.execute.duty.DutyMetaDataImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
-import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
@@ -103,9 +103,9 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	private final AdministratorIndex administratorIndex;
 
 	/**
-	 * {@link AdministratorSourceConfiguration}.
+	 * {@link AdministratorConfiguration}.
 	 */
-	private final AdministratorSourceConfiguration<A, ?> administratorSourceConfiguration;
+	private final AdministratorConfiguration<A, ?> administratorSourceConfiguration;
 
 	/**
 	 * Administered {@link RawBoundManagedObjectMetaData}.
@@ -141,7 +141,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 * @param administratorIndex
 	 *            {@link AdministratorIndex}.
 	 * @param administratorSourceConfiguration
-	 *            {@link AdministratorSourceConfiguration}.
+	 *            {@link AdministratorConfiguration}.
 	 * @param administeredRawBoundManagedObjects
 	 *            Administered {@link RawBoundManagedObjectMetaData}.
 	 * @param dutyKeysByName
@@ -152,7 +152,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 *            {@link AdministratorMetaData}.
 	 */
 	private RawBoundAdministratorMetaDataImpl(String boundAdministratorName, AdministratorIndex administratorIndex,
-			AdministratorSourceConfiguration<A, ?> administratorSourceConfiguration,
+			AdministratorConfiguration<A, ?> administratorSourceConfiguration,
 			RawBoundManagedObjectMetaData[] administeredRawBoundManagedObjects, Map<String, DutyKey<A>> dutyKeysByName,
 			Map<A, DutyKey<A>> dutyKeysByKey, AdministratorMetaDataImpl<I, A> adminMetaData) {
 		this.boundAdministratorName = boundAdministratorName;
@@ -171,7 +171,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public RawBoundAdministratorMetaData<?, ?>[] constructRawBoundAdministratorMetaData(
-			AdministratorSourceConfiguration<?, ?>[] configuration, SourceContext sourceContext,
+			AdministratorConfiguration<?, ?>[] configuration, SourceContext sourceContext,
 			OfficeFloorIssues issues, AdministratorScope administratorScope, AssetType assetType, String assetName,
 			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
 			FunctionLoop functionLoop) {
@@ -179,7 +179,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 		// Register the bound administrators
 		List<RawBoundAdministratorMetaData<?, ?>> boundAdministrators = new LinkedList<RawBoundAdministratorMetaData<?, ?>>();
 		int boundAdminIndex = 0;
-		for (AdministratorSourceConfiguration config : configuration) {
+		for (AdministratorConfiguration config : configuration) {
 
 			// Create the administrator index
 			AdministratorIndex adminIndex = new AdministratorIndexImpl(administratorScope, boundAdminIndex++);
@@ -200,7 +200,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 * Provides typed construction of a {@link RawBoundAdministratorMetaData}.
 	 * 
 	 * @param configuration
-	 *            {@link AdministratorSourceConfiguration} instances.
+	 *            {@link AdministratorConfiguration} instances.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 * @param issues
@@ -224,7 +224,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 */
 	@SuppressWarnings("unchecked")
 	private <a extends Enum<a>, i, AS extends AdministratorSource<i, a>> RawBoundAdministratorMetaData<i, a> constructRawBoundAdministratorMetaData(
-			AdministratorSourceConfiguration<a, AS> configuration, SourceContext sourceContext,
+			AdministratorConfiguration<a, AS> configuration, SourceContext sourceContext,
 			OfficeFloorIssues issues, AdministratorIndex administratorIndex, AssetType assetType, String assetName,
 			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
 			FunctionLoop functionLoop) {

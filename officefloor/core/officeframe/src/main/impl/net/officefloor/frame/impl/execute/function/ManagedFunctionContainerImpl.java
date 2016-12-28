@@ -21,7 +21,7 @@ import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
-import net.officefloor.frame.internal.structure.AdministratorContainer;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -29,7 +29,6 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
@@ -39,13 +38,10 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * {@link FunctionState} to execute a {@link ManagedFunctionLogic}.
@@ -66,9 +62,16 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	};
 
 	/**
-	 * {@link Flow}.
+	 * Optional {@link FunctionState} to be executed to setup this
+	 * {@link ManagedObjectContainer}.
 	 */
-	private final Flow flow;
+	private FunctionState setupFunction;
+
+	/**
+	 * {@link ManagedFunctionLogic} to be executed by this
+	 * {@link ManagedFunctionContainer}.
+	 */
+	private final ManagedFunctionLogic managedFunctionLogic;
 
 	/**
 	 * {@link ManagedFunctionLogicMetaData}.
@@ -83,13 +86,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private final ManagedObjectContainer[] managedObjects;
 
 	/**
-	 * {@link AdministratorContainer} instances for the respective
-	 * {@link Administrator} instances bound to this
-	 * {@link ManagedFunctionContainer}.
-	 */
-	private final AdministratorContainer<?>[] administrators;
-
-	/**
 	 * {@link ManagedFunctionContainer} {@link ManagedObjectIndex} instances to
 	 * the {@link ManagedObject} instances that must be loaded before the
 	 * {@link ManagedFunction} may be executed.
@@ -99,36 +95,40 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	/**
 	 * <p>
 	 * Array identifying which {@link Governance} instances are required to be
-	 * active for this {@link Job}. The {@link Governance} is identified by the
-	 * index into the array.For each {@link Governance}:
+	 * active for this {@link ManagedFunctionLogic}. The {@link Governance} is
+	 * identified by the index into the array.For each {@link Governance}:
 	 * <ol>
 	 * <li><code>true</code> indicates the {@link Governance} is to be activated
 	 * (if not already activated)</li>
 	 * <li><code>false</code> indicates to deactivate the {@link Governance}
-	 * should it be active. The strategy for deactivation is defined by the
-	 * {@link GovernanceDeactivationStrategy}.</li>
+	 * should it be active.</li>
 	 * </ol>
 	 * <p>
 	 * Should this array be <code>null</code> no change is undertaken with the
-	 * {@link Governance} for the {@link Job}.
+	 * {@link Governance} for the {@link ManagedFunctionLogic}.
 	 */
 	private final boolean[] requiredGovernance;
 
 	/**
-	 * {@link GovernanceDeactivationStrategy}.
+	 * Indicates whether {@link Governance} is to be enforced.
 	 */
-	private final GovernanceDeactivationStrategy governanceDeactivationStrategy;
+	private final boolean isEnforceGovernance;
 
 	/**
-	 * {@link ManagedFunctionLogic} to be executed by this
-	 * {@link ManagedFunctionContainer}.
+	 * {@link Flow}.
 	 */
-	private final ManagedFunctionLogic managedFunctionLogic;
+	private final Flow flow;
 
 	/**
-	 * State of this {@link ManagedFunctionContainerImpl}.
+	 * Indicates whether this {@link ManagedObjectContainer} is responsible for
+	 * unloading the {@link ManagedObject} instances.
 	 */
-	private ManagedFunctionState containerState = ManagedFunctionState.LOAD_MANAGED_OBJECTS;
+	private final boolean isUnloadManagedObjects;
+
+	/**
+	 * State of this {@link ManagedFunctionContainer}.
+	 */
+	private ManagedFunctionState containerState = ManagedFunctionState.SETUP;
 
 	/**
 	 * Index of the next {@link ManagedObject} to load.
@@ -180,13 +180,16 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	/**
 	 * Initiate.
 	 * 
-	 * @param flow
-	 *            {@link Flow} containing this {@link Job}.
-	 * @param functionLogicMetaData
-	 *            {@link ManagedFunctionLogicMetaData} for this node.
-	 * @param parallelOwner
-	 *            Parallel owner of this {@link ManagedFunctionContainer}. May
-	 *            be <code>null</code> if no owner.
+	 * @param setupFunction
+	 *            Optional {@link FunctionState} to be executed to setup this
+	 *            {@link ManagedObjectContainer}. May be <code>null</code>.
+	 * @param managedFunctionLogic
+	 *            {@link ManagedFunctionLogic} to be executed by this
+	 *            {@link ManagedFunctionContainer}.
+	 * @param functionBoundManagedObjects
+	 *            {@link ManagedObjectContainer} instances for the
+	 *            {@link ManagedObject} instances bound to the
+	 *            {@link ManagedFunction}.
 	 * @param requiredManagedObjects
 	 *            {@link ManagedObjectIndex} instances to the
 	 *            {@link ManagedObject} instances that must be loaded before the
@@ -194,28 +197,35 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * @param requiredGovernance
 	 *            Identifies the required activation state of the
 	 *            {@link Governance} for this {@link ManagedFunction}.
-	 * @param governanceDeactivationStrategy
-	 *            {@link GovernanceDeactivationStrategy} for
-	 *            {@link RegisteredGovernance}.
-	 * @param managedFunctionLogic
-	 *            {@link ManagedFunctionLogic} to be executed by this
-	 *            {@link ManagedFunctionContainer}.
+	 * @param isEnforceGovernance
+	 *            <code>true</code> to enforce {@link Governance} on
+	 *            deactivation. <code>false</code> to disregard
+	 *            {@link Governance} on deactivation.
+	 * @param functionLogicMetaData
+	 *            {@link ManagedFunctionLogicMetaData} for this node.
+	 * @param parallelOwner
+	 *            Parallel owner of this {@link ManagedFunctionContainer}. May
+	 *            be <code>null</code> if no owner.
+	 * @param flow
+	 *            {@link Flow} containing this {@link ManagedFunctionContainer}.
+	 * @param isUnloadManagedObjects
+	 *            Indicates whether this {@link ManagedObjectContainer} is
+	 *            responsible for unloading the {@link ManagedObject} instances.
 	 */
-	public ManagedFunctionContainerImpl(Flow flow, M functionLogicMetaData, ManagedFunctionContainer parallelOwner,
-			ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy, ManagedFunctionLogic managedFunctionLogic) {
-		this.flow = flow;
-		this.functionLogicMetaData = functionLogicMetaData;
-		this.parallelOwner = (ManagedFunctionContainerImpl<?>) parallelOwner;
+	public ManagedFunctionContainerImpl(FunctionState setupFunction, ManagedFunctionLogic managedFunctionLogic,
+			ManagedObjectContainer[] functionBoundManagedObjects, ManagedObjectIndex[] requiredManagedObjects,
+			boolean[] requiredGovernance, boolean isEnforceGovernance, M functionLogicMetaData,
+			ManagedFunctionContainer parallelOwner, Flow flow, boolean isUnloadManagedObjects) {
+		this.setupFunction = setupFunction;
+		this.managedFunctionLogic = managedFunctionLogic;
+		this.managedObjects = functionBoundManagedObjects;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.requiredGovernance = requiredGovernance;
-		this.governanceDeactivationStrategy = governanceDeactivationStrategy;
-		this.managedFunctionLogic = managedFunctionLogic;
-
-		// Create the container arrays
-		this.managedObjects = new ManagedObjectContainer[this.functionLogicMetaData.getManagedObjectMetaData().length];
-		this.administrators = new AdministratorContainer<?>[this.functionLogicMetaData
-				.getAdministratorMetaData().length];
+		this.isEnforceGovernance = isEnforceGovernance;
+		this.functionLogicMetaData = functionLogicMetaData;
+		this.parallelOwner = (ManagedFunctionContainerImpl<?>) parallelOwner;
+		this.flow = flow;
+		this.isUnloadManagedObjects = isUnloadManagedObjects;
 	}
 
 	/*
@@ -232,34 +242,18 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 */
 
 	@Override
+	public Flow getFlow() {
+		return this.flow;
+	}
+
+	@Override
 	public void setNextManagedFunctionContainer(ManagedFunctionContainer container) {
 		this.sequentialFunction = (ManagedFunctionContainerImpl<?>) container;
 	}
 
 	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
-
-		// Lazy load the container
-		ManagedObjectContainer container = this.managedObjects[index];
-		if (container == null) {
-			container = this.functionLogicMetaData.getManagedObjectMetaData()[index]
-					.createManagedObjectContainer(this.flow.getThreadState());
-			this.managedObjects[index] = container;
-		}
-		return container;
-	}
-
-	@Override
-	public AdministratorContainer<?> getAdministratorContainer(int index) {
-
-		// Lazy load the container
-		AdministratorContainer<?> container = this.administrators[index];
-		if (container == null) {
-			container = this.functionLogicMetaData.getAdministratorMetaData()[index]
-					.createAdministratorContainer(this.flow.getThreadState());
-			this.administrators[index] = container;
-		}
-		return container;
+		return this.managedObjects[index];
 	}
 
 	/*
@@ -272,8 +266,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	@Override
-	public Flow getFlow() {
-		return this.flow;
+	public ThreadState getThreadState() {
+		return this.flow.getThreadState();
 	}
 
 	@Override
@@ -292,6 +286,14 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		threadState.profile(this.functionLogicMetaData);
 
 		switch (this.containerState) {
+		case SETUP:
+
+			// Setup
+			this.containerState = ManagedFunctionState.LOAD_MANAGED_OBJECTS;
+			if (this.setupFunction != null) {
+				return Promise.then(this.setupFunction, this);
+			}
+
 		case LOAD_MANAGED_OBJECTS:
 
 			// Load the managed objects
@@ -300,31 +302,9 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 					ManagedObjectIndex index = this.requiredManagedObjects[this.loadManagedObjectIndex];
 					this.loadManagedObjectIndex++;
 
-					// Obtain the index of managed object within scope
-					int scopeIndex = index.getIndexOfManagedObjectWithinScope();
-
 					// Obtain the managed object container
-					ManagedObjectContainer container;
-					switch (index.getManagedObjectScope()) {
-					case FUNCTION:
-						// Obtain the container from this managed function
-						container = this.getManagedObjectContainer(scopeIndex);
-						break;
-
-					case THREAD:
-						// Obtain the container from the thread state
-						container = threadState.getManagedObjectContainer(scopeIndex);
-						break;
-
-					case PROCESS:
-						// Obtain the container from the process state
-						container = processState.getManagedObjectContainer(scopeIndex);
-						break;
-
-					default:
-						throw new IllegalStateException(
-								"Unknown managed object scope " + index.getManagedObjectScope());
-					}
+					ManagedObjectContainer container = ManagedObjectContainerImpl.getManagedObjectContainer(index,
+							this);
 
 					// Load the managed object
 					return container.loadManagedObject(this);
@@ -353,19 +333,9 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 						} else {
 							// De-activate the governance
-							switch (this.governanceDeactivationStrategy) {
-							case ENFORCE:
-								updateGovernance = Promise.then(updateGovernance, governance.enforceGovernance());
-
-							case DISREGARD:
-								updateGovernance = Promise.then(updateGovernance, governance.disregardGovernance());
-
-							default:
-								// Unknown de-activation strategy
-								throw new IllegalStateException(
-										"Unknown " + GovernanceDeactivationStrategy.class.getSimpleName() + " "
-												+ ManagedFunctionContainerImpl.this.governanceDeactivationStrategy);
-							}
+							FunctionState deactivateGovernance = (this.isEnforceGovernance
+									? governance.enforceGovernance() : governance.disregardGovernance());
+							updateGovernance = Promise.then(updateGovernance, deactivateGovernance);
 						}
 					}
 				}
@@ -435,8 +405,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				if (nextFunctionMetaData != null) {
 					// Create next managed function container
 					ManagedFunctionContainerImpl<?> nextContainer = (ManagedFunctionContainerImpl<?>) this.flow
-							.createManagedFunction(nextFunctionMetaData, this.parallelOwner,
-									this.nextManagedFunctionParameter, this.governanceDeactivationStrategy);
+							.createManagedFunction(this.nextManagedFunctionParameter, nextFunctionMetaData, true,
+									this.parallelOwner);
 
 					// Load for sequential execution
 					this.loadSequentialFunction(nextContainer);
@@ -447,7 +417,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			}
 
 			// Complete this function (flags state complete)
-			FunctionState completeFunction = this.completeFunction();
+			FunctionState completeFunction = this.complete();
 			if (completeFunction != null) {
 				return Promise.then(completeFunction, this);
 			}
@@ -459,11 +429,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			}
 
 		case COMPLETED:
-			// Now complete (attempt to clean up)
-			FunctionState completeJobNode = this.completeFunction();
-			if (completeJobNode != null) {
-				return Promise.then(completeJobNode, this);
-			}
+			// Now complete, so nothing further
 			return null;
 
 		case FAILED:
@@ -488,7 +454,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				container.containerState = ManagedFunctionState.FAILED;
 
 				// Escalation from this node, so nothing further
-				FunctionState clearFunctions = container.clearFunctions();
+				FunctionState clearFunctions = container.clear();
 
 				// Obtain the escalation flow from this function
 				EscalationFlow escalationFlow = container.functionLogicMetaData.getEscalationProcedure()
@@ -497,9 +463,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 					// Escalation handled by this function
 					ThreadState threadState = container.flow.getThreadState();
 					Flow parallelFlow = threadState.createFlow(null);
-					FunctionState escalationFunction = parallelFlow.createManagedFunction(
-							escalationFlow.getManagedFunctionMetaData(), container.parallelOwner, escalation,
-							GovernanceDeactivationStrategy.DISREGARD);
+					FunctionState escalationFunction = parallelFlow.createManagedFunction(escalation,
+							escalationFlow.getManagedFunctionMetaData(), false, container.parallelOwner);
 					return Promise.then(clearFunctions, escalationFunction);
 				}
 
@@ -507,7 +472,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				return Promise.then(clearFunctions, container.flow.handleEscalation(escalation));
 			}
 		};
-
 	}
 
 	/**
@@ -590,12 +554,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				break;
 
 			case THREAD:
-				moContainer = container.getFlow().getThreadState().getManagedObjectContainer(scopeIndex);
+				moContainer = container.getThreadState().getManagedObjectContainer(scopeIndex);
 				break;
 
 			case PROCESS:
-				moContainer = container.getFlow().getThreadState().getProcessState()
-						.getManagedObjectContainer(scopeIndex);
+				moContainer = container.getThreadState().getProcessState().getManagedObjectContainer(scopeIndex);
 				break;
 
 			default:
@@ -638,8 +601,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				// Create the function
 				@SuppressWarnings("unchecked")
 				ManagedFunctionContainerImpl<?> parallelFunction = (ManagedFunctionContainerImpl<?>) parallelFlow
-						.createManagedFunction(initialFunctionMetaData, container, parameter,
-								GovernanceDeactivationStrategy.ENFORCE);
+						.createManagedFunction(parameter, initialFunctionMetaData, true, container);
 
 				// Load the parallel function
 				container.loadParallelFunction(parallelFunction);
@@ -651,8 +613,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				// Create the function on the same flow as this function
 				@SuppressWarnings("unchecked")
 				ManagedFunctionContainerImpl<?> sequentialFunction = (ManagedFunctionContainerImpl<?>) container.flow
-						.createManagedFunction(initialFunctionMetaData, container.parallelOwner, parameter,
-								GovernanceDeactivationStrategy.ENFORCE);
+						.createManagedFunction(parameter, initialFunctionMetaData, true, container.parallelOwner);
 
 				// Load the sequential function
 				container.loadSequentialFunction(sequentialFunction);
@@ -757,7 +718,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	/**
 	 * Clears this {@link FunctionState}.
 	 */
-	private final FunctionState clearFunctions() {
+	private final FunctionState clear() {
 		return new ManagedFunctionOperation() {
 			@Override
 			public FunctionState execute() throws Throwable {
@@ -770,16 +731,16 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 				// Clear all the parallel functions from this node
 				if (container.parallelFunction != null) {
-					cleanUpFunctions = Promise.then(container.parallelFunction.clearFunctions(), cleanUpFunctions);
+					cleanUpFunctions = Promise.then(container.parallelFunction.clear(), cleanUpFunctions);
 				}
 
 				// Clear all the sequential functions from this node
 				if (container.sequentialFunction != null) {
-					cleanUpFunctions = Promise.then(container.sequentialFunction.clearFunctions(), cleanUpFunctions);
+					cleanUpFunctions = Promise.then(container.sequentialFunction.clear(), cleanUpFunctions);
 				}
 
 				// Clear this function
-				return Promise.then(cleanUpFunctions, container.completeFunction());
+				return Promise.then(cleanUpFunctions, container.complete());
 			}
 		};
 	}
@@ -787,7 +748,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	/**
 	 * Completes this {@link FunctionState}.
 	 */
-	private FunctionState completeFunction() {
+	private FunctionState complete() {
 		return new ManagedFunctionOperation() {
 			@Override
 			public FunctionState execute() throws Throwable {
@@ -804,9 +765,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				FunctionState cleanUpFunctions = null;
 
 				// Clean up the managed objects
-				for (int i = 0; i < container.managedObjects.length; i++) {
-					ManagedObjectContainer managedObject = container.managedObjects[i];
-					cleanUpFunctions = Promise.then(cleanUpFunctions, managedObject.unloadManagedObject());
+				if (container.isUnloadManagedObjects) {
+					for (int i = 0; i < container.managedObjects.length; i++) {
+						ManagedObjectContainer managedObject = container.managedObjects[i];
+						cleanUpFunctions = Promise.then(cleanUpFunctions, managedObject.unloadManagedObject());
+					}
 				}
 
 				// Complete this function
@@ -841,8 +804,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		}
 
 		@Override
-		public Flow getFlow() {
-			return ManagedFunctionContainerImpl.this.getFlow();
+		public ThreadState getThreadState() {
+			return ManagedFunctionContainerImpl.this.getThreadState();
 		}
 
 		@Override
@@ -865,6 +828,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * State of this {@link ManagedFunctionContainer}.
 	 */
 	private static enum ManagedFunctionState {
+
+		/**
+		 * Set up of this {@link ManagedFunctionContainer}.
+		 */
+		SETUP,
 
 		/**
 		 * Initial state requiring the {@link ManagedObject} instances to be

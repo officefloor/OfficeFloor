@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import net.officefloor.frame.impl.execute.function.FailThreadStateJobNode;
+import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
@@ -25,6 +25,7 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.OfficeClock;
@@ -36,7 +37,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * @author Daniel Sagenschneider
  */
 public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, AssetManager>
-		implements AssetLatch, FunctionState, CheckAssetContext {
+		implements AssetLatch, CheckAssetContext {
 
 	/**
 	 * {@link Asset} being monitored.
@@ -67,15 +68,15 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	/**
 	 * Set of {@link FunctionState} instances waiting on the {@link Asset}.
 	 */
-	private final LinkedListSet<AwaitingJobNode, AssetLatch> awaitingJobNodes = new ComparatorLinkedListSet<AwaitingJobNode, AssetLatch>() {
+	private final LinkedListSet<AwaitingEntry, AssetLatch> awaiting = new ComparatorLinkedListSet<AwaitingEntry, AssetLatch>() {
 		@Override
 		protected AssetLatch getOwner() {
 			return AssetLatchImpl.this;
 		}
 
 		@Override
-		protected boolean isEqual(AwaitingJobNode entryA, AwaitingJobNode entryB) {
-			return (entryA.jobNode == entryB.jobNode);
+		protected boolean isEqual(AwaitingEntry entryA, AwaitingEntry entryB) {
+			return (entryA.function == entryB.function);
 		}
 	};
 
@@ -93,6 +94,15 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		this.asset = asset;
 		this.assetManager = assetManager;
 		this.clock = clock;
+	}
+
+	/**
+	 * Creates {@link FunctionState} to check this {@link AssetLatch}.
+	 * 
+	 * @return {@link FunctionState} to check this {@link AssetLatch}.
+	 */
+	FunctionState check() {
+		return new CheckOperation();
 	}
 
 	/*
@@ -114,23 +124,28 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	}
 
 	@Override
-	public FunctionState awaitOnAsset(FunctionState jobNode) {
+	public FunctionState awaitOnAsset(FunctionState function) {
 
 		// Undertake permanent release of latch
 		if (this.isPermanentlyActivate) {
 
 			// Fail immediately if failure of asset
-			Throwable failure = this.failure;
+			final Throwable failure = this.failure;
 			if (failure != null) {
-				return new FailThreadStateJobNode(failure, jobNode.getThreadState()).then(jobNode);
+				return new AbstractDelegateFunctionState(function) {
+					@Override
+					public FunctionState execute() throws Throwable {
+						throw failure;
+					}
+				};
 			}
 
 			// Activate immediately if permanently active
-			return jobNode;
+			return function;
 		}
 
-		// Return job to wait on the asset
-		return new AwaitingJobNode(jobNode);
+		// Return operation to wait on the asset
+		return new AwaitingOperation(new AwaitingEntry(function));
 	}
 
 	/*
@@ -145,66 +160,81 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	@Override
 	public void releaseFunctions(boolean isPermanent) {
 		// Latch released, so proceed with job nodes
-		this.assetManager.getJobNodeLoop().delegateFunction(new ReleaseJobNodes(isPermanent));
+		this.assetManager.getFunctionLoop().delegateFunction(new ReleaseOperation(isPermanent));
 	}
 
 	@Override
 	public void failFunctions(Throwable failure, boolean isPermanent) {
 		// Latch failed, so fail the job nodes
-		this.assetManager.getJobNodeLoop().delegateFunction(new FailJobNodes(failure, isPermanent));
+		this.assetManager.getFunctionLoop().delegateFunction(new FailOperation(failure, isPermanent));
 	}
 
-	/*
-	 * ================= JobNode ==========================================
+	/**
+	 * {@link FunctionState} to check on the {@link Asset}.
 	 */
+	private class CheckOperation extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
 
-	@Override
-	public ThreadState getThreadState() {
-		return this.asset.getOwningThreadState();
+		@Override
+		public ThreadState getThreadState() {
+			return AssetLatchImpl.this.asset.getOwningThreadState();
+		}
+
+		@Override
+		public FunctionState execute() {
+
+			// Check on the asset
+			AssetLatchImpl.this.asset.checkOnAsset(AssetLatchImpl.this);
+
+			// Nothing further, as release/fail functions continue independently
+			return null;
+		}
 	}
 
-	@Override
-	public FunctionState execute() {
+	/**
+	 * Awaiting entry.
+	 */
+	private class AwaitingEntry extends AbstractLinkedListSetEntry<AwaitingEntry, AssetLatch> {
 
-		// Check on the asset
-		this.asset.checkOnAsset(this);
+		/**
+		 * {@link FunctionState} awaiting on this {@link AssetLatch}.
+		 */
+		private FunctionState function;
 
-		// Nothing further, as release/fail job nodes continue independently
-		return null;
+		/**
+		 * Instantiate.
+		 * 
+		 * @param function
+		 *            {@link FunctionState} awaiting on this {@link AssetLatch}.
+		 */
+		public AwaitingEntry(FunctionState function) {
+			this.function = function;
+		}
+
+		@Override
+		public AssetLatchImpl getLinkedListSetOwner() {
+			return AssetLatchImpl.this;
+		}
 	}
 
 	/**
 	 * {@link FunctionState} waiting on the {@link AssetLatch}.
 	 */
-	private class AwaitingJobNode extends AbstractLinkedListSetEntry<AwaitingJobNode, AssetLatch> implements FunctionState {
+	private class AwaitingOperation extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
 
 		/**
-		 * {@link FunctionState} being monitored.
+		 * {@link AwaitingEntry} to be registered.
 		 */
-		public final FunctionState jobNode;
+		public final AwaitingEntry entry;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param jobNode
-		 *            {@link FunctionState} waiting on the {@link AssetLatch}.
+		 * @param entry
+		 *            {@link AwaitingEntry} to be registered.
 		 */
-		public AwaitingJobNode(FunctionState jobNode) {
-			this.jobNode = jobNode;
+		public AwaitingOperation(AwaitingEntry entry) {
+			this.entry = entry;
 		}
-
-		/*
-		 * ================= LinkedListSetEntry =========================
-		 */
-
-		@Override
-		public AssetLatch getLinkedListSetOwner() {
-			return AssetLatchImpl.this;
-		}
-
-		/*
-		 * ======================== JobNode ============================
-		 */
 
 		@Override
 		public ThreadState getThreadState() {
@@ -216,19 +246,19 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 
 			// Determine if release is permanent
 			if (AssetLatchImpl.this.isPermanentlyActivate) {
-				// Proceed immediately with job nodes
-				return Promise.then(this.jobNode, new ReleaseJobNodes(true));
+				// Proceed immediately with functions
+				return Promise.then(this.entry.function, new ReleaseOperation(true));
 			}
 
-			// Determine if first job waiting
-			if (AssetLatchImpl.this.awaitingJobNodes.getHead() == null) {
+			// Determine if first function waiting
+			if (AssetLatchImpl.this.awaiting.getHead() == null) {
 				AssetLatchImpl.this.assetManager.registerAssetLatch(AssetLatchImpl.this);
 			}
 
-			// Register this latch with the asset manager
-			AssetLatchImpl.this.awaitingJobNodes.addEntry(this);
+			// Register this entry with the latch
+			AssetLatchImpl.this.awaiting.addEntry(this.entry);
 
-			// Nothing further, as job node now waiting on latch
+			// Nothing further, as function now waiting on latch
 			return null;
 		}
 	}
@@ -237,7 +267,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	 * {@link FunctionState} to release the {@link AssetLatch} and proceed with
 	 * awaiting {@link FunctionState} instances.
 	 */
-	private class ReleaseJobNodes implements FunctionState {
+	private class ReleaseOperation extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
 
 		/**
 		 * Indicates if proceeding is permanent.
@@ -250,13 +280,9 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		 * @param isPermanent
 		 *            Indicates if proceeding is permanent.
 		 */
-		public ReleaseJobNodes(boolean isPermanent) {
+		public ReleaseOperation(boolean isPermanent) {
 			this.isPermanent = isPermanent;
 		}
-
-		/*
-		 * ======================== JobNode ============================
-		 */
 
 		@Override
 		public ThreadState getThreadState() {
@@ -271,15 +297,15 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 				AssetLatchImpl.this.isPermanentlyActivate = true;
 			}
 
-			// Release the job nodes in their own threads
-			AwaitingJobNode awaitingJobNode = AssetLatchImpl.this.awaitingJobNodes.purgeEntries();
-			while (awaitingJobNode != null) {
+			// Release the functions in their own threads
+			AwaitingEntry entry = AssetLatchImpl.this.awaiting.purgeEntries();
+			while (entry != null) {
 
-				// Release the job and continue its flow independently
-				AssetLatchImpl.this.assetManager.getJobNodeLoop().delegateFunction(awaitingJobNode.jobNode);
+				// Release the function and continue its flow independently
+				AssetLatchImpl.this.assetManager.getFunctionLoop().delegateFunction(entry.function);
 
-				// Fail the next waiting job node
-				awaitingJobNode = awaitingJobNode.getNext();
+				// Release the next waiting function
+				entry = entry.getNext();
 			}
 
 			// No further job nodes to fail
@@ -291,7 +317,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	 * {@link FunctionState} to release the {@link AssetLatch} and fail the
 	 * {@link FunctionState} instances.
 	 */
-	private class FailJobNodes implements FunctionState {
+	private class FailOperation extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
 
 		/**
 		 * Failure.
@@ -311,7 +337,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		 * @param isPermanent
 		 *            Indicates if proceeding is permanent.
 		 */
-		public FailJobNodes(Throwable failure, boolean isPermanent) {
+		public FailOperation(Throwable failure, boolean isPermanent) {
 			this.failure = failure;
 			this.isPermanent = isPermanent;
 		}
@@ -334,20 +360,24 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 				AssetLatchImpl.this.isPermanentlyActivate = true;
 			}
 
-			// Fail the job nodes in their own threads
-			AwaitingJobNode awaitingJobNode = AssetLatchImpl.this.awaitingJobNodes.purgeEntries();
-			while (awaitingJobNode != null) {
+			// Fail the functions in their own threads
+			AwaitingEntry entry = AssetLatchImpl.this.awaiting.purgeEntries();
+			while (entry != null) {
 
-				// Fail the job and continue its flow independently
-				AssetLatchImpl.this.assetManager.getJobNodeLoop().delegateFunction(
-						new FailThreadStateJobNode(this.failure, awaitingJobNode.jobNode.getThreadState())
-								.then(awaitingJobNode.jobNode));
+				// Fail the function and continue its flow independently
+				AssetLatchImpl.this.assetManager.getFunctionLoop()
+						.delegateFunction(new AbstractDelegateFunctionState(entry.function) {
+							@Override
+							public FunctionState execute() throws Throwable {
+								throw FailOperation.this.failure;
+							}
+						});
 
-				// Fail the next waiting job node
-				awaitingJobNode = awaitingJobNode.getNext();
+				// Fail the next waiting function
+				entry = entry.getNext();
 			}
 
-			// No further job nodes to fail
+			// No further functions to fail
 			return null;
 		}
 	}

@@ -51,7 +51,7 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	/**
 	 * {@link Timer} to monitor the {@link Office}.
 	 */
-	private final Timer timer = new Timer(true);
+	private final Timer timer;
 
 	/**
 	 * {@link OfficeClockImpl}.
@@ -74,13 +74,16 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	 *            {@link OfficeClock} for the {@link Office}.
 	 * @param functionLoop
 	 *            {@link FunctionLoop} for the {@link Office}.
+	 * @param timer
+	 *            {@link Timer} to monitor the {@link Office}.
 	 */
 	public OfficeManagerImpl(String officeName, long monitorInterval, AssetManager[] assetManagers,
-			OfficeClockImpl officeClock, FunctionLoop functionLoop) {
+			OfficeClockImpl officeClock, FunctionLoop functionLoop, Timer timer) {
 		this.monitorInterval = monitorInterval;
 		this.assetManagers = assetManagers;
 		this.officeClock = officeClock;
 		this.functionLoop = functionLoop;
+		this.timer = timer;
 	}
 
 	/*

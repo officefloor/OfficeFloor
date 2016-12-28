@@ -143,7 +143,7 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 
 			// Obtain the managed object index
 			ManagedObjectIndex index = ManagedFunctionLogicImpl.this.functionMetaData
-					.getRequiredManagedObjects()[managedObjectIndex];
+					.getManagedObject(managedObjectIndex);
 
 			// Determine if a parameter
 			if (index.getIndexOfManagedObjectWithinScope() == PARAMETER_INDEX) {

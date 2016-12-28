@@ -51,8 +51,7 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcessStat
 	 * <p>
 	 * Typically only one {@link ThreadState} per {@link ProcessState}.
 	 */
-	private final List<ProfiledThreadState> threads = new ArrayList<ProfiledThreadState>(
-			1);
+	private final List<ProfiledThreadState> threads = new ArrayList<ProfiledThreadState>(1);
 
 	/**
 	 * Initiate.
@@ -74,15 +73,14 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcessStat
 	@Override
 	public ThreadProfiler addThread(ThreadState thread) {
 		long threadStartTimestamp = System.nanoTime();
-		ThreadProfilerImpl profiler = new ThreadProfilerImpl(
-				threadStartTimestamp);
+		ThreadProfilerImpl profiler = new ThreadProfilerImpl(threadStartTimestamp);
 		this.threads.add(profiler);
 		return profiler;
 	}
 
 	@Override
 	public void processCompleted() {
-		this.profiler.profileProcess(this);
+		this.profiler.profileProcessState(this);
 	}
 
 	/*
@@ -95,7 +93,7 @@ public class ProcessProfilerImpl implements ProcessProfiler, ProfiledProcessStat
 	}
 
 	@Override
-	public List<ProfiledThreadState> getProfiledThreads() {
+	public List<ProfiledThreadState> getProfiledThreadStates() {
 		return this.threads;
 	}
 

@@ -31,7 +31,9 @@ public interface EscalationHandler {
 	 * 
 	 * @param escalation
 	 *            {@link Escalation}.
+	 * @throws Throwable
+	 *             Should failure in handling {@link Escalation}.
 	 */
-	void handleEscalation(Throwable escalation);
+	void handleEscalation(Throwable escalation) throws Throwable;
 
 }

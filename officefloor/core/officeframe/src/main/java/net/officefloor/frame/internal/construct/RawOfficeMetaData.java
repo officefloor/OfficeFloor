@@ -24,6 +24,7 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Raw meta-data of the {@link Office}.
@@ -54,6 +55,13 @@ public interface RawOfficeMetaData {
 	 *         registered names.
 	 */
 	Map<String, TeamManagement> getTeams();
+
+	/**
+	 * Indicates if manually manage {@link Governance}.
+	 * 
+	 * @return <code>true</code> to manually manage {@link Governance}.
+	 */
+	boolean isManuallyManageGovernance();
 
 	/**
 	 * Obtains the {@link RawGovernanceMetaData} by their {@link Office}

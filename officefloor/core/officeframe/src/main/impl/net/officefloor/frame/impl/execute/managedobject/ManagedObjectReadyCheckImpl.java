@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
@@ -33,7 +35,7 @@ public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 	/**
 	 * {@link ManagedFunctionContainer} requiring the check.
 	 */
-	private final ManagedFunctionContainer managedJobNode;
+	private final ManagedFunctionContainer managedFunction;
 
 	/**
 	 * Flag indicating if ready.
@@ -43,11 +45,11 @@ public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param managedJobNode
+	 * @param managedFunction
 	 *            {@link ManagedFunctionContainer} requiring the check.
 	 */
-	public ManagedObjectReadyCheckImpl(ManagedFunctionContainer managedJobNode) {
-		this.managedJobNode = managedJobNode;
+	public ManagedObjectReadyCheckImpl(ManagedFunctionContainer managedFunction) {
+		this.managedFunction = managedFunction;
 	}
 
 	/**
@@ -64,8 +66,8 @@ public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 	 */
 
 	@Override
-	public ManagedFunctionContainer getManagedJobNode() {
-		return this.managedJobNode;
+	public ManagedFunctionContainer getManagedFunctionContainer() {
+		return this.managedFunction;
 	}
 
 	@Override
@@ -76,11 +78,11 @@ public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 	/**
 	 * Flags that the {@link ManagedObject} is not ready.
 	 */
-	private class NotReadyJobNode implements FunctionState {
+	private class NotReadyJobNode extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
 
 		@Override
 		public ThreadState getThreadState() {
-			return ManagedObjectReadyCheckImpl.this.managedJobNode.getThreadState();
+			return ManagedObjectReadyCheckImpl.this.managedFunction.getThreadState();
 		}
 
 		@Override

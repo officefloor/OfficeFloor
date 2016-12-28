@@ -19,23 +19,20 @@ package net.officefloor.frame.impl.execute.governance;
 
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
-import net.officefloor.frame.impl.execute.work.WorkContainerImpl;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.team.Team;
@@ -133,7 +130,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	@Override
-	public ManagedFunctionMetaData<?, ?, ?> getNextManagedFunctionMetaData() {
+	public ManagedFunctionMetaData<?, ?> getNextManagedFunctionMetaData() {
 		// Never a next task for governance activity
 		return null;
 	}
@@ -158,8 +155,8 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	@Override
-	public ManagedFunctionContainerImpl createGovernanceFunction(GovernanceActivity<F> activity, Flow flow) {
-		return new GovernanceFunction(flow, activity);
+	public ManagedFunctionLogic createGovernanceFunctionLogic(GovernanceActivity<F> activity) {
+		return new GovernanceFunctionLogic(activity);
 	}
 
 	@Override
@@ -168,19 +165,14 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	@Override
-	public FlowMetaData<?> getFlow(int flowIndex) {
+	public FlowMetaData getFlow(int flowIndex) {
 		return this.flowMetaData[flowIndex];
 	}
 
 	/**
-	 * {@link ManagedFunctionContainerImpl} to undertake the
-	 * {@link GovernanceActivity}.
-	 * 
-	 * @param <W>
-	 *            {@link Work} type.
+	 * {@link ManagedFunctionLogic} to undertake the {@link GovernanceActivity}.
 	 */
-	private class GovernanceFunction extends ManagedFunctionContainerImpl<Work, GovernanceMetaData<I, F>>
-			implements GovernanceContext<F> {
+	private class GovernanceFunctionLogic implements ManagedFunctionLogic {
 
 		/**
 		 * {@link GovernanceActivity}.
@@ -190,18 +182,10 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 		/**
 		 * Instantiate.
 		 * 
-		 * @param flow
-		 *            {@link Flow}.
-		 * @param workContainer
-		 *            {@link WorkContainer}.
-		 * @param governanceMetaData
-		 *            {@link GovernanceMetaData}.
 		 * @param activity
 		 *            {@link GovernanceActivity}.
 		 */
-		public GovernanceFunction(Flow flow, GovernanceActivity<F> activity) {
-			super(flow, new WorkContainerImpl<>(null, new GovernanceWork(), flow.getThreadState()),
-					GovernanceMetaDataImpl.this, null, null, null, GovernanceDeactivationStrategy.DISREGARD);
+		public GovernanceFunctionLogic(GovernanceActivity<F> activity) {
 			this.activity = activity;
 		}
 
@@ -210,28 +194,42 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 		 */
 
 		@Override
-		protected Object executeFunction(ManagedFunctionLogicContext context) throws Throwable {
-			context.next(this.activity.doActivity(this));
+		public Object execute(final ManagedFunctionLogicContext context) throws Throwable {
+
+			// Create the governance context
+			GovernanceContext<F> governanceContext = new GovernanceContext<F>() {
+
+				@Override
+				public void doFlow(F key, Object parameter, FlowCallback callback) {
+					this.doFlow(key.ordinal(), parameter, callback);
+				}
+
+				@Override
+				public void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
+
+					// Obtain the flow meta-data
+					FlowMetaData flowMetaData = GovernanceMetaDataImpl.this.flowMetaData[flowIndex];
+
+					// Undertake the flow
+					context.doFlow(flowMetaData, parameter, callback);
+				}
+			};
+
+			// Execute the activity
+			final FunctionState next = this.activity.doActivity(governanceContext);
+
+			// Specify next function
+			if (next != null) {
+				context.next(new FunctionLogic() {
+					@Override
+					public FunctionState execute(Flow flow) throws Throwable {
+						return next;
+					}
+				});
+			}
+
+			// No next function for governance
 			return null;
-		}
-
-		/*
-		 * ================== GovernanceContext ==========================
-		 */
-
-		@Override
-		public void doFlow(F key, Object parameter, FlowCallback callback) {
-			this.doFlow(key.ordinal(), parameter, callback);
-		}
-
-		@Override
-		public void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
-
-			// Obtain the flow meta-data
-			FlowMetaData<?> flowMetaData = this.functionContainerMetaData.getFlow(flowIndex);
-
-			// Undertake the flow
-			this.doFlow(flowMetaData, parameter, callback);
 		}
 	}
 

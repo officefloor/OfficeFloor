@@ -17,27 +17,26 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 
 /**
  * {@link FunctionManager} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskManagerImpl implements FunctionManager {
+public class FunctionManagerImpl implements FunctionManager {
 
 	/**
 	 * {@link ManagedFunctionMetaData}.
 	 */
-	private final ManagedFunctionMetaData<?, ?, ?> taskMetaData;
+	private final ManagedFunctionMetaData<?, ?> functionMetaData;
 
 	/**
 	 * {@link OfficeMetaData}.
@@ -47,63 +46,60 @@ public class TaskManagerImpl implements FunctionManager {
 	/**
 	 * {@link FlowMetaData} for this {@link FunctionManager}.
 	 */
-	private final FlowMetaData<?> flowMetaData = new TaskManagerFlowMetaData();
+	private final FlowMetaData flowMetaData = new FunctionManagerFlowMetaData();
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param taskMetaData
+	 * @param functionMetaData
 	 *            {@link ManagedFunctionMetaData}.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
 	 */
-	public TaskManagerImpl(ManagedFunctionMetaData<?, ?, ?> taskMetaData, OfficeMetaData officeMetaData) {
-		this.taskMetaData = taskMetaData;
+	public FunctionManagerImpl(ManagedFunctionMetaData<?, ?> functionMetaData, OfficeMetaData officeMetaData) {
+		this.functionMetaData = functionMetaData;
 		this.officeMetaData = officeMetaData;
 	}
 
 	/*
-	 * ===================== TaskManager ============================
+	 * ===================== FunctionManager ============================
 	 */
 
 	@Override
 	public Object getDifferentiator() {
-		return this.taskMetaData.getDifferentiator();
+		return this.functionMetaData.getDifferentiator();
 	}
 
 	@Override
 	public Class<?> getParameterType() {
-		return this.taskMetaData.getParameterType();
+		return this.functionMetaData.getParameterType();
 	}
 
 	@Override
-	public void invokeFunction(Object parameter, ProcessCompletionListener completionListener)
-			throws InvalidParameterTypeException {
-		// Invoke the process for the task
-		OfficeMetaDataImpl.invokeProcess(this.officeMetaData, this.flowMetaData, parameter, completionListener);
+	public void invokeProcess(Object parameter, FlowCallback callback) throws InvalidParameterTypeException {
+		// Invoke the process for the function
+		OfficeMetaDataImpl.invokeProcess(this.officeMetaData, this.flowMetaData, parameter, callback);
 	}
 
 	/**
 	 * {@link FlowMetaData} for invoking a {@link ManagedFunction} by this
 	 * {@link FunctionManager}.
 	 */
-	@SuppressWarnings("rawtypes")
-	private class TaskManagerFlowMetaData implements FlowMetaData {
+	private class FunctionManagerFlowMetaData implements FlowMetaData {
 
 		@Override
-		public ManagedFunctionMetaData<?, ?, ?> getInitialTaskMetaData() {
-			return TaskManagerImpl.this.taskMetaData;
+		public ManagedFunctionMetaData<?, ?> getInitialFunctionMetaData() {
+			return FunctionManagerImpl.this.functionMetaData;
 		}
 
 		@Override
-		public FlowInstigationStrategyEnum getInstigationStrategy() {
-			// Always sequential for invoking
-			return FlowInstigationStrategyEnum.SEQUENTIAL;
+		public boolean isSpawnThreadState() {
+			return false; // already in new process
 		}
 
 		@Override
 		public AssetManager getFlowManager() {
-			// No AssetManager required as can not join on initial thread
+			// No AssetManager required
 			return null;
 		}
 	}

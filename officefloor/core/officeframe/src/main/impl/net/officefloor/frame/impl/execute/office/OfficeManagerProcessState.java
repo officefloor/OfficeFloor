@@ -18,29 +18,23 @@
 package net.officefloor.frame.impl.execute.office;
 
 import net.officefloor.frame.api.manage.UnknownFunctionException;
-import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
-import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
-import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FlowCallbackFactory;
+import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
-import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -55,11 +49,6 @@ public class OfficeManagerProcessState implements ProcessState {
 	 * {@link ThreadMetaData}.
 	 */
 	private final ThreadMetaData threadMetaData;
-
-	/**
-	 * {@link ProcessMetaData}.
-	 */
-	private final ProcessMetaData processMetaData;
 
 	/**
 	 * Main {@link ThreadState}.
@@ -81,13 +70,12 @@ public class OfficeManagerProcessState implements ProcessState {
 
 		// Create the meta-data for the process and its main thread state
 		this.threadMetaData = new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0],
-				new AdministratorMetaData[0], GovernanceDeactivationStrategy.DISREGARD);
-		this.processMetaData = new ProcessMetaDataImpl(new ManagedObjectMetaData[0], new AdministratorMetaData[0],
-				this.threadMetaData, mainThreadAssetManager);
+				new AdministratorMetaData[0], new EscalationProcedureImpl(), null);
 
 		// Create the main thread state
 		// Note: purpose of this to enable synchronising changes to office
-		this.mainThreadState = new ThreadStateImpl(this.threadMetaData, mainThreadAssetManager, null, this, null);
+		this.mainThreadState = new ThreadStateImpl(this.threadMetaData, mainThreadAssetManager, (FlowCompletion) null,
+				this, null);
 	}
 
 	/*
@@ -100,23 +88,18 @@ public class OfficeManagerProcessState implements ProcessState {
 	}
 
 	@Override
-	public ProcessMetaData getProcessMetaData() {
-		return this.processMetaData;
-	}
-
-	@Override
 	public ThreadState getMainThreadState() {
 		return this.mainThreadState;
 	}
 
 	@Override
-	public ManagedFunctionMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName)
-			throws UnknownWorkException, UnknownFunctionException {
+	public ManagedFunctionMetaData<?, ?> getFunctionMetaData(String functionName) throws UnknownFunctionException {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " should be be involved in specific tasks");
 	}
 
 	@Override
-	public ThreadState createThread(AssetManager assetManager, FlowCallbackFactory callbackFactory) {
+	public FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
+			FlowCompletion completion, AssetManager flowAssetManager) {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " should be be spawning threads");
 	}
 
@@ -128,26 +111,6 @@ public class OfficeManagerProcessState implements ProcessState {
 	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " does not have managed objects");
-	}
-
-	@Override
-	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
-		throw new IllegalStateException(this.getClass().getSimpleName() + " does not have administrators");
-	}
-
-	@Override
-	public EscalationFlow getInvocationEscalation() {
-		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be handling escalations");
-	}
-
-	@Override
-	public EscalationProcedure getOfficeEscalationProcedure() {
-		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be handling escalations");
-	}
-
-	@Override
-	public EscalationFlow getOfficeFloorEscalation() {
-		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be handling escalations");
 	}
 
 	@Override

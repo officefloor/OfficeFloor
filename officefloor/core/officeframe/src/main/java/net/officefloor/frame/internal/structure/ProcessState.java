@@ -104,15 +104,6 @@ public interface ProcessState {
 	ManagedObjectContainer getManagedObjectContainer(int index);
 
 	/**
-	 * Obtains the {@link AdministratorContainer} for the input index.
-	 * 
-	 * @param index
-	 *            Index of the {@link AdministratorContainer} to be returned.
-	 * @return {@link AdministratorContainer} for the index.
-	 */
-	AdministratorContainer<?> getAdministratorContainer(int index);
-
-	/**
 	 * Obtains the {@link ManagedObjectCleanup} for this {@link ProcessState}.
 	 * 
 	 * @return {@link ManagedObjectCleanup} for this {@link ProcessState}.

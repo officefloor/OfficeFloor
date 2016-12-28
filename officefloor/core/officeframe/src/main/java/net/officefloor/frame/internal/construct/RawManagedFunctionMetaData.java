@@ -55,6 +55,7 @@ public interface RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>
 	 * 
 	 * @return {@link RawOfficeMetaData}.
 	 */
+	@Deprecated // TODO determine if needed
 	RawOfficeMetaData getRawOfficeMetaData();
 
 	/**
@@ -67,6 +68,7 @@ public interface RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>
 	 * @return {@link RawBoundManagedObjectMetaData} or <code>null</code> not
 	 *         found.
 	 */
+	@Deprecated // TODO determine if needed
 	RawBoundManagedObjectMetaData getScopeManagedObjectMetaData(String scopeManagedObjectName);
 
 	/**
@@ -79,6 +81,7 @@ public interface RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>
 	 * @return {@link RawBoundAdministratorMetaData} or <code>null</code> if not
 	 *         found.
 	 */
+	@Deprecated // TODO determine if needed
 	RawBoundAdministratorMetaData<?, ?> getScopeAdministratorMetaData(String scopeAdministratorName);
 
 	/**

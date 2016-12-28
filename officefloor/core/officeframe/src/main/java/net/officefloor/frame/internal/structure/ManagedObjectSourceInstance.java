@@ -28,15 +28,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface ManagedObjectSourceInstance<F extends Enum<F>> {
 
 	/**
-	 * Obtains the {@link TeamManagement} responsible for this
-	 * {@link ManagedObjectSourceInstance}.
-	 * 
-	 * @return {@link TeamManagement} responsible for this
-	 *         {@link ManagedObjectSourceInstance}.
-	 */
-	TeamManagement getResponsibleTeam();
-
-	/**
 	 * Obtains the {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link ManagedObjectSource}.

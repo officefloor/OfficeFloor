@@ -66,16 +66,6 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	int getInstanceIndex();
 
 	/**
-	 * Creates a new {@link ManagedObjectContainer}.
-	 * 
-	 * @param threadState
-	 *            {@link ThreadState} responsible for managing this
-	 *            {@link ManagedObjectContainer}.
-	 * @return New {@link ManagedObjectContainer}.
-	 */
-	ManagedObjectContainer createManagedObjectContainer(ThreadState threadState);
-
-	/**
 	 * Obtains the {@link FunctionLoop} for the {@link ManagedObject}.
 	 * 
 	 * @return {@link FunctionLoop} for the {@link ManagedObject}.
@@ -178,6 +168,9 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to
 	 * be ready.
 	 * 
+	 * @param managedFunction
+	 *            {@link ManagedFunctionContainer} requesting the check of the
+	 *            {@link ManagedObject} to be ready.
 	 * @param check
 	 *            {@link ManagedObjectReadyCheck}.
 	 * @param currentContainer
@@ -188,7 +181,8 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	 * @return {@link FunctionState} instances to check if the dependencies of
 	 *         this {@link ManagedObject} are ready.
 	 */
-	FunctionState checkReady(ManagedObjectReadyCheck check, ManagedObjectContainer currentContainer);
+	FunctionState checkReady(ManagedFunctionContainer managedFunction, ManagedObjectReadyCheck check,
+			ManagedObjectContainer currentContainer);
 
 	/**
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.

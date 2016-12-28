@@ -21,28 +21,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
-import net.officefloor.frame.impl.execute.function.FailThreadStateJobNode;
+import net.officefloor.frame.internal.structure.Administration;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
-import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
@@ -55,36 +52,28 @@ import net.officefloor.frame.spi.governance.Governance;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F extends Enum<F>, G extends Enum<G>>
-		implements AdministratorContainer<I, A> {
+public class AdministratorContainerImpl<E extends Object, A extends Enum<A>, F extends Enum<F>, G extends Enum<G>>
+		implements AdministratorContainer<A> {
 
 	/**
 	 * {@link AdministratorMetaData}.MetaData} for disregarding the
 	 * {@link Governance}.
 	 */
-	private final AdministratorMetaData<I, A> metaData;
-
-	/**
-	 * Responsible {@link ThreadState}.
-	 */
-	private final ThreadState responsibleThreadState;
+	private final AdministratorMetaData<E, A> metaData;
 
 	/**
 	 * {@link Administrator}.
 	 */
-	private Administrator<I, A> administrator;
+	private Administrator<E, A> administrator;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param metaData
 	 *            {@link AdministratorMetaData}.
-	 * @param responsibleThreadState
-	 *            Responsible {@link ThreadState}.
 	 */
-	public AdministratorContainerImpl(AdministratorMetaData<I, A> metaData, ThreadState responsibleThreadState) {
+	public AdministratorContainerImpl(AdministratorMetaData<E, A> metaData) {
 		this.metaData = metaData;
-		this.responsibleThreadState = responsibleThreadState;
 	}
 
 	/*
@@ -92,81 +81,84 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 */
 
 	@Override
-	public ThreadState getResponsibleThreadState() {
-		return this.responsibleThreadState;
-	}
-
-	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedFunctionContainerImpl administerManagedObjects(final ManagedFunctionDutyAssociation<A> duty, Flow flow,
-			ManagedFunctionMetaData<?, ?, ?> managedFunctionMetaData, final WorkContainer<?> workContainer) {
+	public Administration administerManagedObjects(final ManagedFunctionDutyAssociation<A> functionDutyAssociation,
+			final ManagedObjectContainer[] functionBoundManagedObjects, final ThreadState threadState) {
 
 		// Obtain the extension interfaces to be managed
 		final ExtensionInterfaceMetaData<?>[] eiMetaDatas = this.metaData.getExtensionInterfaceMetaData();
 
+		// Obtain the responsible team (ensure all done on same thread)
+		// (this ensures safe to add to extensions list in setup)
+		final TeamManagement responsibleTeam = this.metaData.getResponsibleTeam();
+
 		// Create the listing of extensions
-		List extensions = new ArrayList(eiMetaDatas.length);
-		FunctionState extractFunction = null;
-		for (int i = 0; i < eiMetaDatas.length; i++) {
-			ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
+		@SuppressWarnings("rawtypes")
+		final List extensions = new ArrayList<>(eiMetaDatas.length);
 
-			// Obtain the index of managed object to administer
-			ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
+		// Return the administration
+		return new Administration() {
 
-			// Obtain the managed object container
-			ManagedObjectContainer moContainer = workContainer.getManagedObjectContainer(moIndex);
+			@Override
+			public FunctionState getSetup() {
 
-			// Extract the extension interface
-			extractFunction = Promise.then(extractFunction,
-					moContainer.extractExtensionInterface(eiMetaData.getExtensionInterfaceExtractor(), extensions));
-		}
+				// Create the extractions of managed object extension
+				FunctionState allExtractions = null;
+				for (int i = 0; i < eiMetaDatas.length; i++) {
+					ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
 
-		// Administer (after extracting extensions)
-		FunctionState administer = Promise.then(extractFunction,
-				new DutyFunction(flow, workContainer, duty, managedFunctionMetaData, extensions));
-		return new AdministerFunction<>(flow, workContainer, duty, managedFunctionMetaData, administer);
+					// Obtain the index of managed object to administer
+					ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
+
+					// Obtain the managed object container
+					ManagedObjectContainer moContainer;
+					int scopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
+					switch (moIndex.getManagedObjectScope()) {
+					case FUNCTION:
+						moContainer = functionBoundManagedObjects[scopeIndex];
+						break;
+
+					case THREAD:
+						moContainer = threadState.getManagedObjectContainer(scopeIndex);
+						break;
+
+					case PROCESS:
+						moContainer = threadState.getProcessState().getManagedObjectContainer(scopeIndex);
+						break;
+
+					default:
+						throw new IllegalStateException(
+								"Unknown managed object scope " + moIndex.getManagedObjectScope());
+					}
+
+					// Extract the extension interface
+					@SuppressWarnings("unchecked")
+					FunctionState moExtraction = moContainer.extractExtensionInterface(
+							eiMetaData.getExtensionInterfaceExtractor(), extensions, responsibleTeam);
+					allExtractions = Promise.then(allExtractions, moExtraction);
+				}
+
+				// Return the extraction function
+				return allExtractions;
+			}
+
+			@Override
+			public ManagedFunctionLogic getDutyLogic() {
+				@SuppressWarnings("unchecked")
+				ManagedFunctionLogic logic = new DutyFunctionLogic(functionDutyAssociation, extensions, threadState);
+				return logic;
+			}
+
+			@Override
+			public AdministratorMetaData<?, ?> getAdministratorMetaData() {
+				return AdministratorContainerImpl.this.metaData;
+			}
+		};
 	}
 
 	/**
-	 * {@link ManagedFunctionContainerImpl} to administer the {@link FunctionState}
-	 * instances for administration.
-	 * 
-	 * @param <W>
-	 *            {@link Work} type.
+	 * {@link Duty} {@link ManagedFunctionLogic}.
 	 */
-	@Deprecated // FunctionState to always be returned
-	private class AdministerFunction<W extends Work>
-			extends ManagedFunctionContainerImpl<W, AdministratorMetaData<I, A>> {
-
-		private final FunctionState administer;
-
-		public AdministerFunction(Flow flow, WorkContainer<W> workContainer,
-				ManagedFunctionDutyAssociation<A> functionDutyAssociation,
-				ManagedFunctionMetaData<?, ?, ?> administeringFunctionMetaData, FunctionState administer) {
-			super(flow, workContainer, AdministratorContainerImpl.this.metaData, null,
-					administeringFunctionMetaData.getRequiredManagedObjects(), null, null);
-			this.administer = administer;
-		}
-
-		@Override
-		public FunctionState execute() {
-			return administer;
-		}
-
-		@Override
-		protected Object executeFunction(ManagedFunctionLogicContext context) throws Throwable {
-			// Not invoked
-			return null;
-		}
-	}
-
-	/**
-	 * {@link Duty} implementation for a {@link ManagedFunctionContainerImpl}.
-	 * 
-	 * @param <W>
-	 *            {@link Work} type.
-	 */
-	public class DutyFunction<W extends Work> extends ManagedFunctionContainerImpl<W, AdministratorMetaData<I, A>> {
+	public class DutyFunctionLogic implements ManagedFunctionLogic {
 
 		/**
 		 * {@link ManagedFunctionDutyAssociation}.
@@ -174,102 +166,78 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		private final ManagedFunctionDutyAssociation<A> functionDutyAssociation;
 
 		/**
-		 * {@link AdministratorContext}.
-		 */
-		private final AdministratorContext administratorContext = new AdministratorContextImpl();
-
-		/**
 		 * Extensions.
 		 */
-		private final List<I> extensions;
+		private final List<E> extensions;
+
+		/**
+		 * {@link ThreadState}.
+		 */
+		private final ThreadState threadState;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param flow
-		 *            {@link Flow}.
-		 * @param workContainer
-		 *            {@link WorkContainer}.
-		 * @param adminMetaData
-		 *            {@link AdministratorMetaData}.
 		 * @param functionDutyAssociation
 		 *            {@link ManagedFunctionDutyAssociation}.
-		 * @param administeringFunctionMetaData
-		 *            {@link ManagedFunctionMetaData} of the
-		 *            {@link ManagedFunction} being administered.
 		 * @param extensions
 		 *            Extensions to administer.
+		 * @param threadState
+		 *            {@link ThreadState}.
 		 */
-		public DutyFunction(Flow flow, WorkContainer<W> workContainer,
-				ManagedFunctionDutyAssociation<A> functionDutyAssociation,
-				ManagedFunctionMetaData<?, ?, ?> administeringFunctionMetaData, List<I> extensions) {
-			super(flow, workContainer, AdministratorContainerImpl.this.metaData, null,
-					administeringFunctionMetaData.getRequiredManagedObjects(), null, null);
+		public DutyFunctionLogic(ManagedFunctionDutyAssociation<A> functionDutyAssociation, List<E> extensions,
+				ThreadState threadState) {
 			this.functionDutyAssociation = functionDutyAssociation;
 			this.extensions = extensions;
+			this.threadState = threadState;
 		}
 
 		/*
-		 * ===================== ManagedFunctionContainer =====================
+		 * ===================== ManagedFunctionLogic =====================
 		 */
 
 		@Override
-		protected Object executeFunction(ManagedFunctionLogicContext context) throws Throwable {
+		public Object execute(ManagedFunctionLogicContext context) throws Throwable {
 
 			// Easy access to the container
-			AdministratorContainerImpl<I, A, F, G> container = AdministratorContainerImpl.this;
+			AdministratorContainerImpl<E, A, F, G> container = AdministratorContainerImpl.this;
 
-			try {
-
-				// Lazy create the administrator
-				if (container.administrator == null) {
-					container.administrator = container.metaData.getAdministratorSource().createAdministrator();
-				}
-
-				// Obtain the key identifying the duty
-				DutyKey<A> key = this.functionDutyAssociation.getDutyKey();
-
-				// Obtain the duty
-				Duty<I, F, G> duty = (Duty<I, F, G>) container.administrator.getDuty(key);
-
-				// Obtain the duty meta-data
-				DutyMetaData dutyMetaData = container.metaData.getDutyMetaData(key);
-
-				// Execute the duty
-				DutyContextToken token = new DutyContextToken(this.administratorContext, this.extensions, dutyMetaData);
-				duty.doDuty(token);
-
-				// Undertake the governance actions
-				FunctionState governanceAction = null;
-				for (FunctionState governanceFunction : token.actionedGovernances) {
-					governanceAction = Promise.then(governanceAction, governanceFunction);
-				}
-				return governanceAction;
-
-			} catch (Throwable ex) {
-				// Fail the thread state
-				return new FailThreadStateJobNode(ex, container.responsibleThreadState);
-			}
-		}
-
-		/**
-		 * {@link AdministratorContext} implementations.
-		 */
-		private class AdministratorContextImpl implements AdministratorContext {
-
-			/*
-			 * ================= AdministratorContext =======================
-			 */
-
-			@Override
-			public ThreadState getThreadState() {
-				return DutyFunction.this.flow.getThreadState();
+			// Lazy create the administrator
+			if (container.administrator == null) {
+				container.administrator = container.metaData.getAdministratorSource().createAdministrator();
 			}
 
-			@Override
-			public void doFlow(FlowMetaData<?> flowMetaData, Object parameter, FlowCallback callback) {
-				DutyFunction.this.doFlow(flowMetaData, parameter, callback);
+			// Obtain the key identifying the duty
+			DutyKey<A> key = this.functionDutyAssociation.getDutyKey();
+
+			// Obtain the duty
+			@SuppressWarnings("unchecked")
+			Duty<E, F, G> duty = (Duty<E, F, G>) container.administrator.getDuty(key);
+
+			// Obtain the duty meta-data
+			DutyMetaData dutyMetaData = container.metaData.getDutyMetaData(key);
+
+			// Execute the duty
+			DutyContextToken token = new DutyContextToken(this.threadState, context, this.extensions, dutyMetaData);
+			duty.doDuty(token);
+
+			// Undertake the governance actions
+			FunctionState governanceAction = null;
+			for (FunctionState governanceFunction : token.actionedGovernances) {
+				governanceAction = Promise.then(governanceAction, governanceFunction);
 			}
+			if (governanceAction != null) {
+				final FunctionState finalGovernanceAction = governanceAction;
+				context.next(new FunctionLogic() {
+					@Override
+					public FunctionState execute(Flow flow) throws Throwable {
+						return finalGovernanceAction;
+					}
+				});
+			}
+
+			// No next function
+			return null;
 		}
 	}
 
@@ -281,17 +249,22 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 * just the necessary functionality and prevents access to internals of the
 	 * framework.
 	 */
-	private class DutyContextToken implements DutyContext<I, F, G> {
+	private class DutyContextToken implements DutyContext<E, F, G> {
 
 		/**
-		 * {@link AdministratorContext}.
+		 * {@link ThreadState}.
 		 */
-		private final AdministratorContext adminContext;
+		private final ThreadState threadState;
+
+		/**
+		 * {@link ManagedFunctionLogicContext}.
+		 */
+		private final ManagedFunctionLogicContext context;
 
 		/**
 		 * Extension interfaces.
 		 */
-		private final List<I> extensionInterfaces;
+		private final List<E> extensionInterfaces;
 
 		/**
 		 * {@link DutyMetaData}.
@@ -299,23 +272,30 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		private final DutyMetaData dutyMetaData;
 
 		/**
+		 * <p>
 		 * {@link FunctionState} instances regarding {@link Governance}.
+		 * <p>
+		 * Typically {@link Duty} will only undertake a single
+		 * {@link GovernanceActivity}.
 		 */
 		private final List<FunctionState> actionedGovernances = new ArrayList<>(1);
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param adminContext
-		 *            {@link AdministratorContext}.
+		 * @param threadState
+		 *            {@link ThreadState}.
+		 * @param context
+		 *            {@link ManagedFunctionLogicContext}.
 		 * @param extensionInterfaces
 		 *            Extension interfaces.
 		 * @param dutyMetaData
 		 *            {@link DutyMetaData}.
 		 */
-		public DutyContextToken(AdministratorContext adminContext, List<I> extensionInterfaces,
-				DutyMetaData dutyMetaData) {
-			this.adminContext = adminContext;
+		public DutyContextToken(ThreadState threadState, ManagedFunctionLogicContext context,
+				List<E> extensionInterfaces, DutyMetaData dutyMetaData) {
+			this.threadState = threadState;
+			this.context = context;
 			this.extensionInterfaces = extensionInterfaces;
 			this.dutyMetaData = dutyMetaData;
 		}
@@ -325,7 +305,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		 */
 
 		@Override
-		public List<I> getExtensionInterfaces() {
+		public List<E> getExtensionInterfaces() {
 			return this.extensionInterfaces;
 		}
 
@@ -338,10 +318,10 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		@Override
 		public void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
 			// Obtain the flow meta-data
-			FlowMetaData<?> flowMetaData = this.dutyMetaData.getFlow(flowIndex);
+			FlowMetaData flowMetaData = this.dutyMetaData.getFlow(flowIndex);
 
 			// Do the flow
-			this.adminContext.doFlow(flowMetaData, parameter, callback);
+			this.context.doFlow(flowMetaData, parameter, callback);
 		}
 
 		@Override
@@ -356,7 +336,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 			int processIndex = this.dutyMetaData.translateGovernanceIndexToThreadIndex(governanceIndex);
 
 			// Create Governance Manager to wrap Governance Container
-			GovernanceManager manager = new GovernanceManagerImpl(this.adminContext, processIndex);
+			GovernanceManager manager = new GovernanceManagerImpl(processIndex);
 
 			// Return the governance manager
 			return manager;
@@ -375,14 +355,11 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 			/**
 			 * Initiate.
 			 * 
-			 * @param adminContext
-			 *            {@link AdministratorContext}.
-			 *            {@link GovernanceContainer}.
 			 * @param governanceIndex
 			 *            Index of {@link Governance} within the
 			 *            {@link ThreadState}.
 			 */
-			public GovernanceManagerImpl(AdministratorContext adminContext, int governanceIndex) {
+			public GovernanceManagerImpl(int governanceIndex) {
 				this.governanceIndex = governanceIndex;
 			}
 
@@ -416,7 +393,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 			private GovernanceContainer<?> getGovernanceContainer() {
 
 				// Obtain the governance container
-				GovernanceContainer<?> container = DutyContextToken.this.adminContext.getThreadState()
+				GovernanceContainer<?> container = DutyContextToken.this.threadState
 						.getGovernanceContainer(this.governanceIndex);
 
 				// Return the governance container

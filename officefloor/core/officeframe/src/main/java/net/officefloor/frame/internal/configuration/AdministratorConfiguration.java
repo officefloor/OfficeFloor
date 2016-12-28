@@ -26,11 +26,11 @@ import net.officefloor.frame.spi.source.SourceProperties;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Configuration of the {@link AdministratorSource}.
+ * Configuration of the {@link Administrator}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministratorSourceConfiguration<A extends Enum<A>, AS extends AdministratorSource<?, A>> {
+public interface AdministratorConfiguration<A extends Enum<A>, AS extends AdministratorSource<?, A>> {
 
 	/**
 	 * Obtains the name of the {@link AdministratorSource}.

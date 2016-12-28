@@ -26,12 +26,12 @@ import net.officefloor.frame.internal.structure.OfficeStartupFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeStartupTaskImpl implements OfficeStartupFunction {
+public class OfficeStartupFunctionImpl implements OfficeStartupFunction {
 
 	/**
 	 * {@link FlowMetaData} for the {@link OfficeStartupFunction}.
 	 */
-	private final FlowMetaData<?> flowMetaData;
+	private final FlowMetaData flowMetaData;
 
 	/**
 	 * Parameter for the startup {@link Flow}.
@@ -46,17 +46,17 @@ public class OfficeStartupTaskImpl implements OfficeStartupFunction {
 	 * @param parameter
 	 *            Parameter for the startup {@link Flow}.
 	 */
-	public OfficeStartupTaskImpl(FlowMetaData<?> flowMetaData, Object parameter) {
+	public OfficeStartupFunctionImpl(FlowMetaData flowMetaData, Object parameter) {
 		this.flowMetaData = flowMetaData;
 		this.parameter = parameter;
 	}
 
 	/*
-	 * ================== OfficeStartupTask =================================
+	 * ================== OfficeStartupFunction ==================
 	 */
 
 	@Override
-	public FlowMetaData<?> getFlowMetaData() {
+	public FlowMetaData getFlowMetaData() {
 		return this.flowMetaData;
 	}
 

@@ -33,7 +33,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
@@ -2033,12 +2033,12 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			String... processBoundNames) {
 
 		// Create the mock objects to register the process bound administrators
-		final AdministratorSourceConfiguration<?, ?>[] adminConfigurations = new AdministratorSourceConfiguration[processBoundNames.length];
+		final AdministratorConfiguration<?, ?>[] adminConfigurations = new AdministratorConfiguration[processBoundNames.length];
 		final RawBoundAdministratorMetaData<?, ?>[] rawBoundAdminMetaDatas = new RawBoundAdministratorMetaData[processBoundNames.length];
 		final Map<String, RawBoundAdministratorMetaData<?, ?>> boundAdministrators = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
 		for (int i = 0; i < processBoundNames.length; i++) {
 			adminConfigurations[i] = this
-					.createMock(AdministratorSourceConfiguration.class);
+					.createMock(AdministratorConfiguration.class);
 			rawBoundAdminMetaDatas[i] = this
 					.createMock(RawBoundAdministratorMetaData.class);
 			boundAdministrators.put(processBoundNames[i],
@@ -2091,12 +2091,12 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			String... threadBoundNames) {
 
 		// Create the mock objects to register the thread bound administrators
-		final AdministratorSourceConfiguration<?, ?>[] adminConfigurations = new AdministratorSourceConfiguration[threadBoundNames.length];
+		final AdministratorConfiguration<?, ?>[] adminConfigurations = new AdministratorConfiguration[threadBoundNames.length];
 		final RawBoundAdministratorMetaData<?, ?>[] rawBoundAdminMetaDatas = new RawBoundAdministratorMetaData[threadBoundNames.length];
 		final Map<String, RawBoundAdministratorMetaData<?, ?>> boundAdministrators = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
 		for (int i = 0; i < threadBoundNames.length; i++) {
 			adminConfigurations[i] = this
-					.createMock(AdministratorSourceConfiguration.class);
+					.createMock(AdministratorConfiguration.class);
 			rawBoundAdminMetaDatas[i] = this
 					.createMock(RawBoundAdministratorMetaData.class);
 			boundAdministrators.put(threadBoundNames[i],

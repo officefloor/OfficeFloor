@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.administration.Duty;
  * 
  * @author Daniel Sagenschneider
  */
-public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
+public class ManagedFunctionDutyConfigurationImpl<A extends Enum<A>> implements
 		ManagedFunctionDutyConfiguration<A> {
 
 	/**
@@ -54,7 +54,7 @@ public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
 	 * @param dutyName
 	 *            Name identifying {@link Duty} of the {@link Administrator}.
 	 */
-	public TaskDutyConfigurationImpl(String scopeAdministratorName,
+	public ManagedFunctionDutyConfigurationImpl(String scopeAdministratorName,
 			String dutyName) {
 		this.scopeAdministratorName = scopeAdministratorName;
 		this.dutyName = dutyName;
@@ -70,7 +70,7 @@ public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
 	 * @param dutyKey
 	 *            Key identifying the {@link Duty} of the {@link Administrator}.
 	 */
-	public TaskDutyConfigurationImpl(String scopeAdministratorName, A dutyKey) {
+	public ManagedFunctionDutyConfigurationImpl(String scopeAdministratorName, A dutyKey) {
 		this.scopeAdministratorName = scopeAdministratorName;
 		this.dutyName = null;
 		this.dutyKey = dutyKey;

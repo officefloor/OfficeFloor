@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.structure;
 import java.util.List;
 
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Container managing a {@link ManagedObject}.
@@ -79,11 +80,14 @@ public interface ManagedObjectContainer {
 	 *            {@link ExtensionInterfaceExtractor}.
 	 * @param managedObjectExtensions
 	 *            {@link List} to load the {@link ManagedObject} extension.
+	 * @param responsibleTeam
+	 *            {@link TeamManagement} responsible for extracting the
+	 *            extension. May be <code>null</code> to use any {@link Team}.
 	 * @return {@link FunctionState} to load the {@link ManagedObject}
 	 *         extension.
 	 */
 	<E> FunctionState extractExtensionInterface(ExtensionInterfaceExtractor<E> extractor,
-			List<E> managedObjectExtensions);
+			List<E> managedObjectExtensions, TeamManagement responsibleTeam);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.

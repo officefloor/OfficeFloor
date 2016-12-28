@@ -70,13 +70,4 @@ public interface ThreadMetaData {
 	 */
 	EscalationFlow getOfficeFloorEscalation();
 
-	/**
-	 * Obtains the {@link GovernanceDeactivationStrategy} for active
-	 * {@link Governance} on {@link ThreadState} completion.
-	 * 
-	 * @return {@link GovernanceDeactivationStrategy} for active
-	 *         {@link Governance} on {@link ThreadState} completion.
-	 */
-	GovernanceDeactivationStrategy getGovernanceDeactivationStrategy();
-
 }

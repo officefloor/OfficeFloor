@@ -19,22 +19,17 @@ package net.officefloor.frame.impl.execute.managedfunction;
 
 import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.GovernanceDeactivationStrategy;
-import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
-import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
-import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -88,6 +83,13 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final boolean[] requiredGovernance;
 
 	/**
+	 * Translates the {@link ManagedFunction} index to the
+	 * {@link ManagedObjectIndex} to obtain the {@link ManagedObject} for the
+	 * {@link ManagedFunction}.
+	 */
+	private final ManagedObjectIndex[] functionIndexedManagedObjects;
+
+	/**
 	 * {@link ManagedFunctionDutyAssociation} specifying the {@link Duty}
 	 * instances to be completed before executing the {@link ManagedFunction}.
 	 */
@@ -98,6 +100,18 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 * instances to be completed after executing the {@link ManagedFunction}.
 	 */
 	private final ManagedFunctionDutyAssociation<?>[] postFunctionDuties;
+
+	/**
+	 * {@link ManagedObjectMetaData} for the {@link ManagedObject} instances
+	 * bound to this {@link ManagedFunction}.
+	 */
+	private final ManagedObjectMetaData<?>[] functionBoundManagedObjects;
+
+	/**
+	 * {@link AdministratorMetaData} for the {@link Administrator} instances
+	 * bound to this {@link ManagedFunction}.
+	 */
+	private final AdministratorMetaData<?, ?>[] functionBoundAdministrators;
 
 	/**
 	 * {@link FunctionLoop}.
@@ -141,6 +155,10 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            {@link TeamManagement} of the {@link Team} responsible for
 	 *            executing this {@link ManagedFunction}. May be
 	 *            <code>null</code>.
+	 * @param functionIndexedManagedObjects
+	 *            Translates the {@link ManagedFunction} index to the
+	 *            {@link ManagedObjectIndex} to obtain the {@link ManagedObject}
+	 *            for the {@link ManagedFunction}.
 	 * @param requiredManagedObjects
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances that must be loaded before the
@@ -160,7 +178,9 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 */
 	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory,
 			Object differentiator, Class<?> parameterType, TeamManagement responsibleTeam,
+			ManagedObjectIndex[] functionIndexedManagedObjects, ManagedObjectMetaData<?>[] functionBoundManagedObjects,
 			ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance,
+			AdministratorMetaData<?, ?>[] functionBoundAdministrators,
 			ManagedFunctionDutyAssociation<?>[] preFunctionDuties,
 			ManagedFunctionDutyAssociation<?>[] postFunctionDuties, FunctionLoop functionLoop) {
 		this.functionName = functionName;
@@ -168,8 +188,11 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 		this.differentiator = differentiator;
 		this.parameterType = parameterType;
 		this.responsibleTeam = responsibleTeam;
+		this.functionIndexedManagedObjects = functionIndexedManagedObjects;
+		this.functionBoundManagedObjects = functionBoundManagedObjects;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.requiredGovernance = requiredGovernance;
+		this.functionBoundAdministrators = functionBoundAdministrators;
 		this.preFunctionDuties = preFunctionDuties;
 		this.postFunctionDuties = postFunctionDuties;
 		this.functionLoop = functionLoop;
@@ -236,6 +259,11 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
+	public ManagedObjectIndex getManagedObject(int managedObjectIndex) {
+		return this.functionIndexedManagedObjects[managedObjectIndex];
+	}
+
+	@Override
 	public FlowMetaData getFlow(int flowIndex) {
 		return this.flowMetaData[flowIndex];
 	}
@@ -262,31 +290,17 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 
 	@Override
 	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {
-		// TODO implement ManagedFunctionLogicMetaData.getManagedObjectMetaData
-		throw new UnsupportedOperationException("TODO implement ManagedFunctionLogicMetaData.getManagedObjectMetaData");
-
+		return this.functionBoundManagedObjects;
 	}
 
 	@Override
 	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
-		// TODO implement ManagedFunctionLogicMetaData.getAdministratorMetaData
-		throw new UnsupportedOperationException("TODO implement ManagedFunctionLogicMetaData.getAdministratorMetaData");
-
+		return this.functionBoundAdministrators;
 	}
 
 	@Override
 	public FunctionLoop getFunctionLoop() {
 		return this.functionLoop;
-	}
-
-	@Override
-	public ManagedFunctionContainer createManagedFunctionContainer(Flow flow,
-			ManagedFunctionContainer parallelFunctionOwner, Object parameter,
-			GovernanceDeactivationStrategy governanceDeactivationStrategy) {
-		ProcessState processState = flow.getThreadState().getProcessState();
-		ManagedFunctionLogic functionLogic = new ManagedFunctionLogicImpl<>(this, parameter, processState);
-		return new ManagedFunctionContainerImpl<ManagedFunctionLogicMetaData>(flow, this, parallelFunctionOwner,
-				this.requiredManagedObjects, this.requiredGovernance, governanceDeactivationStrategy, functionLogic);
 	}
 
 }

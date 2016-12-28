@@ -34,7 +34,9 @@ public interface GovernanceActivity<F extends Enum<F>> {
 	 *            {@link GovernanceContext}.
 	 * @return Optional {@link FunctionState} to further execute for the
 	 *         {@link GovernanceActivity}.
+	 * @throws Throwable
+	 *             If issue in undertaking the {@link GovernanceActivity}.
 	 */
-	FunctionState doActivity(GovernanceContext<F> context);
+	FunctionState doActivity(GovernanceContext<F> context) throws Throwable;
 
 }
