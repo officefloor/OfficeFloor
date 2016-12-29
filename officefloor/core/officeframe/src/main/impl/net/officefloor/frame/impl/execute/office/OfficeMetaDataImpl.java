@@ -91,8 +91,9 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		// Create the function within a new process
 		ManagedFunctionContainer function = officeMetaData.createProcess(flowMetaData, parameter, callback, null);
 
-		// Delegate function to team
-		officeMetaData.getFunctionLoop().delegateFunction(function);
+		// Execute the function (will delegate as required)
+		FunctionLoop functionLoop = officeMetaData.getFunctionLoop();
+		functionLoop.executeFunction(function);
 	}
 
 	/**

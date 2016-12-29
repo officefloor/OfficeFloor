@@ -17,18 +17,15 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import java.util.function.Function;
-
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.execute.flow.FlowImpl;
-import net.officefloor.frame.impl.execute.function.LinkedListSetFunctionLogic;
+import net.officefloor.frame.impl.execute.function.LinkedListSetFunctionState;
+import net.officefloor.frame.impl.execute.function.LinkedListSetFunctionState.Translate;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
@@ -142,17 +139,15 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 		}
 
 		// Undertake checks for each of the latches
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		FunctionLogic functionLogic = new LinkedListSetFunctionLogic(head, LATCH_TO_CHECK);
-		return functionLogic.execute(new FlowImpl(null, this.officeManagerProcess.getMainThreadState()));
+		return new LinkedListSetFunctionState<>(head, LATCH_TO_CHECK);
 	}
 
 	/**
 	 * Obtains the check {@link FunctionState} for the {@link AssetLatch}.
 	 */
-	private static final Function<LinkedListSetItem<AssetLatchImpl>, FunctionState> LATCH_TO_CHECK = new Function<LinkedListSetItem<AssetLatchImpl>, FunctionState>() {
+	private static final Translate<AssetLatchImpl> LATCH_TO_CHECK = new Translate<AssetLatchImpl>() {
 		@Override
-		public FunctionState apply(LinkedListSetItem<AssetLatchImpl> latch) {
+		public FunctionState translate(LinkedListSetItem<AssetLatchImpl> latch) {
 			return latch.getEntry().check();
 		}
 	};

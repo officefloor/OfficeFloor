@@ -413,6 +413,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 		@Override
 		public FunctionState execute() throws Throwable {
+			FlowImpl.this.activeFunctions.removeEntry(this);
 			return this.functionLogic.execute(FlowImpl.this);
 		}
 

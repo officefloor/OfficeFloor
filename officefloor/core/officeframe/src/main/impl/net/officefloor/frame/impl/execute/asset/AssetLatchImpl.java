@@ -26,6 +26,7 @@ import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.OfficeClock;
@@ -170,7 +171,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	}
 
 	/**
-	 * {@link FunctionState} to check on the {@link Asset}.
+	 * {@link FunctionLogic} to check on the {@link Asset}.
 	 */
 	private class CheckOperation extends AbstractLinkedListSetEntry<FunctionState, Flow> implements FunctionState {
 

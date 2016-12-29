@@ -794,7 +794,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 		// Invoke the function
 		Office office = this.officeFloor.getOffice(officeName);
 		FunctionManager functionManager = office.getFunctionManager(functionName);
-		functionManager.invokeProcess(parameter, new FlowCallback() {
+		FlowCallback callback = new FlowCallback() {
 			@Override
 			public void run(Throwable escalation) throws Throwable {
 
@@ -805,7 +805,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 					isComplete.notify();
 				}
 			}
-		});
+		};
+		functionManager.invokeProcess(parameter, callback);
 
 		// Block until flow is complete (or times out)
 		int iteration = 0;

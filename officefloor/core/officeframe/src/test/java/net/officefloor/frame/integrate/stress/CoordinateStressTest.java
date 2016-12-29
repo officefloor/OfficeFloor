@@ -18,34 +18,30 @@
 package net.officefloor.frame.integrate.stress;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Stress tests coordination of {@link ManagedObject} instances.
@@ -60,8 +56,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressCoordination_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -70,8 +65,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressCoordination_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 3, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 3, 100));
 	}
 
 	/**
@@ -80,15 +74,24 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressCoordination_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				MockTeamSource.createTeamIdentifier(), 3));
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 3));
+	}
+
+	/**
+	 * Ensures no issues arising in stress coordination with a
+	 * {@link PassiveTeam}.
+	 */
+	@StressTest
+	public void test_StressCoordination_PassiveTeam() throws Exception {
+		this.doTest(new PassiveTeam());
 	}
 
 	/**
 	 * Does the coordination stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction}
+	 *            instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -106,45 +109,32 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", team);
 
 		// Construct the direct use managed object
-		this.constructManagedObject("DIRECT_USE",
-				DirectUseManagedObjectSource.class).setManagingOffice(
-				officeName);
+		this.constructManagedObject("DIRECT_USE", DirectUseManagedObjectSource.class).setManagingOffice(officeName);
 
 		// Construct the dependency managed object
-		ManagedObjectBuilder<Indexed> dependencyBuilder = this
-				.constructManagedObject("DEPENDENCY",
-						DependencyManagedObjectSource.class);
-		dependencyBuilder.setManagingOffice(officeName)
-				.setInputManagedObjectName("PROCESS_BOUND");
+		ManagedObjectBuilder<Indexed> dependencyBuilder = this.constructManagedObject("DEPENDENCY",
+				DependencyManagedObjectSource.class);
+		dependencyBuilder.setManagingOffice(officeName).setInputManagedObjectName("PROCESS_BOUND");
 		dependencyBuilder.setTimeout(MANAGED_OBJECT_WAIT_TIME);
-		this.constructTeam("of-DEPENDENCY.MO_TEAM", new OnePersonTeam(
-				"MO_TEAM", MockTeamSource.createTeamIdentifier(), 100));
+		this.constructTeam("of-DEPENDENCY.MO_TEAM", new OnePersonTeam("MO_TEAM", 100));
 
-		// Construct the work
+		// Construct the function
 		CoordinateWork work = new CoordinateWork(TASK_INVOKE_COUNT);
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(work,
-				"COORDINATE_WORK", "task");
-		workBuilder.getBuilder()
-				.addWorkManagedObject("DIRECT_USE", "DIRECT_USE")
-				.mapDependency(0, "DEPENDENCY");
-		workBuilder.getBuilder().addWorkManagedObject("DEPENDENCY",
-				"DEPENDENCY");
-		ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask("task",
-				"TEAM");
-		taskBuilder.buildObject("DIRECT_USE");
-		taskBuilder.buildFlow("task", FlowInstigationStrategyEnum.SEQUENTIAL,
-				null);
+		ReflectiveFunctionBuilder functionBuilder = this.constructFunction(work, "task", "TEAM");
+		functionBuilder.getBuilder().addManagedObject("DIRECT_USE", "DIRECT_USE").mapDependency(0, "DEPENDENCY");
+		functionBuilder.getBuilder().addManagedObject("DEPENDENCY", "DEPENDENCY");
+		functionBuilder.buildObject("DIRECT_USE");
+		functionBuilder.buildFlow("task", null, false);
 
 		// Run the coordination
-		this.invokeWork("COORDINATE_WORK", null, MAX_RUN_TIME);
+		this.invokeFunction("task", null, MAX_RUN_TIME);
 
 		// Ensure correct number of invocations
-		assertEquals("Incorrect number of task invocations", TASK_INVOKE_COUNT,
-				work.invokeCount);
+		assertEquals("Incorrect number of function invocations", TASK_INVOKE_COUNT, work.invokeCount);
 	}
 
 	/**
-	 * {@link Work}.
+	 * Functionality.
 	 */
 	public class CoordinateWork {
 
@@ -172,7 +162,8 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		 * Initiate.
 		 * 
 		 * @param maxInvokes
-		 *            Maximum number of times to invoke another {@link ManagedFunction}.
+		 *            Maximum number of times to invoke another
+		 *            {@link ManagedFunction}.
 		 */
 		public CoordinateWork(int maxInvokes) {
 			this.maxInvokes = maxInvokes;
@@ -189,32 +180,27 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		public void task(DirectUseManagedObject directUse, ReflectiveFlow flow) {
 
 			// Ensure not the same previous direct use object
-			assertNotSame("Should not be same previous direct use",
-					this.previousDirectUse, directUse);
+			assertNotSame("Should not be same previous direct use", this.previousDirectUse, directUse);
 			this.previousDirectUse = directUse;
 
 			// Obtain the dependency and ensure not same as previous
 			DependencyManagedObject dependency = directUse.getDependency();
 			assertNotNull("Ensure have dependency", dependency);
-			assertNotSame("Should not be same previous dependency",
-					this.previousDependency, dependency);
+			assertNotSame("Should not be same previous dependency", this.previousDependency, dependency);
 			this.previousDependency = dependency;
 
 			// Ensure asynchronous operations complete
-			assertEquals("Dependency should be ready",
-					TransitionState.COORDINATE_COMPLETE,
-					dependency.transitionState);
+			assertEquals("Dependency should be ready", TransitionState.COORDINATE_COMPLETE, dependency.transitionState);
 
 			// Increment the number of times invoked
 			this.invokeCount++;
 			if (this.invokeCount < this.maxInvokes) {
-				flow.doFlow(null);
+				flow.doFlow(null, null);
 			}
 
 			// Indicate progress
 			if ((this.invokeCount % (this.maxInvokes / 10)) == 0) {
-				System.out.println("Task invoked " + this.invokeCount
-						+ " times");
+				System.out.println("Task invoked " + this.invokeCount + " times");
 			}
 		}
 	}
@@ -222,8 +208,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * {@link ManagedObject} used directly by {@link ManagedFunction}.
 	 */
-	public static class DirectUseManagedObject implements
-			CoordinatingManagedObject<Indexed> {
+	public static class DirectUseManagedObject implements CoordinatingManagedObject<Indexed> {
 
 		/**
 		 * {@link DependencyManagedObject}.
@@ -244,13 +229,10 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public void loadObjects(ObjectRegistry<Indexed> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
 			// Start operation to indicate object not ready for use by task
 			this.dependency = (DependencyManagedObject) registry.getObject(0);
-			this.dependency.startAsynchronousOperation(
-					TransitionState.LOAD_COMPLETE,
-					TransitionState.COORDINATE_START);
+			this.dependency.startAsynchronousOperation(TransitionState.LOAD_COMPLETE, TransitionState.COORDINATE_START);
 		}
 
 		@Override
@@ -262,8 +244,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * {@link ManagedObjectSource} for the {@link DirectUseManagedObject}.
 	 */
-	public static class DirectUseManagedObjectSource extends
-			AbstractManagedObjectSource<Indexed, None> {
+	public static class DirectUseManagedObjectSource extends AbstractManagedObjectSource<Indexed, None> {
 
 		/*
 		 * =================== AbstractManagedObjectSource ===================
@@ -275,8 +256,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<Indexed, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<Indexed, None> context) throws Exception {
 			context.setObjectClass(DirectUseManagedObject.class);
 			context.setManagedObjectClass(DirectUseManagedObject.class);
 
@@ -293,8 +273,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Dependency {@link ManagedObject}.
 	 */
-	public static class DependencyManagedObject implements
-			AsynchronousManagedObject {
+	public static class DependencyManagedObject implements AsynchronousManagedObject {
 
 		/**
 		 * {@link ManagedObjectExecuteContext}.
@@ -317,8 +296,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		 * @param executeContext
 		 *            {@link ManagedObjectExecuteContext}.
 		 */
-		public DependencyManagedObject(
-				ManagedObjectExecuteContext<Indexed> executeContext) {
+		public DependencyManagedObject(ManagedObjectExecuteContext<Indexed> executeContext) {
 			this.executeContext = executeContext;
 		}
 
@@ -330,18 +308,16 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		 * @param nextState
 		 *            Next {@link TransitionState}.
 		 */
-		public void startAsynchronousOperation(TransitionState expectedState,
-				TransitionState nextState) {
+		public void startAsynchronousOperation(TransitionState expectedState, TransitionState nextState) {
 			// Flag asynchronous operation occurring
 			this.listener.notifyStarted();
 
 			// Ensure correct state and move to next state
-			assertEquals("Incorrect state on start", expectedState,
-					this.transitionState);
+			assertEquals("Incorrect state on start", expectedState, this.transitionState);
 			this.transitionState = nextState;
 
 			// Run process for asynchronous operation
-			this.executeContext.invokeProcess(0, this, this, 0);
+			this.executeContext.invokeProcess(0, this, this, 0, null);
 		}
 
 		/**
@@ -362,16 +338,14 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(
-				AsynchronousListener listener) {
+		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
 			// Only load the first listener (as second from invoked process)
 			if (this.listener == null) {
 				this.listener = listener;
 
 				// Start operation on sourcing Managed Object.
 				// In other words not ready to coordinate.
-				this.startAsynchronousOperation(TransitionState.INIT,
-						TransitionState.LOAD_START);
+				this.startAsynchronousOperation(TransitionState.INIT, TransitionState.LOAD_START);
 			}
 		}
 
@@ -384,11 +358,8 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Dependency {@link ManagedObjectSource}.
 	 */
-	public static class DependencyManagedObjectSource extends
-			AbstractManagedObjectSource<None, Indexed> implements
-			WorkFactory<DependencyManagedObjectSource>, Work,
-			ManagedFunctionFactory<DependencyManagedObjectSource, Indexed, None>,
-			ManagedFunction<DependencyManagedObjectSource, Indexed, None> {
+	public static class DependencyManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
+			implements ManagedFunctionFactory<Indexed, None>, ManagedFunction<Indexed, None> {
 
 		/**
 		 * {@link ManagedObjectExecuteContext}.
@@ -405,31 +376,25 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, Indexed> context)
-				throws Exception {
-			ManagedObjectSourceContext<Indexed> mosContext = context
-					.getManagedObjectSourceContext();
+		protected void loadMetaData(MetaDataContext<None, Indexed> context) throws Exception {
+			ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
 
 			// Registry types
 			context.setObjectClass(DependencyManagedObject.class);
 			context.setManagedObjectClass(DependencyManagedObject.class);
 
-			// Register task to active object
-			ManagedObjectWorkBuilder<DependencyManagedObjectSource> workBuilder = mosContext
-					.addWork("WORK", this);
-			ManagedObjectFunctionBuilder<Indexed, None> taskBuilder = workBuilder
-					.addTask("TASK", this);
+			// Register function to active object
+			ManagedObjectFunctionBuilder<Indexed, None> taskBuilder = mosContext.addManagedFunction("TASK", this);
 			taskBuilder.linkParameter(0, DependencyManagedObject.class);
 			taskBuilder.setTeam("MO_TEAM");
 
 			// Register flow to run task to activate object
 			context.addFlow(DependencyManagedObject.class);
-			mosContext.linkProcess(0, "WORK", "TASK");
+			mosContext.linkProcess(0, "TASK");
 		}
 
 		@Override
-		public void start(ManagedObjectExecuteContext<Indexed> context)
-				throws Exception {
+		public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
 			this.executeContext = context;
 		}
 
@@ -439,38 +404,27 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/*
-		 * =============== WorkFactory, TaskFactory, Task ===================
+		 * ============== ManagedFunctionFactory, ManagedFunction ==============
 		 */
 
 		@Override
-		public DependencyManagedObjectSource createWork() {
+		public ManagedFunction<Indexed, None> createManagedFunction() {
 			return this;
 		}
 
 		@Override
-		public ManagedFunction<DependencyManagedObjectSource, Indexed, None> createTask(
-				DependencyManagedObjectSource work) {
-			return work;
-		}
-
-		@Override
-		public Object execute(
-				ManagedFunctionContext<DependencyManagedObjectSource, Indexed, None> context)
-				throws Throwable {
+		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 			// Obtain the dependency managed object
-			DependencyManagedObject dependency = (DependencyManagedObject) context
-					.getObject(0);
+			DependencyManagedObject dependency = (DependencyManagedObject) context.getObject(0);
 
 			// Indicate flag next state
 			switch (dependency.transitionState) {
 			case LOAD_START:
-				dependency
-						.completeAsynchronousOperation(TransitionState.LOAD_COMPLETE);
+				dependency.completeAsynchronousOperation(TransitionState.LOAD_COMPLETE);
 				break;
 			case COORDINATE_START:
-				dependency
-						.completeAsynchronousOperation(TransitionState.COORDINATE_COMPLETE);
+				dependency.completeAsynchronousOperation(TransitionState.COORDINATE_COMPLETE);
 				break;
 			default:
 				fail("Invalid state " + dependency.transitionState);

@@ -77,7 +77,9 @@ public class FunctionLoopImpl implements FunctionLoop {
 		}
 
 		// Delegate function to the responsible team
-		responsibleTeam.getTeam().assignJob(new SafeLoop(function, responsibleTeam.getIdentifier()));
+		SafeLoop loop = new SafeLoop(function, responsibleTeam.getIdentifier());
+		Team team = responsibleTeam.getTeam();
+		team.assignJob(loop);
 	}
 
 	/**
@@ -96,7 +98,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 	 * @return Optional next {@link FunctionState} that requires execution by
 	 *         another {@link ThreadState} (or {@link TeamManagement}).
 	 */
-	private FunctionState executeThreadStateJobNodeLoop(FunctionState headFunction, boolean isThreadStateSafe,
+	private FunctionState executeThreadStateFunctionLoop(FunctionState headFunction, boolean isThreadStateSafe,
 			TeamIdentifier currentTeam) {
 
 		// Obtain the thread state for loop
@@ -200,11 +202,11 @@ public class FunctionLoopImpl implements FunctionLoop {
 			if (isRequireThreadStateSafety) {
 				// Execute loop with thread state safety
 				synchronized (headFunction.getThreadState()) {
-					return FunctionLoopImpl.this.executeThreadStateJobNodeLoop(headFunction, true, this.currentTeam);
+					return FunctionLoopImpl.this.executeThreadStateFunctionLoop(headFunction, true, this.currentTeam);
 				}
 			} else {
 				// Execute loop unsafely (only one thread, avoid overheads)
-				return FunctionLoopImpl.this.executeThreadStateJobNodeLoop(headFunction, false, this.currentTeam);
+				return FunctionLoopImpl.this.executeThreadStateFunctionLoop(headFunction, false, this.currentTeam);
 			}
 		}
 
@@ -253,7 +255,8 @@ public class FunctionLoopImpl implements FunctionLoop {
 				}
 
 				// Undertake loop for thread state
-				nextFunction = this.doThreadStateFunctionLoop(nextFunction, nextFunction.isRequireThreadStateSafety());
+				boolean isRequireThreadStateSafety = nextFunction.isRequireThreadStateSafety();
+				nextFunction = this.doThreadStateFunctionLoop(nextFunction, isRequireThreadStateSafety);
 
 			} while (nextFunction != null);
 		}

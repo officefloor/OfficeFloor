@@ -20,7 +20,7 @@ package net.officefloor.frame.integrate.managedobject.coordinate;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.TestSource;
@@ -37,8 +37,7 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  *
  * @author Daniel Sagenschneider
  */
-public class CoordinateManagedObjectTest extends
-		AbstractOfficeConstructTestCase {
+public class CoordinateManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * {@link CoordinatingMo} from the {@link CoordinatingWork}.
@@ -61,10 +60,10 @@ public class CoordinateManagedObjectTest extends
 		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
+		officeBuilder.setMonitorOfficeInterval(0);
 
 		// Construct the coordinating managed object
-		this.constructManagedObject("coordinate",
-				CoordinatingManagedObjectSource.class, officeName);
+		this.constructManagedObject("coordinate", CoordinatingManagedObjectSource.class, officeName);
 
 		// Construct the managed objects
 		// (Constructed after coordinating to ensure dependency ordering)
@@ -79,27 +78,22 @@ public class CoordinateManagedObjectTest extends
 		this.constructManagedObject(processTwo, "processTwo", officeName);
 		officeBuilder.addProcessManagedObject("processTwo", "processTwo");
 
-		// Construct work to obtain the coordinating managed object
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(
-				new CoordinatingWork(), "w", "task");
-		workBuilder.getBuilder().addWorkManagedObject("workOne", "workOne");
-		workBuilder.getBuilder().addWorkManagedObject("workTwo", "workTwo");
+		// Construct function to obtain the coordinating managed object
+		ReflectiveFunctionBuilder functionBuilder = this.constructFunction(new CoordinatingWork(), "task");
+		functionBuilder.getBuilder().addManagedObject("workOne", "workOne");
+		functionBuilder.getBuilder().addManagedObject("workTwo", "workTwo");
 
-		// Construct the task to obtain the coordinating mo
-		this.constructTeam("team", new PassiveTeam());
-		DependencyMappingBuilder mapper = workBuilder.buildTask("task", "team")
-				.buildObject("coordinate", ManagedObjectScope.WORK);
+		// Construct the function to obtain the coordinating mo
+		DependencyMappingBuilder mapper = functionBuilder.buildObject("coordinate", ManagedObjectScope.FUNCTION);
 		mapper.mapDependency(CoordinatingDependencyKey.WORK_ONE, "workOne");
 		mapper.mapDependency(CoordinatingDependencyKey.WORK_TWO, "workTwo");
 		mapper.mapDependency(CoordinatingDependencyKey.THREAD_ONE, "threadOne");
 		mapper.mapDependency(CoordinatingDependencyKey.THREAD_TWO, "threadTwo");
-		mapper.mapDependency(CoordinatingDependencyKey.PROCESS_ONE,
-				"processOne");
-		mapper.mapDependency(CoordinatingDependencyKey.PROCESS_TWO,
-				"processTwo");
+		mapper.mapDependency(CoordinatingDependencyKey.PROCESS_ONE, "processOne");
+		mapper.mapDependency(CoordinatingDependencyKey.PROCESS_TWO, "processTwo");
 
-		// Invoke the work to obtain the coordinating mo
-		this.invokeWork("w", null);
+		// Invoke the function to obtain the coordinating mo
+		this.invokeFunction("task", null);
 
 		// Ensure no top level issue
 		this.validateNoTopLevelEscalation();
@@ -108,22 +102,18 @@ public class CoordinateManagedObjectTest extends
 		assertNotNull("Must obtain coordinating mo", this.coordinatingMo);
 		assertEquals("Incorrect workOne", workOne, this.coordinatingMo.workOne);
 		assertEquals("Incorrect workTwo", workTwo, this.coordinatingMo.workTwo);
-		assertEquals("Incorrect threadOne", threadOne,
-				this.coordinatingMo.threadOne);
-		assertEquals("Incorrect threadTwo", threadTwo,
-				this.coordinatingMo.threadTwo);
-		assertEquals("Incorrect processOne", processOne,
-				this.coordinatingMo.processOne);
-		assertEquals("Incorrect processTwo", processTwo,
-				this.coordinatingMo.processTwo);
+		assertEquals("Incorrect threadOne", threadOne, this.coordinatingMo.threadOne);
+		assertEquals("Incorrect threadTwo", threadTwo, this.coordinatingMo.threadTwo);
+		assertEquals("Incorrect processOne", processOne, this.coordinatingMo.processOne);
+		assertEquals("Incorrect processTwo", processTwo, this.coordinatingMo.processTwo);
 	}
 
 	/**
 	 * Coordinating {@link ManagedObjectSource}.
 	 */
 	@TestSource
-	public static class CoordinatingManagedObjectSource extends
-			AbstractManagedObjectSource<CoordinatingDependencyKey, None> {
+	public static class CoordinatingManagedObjectSource
+			extends AbstractManagedObjectSource<CoordinatingDependencyKey, None> {
 
 		/*
 		 * ============= AbstractAsyncManagedObjectSource =====================
@@ -135,24 +125,16 @@ public class CoordinateManagedObjectTest extends
 		}
 
 		@Override
-		protected void loadMetaData(
-				MetaDataContext<CoordinatingDependencyKey, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<CoordinatingDependencyKey, None> context) throws Exception {
 			// Loads the meta-data
 			context.setManagedObjectClass(CoordinatingManagedObject.class);
 			context.setObjectClass(CoordinatingMo.class);
-			context.addDependency(CoordinatingDependencyKey.WORK_ONE,
-					String.class);
-			context.addDependency(CoordinatingDependencyKey.WORK_TWO,
-					String.class);
-			context.addDependency(CoordinatingDependencyKey.THREAD_ONE,
-					String.class);
-			context.addDependency(CoordinatingDependencyKey.THREAD_TWO,
-					String.class);
-			context.addDependency(CoordinatingDependencyKey.PROCESS_ONE,
-					String.class);
-			context.addDependency(CoordinatingDependencyKey.PROCESS_TWO,
-					String.class);
+			context.addDependency(CoordinatingDependencyKey.WORK_ONE, String.class);
+			context.addDependency(CoordinatingDependencyKey.WORK_TWO, String.class);
+			context.addDependency(CoordinatingDependencyKey.THREAD_ONE, String.class);
+			context.addDependency(CoordinatingDependencyKey.THREAD_TWO, String.class);
+			context.addDependency(CoordinatingDependencyKey.PROCESS_ONE, String.class);
+			context.addDependency(CoordinatingDependencyKey.PROCESS_TWO, String.class);
 		}
 
 		@Override
@@ -171,16 +153,15 @@ public class CoordinateManagedObjectTest extends
 	/**
 	 * {@link CoordinatingManagedObject}.
 	 */
-	private static class CoordinatingMo implements
-			CoordinatingManagedObject<CoordinatingDependencyKey> {
+	private static class CoordinatingMo implements CoordinatingManagedObject<CoordinatingDependencyKey> {
 
 		/**
-		 * {@link ManagedObjectScope#WORK} dependency one.
+		 * {@link ManagedObjectScope#FUNCTION} dependency one.
 		 */
 		public Object workOne;
 
 		/**
-		 * {@link ManagedObjectScope#WORK} dependency two.
+		 * {@link ManagedObjectScope#FUNCTION} dependency two.
 		 */
 		public Object workTwo;
 
@@ -205,22 +186,14 @@ public class CoordinateManagedObjectTest extends
 		public Object processTwo;
 
 		@Override
-		public void loadObjects(
-				ObjectRegistry<CoordinatingDependencyKey> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<CoordinatingDependencyKey> registry) throws Throwable {
 			// Obtain the dependencies
-			this.workOne = registry
-					.getObject(CoordinatingDependencyKey.WORK_ONE);
-			this.workTwo = registry
-					.getObject(CoordinatingDependencyKey.WORK_TWO);
-			this.threadOne = registry
-					.getObject(CoordinatingDependencyKey.THREAD_ONE);
-			this.threadTwo = registry
-					.getObject(CoordinatingDependencyKey.THREAD_TWO);
-			this.processOne = registry
-					.getObject(CoordinatingDependencyKey.PROCESS_ONE);
-			this.processTwo = registry
-					.getObject(CoordinatingDependencyKey.PROCESS_TWO);
+			this.workOne = registry.getObject(CoordinatingDependencyKey.WORK_ONE);
+			this.workTwo = registry.getObject(CoordinatingDependencyKey.WORK_TWO);
+			this.threadOne = registry.getObject(CoordinatingDependencyKey.THREAD_ONE);
+			this.threadTwo = registry.getObject(CoordinatingDependencyKey.THREAD_TWO);
+			this.processOne = registry.getObject(CoordinatingDependencyKey.PROCESS_ONE);
+			this.processTwo = registry.getObject(CoordinatingDependencyKey.PROCESS_TWO);
 		}
 
 		@Override
@@ -230,7 +203,7 @@ public class CoordinateManagedObjectTest extends
 	}
 
 	/**
-	 * Coordinating {@link Work} to test coordination.
+	 * Coordinating {@link ManagedFunction} to test coordination.
 	 */
 	public class CoordinatingWork {
 

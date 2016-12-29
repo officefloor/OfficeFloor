@@ -251,8 +251,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 		// Obtain the monitor interval for the office manager
 		long monitorOfficeInterval = configuration.getMonitorOfficeInterval();
-		if (monitorOfficeInterval <= 0) {
-			issues.addIssue(AssetType.OFFICE, officeName, "Monitor office interval must be greater than zero");
+		if (monitorOfficeInterval < 0) {
+			issues.addIssue(AssetType.OFFICE, officeName, "Monitor office interval can not be negative");
 			return null; // can not continue
 		}
 
@@ -576,18 +576,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			officeEscalations[i] = new EscalationFlowImpl(typeOfCause, escalationFunctionMetaData);
 		}
 
-		// Obtain all the asset managers for the office
-		AssetManager[] assetManagers = officeAssetManagerFactory.getAssetManagers();
-
-		// Create the office manager
-		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName, monitorOfficeInterval, assetManagers,
-				officeClock, functionLoop, timer);
-
-		// Load the office meta-data
-		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,
-				functionLoop, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), processMetaData,
-				processContextListeners, startupFunctions, profiler);
-
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
 			officeManagingManagedObject.manageByOffice(processBoundManagedObjects, officeMetaData, functionLocator,
@@ -605,6 +593,18 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		for (RawGovernanceMetaData<?, ?> rawGovernance : rawGovernanceMetaDataList) {
 			rawGovernance.linkOfficeMetaData(functionLocator, officeAssetManagerFactory, issues);
 		}
+
+		// Obtain all the asset managers for the office
+		AssetManager[] assetManagers = officeAssetManagerFactory.getAssetManagers();
+
+		// Create the office manager
+		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName, monitorOfficeInterval, assetManagers,
+				officeClock, functionLoop, timer);
+
+		// Load the office meta-data
+		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,
+				functionLoop, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), processMetaData,
+				processContextListeners, startupFunctions, profiler);
 
 		// Return the raw office meta-data
 		rawOfficeMetaData.officeMetaData = officeMetaData;

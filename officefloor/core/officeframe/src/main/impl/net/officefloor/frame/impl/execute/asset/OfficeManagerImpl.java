@@ -92,7 +92,9 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 
 	@Override
 	public void startManaging() {
-		this.timer.scheduleAtFixedRate(this, 0, this.monitorInterval);
+		if (this.monitorInterval > 0) {
+			this.timer.scheduleAtFixedRate(this, 0, this.monitorInterval);
+		}
 	}
 
 	@Override

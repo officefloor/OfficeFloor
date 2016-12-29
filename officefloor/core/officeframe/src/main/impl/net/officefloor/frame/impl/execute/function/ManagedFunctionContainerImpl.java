@@ -387,9 +387,9 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				return Promise.then(executeFunctions, this);
 			}
 
-			// Determine if awaiting on callback
+			// Determine if awaiting on flow
 			if (this.awaitingFlowCompletions.getHead() != null) {
-				return null; // callback will re-execute
+				return this.getParallelFunctionToExecute();
 			}
 
 			// All callbacks completed

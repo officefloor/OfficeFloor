@@ -21,10 +21,9 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -38,7 +37,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests construction scenarios of a {@link ManagedObject}.
@@ -85,7 +83,8 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensures construction of a {@link ManagedObject} that invokes a
-	 * {@link ManagedFunction} of the {@link Office} but is not used by the {@link Office}.
+	 * {@link ManagedFunction} of the {@link Office} but is not used by the
+	 * {@link Office}.
 	 */
 	public void testManagedObjectOutsideOffice() throws Throwable {
 		this.doTest(true, false, null, 0);
@@ -102,8 +101,8 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensures construction of a {@link ProcessState} bound
-	 * {@link ManagedObject} that is a dependency of a {@link ManagedFunction} within the
-	 * {@link Office}.
+	 * {@link ManagedObject} that is a dependency of a {@link ManagedFunction}
+	 * within the {@link Office}.
 	 */
 	public void testProcessManagedObjectInsideOffice() throws Throwable {
 		this.doTest(false, true, ManagedObjectScope.PROCESS, 0);
@@ -111,30 +110,29 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensures construction of a {@link ProcessState} bound
-	 * {@link AsynchronousManagedObject} that is a dependency of a {@link ManagedFunction}
-	 * within the {@link Office}.
+	 * {@link AsynchronousManagedObject} that is a dependency of a
+	 * {@link ManagedFunction} within the {@link Office}.
 	 */
-	public void testAsynchronousProcessManagedObjectInsideOffice()
-			throws Throwable {
+	public void testAsynchronousProcessManagedObjectInsideOffice() throws Throwable {
 		this.doTest(false, true, ManagedObjectScope.PROCESS, 10);
 	}
 
 	/**
-	 * Ensures construction of a {@link Work} bound {@link ManagedObject} that
-	 * is a dependency of a {@link ManagedFunction} within the {@link Office}.
+	 * Ensures construction of a {@link ManagedFunction} bound
+	 * {@link ManagedObject} that is a dependency of a {@link ManagedFunction}
+	 * within the {@link Office}.
 	 */
-	public void testWorkManagedObjectInsideOffice() throws Throwable {
-		this.doTest(false, true, ManagedObjectScope.WORK, 0);
+	public void testFunctionManagedObjectInsideOffice() throws Throwable {
+		this.doTest(false, true, ManagedObjectScope.FUNCTION, 0);
 	}
 
 	/**
-	 * Ensures construction of a {@link Work} bound
-	 * {@link AsynchronousManagedObject} that is a dependency of a {@link ManagedFunction}
-	 * within the {@link Office}.
+	 * Ensures construction of a {@link ManagedFunction} bound
+	 * {@link AsynchronousManagedObject} that is a dependency of a
+	 * {@link ManagedFunction} within the {@link Office}.
 	 */
-	public void testAsynchronousWorkManagedObjectInsideOffice()
-			throws Throwable {
-		this.doTest(false, true, ManagedObjectScope.WORK, 10);
+	public void testAsynchronousFunctionManagedObjectInsideOffice() throws Throwable {
+		this.doTest(false, true, ManagedObjectScope.FUNCTION, 10);
 	}
 
 	/**
@@ -145,8 +143,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 * <li>has a {@link ManagedFunction} dependent on it.</li>
 	 * </ol>
 	 */
-	public void testProcessManagedObjectOutsideAndInsideOffice()
-			throws Throwable {
+	public void testProcessManagedObjectOutsideAndInsideOffice() throws Throwable {
 		this.doTest(true, true, ManagedObjectScope.PROCESS, 0);
 	}
 
@@ -158,34 +155,32 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 * <li>has a {@link ManagedFunction} dependent on it.</li>
 	 * </ol>
 	 */
-	public void testAsynchronousProcessManagedObjectOutsideAndInsideOffice()
-			throws Throwable {
+	public void testAsynchronousProcessManagedObjectOutsideAndInsideOffice() throws Throwable {
 		this.doTest(true, true, ManagedObjectScope.PROCESS, 10);
 	}
 
 	/**
-	 * Ensures construction of a {@link Work} bound {@link ManagedObject} that
-	 * both:
+	 * Ensures construction of a {@link ManagedFunction} bound
+	 * {@link ManagedObject} that both:
 	 * <ol>
 	 * <li>triggers a {@link ManagedFunction} in the {@link Office}, and</li>
 	 * <li>has a {@link ManagedFunction} dependent on it.</li>
 	 * </ol>
 	 */
-	public void testWorkManagedObjectOutsideAndInsideOffice() throws Throwable {
-		this.doTest(true, true, ManagedObjectScope.WORK, 0);
+	public void testFunctionManagedObjectOutsideAndInsideOffice() throws Throwable {
+		this.doTest(true, true, ManagedObjectScope.FUNCTION, 0);
 	}
 
 	/**
-	 * Ensures construction of a {@link Work} bound
+	 * Ensures construction of a {@link ManagedFunction} bound
 	 * {@link AsynchronousManagedObject} that both:
 	 * <ol>
 	 * <li>triggers a {@link ManagedFunction} in the {@link Office}, and</li>
 	 * <li>has a {@link ManagedFunction} dependent on it.</li>
 	 * </ol>
 	 */
-	public void testAsynchronousWorkManagedObjectOutsideAndInsideOffice()
-			throws Throwable {
-		this.doTest(true, true, ManagedObjectScope.WORK, 10);
+	public void testAsynchronousFunctionManagedObjectOutsideAndInsideOffice() throws Throwable {
+		this.doTest(true, true, ManagedObjectScope.FUNCTION, 10);
 	}
 
 	/**
@@ -203,19 +198,17 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 *            Timeout. If greater than zero will have the
 	 *            {@link ManagedObject} be an {@link AsynchronousManagedObject}.
 	 */
-	private void doTest(boolean isManagedObjectOutside,
-			boolean isManagedObjectInside, ManagedObjectScope scope,
+	private void doTest(boolean isManagedObjectOutside, boolean isManagedObjectInside, ManagedObjectScope scope,
 			long timeout) throws Throwable {
 		String officeName = this.getOfficeName();
-		this.initiateOfficeFloor(isManagedObjectOutside, isManagedObjectInside,
-				scope, timeout);
+		this.initiateOfficeFloor(isManagedObjectOutside, isManagedObjectInside, scope, timeout);
 		if (isManagedObjectOutside) {
 			// As managed object outside, validate can handle external event
 			this.ensureCanTriggerExternalEvent();
 		}
 		if (isManagedObjectInside) {
-			// Available inside, so trigger work depending on managed object
-			this.ensureCanInvokeWork(officeName);
+			// Available inside, so trigger function depending on managed object
+			this.ensureCanInvokeFunction(officeName);
 		}
 	}
 
@@ -230,14 +223,13 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Tests invoking the {@link Work}.
+	 * Tests invoking the {@link ManagedFunction}.
 	 */
-	private void ensureCanInvokeWork(String officeName) throws Throwable {
+	private void ensureCanInvokeFunction(String officeName) throws Throwable {
 		this.resetTask();
 		Object parameter = new Object();
-		WorkManager workManager = this.officeFloor.getOffice(officeName)
-				.getWorkManager("WORK");
-		workManager.invokeWork(parameter);
+		FunctionManager functionManager = this.officeFloor.getOffice(officeName).getFunctionManager("invokedTask");
+		functionManager.invokeProcess(parameter, null);
 		this.validateTaskInvoked(parameter, managedObjectSource);
 	}
 
@@ -260,18 +252,15 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 * @throws Throwable
 	 *             If failure invoking {@link ManagedFunction}.
 	 */
-	private void validateTaskInvoked(Object parameter,
-			ManagedObject managedObject) throws Throwable {
+	private void validateTaskInvoked(Object parameter, ManagedObject managedObject) throws Throwable {
 
 		// Ensure no escalation failures invoking task
 		this.validateNoTopLevelEscalation();
 
 		// Validates the task was invoked
 		assertTrue("Task should be executed", this.work.isTaskInvoked);
-		assertEquals("Incorrect parameter to task", parameter,
-				this.work.parameter);
-		assertEquals("Incorrect managed object", managedObject,
-				this.work.managedObject);
+		assertEquals("Incorrect parameter to task", parameter, this.work.parameter);
+		assertEquals("Incorrect managed object", managedObject, this.work.managedObject);
 	}
 
 	/**
@@ -292,22 +281,16 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 * @throws Exception
 	 *             If fails to initialise the {@link OfficeFloor}.
 	 */
-	private void initiateOfficeFloor(boolean isManagedObjectOutside,
-			boolean isManagedObjectInside, ManagedObjectScope scope,
-			long timeout) throws Exception {
-
-		final String EXTERNAL_EVENT_TASK = "externalEvent";
-		final String INVOKED_TASK = "invokedTask";
+	private void initiateOfficeFloor(boolean isManagedObjectOutside, boolean isManagedObjectInside,
+			ManagedObjectScope scope, long timeout) throws Exception {
 
 		// Obtain the name of the office
 		String officeName = this.getOfficeName();
 
 		// Create and register the managed object source
-		ManagedObjectBuilder<Flows> managedObjectBuilder = this
-				.getOfficeFloorBuilder().addManagedObject("MO",
-						TestManagedObjectSource.class);
-		ManagingOfficeBuilder<Flows> managingOfficeBuilder = managedObjectBuilder
-				.setManagingOffice(officeName);
+		ManagedObjectBuilder<Flows> managedObjectBuilder = this.getOfficeFloorBuilder().addManagedObject("MO",
+				TestManagedObjectSource.class);
+		ManagingOfficeBuilder<Flows> managingOfficeBuilder = managedObjectBuilder.setManagingOffice(officeName);
 		if (isManagedObjectOutside) {
 			managingOfficeBuilder.setInputManagedObjectName("OFFICE_MO");
 		}
@@ -325,27 +308,21 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		// Only provide flow if outside
 		TestManagedObjectSource.isLoadFlow = isManagedObjectOutside;
 		if (isManagedObjectOutside) {
-			managingOfficeBuilder.linkProcess(Flows.FLOW, "WORK",
-					EXTERNAL_EVENT_TASK);
+			managingOfficeBuilder.linkProcess(Flows.FLOW, "externalEvent");
 		}
 
-		// Create and register the work
+		// Create and register the functions
 		this.work = new TestWork();
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(this.work,
-				"WORK", (isManagedObjectInside ? INVOKED_TASK : null));
 		if (isManagedObjectOutside) {
-			// Provide the externally executed task from managed object
-			ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask(
-					EXTERNAL_EVENT_TASK, "TEAM");
-			taskBuilder.buildParameter();
+			// Provide the externally executed function from managed object
+			ReflectiveFunctionBuilder functionBuilder = this.constructFunction(this.work, "externalEvent", "TEAM");
+			functionBuilder.buildParameter();
 		}
 		if (isManagedObjectInside) {
 			// Provide the invoked task dependent on managed object
-			ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask(
-					INVOKED_TASK, "TEAM");
+			ReflectiveFunctionBuilder taskBuilder = this.constructFunction(this.work, "invokedTask", "TEAM");
 			taskBuilder.buildParameter();
-			this.getOfficeBuilder().registerManagedObjectSource("OFFICE_MO",
-					"MO");
+			this.getOfficeBuilder().registerManagedObjectSource("OFFICE_MO", "MO");
 			if (isManagedObjectOutside) {
 				// Already registered via Input ManagedObject
 				taskBuilder.buildObject("OFFICE_MO");
@@ -365,9 +342,8 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 * Test {@link ManagedObjectSource}.
 	 */
 	@TestSource
-	public static class TestManagedObjectSource extends
-			AbstractManagedObjectSource<None, Flows> implements ManagedObject,
-			AsynchronousManagedObject {
+	public static class TestManagedObjectSource extends AbstractManagedObjectSource<None, Flows>
+			implements ManagedObject, AsynchronousManagedObject {
 
 		/**
 		 * {@link ManagedObject} class.
@@ -389,8 +365,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 */
 		public TestManagedObjectSource() {
 			// Should only be instantiated once
-			assertNull("Managd Object Source should only be instantiated once",
-					ManagedObjectTest.managedObjectSource);
+			assertNull("Managd Object Source should only be instantiated once", ManagedObjectTest.managedObjectSource);
 			ManagedObjectTest.managedObjectSource = this;
 		}
 
@@ -403,7 +378,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 *            the initial {@link ManagedFunction}.
 		 */
 		public void triggerByExternalEvent(Object parameter) {
-			executeContext.invokeProcess(Flows.FLOW, parameter, this, 0);
+			executeContext.invokeProcess(Flows.FLOW, parameter, this, 0, null);
 		}
 
 		/*
@@ -416,8 +391,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, Flows> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
 
 			// Specify the managed object class
 			context.setManagedObjectClass(managedObjectClass);
@@ -429,14 +403,12 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 			if (isLoadFlow) {
 				// Load the flow
 				Labeller labeller = context.addFlow(Flows.FLOW, Object.class);
-				assertEquals("Incorrect flow index", Flows.FLOW.ordinal(),
-						labeller.getIndex());
+				assertEquals("Incorrect flow index", Flows.FLOW.ordinal(), labeller.getIndex());
 			}
 		}
 
 		@Override
-		public void start(ManagedObjectExecuteContext<Flows> context)
-				throws Exception {
+		public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
 			this.executeContext = context;
 		}
 
@@ -459,8 +431,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(
-				AsynchronousListener listener) {
+		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
 			// Do nothing
 		}
 	}
@@ -473,7 +444,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Test reflective {@link Work}.
+	 * Test reflective object.
 	 */
 	public static class TestWork {
 
@@ -504,15 +475,15 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/**
-		 * {@link ManagedFunction} invoked that depends on {@link ManagedObject}.
+		 * {@link ManagedFunction} invoked that depends on
+		 * {@link ManagedObject}.
 		 * 
 		 * @param parameter
 		 *            Parameter to the {@link ManagedFunction}.
 		 * @param managedObject
 		 *            {@link ManagedObject}.
 		 */
-		public void invokedTask(Object parameter,
-				TestManagedObjectSource managedObject) {
+		public void invokedTask(Object parameter, TestManagedObjectSource managedObject) {
 			this.isTaskInvoked = true;
 			this.parameter = parameter;
 			this.managedObject = managedObject;

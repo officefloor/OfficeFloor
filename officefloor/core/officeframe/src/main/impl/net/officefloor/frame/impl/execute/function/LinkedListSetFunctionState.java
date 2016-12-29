@@ -19,11 +19,9 @@ package net.officefloor.frame.impl.execute.function;
 
 import java.util.function.Function;
 
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSetItem;
-import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
  * {@link FunctionLogic} to execute a {@link FunctionLogic} for each
@@ -31,30 +29,44 @@ import net.officefloor.frame.internal.structure.TeamManagement;
  *
  * @author Daniel Sagenschneider
  */
-public class LinkedListSetFunctionLogic<E> implements FunctionLogic {
+public class LinkedListSetFunctionState<E> extends AbstractDelegateFunctionState {
 
 	/**
-	 * Convenience constructor to create a {@link LinkedListSetFunctionLogic}
+	 * Translates the {@link LinkedListSetItem} to a {@link FunctionState}.
+	 */
+	public static interface Translate<E> {
+
+		/**
+		 * Translates the {@link LinkedListSetItem} to a {@link FunctionState}.
+		 * 
+		 * @param item
+		 *            {@link LinkedListSetItem}.
+		 * @return {@link FunctionState}.
+		 */
+		FunctionState translate(LinkedListSetItem<E> item);
+	}
+
+	/**
+	 * Convenience constructor to create a {@link LinkedListSetFunctionState}
 	 * that casts the {@link LinkedListSetItem} to a {@link Function}.
 	 * 
 	 * @param head
 	 *            {@link LinkedListSetItem} head of list.
-	 * @return {@link LinkedListSetFunctionLogic}.
+	 * @return {@link LinkedListSetFunctionState}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <J extends FunctionLogic> LinkedListSetFunctionLogic<J> createCastFunction(
+	public static <J extends FunctionLogic> LinkedListSetFunctionState<J> createCastFunction(
 			LinkedListSetItem<J> head) {
-		return new LinkedListSetFunctionLogic<>(null, head, head.getEntry(), CAST_JOB_NODE_FACTORY);
+		return new LinkedListSetFunctionState<>(head, CAST_TRANSLATE);
 	}
 
 	/**
 	 * {@link Function} to cast {@link LinkedListSetItem} to a {@link Function}.
 	 */
-	@SuppressWarnings({ "rawtypes" })
-	private static final Function CAST_JOB_NODE_FACTORY = new Function() {
+	private static final Translate CAST_TRANSLATE = new Translate() {
 		@Override
-		public Object apply(Object item) {
-			return ((LinkedListSetItem) item).getEntry();
+		public FunctionState translate(LinkedListSetItem item) {
+			return (FunctionState) item.getEntry();
 		}
 	};
 
@@ -70,28 +82,25 @@ public class LinkedListSetFunctionLogic<E> implements FunctionLogic {
 	private final LinkedListSetItem<E> head;
 
 	/**
-	 * Head {@link FunctionLogic}.
+	 * Head {@link FunctionState}.
 	 */
-	private final FunctionLogic headFunction;
+	private final FunctionState headFunction;
 
 	/**
-	 * {@link Function} to transform the {@link LinkedListSetItem} to a
-	 * {@link FunctionLogic}.
+	 * {@link Translate}.
 	 */
-	private final Function<LinkedListSetItem<E>, FunctionLogic> functionFactory;
+	private final Translate<E> translate;
 
 	/**
 	 * Under takes all {@link FunctionState} instances within the list.
 	 * 
 	 * @param head
 	 *            Head {@link LinkedListSetItem} of the listing.
-	 * @param jobNodeFactory
-	 *            {@link Function} to transform the {@link LinkedListSetItem} to
-	 *            a {@link FunctionLogic}.
+	 * @param translate
+	 *            {@link Translate}.
 	 */
-	public LinkedListSetFunctionLogic(LinkedListSetItem<E> head,
-			Function<LinkedListSetItem<E>, FunctionLogic> functionFactory) {
-		this(null, head, functionFactory.apply(head), functionFactory);
+	public LinkedListSetFunctionState(LinkedListSetItem<E> head, Translate<E> translate) {
+		this(null, head, translate.translate(head), translate);
 	}
 
 	/**
@@ -106,16 +115,16 @@ public class LinkedListSetFunctionLogic<E> implements FunctionLogic {
 	 *            {@link FunctionState} instances to execute.
 	 * @param headFunction
 	 *            {@link FunctionState} for head.
-	 * @param functionFactory
-	 *            {@link Function} to transform the {@link LinkedListSetItem} to
-	 *            a {@link FunctionLogic}.
+	 * @param translate
+	 *            {@link Translate}.
 	 */
-	private LinkedListSetFunctionLogic(FunctionState previousFunction, LinkedListSetItem<E> head,
-			FunctionLogic headFunction, Function<LinkedListSetItem<E>, FunctionLogic> functionFactory) {
+	private LinkedListSetFunctionState(FunctionState previousFunction, LinkedListSetItem<E> head,
+			FunctionState headFunction, Translate<E> translate) {
+		super(previousFunction != null ? previousFunction : headFunction);
 		this.previousFunction = previousFunction;
 		this.head = head;
 		this.headFunction = headFunction;
-		this.functionFactory = functionFactory;
+		this.translate = translate;
 	}
 
 	/*
@@ -123,35 +132,27 @@ public class LinkedListSetFunctionLogic<E> implements FunctionLogic {
 	 */
 
 	@Override
-	public TeamManagement getResponsibleTeam() {
-		return (this.previousFunction != null) ? this.previousFunction.getResponsibleTeam()
-				: this.headFunction.getResponsibleTeam();
-	}
-
-	@Override
-	public FunctionState execute(Flow flow) throws Throwable {
+	public FunctionState execute() throws Throwable {
 
 		// Determine if previous chain of functions to complete
 		if (this.previousFunction != null) {
 			FunctionState nextFunction = this.previousFunction.execute();
 			if (nextFunction != null) {
 				// Need to complete previous functions before next item in list
-				return flow.createFunction(new LinkedListSetFunctionLogic<E>(nextFunction, this.head, this.headFunction,
-						this.functionFactory));
+				return new LinkedListSetFunctionState<E>(nextFunction, this.head, this.headFunction, this.translate);
 			}
 		}
 
 		// Undertake the head function
-		FunctionState nextPreviousFunction = this.headFunction.execute(flow);
+		FunctionState nextPreviousFunction = this.headFunction.execute();
 		LinkedListSetItem<E> nextHead = this.head.getNext();
 		if (nextHead == null) {
 			// Nothing further in list, so complete last chain of functions
 			return nextPreviousFunction;
 		} else {
 			// Continue on for next item in the list
-			FunctionLogic nextHeadFunction = this.functionFactory.apply(nextHead);
-			return flow.createFunction(new LinkedListSetFunctionLogic<>(nextPreviousFunction, nextHead,
-					nextHeadFunction, this.functionFactory));
+			FunctionState nextHeadFunction = this.translate.translate(nextHead);
+			return new LinkedListSetFunctionState<>(nextPreviousFunction, nextHead, nextHeadFunction, this.translate);
 		}
 	}
 

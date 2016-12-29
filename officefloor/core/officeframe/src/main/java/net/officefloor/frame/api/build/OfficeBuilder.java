@@ -38,7 +38,7 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public interface OfficeBuilder {
-
+	
 	/**
 	 * Specifies the interval in milli-seconds between each time the
 	 * {@link OfficeManager} monitors the {@link Office}.

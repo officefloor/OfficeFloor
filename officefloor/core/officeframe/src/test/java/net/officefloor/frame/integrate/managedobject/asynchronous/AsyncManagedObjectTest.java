@@ -19,9 +19,10 @@ package net.officefloor.frame.integrate.managedobject.asynchronous;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
@@ -31,13 +32,10 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.MockTeamSource;
+import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.StepTeam;
 
 /**
  * Tests loading the {@link ManagedObject} asynchronously.
@@ -52,9 +50,9 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 	private TestWork work;
 
 	/**
-	 * {@link TestTeam}.
+	 * {@link StepTeam}.
 	 */
-	private TestTeam team;
+	private StepTeam team;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -63,29 +61,29 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		// Obtain the office name
 		String officeName = this.getOfficeName();
 
+		// Flag not to monitor office
+		this.getOfficeBuilder().setMonitorOfficeInterval(0);
+
 		// Construct the managed object
-		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject("MO",
-				TestManagedObjectSource.class, officeName);
+		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject("MO", TestManagedObjectSource.class,
+				officeName);
 		moBuilder.setTimeout(1000);
 
-		// Construct the work to execute
+		// Construct the function to execute
 		this.work = new TestWork();
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(this.work,
-				"WORK", "task");
-		ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask("task",
-				"TEAM");
-		taskBuilder.buildObject("MO", ManagedObjectScope.WORK);
-		taskBuilder.buildTaskContext();
+		ReflectiveFunctionBuilder functionBuilder = this.constructFunction(this.work, "task", "TEAM");
+		functionBuilder.buildObject("MO", ManagedObjectScope.FUNCTION);
+		functionBuilder.buildFlow("flow", null, false);
+		this.constructFunction(this.work, "flow");
 
-		// Construct team to run task
-		this.team = new TestTeam();
+		// Construct team to run function
+		this.team = new StepTeam();
 		this.constructTeam("TEAM", this.team);
 
-		// Open the Office Floor and invoke work
+		// Open the OfficeFloor and invoke function
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
-		officeFloor.getOffice(officeName).getWorkManager("WORK")
-				.invokeWork(null);
+		officeFloor.getOffice(officeName).getFunctionManager("task").invokeProcess(null, null);
 	}
 
 	/**
@@ -94,19 +92,15 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 	public void testAsynchronousSourceManagedObject() throws Exception {
 
 		// Execute Job, attempting to load managed object
-		this.team.executeJob(false, true);
+		this.team.executeJob();
+		assertFalse("Should not run function", this.work.isFunctionExecuted);
 
 		// Load managed object later, waiting for activation by OfficeManager
-		synchronized (this.team) {
-			this.team.isAssignedJob = false;
-			TestManagedObjectSource.loadManagedObject(new TestManagedObject());
-			this.team.wait(1000);
-			assertTrue("Job should be activated by OfficeManager",
-					this.team.isAssignedJob);
-		}
+		TestManagedObjectSource.loadManagedObject(new TestManagedObject());
 
 		// Managed Object available, so should complete on next execution
-		this.team.executeJob(true, true);
+		this.team.executeJob();
+		assertTrue("Function now run after object available", this.work.isFunctionExecuted);
 	}
 
 	/**
@@ -120,130 +114,33 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		// Load managed object and trigger asynchronous operation
 		TestManagedObjectSource.loadManagedObject(mo);
 		this.work.isTriggerAsynchronousOperation = true;
-		this.team.executeJob(true, false); // execute and need re-executing
-
-		// Asynchronous operation in progress, so should not execute Job
-		this.team.executeJob(false, true);
+		this.team.executeJob();
+		assertTrue("Function run as object available", this.work.isFunctionExecuted);
+		assertFalse("Callback should not be executed as waiting on operation", this.work.isCallbackExecuted);
 
 		// Notify asynchronous operation over, activate by OfficeManager
-		synchronized (this.team) {
-			// Indicate asynchronous operation over
-			this.team.isAssignedJob = false;
-			mo.listener.notifyComplete();
-			this.team.wait(1000);
-			assertTrue(
-					"On completion of async operation, Job should be activated by OfficeManager",
-					this.team.isAssignedJob);
-		}
+		mo.listener.notifyComplete();
+		assertFalse("Callback should be queued to same team, so not exeuted", this.work.isCallbackExecuted);
 
 		// Asynchronous operation over, so should complete on next execution
-		this.team.executeJob(true, true);
+		this.team.executeJob();
+		assertTrue("Callback run as asynchronous operation complete", this.work.isCallbackExecuted);
 	}
 
 	/**
-	 * Test {@link Team}.
-	 */
-	private class TestTeam implements Team {
-
-		/**
-		 * {@link Job}.
-		 */
-		private Job job;
-
-		/**
-		 * Flag indicating if {@link Job} was assigned to this {@link Team}.
-		 */
-		public boolean isAssignedJob = false;
-
-		/**
-		 * Executes the {@link Job}.
-		 * 
-		 * @param isExpectExecute
-		 *            Flag indicating whether the {@link TestWork} should be
-		 *            executed.
-		 * @param isExpectComplete
-		 *            Flag indicating the expected return of
-		 *            {@link Job#doJob(JobContext)}.
-		 */
-		public synchronized void executeJob(boolean isExpectExecute,
-				boolean isExpectComplete) {
-
-			// Reset the Job to not be executed
-			AsyncManagedObjectTest.this.work.isJobExecuted = false;
-
-			// Execute the job
-			boolean isComplete = this.job.doJob(new JobContext() {
-
-				private final TeamIdentifier teamIdentifier = MockTeamSource
-						.createTeamIdentifier();
-
-				@Override
-				public long getTime() {
-					return System.currentTimeMillis();
-				}
-
-				@Override
-				public TeamIdentifier getCurrentTeam() {
-					return this.teamIdentifier;
-				}
-
-				@Override
-				public boolean continueExecution() {
-					return true;
-				}
-			});
-
-			// Validate details
-			assertEquals("doJob return incorrect", isExpectComplete, isComplete);
-			assertEquals("Job execution incorrect", isExpectExecute,
-					AsyncManagedObjectTest.this.work.isJobExecuted);
-		}
-
-		/*
-		 * ==================== Team ================================
-		 */
-
-		@Override
-		public synchronized void assignJob(Job job, TeamIdentifier assignerTeam) {
-
-			// Determine if invoke Work assignment
-			if (this.job == null) {
-				this.job = job;
-				return;
-			}
-
-			// Assignment after managed object source change
-			assertEquals("Incorrect job", this.job, job);
-
-			// Indicate Job assigned to this team
-			assertEquals("Only 1 assigning of Job expected", false,
-					this.isAssignedJob);
-			this.isAssignedJob = true;
-
-			// Notify test waiting for OfficeManager activation
-			this.notify();
-		}
-
-		@Override
-		public void startWorking() {
-			// Mock, so do nothing
-		}
-
-		@Override
-		public void stopWorking() {
-			// Mock, so do nothing
-		}
-	}
-
-	/**
-	 * Test {@link Work}.
+	 * Test functionality.
 	 */
 	public class TestWork {
 
 		/**
-		 * Flag indicating if the {@link Job} was executed.
+		 * Flag indicating if the {@link ManagedFunction} was executed.
 		 */
-		public boolean isJobExecuted = false;
+		public boolean isFunctionExecuted = false;
+
+		/**
+		 * Flag indicating if the {@link FlowCallback} was executed.
+		 */
+		public boolean isCallbackExecuted = false;
 
 		/**
 		 * Flag indicating if the {@link Job} will trigger an asynchronous
@@ -256,24 +153,37 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 * 
 		 * @param object
 		 *            Object from the {@link ManagedObject}.
-		 * @param taskContext
-		 *            {@link ManagedFunctionContext}.
+		 * @param flow
+		 *            {@link ReflectiveFlow}.
 		 */
-		public void task(Object object, ManagedFunctionContext<?, ?, ?> taskContext) {
+		public void task(Object object, ReflectiveFlow flow) {
 
-			// Flag that the Job was executed
-			this.isJobExecuted = true;
+			// Flag that executed
+			this.isFunctionExecuted = true;
 
 			// Determine if trigger an asynchronous operation
 			if (this.isTriggerAsynchronousOperation) {
-				// Trigger asynchronous operation and not complete
+				// Trigger asynchronous operation
 				TestManagedObject mo = (TestManagedObject) object;
 				mo.listener.notifyStarted();
-				taskContext.setComplete(false);
 
 				// Clear trigger flag (as triggered)
 				this.isTriggerAsynchronousOperation = false;
+
+				// Undertake flow (will wait until operation complete)
+				flow.doFlow(null, new FlowCallback() {
+					@Override
+					public void run(Throwable escalation) throws Throwable {
+						TestWork.this.isCallbackExecuted = true;
+					}
+				});
 			}
+		}
+
+		/**
+		 * {@link Flow} to be invoked.
+		 */
+		public void flow() {
 		}
 	}
 
@@ -281,8 +191,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 * Test {@link ManagedObjectSource}.
 	 */
 	@TestSource
-	public static class TestManagedObjectSource extends
-			AbstractAsyncManagedObjectSource<None, None> {
+	public static class TestManagedObjectSource extends AbstractAsyncManagedObjectSource<None, None> {
 
 		/**
 		 * {@link ManagedObjectUser}.
@@ -329,8 +238,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 			context.setManagedObjectClass(TestManagedObject.class);
 			context.setObjectClass(Object.class);
 		}
@@ -363,8 +271,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(
-				AsynchronousListener listener) {
+		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
 			this.listener = listener;
 		}
 
