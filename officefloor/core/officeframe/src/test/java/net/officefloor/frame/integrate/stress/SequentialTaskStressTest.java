@@ -17,20 +17,22 @@
  */
 package net.officefloor.frame.integrate.stress;
 
-import net.officefloor.frame.api.execute.Work;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
- * Tests invoking {@link FlowInstigationStrategyEnum#SEQUENTIAL} many times.
+ * Tests invoking sequential {@link Flow} many times.
  * 
  * @author Daniel Sagenschneider
  */
@@ -41,8 +43,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressSequential_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -50,8 +51,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressSequential_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 5, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 5, 100));
 	}
 
 	/**
@@ -59,8 +59,23 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressSequential_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				MockTeamSource.createTeamIdentifier(), 5));
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 5));
+	}
+
+	/**
+	 * Stress tests with the {@link ExecutorCacheTeamSource}.
+	 */
+	@StressTest
+	public void test_StressSequential_ExecutorCachedTeam() throws Exception {
+		this.doTest(new ExecutorCachedTeamSource().createTeam());
+	}
+
+	/**
+	 * Stress tests with the {@link PassiveTeam}.
+	 */
+	@StressTest
+	public void test_StressSequential_PassiveTeam() throws Exception {
+		this.doTest(new PassiveTeam());
 	}
 
 	/**
@@ -76,29 +91,23 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 		this.setVerbose(true);
 
 		// Create the sequential
-		SequentialInvokeTask sequential = new SequentialInvokeTask(
-				SEQUENTIAL_COUNT);
+		SequentialInvokeTask sequential = new SequentialInvokeTask(SEQUENTIAL_COUNT);
 
-		// Register the sequential task
-		ReflectiveFunctionBuilder task = this.constructWork(sequential, "work",
-				"sequential").buildTask("sequential", "TEAM");
-		task.buildParameter();
-		task.buildFlow("sequential", FlowInstigationStrategyEnum.SEQUENTIAL,
-				Integer.class);
+		// Register the sequential function
+		ReflectiveFunctionBuilder function = this.constructFunction(sequential, "sequential", "TEAM");
+		function.buildParameter();
+		function.buildFlow("sequential", Integer.class, false);
 		this.constructTeam("TEAM", team);
 
 		// Run the repeats
-		this.invokeWork("work", new Integer(1), MAX_RUN_TIME);
+		this.invokeFunction("sequential", new Integer(1), MAX_RUN_TIME);
 
 		// Ensure is complete
-		synchronized (sequential) {
-			assertEquals("Did not complete all sequential calls",
-					SEQUENTIAL_COUNT, sequential.sequentialCallCount);
-		}
+		assertEquals("Did not complete all sequential calls", SEQUENTIAL_COUNT, sequential.sequentialCallCount.get());
 	}
 
 	/**
-	 * {@link Work}.
+	 * Functionality for test.
 	 */
 	public class SequentialInvokeTask {
 
@@ -110,7 +119,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 		/**
 		 * Number of sequential calls made.
 		 */
-		public int sequentialCallCount = 0;
+		public AtomicInteger sequentialCallCount = new AtomicInteger(0);
 
 		/**
 		 * Initiate.
@@ -131,24 +140,20 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 		 *            {@link ReflectiveFlow} to invoke the sequential
 		 *            {@link Flow}.
 		 */
-		public synchronized void sequential(Integer callCount,
-				ReflectiveFlow flow) {
+		public void sequential(Integer callCount, ReflectiveFlow flow) {
 
 			// Indicate the number of sequential calls made
-			synchronized (this) {
-				this.sequentialCallCount++;
-			}
+			this.sequentialCallCount.incrementAndGet();
 
 			// Output heap sizes after garbage collection
 			if ((callCount.intValue() % 1000000) == 0) {
-				SequentialTaskStressTest.this.printMessage("Sequential Calls="
-						+ callCount.intValue());
+				SequentialTaskStressTest.this.printMessage("Sequential Calls=" + callCount.intValue());
 			}
 
 			// Determine if enough sequential calls
 			if (callCount.intValue() < this.maxSequentialCalls) {
 				// Make another sequential call
-				flow.doFlow(new Integer(callCount.intValue() + 1));
+				flow.doFlow(new Integer(callCount.intValue() + 1), null);
 			}
 		}
 	}

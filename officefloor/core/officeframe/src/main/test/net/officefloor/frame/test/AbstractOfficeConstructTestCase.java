@@ -249,6 +249,23 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
+	 * Facade method to register a {@link ManagedFunction}.
+	 * 
+	 * @param object
+	 *            {@link Object} containing the {@link Method}.
+	 * @param methodName
+	 *            Name of the {@link Method}.
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @return {@link ReflectiveFunctionBuilder}.
+	 */
+	public ReflectiveFunctionBuilder constructFunction(Object object, String methodName, String teamName) {
+		ReflectiveFunctionBuilder builder = this.constructFunction(object, methodName);
+		builder.getBuilder().setTeam(teamName);
+		return builder;
+	}
+
+	/**
 	 * Constructs the {@link ReflectiveFunctionBuilder} for a static
 	 * {@link Method}.
 	 * 
