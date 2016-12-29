@@ -28,7 +28,7 @@ import net.officefloor.frame.integrate.governance.MockTransactionalAdministrator
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.MockTeamSource;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * <p>
@@ -72,8 +72,8 @@ public class AdministratedGovernanceStressTest extends
 	}
 
 	@Override
-	protected boolean configure(ReflectiveTaskBuilder commitTask,
-			ReflectiveTaskBuilder rollbackTask, ReflectiveTaskBuilder tidyUpTask) {
+	protected boolean configure(ReflectiveFunctionBuilder commitTask,
+			ReflectiveFunctionBuilder rollbackTask, ReflectiveFunctionBuilder tidyUpTask) {
 
 		// Flag to manually administer governance
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();

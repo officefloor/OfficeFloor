@@ -73,6 +73,26 @@ public interface RawOfficeMetaData {
 	Map<String, RawGovernanceMetaData<?, ?>> getGovernanceMetaData();
 
 	/**
+	 * Obtains the {@link ThreadState} {@link RawBoundAdministratorMetaData}
+	 * instances.
+	 * 
+	 * @return {@link ThreadState} {@link RawBoundAdministratorMetaData}
+	 *         instances.
+	 */
+	RawBoundAdministratorMetaData<?, ?>[] getBoundAdministrators();
+
+	/**
+	 * Obtains the scope {@link RawBoundAdministratorMetaData} instances of the
+	 * {@link Office} by their {@link ProcessState} and {@link ThreadState}
+	 * bound names.
+	 * 
+	 * @return Scope {@link RawBoundAdministratorMetaData} instances of the
+	 *         {@link Office} by the {@link ProcessState} and
+	 *         {@link ThreadState} bound names.
+	 */
+	Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrators();
+
+	/**
 	 * Obtains the {@link RawManagedObjectMetaData} by their {@link Office}
 	 * registered names.
 	 * 
@@ -109,35 +129,6 @@ public interface RawOfficeMetaData {
 	 *         {@link ThreadState} bound names.
 	 */
 	Map<String, RawBoundManagedObjectMetaData> getOfficeScopeManagedObjects();
-
-	/**
-	 * Obtains the {@link ProcessState} {@link RawBoundAdministratorMetaData}
-	 * instances.
-	 * 
-	 * @return {@link ProcessState} {@link RawBoundAdministratorMetaData}
-	 *         instances.
-	 */
-	RawBoundAdministratorMetaData<?, ?>[] getProcessBoundAdministrators();
-
-	/**
-	 * Obtains the {@link ThreadState} {@link RawBoundAdministratorMetaData}
-	 * instances.
-	 * 
-	 * @return {@link ThreadState} {@link RawBoundAdministratorMetaData}
-	 *         instances.
-	 */
-	RawBoundAdministratorMetaData<?, ?>[] getThreadBoundAdministrators();
-
-	/**
-	 * Obtains the scope {@link RawBoundAdministratorMetaData} instances of the
-	 * {@link Office} by their {@link ProcessState} and {@link ThreadState}
-	 * bound names.
-	 * 
-	 * @return Scope {@link RawBoundAdministratorMetaData} instances of the
-	 *         {@link Office} by the {@link ProcessState} and
-	 *         {@link ThreadState} bound names.
-	 */
-	Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrators();
 
 	/**
 	 * Obtains the {@link OfficeMetaData}.

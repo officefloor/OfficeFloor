@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Stress tests the {@link ProcessContextTeam}.
@@ -69,7 +69,7 @@ public class ProcessContextTeamStressTest extends
 
 		// Construct the static work
 		StaticWork staticWork = new StaticWork();
-		ReflectiveTaskBuilder staticTask = this.constructWork(staticWork,
+		ReflectiveFunctionBuilder staticTask = this.constructWork(staticWork,
 				"STATIC_WORK", "staticTask").buildTask("staticTask",
 				"STATIC_TEAM");
 		staticTask.buildParameter();
@@ -78,7 +78,7 @@ public class ProcessContextTeamStressTest extends
 
 		// Construct the context work
 		ContextWork contextWork = new ContextWork();
-		ReflectiveTaskBuilder contextTask = this.constructWork(contextWork,
+		ReflectiveFunctionBuilder contextTask = this.constructWork(contextWork,
 				"CONTEXT_WORK", null).buildTask("contextTask", "CONTEXT_TEAM");
 		contextTask.buildParameter();
 		contextTask.buildFlow("STATIC_WORK", "staticTask",

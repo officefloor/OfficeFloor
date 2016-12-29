@@ -41,8 +41,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Stress tests using Input {@link ManagedObject} instances.
@@ -120,9 +120,9 @@ public class InputManagedObjectStressTest extends
 
 		// Create the task for processing input managed object
 		InputWork work = new InputWork(dependency);
-		ReflectiveWorkBuilder workBuilder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, "WORK",
 				"task");
-		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("task",
+		ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask("task",
 				"TEAM");
 		taskBuilder.buildObject("INPUT_MO");
 
@@ -191,7 +191,7 @@ public class InputManagedObjectStressTest extends
 		 * @param context
 		 *            {@link ManagedFunctionContext}.
 		 */
-		public void run(ManagedFunctionContext<ReflectiveWorkBuilder, None, None> context) {
+		public void run(ManagedFunctionContext<ReflectiveFunctionBuilder, None, None> context) {
 
 			// Trigger processing on first invocation
 			if (!this.isTriggeredProcessing) {

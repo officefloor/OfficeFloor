@@ -23,7 +23,7 @@ import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
  * Tests {@link Work} being invoked from the {@link WorkManager}.
@@ -42,7 +42,7 @@ public class WorkTest extends AbstractOfficeConstructTestCase {
 
 		// Register the work
 		final String WORK_NAME = "WORK";
-		ReflectiveWorkBuilder workBuilder = this.constructWork(work, WORK_NAME,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, WORK_NAME,
 				"taskOne");
 		workBuilder.buildTask("taskOne", "TEAM");
 
@@ -67,7 +67,7 @@ public class WorkTest extends AbstractOfficeConstructTestCase {
 
 		// Register the work
 		final String WORK_NAME = "WORK";
-		ReflectiveWorkBuilder workBuilder = this.constructWork(work, WORK_NAME,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, WORK_NAME,
 				null);
 		workBuilder.buildTask("taskOne", "TEAM");
 

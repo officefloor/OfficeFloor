@@ -28,8 +28,8 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Stress tests invoking a parallel {@link ManagedFunction}.
@@ -86,13 +86,13 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 				TRIGGER_COUNT);
 
 		// Register the parallel tasks
-		ReflectiveWorkBuilder work = this.constructWork(functionality, "work",
+		ReflectiveFunctionBuilder work = this.constructWork(functionality, "work",
 				"trigger");
-		ReflectiveTaskBuilder trigger = work.buildTask("trigger", "TEAM");
+		ReflectiveFunctionBuilder trigger = work.buildTask("trigger", "TEAM");
 		trigger.buildTaskContext();
 		trigger.buildFlow("parallel", FlowInstigationStrategyEnum.PARALLEL,
 				Integer.class);
-		ReflectiveTaskBuilder parallel = work.buildTask("parallel", "TEAM");
+		ReflectiveFunctionBuilder parallel = work.buildTask("parallel", "TEAM");
 		parallel.buildParameter();
 		parallel.buildFlow("parallel", FlowInstigationStrategyEnum.PARALLEL,
 				Integer.class);

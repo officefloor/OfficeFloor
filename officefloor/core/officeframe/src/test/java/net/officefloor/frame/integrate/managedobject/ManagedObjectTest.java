@@ -37,8 +37,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests construction scenarios of a {@link ManagedObject}.
@@ -331,17 +331,17 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		// Create and register the work
 		this.work = new TestWork();
-		ReflectiveWorkBuilder workBuilder = this.constructWork(this.work,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(this.work,
 				"WORK", (isManagedObjectInside ? INVOKED_TASK : null));
 		if (isManagedObjectOutside) {
 			// Provide the externally executed task from managed object
-			ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask(
+			ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask(
 					EXTERNAL_EVENT_TASK, "TEAM");
 			taskBuilder.buildParameter();
 		}
 		if (isManagedObjectInside) {
 			// Provide the invoked task dependent on managed object
-			ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask(
+			ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask(
 					INVOKED_TASK, "TEAM");
 			taskBuilder.buildParameter();
 			this.getOfficeBuilder().registerManagedObjectSource("OFFICE_MO",

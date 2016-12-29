@@ -34,8 +34,8 @@ import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Ensures the external management API of {@link OfficeFloor} responses
@@ -89,9 +89,9 @@ public class OfficeFloorExternalManagementTest extends
 
 		// Construct the Work
 		this.mockWork = new MockWork();
-		ReflectiveWorkBuilder workBuilder = this.constructWork(this.mockWork,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(this.mockWork,
 				this.workName, "initialTask");
-		ReflectiveTaskBuilder initialTask = workBuilder.buildTask(
+		ReflectiveFunctionBuilder initialTask = workBuilder.buildTask(
 				"initialTask", TEAM_NAME);
 		initialTask.buildParameter();
 		initialTask.getBuilder().setDifferentiator(this.differentiator);

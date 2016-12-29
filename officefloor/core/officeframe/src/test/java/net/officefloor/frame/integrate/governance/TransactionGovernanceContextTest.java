@@ -36,8 +36,8 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Typical use of {@link Governance} is for transaction management. This test to
@@ -88,12 +88,12 @@ public class TransactionGovernanceContextTest extends
 	/**
 	 * {@link ManagedFunction} one.
 	 */
-	private ReflectiveTaskBuilder taskOne;
+	private ReflectiveFunctionBuilder taskOne;
 
 	/**
 	 * {@link ManagedFunction} two.
 	 */
-	private ReflectiveTaskBuilder taskTwo;
+	private ReflectiveFunctionBuilder taskTwo;
 
 	/**
 	 * Flags for {@link ManagedFunction} one to be constructed under {@link Governance}.
@@ -386,7 +386,7 @@ public class TransactionGovernanceContextTest extends
 	protected void constructRawTasks() throws Exception {
 
 		// Construct the work and tasks (with basic content)
-		ReflectiveWorkBuilder workBuilder = this.constructWork(this.work,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(this.work,
 				WORK_NAME, "taskOne");
 
 		// Construct task one

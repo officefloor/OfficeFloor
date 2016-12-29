@@ -29,8 +29,8 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Ensure dynamically invoking {@link ManagedFunction} instances is stress tested.
@@ -88,12 +88,12 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 		// 1) reset thread state for next dynamic invocation
 		// 2) not have too many linked JobNodes causing OOM
 		DynamicInvokeFlowWork work = new DynamicInvokeFlowWork(MAX_COUNT);
-		ReflectiveWorkBuilder builder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
 				"initialTask");
-		ReflectiveTaskBuilder initialTask = builder.buildTask("initialTask",
+		ReflectiveFunctionBuilder initialTask = builder.buildTask("initialTask",
 				"TEAM");
 		initialTask.buildTaskContext();
-		ReflectiveTaskBuilder dynamicTask = builder.buildTask("dynamicTask",
+		ReflectiveFunctionBuilder dynamicTask = builder.buildTask("dynamicTask",
 				"TEAM");
 		dynamicTask.buildFlow("initialTask",
 				FlowInstigationStrategyEnum.ASYNCHRONOUS, null);

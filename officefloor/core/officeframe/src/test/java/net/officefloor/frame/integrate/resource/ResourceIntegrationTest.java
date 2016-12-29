@@ -32,8 +32,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Ensure able to override {@link ClassLoader} and add {@link ResourceSource}
@@ -54,9 +54,9 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 
 		// Construct work to obtain the Class Loader
 		ClassLoaderWork classLoaderWork = new ClassLoaderWork();
-		ReflectiveWorkBuilder work = this.constructWork(classLoaderWork,
+		ReflectiveFunctionBuilder work = this.constructWork(classLoaderWork,
 				"WORK", "validateClassLoader");
-		ReflectiveTaskBuilder task = work.buildTask("validateClassLoader",
+		ReflectiveFunctionBuilder task = work.buildTask("validateClassLoader",
 				"TEAM");
 		task.buildObject("MO", ManagedObjectScope.PROCESS);
 		this.constructTeam("TEAM", new PassiveTeam());
@@ -85,9 +85,9 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 
 		// Construct work to obtain the Class Loader
 		ClassLoaderWork classLoaderWork = new ClassLoaderWork();
-		ReflectiveWorkBuilder work = this.constructWork(classLoaderWork,
+		ReflectiveFunctionBuilder work = this.constructWork(classLoaderWork,
 				"WORK", "validateClassLoader");
-		ReflectiveTaskBuilder task = work.buildTask("validateClassLoader",
+		ReflectiveFunctionBuilder task = work.buildTask("validateClassLoader",
 				"TEAM");
 		task.buildObject("MO", ManagedObjectScope.PROCESS);
 		this.constructTeam("TEAM", new PassiveTeam());
@@ -179,9 +179,9 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 
 		// Construct work to obtain the Resource
 		ResourceWork resourceWork = new ResourceWork();
-		ReflectiveWorkBuilder work = this.constructWork(resourceWork, "WORK",
+		ReflectiveFunctionBuilder work = this.constructWork(resourceWork, "WORK",
 				"validateResource");
-		ReflectiveTaskBuilder task = work.buildTask("validateResource", "TEAM");
+		ReflectiveFunctionBuilder task = work.buildTask("validateResource", "TEAM");
 		task.buildObject("MO", ManagedObjectScope.PROCESS);
 		this.constructTeam("TEAM", new PassiveTeam());
 

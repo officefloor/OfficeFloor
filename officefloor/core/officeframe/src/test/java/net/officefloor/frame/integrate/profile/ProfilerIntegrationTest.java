@@ -27,8 +27,8 @@ import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests profiling.
@@ -45,9 +45,9 @@ public class ProfilerIntegrationTest extends AbstractOfficeConstructTestCase {
 		// Configure
 		this.constructTeam("TEAM", new PassiveTeam());
 		ProfiledWork work = new ProfiledWork();
-		ReflectiveWorkBuilder builder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
 				"taskOne");
-		ReflectiveTaskBuilder taskOne = builder.buildTask("taskOne", "TEAM");
+		ReflectiveFunctionBuilder taskOne = builder.buildTask("taskOne", "TEAM");
 		taskOne.setNextTaskInFlow("taskTwo");
 		builder.buildTask("taskTwo", "TEAM");
 

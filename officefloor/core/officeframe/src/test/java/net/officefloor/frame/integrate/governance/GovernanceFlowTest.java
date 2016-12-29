@@ -36,8 +36,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests flow for {@link Governance}.
@@ -152,11 +152,11 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 
 		// Configure the Work
 		TransactionalWork work = new TransactionalWork();
-		ReflectiveWorkBuilder builder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
 				"doTask");
 
 		// Configure the Task
-		ReflectiveTaskBuilder task = builder.buildTask("doTask", TEAM_TASK);
+		ReflectiveFunctionBuilder task = builder.buildTask("doTask", TEAM_TASK);
 		task.getBuilder().linkPreTaskAdministration("ADMIN", "BEGIN");
 		if (this.isCommit) {
 			task.getBuilder().linkPostTaskAdministration("ADMIN", "COMMIT");
@@ -168,21 +168,21 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 				ManagedObjectScope.PROCESS);
 
 		// Configure the governance flow tasks
-		ReflectiveTaskBuilder beginTask = builder.buildTask("flowBegin",
+		ReflectiveFunctionBuilder beginTask = builder.buildTask("flowBegin",
 				TEAM_TASK);
 		beginTask.buildObject("MO");
 		beginTask.buildParameter();
-		ReflectiveTaskBuilder commitTask = builder.buildTask("flowCommit",
+		ReflectiveFunctionBuilder commitTask = builder.buildTask("flowCommit",
 				TEAM_TASK);
 		commitTask.buildObject("MO");
 		commitTask.buildParameter();
-		ReflectiveTaskBuilder rollbackTask = builder.buildTask("flowRollback",
+		ReflectiveFunctionBuilder rollbackTask = builder.buildTask("flowRollback",
 				TEAM_TASK);
 		rollbackTask.buildObject("MO");
 		rollbackTask.buildParameter();
 
 		// Configure handling test failures
-		ReflectiveTaskBuilder handleException = builder.buildTask(
+		ReflectiveFunctionBuilder handleException = builder.buildTask(
 				"handleException", TEAM_TASK);
 		handleException.buildParameter();
 		officeBuilder.addEscalation(Throwable.class, "WORK", "handleException");

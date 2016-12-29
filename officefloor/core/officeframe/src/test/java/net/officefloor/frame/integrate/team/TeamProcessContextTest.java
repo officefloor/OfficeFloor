@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
  * Ensures that {@link ProcessContextListener} provides appropriate
@@ -65,7 +65,7 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 
 		// Register the work
 		final String WORK_NAME = "WORK";
-		ReflectiveWorkBuilder workBuilder = this.constructWork(work, WORK_NAME,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, WORK_NAME,
 				"task");
 		workBuilder.buildTask("task", "TEAM");
 

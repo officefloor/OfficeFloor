@@ -101,7 +101,8 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 		ManagedFunction<O, F> function = functionMetaData.getManagedFunctionFactory().createManagedFunction();
 
 		// Execute the managed function
-		return function.execute(new ManagedFunctionContextToken(context));
+		ManagedFunctionContextToken token = new ManagedFunctionContextToken(context);
+		return function.execute(token);
 	}
 
 	/**

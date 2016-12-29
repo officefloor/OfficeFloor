@@ -25,8 +25,8 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests parallel invocations.
@@ -71,14 +71,14 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 
 		// Configure
 		this.constructTeam("team", team);
-		ReflectiveWorkBuilder workBuilder = this.constructWork(
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(
 				new ParallelWorkObject("TestParameter"), "work", "first");
-		ReflectiveTaskBuilder firstTaskBuilder = workBuilder.buildTask("first",
+		ReflectiveFunctionBuilder firstTaskBuilder = workBuilder.buildTask("first",
 				"team");
 		firstTaskBuilder.buildFlow("parallel",
 				FlowInstigationStrategyEnum.PARALLEL, Object.class);
 		firstTaskBuilder.setNextTaskInFlow("second");
-		ReflectiveTaskBuilder parallelTaskBuilder = workBuilder.buildTask(
+		ReflectiveFunctionBuilder parallelTaskBuilder = workBuilder.buildTask(
 				"parallel", "team");
 		parallelTaskBuilder.buildParameter();
 		workBuilder.buildTask("second", "team");

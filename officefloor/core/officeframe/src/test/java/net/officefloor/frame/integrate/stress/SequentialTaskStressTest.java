@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests invoking {@link FlowInstigationStrategyEnum#SEQUENTIAL} many times.
@@ -80,7 +80,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 				SEQUENTIAL_COUNT);
 
 		// Register the sequential task
-		ReflectiveTaskBuilder task = this.constructWork(sequential, "work",
+		ReflectiveFunctionBuilder task = this.constructWork(sequential, "work",
 				"sequential").buildTask("sequential", "TEAM");
 		task.buildParameter();
 		task.buildFlow("sequential", FlowInstigationStrategyEnum.SEQUENTIAL,

@@ -36,8 +36,8 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests loading the {@link ManagedObject} asynchronously.
@@ -70,9 +70,9 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the work to execute
 		this.work = new TestWork();
-		ReflectiveWorkBuilder workBuilder = this.constructWork(this.work,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(this.work,
 				"WORK", "task");
-		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("task",
+		ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask("task",
 				"TEAM");
 		taskBuilder.buildObject("MO", ManagedObjectScope.WORK);
 		taskBuilder.buildTaskContext();

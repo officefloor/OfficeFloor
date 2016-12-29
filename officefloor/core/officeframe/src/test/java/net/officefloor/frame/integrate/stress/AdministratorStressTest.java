@@ -44,8 +44,8 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests the {@link Administrator}.
@@ -131,11 +131,11 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		// Create the administered work
 		AdministeredWork work = new AdministeredWork(PRE_TASK_VALUE,
 				POST_TASK_VALUE, ADMIN_TASK_COUNT);
-		ReflectiveWorkBuilder workBuilder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, "WORK",
 				"setupTask");
 
 		// Create the setup task
-		ReflectiveTaskBuilder setupTask = workBuilder.buildTask("setupTask",
+		ReflectiveFunctionBuilder setupTask = workBuilder.buildTask("setupTask",
 				"TEAM");
 		setupTask.buildFlow("administeredTask",
 				FlowInstigationStrategyEnum.PARALLEL, null);
@@ -143,7 +143,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		setupTask.buildObject("MO");
 
 		// Create the administered task
-		ReflectiveTaskBuilder administeredTask = workBuilder.buildTask(
+		ReflectiveFunctionBuilder administeredTask = workBuilder.buildTask(
 				"administeredTask", "TEAM");
 		administeredTask.buildObject("MO");
 		ManagedFunctionBuilder<?, ?, ?> adminTaskBuilder = administeredTask.getBuilder();

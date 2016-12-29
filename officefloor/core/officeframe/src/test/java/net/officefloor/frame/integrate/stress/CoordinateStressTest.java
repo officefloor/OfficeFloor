@@ -44,8 +44,8 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Stress tests coordination of {@link ManagedObject} instances.
@@ -122,14 +122,14 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the work
 		CoordinateWork work = new CoordinateWork(TASK_INVOKE_COUNT);
-		ReflectiveWorkBuilder workBuilder = this.constructWork(work,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(work,
 				"COORDINATE_WORK", "task");
 		workBuilder.getBuilder()
 				.addWorkManagedObject("DIRECT_USE", "DIRECT_USE")
 				.mapDependency(0, "DEPENDENCY");
 		workBuilder.getBuilder().addWorkManagedObject("DEPENDENCY",
 				"DEPENDENCY");
-		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("task",
+		ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask("task",
 				"TEAM");
 		taskBuilder.buildObject("DIRECT_USE");
 		taskBuilder.buildFlow("task", FlowInstigationStrategyEnum.SEQUENTIAL,

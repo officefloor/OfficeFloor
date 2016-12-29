@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
  * Tests coordinating of {@link ManagedObject}.
@@ -80,7 +80,7 @@ public class CoordinateManagedObjectTest extends
 		officeBuilder.addProcessManagedObject("processTwo", "processTwo");
 
 		// Construct work to obtain the coordinating managed object
-		ReflectiveWorkBuilder workBuilder = this.constructWork(
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(
 				new CoordinatingWork(), "w", "task");
 		workBuilder.getBuilder().addWorkManagedObject("workOne", "workOne");
 		workBuilder.getBuilder().addWorkManagedObject("workTwo", "workTwo");

@@ -29,8 +29,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Ensure able to invoke flow dynamically by {@link Work} and {@link ManagedFunction} name.
@@ -47,12 +47,12 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		// Configure
 		this.constructTeam("TEAM", new PassiveTeam());
 		DynamicInvokeFlowWork work = new DynamicInvokeFlowWork();
-		ReflectiveWorkBuilder builder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
 				"initialTask");
-		ReflectiveTaskBuilder initialTask = builder.buildTask("initialTask",
+		ReflectiveFunctionBuilder initialTask = builder.buildTask("initialTask",
 				"TEAM");
 		initialTask.buildTaskContext();
-		ReflectiveTaskBuilder dynamicTask = builder.buildTask("dynamicTask",
+		ReflectiveFunctionBuilder dynamicTask = builder.buildTask("dynamicTask",
 				"TEAM");
 		dynamicTask.buildParameter();
 
@@ -115,13 +115,13 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		this.constructManagedObject("MO", new MaintainStateManagedObject(),
 				this.getOfficeName());
 		MaintainStateWork work = new MaintainStateWork("KEY", CONTEXT_VALUE);
-		ReflectiveWorkBuilder builder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
 				"initialTask");
-		ReflectiveTaskBuilder initialTask = builder.buildTask("initialTask",
+		ReflectiveFunctionBuilder initialTask = builder.buildTask("initialTask",
 				"TEAM");
 		initialTask.buildTaskContext();
 		initialTask.buildObject("MO", ManagedObjectScope.THREAD);
-		ReflectiveTaskBuilder dynamicTask = builder.buildTask("dynamicTask",
+		ReflectiveFunctionBuilder dynamicTask = builder.buildTask("dynamicTask",
 				"TEAM");
 		dynamicTask.buildObject("MO");
 

@@ -28,6 +28,7 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.util.TeamSourceStandAlone;
 
 /**
  * {@link TeamSource} based on the {@link Executors} cached thread pool.
@@ -40,6 +41,24 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	 * Name of property to obtain the {@link Thread} priority.
 	 */
 	public static final String PROPERTY_THREAD_PRIORITY = "thread.priority";
+
+	/**
+	 * Convenience method to create a {@link Team} from the implementation of
+	 * this {@link AbstractExecutorTeamSource}.
+	 * 
+	 * @return {@link Team}.
+	 * @throws Exception
+	 *             If fails to load {@link Team}.
+	 */
+	public Team createTeam(String... parameterNameValues) throws Exception {
+		TeamSourceStandAlone standAlone = new TeamSourceStandAlone();
+		for (int i = 0; i < parameterNameValues.length; i += 2) {
+			String name = parameterNameValues[i];
+			String value = parameterNameValues[i + 1];
+			standAlone.addProperty(name, value);
+		}
+		return standAlone.loadTeam(this.getClass());
+	}
 
 	/**
 	 * Obtains the factory to create {@link ExecutorService}.
@@ -198,7 +217,7 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		 */
 
 		@Override
-		public synchronized void startWorking() {
+		public void startWorking() {
 			this.servicer = this.factory.createExecutorService();
 		}
 
@@ -208,7 +227,7 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		}
 
 		@Override
-		public synchronized void stopWorking() {
+		public void stopWorking() {
 			// Shutdown servicer
 			this.servicer.shutdown();
 			this.servicer = null;

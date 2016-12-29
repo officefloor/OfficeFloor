@@ -35,8 +35,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests the clean up of {@link ManagedObject} instances.
@@ -88,9 +88,9 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", PassiveTeamSource.class);
 
 		// Construct the work
-		ReflectiveWorkBuilder workBuilder = this.constructWork(new MockWork(),
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(new MockWork(),
 				"WORK", "task");
-		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("task",
+		ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask("task",
 				"TEAM");
 		taskBuilder.buildObject("MO_A");
 		taskBuilder.buildObject("MO_B");

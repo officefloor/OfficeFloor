@@ -36,7 +36,7 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Stress tests the {@link NameAwareManagedObject}.
@@ -97,7 +97,7 @@ public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
 		// Register the name aware task
 		NameAwareManagedObjectTask nameAwareMoTask = new NameAwareManagedObjectTask(
 				SEQUENTIAL_COUNT, BOUND_NAME);
-		ReflectiveTaskBuilder task = this.constructWork(nameAwareMoTask,
+		ReflectiveFunctionBuilder task = this.constructWork(nameAwareMoTask,
 				"work", "nameAware").buildTask("nameAware", "TEAM");
 		task.buildParameter();
 		task.buildFlow("nameAware", FlowInstigationStrategyEnum.SEQUENTIAL,

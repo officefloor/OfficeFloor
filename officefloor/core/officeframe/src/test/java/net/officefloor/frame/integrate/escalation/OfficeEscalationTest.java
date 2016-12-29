@@ -23,8 +23,8 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests handling escalations.
@@ -51,15 +51,15 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the office
 		this.constructTeam("team", new PassiveTeam());
-		ReflectiveWorkBuilder workBuilder = this.constructWork(workObject,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(workObject,
 				"work", "causeEscalation");
-		ReflectiveTaskBuilder causeEscalation = workBuilder.buildTask(
+		ReflectiveFunctionBuilder causeEscalation = workBuilder.buildTask(
 				"causeEscalation", "team");
 		causeEscalation.setNextTaskInFlow("nextTask");
 		causeEscalation.getBuilder().addEscalation(
 				workObject.failure.getClass(), "handleEscalation");
 		workBuilder.buildTask("nextTask", "team");
-		ReflectiveTaskBuilder escalationHandler = workBuilder.buildTask(
+		ReflectiveFunctionBuilder escalationHandler = workBuilder.buildTask(
 				"handleEscalation", "team");
 		escalationHandler.buildParameter();
 
@@ -91,16 +91,16 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the office
 		this.constructTeam("team", new PassiveTeam());
-		ReflectiveWorkBuilder workBuilder = this.constructWork(workObject,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(workObject,
 				"work", "parallelOwner");
-		ReflectiveTaskBuilder parallelOwner = workBuilder.buildTask(
+		ReflectiveFunctionBuilder parallelOwner = workBuilder.buildTask(
 				"parallelOwner", "team");
 		parallelOwner.buildFlow("causeEscalation",
 				FlowInstigationStrategyEnum.PARALLEL, null);
 		parallelOwner.getBuilder().addEscalation(workObject.failure.getClass(),
 				"handleEscalation");
 		workBuilder.buildTask("causeEscalation", "team");
-		ReflectiveTaskBuilder escalationHandler = workBuilder.buildTask(
+		ReflectiveFunctionBuilder escalationHandler = workBuilder.buildTask(
 				"handleEscalation", "team");
 		escalationHandler.buildParameter();
 

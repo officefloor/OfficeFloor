@@ -110,7 +110,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 			do {
 				try {
 					// Ensure appropriate thread state
-					if (nextFunction.getThreadState() != this) {
+					if (nextFunction.getThreadState() != threadState) {
 						// Other thread state to undertake function loop
 						return nextFunction;
 					}

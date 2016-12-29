@@ -22,7 +22,7 @@ import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.test.MockTeamSource;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Stress test for managed {@link Governance}.
@@ -63,8 +63,8 @@ public class ManagedGovernanceStressTest extends
 	}
 
 	@Override
-	protected boolean configure(ReflectiveTaskBuilder commitTask,
-			ReflectiveTaskBuilder rollbackTask, ReflectiveTaskBuilder tidyUpTask) {
+	protected boolean configure(ReflectiveFunctionBuilder commitTask,
+			ReflectiveFunctionBuilder rollbackTask, ReflectiveFunctionBuilder tidyUpTask) {
 
 		// Configure governance on tasks
 		commitTask.getBuilder().addGovernance(GOVERNANCE_NAME);

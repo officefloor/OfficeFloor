@@ -30,8 +30,8 @@ import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Validates that escalations of tasks is appropriately managed by the
@@ -51,7 +51,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		RuntimeException escalation = new RuntimeException("Escalation");
 
 		// Construct work
-		ReflectiveWorkBuilder workBuilder = this.constructWork(
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(
 				new EscalationHandlerWork(escalation), "WORK", "task");
 		workBuilder.buildTask("task", "TEAM").buildParameter();
 		this.constructTeam("TEAM", new PassiveTeam());
@@ -89,10 +89,10 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 
 		// Construct work
 		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
-		ReflectiveWorkBuilder workBuilder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, "WORK",
 				"task");
 		workBuilder.buildTask("task", "TEAM").buildParameter();
-		ReflectiveTaskBuilder officeEscalation = workBuilder.buildTask(
+		ReflectiveFunctionBuilder officeEscalation = workBuilder.buildTask(
 				"officeEscalation", "TEAM");
 		officeEscalation.buildParameter();
 		this.constructTeam("TEAM", new PassiveTeam());
@@ -132,7 +132,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the work
 		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
-		ReflectiveWorkBuilder workBuilder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, "WORK",
 				"task");
 		workBuilder.buildTask("task", "TEAM").buildParameter();
 		this.constructTeam("TEAM", new PassiveTeam());
@@ -193,7 +193,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the work
 		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
-		ReflectiveWorkBuilder workBuilder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, "WORK",
 				"task");
 		workBuilder.buildTask("task", "TEAM").buildParameter();
 		this.constructTeam("TEAM", new PassiveTeam());

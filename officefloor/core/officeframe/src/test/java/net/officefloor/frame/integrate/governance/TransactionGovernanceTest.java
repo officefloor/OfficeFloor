@@ -34,8 +34,8 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Typical use of {@link Governance} is for transaction management. This test to
@@ -165,11 +165,11 @@ public class TransactionGovernanceTest extends AbstractGovernanceTestCase {
 
 		// Configure the Work
 		TransactionalWork work = new TransactionalWork();
-		ReflectiveWorkBuilder builder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
 				"doTask");
 
 		// Configure the Task
-		ReflectiveTaskBuilder task = builder.buildTask("doTask", TEAM_TASK);
+		ReflectiveFunctionBuilder task = builder.buildTask("doTask", TEAM_TASK);
 		task.getBuilder().linkPreTaskAdministration("ADMIN", "BEGIN");
 		if (this.isCommit) {
 			task.getBuilder().linkPostTaskAdministration("ADMIN", "COMMIT");
@@ -181,7 +181,7 @@ public class TransactionGovernanceTest extends AbstractGovernanceTestCase {
 				ManagedObjectScope.PROCESS);
 
 		// Configure the Escalation
-		ReflectiveTaskBuilder escalation = builder.buildTask(
+		ReflectiveFunctionBuilder escalation = builder.buildTask(
 				"handleEscalation", TEAM_TASK);
 		escalation.buildParameter();
 

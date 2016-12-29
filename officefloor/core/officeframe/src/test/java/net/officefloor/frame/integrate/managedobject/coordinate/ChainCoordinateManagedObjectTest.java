@@ -38,8 +38,8 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Ensure can have multiple {@link CoordinatingManagedObject} dependencies that
@@ -106,9 +106,9 @@ public class ChainCoordinateManagedObjectTest extends
 
 		// Construct the work
 		ChainCoordinatingWork coordinate = new ChainCoordinatingWork();
-		ReflectiveWorkBuilder work = this.constructWork(coordinate,
+		ReflectiveFunctionBuilder work = this.constructWork(coordinate,
 				"COORDINATE", "service");
-		ReflectiveTaskBuilder task = work.buildTask("service", "TEAM");
+		ReflectiveFunctionBuilder task = work.buildTask("service", "TEAM");
 		task.buildObject(identifier);
 
 		// Construct the team to service

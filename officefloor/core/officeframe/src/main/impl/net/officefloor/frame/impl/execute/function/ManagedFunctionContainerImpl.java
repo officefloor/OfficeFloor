@@ -358,8 +358,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		case EXECUTE_FUNCTION:
 
 			// Execute the managed function
-			this.nextManagedFunctionParameter = this.managedFunctionLogic
-					.execute(new ManagedFunctionLogicContextImpl());
+			ManagedFunctionLogicContextImpl context = new ManagedFunctionLogicContextImpl();
+			this.nextManagedFunctionParameter = this.managedFunctionLogic.execute(context);
 
 			// Function executed, so now await flow completions
 			this.containerState = ManagedFunctionState.AWAIT_FLOW_COMPLETIONS;
@@ -422,15 +422,9 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				return Promise.then(completeFunction, this);
 			}
 
-			// Obtain next function to execute
-			FunctionState nextFunction = this.getNextFunctionToExecute();
-			if (nextFunction != null) {
-				return nextFunction;
-			}
-
 		case COMPLETED:
-			// Now complete, so nothing further
-			return null;
+			// Now complete, so undertake next function
+			return this.getNextFunctionToExecute();
 
 		case FAILED:
 			throw new IllegalStateException("Should not attempt to execute "
@@ -773,7 +767,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				}
 
 				// Complete this function
-				cleanUpFunctions = Promise.then(cleanUpFunctions, container.flow.managedFunctionComplete(this));
+				cleanUpFunctions = Promise.then(cleanUpFunctions, container.flow.managedFunctionComplete(container));
 
 				// Function complete
 				return Promise.then(cleanUpFunctions, new ManagedFunctionOperation() {

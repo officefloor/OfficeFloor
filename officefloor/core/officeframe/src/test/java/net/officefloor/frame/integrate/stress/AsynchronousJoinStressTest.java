@@ -29,8 +29,8 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests invoking asynchronous {@link Flow} instances and joining on the
@@ -92,18 +92,18 @@ public class AsynchronousJoinStressTest extends AbstractOfficeConstructTestCase 
 		// Construct the work
 		Tasks tasks = new Tasks(MAX_ASYNCHRONOUS_FLOWS, JOIN_TIME,
 				MAX_ITERATIONS);
-		ReflectiveWorkBuilder work = this.constructWork(tasks, "WORK",
+		ReflectiveFunctionBuilder work = this.constructWork(tasks, "WORK",
 				"invokeAndJoin");
 
 		// Construct the invokeAndJoin task
-		ReflectiveTaskBuilder invokeAndJoin = work.buildTask("invokeAndJoin",
+		ReflectiveFunctionBuilder invokeAndJoin = work.buildTask("invokeAndJoin",
 				"TEAM");
 		invokeAndJoin.buildTaskContext();
 		invokeAndJoin.buildFlow("asynchronousTask",
 				FlowInstigationStrategyEnum.ASYNCHRONOUS, null);
 
 		// Construct the asynchronousTask task
-		ReflectiveTaskBuilder asynchronousTask = work.buildTask(
+		ReflectiveFunctionBuilder asynchronousTask = work.buildTask(
 				"asynchronousTask", "TEAM");
 		asynchronousTask.buildTaskContext();
 

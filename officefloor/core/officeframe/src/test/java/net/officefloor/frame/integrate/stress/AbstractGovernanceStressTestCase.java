@@ -44,8 +44,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Abstract {@link Governance} stress test.
@@ -87,8 +87,8 @@ public abstract class AbstractGovernanceStressTestCase extends
 	 *            Tidy up {@link ManagedFunction}.
 	 * @return <code>true</code> if managed {@link Governance}.
 	 */
-	protected abstract boolean configure(ReflectiveTaskBuilder commitTask,
-			ReflectiveTaskBuilder rollbackTask, ReflectiveTaskBuilder tidyUpTask);
+	protected abstract boolean configure(ReflectiveFunctionBuilder commitTask,
+			ReflectiveFunctionBuilder rollbackTask, ReflectiveFunctionBuilder tidyUpTask);
 
 	/**
 	 * Failure of testing.
@@ -119,30 +119,30 @@ public abstract class AbstractGovernanceStressTestCase extends
 
 		// Create and register the work and tasks
 		MockWork workObject = new MockWork();
-		ReflectiveWorkBuilder work = this.constructWork(workObject, "WORK",
+		ReflectiveFunctionBuilder work = this.constructWork(workObject, "WORK",
 				"setupTask");
 
 		// Build tasks
-		ReflectiveTaskBuilder setupTask = work
+		ReflectiveFunctionBuilder setupTask = work
 				.buildTask("setupTask", TEAM_NAME);
 		setupTask.buildObject("MO");
 		setupTask.setNextTaskInFlow("completeTask");
-		ReflectiveTaskBuilder completeTask = work.buildTask("completeTask",
+		ReflectiveFunctionBuilder completeTask = work.buildTask("completeTask",
 				TEAM_NAME);
 		completeTask.buildObject("MO");
 
 		// Build the commit task
-		ReflectiveTaskBuilder commitTask = work.buildTask("doCommitTask",
+		ReflectiveFunctionBuilder commitTask = work.buildTask("doCommitTask",
 				TEAM_NAME);
 		commitTask.buildObject("MO");
 
 		// Build the rollback task
-		ReflectiveTaskBuilder rollbackTask = work.buildTask("doRollbackTask",
+		ReflectiveFunctionBuilder rollbackTask = work.buildTask("doRollbackTask",
 				TEAM_NAME);
 		rollbackTask.buildObject("MO");
 
 		// Build the tidy up task
-		ReflectiveTaskBuilder tidyUpTask = work.buildTask("doTidyUpTask",
+		ReflectiveFunctionBuilder tidyUpTask = work.buildTask("doTidyUpTask",
 				TEAM_NAME);
 		tidyUpTask.buildObject("MO");
 
@@ -152,7 +152,7 @@ public abstract class AbstractGovernanceStressTestCase extends
 
 		// Build rollback handling
 		if (isManagedGovernance) {
-			ReflectiveTaskBuilder handleRollback = work.buildTask(
+			ReflectiveFunctionBuilder handleRollback = work.buildTask(
 					"handleRollback", TEAM_NAME);
 			handleRollback.buildParameter();
 			officeBuilder.addEscalation(SQLException.class, "WORK",
@@ -160,7 +160,7 @@ public abstract class AbstractGovernanceStressTestCase extends
 		}
 
 		// Build escalation handling
-		ReflectiveTaskBuilder escalationTask = work.buildTask(
+		ReflectiveFunctionBuilder escalationTask = work.buildTask(
 				"handleException", TEAM_NAME);
 		escalationTask.buildParameter();
 		escalationTask.buildObject("MO");

@@ -31,7 +31,7 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Stress tests asynchronous operations by {@link AsynchronousManagedObject}
@@ -106,7 +106,7 @@ public class AsynchronousOperationStressTest extends
 
 		// Create and register the setup task
 		SetupWork setupWork = new SetupWork();
-		ReflectiveTaskBuilder setupTask = this.constructWork(setupWork,
+		ReflectiveFunctionBuilder setupTask = this.constructWork(setupWork,
 				"SETUP", "setup").buildTask("setup", "TEAM");
 		setupTask.buildFlow("WORK_ONE", "task",
 				FlowInstigationStrategyEnum.ASYNCHRONOUS, null);
@@ -118,13 +118,13 @@ public class AsynchronousOperationStressTest extends
 		// others asynchronous operations.
 		AsynchronousOperationWork workOne = new AsynchronousOperationWork(
 				moTwo, OPERATION_COUNT, setupWork);
-		ReflectiveTaskBuilder taskOne = this.constructWork(workOne, "WORK_ONE",
+		ReflectiveFunctionBuilder taskOne = this.constructWork(workOne, "WORK_ONE",
 				null).buildTask("task", "TEAM");
 		taskOne.buildObject("MO_ONE");
 		taskOne.buildTaskContext();
 		AsynchronousOperationWork workTwo = new AsynchronousOperationWork(
 				moOne, OPERATION_COUNT, null);
-		ReflectiveTaskBuilder taskTwo = this.constructWork(workTwo, "WORK_TWO",
+		ReflectiveFunctionBuilder taskTwo = this.constructWork(workTwo, "WORK_TWO",
 				null).buildTask("task", "TEAM");
 		taskTwo.buildObject("MO_TWO");
 		taskTwo.buildTaskContext();

@@ -17,84 +17,91 @@
  */
 package net.officefloor.frame.integrate.flow;
 
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.MockTeamSource;
 
 /**
- * Validates passing a parameter between two {@link Work} instances of a office.
+ * Validates passing a parameter between two {@link ManagedFunction} instances
+ * of an {@link Office}.
  * 
  * @author Daniel Sagenschneider
  */
 public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Validates that able to pass parameters between {@link Work} instances.
+	 * Validates with {@link PassiveTeam}.
 	 */
-	@SuppressWarnings("unchecked")
-	public void testPassParameterBetweenWork() throws Exception {
+	public void test_passive_PassParameterBetweenFunctions() throws Exception {
+		this.doPassParameterBetweenFunctionsTest(new PassiveTeam());
+	}
+
+	/**
+	 * Validates with {@link OnePersonTeam}.
+	 * 
+	 * @throws Exception
+	 */
+	public void test_onePerson_PassParameterBetweenFunctions() throws Exception {
+		this.doPassParameterBetweenFunctionsTest(new OnePersonTeam("TEAM", 10));
+	}
+
+	/**
+	 * Validates with execu
+	 * 
+	 * @throws Exception
+	 */
+	public void test_executor_PassParameterBetweenFunctions() throws Exception {
+		this.doPassParameterBetweenFunctionsTest(new ExecutorCachedTeamSource().createTeam());
+	}
+
+	/**
+	 * Validates passing a parameter between two {@link ManagedFunction}
+	 * instances of an {@link Office}.
+	 * 
+	 * @param team
+	 *            {@link Team}.
+	 */
+	private void doPassParameterBetweenFunctionsTest(Team team) throws Exception {
 
 		// Parameter to be passed between work instances
 		final Object parameter = new Object();
 
 		// Add the team
-		this.constructTeam("TEAM",
-				new OnePersonTeam("TEAM",
-						MockTeamSource.createTeamIdentifier(), 10));
+		this.constructTeam("TEAM", team);
 
-		// Add the first work
-		WorkOne workOne = new WorkOne(parameter);
-		this.constructWork("WORK_ONE", workOne, "SENDER");
-		ManagedFunctionBuilder<WorkOne, None, WorkOneDelegatesEnum> taskOneBuilder = this
-				.constructTask("SENDER", workOne, "TEAM", null, null);
-		taskOneBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
-				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL,
-				Object.class);
+		// Add the first function
+		FunctionOne functionOne = new FunctionOne(parameter);
+		ManagedFunctionBuilder<None, FunctionOneDelegatesEnum> functionOneBuilder = this.constructFunction("SENDER",
+				functionOne, "TEAM", null, null);
+		functionOneBuilder.linkFlow(FunctionOneDelegatesEnum.FUNCTION_TWO.ordinal(), "RECEIVER", Object.class, false);
 
-		// Add the second work
-		WorkTwo workTwo = new WorkTwo();
-		this.constructWork("WORK_TWO", workTwo, "RECEIVER");
-		ManagedFunctionBuilder<WorkTwo, WorkTwoDependenciesEnum, None> taskTwoBuilder = this
-				.constructTask("RECEIVER", workTwo, "TEAM", null, null);
-		taskTwoBuilder.linkParameter(WorkTwoDependenciesEnum.PARAMETER,
-				Object.class);
+		// Add the second function
+		FunctionTwo functionTwo = new FunctionTwo();
+		ManagedFunctionBuilder<FunctionTwoDependenciesEnum, None> functionTwoBuilder = this
+				.constructFunction("RECEIVER", functionTwo, "TEAM", null, null);
+		functionTwoBuilder.linkParameter(FunctionTwoDependenciesEnum.PARAMETER, Object.class);
 
-		// Register and open the office floor
-		String officeName = this.getOfficeName();
-		OfficeFloor officeFloor = this.constructOfficeFloor();
-		officeFloor.openOfficeFloor();
-
-		// Invoke WorkOne
-		WorkManager workManager = officeFloor.getOffice(officeName)
-				.getWorkManager("WORK_ONE");
-		workManager.invokeWork(null);
-
-		// Allow some time for processing
-		this.sleep(1);
-
-		// Close the office floor
-		officeFloor.closeOfficeFloor();
+		// Invoke first function
+		this.invokeFunction("SENDER", null);
 
 		// Validate the parameter was passed
-		assertEquals("Incorrect parameter", parameter, workTwo.getParameter());
+		assertEquals("Incorrect parameter", parameter, functionTwo.getParameter());
 	}
 
 	/**
-	 * First {@link Work} type for testing.
+	 * First {@link ManagedFunction} type for testing.
 	 */
-	private class WorkOne implements Work,
-			ManagedFunction<WorkOne, None, WorkOneDelegatesEnum> {
+	private class FunctionOne implements ManagedFunction<None, FunctionOneDelegatesEnum> {
 
 		/**
-		 * Parameter to invoke delegate work with.
+		 * Parameter to invoke delegate with.
 		 */
 		protected final Object parameter;
 
@@ -102,41 +109,38 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		 * Initiate.
 		 * 
 		 * @param parameter
-		 *            Parameter to invoke delegate work with.
+		 *            Parameter to invoke delegate with.
 		 */
-		public WorkOne(Object parameter) {
+		public FunctionOne(Object parameter) {
 			this.parameter = parameter;
 		}
 
 		/*
-		 * ==================== Task ==========================================
+		 * ==================== ManaagedFunction ====================
 		 */
 
 		@Override
-		public Object execute(
-				ManagedFunctionContext<WorkOne, None, WorkOneDelegatesEnum> context)
-				throws Exception {
+		public Object execute(ManagedFunctionContext<None, FunctionOneDelegatesEnum> context) throws Exception {
 
-			// Delegate to the work
-			context.doFlow(WorkOneDelegatesEnum.WORK_TWO, this.parameter);
+			// Delegate to the next function
+			context.doFlow(FunctionOneDelegatesEnum.FUNCTION_TWO, this.parameter, null);
 
 			// No parameter
 			return null;
 		}
 	}
 
-	private enum WorkOneDelegatesEnum {
-		WORK_TWO
+	private enum FunctionOneDelegatesEnum {
+		FUNCTION_TWO
 	}
 
 	/**
-	 * Second {@link Work} type for testing.
+	 * Second {@link ManagedFunction} type for testing.
 	 */
-	private class WorkTwo implements Work,
-			ManagedFunction<WorkTwo, WorkTwoDependenciesEnum, None> {
+	private class FunctionTwo implements ManagedFunction<FunctionTwoDependenciesEnum, None> {
 
 		/**
-		 * Parameter received when {@link Work} invoked.
+		 * Parameter received when invoked.
 		 */
 		protected volatile Object parameter;
 
@@ -150,24 +154,21 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/*
-		 * ==================== Task ==========================================
+		 * ==================== ManagedFunction ====================
 		 */
 
 		@Override
-		public Object execute(
-				ManagedFunctionContext<WorkTwo, WorkTwoDependenciesEnum, None> context)
-				throws Exception {
+		public Object execute(ManagedFunctionContext<FunctionTwoDependenciesEnum, None> context) throws Exception {
 
 			// Store the parameter
-			this.parameter = context
-					.getObject(WorkTwoDependenciesEnum.PARAMETER);
+			this.parameter = context.getObject(FunctionTwoDependenciesEnum.PARAMETER);
 
 			// No parameter
 			return null;
 		}
 	}
 
-	private enum WorkTwoDependenciesEnum {
+	private enum FunctionTwoDependenciesEnum {
 		PARAMETER
 	}
 

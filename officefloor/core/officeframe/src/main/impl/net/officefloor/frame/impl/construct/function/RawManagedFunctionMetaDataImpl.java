@@ -408,11 +408,36 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			}
 		}
 
+		// Create the function bound managed object meta-data
+		ManagedObjectMetaData<?>[] functionBoundMoMetaData = new ManagedObjectMetaData[functionBoundMo.length];
+		for (int i = 0; i < functionBoundMoMetaData.length; i++) {
+			RawBoundManagedObjectMetaData rawMoMetaData = functionBoundMo[i];
+
+			// Obtain the default managed object instance meta-data
+			int defaultInstanceIndex = rawMoMetaData.getDefaultInstanceIndex();
+			RawBoundManagedObjectInstanceMetaData<?> moInstanceMetaData = rawMoMetaData
+					.getRawBoundManagedObjectInstanceMetaData()[defaultInstanceIndex];
+
+			// Obtain the default managed object meta-data
+			functionBoundMoMetaData[i] = moInstanceMetaData.getManagedObjectMetaData();
+			if (functionBoundMoMetaData[i] == null) {
+				issues.addIssue(AssetType.FUNCTION, functionName,
+						"No managed object meta-data for function managed object "
+								+ rawMoMetaData.getBoundManagedObjectName());
+			}
+		}
+
+		// Create the listing of function bound administrator meta-data
+		AdministratorMetaData<?, ?>[] functionBoundAdminMetaData = new AdministratorMetaData[functionBoundAdmins.length];
+		for (int i = 0; i < functionBoundAdminMetaData.length; i++) {
+			functionBoundAdminMetaData[i] = functionBoundAdmins[i].getAdministratorMetaData();
+		}
+
 		// Create the function meta-data
 		ManagedFunctionMetaDataImpl<?, ?> functionMetaData = new ManagedFunctionMetaDataImpl<>(functionName,
 				functionFactory, differentiator, parameterType, responsibleTeam, functionIndexedManagedObjects,
-				(ManagedObjectMetaData[]) functionBoundMo, requiredManagedObjectIndexes, requiredGovernance,
-				(AdministratorMetaData[]) functionBoundAdmins, preFunctionDuties, postFunctionDuties, functionLoop);
+				functionBoundMoMetaData, requiredManagedObjectIndexes, requiredGovernance, functionBoundAdminMetaData,
+				preFunctionDuties, postFunctionDuties, functionLoop);
 
 		// Return the raw function meta-data
 		@SuppressWarnings({ "rawtypes", "unchecked" })

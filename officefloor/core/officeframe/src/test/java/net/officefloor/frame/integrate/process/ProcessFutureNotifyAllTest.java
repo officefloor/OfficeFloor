@@ -26,7 +26,7 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
  * Tests that the {@link #notifyAll()} is invoked on the {@link ProcessFuture}
@@ -50,7 +50,7 @@ public class ProcessFutureNotifyAllTest extends AbstractOfficeConstructTestCase 
 
 		// Register the work
 		final String WORK_NAME = "WORK";
-		ReflectiveWorkBuilder workBuilder = this.constructWork(work, WORK_NAME,
+		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, WORK_NAME,
 				"task");
 		workBuilder.buildTask("task", "TEAM");
 

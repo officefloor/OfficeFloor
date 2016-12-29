@@ -36,8 +36,7 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecif
  * @author Daniel Sagenschneider
  */
 @TestSource
-public class MockAdministratorSource implements
-		AdministratorSource<Object, Indexed> {
+public class MockAdministratorSource implements AdministratorSource<Object, Indexed> {
 
 	/**
 	 * Property name to source the {@link Administrator}.
@@ -66,14 +65,12 @@ public class MockAdministratorSource implements
 	 * @return {@link AdministratorBuilder} for additional configuration.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <A extends Enum<A>> AdministratorBuilder<A> bindAdministrator(
-			String name, Administrator<?, A> administrator,
-			AdministratorSourceMetaData<?, A> sourceMetaData,
+	public static <A extends Enum<A>> AdministratorBuilder<A> bindAdministrator(String name,
+			Administrator<?, A> administrator, AdministratorSourceMetaData<?, A> sourceMetaData,
 			OfficeBuilder officeBuilder) {
 
 		// Create the administrator builder
-		AdministratorBuilder<Indexed> builder = officeBuilder
-				.addThreadAdministrator(name, MockAdministratorSource.class);
+		AdministratorBuilder<Indexed> builder = officeBuilder.addAdministrator(name, MockAdministratorSource.class);
 
 		// Provide task administrator link to meta-data
 		builder.addProperty(TASK_ADMINISTRATOR_PROPERTY, name);
@@ -107,8 +104,7 @@ public class MockAdministratorSource implements
 
 	@Override
 	public AdministratorSourceSpecification getSpecification() {
-		throw new UnsupportedOperationException(
-				"Not supported by mock implementation");
+		throw new UnsupportedOperationException("Not supported by mock implementation");
 	}
 
 	@Override

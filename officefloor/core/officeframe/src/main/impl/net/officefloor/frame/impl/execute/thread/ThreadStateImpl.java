@@ -261,7 +261,13 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			if (callbackThreadState == null) {
 				// No provided thread state, so attempt to determine one
 				ActiveThreadState active = activeThreadState.get();
-				callbackThreadState = (active.threadState != null ? active.threadState : this);
+				if ((active != null) && (active.threadState != null)) {
+					// Use currently active thread state
+					callbackThreadState = active.threadState;
+				} else {
+					// Fall back to this thread state
+					callbackThreadState = this;
+				}
 			}
 
 			// Specify process flow completion

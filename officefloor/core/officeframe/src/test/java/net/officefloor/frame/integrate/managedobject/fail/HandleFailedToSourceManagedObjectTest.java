@@ -31,8 +31,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests handling {@link FailedToSourceManagedObjectEscalation}.
@@ -137,11 +137,11 @@ public class HandleFailedToSourceManagedObjectTest extends
 
 		// Construct the work
 		Tasks tasks = new Tasks();
-		ReflectiveWorkBuilder work = this.constructWork(tasks, "WORK",
+		ReflectiveFunctionBuilder work = this.constructWork(tasks, "WORK",
 				"obtainObject");
 
 		// Construct the task attempting to obtain the object
-		ReflectiveTaskBuilder obtainObject = work.buildTask("obtainObject",
+		ReflectiveFunctionBuilder obtainObject = work.buildTask("obtainObject",
 				"TEAM");
 		obtainObject.buildObject("MO", ManagedObjectScope.WORK);
 		obtainObject.getBuilder()
@@ -149,7 +149,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 						"handleEscalation");
 
 		// Construct the task to handle failure to source managed object
-		ReflectiveTaskBuilder handleEscalation = work.buildTask(
+		ReflectiveFunctionBuilder handleEscalation = work.buildTask(
 				"handleEscalation", "TEAM");
 		handleEscalation.buildParameter();
 

@@ -57,8 +57,7 @@ public class MockTeamSource implements TeamSource {
 	 * @return {@link OnePersonTeam}.
 	 */
 	public static OnePersonTeam createOnePersonTeam(String teamName) {
-		return new OnePersonTeam(teamName,
-				MockTeamSource.createTeamIdentifier(), 100);
+		return new OnePersonTeam(teamName, 100);
 	}
 
 	/**
@@ -69,8 +68,7 @@ public class MockTeamSource implements TeamSource {
 	 * @return {@link WorkerPerTaskTeam}
 	 */
 	public static WorkerPerTaskTeam createWorkerPerTaskTeam(String teamName) {
-		return new WorkerPerTaskTeam(teamName,
-				MockTeamSource.createTeamIdentifier());
+		return new WorkerPerTaskTeam(teamName);
 	}
 
 	/**
@@ -94,12 +92,10 @@ public class MockTeamSource implements TeamSource {
 	 *            {@link Team}.
 	 * @return {@link TeamBuilder}.
 	 */
-	public static TeamBuilder<?> bindTeamBuilder(
-			OfficeFloorBuilder officeFloorBuilder, String teamName, Team team) {
+	public static TeamBuilder<?> bindTeamBuilder(OfficeFloorBuilder officeFloorBuilder, String teamName, Team team) {
 
 		// Create the team builder
-		TeamBuilder<?> teamBuilder = officeFloorBuilder.addTeam(teamName,
-				MockTeamSource.class);
+		TeamBuilder<?> teamBuilder = officeFloorBuilder.addTeam(teamName, MockTeamSource.class);
 
 		// Bind team builder to team
 		teamBuilder.addProperty(TEAM_PROPERTY, teamName);

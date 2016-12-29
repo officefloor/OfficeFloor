@@ -37,8 +37,8 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Ensure do not unload {@link ManagedObject} that is under {@link Governance}.
@@ -165,11 +165,11 @@ public class ManagedObjectUnloadGovernanceTest extends
 
 		// Configure the Work
 		TransactionalWork work = new TransactionalWork();
-		ReflectiveWorkBuilder builder = this.constructWork(work, "WORK",
+		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
 				"doTaskOne");
 
 		// Configure the first task
-		ReflectiveTaskBuilder taskOne = builder.buildTask("doTaskOne",
+		ReflectiveFunctionBuilder taskOne = builder.buildTask("doTaskOne",
 				TEAM_TASK);
 		DependencyMappingBuilder dependenciesOne = taskOne.buildObject(
 				"MO_ONE", ManagedObjectScope.WORK);
@@ -177,7 +177,7 @@ public class ManagedObjectUnloadGovernanceTest extends
 		taskOne.getBuilder().setNextTaskInFlow("doTaskTwo", null);
 
 		// Configure the second task
-		ReflectiveTaskBuilder taskTwo = builder.buildTask("doTaskTwo",
+		ReflectiveFunctionBuilder taskTwo = builder.buildTask("doTaskTwo",
 				TEAM_TASK);
 		DependencyMappingBuilder dependenciesTwo = taskTwo.buildObject(
 				"MO_TWO", ManagedObjectScope.WORK);

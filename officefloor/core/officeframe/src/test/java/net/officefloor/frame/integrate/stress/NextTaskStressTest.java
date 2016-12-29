@@ -27,8 +27,8 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveWorkBuilder;
-import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Stress tests invoking a next {@link ManagedFunction}.
@@ -83,12 +83,12 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 		NextTaskInvoker functionality = new NextTaskInvoker(NEXT_TASK_COUNT);
 
 		// Register the next tasks
-		ReflectiveWorkBuilder work = this.constructWork(functionality, "work",
+		ReflectiveFunctionBuilder work = this.constructWork(functionality, "work",
 				"trigger");
-		ReflectiveTaskBuilder trigger = work.buildTask("trigger", "TEAM");
+		ReflectiveFunctionBuilder trigger = work.buildTask("trigger", "TEAM");
 		trigger.buildParameter();
 		trigger.setNextTaskInFlow("nextTask");
-		ReflectiveTaskBuilder nextTask = work.buildTask("nextTask", "TEAM");
+		ReflectiveFunctionBuilder nextTask = work.buildTask("nextTask", "TEAM");
 		nextTask.buildParameter();
 		nextTask.buildFlow("trigger", FlowInstigationStrategyEnum.SEQUENTIAL,
 				Integer.class);
