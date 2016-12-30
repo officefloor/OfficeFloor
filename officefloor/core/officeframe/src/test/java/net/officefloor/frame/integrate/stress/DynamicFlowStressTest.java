@@ -19,21 +19,19 @@ package net.officefloor.frame.integrate.stress;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
- * Ensure dynamically invoking {@link ManagedFunction} instances is stress tested.
+ * Ensure dynamically invoking {@link ManagedFunction} instances is stress
+ * tested.
  * 
  * @author Daniel Sagenschneider
  */
@@ -45,8 +43,7 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressDynamicFlow_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -55,8 +52,7 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressDynamicFlow_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 3, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 3, 100));
 	}
 
 	/**
@@ -65,8 +61,7 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressDynamicFlow_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				MockTeamSource.createTeamIdentifier(), 3));
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 3));
 	}
 
 	/**
@@ -86,29 +81,23 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 
 		// Construct tasks. Asynchronous instigated to:
 		// 1) reset thread state for next dynamic invocation
-		// 2) not have too many linked JobNodes causing OOM
+		// 2) not have too many linked functions causing OOM
 		DynamicInvokeFlowWork work = new DynamicInvokeFlowWork(MAX_COUNT);
-		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
-				"initialTask");
-		ReflectiveFunctionBuilder initialTask = builder.buildTask("initialTask",
-				"TEAM");
-		initialTask.buildTaskContext();
-		ReflectiveFunctionBuilder dynamicTask = builder.buildTask("dynamicTask",
-				"TEAM");
-		dynamicTask.buildFlow("initialTask",
-				FlowInstigationStrategyEnum.ASYNCHRONOUS, null);
+		ReflectiveFunctionBuilder initialTask = this.constructFunction(work, "initialTask", "TEAM");
+		initialTask.buildManagedFunctionContext();
+		ReflectiveFunctionBuilder dynamicTask = this.constructFunction(work, "dynamicTask", "TEAM");
+		dynamicTask.buildFlow("initialTask", null, false);
 		dynamicTask.buildParameter();
 
 		// Run stress test
-		this.invokeWork("WORK", null, MAX_RUN_TIME);
+		this.invokeFunction("initialTask", null, MAX_RUN_TIME);
 
 		// Ensure correct number of invocations
-		assertEquals("Incorrect number of invocations", MAX_COUNT,
-				work.invocationCount);
+		assertEquals("Incorrect number of invocations", MAX_COUNT, work.invocationCount);
 	}
 
 	/**
-	 * Mock {@link Work} for testing.
+	 * Mock work.
 	 */
 	public class DynamicInvokeFlowWork {
 
@@ -138,10 +127,9 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 		 * @param context
 		 *            {@link ManagedFunctionContext}.
 		 */
-		public void initialTask(ManagedFunctionContext<?, ?, ?> context) throws Exception {
+		public void initialTask(ManagedFunctionContext<?, ?> context) throws Exception {
 			// Invoke the dynamic flow
-			context.doFlow("WORK", "dynamicTask", new Integer(
-					this.invocationCount));
+			context.doFlow("dynamicTask", new Integer(this.invocationCount), null);
 		}
 
 		/**
@@ -153,25 +141,23 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 		 *            Invocation count passed as parameter from
 		 *            <code>initialTask</code>.
 		 */
-		public void dynamicTask(ReflectiveFlow flow,
-				Integer currentInvocationCount) {
+		public void dynamicTask(ReflectiveFlow flow, Integer currentInvocationCount) {
 
 			// Ensure correct current count
-			assertEquals("Incorrect current invocation count",
-					this.invocationCount, currentInvocationCount.intValue());
+			assertEquals("Incorrect current invocation count", this.invocationCount, currentInvocationCount.intValue());
 
 			// Increment the number of invocations
 			this.invocationCount++;
 
 			// Provide progress
 			if ((this.invocationCount % (this.maxInvocations / 10)) == 0) {
-				DynamicFlowStressTest.this.printMessage("Processed "
-						+ this.invocationCount + " dynamic flow invocations");
+				DynamicFlowStressTest.this
+						.printMessage("Processed " + this.invocationCount + " dynamic flow invocations");
 			}
 
 			// Invoke another invocation if not yet max invocations
 			if (this.invocationCount < this.maxInvocations) {
-				flow.doFlow(null);
+				flow.doFlow(null, null);
 			}
 		}
 	}

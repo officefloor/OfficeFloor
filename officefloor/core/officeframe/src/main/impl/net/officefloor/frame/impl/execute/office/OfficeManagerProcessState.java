@@ -18,12 +18,10 @@
 package net.officefloor.frame.impl.execute.office;
 
 import net.officefloor.frame.api.manage.UnknownFunctionException;
-import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -65,17 +63,13 @@ public class OfficeManagerProcessState implements ProcessState {
 	 */
 	public OfficeManagerProcessState(OfficeClock officeClock, FunctionLoop functionLoop) {
 
-		// Create the main thread asset manager
-		AssetManager mainThreadAssetManager = new AssetManagerImpl(this, officeClock, functionLoop);
-
 		// Create the meta-data for the process and its main thread state
 		this.threadMetaData = new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0],
 				new AdministratorMetaData[0], new EscalationProcedureImpl(), null);
 
 		// Create the main thread state
 		// Note: purpose of this to enable synchronising changes to office
-		this.mainThreadState = new ThreadStateImpl(this.threadMetaData, mainThreadAssetManager, (FlowCompletion) null,
-				this, null);
+		this.mainThreadState = new ThreadStateImpl(this.threadMetaData, (FlowCompletion) null, this, null);
 	}
 
 	/*
@@ -99,7 +93,7 @@ public class OfficeManagerProcessState implements ProcessState {
 
 	@Override
 	public FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
-			FlowCompletion completion, AssetManager flowAssetManager) {
+			FlowCompletion completion) {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " should be be spawning threads");
 	}
 

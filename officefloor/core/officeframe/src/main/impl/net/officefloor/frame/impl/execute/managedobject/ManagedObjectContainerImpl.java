@@ -336,9 +336,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				// Check whether dependencies are ready
 				if (container.check == null) {
 					// Undertake check to ensure managed objects are ready
-					container.check = new ManagedObjectReadyCheckImpl(this.managedFunction);
-					return Promise.then(container.metaData.checkReady(this.managedFunction, container.check, null),
-							this);
+					container.check = new ManagedObjectReadyCheckImpl(this, this.managedFunction);
+					FunctionState checkFunction = container.metaData.checkReady(this.managedFunction, container.check,
+							null);
+					if (checkFunction != null) {
+						return Promise.then(checkFunction, this);
+					}
 				} else if (!container.check.isReady()) {
 					// Not ready so wait on latch release and try again
 					container.check = null;
@@ -357,7 +360,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					} else {
 						// Source directly
 						ManagedObjectSource<?, ?> managedObjectSource = container.metaData.getManagedObjectSource();
-						managedObjectSource.sourceManagedObject(new ManagedObjectUserImpl());
+						ManagedObjectUser user = new ManagedObjectUserImpl();
+						managedObjectSource.sourceManagedObject(user);
 					}
 
 				} catch (Throwable ex) {
@@ -430,9 +434,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				// Check whether managed object and its dependencies are ready
 				if (container.check == null) {
 					// Undertake check to ensure managed objects are ready
-					container.check = new ManagedObjectReadyCheckImpl(this.managedFunction);
-					return Promise.then(container.metaData.checkReady(this.managedFunction, container.check, container),
-							this);
+					container.check = new ManagedObjectReadyCheckImpl(this, this.managedFunction);
+					FunctionState checkFunction = container.metaData.checkReady(this.managedFunction, container.check,
+							container);
+					if (checkFunction != null) {
+						return Promise.then(checkFunction, this);
+					}
 				} else if (!container.check.isReady()) {
 					// Not ready so watch on latch release and try again
 					container.check = null;
@@ -476,9 +483,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				// Check whether managed object and its dependencies are ready
 				if (container.check == null) {
 					// Undertake check to ensure managed objects are ready
-					container.check = new ManagedObjectReadyCheckImpl(this.managedFunction);
-					return Promise.then(container.metaData.checkReady(this.managedFunction, container.check, container),
-							this);
+					container.check = new ManagedObjectReadyCheckImpl(this, this.managedFunction);
+					FunctionState checkFunction = container.metaData.checkReady(this.managedFunction, container.check,
+							container);
+					if (checkFunction != null) {
+						return Promise.then(checkFunction, this);
+					}
 				} else if (!container.check.isReady()) {
 					// Not ready so watch on latch release and try again
 					container.check = null;
@@ -520,7 +530,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 		@Override
 		public void setManagedObject(final ManagedObject managedObject) {
-			ManagedObjectContainerImpl.this.doOperation(new ManagedObjectOperation() {
+			ManagedObjectOperation setManagedObject = new ManagedObjectOperation() {
 				@Override
 				public FunctionState execute() {
 
@@ -537,12 +547,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					// Nothing further to set the managed object
 					return null;
 				}
-			});
+			};
+			ManagedObjectContainerImpl.this.doOperation(setManagedObject);
 		}
 
 		@Override
 		public void setFailure(final Throwable cause) {
-			ManagedObjectContainerImpl.this.doOperation(new ManagedObjectOperation() {
+			ManagedObjectOperation failManagedObject = new ManagedObjectOperation() {
 				@Override
 				public FunctionState execute() {
 					// Easy access to the container
@@ -551,13 +562,14 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					// Flag failure of managed object
 					container.failure = cause;
 
-					// Wake up any waiting jobs
+					// Wake up any waiting functions
 					container.sourcingLatch.failFunctions(cause, true);
 
 					// Nothing further to fail the managed object
 					return null;
 				}
-			});
+			};
+			ManagedObjectContainerImpl.this.doOperation(failManagedObject);
 		}
 	}
 
@@ -629,14 +641,14 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				// Determine if have the managed object
 				if (container.managedObject == null) {
 					// Not yet source, so wait on sourcing
-					return Promise.then(container.sourcingLatch.awaitOnAsset(check.getManagedFunctionContainer()),
+					return Promise.then(container.sourcingLatch.awaitOnAsset(check.getLatchFunction()),
 							check.setNotReady());
 				}
 
 				// Determine if within asynchronous operation
 				if (container.asynchronousStartTime != NO_ASYNC_OPERATION) {
 					// Must wait on the asynchronous operation
-					return Promise.then(container.operationsLatch.awaitOnAsset(check.getManagedFunctionContainer()),
+					return Promise.then(container.operationsLatch.awaitOnAsset(check.getLatchFunction()),
 							check.setNotReady());
 				}
 

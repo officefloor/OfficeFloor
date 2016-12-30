@@ -17,11 +17,9 @@
  */
 package net.officefloor.frame.impl.execute.process;
 
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
-import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link ProcessMetaData} implementation.
@@ -41,25 +39,16 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	private final ThreadMetaData threadMetaData;
 
 	/**
-	 * {@link AssetManager} for the main {@link ThreadState}.
-	 */
-	private final AssetManager mainThreadAssetManager;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectMetaData
 	 *            {@link ManagedObjectMetaData} instances.
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData}.
-	 * @param mainThreadAssetManager
-	 *            {@link AssetManager} for the main {@link ThreadState}.
 	 */
-	public ProcessMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData, ThreadMetaData threadMetaData,
-			AssetManager mainThreadAssetManager) {
+	public ProcessMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData, ThreadMetaData threadMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.threadMetaData = threadMetaData;
-		this.mainThreadAssetManager = mainThreadAssetManager;
 	}
 
 	/*
@@ -69,11 +58,6 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	@Override
 	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {
 		return this.managedObjectMetaData;
-	}
-
-	@Override
-	public AssetManager getMainThreadAssetManager() {
-		return this.mainThreadAssetManager;
 	}
 
 	@Override

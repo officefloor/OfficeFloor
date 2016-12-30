@@ -21,7 +21,6 @@ import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;

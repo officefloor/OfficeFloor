@@ -310,13 +310,13 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	@Override
-	public FunctionState cancel(Throwable escalation) {
+	public FunctionState cancel() {
 
 		// Clean up the functions of this flow
 		FunctionState cleanUpFunctions = null;
-		FunctionState flowFunctions = this.activeFunctions.purgeEntries();
+		FunctionState flowFunctions = this.activeFunctions.getHead();
 		while (flowFunctions != null) {
-			cleanUpFunctions = Promise.then(cleanUpFunctions, flowFunctions.cancel(escalation));
+			cleanUpFunctions = Promise.then(cleanUpFunctions, flowFunctions.cancel());
 			flowFunctions = flowFunctions.getNext();
 		}
 
@@ -328,7 +328,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	public FunctionState handleEscalation(Throwable escalation) {
 
 		// Cancel this flow
-		FunctionState cleanUpFunctions = this.cancel(escalation);
+		FunctionState cleanUpFunctions = this.cancel();
 
 		// Attempt handling by flow completion
 		if (this.completion != null) {
@@ -342,19 +342,19 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	@Override
-	public FunctionState managedFunctionComplete(FunctionState function) {
+	public FunctionState managedFunctionComplete(FunctionState function, boolean isCancel) {
 
 		// Remove function from active function listing
 		if (this.activeFunctions.removeEntry(function)) {
 
 			// Determine if flow completion
 			FunctionState flowCompletion = null;
-			if (this.completion != null) {
+			if (!isCancel && (this.completion != null)) {
 				flowCompletion = this.completion.complete(null);
 			}
 
 			// Last active function so flow is now complete
-			return Promise.then(flowCompletion, this.threadState.flowComplete(this));
+			return Promise.then(flowCompletion, this.threadState.flowComplete(this, isCancel));
 		}
 
 		// Flow still active
@@ -418,8 +418,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		}
 
 		@Override
-		public FunctionState cancel(Throwable cause) {
-			return FlowImpl.this.cancel(cause);
+		public FunctionState cancel() {
+			return FlowImpl.this.cancel();
 		}
 
 		@Override

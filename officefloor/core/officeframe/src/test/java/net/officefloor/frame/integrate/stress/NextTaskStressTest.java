@@ -18,17 +18,15 @@
 package net.officefloor.frame.integrate.stress;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Stress tests invoking a next {@link ManagedFunction}.
@@ -43,8 +41,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressNextTask_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -53,8 +50,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressNextTask_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 5, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 5, 100));
 	}
 
 	/**
@@ -63,15 +59,33 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressNextTask_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				MockTeamSource.createTeamIdentifier(), 5));
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 5));
+	}
+
+	/**
+	 * Ensures no issues arising in stress next {@link ManagedFunction} with a
+	 * {@link PassiveTeam}.
+	 */
+	@StressTest
+	public void test_StressNextTask_PassiveTeam() throws Exception {
+		this.doTest(new PassiveTeam());
+	}
+
+	/**
+	 * Ensures no issues arising in stress next {@link ManagedFunction} with no
+	 * {@link Team}.
+	 */
+	@StressTest
+	public void test_StressNextTask_NoTeam() throws Exception {
+		this.doTest((Team) null);
 	}
 
 	/**
 	 * Does the parallel stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction}
+	 *            instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -82,30 +96,32 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 		// Create the next task invoker
 		NextTaskInvoker functionality = new NextTaskInvoker(NEXT_TASK_COUNT);
 
+		// Construct the team
+		String teamName = null;
+		if (team != null) {
+			teamName = "TEAM";
+			this.constructTeam(teamName, team);
+		}
+
 		// Register the next tasks
-		ReflectiveFunctionBuilder work = this.constructWork(functionality, "work",
-				"trigger");
-		ReflectiveFunctionBuilder trigger = work.buildTask("trigger", "TEAM");
+		ReflectiveFunctionBuilder trigger = this.constructFunction(functionality, "trigger", teamName);
 		trigger.buildParameter();
-		trigger.setNextTaskInFlow("nextTask");
-		ReflectiveFunctionBuilder nextTask = work.buildTask("nextTask", "TEAM");
+		trigger.setNextFunction("nextTask");
+		ReflectiveFunctionBuilder nextTask = this.constructFunction(functionality, "nextTask", teamName);
 		nextTask.buildParameter();
-		nextTask.buildFlow("trigger", FlowInstigationStrategyEnum.SEQUENTIAL,
-				Integer.class);
-		this.constructTeam("TEAM", team);
+		nextTask.buildFlow("trigger", Integer.class, false);
 
 		// Run the repeats
-		this.invokeWork("work", new Integer(1), MAX_RUN_TIME);
+		this.invokeFunction("trigger", new Integer(1), MAX_RUN_TIME);
 
 		// Ensure correct number of repeats
 		synchronized (functionality) {
-			assertEquals("Incorrect number of next tasks run", NEXT_TASK_COUNT,
-					functionality.nextTaskCount);
+			assertEquals("Incorrect number of next tasks run", NEXT_TASK_COUNT, functionality.nextTaskCount);
 		}
 	}
 
 	/**
-	 * {@link Work}.
+	 * Functionality.
 	 */
 	public class NextTaskInvoker {
 
@@ -143,7 +159,8 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 		 * Next {@link ManagedFunction}.
 		 * 
 		 * @param callCount
-		 *            Number of next {@link ManagedFunction} instances invoked so far.
+		 *            Number of next {@link ManagedFunction} instances invoked
+		 *            so far.
 		 * @param flow
 		 *            Trigger {@link ManagedFunction}.
 		 */
@@ -158,8 +175,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 
 			// Output progress
 			if ((count % 1000000) == 0) {
-				NextTaskStressTest.this.printMessage("Next tasks called="
-						+ count);
+				NextTaskStressTest.this.printMessage("Next tasks called=" + count);
 			}
 
 			// Determine if max next task calls made
@@ -169,7 +185,7 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 			}
 
 			// Trigger for another next task
-			flow.doFlow(new Integer(callCount.intValue() + 1));
+			flow.doFlow(new Integer(callCount.intValue() + 1), null);
 		}
 	}
 

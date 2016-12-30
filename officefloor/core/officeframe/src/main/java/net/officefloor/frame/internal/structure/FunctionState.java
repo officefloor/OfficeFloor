@@ -87,13 +87,11 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	 * Cancels this {@link FunctionState} returning an optional
 	 * {@link FunctionState} to clean up this {@link FunctionState}.
 	 * 
-	 * @param cause
-	 *            {@link Throwable} identifying the reason for cancel.
 	 * @return Optional clean up {@link FunctionState}. May be
 	 *         <code>null</code>.
 	 */
-	default FunctionState cancel(Throwable cause) {
-		return this.handleEscalation(cause);
+	default FunctionState cancel() {
+		return null; // no clean up by default
 	}
 
 	/**

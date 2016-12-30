@@ -30,7 +30,6 @@ import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -167,11 +166,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private final ProcessState processState;
 
 	/**
-	 * {@link AssetManager} for this {@link ThreadState}.
-	 */
-	private final AssetManager assetManager;
-
-	/**
 	 * {@link FlowCompletion}.
 	 */
 	private final FlowCompletion completion;
@@ -191,8 +185,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * 
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData} for this {@link ThreadState}.
-	 * @param assetManager
-	 *            {@link AssetManager} for this {@link ThreadState}.
 	 * @param callback
 	 *            {@link ProcessState} {@link FlowCallback}.
 	 * @param callbackThreadState
@@ -202,9 +194,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * @param processProfiler
 	 *            {@link ProcessProfiler}. May be <code>null</code>.
 	 */
-	public ThreadStateImpl(ThreadMetaData threadMetaData, AssetManager assetManager, FlowCallback callback,
-			ThreadState callbackThreadState, ProcessState processState, ProcessProfiler processProfiler) {
-		this(threadMetaData, assetManager, null, callback, callbackThreadState, processState, processProfiler);
+	public ThreadStateImpl(ThreadMetaData threadMetaData, FlowCallback callback, ThreadState callbackThreadState,
+			ProcessState processState, ProcessProfiler processProfiler) {
+		this(threadMetaData, null, callback, callbackThreadState, processState, processProfiler);
 	}
 
 	/**
@@ -212,8 +204,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * 
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData} for this {@link ThreadState}.
-	 * @param assetManager
-	 *            {@link AssetManager} for this {@link ThreadState}.
 	 * @param completion
 	 *            {@link FlowCompletion} for this {@link ThreadState}.
 	 * @param processState
@@ -221,9 +211,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * @param processProfiler
 	 *            {@link ProcessProfiler}. May be <code>null</code>.
 	 */
-	public ThreadStateImpl(ThreadMetaData threadMetaData, AssetManager assetManager, FlowCompletion completion,
-			ProcessState processState, ProcessProfiler processProfiler) {
-		this(threadMetaData, assetManager, completion, null, null, processState, processProfiler);
+	public ThreadStateImpl(ThreadMetaData threadMetaData, FlowCompletion completion, ProcessState processState,
+			ProcessProfiler processProfiler) {
+		this(threadMetaData, completion, null, null, processState, processProfiler);
 	}
 
 	/**
@@ -231,8 +221,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * 
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData} for this {@link ThreadState}.
-	 * @param assetManager
-	 *            {@link AssetManager} for this {@link ThreadState}.
 	 * @param completion
 	 *            {@link FlowCompletion} for this {@link ThreadState}.
 	 * @param callback
@@ -244,12 +232,10 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * @param processProfiler
 	 *            {@link ProcessProfiler}. May be <code>null</code>.
 	 */
-	private ThreadStateImpl(ThreadMetaData threadMetaData, AssetManager assetManager, FlowCompletion completion,
-			FlowCallback callback, ThreadState callbackThreadState, ProcessState processState,
-			ProcessProfiler processProfiler) {
+	private ThreadStateImpl(ThreadMetaData threadMetaData, FlowCompletion completion, FlowCallback callback,
+			ThreadState callbackThreadState, ProcessState processState, ProcessProfiler processProfiler) {
 		this.threadMetaData = threadMetaData;
 		this.processState = processState;
-		this.assetManager = assetManager;
 
 		// Determine completion
 		if (completion != null) {
@@ -337,9 +323,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		FunctionState cleanUpFunctions = null;
 
 		// Cancel all flows
-		Flow flow = this.activeFlows.purgeEntries();
+		Flow flow = this.activeFlows.getHead();
 		while (flow != null) {
-			cleanUpFunctions = Promise.then(cleanUpFunctions, flow.cancel(escalation));
+			cleanUpFunctions = Promise.then(cleanUpFunctions, flow.cancel());
 			flow = flow.getNext();
 		}
 
@@ -350,12 +336,13 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 					.getEscalation(escalation);
 			if (escalationFlow != null) {
 				flow = this.createFlow(null);
+
+				// Next escalation will be flow completion
+				this.escalationLevel = EscalationLevel.FLOW_COMPLETION;
 				return Promise.then(cleanUpFunctions, flow.createManagedFunction(escalation,
 						escalationFlow.getManagedFunctionMetaData(), false, null));
 			}
 
-			// No office escalation procedure, so escalate to flow completion
-			this.escalationLevel = EscalationLevel.FLOW_COMPLETION;
 		case FLOW_COMPLETION:
 			// Outside normal handling, so clean up thread state
 
@@ -377,22 +364,22 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 			// Notify flow completion (if provided)
 			if (this.completion != null) {
-				// Flow completion to handle escalation
+				// Next is to escalate to OfficeFloor
+				this.escalationLevel = EscalationLevel.OFFICE_FLOOR;
 				return Promise.then(cleanUpFunctions, this.completion.complete(escalation));
 			}
 
-			// No flow completion, escalate to OfficeFloor
-			this.escalationLevel = EscalationLevel.OFFICE_FLOOR;
 		case OFFICE_FLOOR:
 			escalationFlow = this.threadMetaData.getOfficeFloorEscalation();
 			if (escalationFlow != null) {
 				flow = this.createFlow(null);
+
+				// Any further failure, log (not happen most applications)
+				this.escalationLevel = EscalationLevel.LOG;
 				return Promise.then(cleanUpFunctions, flow.createManagedFunction(escalation,
 						escalationFlow.getManagedFunctionMetaData(), false, null));
 			}
 
-			// Any further failure, just log (not happen for most applications)
-			this.escalationLevel = escalationLevel.LOG;
 		case LOG:
 			LOGGER.log(Level.SEVERE, "Unhandle escalation", escalation);
 		}
@@ -402,21 +389,21 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public FunctionState flowComplete(Flow flow) {
-
-		// Clean up functions
-		FunctionState cleanUpFunctions = null;
+	public FunctionState flowComplete(Flow flow, boolean isCancel) {
 
 		// Remove flow from active flow listing
 		if (this.activeFlows.removeEntry(flow)) {
 
 			// Last flow, so thread state is now complete
+			FunctionState cleanUpFunctions = null;
 
-			// Enforce any active governance
+			// Disregard any active governance
 			for (int i = 0; i < this.governanceContainers.length; i++) {
 				GovernanceContainer<?> container = this.governanceContainers[i];
 				if ((container != null) && (container.isGovernanceActive())) {
-					cleanUpFunctions = Promise.then(cleanUpFunctions, container.enforceGovernance());
+					FunctionState disregard = isCancel ? container.disregardGovernance()
+							: container.enforceGovernance();
+					cleanUpFunctions = Promise.then(cleanUpFunctions, disregard);
 				}
 			}
 
@@ -429,7 +416,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			}
 
 			// Notify completion of thread state
-			if (this.completion != null) {
+			if (!isCancel && (this.completion != null)) {
 				cleanUpFunctions = Promise.then(cleanUpFunctions, this.completion.complete(null));
 			}
 

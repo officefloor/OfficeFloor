@@ -512,14 +512,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 				this.constructAdministratorMetaData(threadBoundAdministrators), officeEscalationProcedure,
 				officeFloorEscalation);
 
-		// Create the main thread asset manager
-		AssetManager mainThreadAssetManager = officeAssetManagerFactory.createAssetManager(AssetType.THREAD, "MAIN",
-				"THREAD", issues);
-
 		// Create the process meta-data
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
-				this.constructDefaultManagedObjectMetaData(processBoundManagedObjects), threadMetaData,
-				mainThreadAssetManager);
+				this.constructDefaultManagedObjectMetaData(processBoundManagedObjects), threadMetaData);
 
 		// Obtain the Process Context Listeners
 		ProcessContextListener[] processContextListeners = rawOfficeFloorMetaData.getProcessContextListeners();
@@ -576,6 +571,18 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			officeEscalations[i] = new EscalationFlowImpl(typeOfCause, escalationFunctionMetaData);
 		}
 
+		// Obtain all the asset managers for the office
+		AssetManager[] assetManagers = officeAssetManagerFactory.getAssetManagers();
+
+		// Create the office manager
+		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName, monitorOfficeInterval, assetManagers,
+				officeClock, functionLoop, timer);
+
+		// Load the office meta-data
+		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,
+				functionLoop, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), processMetaData,
+				processContextListeners, startupFunctions, profiler);
+
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
 			officeManagingManagedObject.manageByOffice(processBoundManagedObjects, officeMetaData, functionLocator,
@@ -593,18 +600,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		for (RawGovernanceMetaData<?, ?> rawGovernance : rawGovernanceMetaDataList) {
 			rawGovernance.linkOfficeMetaData(functionLocator, officeAssetManagerFactory, issues);
 		}
-
-		// Obtain all the asset managers for the office
-		AssetManager[] assetManagers = officeAssetManagerFactory.getAssetManagers();
-
-		// Create the office manager
-		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName, monitorOfficeInterval, assetManagers,
-				officeClock, functionLoop, timer);
-
-		// Load the office meta-data
-		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,
-				functionLoop, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), processMetaData,
-				processContextListeners, startupFunctions, profiler);
 
 		// Return the raw office meta-data
 		rawOfficeMetaData.officeMetaData = officeMetaData;

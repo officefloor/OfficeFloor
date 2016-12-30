@@ -121,12 +121,13 @@ public class Promise {
 
 		@Override
 		public FunctionState execute() throws Throwable {
-			return Promise.then(this.delegate.execute(), this.thenFunction);
+			FunctionState next = this.delegate.execute();
+			return Promise.then(next, this.thenFunction);
 		}
 
 		@Override
-		public FunctionState cancel(Throwable cause) {
-			return Promise.then(this.delegate.cancel(cause), this.thenFunction.cancel(cause));
+		public FunctionState cancel() {
+			return Promise.then(this.delegate.cancel(), this.thenFunction.cancel());
 		}
 	}
 

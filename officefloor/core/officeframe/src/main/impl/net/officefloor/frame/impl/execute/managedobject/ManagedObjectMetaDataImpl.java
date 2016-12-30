@@ -347,6 +347,11 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 		 */
 
 		@Override
+		public FunctionState getLatchFunction() {
+			return this.delegate.getLatchFunction();
+		}
+
+		@Override
 		public ManagedFunctionContainer getManagedFunctionContainer() {
 			return this.delegate.getManagedFunctionContainer();
 		}

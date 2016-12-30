@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.execute.flow;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -32,21 +31,16 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class FlowMetaDataImpl implements FlowMetaData {
 
 	/**
-	 * Indicates whether the {@link Flow} should be instigated in a spawned
-	 * {@link ThreadState}.
-	 */
-	private final boolean isSpawnThreadState;
-
-	/**
 	 * {@link ManagedFunctionMetaData} of the initial {@link ManagedFunction} of
 	 * the {@link Flow}.
 	 */
 	private final ManagedFunctionMetaData<?, ?> initialFunctionMetaData;
 
 	/**
-	 * {@link AssetManager} to managed this {@link Flow}.
+	 * Indicates whether the {@link Flow} should be instigated in a spawned
+	 * {@link ThreadState}.
 	 */
-	private final AssetManager flowManager;
+	private final boolean isSpawnThreadState;
 
 	/**
 	 * Initiate.
@@ -57,14 +51,10 @@ public class FlowMetaDataImpl implements FlowMetaData {
 	 * @param initialFunctionMetaData
 	 *            {@link ManagedFunctionMetaData} of the initial
 	 *            {@link ManagedFunction} of the {@link Flow}.
-	 * @param flowManager
-	 *            {@link AssetManager} to managed this {@link Flow}.
 	 */
-	public FlowMetaDataImpl(boolean isSpawnThreadState, ManagedFunctionMetaData<?, ?> initialFunctionMetaData,
-			AssetManager flowManager) {
+	public FlowMetaDataImpl(boolean isSpawnThreadState, ManagedFunctionMetaData<?, ?> initialFunctionMetaData) {
 		this.isSpawnThreadState = isSpawnThreadState;
 		this.initialFunctionMetaData = initialFunctionMetaData;
-		this.flowManager = flowManager;
 	}
 
 	/*
@@ -72,18 +62,13 @@ public class FlowMetaDataImpl implements FlowMetaData {
 	 */
 
 	@Override
-	public boolean isSpawnThreadState() {
-		return this.isSpawnThreadState;
-	}
-
-	@Override
 	public ManagedFunctionMetaData<?, ?> getInitialFunctionMetaData() {
 		return this.initialFunctionMetaData;
 	}
 
 	@Override
-	public AssetManager getFlowManager() {
-		return this.flowManager;
+	public boolean isSpawnThreadState() {
+		return this.isSpawnThreadState;
 	}
 
 }

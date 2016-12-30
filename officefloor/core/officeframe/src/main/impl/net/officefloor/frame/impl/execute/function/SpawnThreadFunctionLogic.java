@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.execute.function;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -86,9 +85,8 @@ public class SpawnThreadFunctionLogic implements FunctionLogic {
 		ProcessState processState = flow.getThreadState().getProcessState();
 
 		// Create thread to execute asynchronously
-		AssetManager flowAssetManager = this.flowMetaData.getFlowManager();
 		FunctionState spawnFunction = processState.spawnThreadState(initialFunctionMetaData, this.parameter,
-				this.completion, flowAssetManager);
+				this.completion);
 
 		// Return the function to spawn the thread state
 		return spawnFunction;

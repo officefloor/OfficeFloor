@@ -23,7 +23,6 @@ import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
@@ -186,12 +185,6 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 				public boolean isSpawnThreadState() {
 					// Dynamic flows are not spawned in thread states
 					return false;
-				}
-
-				@Override
-				public AssetManager getFlowManager() {
-					// Asset Manager not required
-					return null;
 				}
 			};
 

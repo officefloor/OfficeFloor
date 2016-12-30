@@ -17,16 +17,14 @@
  */
 package net.officefloor.frame.integrate.flow;
 
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests parallel invocations.
@@ -39,7 +37,7 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 	 * Flag to record task method invocations.
 	 */
 	public ParallelTest() {
-		this.setRecordReflectiveTaskMethodsInvoked(true);
+		this.setRecordReflectiveFunctionMethodsInvoked(true);
 	}
 
 	/**
@@ -53,16 +51,15 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 	 * Ensures invokes parallel task with active team.
 	 */
 	public void testParallelWithActiveTeam() throws Exception {
-		this.doTest(new OnePersonTeam("PARALLEL", MockTeamSource
-				.createTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("PARALLEL", 100));
 	}
 
 	/**
 	 * <p>
 	 * Does the parallel test with the input {@link Team}.
 	 * <p>
-	 * Given any type of team, the order of {@link FunctionState} execution should be
-	 * the same.
+	 * Given any type of team, the order of {@link FunctionState} execution
+	 * should be the same.
 	 * 
 	 * @param team
 	 *            {@link Team}.
@@ -71,20 +68,15 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 
 		// Configure
 		this.constructTeam("team", team);
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(
-				new ParallelWorkObject("TestParameter"), "work", "first");
-		ReflectiveFunctionBuilder firstTaskBuilder = workBuilder.buildTask("first",
-				"team");
-		firstTaskBuilder.buildFlow("parallel",
-				FlowInstigationStrategyEnum.PARALLEL, Object.class);
-		firstTaskBuilder.setNextTaskInFlow("second");
-		ReflectiveFunctionBuilder parallelTaskBuilder = workBuilder.buildTask(
-				"parallel", "team");
-		parallelTaskBuilder.buildParameter();
-		workBuilder.buildTask("second", "team");
+		ParallelWorkObject work = new ParallelWorkObject();
+		ReflectiveFunctionBuilder firstFunctionBuilder = this.constructFunction(work, "first", "team");
+		firstFunctionBuilder.buildFlow("parallel", Object.class, false);
+		firstFunctionBuilder.setNextFunction("second");
+		this.constructFunction(work, "parallel", "team");
+		this.constructFunction(work, "second", "team");
 
 		// Run
-		this.invokeWork("work", null);
+		this.invokeFunction("first", null);
 
 		// Validate methods invoked
 		this.validateReflectiveMethodOrder("first", "parallel", "second");
@@ -92,20 +84,15 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 
 	public static class ParallelWorkObject {
 
-		public final Object inputParameter;
-
-		public volatile Object parallelParameter;
-
-		public ParallelWorkObject(Object inputParameter) {
-			this.inputParameter = inputParameter;
-		}
-
 		public void first(ReflectiveFlow flow) {
-			flow.doFlow(this.inputParameter);
+			flow.doFlow(null, new FlowCallback() {
+				@Override
+				public void run(Throwable escalation) throws Throwable {
+				}
+			});
 		}
 
-		public void parallel(Object parameter) {
-			this.parallelParameter = parameter;
+		public void parallel() {
 		}
 
 		public void second() {

@@ -25,9 +25,9 @@ import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectCleanupImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
+import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
@@ -173,9 +173,8 @@ public class ProcessStateImpl implements ProcessState {
 		this.completionListeners = completionListeners;
 
 		// Create the main thread state
-		AssetManager mainThreadAssetManager = this.processMetaData.getMainThreadAssetManager();
-		this.mainThreadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), mainThreadAssetManager,
-				callback, callbackThreadState, this, this.processProfiler);
+		this.mainThreadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), callback,
+				callbackThreadState, this, this.processProfiler);
 		this.activeThreads.addEntry(this.mainThreadState);
 
 		// Create all managed object containers (final for thread safety)
@@ -232,7 +231,7 @@ public class ProcessStateImpl implements ProcessState {
 
 	@Override
 	public FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
-			FlowCompletion completion, AssetManager flowAssetManager) {
+			FlowCompletion completion) {
 		return new ProcessOperation() {
 			@Override
 			public FunctionState execute() throws Throwable {
@@ -241,8 +240,8 @@ public class ProcessStateImpl implements ProcessState {
 				ProcessStateImpl process = ProcessStateImpl.this;
 
 				// Create the spawned thread state
-				ThreadState threadState = new ThreadStateImpl(process.processMetaData.getThreadMetaData(),
-						flowAssetManager, completion, process, process.processProfiler);
+				ThreadState threadState = new ThreadStateImpl(process.processMetaData.getThreadMetaData(), completion,
+						process, process.processProfiler);
 
 				// Register as active thread
 				process.activeThreads.addEntry(threadState);
@@ -253,7 +252,8 @@ public class ProcessStateImpl implements ProcessState {
 						null);
 
 				// Spawn the thread state
-				process.officeMetaData.getFunctionLoop().delegateFunction(function);
+				FunctionLoop loop = process.officeMetaData.getFunctionLoop();
+				loop.delegateFunction(function);
 
 				// Thread state spawned
 				return null;

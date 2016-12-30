@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.managedobject;
 
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
@@ -33,6 +34,11 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 
 	/**
+	 * {@link FunctionState} for the {@link AssetLatch} if not ready.
+	 */
+	private final FunctionState latchFunction;
+
+	/**
 	 * {@link ManagedFunctionContainer} requiring the check.
 	 */
 	private final ManagedFunctionContainer managedFunction;
@@ -45,10 +51,13 @@ public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 	/**
 	 * Instantiate.
 	 * 
+	 * @param latchFunction
+	 *            {@link FunctionState} for the {@link AssetLatch} if not ready.
 	 * @param managedFunction
 	 *            {@link ManagedFunctionContainer} requiring the check.
 	 */
-	public ManagedObjectReadyCheckImpl(ManagedFunctionContainer managedFunction) {
+	public ManagedObjectReadyCheckImpl(FunctionState latchFunction, ManagedFunctionContainer managedFunction) {
+		this.latchFunction = latchFunction;
 		this.managedFunction = managedFunction;
 	}
 
@@ -64,6 +73,11 @@ public class ManagedObjectReadyCheckImpl implements ManagedObjectReadyCheck {
 	/*
 	 * ========================= ManagedObjectReadyCheck ======================
 	 */
+
+	@Override
+	public FunctionState getLatchFunction() {
+		return this.latchFunction;
+	}
 
 	@Override
 	public ManagedFunctionContainer getManagedFunctionContainer() {

@@ -808,29 +808,53 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 		};
 		functionManager.invokeProcess(parameter, callback);
 
-		// Block until flow is complete (or times out)
-		int iteration = 0;
-		long startBlockTime = System.currentTimeMillis();
-		synchronized (isComplete) {
-			while (!isComplete[0]) {
+		try {
+			// Block until flow is complete (or times out)
+			int iteration = 0;
+			long startBlockTime = System.currentTimeMillis();
+			synchronized (isComplete) {
+				while (!isComplete[0]) {
 
-				// Only timeout if positive time to run
-				if (secondsToRun > 0) {
-					// Provide heap diagnostics and time out
-					this.timeout(startBlockTime, secondsToRun);
+					// Ensure propagate escalations
+					if (failure[0] != null) {
+						throw failure[0];
+					}
+					this.validateNoTopLevelEscalation();
+
+					// Only timeout if positive time to run
+					if (secondsToRun > 0) {
+						// Provide heap diagnostics and time out
+						this.timeout(startBlockTime, secondsToRun);
+					}
+
+					// Output heap diagnostics after every approximate 3 seconds
+					iteration++;
+					if ((iteration % 30) == 0) {
+						iteration = 0;
+						this.printHeapMemoryDiagnostics();
+					}
+
+					// Wait some time as still executing
+					isComplete.wait(100);
 				}
-
-				// Output heap diagnostics after every approximate 3 seconds
-				iteration++;
-				if ((iteration % 30) == 0) {
-					iteration = 0;
-					this.printHeapMemoryDiagnostics();
+				
+				// Ensure propagate escalations
+				if (failure[0] != null) {
+					throw failure[0];
 				}
+				this.validateNoTopLevelEscalation();
+			}
 
-				// Wait some time as still executing
-				isComplete.wait(100);
+		} catch (Throwable ex) {
+			if (ex instanceof Error) {
+				throw (Error) ex;
+			} else if (ex instanceof Exception) {
+				throw (Exception) ex;
+			} else {
+				throw new Error(ex);
 			}
 		}
+
 	}
 
 }

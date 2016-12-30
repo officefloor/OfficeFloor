@@ -244,15 +244,8 @@ public class ConstructUtil {
 	public static FlowMetaData newFlowMetaData(ManagedFunctionMetaData<?, ?> functionMetaData,
 			boolean isSpawnThreadState, AssetManagerFactory assetManagerFactory, AssetType assetType, String assetName,
 			String responsibility, OfficeFloorIssues issues) {
-
-		// Only create the asset manager if spawning thead state
-		AssetManager flowAssetManager = null;
-		if (isSpawnThreadState) {
-			flowAssetManager = assetManagerFactory.createAssetManager(assetType, assetName, responsibility, issues);
-		}
-
 		// Create and return the flow meta-data
-		return new FlowMetaDataImpl(isSpawnThreadState, functionMetaData, flowAssetManager);
+		return new FlowMetaDataImpl(isSpawnThreadState, functionMetaData);
 	}
 
 	/**

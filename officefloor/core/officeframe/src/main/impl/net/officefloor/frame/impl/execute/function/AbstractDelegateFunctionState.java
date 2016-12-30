@@ -77,8 +77,8 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 	}
 
 	@Override
-	public FunctionState cancel(Throwable cause) {
-		return this.delegate.cancel(cause);
+	public FunctionState cancel() {
+		return this.delegate.cancel();
 	}
 
 }

@@ -417,7 +417,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			}
 
 			// Complete this function (flags state complete)
-			FunctionState completeFunction = this.complete();
+			FunctionState completeFunction = this.complete(false);
 			if (completeFunction != null) {
 				return Promise.then(completeFunction, this);
 			}
@@ -433,6 +433,12 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		default:
 			throw new IllegalStateException("Should not be in state " + this.containerState);
 		}
+	}
+
+	@Override
+	public FunctionState cancel() {
+		// Complete immediately (does clean up)
+		return this.complete(true);
 	}
 
 	@Override
@@ -540,25 +546,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
 
 			// Obtain the managed object container
-			ManagedObjectContainer moContainer = null;
-			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
-			switch (index.getManagedObjectScope()) {
-			case FUNCTION:
-				moContainer = container.managedObjects[scopeIndex];
-				break;
-
-			case THREAD:
-				moContainer = container.getThreadState().getManagedObjectContainer(scopeIndex);
-				break;
-
-			case PROCESS:
-				moContainer = container.getThreadState().getProcessState().getManagedObjectContainer(scopeIndex);
-				break;
-
-			default:
-				throw new IllegalStateException(
-						"Unknown " + ManagedObject.class.getSimpleName() + " scope " + index.getManagedObjectScope());
-			}
+			ManagedObjectContainer moContainer = ManagedObjectContainerImpl.getManagedObjectContainer(index, container);
 
 			// Return the object from the container
 			return moContainer.getObject();
@@ -733,16 +721,19 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 					cleanUpFunctions = Promise.then(container.sequentialFunction.clear(), cleanUpFunctions);
 				}
 
-				// Clear this function
-				return Promise.then(cleanUpFunctions, container.complete());
+				// Clear this function (complete due to cancel)
+				return Promise.then(cleanUpFunctions, container.complete(true));
 			}
 		};
 	}
 
 	/**
 	 * Completes this {@link FunctionState}.
+	 * 
+	 * @param isCancel
+	 *            Flags whether completed due to cancel.
 	 */
-	private FunctionState complete() {
+	private FunctionState complete(final boolean isCancel) {
 		return new ManagedFunctionOperation() {
 			@Override
 			public FunctionState execute() throws Throwable {
@@ -767,16 +758,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				}
 
 				// Complete this function
-				cleanUpFunctions = Promise.then(cleanUpFunctions, container.flow.managedFunctionComplete(container));
-
-				// Function complete
-				return Promise.then(cleanUpFunctions, new ManagedFunctionOperation() {
-					@Override
-					public FunctionState execute() throws Throwable {
-						container.containerState = ManagedFunctionState.COMPLETED;
-						return null;
-					}
-				});
+				container.containerState = ManagedFunctionState.COMPLETED;
+				return Promise.then(cleanUpFunctions, container.flow.managedFunctionComplete(container, isCancel));
 			}
 		};
 	}
@@ -808,8 +791,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		}
 
 		@Override
-		public FunctionState cancel(Throwable cause) {
-			return ManagedFunctionContainerImpl.this.cancel(cause);
+		public FunctionState cancel() {
+			return ManagedFunctionContainerImpl.this.cancel();
 		}
 
 		@Override

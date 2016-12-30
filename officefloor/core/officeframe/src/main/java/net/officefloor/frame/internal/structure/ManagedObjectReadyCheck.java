@@ -27,11 +27,20 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface ManagedObjectReadyCheck {
 
 	/**
-	 * Obtains the {@link ManagedFunctionContainer} requiring the check on the
-	 * {@link ManagedObject}.
+	 * Obtains the {@link FunctionState} to use in an {@link AssetLatch} if not
+	 * ready.
 	 * 
-	 * @return {@link ManagedFunctionContainer} requiring the check on the
-	 *         {@link ManagedObject}.
+	 * @return {@link FunctionState} to use in an {@link AssetLatch} if not
+	 *         ready.
+	 */
+	FunctionState getLatchFunction();
+
+	/**
+	 * Obtains the {@link ManagedFunctionContainer} to access dependent
+	 * {@link ManagedObject} instances.
+	 * 
+	 * @return {@link ManagedFunctionContainer} to access dependent
+	 *         {@link ManagedObject} instances.
 	 */
 	ManagedFunctionContainer getManagedFunctionContainer();
 

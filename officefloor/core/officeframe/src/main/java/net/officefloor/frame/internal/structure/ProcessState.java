@@ -78,12 +78,10 @@ public interface ProcessState {
 	 * @param callback
 	 *            Optional {@link FlowCompletion} to be notified of completion
 	 *            of the spawned {@link ThreadState}.
-	 * @param flowAssetManager
-	 *            {@link AssetManager} for the {@link Flow}.
 	 * @return {@link FunctionState} to spawn the {@link ThreadState}.
 	 */
 	FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
-			FlowCompletion completion, AssetManager flowAssetManager);
+			FlowCompletion completion);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.

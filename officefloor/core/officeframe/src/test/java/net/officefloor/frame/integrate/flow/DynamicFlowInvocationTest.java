@@ -22,7 +22,6 @@ import java.util.Map;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -30,10 +29,9 @@ import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
- * Ensure able to invoke flow dynamically by {@link Work} and {@link ManagedFunction} name.
+ * Ensure able to invoke flow dynamically by {@link ManagedFunction} name.
  * 
  * @author Daniel Sagenschneider
  */
@@ -47,26 +45,21 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		// Configure
 		this.constructTeam("TEAM", new PassiveTeam());
 		DynamicInvokeFlowWork work = new DynamicInvokeFlowWork();
-		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
-				"initialTask");
-		ReflectiveFunctionBuilder initialTask = builder.buildTask("initialTask",
-				"TEAM");
-		initialTask.buildTaskContext();
-		ReflectiveFunctionBuilder dynamicTask = builder.buildTask("dynamicTask",
-				"TEAM");
+		ReflectiveFunctionBuilder initialTask = this.constructFunction(work, "initialTask", "TEAM");
+		initialTask.buildManagedFunctionContext();
+		ReflectiveFunctionBuilder dynamicTask = this.constructFunction(work, "dynamicTask", "TEAM");
 		dynamicTask.buildParameter();
 
-		// Execute the work
-		this.invokeWork("WORK", null);
+		// Execute the function
+		this.invokeFunction("initialTask", null);
 
 		// Ensure the dynamic task is invoked with the parameter
 		assertTrue("Dynamic task should be invoked", work.isDynamicTaskInvoked);
-		assertEquals("Incorrect parameter for dynamic task", "PARAMETER",
-				work.parameter);
+		assertEquals("Incorrect parameter for dynamic task", "PARAMETER", work.parameter);
 	}
 
 	/**
-	 * Mock {@link Work} for testing.
+	 * Mock work.
 	 */
 	public static class DynamicInvokeFlowWork {
 
@@ -86,8 +79,8 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		 * @param context
 		 *            {@link ManagedFunctionContext}.
 		 */
-		public void initialTask(ManagedFunctionContext<?, ?, ?> context) throws Exception {
-			context.doFlow("WORK", "dynamicTask", "PARAMETER");
+		public void initialTask(ManagedFunctionContext<?, ?> context) throws Exception {
+			context.doFlow("dynamicTask", "PARAMETER", null);
 		}
 
 		/**
@@ -112,30 +105,24 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 
 		// Configure
 		this.constructTeam("TEAM", new PassiveTeam());
-		this.constructManagedObject("MO", new MaintainStateManagedObject(),
-				this.getOfficeName());
+		this.constructManagedObject("MO", new MaintainStateManagedObject(), this.getOfficeName());
 		MaintainStateWork work = new MaintainStateWork("KEY", CONTEXT_VALUE);
-		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
-				"initialTask");
-		ReflectiveFunctionBuilder initialTask = builder.buildTask("initialTask",
-				"TEAM");
-		initialTask.buildTaskContext();
+		ReflectiveFunctionBuilder initialTask = this.constructFunction(work, "initialTask", "TEAM");
+		initialTask.buildManagedFunctionContext();
 		initialTask.buildObject("MO", ManagedObjectScope.THREAD);
-		ReflectiveFunctionBuilder dynamicTask = builder.buildTask("dynamicTask",
-				"TEAM");
+		ReflectiveFunctionBuilder dynamicTask = this.constructFunction(work, "dynamicTask", "TEAM");
 		dynamicTask.buildObject("MO");
 
-		// Execute the work
-		this.invokeWork("WORK", null);
+		// Execute the function
+		this.invokeFunction("initialTask", null);
 
 		// Ensure the dynamic task is invoked with the parameter
 		assertTrue("Dynamic task should be invoked", work.isDynamicTaskInvoked);
-		assertEquals("Incorrect context value for dynamic task", CONTEXT_VALUE,
-				work.obtainedContextValue);
+		assertEquals("Incorrect context value for dynamic task", CONTEXT_VALUE, work.obtainedContextValue);
 	}
 
 	/**
-	 * Mock {@link Work} for testing.
+	 * Mock work.
 	 */
 	public static class MaintainStateWork {
 
@@ -180,14 +167,14 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		 * @param managedObject
 		 *            {@link ManagedObject} value.
 		 */
-		public void initialTask(ManagedFunctionContext<?, ?, ?> context,
-				Map<String, Object> managedObject) throws Exception {
+		public void initialTask(ManagedFunctionContext<?, ?> context, Map<String, Object> managedObject)
+				throws Exception {
 
 			// Provide context value
 			managedObject.put(this.contextKey, this.contextValue);
 
 			// Invoke the dynamic flow
-			context.doFlow("WORK", "dynamicTask", null);
+			context.doFlow("dynamicTask", null, null);
 		}
 
 		/**

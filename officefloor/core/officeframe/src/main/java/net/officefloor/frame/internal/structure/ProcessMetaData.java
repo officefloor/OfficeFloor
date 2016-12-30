@@ -36,13 +36,6 @@ public interface ProcessMetaData {
 	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
 
 	/**
-	 * Obtains the {@link AssetManager} for the main {@link ThreadState}.
-	 * 
-	 * @return {@link AssetManager} for the main {@link ThreadState}.
-	 */
-	AssetManager getMainThreadAssetManager();
-
-	/**
 	 * Obtains the {@link ThreadMetaData} of {@link ThreadState} instances
 	 * spawned from the {@link ProcessState} of this {@link ProcessMetaData}.
 	 * 

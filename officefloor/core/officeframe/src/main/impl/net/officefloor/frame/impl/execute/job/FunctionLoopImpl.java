@@ -263,21 +263,9 @@ public class FunctionLoopImpl implements FunctionLoop {
 
 		@Override
 		public void cancel(Throwable cause) {
-
-			// Cancel the job
-			FunctionState thenFunction;
-			try {
-				// Handle cancellation of the job
-				thenFunction = this.initialFunction.cancel(cause);
-
-			} catch (Throwable escalation) {
-				thenFunction = this.initialFunction.handleEscalation(escalation);
-			}
-
-			// Undertake canceling of the job
-			if (thenFunction != null) {
-				new SafeLoop(thenFunction, this.currentTeam).run();
-			}
+			// Handle cancellation of the job
+			SafeLoop loop = new SafeLoop(this.initialFunction.handleEscalation(cause), this.currentTeam);
+			loop.run();
 		}
 	}
 

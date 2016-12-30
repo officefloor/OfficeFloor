@@ -21,7 +21,6 @@ import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -95,12 +94,6 @@ public class FunctionManagerImpl implements FunctionManager {
 		@Override
 		public boolean isSpawnThreadState() {
 			return false; // already in new process
-		}
-
-		@Override
-		public AssetManager getFlowManager() {
-			// No AssetManager required
-			return null;
 		}
 	}
 

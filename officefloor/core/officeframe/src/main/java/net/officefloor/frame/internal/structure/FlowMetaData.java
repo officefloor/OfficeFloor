@@ -27,15 +27,6 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 public interface FlowMetaData {
 
 	/**
-	 * Indicates whether the {@link Flow} should be instigated within a spawned
-	 * {@link ThreadState}.
-	 * 
-	 * @return <code>true</code> to execute the {@link Flow} within a spawned
-	 *         {@link ThreadState}.
-	 */
-	boolean isSpawnThreadState();
-
-	/**
 	 * Obtains the {@link ManagedFunctionMetaData} of the initial
 	 * {@link ManagedFunction} within the {@link Flow}.
 	 * 
@@ -45,10 +36,12 @@ public interface FlowMetaData {
 	ManagedFunctionMetaData<?, ?> getInitialFunctionMetaData();
 
 	/**
-	 * Obtains the {@link AssetManager} to managed this {@link Flow}.
+	 * Indicates whether the {@link Flow} should be instigated within a spawned
+	 * {@link ThreadState}.
 	 * 
-	 * @return {@link AssetManager} to managed this {@link Flow}.
+	 * @return <code>true</code> to execute the {@link Flow} within a spawned
+	 *         {@link ThreadState}.
 	 */
-	AssetManager getFlowManager();
+	boolean isSpawnThreadState();
 
 }
