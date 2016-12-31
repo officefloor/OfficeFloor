@@ -30,7 +30,6 @@ import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
@@ -199,8 +198,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 	}
 
 	@Override
-	public void linkOfficeMetaData(ManagedFunctionLocator functionLocator, AssetManagerFactory assetManagerFactory,
-			OfficeFloorIssues issues) {
+	public void linkOfficeMetaData(ManagedFunctionLocator functionLocator, OfficeFloorIssues issues) {
 
 		// Obtain the listing of flow meta-data
 		GovernanceFlowConfiguration<F>[] flowConfigurations = this.governanceConfiguration.getFlowConfiguration();
@@ -232,8 +230,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 			boolean isSpawnThreadState = flowConfiguration.isSpawnThreadState();
 
 			// Create and add the flow meta-data
-			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(functionMetaData, isSpawnThreadState, assetManagerFactory,
-					AssetType.GOVERNANCE, this.governanceName, "Flow" + i, issues);
+			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(functionMetaData, isSpawnThreadState);
 		}
 
 		// Create the escalation procedure

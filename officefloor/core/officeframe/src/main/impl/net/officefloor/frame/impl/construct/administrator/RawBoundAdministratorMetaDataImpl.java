@@ -39,7 +39,6 @@ import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
@@ -171,8 +170,8 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public RawBoundAdministratorMetaData<?, ?>[] constructRawBoundAdministratorMetaData(
-			AdministratorConfiguration<?, ?>[] configuration, SourceContext sourceContext,
-			OfficeFloorIssues issues, AdministratorScope administratorScope, AssetType assetType, String assetName,
+			AdministratorConfiguration<?, ?>[] configuration, SourceContext sourceContext, OfficeFloorIssues issues,
+			AdministratorScope administratorScope, AssetType assetType, String assetName,
 			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
 			FunctionLoop functionLoop) {
 
@@ -224,8 +223,8 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 */
 	@SuppressWarnings("unchecked")
 	private <a extends Enum<a>, i, AS extends AdministratorSource<i, a>> RawBoundAdministratorMetaData<i, a> constructRawBoundAdministratorMetaData(
-			AdministratorConfiguration<a, AS> configuration, SourceContext sourceContext,
-			OfficeFloorIssues issues, AdministratorIndex administratorIndex, AssetType assetType, String assetName,
+			AdministratorConfiguration<a, AS> configuration, SourceContext sourceContext, OfficeFloorIssues issues,
+			AdministratorIndex administratorIndex, AssetType assetType, String assetName,
 			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
 			FunctionLoop functionLoop) {
 
@@ -492,7 +491,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 
 	@Override
 	public void linkOfficeMetaData(OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
+			OfficeFloorIssues issues) {
 
 		// Create the set of required duties to ensure they are configured
 		Set<DutyKey<A>> requiredDuties = new HashSet<DutyKey<A>>(this.linkedDutyKeys);
@@ -541,8 +540,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 				}
 
 				// Create and register the flow for the duty.
-				dutyFlows[i] = ConstructUtil.newFlowMetaData(functionMetaData, false, assetManagerFactory,
-						AssetType.ADMINISTRATOR, this.boundAdministratorName, "Duty " + dutyKey + " Flow " + i, issues);
+				dutyFlows[i] = ConstructUtil.newFlowMetaData(functionMetaData, false);
 			}
 
 			// Obtain the governance mapping for the duty

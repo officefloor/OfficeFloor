@@ -101,14 +101,12 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            names.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
 	void manageByOffice(RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
 			OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
-			Map<String, TeamManagement> officeTeams, AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
+			Map<String, TeamManagement> officeTeams, OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link ManagedObjectExecuteContextFactory} for the

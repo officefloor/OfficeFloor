@@ -97,12 +97,10 @@ public interface RawBoundAdministratorMetaData<E, A extends Enum<A>> {
 	 *            {@link OfficeMetaData}.
 	 * @param functionLocator
 	 *            {@link ManagedFunctionLocator}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
 	void linkOfficeMetaData(OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
+			OfficeFloorIssues issues);
 
 }

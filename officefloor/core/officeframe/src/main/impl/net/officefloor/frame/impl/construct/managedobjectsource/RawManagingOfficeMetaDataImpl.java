@@ -34,7 +34,6 @@ import net.officefloor.frame.internal.configuration.InputManagedObjectConfigurat
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
@@ -213,8 +212,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 	@Override
 	public void manageByOffice(RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
 			OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
-			Map<String, TeamManagement> officeTeams, AssetManagerFactory assetManagerFactory,
-			OfficeFloorIssues issues) {
+			Map<String, TeamManagement> officeTeams, OfficeFloorIssues issues) {
 
 		// Obtain the name of the managed object source
 		String managedObjectSourceName = this.rawManagedObjectMetaData.getManagedObjectName();
@@ -249,8 +247,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 			}
 
 			// Obtain the initial flow of work as recycle flow
-			recycleFlowMetaData = ConstructUtil.newFlowMetaData(recycleFunctionMetaData, false, assetManagerFactory,
-					AssetType.FUNCTION, this.recycleFunctionName, "Recycle", issues);
+			recycleFlowMetaData = ConstructUtil.newFlowMetaData(recycleFunctionMetaData, false);
 		}
 
 		// Load remaining state to existing managed object meta-data
@@ -381,8 +378,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 			}
 
 			// Create and specify the flow meta-data
-			flows[i] = ConstructUtil.newFlowMetaData(functionMetaData, false, assetManagerFactory,
-					AssetType.MANAGED_OBJECT, managedObjectSourceName, flowLabel, issues);
+			flows[i] = ConstructUtil.newFlowMetaData(functionMetaData, false);
 		}
 
 		// Ensure no extra flow configurations

@@ -60,13 +60,10 @@ public interface RawGovernanceMetaData<E, F extends Enum<F>> {
 	 * 
 	 * @param taskLocator
 	 *            {@link ManagedFunctionLocator}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkOfficeMetaData(ManagedFunctionLocator taskLocator, AssetManagerFactory assetManagerFactory,
-			OfficeFloorIssues issues);
+	void linkOfficeMetaData(ManagedFunctionLocator taskLocator, OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link GovernanceMetaData}.

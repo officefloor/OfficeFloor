@@ -26,10 +26,8 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -229,21 +227,10 @@ public class ConstructUtil {
 	 * @param isSpawnThreadState
 	 *            <code>true</code> for {@link Flow} to spawn a
 	 *            {@link ThreadState}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
-	 * @param assetType
-	 *            {@link AssetType} requiring the {@link FlowMetaData}.
-	 * @param assetName
-	 *            Name of the {@link Asset} requiring the {@link FlowMetaData}.
-	 * @param responsibility
-	 *            Responsibility for the possible {@link AssetManager}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
 	 * @return New {@link FlowMetaData}.
 	 */
 	public static FlowMetaData newFlowMetaData(ManagedFunctionMetaData<?, ?> functionMetaData,
-			boolean isSpawnThreadState, AssetManagerFactory assetManagerFactory, AssetType assetType, String assetName,
-			String responsibility, OfficeFloorIssues issues) {
+			boolean isSpawnThreadState) {
 		// Create and return the flow meta-data
 		return new FlowMetaDataImpl(isSpawnThreadState, functionMetaData);
 	}

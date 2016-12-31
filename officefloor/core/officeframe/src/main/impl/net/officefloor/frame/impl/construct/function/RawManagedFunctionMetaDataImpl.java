@@ -734,36 +734,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 	}
 
 	@Override
-	public RawOfficeMetaData getRawOfficeMetaData() {
-		// TODO implement RawManagedFunctionMetaData<O,F>.getRawOfficeMetaData
-		throw new UnsupportedOperationException("TODO implement RawManagedFunctionMetaData<O,F>.getRawOfficeMetaData");
-
-	}
-
-	@Override
-	public RawBoundManagedObjectMetaData getScopeManagedObjectMetaData(String scopeManagedObjectName) {
-		// TODO implement
-		// RawManagedFunctionMetaData<O,F>.getScopeManagedObjectMetaData
-		throw new UnsupportedOperationException(
-				"TODO implement RawManagedFunctionMetaData<O,F>.getScopeManagedObjectMetaData");
-
-	}
-
-	@Override
-	public RawBoundAdministratorMetaData<?, ?> getScopeAdministratorMetaData(String scopeAdministratorName) {
-		// TODO implement
-		// RawManagedFunctionMetaData<O,F>.getScopeAdministratorMetaData
-		throw new UnsupportedOperationException(
-				"TODO implement RawManagedFunctionMetaData<O,F>.getScopeAdministratorMetaData");
-
-	}
-
-	@Override
-	public void linkFunctions(ManagedFunctionLocator functionLocator, AssetManagerFactory assetManagerFactory,
-			OfficeFloorIssues issues) {
-
-		// Obtain the asset name
-		String assetName = this.functionName;
+	public void linkFunctions(ManagedFunctionLocator functionLocator, OfficeFloorIssues issues) {
 
 		// Obtain the listing of flow meta-data
 		ManagedFunctionFlowConfiguration<F>[] flowConfigurations = this.configuration.getFlowConfiguration();
@@ -794,8 +765,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			boolean isSpawnThreadState = flowConfiguration.isSpawnThreadState();
 
 			// Create and add the flow meta-data
-			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(functionMetaData, isSpawnThreadState, assetManagerFactory,
-					AssetType.FUNCTION, assetName, "Flow" + i, issues);
+			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(functionMetaData, isSpawnThreadState);
 		}
 
 		// Obtain the next function

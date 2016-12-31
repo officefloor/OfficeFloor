@@ -22,10 +22,10 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.OfficeManager;
+import net.officefloor.frame.internal.structure.FunctionLoop;
+import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-
-import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link AssetManagerFactoryImpl}.
@@ -35,49 +35,45 @@ import org.easymock.AbstractMatcher;
 public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link OfficeManager}.
+	 * {@link ProcessState}.
 	 */
-	private final OfficeManager officeManager = this
-			.createMock(OfficeManager.class);
+	private final ProcessState processState = this.createMock(ProcessState.class);
+
+	/**
+	 * {@link OfficeClock}.
+	 */
+	private final OfficeClock clock = this.createMock(OfficeClock.class);
+
+	/**
+	 * {@link FunctionLoop}.
+	 */
+	private final FunctionLoop functionLoop = this.createMock(FunctionLoop.class);
 
 	/**
 	 * {@link AssetManagerFactory}.
 	 */
-	private final AssetManagerFactory factory = new AssetManagerFactoryImpl(
-			this.officeManager);
+	private final AssetManagerFactoryImpl factory = new AssetManagerFactoryImpl(this.processState, this.clock,
+			this.functionLoop);
 
 	/**
 	 * {@link OfficeFloorIssues}.
 	 */
-	private final OfficeFloorIssues issues = this
-			.createMock(OfficeFloorIssues.class);
+	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
 
 	/**
 	 * Ensures able to create an {@link AssetManager}.
 	 */
 	public void testCreateAssetManager() {
 
-		// Record registering the asset manager
-		final AssetManager[] registeredAssetManager = new AssetManager[1];
-		this.officeManager.registerAssetManager(null);
-		this.control(this.officeManager).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				registeredAssetManager[0] = (AssetManager) actual[0];
-				return true;
-			}
-		});
-
 		// Create the Asset Manager
 		this.replayMockObjects();
-		AssetManager assetManager = this.factory.createAssetManager(
-				AssetType.MANAGED_OBJECT, "connection", "timeout", this.issues);
+		AssetManager assetManager = this.factory.createAssetManager(AssetType.MANAGED_OBJECT, "connection", "timeout",
+				this.issues);
 		assertNotNull("Must create asset manager", assetManager);
 		this.verifyMockObjects();
 
 		// Ensure returned asset manager is also registered
-		assertEquals("Incorrect registered asset manager", assetManager,
-				registeredAssetManager[0]);
+		assertEquals("Incorrect registered asset manager", assetManager, this.factory.getAssetManagers()[0]);
 	}
 
 	/**
@@ -90,35 +86,22 @@ public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 		final String responsibility = "timeout";
 
 		// Record only creating the first of the duplicates
-		final AssetManager[] registeredAssetManager = new AssetManager[1];
-		this.officeManager.registerAssetManager(null);
-		this.control(this.officeManager).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertNull("Should only register first",
-						registeredAssetManager[0]);
-				registeredAssetManager[0] = (AssetManager) actual[0];
-				return true;
-			}
-		});
-		this.issues.addIssue(assetType, assetName,
-				"AssetManager already responsible for 'timeout'");
+		this.issues.addIssue(assetType, assetName, "AssetManager already responsible for 'timeout'");
 
 		// Attempt to create the Asset Manager twice
 		this.replayMockObjects();
-		AssetManager assetManagerOne = this.factory.createAssetManager(
-				assetType, assetName, responsibility, this.issues);
-		assertNotNull("Should create asset manager on first attempt",
-				assetManagerOne);
-		AssetManager assetManagerTwo = this.factory.createAssetManager(
-				assetType, assetName, responsibility, this.issues);
-		assertNull("Should not create asset manager for same asset",
-				assetManagerTwo);
+		AssetManager assetManagerOne = this.factory.createAssetManager(assetType, assetName, responsibility,
+				this.issues);
+		assertNotNull("Should create asset manager on first attempt", assetManagerOne);
+		AssetManager assetManagerTwo = this.factory.createAssetManager(assetType, assetName, responsibility,
+				this.issues);
+		assertNull("Should not create asset manager for same asset", assetManagerTwo);
 		this.verifyMockObjects();
 
 		// Ensure registered asset manager is the first
-		assertEquals("Incorrect registered asset manager", assetManagerOne,
-				registeredAssetManager[0]);
+		AssetManager[] registered = this.factory.getAssetManagers();
+		assertEquals("Incorrect number of registered asset managers", 1, registered.length);
+		assertEquals("Incorrect registered asset manager", assetManagerOne, registered[0]);
 	}
 
 }

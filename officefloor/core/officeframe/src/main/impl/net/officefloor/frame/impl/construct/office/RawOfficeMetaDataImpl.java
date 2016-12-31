@@ -50,7 +50,6 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationCon
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
@@ -538,8 +537,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			}
 
 			// Create the startup flow meta-data
-			FlowMetaData startupFlow = ConstructUtil.newFlowMetaData(startupFunctionMetaData, false,
-					officeAssetManagerFactory, AssetType.OFFICE, officeName, "StartupTask" + i, issues);
+			FlowMetaData startupFlow = ConstructUtil.newFlowMetaData(startupFunctionMetaData, false);
 
 			// TODO consider providing a parameter to the startup task
 			Object parameter = null;
@@ -586,19 +584,18 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
 			officeManagingManagedObject.manageByOffice(processBoundManagedObjects, officeMetaData, functionLocator,
-					officeTeams, officeAssetManagerFactory, issues);
+					officeTeams, issues);
 		}
 
 		// Link functions within the meta-data of the office
 		for (RawManagedFunctionMetaData<?, ?> rawFunctionMetaData : rawFunctionMetaDatas) {
-			rawFunctionMetaData.linkFunctions(functionLocator, officeAssetManagerFactory, issues);
+			rawFunctionMetaData.linkFunctions(functionLocator, issues);
 		}
-		this.linkFunctions(officeMetaData, functionLocator, officeAssetManagerFactory, threadBoundAdministrators,
-				issues);
+		this.linkFunctions(officeMetaData, functionLocator, threadBoundAdministrators, issues);
 
 		// Link functions for Governance
 		for (RawGovernanceMetaData<?, ?> rawGovernance : rawGovernanceMetaDataList) {
-			rawGovernance.linkOfficeMetaData(functionLocator, officeAssetManagerFactory, issues);
+			rawGovernance.linkOfficeMetaData(functionLocator, issues);
 		}
 
 		// Return the raw office meta-data
@@ -661,18 +658,15 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 	 *            {@link OfficeMetaData}.
 	 * @param functionLocator
 	 *            {@link ManagedFunctionLocator}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
 	 * @param rawBoundManagedObjects
 	 *            {@link RawBoundAdministratorMetaData} instances.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
 	private void linkFunctions(OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
-			AssetManagerFactory assetManagerFactory, RawBoundAdministratorMetaData<?, ?>[] rawBoundAdministrators,
-			OfficeFloorIssues issues) {
+			RawBoundAdministratorMetaData<?, ?>[] rawBoundAdministrators, OfficeFloorIssues issues) {
 		for (RawBoundAdministratorMetaData<?, ?> rawBoundAdministrator : rawBoundAdministrators) {
-			rawBoundAdministrator.linkOfficeMetaData(officeMetaData, functionLocator, assetManagerFactory, issues);
+			rawBoundAdministrator.linkOfficeMetaData(officeMetaData, functionLocator, issues);
 		}
 	}
 
