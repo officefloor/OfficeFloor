@@ -30,8 +30,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * @author Daniel Sagenschneider
  */
 @TestSource
-public class InputManagedObjectSource extends
-		AbstractManagedObjectSource<None, InputManagedObjectSource.Flows> {
+public class InputManagedObjectSource extends AbstractManagedObjectSource<None, InputManagedObjectSource.Flows> {
 
 	/**
 	 * Keys of {@link Flow} instances instigated.
@@ -60,11 +59,9 @@ public class InputManagedObjectSource extends
 	 * @param delay
 	 *            Delay to invoke process.
 	 */
-	public static void input(Object parameter, ManagedObject managedObject,
-			long delay) {
+	public static void input(Object parameter, ManagedObject managedObject, long delay) {
 		// Input the parameter
-		INSTANCE.executeContext.invokeProcess(Flows.INPUT, parameter,
-				managedObject, delay);
+		INSTANCE.executeContext.invokeProcess(Flows.INPUT, parameter, managedObject, delay, null);
 	}
 
 	/**
@@ -84,15 +81,13 @@ public class InputManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, Flows> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
 		context.setObjectClass(this.getClass());
 		context.addFlow(Flows.INPUT, Object.class);
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<Flows> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
 		this.executeContext = context;
 	}
 

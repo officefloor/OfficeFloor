@@ -53,7 +53,8 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		// Add the first work
 		WorkOne workOne = new WorkOne(parameter);
 		ManagedFunctionBuilder<WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> taskOneBuilder = this
-				.constructFunction("SENDER", workOne, "TEAM", null, null);
+				.constructFunction("SENDER", workOne);
+		taskOneBuilder.setTeam("TEAM");
 		taskOneBuilder.addManagedObject("mo-one", "MANAGED_OBJECT");
 		taskOneBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(), "RECEIVER", Object.class, false);
 		taskOneBuilder.linkManagedObject(WorkOneManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(), "mo-one",
@@ -62,7 +63,8 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		// Add the second work
 		WorkTwo workTwo = new WorkTwo();
 		ManagedFunctionBuilder<WorkTwoManagedObjectsEnum, NoDelegatesEnum> taskTwoBuilder = this
-				.constructFunction("RECEIVER", workTwo, "TEAM", null, null);
+				.constructFunction("RECEIVER", workTwo);
+		taskTwoBuilder.setTeam("TEAM");
 		taskTwoBuilder.addManagedObject("mo-two", "MANAGED_OBJECT");
 		taskTwoBuilder.linkManagedObject(WorkTwoManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(), "mo-two",
 				ManagedObjectOne.class);

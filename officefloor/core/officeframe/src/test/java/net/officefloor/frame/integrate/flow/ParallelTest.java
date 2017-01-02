@@ -69,11 +69,12 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 		// Configure
 		this.constructTeam("team", team);
 		ParallelWorkObject work = new ParallelWorkObject();
-		ReflectiveFunctionBuilder firstFunctionBuilder = this.constructFunction(work, "first", "team");
+		ReflectiveFunctionBuilder firstFunctionBuilder = this.constructFunction(work, "first");
+		firstFunctionBuilder.getBuilder().setTeam("team");
 		firstFunctionBuilder.buildFlow("parallel", Object.class, false);
 		firstFunctionBuilder.setNextFunction("second");
-		this.constructFunction(work, "parallel", "team");
-		this.constructFunction(work, "second", "team");
+		this.constructFunction(work, "parallel").getBuilder().setTeam("team");
+		this.constructFunction(work, "second").getBuilder().setTeam("team");
 
 		// Run
 		this.invokeFunction("first", null);

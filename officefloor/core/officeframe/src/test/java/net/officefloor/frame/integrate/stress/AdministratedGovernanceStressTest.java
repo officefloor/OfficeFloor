@@ -28,7 +28,7 @@ import net.officefloor.frame.integrate.governance.MockTransactionalAdministrator
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.MockTeamSource;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
  * <p>
@@ -39,8 +39,7 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBu
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratedGovernanceStressTest extends
-		AbstractGovernanceStressTestCase {
+public class AdministratedGovernanceStressTest extends AbstractGovernanceStressTestCase {
 
 	/**
 	 * Ensures no issues arising in stress {@link Governance} with a
@@ -48,7 +47,7 @@ public class AdministratedGovernanceStressTest extends
 	 */
 	@StressTest
 	public void test_StressGovernance_OnePersonTeam() throws Throwable {
-		this.doTest(new OnePersonTeam("TEST", MockTeamSource.createTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -57,8 +56,7 @@ public class AdministratedGovernanceStressTest extends
 	 */
 	@StressTest
 	public void test_StressGovernance_LeaderFollowerTeam() throws Throwable {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 3,
-				100));
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 3, 100));
 	}
 
 	/**
@@ -67,45 +65,35 @@ public class AdministratedGovernanceStressTest extends
 	 */
 	@StressTest
 	public void test_StressGovernance_ExecutorFixedTeam() throws Throwable {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				MockTeamSource.createTeamIdentifier(), 3));
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 3));
 	}
 
 	@Override
-	protected boolean configure(ReflectiveFunctionBuilder commitTask,
-			ReflectiveFunctionBuilder rollbackTask, ReflectiveFunctionBuilder tidyUpTask) {
+	protected boolean configure(ReflectiveFunctionBuilder commitTask, ReflectiveFunctionBuilder rollbackTask,
+			ReflectiveFunctionBuilder tidyUpTask) {
 
 		// Flag to manually administer governance
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 		officeBuilder.setManuallyManageGovernance(true);
 
 		// Configure the Administration
-		AdministratorBuilder<TransactionDutyKey> admin = this
-				.constructAdministrator("ADMIN",
-						MockTransactionalAdministratorSource.class, TEAM_NAME);
+		AdministratorBuilder<TransactionDutyKey> admin = this.constructAdministrator("ADMIN",
+				MockTransactionalAdministratorSource.class, TEAM_NAME);
 		admin.administerManagedObject("MO");
-		admin.addDuty("BEGIN").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, GOVERNANCE_NAME);
-		admin.addDuty("COMMIT").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, GOVERNANCE_NAME);
-		admin.addDuty("ROLLBACK").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, GOVERNANCE_NAME);
+		admin.addDuty("BEGIN").linkGovernance(TransactionGovernanceKey.TRANSACTION, GOVERNANCE_NAME);
+		admin.addDuty("COMMIT").linkGovernance(TransactionGovernanceKey.TRANSACTION, GOVERNANCE_NAME);
+		admin.addDuty("ROLLBACK").linkGovernance(TransactionGovernanceKey.TRANSACTION, GOVERNANCE_NAME);
 
 		// Configure commit Task
-		commitTask.getBuilder().linkPreTaskAdministration("ADMIN",
-				TransactionDutyKey.BEGIN);
-		commitTask.getBuilder().linkPostTaskAdministration("ADMIN",
-				TransactionDutyKey.COMMIT);
+		commitTask.getBuilder().linkPreFunctionAdministration("ADMIN", TransactionDutyKey.BEGIN);
+		commitTask.getBuilder().linkPostFunctionAdministration("ADMIN", TransactionDutyKey.COMMIT);
 
 		// Configure rollback Task
-		rollbackTask.getBuilder().linkPreTaskAdministration("ADMIN",
-				TransactionDutyKey.BEGIN);
-		rollbackTask.getBuilder().linkPostTaskAdministration("ADMIN",
-				TransactionDutyKey.ROLLBACK);
+		rollbackTask.getBuilder().linkPreFunctionAdministration("ADMIN", TransactionDutyKey.BEGIN);
+		rollbackTask.getBuilder().linkPostFunctionAdministration("ADMIN", TransactionDutyKey.ROLLBACK);
 
 		// Configure tidy up Task
-		tidyUpTask.getBuilder().linkPreTaskAdministration("ADMIN",
-				TransactionDutyKey.BEGIN);
+		tidyUpTask.getBuilder().linkPreFunctionAdministration("ADMIN", TransactionDutyKey.BEGIN);
 
 		// Not managed Governance
 		return false;

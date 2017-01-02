@@ -19,7 +19,6 @@ package net.officefloor.frame.integrate.managedobject.fail;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
-import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
@@ -32,15 +31,13 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests handling {@link FailedToSourceManagedObjectEscalation}.
  * 
  * @author Daniel Sagenschneider
  */
-public class HandleFailedToSourceManagedObjectTest extends
-		AbstractOfficeConstructTestCase {
+public class HandleFailedToSourceManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
@@ -55,8 +52,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 	public void testSourceThrowFailure() throws Exception {
 
 		// Indicate failure thrown when source managed object
-		NullPointerException failure = new NullPointerException(
-				"source managed object thrown failure");
+		NullPointerException failure = new NullPointerException("source managed object thrown failure");
 		MockManagedObjectSource.sourceThrowFailure = failure;
 
 		// Test
@@ -130,38 +126,28 @@ public class HandleFailedToSourceManagedObjectTest extends
 		// Obtain the managing office name
 		String officeName = this.getOfficeName();
 
-		// Construct the managed object and team
-		this.constructManagedObject("MO", MockManagedObjectSource.class,
-				officeName).setTimeout(1000);
-		this.constructTeam("TEAM", OnePersonTeamSource.class);
+		// Construct the managed object
+		this.constructManagedObject("MO", MockManagedObjectSource.class, officeName).setTimeout(1000);
 
 		// Construct the work
 		Tasks tasks = new Tasks();
-		ReflectiveFunctionBuilder work = this.constructWork(tasks, "WORK",
-				"obtainObject");
 
 		// Construct the task attempting to obtain the object
-		ReflectiveFunctionBuilder obtainObject = work.buildTask("obtainObject",
-				"TEAM");
-		obtainObject.buildObject("MO", ManagedObjectScope.WORK);
-		obtainObject.getBuilder()
-				.addEscalation(FailedToSourceManagedObjectEscalation.class,
-						"handleEscalation");
+		ReflectiveFunctionBuilder obtainObject = this.constructFunction(tasks, "obtainObject");
+		obtainObject.buildObject("MO", ManagedObjectScope.FUNCTION);
+		obtainObject.getBuilder().addEscalation(FailedToSourceManagedObjectEscalation.class, "handleEscalation");
 
 		// Construct the task to handle failure to source managed object
-		ReflectiveFunctionBuilder handleEscalation = work.buildTask(
-				"handleEscalation", "TEAM");
+		ReflectiveFunctionBuilder handleEscalation = this.constructFunction(tasks, "handleEscalation");
 		handleEscalation.buildParameter();
 
-		// Invoke work
-		this.invokeWork("WORK", null);
+		// Invoke function
+		this.invokeFunction("obtainObject", null);
 
 		// Ensure escalation handled
 		assertNotNull("Should have handled escalation", tasks.escalation);
-		assertEquals("Incorrect cause of source failure", cause,
-				tasks.escalation.getCause());
-		assertEquals("Incorrect object type", MockManagedObjectSource.class,
-				tasks.escalation.getObjectType());
+		assertEquals("Incorrect cause of source failure", cause, tasks.escalation.getCause());
+		assertEquals("Incorrect object type", MockManagedObjectSource.class, tasks.escalation.getObjectType());
 	}
 
 	/**
@@ -184,8 +170,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 		/**
 		 * Task to handle the escalation.
 		 */
-		public void handleEscalation(
-				FailedToSourceManagedObjectEscalation escalation) {
+		public void handleEscalation(FailedToSourceManagedObjectEscalation escalation) {
 			this.escalation = escalation;
 		}
 	}
@@ -194,9 +179,8 @@ public class HandleFailedToSourceManagedObjectTest extends
 	 * {@link ManagedObjectSource} that fails.
 	 */
 	@TestSource
-	public static class MockManagedObjectSource extends
-			AbstractAsyncManagedObjectSource<None, None> implements
-			AsynchronousManagedObject, CoordinatingManagedObject<None> {
+	public static class MockManagedObjectSource extends AbstractAsyncManagedObjectSource<None, None>
+			implements AsynchronousManagedObject, CoordinatingManagedObject<None> {
 
 		/**
 		 * Failure thrown in attempting to source the
@@ -247,8 +231,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 			context.setManagedObjectClass(MockManagedObjectSource.class);
 			context.setObjectClass(MockManagedObjectSource.class);
 		}
@@ -275,8 +258,7 @@ public class HandleFailedToSourceManagedObjectTest extends
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(
-				AsynchronousListener listener) {
+		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
 			// Determine if throw failure
 			if (registerCompletionListenerFailure != null) {
 				throw registerCompletionListenerFailure;

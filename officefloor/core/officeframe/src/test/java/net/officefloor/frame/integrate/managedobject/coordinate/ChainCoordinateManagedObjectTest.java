@@ -25,11 +25,8 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.ProcessFuture;
-import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -39,7 +36,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Ensure can have multiple {@link CoordinatingManagedObject} dependencies that
@@ -48,8 +44,7 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBu
  * 
  * @author Daniel Sagenschneider
  */
-public class ChainCoordinateManagedObjectTest extends
-		AbstractOfficeConstructTestCase {
+public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * {@link AsynchronousListener} instances to trigger.
@@ -60,13 +55,10 @@ public class ChainCoordinateManagedObjectTest extends
 	 * Ensure that {@link CoordinatingManagedObject} can depend on another
 	 * {@link CoordinatingManagedObject}.
 	 */
-	public void testChainingTogetherCoordinatingManagedObjects()
-			throws Exception {
+	public void testChainingTogetherCoordinatingManagedObjects() throws Exception {
 
 		// Ensure no listeners
-		synchronized (listeners) {
-			listeners.clear();
-		}
+		listeners.clear();
 
 		// Obtain the office name
 		final String officeName = this.getOfficeName();
@@ -92,65 +84,48 @@ public class ChainCoordinateManagedObjectTest extends
 			expectedCoordination = identifier + "-" + expectedCoordination;
 
 			// Provide the chained coordinating managed object
-			ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(
-					identifier, ChainCoordinatingManagedObjectSource.class);
-			moBuilder.addProperty(
-					ChainCoordinatingManagedObjectSource.PROPERTY_PREFIX,
-					identifier);
+			ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(identifier,
+					ChainCoordinatingManagedObjectSource.class);
+			moBuilder.addProperty(ChainCoordinatingManagedObjectSource.PROPERTY_PREFIX, identifier);
 			moBuilder.setManagingOffice(officeName);
 			moBuilder.setTimeout(100000); // 100 seconds (large, not fail test)
-			DependencyMappingBuilder dependencies = this.getOfficeBuilder()
-					.addProcessManagedObject(identifier, identifier);
+			DependencyMappingBuilder dependencies = this.getOfficeBuilder().addProcessManagedObject(identifier,
+					identifier);
 			dependencies.mapDependency(0, PREVIOUS);
 		}
 
 		// Construct the work
 		ChainCoordinatingWork coordinate = new ChainCoordinatingWork();
-		ReflectiveFunctionBuilder work = this.constructWork(coordinate,
-				"COORDINATE", "service");
-		ReflectiveFunctionBuilder task = work.buildTask("service", "TEAM");
+		ReflectiveFunctionBuilder task = this.constructFunction(coordinate, "service");
 		task.buildObject(identifier);
-
-		// Construct the team to service
-		this.constructTeam("TEAM", OnePersonTeamSource.class);
 
 		// Invoke the work
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
-		WorkManager workManager = officeFloor.getOffice(officeName)
-				.getWorkManager("COORDINATE");
-		ProcessFuture future = workManager.invokeWork(null);
+		FunctionManager functionManager = officeFloor.getOffice(officeName).getFunctionManager("service");
+		boolean[] isComplete = new boolean[] { false };
+		functionManager.invokeProcess(null, (escalation) -> isComplete[0] = true);
 
 		// Allow processing of work
-		final long startTime = System.currentTimeMillis();
-		final long MAX_TIME = 10000; // 10 seconds
-		while (!future.isComplete()) {
+		while (!isComplete[0]) {
 
-			// Ensure not time out
-			assertTrue("Timed out waiting for test to complete", (System
-					.currentTimeMillis() - startTime) < MAX_TIME);
+			// Ensure have completion listener
+			// (otherwise should be complete)
+			assertTrue("Should have completion listener", listeners.size() > 0);
 
 			// Trigger completion of listeners
-			synchronized (listeners) {
-				while (listeners.size() > 0) {
-					AsynchronousListener listener = listeners.remove(0);
-					listener.notifyComplete();
-				}
-			}
-
-			// Allow further time for processing
-			synchronized (future) {
-				future.wait(10); // very to allow enough coordination
+			while (listeners.size() > 0) {
+				AsynchronousListener listener = listeners.remove(0);
+				listener.notifyComplete();
 			}
 		}
 
 		// Verify the resulting coordination
-		assertEquals("Incorrect coordination", expectedCoordination,
-				coordinate.coordination);
+		assertEquals("Incorrect coordination", expectedCoordination, coordinate.coordination);
 	}
 
 	/**
-	 * {@link Work} for obtaining the resulting chained coordination.
+	 * Functionality for obtaining the resulting chained coordination.
 	 */
 	public static class ChainCoordinatingWork {
 
@@ -173,8 +148,7 @@ public class ChainCoordinateManagedObjectTest extends
 	/**
 	 * Chaining together {@link CoordinatingManagedObject}.
 	 */
-	public static class ChainCoordinatingManagedObjectSource extends
-			AbstractManagedObjectSource<Indexed, None> {
+	public static class ChainCoordinatingManagedObjectSource extends AbstractManagedObjectSource<Indexed, None> {
 
 		/**
 		 * Name of property to specify the prefix.
@@ -196,10 +170,8 @@ public class ChainCoordinateManagedObjectTest extends
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<Indexed, None> context)
-				throws Exception {
-			ManagedObjectSourceContext<None> mosContext = context
-					.getManagedObjectSourceContext();
+		protected void loadMetaData(MetaDataContext<Indexed, None> context) throws Exception {
+			ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 			// Obtain the prefix
 			this.prefix = mosContext.getProperty(PROPERTY_PREFIX);
@@ -219,8 +191,8 @@ public class ChainCoordinateManagedObjectTest extends
 	/**
 	 * Chaining together {@link CoordinatingManagedObject}.
 	 */
-	public static class ChainCoordinatingManagedObject implements
-			CoordinatingManagedObject<Indexed>, AsynchronousManagedObject {
+	public static class ChainCoordinatingManagedObject
+			implements CoordinatingManagedObject<Indexed>, AsynchronousManagedObject {
 
 		/**
 		 * Prefix to apply to the dependency.
@@ -252,25 +224,20 @@ public class ChainCoordinateManagedObjectTest extends
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(
-				AsynchronousListener listener) {
+		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
 			this.listener = listener;
 		}
 
 		@Override
-		public void loadObjects(ObjectRegistry<Indexed> registry)
-				throws Throwable {
+		public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
 			// Obtain the dependency (applying prefix)
-			this.dependency = this.prefix + "-"
-					+ ((String) registry.getObject(0));
+			this.dependency = this.prefix + "-" + ((String) registry.getObject(0));
 
 			// Trigger asynchronous operation (so continues coordinating)
 			this.listener.notifyStarted();
 
 			// Register the lister for triggering completion
-			synchronized (listeners) {
-				listeners.add(this.listener);
-			}
+			listeners.add(this.listener);
 		}
 
 		@Override

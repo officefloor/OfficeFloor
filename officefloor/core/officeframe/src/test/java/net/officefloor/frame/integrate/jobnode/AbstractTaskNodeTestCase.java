@@ -70,6 +70,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
+@Deprecated
 public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		OfficeFrameTestCase {
 

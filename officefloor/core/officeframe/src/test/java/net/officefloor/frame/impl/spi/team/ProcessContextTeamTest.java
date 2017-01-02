@@ -19,13 +19,10 @@ package net.officefloor.frame.impl.spi.team;
 
 import org.easymock.AbstractMatcher;
 
-import net.officefloor.frame.api.manage.ProcessFuture;
-import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -61,21 +58,18 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 	public void testPassiveExecuteJob() {
 
 		// Create the team
-		Team team = new ProcessContextTeam(
-				MockTeamSource.createTeamIdentifier());
+		Team team = new ProcessContextTeam();
 
 		// Create the mock task (completes immediately)
-		MockTaskContainer task = new MockTaskContainer();
-		task.stopProcessing = true;
+		MockJob task = new MockJob();
 
 		// Run team and execute a task
 		team.startWorking();
-		team.assignJob(task, MockTeamSource.createTeamIdentifier());
+		team.assignJob(task);
 		team.stopWorking();
 
 		// Ensure the task executed
-		assertEquals("Task should be executed once", 1,
-				task.doTaskInvocationCount);
+		assertEquals("Task should be executed once", 1, task.doTaskInvocationCount);
 	}
 
 	/**
@@ -85,12 +79,10 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 	public void testExecuteJobWithContextThread() throws Exception {
 
 		// Create the team
-		final ProcessContextTeam team = new ProcessContextTeam(
-				MockTeamSource.createTeamIdentifier());
+		final ProcessContextTeam team = new ProcessContextTeam();
 
 		// Mocks
-		final WorkManager workManager = this
-				.createSynchronizedMock(WorkManager.class);
+		final FunctionManager functionManager = this.createSynchronizedMock(FunctionManager.class);
 
 		// Helper Objects
 		final Object processIdentifier = "ProcessIdentifier";
@@ -101,39 +93,22 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 		isProcessingStarted[0] = false; // processing not yet started
 		final boolean[] isProcessComplete = new boolean[1];
 		isProcessComplete[0] = false; // not yet complete
-		final ProcessFuture processFuture = new ProcessFuture() {
+
+		// Record invoking function
+		functionManager.invokeProcess(parameter, null);
+		this.control(functionManager).setMatcher(new AbstractMatcher() {
 			@Override
-			public boolean isComplete() {
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect parameter", parameter, actual[0]);
 
-				// Flag processing started
-				synchronized (isProcessingStarted) {
-					isProcessingStarted[0] = true;
-					isProcessingStarted.notify();
-				}
+				// Associate Thread to process identifier.
+				// This would occur during the creation of the Process
+				// for the invoked work.
+				team.processCreated(processIdentifier);
 
-				// Return whether completed processing
-				synchronized (isProcessComplete) {
-					return isProcessComplete[0];
-				}
+				return true;
 			}
-		};
-
-		// Record invoking work
-		this.recordReturn(workManager, workManager.invokeWork(parameter),
-				processFuture, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						assertEquals("Incorrect parameter", parameter,
-								actual[0]);
-
-						// Associate Thread to process identifier.
-						// This would occur during the creation of the Process
-						// for the invoked work.
-						team.processCreated(processIdentifier);
-
-						return true;
-					}
-				});
+		});
 
 		// Run test
 		this.replayMockObjects();
@@ -146,8 +121,14 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 			@Override
 			public void run() {
 				try {
+					// Flag processing started
+					synchronized (isProcessingStarted) {
+						isProcessingStarted[0] = true;
+						isProcessingStarted.notify();
+					}
+
 					// Do the work (blocking call)
-					ProcessContextTeam.doWork(workManager, parameter);
+					ProcessContextTeam.doFunction(functionManager, parameter);
 
 				} catch (Exception ex) {
 					// Flag testing failed
@@ -175,14 +156,13 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 			}
 
 			@Override
-			public boolean doJob(JobContext executionContext) {
+			public void run() {
 				try {
 					// Obtain the Thread executing this job
 					Thread executingThread = Thread.currentThread();
 
 					// Ensure same as context Thread
-					assertEquals("Incorrect executing Thread", contextThread,
-							executingThread);
+					assertEquals("Incorrect executing Thread", contextThread, executingThread);
 
 				} catch (Throwable ex) {
 					ProcessContextTeamTest.this.failure = ex;
@@ -193,35 +173,19 @@ public class ProcessContextTeamTest extends OfficeFrameTestCase {
 					isJobExecuted[0] = true;
 					isJobExecuted.notify();
 				}
-
-				// Job complete
-				return true;
 			}
 
 			@Override
-			public void cancelJob(Exception cause) {
+			public void cancel(Throwable cause) {
 				/*
 				 * At moment, not seeing loads to require this as a priority.
 				 * 
 				 * TODO implement after HTTP Security to allow admission control
 				 * algorithms.
 				 */
-				throw new UnsupportedOperationException(
-						"TODO implement Job.cancelJob");
+				throw new UnsupportedOperationException("TODO implement Job.cancelJob");
 			}
-
-			private Job nextJob;
-
-			@Override
-			public Job getNextJob() {
-				return this.nextJob;
-			}
-
-			@Override
-			public void setNextJob(Job job) {
-				this.nextJob = job;
-			}
-		}, MockTeamSource.createTeamIdentifier());
+		});
 
 		// Ensure Job to be executed
 		synchronized (isJobExecuted) {

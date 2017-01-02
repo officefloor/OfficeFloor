@@ -18,12 +18,9 @@
 package net.officefloor.frame.integrate.team;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
@@ -60,28 +57,23 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 		// Reset current step
 		currentStep = ProcessingStep.START;
 
-		// Create the work
+		// Register the function
 		MockWork work = new MockWork();
-
-		// Register the work
-		final String WORK_NAME = "WORK";
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, WORK_NAME,
-				"task");
-		workBuilder.buildTask("task", "TEAM");
+		ReflectiveFunctionBuilder function = this.constructFunction(work, "task");
+		function.getBuilder().setTeam("TEAM");
 
 		// Register the team
 		this.constructTeam("TEAM", MockListenerTeamSource.class);
 
-		// Invoke the work
-		this.invokeWork(WORK_NAME, null);
+		// Invoke the function
+		this.invokeFunction("task", null);
 
 		// Ensure all steps were taken
-		assertEquals("Incorrect steps undertaken",
-				ProcessingStep.PROCESS_COMPLETED, currentStep);
+		assertEquals("Incorrect steps undertaken", ProcessingStep.PROCESS_COMPLETED, currentStep);
 	}
 
 	/**
-	 * Mock {@link Work} for testing.
+	 * Mock functionality for testing.
 	 */
 	public static class MockWork {
 
@@ -89,8 +81,7 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 		 * {@link ManagedFunction} to be executed.
 		 */
 		public void task() {
-			assertEquals("Incorrect step", ProcessingStep.ASSIGN_JOB,
-					currentStep);
+			assertEquals("Incorrect step", ProcessingStep.ASSIGN_JOB, currentStep);
 
 			// Increment step
 			currentStep = ProcessingStep.DO_TASK;
@@ -100,8 +91,7 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Mock {@link TeamSource} for testing the {@link ProcessContextListener}.
 	 */
-	public static class MockListenerTeamSource extends AbstractTeamSource
-			implements ProcessContextListener, Team, JobContext, TeamIdentifier {
+	public static class MockListenerTeamSource extends AbstractTeamSource implements ProcessContextListener, Team {
 
 		/**
 		 * {@link ProcessContextListener}.
@@ -134,8 +124,7 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 		@Override
 		public void processCreated(Object processIdentifier) {
 			assertEquals("Incorrect step", ProcessingStep.START, currentStep);
-			assertNull("Process Identifier must not yet be specified",
-					this.identifier);
+			assertNull("Process Identifier must not yet be specified", this.identifier);
 			this.identifier = processIdentifier;
 			assertNotNull("Must have Process Identifier", this.identifier);
 
@@ -146,10 +135,8 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 		@Override
 		public void processCompleted(Object processIdentifier) {
 			assertEquals("Incorrect step", ProcessingStep.DO_TASK, currentStep);
-			assertNotNull("Must have Process Identifier at this point",
-					this.identifier);
-			assertSame("Incorrect completed Process Identifier",
-					this.identifier, processIdentifier);
+			assertNotNull("Must have Process Identifier at this point", this.identifier);
+			assertSame("Incorrect completed Process Identifier", this.identifier, processIdentifier);
 
 			// Clear the Process Identifier as completed
 			this.identifier = null;
@@ -168,48 +155,24 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		public void assignJob(Job job, TeamIdentifier assignerTeam) {
-			assertEquals("Incorrect step", ProcessingStep.PROCESS_CREATED,
-					currentStep);
-			assertNotNull("Must have Process Identifier at this point",
-					this.identifier);
+		public void assignJob(Job job) {
+			assertEquals("Incorrect step", ProcessingStep.PROCESS_CREATED, currentStep);
+			assertNotNull("Must have Process Identifier at this point", this.identifier);
 
 			// Ensure the correct Process Identifier
 			Object processIdentifier = job.getProcessIdentifier();
-			assertSame("Incorrect Process Identifier for Job", this.identifier,
-					processIdentifier);
+			assertSame("Incorrect Process Identifier for Job", this.identifier, processIdentifier);
 
 			// Increment step
 			currentStep = ProcessingStep.ASSIGN_JOB;
 
 			// Execute the Job
-			job.doJob(this);
+			job.run();
 		}
 
 		@Override
 		public void stopWorking() {
 			// Only validating process identifier
-		}
-
-		/*
-		 * ========================== JobContext ==============================
-		 */
-
-		@Override
-		public long getTime() {
-			fail("Should not require time");
-			return -1;
-		}
-
-		@Override
-		public TeamIdentifier getCurrentTeam() {
-			return this;
-		}
-
-		@Override
-		public boolean continueExecution() {
-			fail("Should not need to determine if continue");
-			return false;
 		}
 	}
 

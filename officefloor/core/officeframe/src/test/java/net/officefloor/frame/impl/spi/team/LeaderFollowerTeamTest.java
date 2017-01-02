@@ -77,8 +77,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	private void leaderFollowerTest(int teamMemberCount, int taskCount) {
 
 		// Create the team and start it working
-		this.team = new LeaderFollowerTeam("Test",
-				MockTeamSource.createTeamIdentifier(), teamMemberCount, 10);
+		this.team = new LeaderFollowerTeam("Test", MockTeamSource.createTeamIdentifier(), teamMemberCount, 10);
 		this.team.startWorking();
 
 		// Wait some time before assigning tasks
@@ -89,9 +88,9 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 		}
 
 		// Assign tasks and wait on them to be started for execution
-		MockTaskContainer[] tasks = new MockTaskContainer[taskCount];
+		MockJob[] tasks = new MockJob[taskCount];
 		for (int i = 0; i < taskCount; i++) {
-			tasks[i] = new MockTaskContainer();
+			tasks[i] = new MockJob();
 			tasks[i].assignJobToTeam(this.team, 10);
 		}
 
@@ -101,24 +100,17 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 			teamMembers[i] = this.team.teamMembers[i];
 		}
 
-		// Flag the tasks to stop processing
-		for (int i = 0; i < taskCount; i++) {
-			tasks[i].stopProcessing = true;
-		}
-
 		// Stop processing (should have all teams finished)
 		this.team.stopWorking();
 
 		// Ensure each team member has stopped working
 		for (int i = 0; i < teamMembers.length; i++) {
-			assertTrue("Team member " + i + " should be finished working",
-					teamMembers[i].finished);
+			assertTrue("Team member " + i + " should be finished working", teamMembers[i].finished);
 		}
 
 		// Should have invoked each task at least once
 		for (int i = 0; i < tasks.length; i++) {
-			assertTrue("Should have invoked task " + i + " at least once",
-					tasks[i].doTaskInvocationCount >= 1);
+			assertTrue("Should have invoked task " + i + " at least once", tasks[i].doTaskInvocationCount >= 1);
 		}
 	}
 

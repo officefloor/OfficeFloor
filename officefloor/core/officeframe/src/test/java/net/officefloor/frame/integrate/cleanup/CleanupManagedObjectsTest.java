@@ -17,26 +17,22 @@
  */
 package net.officefloor.frame.integrate.cleanup;
 
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests the clean up of {@link ManagedObject} instances.
@@ -60,21 +56,17 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 		// Register two managed objects for clean up
 		TestManagedObjectSource moA = new TestManagedObjectSource(lock, "MOS_A");
 		TestManagedObjectSource moB = new TestManagedObjectSource(lock, "MOS_B");
-		ManagedObjectBuilder<None> moBuilderA = this.getOfficeFloorBuilder()
-				.addManagedObject(moA.instanceName, moA);
+		ManagedObjectBuilder<None> moBuilderA = this.getOfficeFloorBuilder().addManagedObject(moA.instanceName, moA);
 		moBuilderA.setManagingOffice(this.getOfficeName());
-		ManagedObjectBuilder<None> moBuilderB = this.getOfficeFloorBuilder()
-				.addManagedObject(moB.instanceName, moB);
+		ManagedObjectBuilder<None> moBuilderB = this.getOfficeFloorBuilder().addManagedObject(moB.instanceName, moB);
 		moBuilderB.setManagingOffice(this.getOfficeName());
 
 		// Configure the teams for recycling the managed object
 		this.getOfficeBuilder().addOfficeEnhancer(new OfficeEnhancer() {
 			@Override
 			public void enhanceOffice(OfficeEnhancerContext context) {
-				context.getFlowNodeBuilder("MOS_A", "#recycle#", "cleanup")
-						.setTeam("CLEANUP");
-				context.getFlowNodeBuilder("MOS_B", "#recycle#", "cleanup")
-						.setTeam("CLEANUP");
+				context.getFlowNodeBuilder("MOS_A", "#recycle#").setTeam("CLEANUP");
+				context.getFlowNodeBuilder("MOS_B", "#recycle#").setTeam("CLEANUP");
 			}
 		});
 
@@ -88,15 +80,13 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", PassiveTeamSource.class);
 
 		// Construct the work
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(new MockWork(),
-				"WORK", "task");
-		ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask("task",
-				"TEAM");
+		ReflectiveFunctionBuilder taskBuilder = this.constructFunction(new MockWork(), "task");
+		taskBuilder.getBuilder().setTeam("TEAM");
 		taskBuilder.buildObject("MO_A");
 		taskBuilder.buildObject("MO_B");
 
-		// Invoke the work
-		this.invokeWork("WORK", null);
+		// Invoke the function
+		this.invokeFunction("task", null);
 
 		// Should now be waiting on clean up
 		this.assertManagedObjectCleanup(lock, moA, moB);
@@ -113,9 +103,8 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 	 * @param nextMoToCleanup
 	 *            Next {@link TestManagedObjectSource} to cleanup.
 	 */
-	private void assertManagedObjectCleanup(Object lock,
-			TestManagedObjectSource mo, TestManagedObjectSource nextMoToCleanup)
-			throws InterruptedException {
+	private void assertManagedObjectCleanup(Object lock, TestManagedObjectSource mo,
+			TestManagedObjectSource nextMoToCleanup) throws InterruptedException {
 
 		// Allow timeout calculations
 		long timeout = 10 * 1000; // 10 seconds
@@ -138,10 +127,8 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 
 			// Ensure the next managed object is not yet triggered for cleanup
 			if (nextMoToCleanup != null) {
-				assertFalse("Next managed object "
-						+ nextMoToCleanup.instanceName
-						+ " should not have its clean up task activated",
-						nextMoToCleanup.isWaiting);
+				assertFalse("Next managed object " + nextMoToCleanup.instanceName
+						+ " should not have its clean up task activated", nextMoToCleanup.isWaiting);
 			}
 
 			// Notify to continue on to next managed object
@@ -150,11 +137,10 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Mock {@link Work}.
+	 * Mock functionality.
 	 */
 	public static class MockWork {
-		public void task(TestManagedObjectSource moA,
-				TestManagedObjectSource moB) {
+		public void task(TestManagedObjectSource moA, TestManagedObjectSource moB) {
 		}
 	}
 
@@ -162,10 +148,8 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 	 * Test {@link ManagedObjectSource} for clean up.
 	 */
 	@TestSource
-	public static class TestManagedObjectSource extends
-			AbstractManagedObjectSource<None, None> implements ManagedObject,
-			WorkFactory<Work>, Work, ManagedFunctionFactory<Work, None, None>,
-			ManagedFunction<Work, None, None> {
+	public static class TestManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject, ManagedFunctionFactory<None, None>, ManagedFunction<None, None> {
 
 		/**
 		 * Lock.
@@ -205,17 +189,14 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 
 			// Configure
 			context.setObjectClass(this.getClass());
 
 			// Provide recycle task
-			ManagedObjectSourceContext<None> mos = context
-					.getManagedObjectSourceContext();
-			ManagedObjectWorkBuilder<Work> cleanup = mos.getRecycleWork(this);
-			cleanup.addTask("cleanup", this);
+			ManagedObjectSourceContext<None> mos = context.getManagedObjectSourceContext();
+			mos.getRecycleFunction(this);
 		}
 
 		@Override
@@ -233,30 +214,20 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/*
-		 * ===================== WorkFactory =================================
+		 * ===================== ManagedFunctionFactory =====================
 		 */
 
 		@Override
-		public Work createWork() {
+		public ManagedFunction<None, None> createManagedFunction() {
 			return this;
 		}
 
 		/*
-		 * ===================== TaskFactory =================================
+		 * ======================== ManagedFunction ========================
 		 */
 
 		@Override
-		public ManagedFunction<Work, None, None> createManagedFunction(Work work) {
-			return this;
-		}
-
-		/*
-		 * ======================== Task ======================================
-		 */
-
-		@Override
-		public Object execute(ManagedFunctionContext<Work, None, None> context)
-				throws Throwable {
+		public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
 
 			// Wait to be notified to proceed
 			synchronized (this.lock) {

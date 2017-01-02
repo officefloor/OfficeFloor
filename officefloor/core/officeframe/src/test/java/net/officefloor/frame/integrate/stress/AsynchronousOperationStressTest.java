@@ -19,19 +19,16 @@ package net.officefloor.frame.integrate.stress;
 
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
  * Stress tests asynchronous operations by {@link AsynchronousManagedObject}
@@ -39,18 +36,15 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBu
  * 
  * @author Daniel Sagenschneider
  */
-public class AsynchronousOperationStressTest extends
-		AbstractOfficeConstructTestCase {
+public class AsynchronousOperationStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensures no issues arising in stress asynchronous operations with a
 	 * {@link OnePersonTeam}.
 	 */
 	@StressTest
-	public void test_StressAsynchronousOperation_OnePersonTeam()
-			throws Exception {
-		this.doTest(new OnePersonTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 100));
+	public void test_StressAsynchronousOperation_OnePersonTeam() throws Exception {
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -58,10 +52,8 @@ public class AsynchronousOperationStressTest extends
 	 * {@link LeaderFollowerTeam}.
 	 */
 	@StressTest
-	public void test_StressAsynchronousOperation_LeaderFollowerTeam()
-			throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 2, 100));
+	public void test_StressAsynchronousOperation_LeaderFollowerTeam() throws Exception {
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 2, 100));
 	}
 
 	/**
@@ -69,17 +61,16 @@ public class AsynchronousOperationStressTest extends
 	 * {@link ExecutorFixedTeamSource}.
 	 */
 	@StressTest
-	public void test_StressAsynchronousOperation_ExecutorFixedTeam()
-			throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				MockTeamSource.createTeamIdentifier(), 2));
+	public void test_StressAsynchronousOperation_ExecutorFixedTeam() throws Exception {
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 2));
 	}
 
 	/**
 	 * Does the asynchronous operation stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction}
+	 *            instances.
 	 */
 	private void doTest(Team team) throws Exception {
 
@@ -96,55 +87,47 @@ public class AsynchronousOperationStressTest extends
 
 		// Create and register the two asynchronous managed objects
 		MockManagedObject moOne = new MockManagedObject();
-		this.constructManagedObject("MO_ONE", moOne, officeName).setTimeout(
-				100000);
+		this.constructManagedObject("MO_ONE", moOne, officeName).setTimeout(100000);
 		officeBuilder.addProcessManagedObject("MO_ONE", "MO_ONE");
 		MockManagedObject moTwo = new MockManagedObject();
-		this.constructManagedObject("MO_TWO", moTwo, officeName).setTimeout(
-				100000);
+		this.constructManagedObject("MO_TWO", moTwo, officeName).setTimeout(100000);
 		officeBuilder.addProcessManagedObject("MO_TWO", "MO_TWO");
 
 		// Create and register the setup task
 		SetupWork setupWork = new SetupWork();
-		ReflectiveFunctionBuilder setupTask = this.constructWork(setupWork,
-				"SETUP", "setup").buildTask("setup", "TEAM");
-		setupTask.buildFlow("WORK_ONE", "task",
-				FlowInstigationStrategyEnum.ASYNCHRONOUS, null);
-		setupTask.buildFlow("WORK_TWO", "task",
-				FlowInstigationStrategyEnum.ASYNCHRONOUS, null);
-		setupTask.buildTaskContext();
+		ReflectiveFunctionBuilder setupTask = this.constructFunction(setupWork, "setup");
+		setupTask.getBuilder().setTeam("TEAM");
+		setupTask.buildFlow("task", null, true);
+		setupTask.buildFlow("task", null, true);
+		setupTask.buildFlow("setup", null, false);
 
 		// Create and register the two tasks that will start and stop each
 		// others asynchronous operations.
-		AsynchronousOperationWork workOne = new AsynchronousOperationWork(
-				moTwo, OPERATION_COUNT, setupWork);
-		ReflectiveFunctionBuilder taskOne = this.constructWork(workOne, "WORK_ONE",
-				null).buildTask("task", "TEAM");
+		AsynchronousOperationWork workOne = new AsynchronousOperationWork(moTwo, OPERATION_COUNT, setupWork);
+		ReflectiveFunctionBuilder taskOne = this.constructFunction(workOne, "task");
+		taskOne.getBuilder().setTeam("TEAM");
 		taskOne.buildObject("MO_ONE");
-		taskOne.buildTaskContext();
-		AsynchronousOperationWork workTwo = new AsynchronousOperationWork(
-				moOne, OPERATION_COUNT, null);
-		ReflectiveFunctionBuilder taskTwo = this.constructWork(workTwo, "WORK_TWO",
-				null).buildTask("task", "TEAM");
+		taskOne.buildManagedFunctionContext();
+		AsynchronousOperationWork workTwo = new AsynchronousOperationWork(moOne, OPERATION_COUNT, null);
+		ReflectiveFunctionBuilder taskTwo = this.constructFunction(workTwo, "task");
+		taskTwo.getBuilder().setTeam("TEAM");
 		taskTwo.buildObject("MO_TWO");
-		taskTwo.buildTaskContext();
+		taskTwo.buildFlow("task", null, false);
 
 		// Run the asynchronous operations
-		this.invokeWork("SETUP", null, MAX_RUN_TIME);
+		this.invokeFunction("setup", null, MAX_RUN_TIME);
 
 		// Ensure correct number of asynchronous operations
 		synchronized (workOne) {
-			assertEquals("Incorrect number of operations for task one",
-					OPERATION_COUNT, workOne.repeatCount);
+			assertEquals("Incorrect number of operations for task one", OPERATION_COUNT, workOne.repeatCount);
 		}
 		synchronized (workTwo) {
-			assertEquals("Incorrect number of operations for task two",
-					OPERATION_COUNT, workTwo.repeatCount);
+			assertEquals("Incorrect number of operations for task two", OPERATION_COUNT, workTwo.repeatCount);
 		}
 	}
 
 	/**
-	 * {@link Work} to setup running the asynchronous operations.
+	 * Functionality to setup running the asynchronous operations.
 	 */
 	public static class SetupWork {
 
@@ -165,25 +148,24 @@ public class AsynchronousOperationStressTest extends
 		 *            {@link ManagedFunction} one.
 		 * @param taskTwo
 		 *            {@link ManagedFunction} two.
-		 * @param taskContext
-		 *            {@link ManagedFunctionContext}.
+		 * @param repeat
+		 *            {@link ReflectiveFlow} to repeat.
 		 */
-		public synchronized void setup(ReflectiveFlow taskOne,
-				ReflectiveFlow taskTwo, ManagedFunctionContext<?, ?, ?> taskContext) {
+		public synchronized void setup(ReflectiveFlow taskOne, ReflectiveFlow taskTwo, ReflectiveFlow repeat) {
 
 			// Trigger task one
 			if (!this.isTaskOneRunning) {
-				taskOne.doFlow(null);
+				taskOne.doFlow(null, null);
 				this.isTaskOneRunning = true;
 			}
 
 			// Determine if asynchronous operation started
 			if (this.isAsynchronousOperationStarted) {
 				// Setup done and trigger task two
-				taskTwo.doFlow(null);
+				taskTwo.doFlow(null, null);
 			} else {
 				// Wait for asynchronous operation to be started
-				taskContext.setComplete(false);
+				repeat.doFlow(null, null);
 			}
 		}
 
@@ -196,7 +178,7 @@ public class AsynchronousOperationStressTest extends
 	}
 
 	/**
-	 * {@link Work} to run asynchronous operations on the
+	 * Functionality to run asynchronous operations on the
 	 * {@link MockManagedObject}.
 	 */
 	public class AsynchronousOperationWork {
@@ -230,15 +212,15 @@ public class AsynchronousOperationStressTest extends
 		 * Initiate.
 		 * 
 		 * @param otherTaskManagedObject
-		 *            {@link MockManagedObject} for the other {@link ManagedFunction}.
+		 *            {@link MockManagedObject} for the other
+		 *            {@link ManagedFunction}.
 		 * @param maxRepeats
 		 *            Maximum number of repeats.
 		 * @param setupWork
 		 *            {@link SetupWork} for first {@link ManagedFunction} and
 		 *            <code>null</code> for second {@link ManagedFunction}.
 		 */
-		public AsynchronousOperationWork(
-				MockManagedObject otherTaskManagedObject, int maxRepeats,
+		public AsynchronousOperationWork(MockManagedObject otherTaskManagedObject, int maxRepeats,
 				SetupWork setupWork) {
 			this.otherTaskManagedObject = otherTaskManagedObject;
 			this.maxRepeats = maxRepeats;
@@ -250,19 +232,17 @@ public class AsynchronousOperationStressTest extends
 		 * {@link ManagedFunction}.
 		 * 
 		 * @param ownManagedObject
-		 *            {@link MockManagedObject} instance for this {@link ManagedFunction}.
-		 * @param taskContext
-		 *            {@link ManagedFunctionContext}.
+		 *            {@link MockManagedObject} instance for this
+		 *            {@link ManagedFunction}.
+		 * @param repeat
+		 *            {@link ReflectiveFlow} to repeat.
 		 */
-		public void task(MockManagedObject ownManagedObject,
-				ManagedFunctionContext<?, ?, ?> taskContext) {
+		public void task(MockManagedObject ownManagedObject, ReflectiveFlow repeat) {
 
 			// Output progress
 			if (this.isPrintOutput) {
 				if ((this.repeatCount > 0) & ((this.repeatCount % 100000) == 0)) {
-					AsynchronousOperationStressTest.this
-							.printMessage("Asynchronous operation "
-									+ this.repeatCount);
+					AsynchronousOperationStressTest.this.printMessage("Asynchronous operation " + this.repeatCount);
 				}
 			}
 
@@ -277,7 +257,7 @@ public class AsynchronousOperationStressTest extends
 
 				// Setup finished and start processing
 				this.setupWork = null;
-				taskContext.setComplete(false);
+				repeat.doFlow(null, null);
 				return;
 			}
 
@@ -287,7 +267,7 @@ public class AsynchronousOperationStressTest extends
 			// Repeat again if necessary
 			this.repeatCount++;
 			if (this.repeatCount < this.maxRepeats) {
-				taskContext.setComplete(false);
+				repeat.doFlow(null, null);
 			} else {
 				// Ensure repeat count thread safe for checking
 				int count = this.repeatCount;
@@ -313,8 +293,7 @@ public class AsynchronousOperationStressTest extends
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(
-				AsynchronousListener listener) {
+		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
 			this.listener = listener;
 		}
 

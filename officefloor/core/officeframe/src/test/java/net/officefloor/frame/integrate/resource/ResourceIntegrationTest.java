@@ -23,8 +23,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -33,7 +31,6 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
 import net.officefloor.frame.spi.source.ResourceSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Ensure able to override {@link ClassLoader} and add {@link ResourceSource}
@@ -49,24 +46,19 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 	public void testDefaultClassLoader() throws Exception {
 
 		// Construct the managed object
-		this.constructManagedObject("MO", ClassLoaderManagedObjectSource.class,
-				this.getOfficeName());
+		this.constructManagedObject("MO", ClassLoaderManagedObjectSource.class, this.getOfficeName());
 
 		// Construct work to obtain the Class Loader
 		ClassLoaderWork classLoaderWork = new ClassLoaderWork();
-		ReflectiveFunctionBuilder work = this.constructWork(classLoaderWork,
-				"WORK", "validateClassLoader");
-		ReflectiveFunctionBuilder task = work.buildTask("validateClassLoader",
-				"TEAM");
+		ReflectiveFunctionBuilder task = this.constructFunction(classLoaderWork, "validateClassLoader");
 		task.buildObject("MO", ManagedObjectScope.PROCESS);
-		this.constructTeam("TEAM", new PassiveTeam());
 
-		// Invoke work and ensure correct class loader
-		this.invokeWork("WORK", null);
+		// Invoke function and ensure correct class loader
+		this.invokeFunction("validateClassLoader", null);
 
 		// Ensure correct default class loader
-		assertSame("Incorrect class loader", Thread.currentThread()
-				.getContextClassLoader(), classLoaderWork.classLoader);
+		assertSame("Incorrect class loader", Thread.currentThread().getContextClassLoader(),
+				classLoaderWork.classLoader);
 	}
 
 	/**
@@ -80,28 +72,22 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 		this.getOfficeFloorBuilder().setClassLoader(classLoader);
 
 		// Construct the managed object
-		this.constructManagedObject("MO", ClassLoaderManagedObjectSource.class,
-				this.getOfficeName());
+		this.constructManagedObject("MO", ClassLoaderManagedObjectSource.class, this.getOfficeName());
 
 		// Construct work to obtain the Class Loader
 		ClassLoaderWork classLoaderWork = new ClassLoaderWork();
-		ReflectiveFunctionBuilder work = this.constructWork(classLoaderWork,
-				"WORK", "validateClassLoader");
-		ReflectiveFunctionBuilder task = work.buildTask("validateClassLoader",
-				"TEAM");
+		ReflectiveFunctionBuilder task = this.constructFunction(classLoaderWork, "validateClassLoader");
 		task.buildObject("MO", ManagedObjectScope.PROCESS);
-		this.constructTeam("TEAM", new PassiveTeam());
 
-		// Invoke work and ensure correct class loader
-		this.invokeWork("WORK", null);
+		// Invoke function and ensure correct class loader
+		this.invokeFunction("validateClassLoader", null);
 
 		// Ensure correct class loader
-		assertSame("Incorrect class loader", classLoader,
-				classLoaderWork.classLoader);
+		assertSame("Incorrect class loader", classLoader, classLoaderWork.classLoader);
 	}
 
 	/**
-	 * {@link ClassLoader} {@link Work}.
+	 * {@link ClassLoader} functionality.
 	 */
 	public static class ClassLoaderWork {
 
@@ -124,8 +110,8 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * {@link ManagedObjectSource} to obtain the {@link ClassLoader}.
 	 */
-	public static class ClassLoaderManagedObjectSource extends
-			AbstractManagedObjectSource<None, None> implements ManagedObject {
+	public static class ClassLoaderManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject {
 
 		private ClassLoader classLoader;
 
@@ -135,10 +121,8 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
-			ManagedObjectSourceContext<None> mosContext = context
-					.getManagedObjectSourceContext();
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 			context.setObjectClass(ClassLoader.class);
 			this.classLoader = mosContext.getClassLoader();
 		}
@@ -160,12 +144,10 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 	public void testAdditionalResourceSource() throws Exception {
 
 		final InputStream RESOURCE = new ByteArrayInputStream(new byte[0]);
-		final ResourceSource resourceSource = this
-				.createMock(ResourceSource.class);
+		final ResourceSource resourceSource = this.createMock(ResourceSource.class);
 
 		// Record obtaining the resource
-		this.recordReturn(resourceSource,
-				resourceSource.sourceResource("REQUIRED RESOURCE"), RESOURCE);
+		this.recordReturn(resourceSource, resourceSource.sourceResource("REQUIRED RESOURCE"), RESOURCE);
 
 		// Test
 		this.replayMockObjects();
@@ -174,19 +156,15 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 		this.getOfficeFloorBuilder().addResources(resourceSource);
 
 		// Construct the managed object
-		this.constructManagedObject("MO", ResourceManagedObjectSource.class,
-				this.getOfficeName());
+		this.constructManagedObject("MO", ResourceManagedObjectSource.class, this.getOfficeName());
 
 		// Construct work to obtain the Resource
 		ResourceWork resourceWork = new ResourceWork();
-		ReflectiveFunctionBuilder work = this.constructWork(resourceWork, "WORK",
-				"validateResource");
-		ReflectiveFunctionBuilder task = work.buildTask("validateResource", "TEAM");
+		ReflectiveFunctionBuilder task = this.constructFunction(resourceWork, "validateResource");
 		task.buildObject("MO", ManagedObjectScope.PROCESS);
-		this.constructTeam("TEAM", new PassiveTeam());
 
-		// Invoke work and ensure correct resource
-		this.invokeWork("WORK", null);
+		// Invoke function and ensure correct resource
+		this.invokeFunction("validateResource", null);
 
 		// Ensure correct resource
 		assertSame("Incorrect resource", RESOURCE, resourceWork.resource);
@@ -196,7 +174,7 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Resource {@link Work}.
+	 * Resource functionality.
 	 */
 	public static class ResourceWork {
 
@@ -219,8 +197,8 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * {@link ManagedObjectSource} to obtain the resource.
 	 */
-	public static class ResourceManagedObjectSource extends
-			AbstractManagedObjectSource<None, None> implements ManagedObject {
+	public static class ResourceManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject {
 
 		private InputStream resource;
 
@@ -230,10 +208,8 @@ public class ResourceIntegrationTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
-			ManagedObjectSourceContext<None> mosContext = context
-					.getManagedObjectSourceContext();
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 			context.setObjectClass(InputStream.class);
 			this.resource = mosContext.getResource("REQUIRED RESOURCE");
 		}

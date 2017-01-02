@@ -22,7 +22,6 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -68,8 +67,7 @@ public abstract class MockStressJob implements Job {
 			// Fail testing if can not instantiate new instance
 			StringWriter stackTrace = new StringWriter();
 			ex.printStackTrace(new PrintWriter(stackTrace));
-			TestCase.fail("Failed cloning " + this.getClass().getName() + "\n"
-					+ stackTrace);
+			TestCase.fail("Failed cloning " + this.getClass().getName() + "\n" + stackTrace);
 			return null; // fail will throw problem
 		}
 
@@ -82,20 +80,6 @@ public abstract class MockStressJob implements Job {
 
 		// Return the cloned job
 		return clonedJob;
-	}
-
-	/**
-	 * {@link JobContext}.
-	 */
-	private JobContext jobContext;
-
-	/**
-	 * Obtains the {@link JobContext}.
-	 * 
-	 * @return {@link JobContext}.
-	 */
-	public synchronized JobContext getJobContext() {
-		return this.jobContext;
 	}
 
 	/**
@@ -183,61 +167,38 @@ public abstract class MockStressJob implements Job {
 	 */
 
 	@Override
-	public final boolean doJob(JobContext jobContext) {
+	public final void run() {
 
 		// Synchronised as typically locked on ThreadState when running
 		synchronized (this) {
-
-			// Ensure the next job is null
-			TestCase.assertNull("Next job should not be set on running a job",
-					this.nextJob);
 
 			// Increment the job runs
 			this.cloneCount.incrementDoJobCount();
 			this.doJobCount++;
 
-			// Specify the job context and run the job
-			this.jobContext = jobContext;
-			return this.runJob();
+			// Run the job
+			this.runJob();
 		}
 	}
 
 	@Override
-	public void cancelJob(Exception cause) {
+	public void cancel(Throwable cause) {
 		/*
 		 * At moment, not seeing loads to require this as a priority.
 		 * 
-		 * TODO implement after HTTP Security to allow admission control
-		 * algorithms.
+		 * TODO implement to allow admission control algorithms.
 		 */
 		throw new UnsupportedOperationException("TODO implement Job.cancelJob");
 	}
 
 	/**
 	 * Runs the {@link Job}.
-	 * 
-	 * @return <code>true</code> if {@link Job} is complete.
 	 */
-	protected abstract boolean runJob();
+	protected abstract void runJob();
 
 	@Override
 	public Object getProcessIdentifier() {
 		return this;
-	}
-
-	/**
-	 * Next {@link Job}.
-	 */
-	private Job nextJob = null;
-
-	@Override
-	public final Job getNextJob() {
-		return this.nextJob;
-	}
-
-	@Override
-	public final void setNextJob(Job job) {
-		this.nextJob = job;
 	}
 
 	/**

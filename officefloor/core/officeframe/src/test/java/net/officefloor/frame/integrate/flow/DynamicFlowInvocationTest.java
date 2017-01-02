@@ -22,7 +22,6 @@ import java.util.Map;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -43,11 +42,10 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 	public void testDynamicFlowInvocation() throws Exception {
 
 		// Configure
-		this.constructTeam("TEAM", new PassiveTeam());
 		DynamicInvokeFlowWork work = new DynamicInvokeFlowWork();
-		ReflectiveFunctionBuilder initialTask = this.constructFunction(work, "initialTask", "TEAM");
+		ReflectiveFunctionBuilder initialTask = this.constructFunction(work, "initialTask");
 		initialTask.buildManagedFunctionContext();
-		ReflectiveFunctionBuilder dynamicTask = this.constructFunction(work, "dynamicTask", "TEAM");
+		ReflectiveFunctionBuilder dynamicTask = this.constructFunction(work, "dynamicTask");
 		dynamicTask.buildParameter();
 
 		// Execute the function
@@ -104,13 +102,12 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 		final String CONTEXT_VALUE = "VALUE";
 
 		// Configure
-		this.constructTeam("TEAM", new PassiveTeam());
 		this.constructManagedObject("MO", new MaintainStateManagedObject(), this.getOfficeName());
 		MaintainStateWork work = new MaintainStateWork("KEY", CONTEXT_VALUE);
-		ReflectiveFunctionBuilder initialTask = this.constructFunction(work, "initialTask", "TEAM");
+		ReflectiveFunctionBuilder initialTask = this.constructFunction(work, "initialTask");
 		initialTask.buildManagedFunctionContext();
 		initialTask.buildObject("MO", ManagedObjectScope.THREAD);
-		ReflectiveFunctionBuilder dynamicTask = this.constructFunction(work, "dynamicTask", "TEAM");
+		ReflectiveFunctionBuilder dynamicTask = this.constructFunction(work, "dynamicTask");
 		dynamicTask.buildObject("MO");
 
 		// Execute the function

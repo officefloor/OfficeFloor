@@ -20,7 +20,6 @@ package net.officefloor.frame.impl.spi.team.stress;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -124,17 +123,15 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 	public static class ReassignJob extends MockStressJob {
 
 		@Override
-		protected boolean runJob() {
+		protected void runJob() {
 
 			// Do not reassign if max reassigns done
 			if (this.getClonesDoJobCount() >= this.getMax()) {
-				return true;
+				return;
 			}
 
 			// Assign again (as new job)
-			this.getTeam().assignJob(this.clone(),
-					MockTeamSource.createTeamIdentifier());
-			return true;
+			this.getTeam().assignJob(this.clone());
 		}
 	}
 
@@ -171,18 +168,18 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 	/**
 	 * Repeat {@link Job}.
 	 */
-	public static class RepeatJob extends MockStressJob {
+	public class RepeatJob extends MockStressJob {
 
 		@Override
-		protected boolean runJob() {
+		protected void runJob() {
 
 			// Do not repeat if max repeats done
 			if (this.getClonesDoJobCount() >= this.getMax()) {
-				return true;
+				return;
 			}
 
 			// Repeat job again
-			return false;
+			this.getTeam().assignJob(this);
 		}
 	}
 
@@ -202,7 +199,7 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 
 		// Run the jobs
 		for (int i = 0; i < jobs.length; i++) {
-			this.team.assignJob(jobs[i], MockTeamSource.createTeamIdentifier());
+			this.team.assignJob(jobs[i]);
 		}
 
 		// Capture start time for timing out
@@ -225,8 +222,7 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 				// Provide each job run details
 				msg.append(": ");
 				for (int i = 0; i < jobs.length; i++) {
-					msg.append("Job[" + i + "]="
-							+ jobs[i].getClonesDoJobCount() + "  ");
+					msg.append("Job[" + i + "]=" + jobs[i].getClonesDoJobCount() + "  ");
 				}
 			}
 			this.printMessage(msg.toString());
@@ -248,8 +244,7 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 			// Ensure not timed out
 			this.timeout(startTime, MAX_WAIT_TIME_IN_SECONDS);
 		}
-		this.printMessage("Stress run completed in "
-				+ this.getDisplayRunTime(startTime));
+		this.printMessage("Stress run completed in " + this.getDisplayRunTime(startTime));
 	}
 
 }

@@ -15,25 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.build;
+package net.officefloor.frame.impl.spi.team.stress;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Name aware {@link ManagedFunctionFactory}.
- * 
+ * Stress tests the {@link ExecutorCachedTeamSource}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface NameAwareManagedFunctionFactory<O extends Enum<O>, F extends Enum<F>>
-		extends ManagedFunctionFactory<O, F> {
+public class ExecutorCachedTeamStressTest extends AbstractTeamStressTest {
 
-	/**
-	 * Provides the {@link ManagedFunctionFactory} the bound name for its
-	 * created {@link ManagedFunction} instances.
-	 * 
-	 * @param boundFunctionName
-	 *            Bound name for the created {@link ManagedFunction}.
-	 */
-	void setBoundFunctionName(String boundFunctionName);
+	@Override
+	protected Team getTeamToTest() throws Exception {
+		return new ExecutorCachedTeamSource().createTeam();
+	}
 
 }

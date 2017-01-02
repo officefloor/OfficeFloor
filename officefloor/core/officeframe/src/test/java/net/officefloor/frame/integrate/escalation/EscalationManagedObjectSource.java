@@ -19,6 +19,7 @@ package net.officefloor.frame.integrate.escalation;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -32,8 +33,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  */
 @TestSource
 public class EscalationManagedObjectSource extends
-		AbstractManagedObjectSource<None, EscalationManagedObjectSource.Flows>
-		implements ManagedObject, EscalationHandler {
+		AbstractManagedObjectSource<None, EscalationManagedObjectSource.Flows> implements ManagedObject, FlowCallback {
 
 	/**
 	 * Instance.
@@ -65,8 +65,7 @@ public class EscalationManagedObjectSource extends
 	 */
 	public static void invokeProcessing(String argument) {
 		// Invoke processing
-		INSTANCE.executeContext.invokeProcess(Flows.TASK_TO_ESCALATE, argument,
-				INSTANCE, 0, INSTANCE);
+		INSTANCE.executeContext.invokeProcess(Flows.TASK_TO_ESCALATE, argument, INSTANCE, 0, INSTANCE);
 	}
 
 	/**
@@ -109,15 +108,13 @@ public class EscalationManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, Flows> context)
-			throws Exception {
+	protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
 		context.setObjectClass(EscalationManagedObjectSource.class);
 		context.addFlow(Flows.TASK_TO_ESCALATE, String.class);
 	}
 
 	@Override
-	public void start(ManagedObjectExecuteContext<Flows> context)
-			throws Exception {
+	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
 		this.executeContext = context;
 	}
 
@@ -136,11 +133,11 @@ public class EscalationManagedObjectSource extends
 	}
 
 	/*
-	 * ================= EscalationHandler ====================================
+	 * ================= FlowCompletion ====================================
 	 */
 
 	@Override
-	public void handleEscalation(Throwable escalation) throws Throwable {
+	public void run(Throwable escalation) throws Throwable {
 		this.escalation = escalation;
 
 		// Determine if failure in handling escalation

@@ -79,13 +79,15 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		// Add the first function
 		FunctionOne functionOne = new FunctionOne(parameter);
 		ManagedFunctionBuilder<None, FunctionOneDelegatesEnum> functionOneBuilder = this.constructFunction("SENDER",
-				functionOne, "TEAM", null, null);
+				functionOne);
+		functionOneBuilder.setTeam("TEAM");
 		functionOneBuilder.linkFlow(FunctionOneDelegatesEnum.FUNCTION_TWO.ordinal(), "RECEIVER", Object.class, false);
 
 		// Add the second function
 		FunctionTwo functionTwo = new FunctionTwo();
 		ManagedFunctionBuilder<FunctionTwoDependenciesEnum, None> functionTwoBuilder = this
-				.constructFunction("RECEIVER", functionTwo, "TEAM", null, null);
+				.constructFunction("RECEIVER", functionTwo);
+		functionTwoBuilder.setTeam("TEAM");
 		functionTwoBuilder.linkParameter(FunctionTwoDependenciesEnum.PARAMETER, Object.class);
 
 		// Invoke first function

@@ -71,7 +71,8 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the function to execute
 		this.work = new TestWork();
-		ReflectiveFunctionBuilder functionBuilder = this.constructFunction(this.work, "task", "TEAM");
+		ReflectiveFunctionBuilder functionBuilder = this.constructFunction(this.work, "task");
+		functionBuilder.getBuilder().setTeam("TEAM");
 		functionBuilder.buildObject("MO", ManagedObjectScope.FUNCTION);
 		functionBuilder.buildFlow("flow", null, false);
 		this.constructFunction(this.work, "flow");

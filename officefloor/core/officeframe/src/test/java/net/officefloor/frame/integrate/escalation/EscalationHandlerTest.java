@@ -23,15 +23,11 @@ import junit.framework.AssertionFailedError;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Validates that escalations of tasks is appropriately managed by the
@@ -51,24 +47,20 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		RuntimeException escalation = new RuntimeException("Escalation");
 
 		// Construct work
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(
-				new EscalationHandlerWork(escalation), "WORK", "task");
-		workBuilder.buildTask("task", "TEAM").buildParameter();
-		this.constructTeam("TEAM", new PassiveTeam());
+		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
+		this.constructFunction(work, "task").buildParameter();
 
 		// Capture office floor escalation
 		final Throwable[] failure = new Throwable[1];
-		this.getOfficeFloorBuilder().setEscalationHandler(
-				new EscalationHandler() {
-					@Override
-					public void handleEscalation(Throwable escalation)
-							throws Throwable {
-						failure[0] = escalation;
-					}
-				});
+		this.getOfficeFloorBuilder().setEscalationHandler(new EscalationHandler() {
+			@Override
+			public void handleEscalation(Throwable escalation) throws Throwable {
+				failure[0] = escalation;
+			}
+		});
 
 		// Execute the task to have escalation handled
-		this.invokeWork("WORK", null);
+		this.invokeFunction("task", null);
 
 		// Ensure escalation handled by office floor escalation handler
 		assertEquals("Incorrect escalation", escalation, failure[0]);
@@ -84,21 +76,15 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		RuntimeException escalation = new RuntimeException("Escalation");
 
 		// Add office escalation to handle escalation
-		this.getOfficeBuilder().addEscalation(RuntimeException.class, "WORK",
-				"officeEscalation");
+		this.getOfficeBuilder().addEscalation(RuntimeException.class, "officeEscalation");
 
 		// Construct work
 		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, "WORK",
-				"task");
-		workBuilder.buildTask("task", "TEAM").buildParameter();
-		ReflectiveFunctionBuilder officeEscalation = workBuilder.buildTask(
-				"officeEscalation", "TEAM");
-		officeEscalation.buildParameter();
-		this.constructTeam("TEAM", new PassiveTeam());
+		this.constructFunction(work, "task").buildParameter();
+		this.constructFunction(work, "officeEscalation").buildParameter();
 
 		// Execute the task to have escalation handled
-		this.invokeWork("WORK", null);
+		this.invokeFunction("task", null);
 
 		// Ensure escalation is handled by office escalation procedure
 		assertEquals("Incorrect escalation", escalation, work.officeException);
@@ -118,24 +104,18 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the managed object source
 		EscalationManagedObjectSource.reset(null);
-		ManagedObjectBuilder<EscalationManagedObjectSource.Flows> moBuilder = this
-				.constructManagedObject("MO",
-						EscalationManagedObjectSource.class);
+		ManagedObjectBuilder<EscalationManagedObjectSource.Flows> moBuilder = this.constructManagedObject("MO",
+				EscalationManagedObjectSource.class);
 
 		// Flag managing office and invocation of flow
 		ManagingOfficeBuilder<EscalationManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
 				.setManagingOffice(officeName);
 		managingOfficeBuilder.setInputManagedObjectName("MO");
-		managingOfficeBuilder.linkProcess(
-				EscalationManagedObjectSource.Flows.TASK_TO_ESCALATE, "WORK",
-				"task");
+		managingOfficeBuilder.linkProcess(EscalationManagedObjectSource.Flows.TASK_TO_ESCALATE, "task");
 
 		// Construct the work
 		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, "WORK",
-				"task");
-		workBuilder.buildTask("task", "TEAM").buildParameter();
-		this.constructTeam("TEAM", new PassiveTeam());
+		this.constructFunction(work, "task").buildParameter();
 
 		// Create and open the office
 		this.constructOfficeFloor().openOfficeFloor();
@@ -146,8 +126,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		EscalationManagedObjectSource.invokeProcessing(FLOW_ARGUMENT);
 
 		// Ensure argument passed to task
-		assertEquals("Incorrect parameter value for task", FLOW_ARGUMENT,
-				work.taskParameter);
+		assertEquals("Incorrect parameter value for task", FLOW_ARGUMENT, work.taskParameter);
 
 		// Ensure escalation is handled by managed object escalation handler
 		try {
@@ -179,35 +158,27 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the managed object source
 		EscalationManagedObjectSource.reset(handleEscalation);
-		ManagedObjectBuilder<EscalationManagedObjectSource.Flows> moBuilder = this
-				.constructManagedObject("MO",
-						EscalationManagedObjectSource.class);
+		ManagedObjectBuilder<EscalationManagedObjectSource.Flows> moBuilder = this.constructManagedObject("MO",
+				EscalationManagedObjectSource.class);
 
 		// Flag managing office and invocation of flow
 		ManagingOfficeBuilder<EscalationManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
 				.setManagingOffice(officeName);
 		managingOfficeBuilder.setInputManagedObjectName("MO");
-		managingOfficeBuilder.linkProcess(
-				EscalationManagedObjectSource.Flows.TASK_TO_ESCALATE, "WORK",
-				"task");
+		managingOfficeBuilder.linkProcess(EscalationManagedObjectSource.Flows.TASK_TO_ESCALATE, "task");
 
 		// Construct the work
 		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, "WORK",
-				"task");
-		workBuilder.buildTask("task", "TEAM").buildParameter();
-		this.constructTeam("TEAM", new PassiveTeam());
+		this.constructFunction(work, "task").buildParameter();
 
 		// Capture office floor escalation (from managed object source)
 		final Throwable[] officeFloorEscalation = new Throwable[1];
-		this.getOfficeFloorBuilder().setEscalationHandler(
-				new EscalationHandler() {
-					@Override
-					public void handleEscalation(Throwable escalation)
-							throws Throwable {
-						officeFloorEscalation[0] = escalation;
-					}
-				});
+		this.getOfficeFloorBuilder().setEscalationHandler(new EscalationHandler() {
+			@Override
+			public void handleEscalation(Throwable escalation) throws Throwable {
+				officeFloorEscalation[0] = escalation;
+			}
+		});
 
 		// Create and open the office
 		this.constructOfficeFloor().openOfficeFloor();
@@ -218,8 +189,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		EscalationManagedObjectSource.invokeProcessing(FLOW_ARGUMENT);
 
 		// Ensure argument passed to task
-		assertEquals("Incorrect parameter value for task", FLOW_ARGUMENT,
-				work.taskParameter);
+		assertEquals("Incorrect parameter value for task", FLOW_ARGUMENT, work.taskParameter);
 
 		// Ensure escalation is handled by managed object escalation handler
 		try {
@@ -230,13 +200,11 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		}
 
 		// Ensure managed object source escalation handled by office floor
-		assertEquals("Incorrect handle escalation", handleEscalation,
-				officeFloorEscalation[0]);
+		assertEquals("Incorrect handle escalation", handleEscalation, officeFloorEscalation[0]);
 	}
 
 	/**
-	 * {@link Work} functionality to throw {@link Throwable} for escalation
-	 * handling.
+	 * Functionality to throw {@link Throwable} for escalation handling.
 	 */
 	public static class EscalationHandlerWork {
 

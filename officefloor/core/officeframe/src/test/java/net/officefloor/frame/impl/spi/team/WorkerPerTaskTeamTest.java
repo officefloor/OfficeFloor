@@ -17,8 +17,6 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
-import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -31,8 +29,7 @@ public class WorkerPerTaskTeamTest extends OfficeFrameTestCase {
 	/**
 	 * {@link WorkerPerTaskTeam} to test.
 	 */
-	private WorkerPerTaskTeam team = new WorkerPerTaskTeam("test",
-			MockTeamSource.createTeamIdentifier());
+	private WorkerPerTaskTeam team = new WorkerPerTaskTeam("test");
 
 	/**
 	 * Ensures runs the tasks.
@@ -43,11 +40,8 @@ public class WorkerPerTaskTeamTest extends OfficeFrameTestCase {
 		this.team.startWorking();
 
 		// Assign task and wait on it to be started for execution
-		MockTaskContainer task = new MockTaskContainer();
+		MockJob task = new MockJob();
 		task.assignJobToTeam(this.team, 10);
-
-		// Flag tasks to stop working
-		task.stopProcessing = true;
 
 		// Stop processing
 		this.team.stopWorking();

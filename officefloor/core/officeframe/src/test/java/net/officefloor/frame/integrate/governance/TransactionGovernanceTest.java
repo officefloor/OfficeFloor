@@ -27,7 +27,6 @@ import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -35,7 +34,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Typical use of {@link Governance} is for transaction management. This test to
@@ -59,8 +57,7 @@ public class TransactionGovernanceTest extends AbstractGovernanceTestCase {
 	/**
 	 * {@link TransactionalObject}.
 	 */
-	private final TransactionalObject object = this
-			.createSynchronizedMock(TransactionalObject.class);
+	private final TransactionalObject object = this.createSynchronizedMock(TransactionalObject.class);
 
 	/**
 	 * Flag indicating whether to provide commit after {@link ManagedFunction}.
@@ -165,52 +162,42 @@ public class TransactionGovernanceTest extends AbstractGovernanceTestCase {
 
 		// Configure the Work
 		TransactionalWork work = new TransactionalWork();
-		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
-				"doTask");
 
 		// Configure the Task
-		ReflectiveFunctionBuilder task = builder.buildTask("doTask", TEAM_TASK);
-		task.getBuilder().linkPreTaskAdministration("ADMIN", "BEGIN");
+		ReflectiveFunctionBuilder task = this.constructFunction(work, "doTask");
+		task.getBuilder().setTeam(TEAM_TASK);
+		task.getBuilder().linkPreFunctionAdministration("ADMIN", "BEGIN");
 		if (this.isCommit) {
-			task.getBuilder().linkPostTaskAdministration("ADMIN", "COMMIT");
+			task.getBuilder().linkPostFunctionAdministration("ADMIN", "COMMIT");
 		}
 		if (this.isRollback) {
-			task.getBuilder().linkPostTaskAdministration("ADMIN", "ROLLBACK");
+			task.getBuilder().linkPostFunctionAdministration("ADMIN", "ROLLBACK");
 		}
-		DependencyMappingBuilder dependencies = task.buildObject("MO",
-				ManagedObjectScope.PROCESS);
+		DependencyMappingBuilder dependencies = task.buildObject("MO", ManagedObjectScope.PROCESS);
 
 		// Configure the Escalation
-		ReflectiveFunctionBuilder escalation = builder.buildTask(
-				"handleEscalation", TEAM_TASK);
+		ReflectiveFunctionBuilder escalation = this.constructFunction(work, "handleEscalation");
+		escalation.getBuilder().setTeam(TEAM_TASK);
 		escalation.buildParameter();
 
 		// Configure the Governance
-		GovernanceBuilder<None> governance = this.getOfficeBuilder()
-				.addGovernance("GOVERNANCE",
-						new MockTransactionalGovernanceFactory(),
-						MockTransaction.class);
+		GovernanceBuilder<None> governance = this.getOfficeBuilder().addGovernance("GOVERNANCE", MockTransaction.class,
+				new MockTransactionalGovernanceFactory());
 		governance.setTeam(TEAM_GOVERNANCE);
-		governance
-				.addEscalation(SQLException.class, "WORK", "handleEscalation");
+		governance.addEscalation(SQLException.class, "handleEscalation");
 		dependencies.mapGovernance("GOVERNANCE");
 
 		// Configure the Administration
-		AdministratorBuilder<TransactionDutyKey> admin = this
-				.constructAdministrator("ADMIN",
-						MockTransactionalAdministratorSource.class,
-						TEAM_ADMINISTRATION);
+		AdministratorBuilder<TransactionDutyKey> admin = this.constructAdministrator("ADMIN",
+				MockTransactionalAdministratorSource.class, TEAM_ADMINISTRATION);
 		admin.administerManagedObject("MO");
-		admin.addDuty("BEGIN").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
-		admin.addDuty("COMMIT").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
-		admin.addDuty("ROLLBACK").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+		admin.addDuty("BEGIN").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+		admin.addDuty("COMMIT").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+		admin.addDuty("ROLLBACK").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
 
-		// Execute the work
+		// Execute the function
 		try {
-			this.invokeWork("WORK", null);
+			this.invokeFunction("doTask", null);
 		} catch (Exception ex) {
 			throw fail(ex);
 		}
@@ -228,7 +215,7 @@ public class TransactionGovernanceTest extends AbstractGovernanceTestCase {
 	}
 
 	/**
-	 * Transactional {@link Work}.
+	 * Transactional functionality.
 	 */
 	public static class TransactionalWork {
 

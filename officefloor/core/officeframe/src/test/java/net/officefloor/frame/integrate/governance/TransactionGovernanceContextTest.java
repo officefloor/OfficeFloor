@@ -27,17 +27,15 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationFlow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Typical use of {@link Governance} is for transaction management. This test to
@@ -46,8 +44,7 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBu
  * 
  * @author Daniel Sagenschneider
  */
-public class TransactionGovernanceContextTest extends
-		AbstractGovernanceTestCase {
+public class TransactionGovernanceContextTest extends AbstractGovernanceTestCase {
 
 	/**
 	 * Creates all combinations of meta-data for testing.
@@ -58,11 +55,6 @@ public class TransactionGovernanceContextTest extends
 	public static Test suite() {
 		return createMetaDataCombinationTestSuite(TransactionGovernanceContextTest.class);
 	}
-
-	/**
-	 * Name of the {@link Work} to invoke for testing.
-	 */
-	private static final String WORK_NAME = "WORK";
 
 	/**
 	 * Name of the {@link ManagedObject}.
@@ -82,8 +74,7 @@ public class TransactionGovernanceContextTest extends
 	/**
 	 * {@link TransactionalObject}.
 	 */
-	private final TransactionalObject object = this
-			.createSynchronizedMock(TransactionalObject.class);
+	private final TransactionalObject object = this.createSynchronizedMock(TransactionalObject.class);
 
 	/**
 	 * {@link ManagedFunction} one.
@@ -96,14 +87,10 @@ public class TransactionGovernanceContextTest extends
 	private ReflectiveFunctionBuilder taskTwo;
 
 	/**
-	 * Flags for {@link ManagedFunction} one to be constructed under {@link Governance}.
+	 * Flags for {@link ManagedFunction} one to be constructed under
+	 * {@link Governance}.
 	 */
 	private boolean isTaskOneGoverned = true;
-
-	/**
-	 * {@link FlowInstigationStrategyEnum} from {@link ManagedFunction} one.
-	 */
-	private FlowInstigationStrategyEnum instigationStrategy = FlowInstigationStrategyEnum.SEQUENTIAL;
 
 	/**
 	 * Ensure commit transaction on completion.
@@ -136,7 +123,7 @@ public class TransactionGovernanceContextTest extends
 
 		// Configure tasks
 		this.constructRawTasks();
-		this.taskOne.setNextTaskInFlow("taskTwo");
+		this.taskOne.setNextFunction("taskTwo");
 
 		// Test
 		this.doTest(false);
@@ -155,7 +142,7 @@ public class TransactionGovernanceContextTest extends
 
 		// Configure tasks
 		this.constructRawTasks();
-		this.taskOne.setNextTaskInFlow("taskTwo");
+		this.taskOne.setNextFunction("taskTwo");
 		this.taskTwo.getBuilder().addGovernance(GOVERNANCE_NAME);
 
 		// Test
@@ -239,8 +226,8 @@ public class TransactionGovernanceContextTest extends
 
 		// Configure tasks
 		this.isTaskOneGoverned = false;
-		this.instigationStrategy = FlowInstigationStrategyEnum.PARALLEL;
-		this.work.isTaskOneToComplete = false;
+		this.work.callback = (escalation) -> {
+		};
 		this.constructRawTasks();
 		this.taskTwo.getBuilder().addGovernance(GOVERNANCE_NAME);
 
@@ -264,8 +251,8 @@ public class TransactionGovernanceContextTest extends
 		this.object.commit();
 
 		// Configure tasks
-		this.instigationStrategy = FlowInstigationStrategyEnum.PARALLEL;
-		this.work.isTaskOneToComplete = false;
+		this.work.callback = (escalation) -> {
+		};
 		this.constructRawTasks();
 
 		// Test
@@ -274,8 +261,8 @@ public class TransactionGovernanceContextTest extends
 
 	/**
 	 * Ensure not reactivate {@link Governance} on parallel flow returning to
-	 * invokee {@link ManagedFunction} which is complete and flowing onto next {@link ManagedFunction}
-	 * that does not have {@link Governance}.
+	 * invokee {@link ManagedFunction} which is complete and flowing onto next
+	 * {@link ManagedFunction} that does not have {@link Governance}.
 	 */
 	public void testNotReactivateOnParallelFlow() throws Throwable {
 
@@ -287,9 +274,8 @@ public class TransactionGovernanceContextTest extends
 		this.object.stepTwo();
 
 		// Configure tasks
-		this.instigationStrategy = FlowInstigationStrategyEnum.PARALLEL;
 		this.constructRawTasks();
-		this.taskOne.setNextTaskInFlow("taskTwo");
+		this.taskOne.setNextFunction("taskTwo");
 
 		// Test
 		this.doTest(true);
@@ -310,16 +296,14 @@ public class TransactionGovernanceContextTest extends
 
 		// Add office floor escalation handler
 		final Throwable[] escalation = new Throwable[1];
-		this.getOfficeFloorBuilder().setEscalationHandler(
-				new EscalationHandler() {
-					@Override
-					public void handleEscalation(Throwable cause)
-							throws Throwable {
-						synchronized (escalation) {
-							escalation[0] = cause;
-						}
-					}
-				});
+		this.getOfficeFloorBuilder().setEscalationHandler(new EscalationHandler() {
+			@Override
+			public void handleEscalation(Throwable cause) throws Throwable {
+				synchronized (escalation) {
+					escalation[0] = cause;
+				}
+			}
+		});
 
 		// Configure tasks
 		this.constructRawTasks();
@@ -350,23 +334,19 @@ public class TransactionGovernanceContextTest extends
 		this.constructTeams();
 
 		// Configure the Managed Object
-		this.constructManagedObject(this.object, MANAGED_OBJECT_NAME,
-				officeName);
-		DependencyMappingBuilder dependencies = officeBuilder
-				.addProcessManagedObject(MANAGED_OBJECT_NAME,
-						MANAGED_OBJECT_NAME);
+		this.constructManagedObject(this.object, MANAGED_OBJECT_NAME, officeName);
+		DependencyMappingBuilder dependencies = officeBuilder.addProcessManagedObject(MANAGED_OBJECT_NAME,
+				MANAGED_OBJECT_NAME);
 
 		// Configure the Governance
-		GovernanceBuilder<None> governance = this.getOfficeBuilder()
-				.addGovernance(GOVERNANCE_NAME,
-						new MockTransactionalGovernanceFactory(),
-						MockTransaction.class);
+		GovernanceBuilder<None> governance = this.getOfficeBuilder().addGovernance(GOVERNANCE_NAME,
+				MockTransaction.class, new MockTransactionalGovernanceFactory());
 		governance.setTeam(TEAM_GOVERNANCE);
 		dependencies.mapGovernance(GOVERNANCE_NAME);
 
-		// Execute the work
+		// Execute the function
 		try {
-			this.invokeWork(WORK_NAME, Boolean.valueOf(isInvokeFlow));
+			this.invokeFunction("taskOne", Boolean.valueOf(isInvokeFlow));
 		} catch (Exception ex) {
 			throw fail(ex);
 		}
@@ -385,32 +365,31 @@ public class TransactionGovernanceContextTest extends
 	 */
 	protected void constructRawTasks() throws Exception {
 
-		// Construct the work and tasks (with basic content)
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(this.work,
-				WORK_NAME, "taskOne");
-
 		// Construct task one
-		this.taskOne = workBuilder.buildTask("taskOne", TEAM_TASK);
+		this.taskOne = this.constructFunction(this.work, "taskOne");
+		this.taskOne.getBuilder().setTeam(TEAM_TASK);
 		this.taskOne.buildObject(MANAGED_OBJECT_NAME);
-		this.taskOne.buildFlow("taskTwo", this.instigationStrategy, null);
+		this.taskOne.buildFlow("taskTwo", null, false);
 		this.taskOne.buildParameter();
-		this.taskOne.buildTaskContext();
+		this.taskOne.buildManagedFunctionContext();
 		if (this.isTaskOneGoverned) {
 			this.taskOne.getBuilder().addGovernance(GOVERNANCE_NAME);
 		}
 
 		// Construct task two
-		this.taskTwo = workBuilder.buildTask("taskTwo", TEAM_TASK);
+		this.taskTwo = this.constructFunction(this.work, "taskTwo");
+		this.taskTwo.getBuilder().setTeam(TEAM_TASK);
 		this.taskTwo.buildObject(MANAGED_OBJECT_NAME);
 
 		// Construct escalation handling
-		workBuilder.buildTask("handleEscalation", TEAM_TASK).buildParameter();
-		this.getOfficeBuilder().addEscalation(SQLException.class, WORK_NAME,
-				"handleEscalation");
+		ReflectiveFunctionBuilder escalationHandler = this.constructFunction(this.work, "handleEscalation");
+		escalationHandler.getBuilder().setTeam(TEAM_TASK);
+		escalationHandler.buildParameter();
+		this.getOfficeBuilder().addEscalation(SQLException.class, "handleEscalation");
 	}
 
 	/**
-	 * {@link Work}.
+	 * Functionality.
 	 */
 	public static class TransactionalWork {
 
@@ -420,32 +399,27 @@ public class TransactionGovernanceContextTest extends
 		public volatile SQLException exception = null;
 
 		/**
-		 * Flag indicating if {@link ManagedFunction} one is to completing.
-		 */
-		public boolean isTaskOneToComplete = true;
-
-		/**
 		 * Number of times {@link ManagedFunction} one is invoked.
 		 */
 		private int taskOneInvokeCount = 0;
 
 		/**
+		 * {@link FlowCallback}.
+		 */
+		private FlowCallback callback = null;
+
+		/**
 		 * {@link ManagedFunction} one.
 		 */
-		public void taskOne(TransactionalObject object, ReflectiveFlow flow,
-				Boolean isInvokeFlow, ManagedFunctionContext<?, ?, ?> taskContext)
-				throws Exception {
+		public void taskOne(TransactionalObject object, ReflectiveFlow flow, Boolean isInvokeFlow,
+				ManagedFunctionContext<?, ?> taskContext) throws Exception {
 
 			// Undertake functionality
 			object.stepOne();
 
-			// Flag for task one to complete
-			taskContext.setComplete(this.isTaskOneToComplete);
-			this.isTaskOneToComplete = true; // complete on next
-
 			// Invoke the flow (only on first invocation)
 			if ((this.taskOneInvokeCount == 0) && (isInvokeFlow.booleanValue())) {
-				flow.doFlow(null);
+				flow.doFlow(null, this.callback);
 			}
 
 			// Increment invoke count

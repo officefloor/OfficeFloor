@@ -51,7 +51,7 @@ public class JobQueueTest extends OfficeFrameTestCase {
 	 * Ensure able to enqueue and dequeue a task.
 	 */
 	public void testSingleEnqueueDequeue() {
-		Job task = new MockTaskContainer();
+		Job task = new MockJob();
 		this.taskQueue.enqueue(task);
 		Job returnedTask = this.taskQueue.dequeue();
 
@@ -63,8 +63,8 @@ public class JobQueueTest extends OfficeFrameTestCase {
 	 * Ensure able to dequeue the head of queue if many tasks.
 	 */
 	public void testEnqueueDequeueHead() {
-		Job taskOne = new MockTaskContainer();
-		Job taskTwo = new MockTaskContainer();
+		Job taskOne = new MockJob();
+		Job taskTwo = new MockJob();
 		this.taskQueue.enqueue(taskOne);
 		this.taskQueue.enqueue(taskTwo);
 
@@ -143,7 +143,7 @@ public class JobQueueTest extends OfficeFrameTestCase {
 		}
 
 		// Create the Task
-		Job task = new MockTaskContainer();
+		Job task = new MockJob();
 
 		// Add the task
 		this.taskQueue.enqueue(task);
@@ -223,7 +223,7 @@ public class JobQueueTest extends OfficeFrameTestCase {
 		}
 
 		// Create the Task
-		Job task = new MockTaskContainer();
+		Job task = new MockJob();
 
 		// Add the task
 		this.taskQueue.enqueue(task);

@@ -18,27 +18,24 @@
 package net.officefloor.frame.integrate.managedobject.flow;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
  * Tests {@link ManagedObjectSource} invoking a {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectSourceInstigateProcessTest extends
-		AbstractOfficeConstructTestCase {
+public class ManagedObjectSourceInstigateProcessTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * {@link ProcessState} parameter.
@@ -76,25 +73,19 @@ public class ManagedObjectSourceInstigateProcessTest extends
 		String officeName = this.getOfficeName();
 
 		// Construct the managed object
-		ManagedObjectBuilder<InputManagedObjectSource.Flows> moBuilder = this
-				.constructManagedObject("INPUT", InputManagedObjectSource.class);
+		ManagedObjectBuilder<InputManagedObjectSource.Flows> moBuilder = this.constructManagedObject("INPUT",
+				InputManagedObjectSource.class);
 
 		// Provide flow for input managed object
 		ManagingOfficeBuilder<InputManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
 				.setManagingOffice(officeName);
 		managingOfficeBuilder.setInputManagedObjectName("INPUT");
-		managingOfficeBuilder.linkProcess(InputManagedObjectSource.Flows.INPUT,
-				"WORK", "TASK");
+		managingOfficeBuilder.linkProcess(InputManagedObjectSource.Flows.INPUT, "TASK");
 
-		// Provide task for managed object source input
-		this.constructWork("WORK", this.inputTask, "TASK");
-		ManagedFunctionBuilder<Work, Indexed, Indexed> taskBuilder = this.constructTask(
-				"TASK", this.inputTask, "TEAM", "INPUT", Object.class, null,
-				null);
-		taskBuilder.linkParameter(1, Object.class);
-
-		// Register the team
-		this.constructTeam("TEAM", new PassiveTeam());
+		// Provide function for managed object source input
+		ManagedFunctionBuilder<Indexed, Indexed> functionBuilder = this.constructFunction("TASK", this.inputTask);
+		functionBuilder.linkManagedObject(0, "INPUT", Object.class);
+		functionBuilder.linkParameter(1, Object.class);
 
 		// Build and open the Office Floor
 		this.officeFloor = this.constructOfficeFloor();
@@ -132,8 +123,7 @@ public class ManagedObjectSourceInstigateProcessTest extends
 		InputManagedObjectSource.input(PARAMETER, this.managedObject, 400);
 
 		// Validate that not input as delayed
-		assertNull("Should not be invoked (parameter)",
-				this.inputTask.parameter);
+		assertNull("Should not be invoked (parameter)", this.inputTask.parameter);
 		assertNull("Should not be invoked (object)", this.inputTask.object);
 
 		// Wait for invocation to occur
@@ -150,8 +140,7 @@ public class ManagedObjectSourceInstigateProcessTest extends
 	/**
 	 * Task to process {@link ManagedObjectSource} input.
 	 */
-	private static class InputTask extends
-			AbstractSingleTask<Work, Indexed, Indexed> {
+	private static class InputTask implements ManagedFunction<Indexed, Indexed> {
 
 		/**
 		 * Parameter.
@@ -164,12 +153,11 @@ public class ManagedObjectSourceInstigateProcessTest extends
 		protected volatile Object object;
 
 		/*
-		 * ===================== Task ======================================
+		 * ===================== ManagedFunction =====================
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<Work, Indexed, Indexed> context)
-				throws Throwable {
+		public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 			// Obtain the object
 			this.object = context.getObject(0);

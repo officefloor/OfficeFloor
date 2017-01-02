@@ -15,39 +15,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.integrate.work;
+package net.officefloor.frame.integrate.function;
 
+import org.easymock.AbstractMatcher;
+
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.NameAwareManagedFunctionFactory;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
-import org.easymock.AbstractMatcher;
-
 /**
  * Ensures the additional managed interface functionality is provided to the
- * {@link WorkFactory} sub interfaces.
+ * {@link ManagedFunctionFactory} sub interfaces.
  * 
  * @author Daniel Sagenschneider
  */
-public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
+public class ManagedFunctionFactoryTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure able to open {@link OfficeFloor} with just {@link WorkFactory}.
+	 * Ensure able to open {@link OfficeFloor} with just
+	 * {@link ManagedFunctionFactory}.
 	 */
 	public void testWorkFactory() throws Exception {
 
 		// Mock
-		final WorkFactory<?> workFactory = this.createMock(WorkFactory.class);
+		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Should not invoke additional functionality
 
 		// Test
 		this.replayMockObjects();
-		this.constructWork("WORK", workFactory);
+		this.constructFunction("task", functionFactory);
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
@@ -59,19 +60,19 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 	 * Ensure name aware functionality is provided for the
 	 * {@link NameAwareManagedFunctionFactory}.
 	 */
-	public void testNameAwareWorkFactory() throws Exception {
+	public void testNameAwareManagedFunctionFactory() throws Exception {
 
 		// Mock
-		final String WORK_NAME = "WORK";
-		final NameAwareManagedFunctionFactory<?> workFactory = this
+		final String BOUND_NAME = "bound";
+		final NameAwareManagedFunctionFactory<?, ?> functionFactory = this
 				.createMock(NameAwareManagedFunctionFactory.class);
 
-		// Record providing bound work name
-		workFactory.setBoundWorkName(WORK_NAME);
+		// Record providing bound name
+		functionFactory.setBoundFunctionName(BOUND_NAME);
 
 		// Test
 		this.replayMockObjects();
-		this.constructWork(WORK_NAME, workFactory);
+		this.constructFunction(BOUND_NAME, functionFactory);
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
@@ -83,17 +84,16 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 	 * Ensure {@link Office} aware functionality is provided for the
 	 * {@link OfficeAwareManagedFunctionFactory}.
 	 */
-	public void testOfficeAwareWorkFactory() throws Exception {
+	public void testOfficeAwareManagedFunctionFactory() throws Exception {
 
 		// Mock
-		final String WORK_NAME = "WORK";
-		final OfficeAwareManagedFunctionFactory<?> workFactory = this
+		final OfficeAwareManagedFunctionFactory<?, ?> functionFactory = this
 				.createMock(OfficeAwareManagedFunctionFactory.class);
 
 		// Record providing Office
-		workFactory.setOffice(null);
+		functionFactory.setOffice(null);
 		final Office[] office = new Office[1];
-		this.control(workFactory).setDefaultMatcher(new AbstractMatcher() {
+		this.control(functionFactory).setDefaultMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				office[0] = (Office) actual[0];
@@ -103,7 +103,7 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.constructWork(WORK_NAME, workFactory);
+		this.constructFunction("task", functionFactory);
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
@@ -114,7 +114,7 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 		assertNotNull("Ensure Office provided", office[0]);
 
 		// Ensure correct Office (contains WorkFactory)
-		assertEquals("Incorrect Office", WORK_NAME, office[0].getWorkNames()[0]);
+		assertEquals("Incorrect Office", "task", office[0].getFunctionNames()[0]);
 	}
 
 	/**
@@ -124,15 +124,15 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 	public void testNameAndOfficeAwareWorkFactory() throws Exception {
 
 		// Mock
-		final String WORK_NAME = "WORK";
-		final MockNameAndOfficeAwareWorkFactory workFactory = this
+		final String BOUND_NAME = "task";
+		final MockNameAndOfficeAwareWorkFactory functionFactory = this
 				.createMock(MockNameAndOfficeAwareWorkFactory.class);
 
 		// Record providing name and Office
-		workFactory.setBoundWorkName(WORK_NAME);
-		workFactory.setOffice(null);
+		functionFactory.setBoundFunctionName(BOUND_NAME);
+		functionFactory.setOffice(null);
 		final Office[] office = new Office[1];
-		this.control(workFactory).setMatcher(new AbstractMatcher() {
+		this.control(functionFactory).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				office[0] = (Office) actual[0];
@@ -142,7 +142,7 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 
 		// Test
 		this.replayMockObjects();
-		this.constructWork(WORK_NAME, workFactory);
+		this.constructFunction(BOUND_NAME, functionFactory);
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
@@ -153,15 +153,16 @@ public class WorkFactoryTest extends AbstractOfficeConstructTestCase {
 		assertNotNull("Ensure Office provided", office[0]);
 
 		// Ensure correct Office (contains WorkFactory)
-		assertEquals("Incorrect Office", WORK_NAME, office[0].getWorkNames()[0]);
+		assertEquals("Incorrect Office", BOUND_NAME, office[0].getFunctionNames()[0]);
 	}
 
 	/**
 	 * Interface for mock objects that implements both
-	 * {@link NameAwareManagedFunctionFactory} and {@link OfficeAwareManagedFunctionFactory}.
+	 * {@link NameAwareManagedFunctionFactory} and
+	 * {@link OfficeAwareManagedFunctionFactory}.
 	 */
-	public static interface MockNameAndOfficeAwareWorkFactory extends
-			NameAwareManagedFunctionFactory<Work>, OfficeAwareManagedFunctionFactory<Work> {
+	public static interface MockNameAndOfficeAwareWorkFactory
+			extends NameAwareManagedFunctionFactory<None, None>, OfficeAwareManagedFunctionFactory<None, None> {
 	}
 
 }

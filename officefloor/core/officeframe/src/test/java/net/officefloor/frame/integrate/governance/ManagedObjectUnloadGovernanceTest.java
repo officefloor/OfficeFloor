@@ -22,12 +22,10 @@ import junit.framework.TestSuite;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
@@ -38,15 +36,13 @@ import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFacto
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Ensure do not unload {@link ManagedObject} that is under {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectUnloadGovernanceTest extends
-		AbstractGovernanceTestCase {
+public class ManagedObjectUnloadGovernanceTest extends AbstractGovernanceTestCase {
 
 	/**
 	 * Creates all combinations of meta-data for testing.
@@ -61,8 +57,7 @@ public class ManagedObjectUnloadGovernanceTest extends
 	/**
 	 * {@link TransactionalObject}.
 	 */
-	private final TransactionalObject object = this
-			.createSynchronizedMock(TransactionalObject.class);
+	private final TransactionalObject object = this.createSynchronizedMock(TransactionalObject.class);
 
 	/**
 	 * Flag indicating whether to provide commit after {@link ManagedFunction}.
@@ -158,61 +153,47 @@ public class ManagedObjectUnloadGovernanceTest extends
 
 		// Configure the Managed Objects (one for each work)
 		TransactionalManagedObjectSource.object = this.object;
-		this.constructManagedObject("MO_ONE",
-				TransactionalManagedObjectSource.class, officeName);
-		this.constructManagedObject("MO_TWO",
-				TransactionalManagedObjectSource.class, officeName);
+		this.constructManagedObject("MO_ONE", TransactionalManagedObjectSource.class, officeName);
+		this.constructManagedObject("MO_TWO", TransactionalManagedObjectSource.class, officeName);
 
 		// Configure the Work
 		TransactionalWork work = new TransactionalWork();
-		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
-				"doTaskOne");
 
 		// Configure the first task
-		ReflectiveFunctionBuilder taskOne = builder.buildTask("doTaskOne",
-				TEAM_TASK);
-		DependencyMappingBuilder dependenciesOne = taskOne.buildObject(
-				"MO_ONE", ManagedObjectScope.WORK);
-		taskOne.getBuilder().linkPreTaskAdministration("ADMIN", "BEGIN");
-		taskOne.getBuilder().setNextTaskInFlow("doTaskTwo", null);
+		ReflectiveFunctionBuilder taskOne = this.constructFunction(work, "doTaskOne");
+		taskOne.getBuilder().setTeam(TEAM_TASK);
+		DependencyMappingBuilder dependenciesOne = taskOne.buildObject("MO_ONE", ManagedObjectScope.FUNCTION);
+		taskOne.getBuilder().linkPreFunctionAdministration("ADMIN", "BEGIN");
+		taskOne.getBuilder().setNextFunction("doTaskTwo", null);
 
 		// Configure the second task
-		ReflectiveFunctionBuilder taskTwo = builder.buildTask("doTaskTwo",
-				TEAM_TASK);
-		DependencyMappingBuilder dependenciesTwo = taskTwo.buildObject(
-				"MO_TWO", ManagedObjectScope.WORK);
+		ReflectiveFunctionBuilder taskTwo = this.constructFunction(work, "doTaskTwo");
+		taskTwo.getBuilder().setTeam(TEAM_TASK);
+		DependencyMappingBuilder dependenciesTwo = taskTwo.buildObject("MO_TWO", ManagedObjectScope.FUNCTION);
 		if (this.isCommit) {
-			taskTwo.getBuilder().linkPostTaskAdministration("ADMIN", "COMMIT");
+			taskTwo.getBuilder().linkPostFunctionAdministration("ADMIN", "COMMIT");
 		}
 		if (this.isRollback) {
-			taskTwo.getBuilder()
-					.linkPostTaskAdministration("ADMIN", "ROLLBACK");
+			taskTwo.getBuilder().linkPostFunctionAdministration("ADMIN", "ROLLBACK");
 		}
 
 		// Configure the Governance
-		GovernanceBuilder<None> governance = this.getOfficeBuilder()
-				.addGovernance("GOVERNANCE",
-						new MockTransactionalGovernanceFactory(),
-						MockTransaction.class);
+		GovernanceBuilder<None> governance = this.getOfficeBuilder().addGovernance("GOVERNANCE", MockTransaction.class,
+				new MockTransactionalGovernanceFactory());
 		governance.setTeam(TEAM_GOVERNANCE);
 		dependenciesOne.mapGovernance("GOVERNANCE");
 		dependenciesTwo.mapGovernance("GOVERNANCE");
 
 		// Configure the Administration
-		AdministratorBuilder<TransactionDutyKey> admin = this
-				.constructAdministrator("ADMIN",
-						MockTransactionalAdministratorSource.class,
-						TEAM_ADMINISTRATION);
-		admin.addDuty("BEGIN").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
-		admin.addDuty("COMMIT").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
-		admin.addDuty("ROLLBACK").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+		AdministratorBuilder<TransactionDutyKey> admin = this.constructAdministrator("ADMIN",
+				MockTransactionalAdministratorSource.class, TEAM_ADMINISTRATION);
+		admin.addDuty("BEGIN").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+		admin.addDuty("COMMIT").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+		admin.addDuty("ROLLBACK").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
 
 		// Execute the work
 		try {
-			this.invokeWork("WORK", null);
+			this.invokeFunction("WORK", null);
 		} catch (Exception ex) {
 			throw fail(ex);
 		}
@@ -228,12 +209,9 @@ public class ManagedObjectUnloadGovernanceTest extends
 	/**
 	 * {@link ManagedObjectSource} for the {@link MockTransaction}.
 	 */
-	public static class TransactionalManagedObjectSource extends
-			AbstractManagedObjectSource<None, None> implements ManagedObject,
-			ExtensionInterfaceFactory<MockTransaction>,
-			WorkFactory<TransactionalManagedObjectSource>, Work,
-			ManagedFunctionFactory<TransactionalManagedObjectSource, None, None>,
-			ManagedFunction<TransactionalManagedObjectSource, None, None> {
+	public static class TransactionalManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject, ExtensionInterfaceFactory<MockTransaction>, ManagedFunctionFactory<None, None>,
+			ManagedFunction<None, None> {
 
 		/**
 		 * {@link TransactionalObject}.
@@ -250,17 +228,14 @@ public class ManagedObjectUnloadGovernanceTest extends
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 
-			// Add recycle work
-			context.getManagedObjectSourceContext().getRecycleWork(this)
-					.addTask("RECYCLE", this).setTeam("RECYCLE");
+			// Add recycle function
+			context.getManagedObjectSourceContext().getRecycleFunction(this).setTeam("RECYCLE");
 
 			// Meta-data
 			context.setObjectClass(TransactionalObject.class);
-			context.addManagedObjectExtensionInterface(MockTransaction.class,
-					this);
+			context.addManagedObjectExtensionInterface(MockTransaction.class, this);
 		}
 
 		@Override
@@ -282,38 +257,25 @@ public class ManagedObjectUnloadGovernanceTest extends
 		 */
 
 		@Override
-		public MockTransaction createExtensionInterface(
-				ManagedObject managedObject) {
+		public MockTransaction createExtensionInterface(ManagedObject managedObject) {
 			return object;
 		}
 
 		/*
-		 * =========================== WorkFactory ============================
+		 * ====================== ManagedFunctionFactory =======================
 		 */
 
 		@Override
-		public TransactionalManagedObjectSource createWork() {
+		public ManagedFunction<None, None> createManagedFunction() {
 			return this;
 		}
 
 		/*
-		 * =========================== TaskFactory ============================
+		 * ======================== ManagedFunction ========================
 		 */
 
 		@Override
-		public ManagedFunction<TransactionalManagedObjectSource, None, None> createTask(
-				TransactionalManagedObjectSource work) {
-			return this;
-		}
-
-		/*
-		 * =========================== TaskFactory ============================
-		 */
-
-		@Override
-		public Object execute(
-				ManagedFunctionContext<TransactionalManagedObjectSource, None, None> context)
-				throws Throwable {
+		public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
 			// Flag recycling
 			object.recycled();
 			return null;
@@ -321,7 +283,7 @@ public class ManagedObjectUnloadGovernanceTest extends
 	}
 
 	/**
-	 * Transactional {@link Work}.
+	 * Transactional functionality.
 	 */
 	public static class TransactionalWork {
 

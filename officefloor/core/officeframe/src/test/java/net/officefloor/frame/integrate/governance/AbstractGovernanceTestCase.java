@@ -30,7 +30,6 @@ import net.officefloor.frame.integrate.stress.AdministratorStressTest.Administra
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.MockTeamSource;
 
 /**
  * Abstract {@link Governance} testing to test various multi-threaded
@@ -38,8 +37,7 @@ import net.officefloor.frame.test.MockTeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractGovernanceTestCase extends
-		AbstractOfficeConstructTestCase {
+public abstract class AbstractGovernanceTestCase extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Creates all meta-data combinations for the input {@link TestCase} class.
@@ -58,8 +56,7 @@ public abstract class AbstractGovernanceTestCase extends
 
 		// Create the test suite of all meta-data combinations
 		TestSuite suite = new TestSuite(testCaseClass.getName());
-		for (Enumeration<Test> methods = new TestSuite(testCaseClass).tests(); methods
-				.hasMoreElements();) {
+		for (Enumeration<Test> methods = new TestSuite(testCaseClass).tests(); methods.hasMoreElements();) {
 			T methodTest = (T) methods.nextElement();
 			for (int task = 0; task < 2; task++) {
 				for (int governance = 0; governance < 2; governance++) {
@@ -139,7 +136,8 @@ public abstract class AbstractGovernanceTestCase extends
 	protected String testMethodName;
 
 	/**
-	 * Indicates if multi-threaded {@link Team} responsible for {@link ManagedFunction}.
+	 * Indicates if multi-threaded {@link Team} responsible for
+	 * {@link ManagedFunction}.
 	 */
 	protected boolean isMultiThreadedTask = false;
 
@@ -162,15 +160,10 @@ public abstract class AbstractGovernanceTestCase extends
 
 		// Create the teams
 		Team passiveTeam = new PassiveTeam();
-		Team taskTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
-				"TASK_TEAM", MockTeamSource.createTeamIdentifier(), 100)
+		Team taskTeam = (this.isMultiThreadedTask ? new OnePersonTeam("TASK_TEAM", 100) : passiveTeam);
+		Team governanceTeam = (this.isMultiThreadedTask ? new OnePersonTeam("GOVERNANCE_TEAM", 100) : passiveTeam);
+		Team administrationTeam = (this.isMultiThreadedTask ? new OnePersonTeam("ADMINISTRATOR_TEAM", 100)
 				: passiveTeam);
-		Team governanceTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
-				"GOVERNANCE_TEAM", MockTeamSource.createTeamIdentifier(), 100)
-				: passiveTeam);
-		Team administrationTeam = (this.isMultiThreadedTask ? new OnePersonTeam(
-				"ADMINISTRATOR_TEAM", MockTeamSource.createTeamIdentifier(),
-				100) : passiveTeam);
 
 		// Construct the teams
 		this.constructTeam(TEAM_TASK, taskTeam);

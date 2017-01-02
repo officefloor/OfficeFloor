@@ -28,16 +28,13 @@ import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
 import net.officefloor.frame.integrate.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests flow for {@link Governance}.
@@ -59,8 +56,7 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 	/**
 	 * {@link TransactionalObject}.
 	 */
-	private final TransactionalObject object = this
-			.createSynchronizedMock(TransactionalObject.class);
+	private final TransactionalObject object = this.createSynchronizedMock(TransactionalObject.class);
 
 	/**
 	 * Flag indicating whether to provide commit after {@link ManagedFunction}.
@@ -152,70 +148,58 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 
 		// Configure the Work
 		TransactionalWork work = new TransactionalWork();
-		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
-				"doTask");
 
 		// Configure the Task
-		ReflectiveFunctionBuilder task = builder.buildTask("doTask", TEAM_TASK);
-		task.getBuilder().linkPreTaskAdministration("ADMIN", "BEGIN");
+		ReflectiveFunctionBuilder task = this.constructFunction(work, "doTask");
+		task.getBuilder().setTeam(TEAM_TASK);
+		task.getBuilder().linkPreFunctionAdministration("ADMIN", "BEGIN");
 		if (this.isCommit) {
-			task.getBuilder().linkPostTaskAdministration("ADMIN", "COMMIT");
+			task.getBuilder().linkPostFunctionAdministration("ADMIN", "COMMIT");
 		}
 		if (this.isRollback) {
-			task.getBuilder().linkPostTaskAdministration("ADMIN", "ROLLBACK");
+			task.getBuilder().linkPostFunctionAdministration("ADMIN", "ROLLBACK");
 		}
-		DependencyMappingBuilder dependencies = task.buildObject("MO",
-				ManagedObjectScope.PROCESS);
+		DependencyMappingBuilder dependencies = task.buildObject("MO", ManagedObjectScope.PROCESS);
 
 		// Configure the governance flow tasks
-		ReflectiveFunctionBuilder beginTask = builder.buildTask("flowBegin",
-				TEAM_TASK);
+		ReflectiveFunctionBuilder beginTask = this.constructFunction(work, "flowBegin");
+		beginTask.getBuilder().setTeam(TEAM_TASK);
 		beginTask.buildObject("MO");
 		beginTask.buildParameter();
-		ReflectiveFunctionBuilder commitTask = builder.buildTask("flowCommit",
-				TEAM_TASK);
+		ReflectiveFunctionBuilder commitTask = this.constructFunction(work, "flowCommit");
+		commitTask.getBuilder().setTeam(TEAM_TASK);
 		commitTask.buildObject("MO");
 		commitTask.buildParameter();
-		ReflectiveFunctionBuilder rollbackTask = builder.buildTask("flowRollback",
-				TEAM_TASK);
+		ReflectiveFunctionBuilder rollbackTask = this.constructFunction(work, "flowRollback");
+		rollbackTask.getBuilder().setTeam(TEAM_TASK);
 		rollbackTask.buildObject("MO");
 		rollbackTask.buildParameter();
 
 		// Configure handling test failures
-		ReflectiveFunctionBuilder handleException = builder.buildTask(
-				"handleException", TEAM_TASK);
+		ReflectiveFunctionBuilder handleException = this.constructFunction(work, "handleException");
+		handleException.getBuilder().setTeam(TEAM_TASK);
 		handleException.buildParameter();
-		officeBuilder.addEscalation(Throwable.class, "WORK", "handleException");
+		officeBuilder.addEscalation(Throwable.class, "handleException");
 
 		// Configure the Governance
-		GovernanceBuilder<GovernanceFlowKeys> governance = this
-				.getOfficeBuilder().addGovernance("GOVERNANCE",
-						new FlowGovernanceFactory(), MockTransaction.class);
+		GovernanceBuilder<GovernanceFlowKeys> governance = this.getOfficeBuilder().addGovernance("GOVERNANCE",
+				MockTransaction.class, new FlowGovernanceFactory());
 		governance.setTeam(TEAM_GOVERNANCE);
-		governance.linkFlow(GovernanceFlowKeys.BEGIN, "WORK", "flowBegin",
-				FlowInstigationStrategyEnum.SEQUENTIAL, String.class);
-		governance.linkFlow(GovernanceFlowKeys.COMMIT, "WORK", "flowCommit",
-				FlowInstigationStrategyEnum.PARALLEL, String.class);
-		governance.linkFlow(GovernanceFlowKeys.ROLLBACK, "WORK",
-				"flowRollback", FlowInstigationStrategyEnum.ASYNCHRONOUS,
-				String.class);
+		governance.linkFlow(GovernanceFlowKeys.BEGIN, "flowBegin", String.class, false);
+		governance.linkFlow(GovernanceFlowKeys.COMMIT, "flowCommit", String.class, false);
+		governance.linkFlow(GovernanceFlowKeys.ROLLBACK, "flowRollback", String.class, true);
 		dependencies.mapGovernance("GOVERNANCE");
 
 		// Configure the Administration
-		AdministratorBuilder<TransactionDutyKey> admin = this
-				.constructAdministrator("ADMIN",
-						MockTransactionalAdministratorSource.class,
-						TEAM_ADMINISTRATION);
+		AdministratorBuilder<TransactionDutyKey> admin = this.constructAdministrator("ADMIN",
+				MockTransactionalAdministratorSource.class, TEAM_ADMINISTRATION);
 		admin.administerManagedObject("MO");
-		admin.addDuty("BEGIN").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
-		admin.addDuty("COMMIT").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
-		admin.addDuty("ROLLBACK").linkGovernance(
-				TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+		admin.addDuty("BEGIN").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+		admin.addDuty("COMMIT").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+		admin.addDuty("ROLLBACK").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
 
-		// Execute the work
-		this.invokeWork("WORK", null);
+		// Execute the function
+		this.invokeFunction("flowBegin", null);
 
 		// Propagate any failure
 		if (this.failure != null) {
@@ -230,7 +214,7 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 	}
 
 	/**
-	 * Transactional {@link Work}.
+	 * Transactional functionality.
 	 */
 	public class TransactionalWork {
 
@@ -316,16 +300,14 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 	/**
 	 * {@link GovernanceFactory}.
 	 */
-	private static class FlowGovernanceFactory implements
-			GovernanceFactory<MockTransaction, GovernanceFlowKeys> {
+	private static class FlowGovernanceFactory implements GovernanceFactory<MockTransaction, GovernanceFlowKeys> {
 
 		/*
 		 * ================== GovernanceFactory ======================
 		 */
 
 		@Override
-		public Governance<MockTransaction, GovernanceFlowKeys> createGovernance()
-				throws Throwable {
+		public Governance<MockTransaction, GovernanceFlowKeys> createGovernance() throws Throwable {
 			return new FlowGovernance();
 		}
 	}
@@ -333,8 +315,7 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 	/**
 	 * {@link Governance}.
 	 */
-	private static class FlowGovernance implements
-			Governance<MockTransaction, GovernanceFlowKeys> {
+	private static class FlowGovernance implements Governance<MockTransaction, GovernanceFlowKeys> {
 
 		/**
 		 * {@link MockTransaction} instances.
@@ -354,12 +335,11 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 			this.transactions.add(extensionInterface);
 
 			// Trigger flow
-			context.doFlow(GovernanceFlowKeys.BEGIN, "BEGIN");
+			context.doFlow(GovernanceFlowKeys.BEGIN, "BEGIN", null);
 		}
 
 		@Override
-		public void enforceGovernance(
-				GovernanceContext<GovernanceFlowKeys> context) throws Exception {
+		public void enforceGovernance(GovernanceContext<GovernanceFlowKeys> context) throws Exception {
 
 			// Commit transaction
 			for (MockTransaction transaction : this.transactions) {
@@ -368,12 +348,11 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 			this.transactions.clear();
 
 			// Trigger flow
-			context.doFlow(GovernanceFlowKeys.COMMIT, "COMMIT");
+			context.doFlow(GovernanceFlowKeys.COMMIT, "COMMIT", null);
 		}
 
 		@Override
-		public void disregardGovernance(
-				GovernanceContext<GovernanceFlowKeys> context) throws Exception {
+		public void disregardGovernance(GovernanceContext<GovernanceFlowKeys> context) throws Exception {
 
 			// Rollback transaction
 			for (MockTransaction transaction : this.transactions) {
@@ -382,7 +361,7 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 			this.transactions.clear();
 
 			// Trigger flow
-			context.doFlow(GovernanceFlowKeys.ROLLBACK, "ROLLBACK");
+			context.doFlow(GovernanceFlowKeys.ROLLBACK, "ROLLBACK", null);
 		}
 	}
 

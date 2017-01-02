@@ -177,7 +177,7 @@ public class OfficeFloorTest extends OfficeFrameTestCase {
 		this.recordReturn(workMetaData, workMetaData.getWorkFactory(),
 				workFactory);
 		this.recordReturn(workMetaData, workMetaData.getWorkName(), "WORK");
-		workFactory.setBoundWorkName("WORK");
+		workFactory.setBoundFunctionName("WORK");
 		workFactory.setOffice(null);
 		this.control(workFactory).setMatcher(new AlwaysMatcher());
 		this.recordReturn(this.officeFloorMetaData,

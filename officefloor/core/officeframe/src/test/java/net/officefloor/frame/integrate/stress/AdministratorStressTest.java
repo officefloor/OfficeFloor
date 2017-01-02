@@ -20,16 +20,13 @@ package net.officefloor.frame.integrate.stress;
 import junit.framework.TestCase;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -45,7 +42,6 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests the {@link Administrator}.
@@ -60,8 +56,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressAdministrator_OnePersonTeam() throws Exception {
-		this.doTest(new OnePersonTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 100));
+		this.doTest(new OnePersonTeam("TEST", 100));
 	}
 
 	/**
@@ -70,8 +65,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressAdministrator_LeaderFollowerTeam() throws Exception {
-		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource
-				.createTeamIdentifier(), 5, 100));
+		this.doTest(new LeaderFollowerTeam("TEST", MockTeamSource.createTeamIdentifier(), 5, 100));
 	}
 
 	/**
@@ -80,15 +74,15 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	@StressTest
 	public void test_StressAdministrator_ExecutorFixedTeam() throws Exception {
-		this.doTest(ExecutorFixedTeamSource.createTeam("TEST",
-				MockTeamSource.createTeamIdentifier(), 5));
+		this.doTest(ExecutorFixedTeamSource.createTeam("TEST", MockTeamSource.createTeamIdentifier(), 5));
 	}
 
 	/**
 	 * Does the {@link Administrator} stress test.
 	 * 
 	 * @param team
-	 *            {@link Team} to use to run the {@link ManagedFunction} instances.
+	 *            {@link Team} to use to run the {@link ManagedFunction}
+	 *            instances.
 	 */
 	public void doTest(Team team) throws Exception {
 
@@ -106,60 +100,48 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", team);
 
 		// Create the pre administration
-		AdministratorBuilder<Indexed> preTaskAdmin = this
-				.constructAdministrator("PRE", Administration.class, "TEAM");
-		preTaskAdmin.addProperty(
-				Administration.ADMINISTRATION_VALUE_PROPERTY_NAME,
-				PRE_TASK_VALUE);
+		AdministratorBuilder<Indexed> preTaskAdmin = this.constructAdministrator("PRE", Administration.class, "TEAM");
+		preTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME, PRE_TASK_VALUE);
 		preTaskAdmin.addDuty("DUTY");
 		preTaskAdmin.administerManagedObject("MO");
 
 		// Create the post administration
-		AdministratorBuilder<Indexed> postTaskAdmin = this
-				.constructAdministrator("POST", Administration.class, "TEAM");
-		postTaskAdmin.addProperty(
-				Administration.ADMINISTRATION_VALUE_PROPERTY_NAME,
-				POST_TASK_VALUE);
+		AdministratorBuilder<Indexed> postTaskAdmin = this.constructAdministrator("POST", Administration.class, "TEAM");
+		postTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME, POST_TASK_VALUE);
 		postTaskAdmin.addDuty("DUTY");
 		postTaskAdmin.administerManagedObject("MO");
 
 		// Create the administered managed object
-		this.constructManagedObject("ADMIN_MO", AdministeredObject.class,
-				officeName);
+		this.constructManagedObject("ADMIN_MO", AdministeredObject.class, officeName);
 		officeBuilder.addThreadManagedObject("MO", "ADMIN_MO");
 
 		// Create the administered work
-		AdministeredWork work = new AdministeredWork(PRE_TASK_VALUE,
-				POST_TASK_VALUE, ADMIN_TASK_COUNT);
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(work, "WORK",
-				"setupTask");
+		AdministeredWork work = new AdministeredWork(PRE_TASK_VALUE, POST_TASK_VALUE, ADMIN_TASK_COUNT);
 
 		// Create the setup task
-		ReflectiveFunctionBuilder setupTask = workBuilder.buildTask("setupTask",
-				"TEAM");
-		setupTask.buildFlow("administeredTask",
-				FlowInstigationStrategyEnum.PARALLEL, null);
-		setupTask.buildTaskContext();
+		ReflectiveFunctionBuilder setupTask = this.constructFunction(work, "setupTask");
+		setupTask.getBuilder().setTeam("TEAM");
+		setupTask.buildFlow("administeredTask", null, false);
 		setupTask.buildObject("MO");
+		setupTask.buildFlow("setupTask", null, false);
 
 		// Create the administered task
-		ReflectiveFunctionBuilder administeredTask = workBuilder.buildTask(
-				"administeredTask", "TEAM");
+		ReflectiveFunctionBuilder administeredTask = this.constructFunction(work, "administeredTask");
+		administeredTask.getBuilder().setTeam("TEAM");
 		administeredTask.buildObject("MO");
-		ManagedFunctionBuilder<?, ?, ?> adminTaskBuilder = administeredTask.getBuilder();
-		adminTaskBuilder.linkPreTaskAdministration("PRE", "DUTY");
-		adminTaskBuilder.linkPostTaskAdministration("POST", "DUTY");
+		ManagedFunctionBuilder<?, ?> adminTaskBuilder = administeredTask.getBuilder();
+		adminTaskBuilder.linkPreFunctionAdministration("PRE", "DUTY");
+		adminTaskBuilder.linkPostFunctionAdministration("POST", "DUTY");
 
 		// Run the repeats
-		this.invokeWork("WORK", new Integer(1), MAX_RUN_TIME);
+		this.invokeFunction("setupTask", new Integer(1), MAX_RUN_TIME);
 
 		// Ensure run enough times
-		assertEquals("Incorrect number of admin tasks run", ADMIN_TASK_COUNT,
-				work.adminTaskCount);
+		assertEquals("Incorrect number of admin tasks run", ADMIN_TASK_COUNT, work.adminTaskCount);
 	}
 
 	/**
-	 * Administered {@link Work}.
+	 * Administered functionality.
 	 */
 	public static class AdministeredWork {
 
@@ -198,8 +180,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		 * @param maxAdminTasks
 		 *            Maximum number of administered tasks.
 		 */
-		public AdministeredWork(String preTaskValue, String postTaskValue,
-				int maxAdminTasks) {
+		public AdministeredWork(String preTaskValue, String postTaskValue, int maxAdminTasks) {
 			this.preTaskValue = preTaskValue;
 			this.postTaskValue = postTaskValue;
 			this.maxAdminTasks = maxAdminTasks;
@@ -210,33 +191,30 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		 * 
 		 * @param flow
 		 *            {@link ReflectiveFlow}.
-		 * @param context
-		 *            {@link ManagedFunctionContext}.
 		 * @param object
 		 *            {@link AdministeredObject}.
+		 * @param repeat
+		 *            {@link ReflectiveFlow} to repeat.
 		 */
-		public void setupTask(ReflectiveFlow flow,
-				ManagedFunctionContext<?, ?, ?> context, AdministeredObject object) {
+		public void setupTask(ReflectiveFlow flow, AdministeredObject object, ReflectiveFlow repeat) {
 
 			// Determine if first time run
 			if (this.adminTaskCount > 0) {
 				// Not first time, so ensure admin task run
-				TestCase.assertTrue("Administered task should be run",
-						this.isAdminTaskRun);
+				TestCase.assertTrue("Administered task should be run", this.isAdminTaskRun);
 
 				// Ensure post administration occurred
-				TestCase.assertEquals("Incorrect post task value",
-						this.postTaskValue, object.administrationValue);
+				TestCase.assertEquals("Incorrect post task value", this.postTaskValue, object.administrationValue);
 			}
 
 			// Invoke the administered task
 			this.isAdminTaskRun = false;
-			flow.doFlow(null);
+			flow.doFlow(null, null);
 
 			// Determine if require invoking another administered task
 			this.adminTaskCount++;
 			if (this.adminTaskCount < this.maxAdminTasks) {
-				context.setComplete(false);
+				repeat.doFlow(null, null);
 			}
 		}
 
@@ -249,8 +227,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		public void administeredTask(AdministeredObject object) {
 
 			// Ensure pre administration occurred
-			TestCase.assertEquals("Incorrect pre task value",
-					this.preTaskValue, object.administrationValue);
+			TestCase.assertEquals("Incorrect pre task value", this.preTaskValue, object.administrationValue);
 
 			// Flag that administered task run
 			this.isAdminTaskRun = true;
@@ -275,10 +252,8 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	 * Administered {@link ManagedObjectSource}.
 	 */
 	@TestSource
-	public static class AdministeredObject extends
-			AbstractManagedObjectSource<None, None> implements ManagedObject,
-			ExtensionInterfaceFactory<AdministeredExtensionInterface>,
-			AdministeredExtensionInterface {
+	public static class AdministeredObject extends AbstractManagedObjectSource<None, None> implements ManagedObject,
+			ExtensionInterfaceFactory<AdministeredExtensionInterface>, AdministeredExtensionInterface {
 
 		/**
 		 * Administered type.
@@ -295,11 +270,9 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 			context.setObjectClass(AdministeredObject.class);
-			context.addManagedObjectExtensionInterface(
-					AdministeredExtensionInterface.class, this);
+			context.addManagedObjectExtensionInterface(AdministeredExtensionInterface.class, this);
 		}
 
 		@Override
@@ -320,8 +293,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		 * ================ ExtensionInterfaceFactory =======================
 		 */
 		@Override
-		public AdministeredExtensionInterface createExtensionInterface(
-				ManagedObject managedObject) {
+		public AdministeredExtensionInterface createExtensionInterface(ManagedObject managedObject) {
 			return (AdministeredExtensionInterface) managedObject;
 		}
 
@@ -339,9 +311,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	 * {@link Administrator}.
 	 */
 	@TestSource
-	public static class Administration
-			extends
-			AbstractAdministratorSource<AdministeredExtensionInterface, Indexed>
+	public static class Administration extends AbstractAdministratorSource<AdministeredExtensionInterface, Indexed>
 			implements Administrator<AdministeredExtensionInterface, Indexed>,
 			Duty<AdministeredExtensionInterface, None, None> {
 
@@ -365,9 +335,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(
-				MetaDataContext<AdministeredExtensionInterface, Indexed> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<AdministeredExtensionInterface, Indexed> context) throws Exception {
 
 			// Obtain the administration value
 			this.administrationValue = context.getAdministratorSourceContext()
@@ -388,8 +356,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Duty<AdministeredExtensionInterface, ?, ?> getDuty(
-				DutyKey<Indexed> dutyKey) {
+		public Duty<AdministeredExtensionInterface, ?, ?> getDuty(DutyKey<Indexed> dutyKey) {
 			return this;
 		}
 
@@ -398,11 +365,8 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public void doDuty(
-				DutyContext<AdministeredExtensionInterface, None, None> context)
-				throws Throwable {
-			for (AdministeredExtensionInterface object : context
-					.getExtensionInterfaces()) {
+		public void doDuty(DutyContext<AdministeredExtensionInterface, None, None> context) throws Throwable {
+			for (AdministeredExtensionInterface object : context.getExtensionInterfaces()) {
 				object.doAdministration(this.administrationValue);
 			}
 		}

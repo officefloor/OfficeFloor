@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -38,17 +37,15 @@ public class PassiveTeamTest extends OfficeFrameTestCase {
 		Team team = new PassiveTeam();
 
 		// Create the mock task (completes immediately)
-		MockTaskContainer task = new MockTaskContainer();
-		task.stopProcessing = true;
+		MockJob task = new MockJob();
 
 		// Run team and execute a task
 		team.startWorking();
-		team.assignJob(task, MockTeamSource.createTeamIdentifier());
+		team.assignJob(task);
 		team.stopWorking();
 
 		// Ensure the task executed
-		assertEquals("Task should be executed once", 1,
-				task.doTaskInvocationCount);
+		assertEquals("Task should be executed once", 1, task.doTaskInvocationCount);
 	}
 
 }

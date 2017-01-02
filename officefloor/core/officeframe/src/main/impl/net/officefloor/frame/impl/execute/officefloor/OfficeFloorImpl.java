@@ -146,7 +146,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 				// Handle if name aware
 				if (functionFactory instanceof NameAwareManagedFunctionFactory) {
 					NameAwareManagedFunctionFactory<?, ?> nameAwareFactory = (NameAwareManagedFunctionFactory<?, ?>) functionFactory;
-					nameAwareFactory.setBoundWorkName(functionMetaData.getFunctionName());
+					nameAwareFactory.setBoundFunctionName(functionMetaData.getFunctionName());
 				}
 
 				// Handle if Office aware

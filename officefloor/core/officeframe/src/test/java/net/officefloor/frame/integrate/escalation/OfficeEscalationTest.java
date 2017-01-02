@@ -18,13 +18,10 @@
 package net.officefloor.frame.integrate.escalation;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests handling escalations.
@@ -37,7 +34,7 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 	 * Flag to record task method invocations.
 	 */
 	public OfficeEscalationTest() {
-		this.setRecordReflectiveTaskMethodsInvoked(true);
+		this.setRecordReflectiveFunctionMethodsInvoked(true);
 	}
 
 	/**
@@ -46,39 +43,30 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 	public void testEscalationHandledBySameTask() throws Exception {
 
 		// Create the work object
-		EscalationWorkObject workObject = new EscalationWorkObject(
-				new Exception("test"));
+		EscalationWorkObject workObject = new EscalationWorkObject(new Exception("test"));
 
 		// Construct the office
-		this.constructTeam("team", new PassiveTeam());
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(workObject,
-				"work", "causeEscalation");
-		ReflectiveFunctionBuilder causeEscalation = workBuilder.buildTask(
-				"causeEscalation", "team");
-		causeEscalation.setNextTaskInFlow("nextTask");
-		causeEscalation.getBuilder().addEscalation(
-				workObject.failure.getClass(), "handleEscalation");
-		workBuilder.buildTask("nextTask", "team");
-		ReflectiveFunctionBuilder escalationHandler = workBuilder.buildTask(
-				"handleEscalation", "team");
+		ReflectiveFunctionBuilder causeEscalation = this.constructFunction(workObject, "causeEscalation");
+		causeEscalation.setNextFunction("nextTask");
+		causeEscalation.getBuilder().addEscalation(workObject.failure.getClass(), "handleEscalation");
+		this.constructFunction(workObject, "nextTask");
+		ReflectiveFunctionBuilder escalationHandler = this.constructFunction(workObject, "handleEscalation");
 		escalationHandler.buildParameter();
 
-		// Invoke the work
-		this.invokeWork("work", null);
+		// Invoke the function
+		this.invokeFunction("causeEscalation", null);
 
 		// Validate appropriate methods called
-		this.validateReflectiveMethodOrder("causeEscalation",
-				"handleEscalation");
+		this.validateReflectiveMethodOrder("causeEscalation", "handleEscalation");
 
 		// Validate failure handled
-		assertEquals("Incorrect exception", workObject.failure,
-				workObject.handledFailure);
+		assertEquals("Incorrect exception", workObject.failure, workObject.handledFailure);
 	}
 
 	/**
 	 * <p>
-	 * Ensures a parallel owner {@link FunctionState} has opportunity to handle the
-	 * escalation.
+	 * Ensures a parallel owner {@link FunctionState} has opportunity to handle
+	 * the escalation.
 	 * <p>
 	 * This is represents a method call allowing the caller to handle exceptions
 	 * from the invoked method.
@@ -86,34 +74,24 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 	public void testEscalationHandledByParallelOwner() throws Exception {
 
 		// Create the work object
-		EscalationWorkObject workObject = new EscalationWorkObject(
-				new Exception("test"));
+		EscalationWorkObject workObject = new EscalationWorkObject(new Exception("test"));
 
 		// Construct the office
-		this.constructTeam("team", new PassiveTeam());
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(workObject,
-				"work", "parallelOwner");
-		ReflectiveFunctionBuilder parallelOwner = workBuilder.buildTask(
-				"parallelOwner", "team");
-		parallelOwner.buildFlow("causeEscalation",
-				FlowInstigationStrategyEnum.PARALLEL, null);
-		parallelOwner.getBuilder().addEscalation(workObject.failure.getClass(),
-				"handleEscalation");
-		workBuilder.buildTask("causeEscalation", "team");
-		ReflectiveFunctionBuilder escalationHandler = workBuilder.buildTask(
-				"handleEscalation", "team");
+		ReflectiveFunctionBuilder parallelOwner = this.constructFunction(workObject, "parallelOwner");
+		parallelOwner.buildFlow("causeEscalation", null, false);
+		parallelOwner.getBuilder().addEscalation(workObject.failure.getClass(), "handleEscalation");
+		this.constructFunction(workObject, "causeEscalation");
+		ReflectiveFunctionBuilder escalationHandler = this.constructFunction(workObject, "handleEscalation");
 		escalationHandler.buildParameter();
 
-		// Invoke the work
-		this.invokeWork("work", null);
+		// Invoke the function
+		this.invokeFunction("parallelOwner", null);
 
 		// Validate appropriate methods called
-		this.validateReflectiveMethodOrder("parallelOwner", "causeEscalation",
-				"handleEscalation");
+		this.validateReflectiveMethodOrder("parallelOwner", "causeEscalation", "handleEscalation");
 
 		// Validate failure handled
-		assertEquals("Incorrect exception", workObject.failure,
-				workObject.handledFailure);
+		assertEquals("Incorrect exception", workObject.failure, workObject.handledFailure);
 	}
 
 	/**
@@ -130,7 +108,8 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 		}
 
 		public void parallelOwner(ReflectiveFlow flow) {
-			flow.doFlow(null);
+			flow.doFlow(null, (escalation) -> {
+			});
 		}
 
 		public void causeEscalation() throws Throwable {

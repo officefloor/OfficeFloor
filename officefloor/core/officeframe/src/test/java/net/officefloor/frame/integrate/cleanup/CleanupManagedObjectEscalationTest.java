@@ -18,37 +18,32 @@
 package net.officefloor.frame.integrate.cleanup;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests cleanup {@link Escalation} handling of {@link ManagedObject} instances.
  *
  * @author Daniel Sagenschneider
  */
-public class CleanupManagedObjectEscalationTest extends
-		AbstractOfficeConstructTestCase {
+public class CleanupManagedObjectEscalationTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure handles cleanup escalation, making it available to further
@@ -63,58 +58,46 @@ public class CleanupManagedObjectEscalationTest extends
 		this.constructTeam("TEAM", PassiveTeamSource.class);
 
 		// Register two managed objects for clean up
-		AbstractTestManagedObjectSource moEscalate = new EscalateCleanupManagedObjectSource(
-				escalation);
+		AbstractTestManagedObjectSource moEscalate = new EscalateCleanupManagedObjectSource(escalation);
 		HandleEscalationManagedObjectSource moHandle = new HandleEscalationManagedObjectSource();
-		ManagedObjectBuilder<None> moBuilderEscalate = this
-				.getOfficeFloorBuilder().addManagedObject("ESCALATE",
-						moEscalate);
+		ManagedObjectBuilder<None> moBuilderEscalate = this.getOfficeFloorBuilder().addManagedObject("ESCALATE",
+				moEscalate);
 		moBuilderEscalate.setManagingOffice(this.getOfficeName());
-		ManagedObjectBuilder<None> moBuilderHandle = this
-				.getOfficeFloorBuilder().addManagedObject("HANDLE", moHandle);
+		ManagedObjectBuilder<None> moBuilderHandle = this.getOfficeFloorBuilder().addManagedObject("HANDLE", moHandle);
 		moBuilderHandle.setManagingOffice(this.getOfficeName());
 
 		// Configure the teams for recycling the managed object
 		this.getOfficeBuilder().addOfficeEnhancer(new OfficeEnhancer() {
 			@Override
 			public void enhanceOffice(OfficeEnhancerContext context) {
-				context.getFlowNodeBuilder("ESCALATE", "#recycle#", "cleanup")
-						.setTeam("TEAM");
-				context.getFlowNodeBuilder("HANDLE", "#recycle#", "cleanup")
-						.setTeam("TEAM");
+				context.getFlowNodeBuilder("ESCALATE", "#recycle#").setTeam("TEAM");
+				context.getFlowNodeBuilder("HANDLE", "#recycle#").setTeam("TEAM");
 			}
 		});
 
 		// Add the managed objects
-		this.getOfficeBuilder().addProcessManagedObject("MO_ESCALATE",
-				"ESCALATE");
-		this.getOfficeBuilder().registerManagedObjectSource("ESCALATE",
-				"ESCALATE");
+		this.getOfficeBuilder().addProcessManagedObject("MO_ESCALATE", "ESCALATE");
+		this.getOfficeBuilder().registerManagedObjectSource("ESCALATE", "ESCALATE");
 		this.getOfficeBuilder().addProcessManagedObject("MO_HANDLE", "HANDLE");
 		this.getOfficeBuilder().registerManagedObjectSource("HANDLE", "HANDLE");
 
 		// Construct the work
-		ReflectiveFunctionBuilder workBuilder = this.constructWork(new MockWork(),
-				"WORK", "task");
-		ReflectiveFunctionBuilder taskBuilder = workBuilder.buildTask("task",
-				"TEAM");
+		ReflectiveFunctionBuilder taskBuilder = this.constructFunction(new MockWork(), "task");
 		taskBuilder.buildObject("MO_ESCALATE");
 		taskBuilder.buildObject("MO_HANDLE");
 
-		// Invoke the work
-		this.invokeWork("WORK", null);
+		// Invoke the function
+		this.invokeFunction("task", null);
 
 		// Ensure able to receive the escalation
-		assertEquals("Should have escalation", escalation,
-				moHandle.handledEscalation);
+		assertEquals("Should have escalation", escalation, moHandle.handledEscalation);
 	}
 
 	/**
-	 * Mock {@link Work}.
+	 * Mock functionality.
 	 */
 	public static class MockWork {
-		public void task(AbstractTestManagedObjectSource moA,
-				AbstractTestManagedObjectSource moB) {
+		public void task(AbstractTestManagedObjectSource moA, AbstractTestManagedObjectSource moB) {
 		}
 	}
 
@@ -122,10 +105,8 @@ public class CleanupManagedObjectEscalationTest extends
 	 * Abstract test {@link ManagedObjectSource} for clean up.
 	 */
 	@TestSource
-	public static abstract class AbstractTestManagedObjectSource extends
-			AbstractManagedObjectSource<None, None> implements ManagedObject,
-			WorkFactory<Work>, Work, ManagedFunctionFactory<Work, Indexed, None>,
-			ManagedFunction<Work, Indexed, None> {
+	public static abstract class AbstractTestManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject, ManagedFunctionFactory<Indexed, None>, ManagedFunction<Indexed, None> {
 
 		/**
 		 * ==================== ManagedObjectSource ==========================
@@ -137,19 +118,15 @@ public class CleanupManagedObjectEscalationTest extends
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context)
-				throws Exception {
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 
 			// Configure
 			context.setObjectClass(this.getClass());
 
-			// Provide recycle task
-			ManagedObjectSourceContext<None> mos = context
-					.getManagedObjectSourceContext();
-			ManagedObjectWorkBuilder<Work> cleanup = mos.getRecycleWork(this);
-			ManagedObjectFunctionBuilder<Indexed, None> recycleTask = cleanup
-					.addTask("cleanup", this);
-			recycleTask.linkParameter(0, RecycleManagedObjectParameter.class);
+			// Provide recycle function
+			ManagedObjectSourceContext<None> mos = context.getManagedObjectSourceContext();
+			ManagedObjectFunctionBuilder<?, ?> cleanup = mos.getRecycleFunction(this);
+			cleanup.linkParameter(0, RecycleManagedObjectParameter.class);
 		}
 
 		@Override
@@ -158,7 +135,7 @@ public class CleanupManagedObjectEscalationTest extends
 		}
 
 		/*
-		 * ===================== ManagedObject ===============================
+		 * ===================== ManagedObject ====================
 		 */
 
 		@Override
@@ -167,20 +144,11 @@ public class CleanupManagedObjectEscalationTest extends
 		}
 
 		/*
-		 * ===================== WorkFactory =================================
+		 * ================= MnagedFunctionFactory =================
 		 */
 
 		@Override
-		public Work createWork() {
-			return this;
-		}
-
-		/*
-		 * ===================== TaskFactory =================================
-		 */
-
-		@Override
-		public ManagedFunction<Work, Indexed, None> createManagedFunction(Work work) {
+		public ManagedFunction<Indexed, None> createManagedFunction() {
 			return this;
 		}
 	}
@@ -188,8 +156,7 @@ public class CleanupManagedObjectEscalationTest extends
 	/**
 	 * {@link ManagedObjectSource} to trigger the {@link Escalation}.
 	 */
-	public static class EscalateCleanupManagedObjectSource extends
-			AbstractTestManagedObjectSource {
+	public static class EscalateCleanupManagedObjectSource extends AbstractTestManagedObjectSource {
 
 		/**
 		 * {@link Escalation}.
@@ -207,12 +174,11 @@ public class CleanupManagedObjectEscalationTest extends
 		}
 
 		/*
-		 * ===================== TaskFactory =================================
+		 * ===================== ManagedFunctionFactory =====================
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<Work, Indexed, None> context)
-				throws Throwable {
+		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 			// Throw the escalation
 			throw this.escalation;
 		}
@@ -221,8 +187,7 @@ public class CleanupManagedObjectEscalationTest extends
 	/**
 	 * {@link ManagedObjectSource} to handle the {@link Escalation}.
 	 */
-	public static class HandleEscalationManagedObjectSource extends
-			AbstractTestManagedObjectSource {
+	public static class HandleEscalationManagedObjectSource extends AbstractTestManagedObjectSource {
 
 		/**
 		 * {@link Escalation} handled.
@@ -230,30 +195,25 @@ public class CleanupManagedObjectEscalationTest extends
 		public Throwable handledEscalation = null;
 
 		/*
-		 * ===================== TaskFactory =================================
+		 * ===================== ManagedFunction =====================
 		 */
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object execute(ManagedFunctionContext<Work, Indexed, None> context)
-				throws Throwable {
+		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 			// Obtain the recycle parameter
 			RecycleManagedObjectParameter<HandleEscalationManagedObjectSource> parameter = (RecycleManagedObjectParameter<HandleEscalationManagedObjectSource>) context
 					.getObject(0);
 
 			// Ensure correct managed object
-			assertSame("Incorrect managed object", this,
-					parameter.getManagedObject());
+			assertSame("Incorrect managed object", this, parameter.getManagedObject());
 
 			// Validate the escalation information
 			CleanupEscalation[] escalations = parameter.getCleanupEscalations();
-			assertEquals("Should have a cleanup escalation", 1,
-					escalations.length);
+			assertEquals("Should have a cleanup escalation", 1, escalations.length);
 			CleanupEscalation escalation = escalations[0];
-			assertEquals("Incorrect object type",
-					EscalateCleanupManagedObjectSource.class,
-					escalation.getObjectType());
+			assertEquals("Incorrect object type", EscalateCleanupManagedObjectSource.class, escalation.getObjectType());
 
 			// Obtain the escalation
 			this.handledEscalation = escalation.getEscalation();

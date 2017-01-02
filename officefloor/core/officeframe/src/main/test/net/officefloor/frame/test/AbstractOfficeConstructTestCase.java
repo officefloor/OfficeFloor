@@ -249,23 +249,6 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Facade method to register a {@link ManagedFunction}.
-	 * 
-	 * @param object
-	 *            {@link Object} containing the {@link Method}.
-	 * @param methodName
-	 *            Name of the {@link Method}.
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @return {@link ReflectiveFunctionBuilder}.
-	 */
-	public ReflectiveFunctionBuilder constructFunction(Object object, String methodName, String teamName) {
-		ReflectiveFunctionBuilder builder = this.constructFunction(object, methodName);
-		builder.getBuilder().setTeam(teamName);
-		return builder;
-	}
-
-	/**
 	 * Constructs the {@link ReflectiveFunctionBuilder} for a static
 	 * {@link Method}.
 	 * 
@@ -355,64 +338,11 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 *            Name of the {@link ManagedFunction}.
 	 * @param functionFactory
 	 *            {@link ManagedFunctionFactory}.
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> constructFunction(String functionName,
-			ManagedFunctionFactory<O, F> functionFactory, String teamName) {
-
-		// Create the Function Builder
-		ManagedFunctionBuilder functionBuilder = this.officeBuilder.addManagedFunction(functionName, functionFactory);
-
-		// Link to Team
-		functionBuilder.setTeam(teamName);
-
-		// Return the Function Builder
-		return functionBuilder;
-	}
-
-	/**
-	 * Facade method to register a {@link ManagedFunction}.
-	 *
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param functionFactory
-	 *            {@link ManagedFunctionFactory}.
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @param moName
-	 *            Name of the {@link ManagedObject}.
-	 * @param moType
-	 *            Type of the {@link ManagedObject}.
-	 * @param nextFunctionName
-	 *            Name of the next {@link ManagedFunction}.
-	 * @param nextFunctionArgumentType
-	 *            Type of argument to the next {@link ManagedFunction}.
 	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
 	 */
 	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> constructFunction(String functionName,
-			ManagedFunctionFactory<O, F> functionFactory, String teamName, String moName, Class<?> moType,
-			String nextFunctionName, Class<?> nextFunctionArgumentType) {
-
-		// Create the Function Builder
-		ManagedFunctionBuilder<O, F> functionBuilder = this.constructFunction(functionName, functionFactory, teamName);
-
-		// Register the next function and managed object
-		if (nextFunctionName != null) {
-			functionBuilder.setNextFunction(nextFunctionName, nextFunctionArgumentType);
-		}
-		if (moName != null) {
-			functionBuilder.linkManagedObject(0, moName, moType);
-		}
-
-		// Return the function builder
-		return functionBuilder;
+			ManagedFunctionFactory<O, F> functionFactory) {
+		return this.officeBuilder.addManagedFunction(functionName, functionFactory);
 	}
 
 	/**
@@ -426,18 +356,10 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 *            Name of the {@link ManagedFunction}.
 	 * @param function
 	 *            {@link ManagedFunction}.
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @param nextFunctionName
-	 *            Name of the next {@link ManagedFunction}.
-	 * @param nextFunctionArgumentType
-	 *            {@link Class} of the argument to the next
-	 *            {@link ManagedFunction}.
 	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
 	 */
 	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> constructFunction(String functionName,
-			final ManagedFunction<O, F> function, String teamName, String nextFunctionName,
-			Class<?> nextFunctionArgumentType) {
+			final ManagedFunction<O, F> function) {
 
 		// Create the Function Factory
 		ManagedFunctionFactory<O, F> functionFactory = new ManagedFunctionFactory<O, F>() {
@@ -447,8 +369,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 		};
 
 		// Construct and return the function
-		return this.constructFunction(functionName, functionFactory, teamName, null, null, nextFunctionName,
-				nextFunctionArgumentType);
+		return this.constructFunction(functionName, functionFactory);
 	}
 
 	/**
@@ -837,7 +758,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 					// Wait some time as still executing
 					isComplete.wait(100);
 				}
-				
+
 				// Ensure propagate escalations
 				if (failure[0] != null) {
 					throw failure[0];

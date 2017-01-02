@@ -20,15 +20,12 @@ package net.officefloor.frame.integrate.profile;
 import java.util.List;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.profile.ProfiledManagedFunction;
 import net.officefloor.frame.api.profile.ProfiledProcessState;
 import net.officefloor.frame.api.profile.ProfiledThreadState;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder.ReflectiveFunctionBuilder;
 
 /**
  * Tests profiling.
@@ -43,40 +40,35 @@ public class ProfilerIntegrationTest extends AbstractOfficeConstructTestCase {
 	public void testProfile() throws Exception {
 
 		// Configure
-		this.constructTeam("TEAM", new PassiveTeam());
 		ProfiledWork work = new ProfiledWork();
-		ReflectiveFunctionBuilder builder = this.constructWork(work, "WORK",
-				"taskOne");
-		ReflectiveFunctionBuilder taskOne = builder.buildTask("taskOne", "TEAM");
-		taskOne.setNextTaskInFlow("taskTwo");
-		builder.buildTask("taskTwo", "TEAM");
+		ReflectiveFunctionBuilder taskOne = this.constructFunction(work, "taskOne");
+		taskOne.setNextFunction("taskTwo");
+		this.constructFunction(work, "taskTwo");
 
 		// Provide the profiler
 		final ProfiledProcessState[] profiledProcess = new ProfiledProcessState[1];
 		this.getOfficeBuilder().setProfiler(new Profiler() {
 			@Override
-			public void profileProcess(ProfiledProcessState process) {
+			public void profileProcessState(ProfiledProcessState process) {
 				profiledProcess[0] = process;
 			}
 		});
 
-		// Execute the work
-		this.invokeWork("WORK", null);
+		// Execute the function
+		this.invokeFunction("taskOne", null);
 
 		// Ensure correct profiling
 		assertNotNull("Ensure have profiled process", profiledProcess[0]);
-		List<ProfiledThreadState> threads = profiledProcess[0].getProfiledThreads();
+		List<ProfiledThreadState> threads = profiledProcess[0].getProfiledThreadStates();
 		assertEquals("Incorrect number of threads", 1, threads.size());
-		List<ProfiledManagedFunction> jobs = threads.get(0).getProfiledJobs();
-		assertEquals("Incorrect number of jobs", 2, jobs.size());
-		assertEquals("Incorrect first job", "WORK.taskOne", jobs.get(0)
-				.getJobName());
-		assertEquals("Incorrect second job", "WORK.taskTwo", jobs.get(1)
-				.getJobName());
+		List<ProfiledManagedFunction> functions = threads.get(0).getProfiledManagedFunctions();
+		assertEquals("Incorrect number of functions", 2, functions.size());
+		assertEquals("Incorrect first function", "taskOne", functions.get(0).getFunctionName());
+		assertEquals("Incorrect second function", "taskTwo", functions.get(1).getFunctionName());
 	}
 
 	/**
-	 * {@link Work} for profiling.
+	 * Functionality for profiling.
 	 */
 	public static class ProfiledWork {
 
