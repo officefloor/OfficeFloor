@@ -19,11 +19,9 @@ package net.officefloor.frame.impl.construct.office;
 
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -45,37 +43,26 @@ public class OfficeBuilderImplTest extends OfficeFrameTestCase {
 	private OfficeBuilderImpl officeBuilder = new OfficeBuilderImpl(OFFICE_NAME);
 
 	/**
-	 * {@link WorkFactory}.
-	 */
-	@SuppressWarnings("unchecked")
-	private WorkFactory<Work> workFactory = this.createMock(WorkFactory.class);
-
-	/**
 	 * {@link ManagedFunctionFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	private ManagedFunctionFactory<Work, Indexed, Indexed> taskFactory = this
-			.createMock(ManagedFunctionFactory.class);
+	private ManagedFunctionFactory<Indexed, Indexed> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 	/**
 	 * Ensure able to get the {@link FlowNodeBuilder}.
 	 */
 	public void testGetFlowNodeBuilder() {
 
-		// Name spaced work name
-		String namespacedWork = OfficeBuilderImpl.getNamespacedName(
-				"namespace", "work");
+		// Name spaced function name
+		String namespacedFunction = OfficeBuilderImpl.getNamespacedName("namespace", "function");
 
-		// Add a task
-		ManagedFunctionBuilder<Work, Indexed, Indexed> taskBuilder = this.officeBuilder
-				.addWork(namespacedWork, this.workFactory).addManagedFunction("task",
-						this.taskFactory);
+		// Add a function
+		ManagedFunctionBuilder<Indexed, Indexed> functionBuilder = this.officeBuilder
+				.addManagedFunction(namespacedFunction, this.functionFactory);
 
-		// Ensure can get task as flow node builder
-		FlowNodeBuilder<?> flowNodeBuilder = this.officeBuilder
-				.getFlowNodeBuilder("namespace", "work", "task");
-		assertEquals("Incorrect flow node builder", taskBuilder,
-				flowNodeBuilder);
+		// Ensure can get function as flow node builder
+		FlowNodeBuilder<?> flowNodeBuilder = this.officeBuilder.getFlowNodeBuilder("namespace", "task");
+		assertEquals("Incorrect flow node builder", functionBuilder, flowNodeBuilder);
 	}
 
 }

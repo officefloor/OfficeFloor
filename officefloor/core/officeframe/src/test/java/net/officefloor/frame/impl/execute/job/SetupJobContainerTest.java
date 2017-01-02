@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.job;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -31,29 +32,27 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public class SetupJobContainerTest extends AbstractJobContainerTest {
+public class SetupJobContainerTest extends AbstractManagedFunctionContainerTest {
 
 	/**
-	 * Ensures execution of setup {@link FunctionState} requested before {@link ManagedFunction}
-	 * execution.
+	 * Ensures execution of setup {@link FunctionState} requested before
+	 * {@link ManagedFunction} execution.
 	 */
 	public void testPreExecuteSetupTask() {
 
-		// Create a job that should not be executed
-		Job job = this.createJob(false,
-				new ManagedObjectIndex[] { new ManagedObjectIndexImpl(
-						ManagedObjectScope.PROCESS, 0) }, null, null,
-				new JobFunctionality() {
+		// Create a function that should not be executed
+		ManagedFunctionLogic function = this.createFunction(
+				new ManagedObjectIndex[] { new ManagedObjectIndexImpl(ManagedObjectScope.PROCESS, 0) }, null, null,
+				new FunctionFunctionality() {
 					@Override
-					public Object executeFunctionality(
-							JobFunctionalityContext context) throws Throwable {
-						fail("Job should not be executed");
+					public Object executeFunctionality(FunctionFunctionalityContext context) throws Throwable {
+						fail("Function should not be executed");
 						return null;
 					}
 				});
 
 		// Record actions
-		this.record_JobContainer_initialSteps(job, null);
+		this.record_Container_initialSteps(function);
 
 		// Record setup job from managed object
 		this.record_WorkContainer_loadManagedObjects(job);
@@ -82,20 +81,18 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of setup {@link FunctionState} requested during {@link ManagedFunction}
-	 * execution.
+	 * Ensures execution of setup {@link FunctionState} requested during
+	 * {@link ManagedFunction} execution.
 	 */
 	public void testPostExecuteSetupTask() {
 
-		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this
-				.createMock(ManagedFunctionMetaData.class);
+		final ManagedFunctionMetaData<?, ?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
 		final Object parameter = new Object();
 
 		// Create a job with setup task
 		Job job = this.createJob(false, new JobFunctionality() {
 			@Override
-			public Object executeFunctionality(JobFunctionalityContext context)
-					throws Throwable {
+			public Object executeFunctionality(JobFunctionalityContext context) throws Throwable {
 				context.addSetupTask(taskMetaData, parameter);
 				return null;
 			}
@@ -130,19 +127,17 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of setup {@link FunctionState} requested before {@link ManagedFunction}
-	 * execution.
+	 * Ensures execution of setup {@link FunctionState} requested before
+	 * {@link ManagedFunction} execution.
 	 */
 	public void testPreExecuteGovernanceActivity() {
 
 		// Create a job that should not be executed
 		Job job = this.createJob(false,
-				new ManagedObjectIndex[] { new ManagedObjectIndexImpl(
-						ManagedObjectScope.PROCESS, 0) }, null, null,
+				new ManagedObjectIndex[] { new ManagedObjectIndexImpl(ManagedObjectScope.PROCESS, 0) }, null, null,
 				new JobFunctionality() {
 					@Override
-					public Object executeFunctionality(
-							JobFunctionalityContext context) throws Throwable {
+					public Object executeFunctionality(JobFunctionalityContext context) throws Throwable {
 						fail("Job should not be executed");
 						return null;
 					}
@@ -178,19 +173,17 @@ public class SetupJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensures execution of setup {@link FunctionState} requested during {@link ManagedFunction}
-	 * execution.
+	 * Ensures execution of setup {@link FunctionState} requested during
+	 * {@link ManagedFunction} execution.
 	 */
 	public void testPostExecuteGovernanceActivity() {
 
-		final GovernanceActivity<?, ?> activity = this
-				.createMock(GovernanceActivity.class);
+		final GovernanceActivity<?, ?> activity = this.createMock(GovernanceActivity.class);
 
 		// Create a job with setup task
 		Job job = this.createJob(false, new JobFunctionality() {
 			@Override
-			public Object executeFunctionality(JobFunctionalityContext context)
-					throws Throwable {
+			public Object executeFunctionality(JobFunctionalityContext context) throws Throwable {
 				context.addGovernanceActivity(activity);
 				return null;
 			}

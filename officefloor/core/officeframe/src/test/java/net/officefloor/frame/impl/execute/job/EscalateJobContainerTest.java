@@ -31,7 +31,7 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public class EscalateJobContainerTest extends AbstractJobContainerTest {
+public class EscalateJobContainerTest extends AbstractManagedFunctionContainerTest {
 
 	/**
 	 * Ensure able to handle by {@link EscalationProcedure} of {@link Job}.

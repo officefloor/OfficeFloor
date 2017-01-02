@@ -21,7 +21,6 @@ import junit.framework.TestCase;
 import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
 import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
@@ -58,7 +57,7 @@ public class TeamSourceAdapter implements TeamSource, Team {
 	}
 
 	@Override
-	public void assignJob(Job job, TeamIdentifier assignerTeam) {
+	public void assignJob(Job job) {
 		TestCase.fail("Should not be invoked");
 	}
 

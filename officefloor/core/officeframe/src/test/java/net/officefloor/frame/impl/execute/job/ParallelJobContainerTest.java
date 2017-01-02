@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public class ParallelJobContainerTest extends AbstractJobContainerTest {
+public class ParallelJobContainerTest extends AbstractManagedFunctionContainerTest {
 
 	/**
 	 * Ensures execution of {@link Job} invokes parallel owner.

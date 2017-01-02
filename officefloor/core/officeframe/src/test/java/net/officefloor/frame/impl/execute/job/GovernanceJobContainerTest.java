@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceJobContainerTest extends AbstractJobContainerTest {
+public class GovernanceJobContainerTest extends AbstractManagedFunctionContainerTest {
 
 	/**
 	 * Ensure can not managed the {@link Governance}.

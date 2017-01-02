@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public class AsynchronousJobContainerTest extends AbstractJobContainerTest {
+public class AsynchronousJobContainerTest extends AbstractManagedFunctionContainerTest {
 
 	/**
 	 * Ensures execution of a {@link Job} with an asynchronous {@link Flow}

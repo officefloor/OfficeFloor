@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
+import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 
 /**
  * Tests the {@link ManagedFunctionContainerImpl} invoking sequential
@@ -28,43 +28,40 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public class SequentialJobContainerTest extends AbstractJobContainerTest {
+public class SequentialContainerTest extends AbstractManagedFunctionContainerTest {
 
 	/**
-	 * Ensures execution of a {@link Job} with a sequential {@link Flow}
-	 * invoked.
+	 * Ensures execution of a {@link ManagedFunction} with a sequential
+	 * {@link Flow} invoked.
 	 */
-	public void testExecuteJobWithSequentialFlow() {
+	public void testExecuteFunctionWithSequentialFlow() {
 
-		// Create a job invoking a sequential flow
+		// Create a function invoking a sequential flow
 		final Object sequentialFlowParameter = "Sequential Flow Parameter";
-		Job job = this.createJob(false, new JobFunctionality() {
+		ManagedFunctionLogic function = this.createFunction(new FunctionFunctionality() {
 			@Override
-			public Object executeFunctionality(JobFunctionalityContext context)
-					throws Throwable {
-				context.doFlow(0, FlowInstigationStrategyEnum.SEQUENTIAL,
-						sequentialFlowParameter);
+			public Object executeFunctionality(FunctionFunctionalityContext context) throws Throwable {
+				context.doFlow(0, sequentialFlowParameter, null, false);
 				return null;
 			}
 		});
 
 		// Record actions
-		this.record_JobContainer_initialSteps(job, null);
-		this.record_doSequentialFlow(job, sequentialFlowParameter, true);
-		this.record_completeJob(job);
-		this.record_JobActivatableSet_activateJobs();
+		this.record_Container_initialSteps(function);
+		this.record_doSequentialFlow(function, sequentialFlowParameter);
+		this.record_completeFunction(function);
 
 		// Replay mocks
 		this.replayMockObjects();
 
-		// Execute the job
-		this.doJob(job, true);
+		// Execute the function
+		this.doFunction(function);
 
 		// Verify mocks
 		this.verifyMockObjects();
 
-		// Ensure job run
-		assertJobExecuted(job);
+		// Ensure function run
+		assertFunctionExecuted(function);
 	}
 
 }

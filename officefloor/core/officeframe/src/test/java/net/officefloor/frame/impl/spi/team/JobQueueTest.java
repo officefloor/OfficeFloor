@@ -71,17 +71,13 @@ public class JobQueueTest extends OfficeFrameTestCase {
 		// Validate state
 		assertSame("Incorrect head", this.taskQueue.head, taskOne);
 		assertSame("Incorrect tail", this.taskQueue.tail, taskTwo);
-		assertSame("Incorrect link", taskTwo, taskOne.getNextJob());
-		assertNull("Incorrect end", taskTwo.getNextJob());
 
 		Job returnedTask = this.taskQueue.dequeue();
 
 		// Validate state
 		assertSame("Incorrect return", taskOne, returnedTask);
-		assertNull("Return not cleaned", taskOne.getNextJob());
 		assertSame("Incorrect head", this.taskQueue.head, taskTwo);
 		assertSame("Incorrect tail", this.taskQueue.tail, taskTwo);
-		assertNull("Incorrect end", taskTwo.getNextJob());
 	}
 
 	/**
@@ -197,8 +193,7 @@ public class JobQueueTest extends OfficeFrameTestCase {
 					Job task = JobQueueTest.this.taskQueue.dequeue(WAIT_TIME);
 
 					// Specify time waited
-					JobQueueTest.this.time = System.currentTimeMillis()
-							- startTime;
+					JobQueueTest.this.time = System.currentTimeMillis() - startTime;
 
 					// Flag returned
 					synchronized (lock) {

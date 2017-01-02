@@ -28,7 +28,7 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
  * 
  * @author Daniel Sagenschneider
  */
-public class JoinJobContainerTest extends AbstractJobContainerTest {
+public class JoinJobContainerTest extends AbstractManagedFunctionContainerTest {
 
 	/**
 	 * Ensures join on sequential {@link Flow}.

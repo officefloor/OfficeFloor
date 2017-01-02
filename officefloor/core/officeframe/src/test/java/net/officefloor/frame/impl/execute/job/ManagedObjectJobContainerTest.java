@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
+public class ManagedObjectJobContainerTest extends AbstractManagedFunctionContainerTest {
 
 	/**
 	 * Ensures execution of {@link Job} invoked with {@link ManagedObject}.

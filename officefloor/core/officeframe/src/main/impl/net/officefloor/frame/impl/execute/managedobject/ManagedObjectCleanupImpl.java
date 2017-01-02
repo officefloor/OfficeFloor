@@ -78,7 +78,7 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 	 */
 
 	@Override
-	public FunctionState createCleanUpJobNode(final FlowMetaData recycleFlowMetaData, final Class<?> objectType,
+	public FunctionState createCleanUpFunction(final FlowMetaData recycleFlowMetaData, final Class<?> objectType,
 			final ManagedObject managedObject, final ManagedObjectPool managedObjectPool) {
 		return new CleanupOperation() {
 			@Override

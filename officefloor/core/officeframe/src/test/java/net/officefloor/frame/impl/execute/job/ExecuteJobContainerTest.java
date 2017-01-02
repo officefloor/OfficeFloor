@@ -27,7 +27,7 @@ import net.officefloor.frame.test.MockTeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class ExecuteJobContainerTest extends AbstractJobContainerTest {
+public class ExecuteJobContainerTest extends AbstractManagedFunctionContainerTest {
 
 	/**
 	 * Ensures execution of {@link Job}.
