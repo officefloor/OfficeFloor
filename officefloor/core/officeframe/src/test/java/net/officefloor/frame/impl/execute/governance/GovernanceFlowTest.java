@@ -50,6 +50,9 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 	 *         meta-data.
 	 */
 	public static Test suite() {
+		
+		fail("TODO handle timeout of test");
+		
 		return createMetaDataCombinationTestSuite(GovernanceFlowTest.class);
 	}
 

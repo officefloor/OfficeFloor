@@ -85,6 +85,8 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	 *            instances.
 	 */
 	public void doTest(Team team) throws Exception {
+		
+		fail("TODO fix infinite loop");
 
 		int ADMIN_TASK_COUNT = 1000000;
 		int MAX_RUN_TIME = 100;

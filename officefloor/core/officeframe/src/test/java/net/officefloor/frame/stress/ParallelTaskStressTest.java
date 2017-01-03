@@ -70,6 +70,8 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	private void doTest(Team team) throws Exception {
 
+		fail("TODO handle stack overflow due to too many promises");
+		
 		int TRIGGER_COUNT = 100;
 		int PARALLEL_COUNT = 10000;
 		int MAX_RUN_TIME = 100;

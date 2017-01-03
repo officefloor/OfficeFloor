@@ -94,6 +94,8 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 *            instances.
 	 */
 	private void doTest(Team team) throws Exception {
+		
+		fail("TODO handle timeout of stress test");
 
 		boolean isDebugging = false;
 

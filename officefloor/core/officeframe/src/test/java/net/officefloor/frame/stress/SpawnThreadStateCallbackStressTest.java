@@ -73,6 +73,8 @@ public class SpawnThreadStateCallbackStressTest extends AbstractOfficeConstructT
 	 *            instances.
 	 */
 	private void doTest(Team team) throws Exception {
+		
+		fail("TODO fix hanging of test");
 
 		final int MAX_ASYNCHRONOUS_FLOWS = 10000;
 		final int MAX_ITERATIONS = 10;

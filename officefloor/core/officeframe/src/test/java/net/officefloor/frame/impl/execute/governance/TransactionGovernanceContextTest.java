@@ -53,6 +53,9 @@ public class TransactionGovernanceContextTest extends AbstractGovernanceTestCase
 	 *         meta-data.
 	 */
 	public static Test suite() {
+		
+		fail("TODO fix test timing out");
+		
 		return createMetaDataCombinationTestSuite(TransactionGovernanceContextTest.class);
 	}
 

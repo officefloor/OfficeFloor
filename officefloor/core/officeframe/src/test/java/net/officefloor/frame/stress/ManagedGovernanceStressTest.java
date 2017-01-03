@@ -62,6 +62,8 @@ public class ManagedGovernanceStressTest extends AbstractGovernanceStressTestCas
 	protected boolean configure(ReflectiveFunctionBuilder commitTask, ReflectiveFunctionBuilder rollbackTask,
 			ReflectiveFunctionBuilder tidyUpTask) {
 
+		fail("TODO fix infinite loop");
+		
 		// Configure governance on tasks
 		commitTask.getBuilder().addGovernance(GOVERNANCE_NAME);
 		rollbackTask.getBuilder().addGovernance(GOVERNANCE_NAME);

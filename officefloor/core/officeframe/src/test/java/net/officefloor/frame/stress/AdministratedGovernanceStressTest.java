@@ -71,6 +71,8 @@ public class AdministratedGovernanceStressTest extends AbstractGovernanceStressT
 	@Override
 	protected boolean configure(ReflectiveFunctionBuilder commitTask, ReflectiveFunctionBuilder rollbackTask,
 			ReflectiveFunctionBuilder tidyUpTask) {
+		
+		fail("TODO avoid infinite loop");
 
 		// Flag to manually administer governance
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();

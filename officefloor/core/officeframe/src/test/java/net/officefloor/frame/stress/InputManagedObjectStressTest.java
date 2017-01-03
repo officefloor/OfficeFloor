@@ -94,6 +94,8 @@ public class InputManagedObjectStressTest extends AbstractOfficeConstructTestCas
 	 */
 	private void doTest(Team team) throws Exception {
 
+		fail("TODO fix infinite loop");
+		
 		int MAX_RUN_TIME = 100;
 		this.setVerbose(true);
 
