@@ -61,7 +61,9 @@ public interface ManagedObjectPool {
 	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} to no longer be used.
+	 * @param cause
+	 *            Cause for the {@link ManagedObject} to be lost.
 	 */
-	void lostManagedObject(ManagedObject managedObject);
+	void lostManagedObject(ManagedObject managedObject, Throwable cause);
 
 }

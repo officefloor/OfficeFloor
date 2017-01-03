@@ -17,50 +17,41 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link AssetManager}.
- * 
+ * Tests the {@link AssetLatch}.
+ *
  * @author Daniel Sagenschneider
  */
-public class AssetManagerTest extends OfficeFrameTestCase {
+public class AssetLatchTest extends OfficeFrameTestCase {
 
-	/**
-	 * Tests the {@link AssetManager} checking on no {@link Asset} instances.
-	 */
-	public void testCheckOnNoAssets() {
+	public void testAwaitOnLatch() {
 		fail("TODO implement");
 	}
 
-	/**
-	 * Tests the {@link AssetManager} checking on an {@link Asset}.
-	 */
-	public void testCheckOnAsset() {
+	public void testReleaseLatch() {
 		fail("TODO implement");
 	}
 
-	/**
-	 * Tests the {@link AssetManager} timing out the {@link Asset}.
-	 */
-	public void testTimeoutAsset() {
+	public void testReleaseLatchTwice() {
 		fail("TODO implement");
 	}
 
-	/**
-	 * Tests the {@link Asset} throwing an {@link Exception} on being checked.
-	 */
-	public void testHandleCheckOnAssetThrowingException() {
+	public void testPermanentlyReleaseLatch() {
 		fail("TODO implement");
 	}
 
-	/**
-	 * Ensures the time from {@link CheckAssetContext} is correct.
-	 */
-	public void testCheckTime() {
+	public void testFailLatch() {
+		fail("TODO implement");
+	}
+
+	public void testFailLatchTwice() {
+		fail("TODO implement");
+	}
+
+	public void testPermanentlyFailLatch() {
 		fail("TODO implement");
 	}
 

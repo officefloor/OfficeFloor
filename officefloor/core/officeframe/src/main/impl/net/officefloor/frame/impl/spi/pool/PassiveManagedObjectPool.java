@@ -26,9 +26,9 @@ import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 
 /**
- * {@link net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool} for passive
- * management of {@link net.officefloor.frame.spi.managedobject.ManagedObject}
- * instances.
+ * {@link net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool} for
+ * passive management of
+ * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances.
  * 
  * @author Daniel Sagenschneider
  */
@@ -71,85 +71,61 @@ public class PassiveManagedObjectPool implements ManagedObjectPool {
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObjectPool
-	 * ====================================================================
+	 * ====================== ManagedObjectPool =============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.pool.ManagedObjectPool#init(net.officefloor.frame.spi.pool.ManagedObjectPoolContext)
-	 */
+	@Override
 	public void init(ManagedObjectPoolContext context) throws Exception {
 		this.context = context;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectPool#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
-	 */
-	public void sourceManagedObject(ManagedObjectUser user) {
-		synchronized (this.pool) {
+	@Override
+	public synchronized void sourceManagedObject(ManagedObjectUser user) {
 
-			// If others waiting be polite and get in line
-			if (this.waitingUsers.size() > 0) {
-				this.waitingUsers.add(user);
-				return;
-			}
+		// If others waiting be polite and get in line
+		if (this.waitingUsers.size() > 0) {
+			this.waitingUsers.add(user);
+			return;
+		}
 
-			// Determine if pooled Managed Object is available
-			if (this.pool.size() > 0) {
-				// Available from pool
-				user.setManagedObject(this.pool.remove(0));
+		// Determine if pooled Managed Object is available
+		if (this.pool.size() > 0) {
+			// Available from pool
+			user.setManagedObject(this.pool.remove(0));
 
-			} else if (this.available < this.max) {
-				// Increment number of available managed objects
-				// (Assume successful unless otherwise)
-				this.available++;
+		} else if (this.available < this.max) {
+			// Increment number of available managed objects
+			// (Assume successful unless otherwise)
+			this.available++;
 
-				// Create a new Managed Object
-				// (Wrapper will decrement available if not created)
-				this.context.getManagedObjectSource().sourceManagedObject(
-						new ManagedObjectUserWrapper(user));
+			// Create a new Managed Object
+			// (Wrapper will decrement available if not created)
+			this.context.getManagedObjectSource().sourceManagedObject(new ManagedObjectUserWrapper(user));
 
-			} else {
-				// Add to listing waiting on a Managed Object
-				this.waitingUsers.add(user);
-			}
+		} else {
+			// Add to listing waiting on a Managed Object
+			this.waitingUsers.add(user);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectPool#returnManagedObject(net.officefloor.frame.spi.managedobject.ManagedObject)
-	 */
-	public void returnManagedObject(ManagedObject managedObject) {
-		synchronized (this.pool) {
-			
-			// Determine if waiting user
-			if (this.waitingUsers.size() > 0) {
-				// Provide to first waiting user
-				this.waitingUsers.remove(0).setManagedObject(managedObject);
-			}
-			
-			// No waiting users, therefore pool
-			this.pool.add(managedObject);
+	@Override
+	public synchronized void returnManagedObject(ManagedObject managedObject) {
+
+		// Determine if waiting user
+		if (this.waitingUsers.size() > 0) {
+			// Provide to first waiting user
+			this.waitingUsers.remove(0).setManagedObject(managedObject);
 		}
+
+		// No waiting users, therefore pool
+		this.pool.add(managedObject);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectPool#lostManagedObject(net.officefloor.frame.spi.managedobject.ManagedObject)
-	 */
-	public void lostManagedObject(ManagedObject managedObject) {
+	@Override
+	public synchronized void lostManagedObject(ManagedObject managedObject, Throwable cause) {
+
 		// Decrement number of available Managed Objects
-		synchronized (this.pool) {
-			this.available--;
-		}
+		this.available--;
 	}
 
 	/**
@@ -174,26 +150,24 @@ public class PassiveManagedObjectPool implements ManagedObjectPool {
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectUser#setManagedObject(net.officefloor.frame.spi.managedobject.ManagedObject)
+		 * ================== ManagedObjectUser ====================
 		 */
+
+		@Override
 		public void setManagedObject(ManagedObject managedObject) {
+			
 			// Delegate
 			this.delegate.setManagedObject(managedObject);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectUser#setFailure(java.lang.Throwable)
-		 */
+		@Override
 		public void setFailure(Throwable cause) {
+			
 			// Indicate not available
-			synchronized (PassiveManagedObjectPool.this.pool) {
+			synchronized (PassiveManagedObjectPool.this) {
 				PassiveManagedObjectPool.this.available--;
 			}
-			
+
 			// Delegate
 			this.delegate.setFailure(cause);
 		}

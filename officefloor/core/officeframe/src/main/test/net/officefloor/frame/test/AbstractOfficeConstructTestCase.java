@@ -448,6 +448,64 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 *            Dependency key type.
 	 * @param <F>
 	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance.
+	 * @param managingOffice
+	 *            Name of the managing {@link Office}.
+	 * @return {@link ManagedObjectBuilder}.
+	 */
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
+			String managedObjectName, MS managedObjectSource, String managingOffice) {
+
+		// Obtain the managed object source name
+		String managedObjectSourceName = "of-" + managedObjectName;
+
+		// Create the Managed Object Builder
+		ManagedObjectBuilder<F> managedObjectBuilder = this.getOfficeFloorBuilder()
+				.addManagedObject(managedObjectSourceName, managedObjectSource);
+
+		// Flag managing office
+		managedObjectBuilder.setManagingOffice(managingOffice).setInputManagedObjectName(managedObjectName);
+
+		// Link into the Office
+		this.officeBuilder.registerManagedObjectSource(managedObjectName, managedObjectSourceName);
+
+		// Return the Managed Object Builder
+		return managedObjectBuilder;
+	}
+
+	/**
+	 * Facade method to register a {@link ManagedObject} in the current
+	 * {@link Office}.
+	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
+	 * @param <MS>
+	 *            {@link ManagedObjectSource} type.
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance.
+	 * @return {@link ManagedObjectBuilder}.
+	 */
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> constructManagedObject(
+			String managedObjectName, MS managedObjectSource) {
+		return this.constructManagedObject(managedObjectName, managedObjectSource, this.getOfficeName());
+	}
+
+	/**
+	 * Facade method to register a {@link ManagedObject}.
+	 * 
+	 * @param <D>
+	 *            Dependency key type.
+	 * @param <F>
+	 *            Flow key type.
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
 	 * @param metaData
@@ -524,6 +582,20 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 
 		// Register the managed object
 		return this.constructManagedObject(managedObjectName, managedObject, managingOffice);
+	}
+
+	/**
+	 * Facade method to register a {@link ManagedObject} within the current
+	 * {@link Office}.
+	 * 
+	 * @param object
+	 *            Object for the {@link ManagedObject}.
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @return {@link ManagedObjectBuilder}.
+	 */
+	public ManagedObjectBuilder<?> constructManagedObject(final Object object, String managedObjectName) {
+		return this.constructManagedObject(object, managedObjectName, this.getOfficeName());
 	}
 
 	/**

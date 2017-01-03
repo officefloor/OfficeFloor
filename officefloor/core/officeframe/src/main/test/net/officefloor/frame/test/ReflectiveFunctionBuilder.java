@@ -223,8 +223,8 @@ public class ReflectiveFunctionBuilder
 			break;
 
 		case PROCESS:
-			mappingBuilder = ReflectiveFunctionBuilder.this.officeBuilder
-					.addProcessManagedObject(officeManagedObjectName, officeManagedObjectName);
+			mappingBuilder = this.officeBuilder.addProcessManagedObject(officeManagedObjectName,
+					officeManagedObjectName);
 			break;
 
 		default:

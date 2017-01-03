@@ -258,7 +258,7 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 			// Recycle (if not already recycled)
 			if ((!this.isRecycled) && (this.pool != null)) {
 				// Not recycled, therefore lost to pool
-				this.pool.lostManagedObject(this.managedObject);
+				this.pool.lostManagedObject(this.managedObject, escalation);
 			}
 		}
 	}

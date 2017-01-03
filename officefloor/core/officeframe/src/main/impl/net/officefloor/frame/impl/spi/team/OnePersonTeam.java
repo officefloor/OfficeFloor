@@ -60,12 +60,24 @@ public class OnePersonTeam implements Team {
 		this.waitTime = waitTime;
 	}
 
+	/**
+	 * <p>
+	 * Obtains the name of this {@link Team}.
+	 * <p>
+	 * This name is also used to name the {@link Thread}.
+	 * 
+	 * @return Name of this {@link Team}.
+	 */
+	public String getTeamName() {
+		return this.getClass().getSimpleName() + "_" + this.teamName;
+	}
+
 	/*
 	 * =================== Team =========================================
 	 */
 
 	@Override
-	public synchronized void startWorking() {
+	public void startWorking() {
 		if (this.person != null) {
 			throw new IllegalStateException("Team " + this.getClass().getName() + " has already started working");
 		}
@@ -74,7 +86,7 @@ public class OnePersonTeam implements Team {
 		this.person = new OnePerson(this.taskQueue, this.waitTime);
 
 		// Start the person working
-		String threadName = this.getClass().getSimpleName() + "_" + this.teamName;
+		String threadName = this.getTeamName();
 		Thread thread = new Thread(this.person, threadName);
 		thread.setDaemon(true);
 		thread.start();
@@ -86,7 +98,7 @@ public class OnePersonTeam implements Team {
 	}
 
 	@Override
-	public synchronized void stopWorking() {
+	public void stopWorking() {
 		if (this.person != null) {
 			try {
 				// Stop the Person working
