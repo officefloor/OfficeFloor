@@ -496,6 +496,10 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 		// Create the set of required duties to ensure they are configured
 		Set<DutyKey<A>> requiredDuties = new HashSet<DutyKey<A>>(this.linkedDutyKeys);
 
+		// Obtain the governance meta-data
+		GovernanceMetaData<?, ?>[] governanceMetaDatas = officeMetaData.getProcessMetaData().getThreadMetaData()
+				.getGovernanceMetaData();
+
 		// Obtain the duty meta-data by its duty key index
 		Map<Integer, DutyMetaData> dutyMetaData = new HashMap<Integer, DutyMetaData>();
 		for (DutyConfiguration<A> dutyConfiguration : this.administratorSourceConfiguration.getDutyConfiguration()) {
@@ -547,8 +551,6 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 			DutyGovernanceConfiguration<?>[] dutyGovernanceConfigurations = dutyConfiguration
 					.getGovernanceConfiguration();
 			int[] governanceMapping = new int[dutyGovernanceConfigurations.length];
-			GovernanceMetaData<?, ?>[] governanceMetaDatas = officeMetaData.getProcessMetaData().getThreadMetaData()
-					.getGovernanceMetaData();
 			for (DutyGovernanceConfiguration<?> dutyGovernanceConfiguration : dutyGovernanceConfigurations) {
 
 				// Index of governance for the duty
