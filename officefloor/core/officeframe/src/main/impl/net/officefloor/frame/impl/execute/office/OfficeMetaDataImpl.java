@@ -38,7 +38,6 @@ import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
-import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -261,20 +260,17 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		ProcessProfiler processProfiler = (this.profiler == null ? null
 				: new ProcessProfilerImpl(this.profiler, System.nanoTime()));
 
-		// Create the completion listeners
-		ProcessCompletionListener[] completionListeners = new ProcessCompletionListener[0];
-
 		// Create the Process State (based on whether have managed object)
 		ProcessState processState;
 		if (inputManagedObject == null) {
 			// Create Process without an Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData, this.processContextListeners, this, callback,
-					callbackThreadState, processProfiler, completionListeners);
+					callbackThreadState, processProfiler);
 		} else {
 			// Create Process with the Input Managed Object
 			processState = new ProcessStateImpl(this.processMetaData, this.processContextListeners, this, callback,
-					callbackThreadState, processProfiler, completionListeners, inputManagedObject,
-					inputManagedObjectMetaData, processBoundIndexForInputManagedObject);
+					callbackThreadState, processProfiler, inputManagedObject, inputManagedObjectMetaData,
+					processBoundIndexForInputManagedObject);
 		}
 
 		// Create the Flow

@@ -41,7 +41,7 @@ public interface ManagedObjectCleanup {
 	 *            {@link ManagedObject}. May be <code>null</code>.
 	 * @return {@link FunctionState} to clean up the {@link ManagedObject}.
 	 */
-	FunctionState createCleanUpFunction(FlowMetaData recycleFlowMetaData, Class<?> objectType,
-			ManagedObject managedObject, ManagedObjectPool managedObjectPool);
+	FunctionState cleanup(FlowMetaData recycleFlowMetaData, Class<?> objectType, ManagedObject managedObject,
+			ManagedObjectPool managedObjectPool);
 
 }

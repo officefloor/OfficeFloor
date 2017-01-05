@@ -255,6 +255,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			return null; // can not continue
 		}
 
+		// Enhance the office
+		OfficeEnhancerContextImpl.enhanceOffice(officeName, configuration, issues);
+
 		// Register the teams to office
 		Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>();
 		for (LinkedTeamConfiguration teamConfig : configuration.getRegisteredTeams()) {
@@ -309,9 +312,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		// Create the asset manager factory
 		AssetManagerFactoryImpl officeAssetManagerFactory = new AssetManagerFactoryImpl(officeManagerProcessState,
 				officeClock, functionLoop);
-
-		// Enhance the office
-		OfficeEnhancerContextImpl.enhanceOffice(officeName, configuration, issues);
 
 		// Determine if manually manage governance
 		boolean isManuallyManageGovernance = configuration.isManuallyManageGovernance();
@@ -489,6 +489,10 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			functionMetaDatas.add(functionMetaData);
 		}
 
+		// Create the function locator
+		ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
+				functionMetaDatas.toArray(new ManagedFunctionMetaData[0]));
+
 		// Create the listing of startup functions to later populate
 		ManagedFunctionReference[] startupFunctionReferences = configuration.getStartupFunctions();
 		int startupFunctionsLength = (startupFunctionReferences == null ? 0 : startupFunctionReferences.length);
@@ -520,10 +524,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 		// Obtain the profiler
 		Profiler profiler = configuration.getProfiler();
-
-		// Create the function locator
-		ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
-				functionMetaDatas.toArray(new ManagedFunctionMetaData[0]));
 
 		// Load the startup functions
 		for (int i = 0; i < startupFunctionsLength; i++) {
@@ -559,7 +559,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 			// Obtain the function meta-data for the escalation
 			ManagedFunctionMetaData<?, ?> escalationFunctionMetaData = ConstructUtil.getFunctionMetaData(
-					officeEscalationConfigurations[i].getTaskNodeReference(), functionLocator, issues, AssetType.OFFICE,
+					officeEscalationConfigurations[i].getManagedFunctionReference(), functionLocator, issues, AssetType.OFFICE,
 					officeName, "Office Escalation " + i);
 			if (escalationFunctionMetaData == null) {
 				continue; // escalation function not found

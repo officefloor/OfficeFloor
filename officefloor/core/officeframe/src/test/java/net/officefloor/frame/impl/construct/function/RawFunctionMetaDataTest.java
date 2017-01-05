@@ -1525,7 +1525,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
 				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getTaskNodeReference(), null);
+		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(), null);
 		this.record_functionIssue("No function referenced for escalation index 0");
 
 		// Fully construct task meta-data
@@ -1556,7 +1556,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
 				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getTaskNodeReference(), taskNodeReference);
+		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), null);
 		this.record_functionIssue("No function name provided for escalation index 0");
 
@@ -1588,7 +1588,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
 				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getTaskNodeReference(), taskNodeReference);
+		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "ESCALATION_HANDLER");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("ESCALATION_HANDLER"),
 				escalationTaskMetaData);
@@ -1626,7 +1626,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
 				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
-		this.recordReturn(escalationConfiguration, escalationConfiguration.getTaskNodeReference(), taskNodeReference);
+		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "ESCALATION_HANDLER");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("ESCALATION_HANDLER"),
 				escalationTaskMetaData);

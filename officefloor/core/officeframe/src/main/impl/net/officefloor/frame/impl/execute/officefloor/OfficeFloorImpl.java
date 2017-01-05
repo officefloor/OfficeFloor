@@ -19,10 +19,6 @@ package net.officefloor.frame.impl.execute.officefloor;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.NameAwareManagedFunctionFactory;
@@ -38,7 +34,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
-import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
@@ -53,11 +48,6 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
 public class OfficeFloorImpl implements OfficeFloor {
 
 	/**
-	 * {@link Logger}.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(OfficeFloorImpl.class.getName());
-
-	/**
 	 * {@link OfficeFloorMetaData} for this {@link OfficeFloor}.
 	 */
 	private final OfficeFloorMetaData officeFloorMetaData;
@@ -66,16 +56,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * {@link Office} instances by their name.
 	 */
 	private Map<String, Office> offices = null;
-
-	/**
-	 * {@link ProcessTicker}.
-	 */
-	private ProcessTicker processTicker = null;
-
-	/**
-	 * {@link Timer}.
-	 */
-	private Timer timer = null;
 
 	/**
 	 * Initiate.
@@ -104,31 +84,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 		if (this.offices != null) {
 			throw new IllegalStateException("OfficeFloor is already open");
 		}
-
-		// Create the process ticker
-		final AtomicInteger ticker = new AtomicInteger(0);
-		this.processTicker = new ProcessTicker() {
-
-			@Override
-			public int activeProcessCount() {
-				return ticker.get();
-			}
-
-			@Override
-			public void processStarted() {
-				// Increment the number of active processes
-				ticker.incrementAndGet();
-			}
-
-			@Override
-			public void processComplete() {
-				// Decrement the number of active processes
-				ticker.decrementAndGet();
-			}
-		};
-
-		// Create the timer
-		this.timer = new Timer(true);
 
 		// Create the offices to open floor for work
 		OfficeMetaData[] officeMetaDatas = this.officeFloorMetaData.getOfficeMetaData();
@@ -235,43 +190,19 @@ public class OfficeFloorImpl implements OfficeFloor {
 				mosInstance.getManagedObjectSource().stop();
 			}
 
-			// Wait until processes complete (or reasonable amount of time)
-			long startTime = System.currentTimeMillis();
-			try {
-				while ((this.processTicker.activeProcessCount() > 0)
-						&& ((System.currentTimeMillis() - startTime) < 10000)) {
-					Thread.sleep(100);
-				}
-			} catch (InterruptedException ex) {
-				// Carry on to close the OfficeFloor
+			// Stop the office managers
+			for (OfficeMetaData officeMetaData : this.officeFloorMetaData.getOfficeMetaData()) {
+				officeMetaData.getOfficeManager().stopManaging();
 			}
-
-			// Provide warning that timed out waiting for completion
-			if (this.processTicker.activeProcessCount() > 0) {
-				if (LOGGER.isLoggable(Level.WARNING)) {
-					LOGGER.warning("Timed out waiting for processes to complete ("
-							+ this.processTicker.activeProcessCount() + " remaining).  Forcing close of OfficeFloor.");
-				}
-			}
-
-			// Stop the timer
-			this.timer.cancel();
 
 			// Stop the teams working as closing
 			for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
 				teamManagement.getTeam().stopWorking();
 			}
 
-			// Stop the office managers
-			for (OfficeMetaData officeMetaData : this.officeFloorMetaData.getOfficeMetaData()) {
-				officeMetaData.getOfficeManager().stopManaging();
-			}
-
 		} finally {
 			// Flag that no longer open
 			this.offices = null;
-			this.processTicker = null;
-			this.timer = null;
 		}
 	}
 

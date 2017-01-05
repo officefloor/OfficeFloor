@@ -78,30 +78,31 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 	 */
 
 	@Override
-	public FunctionState createCleanUpFunction(final FlowMetaData recycleFlowMetaData, final Class<?> objectType,
+	public FunctionState cleanup(final FlowMetaData recycleFlowMetaData, final Class<?> objectType,
 			final ManagedObject managedObject, final ManagedObjectPool managedObjectPool) {
+
+		// Determine if recycling the managed object
+		if (recycleFlowMetaData == null) {
+			return null; // no clean up
+		}
+
+		// Clean up the managed object
 		return new CleanupOperation() {
 			@Override
 			public FunctionState execute() {
-				if (recycleFlowMetaData == null) {
-					// No recycling for managed objects
-					return null;
+				// Create the recycle managed object parameter
+				RecycleManagedObjectParameterImpl<ManagedObject> parameter = new RecycleManagedObjectParameterImpl<ManagedObject>(
+						objectType, managedObject, managedObjectPool);
 
-				} else {
-					// Create the recycle managed object parameter
-					RecycleManagedObjectParameterImpl<ManagedObject> parameter = new RecycleManagedObjectParameterImpl<ManagedObject>(
-							objectType, managedObject, managedObjectPool);
+				// Obtain the recycle thread state
+				ThreadState recycleThreadState = ManagedObjectCleanupImpl.this.processState.getMainThreadState();
 
-					// Obtain the recycle thread state
-					ThreadState recycleThreadState = ManagedObjectCleanupImpl.this.processState.getMainThreadState();
+				// Create the recycle function
+				FunctionState recycleFunction = ManagedObjectCleanupImpl.this.officeMetaData
+						.createProcess(recycleFlowMetaData, parameter, parameter, recycleThreadState);
 
-					// Create the recycle function
-					FunctionState recycleFunction = ManagedObjectCleanupImpl.this.officeMetaData
-							.createProcess(recycleFlowMetaData, parameter, parameter, recycleThreadState);
-
-					// Run recycle function in main thread state
-					return new RunInThreadStateFunctionState(recycleFunction, recycleThreadState);
-				}
+				// Run recycle function in main thread state
+				return new RunInThreadStateFunctionState(recycleFunction, recycleThreadState);
 			}
 		};
 	}

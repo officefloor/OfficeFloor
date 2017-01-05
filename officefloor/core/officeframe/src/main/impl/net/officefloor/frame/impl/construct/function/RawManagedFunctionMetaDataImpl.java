@@ -790,7 +790,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			}
 
 			// Obtain the escalation handler
-			ManagedFunctionReference escalationReference = escalationConfiguration.getTaskNodeReference();
+			ManagedFunctionReference escalationReference = escalationConfiguration.getManagedFunctionReference();
 			if (escalationReference == null) {
 				issues.addIssue(AssetType.FUNCTION, this.functionName,
 						"No function referenced for escalation index " + i);

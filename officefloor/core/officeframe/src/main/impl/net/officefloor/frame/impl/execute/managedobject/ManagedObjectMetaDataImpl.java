@@ -454,7 +454,7 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 
 	@Override
 	public FunctionState recycle(ManagedObject managedObject, ManagedObjectCleanup cleanup) {
-		return cleanup.createCleanUpFunction(this.recycleFlowMetaData, this.objectType, managedObject, this.pool);
+		return cleanup.cleanup(this.recycleFlowMetaData, this.objectType, managedObject, this.pool);
 	}
 
 }

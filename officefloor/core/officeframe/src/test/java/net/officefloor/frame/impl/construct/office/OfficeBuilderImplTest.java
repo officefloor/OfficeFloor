@@ -61,7 +61,7 @@ public class OfficeBuilderImplTest extends OfficeFrameTestCase {
 				.addManagedFunction(namespacedFunction, this.functionFactory);
 
 		// Ensure can get function as flow node builder
-		FlowNodeBuilder<?> flowNodeBuilder = this.officeBuilder.getFlowNodeBuilder("namespace", "task");
+		FlowNodeBuilder<?> flowNodeBuilder = this.officeBuilder.getFlowNodeBuilder("namespace", "function");
 		assertEquals("Incorrect flow node builder", functionBuilder, flowNodeBuilder);
 	}
 

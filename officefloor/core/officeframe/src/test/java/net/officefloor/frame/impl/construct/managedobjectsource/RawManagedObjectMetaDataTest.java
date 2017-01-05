@@ -533,6 +533,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		MockManagedObjectSource.addFunctionName = "TASK";
 		MockManagedObjectSource.addFunctionLinkFunctionName = "LINK_TASK";
+		MockManagedObjectSource.addFunctionLinkedParameter = null;
 		this.constructRawManagedObjectMetaData(true);
 		this.verifyMockObjects();
 	}

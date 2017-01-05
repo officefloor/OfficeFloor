@@ -17,6 +17,10 @@
  */
 package net.officefloor.frame.impl.construct.officefloor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,6 +34,7 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow.EscalationKey;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
@@ -265,10 +270,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Should not have Process Context Listeners", 0, metaData.getProcessContextListeners().length);
 
 		// Validate the teams
-		assertEquals("Incorrect number of teams", 4, actualTeams.length);
-		assertTrue("Incorrect continue team", actualTeams[0].getTeam() instanceof PassiveTeam);
-		for (int i = 1; i < 4; i++) {
-			assertEquals("Incorrect team " + i, expectedTeams[i - 1], actualTeams[i]);
+		assertEquals("Incorrect number of teams", 3, actualTeams.length);
+		for (int i = 0; i < 3; i++) {
+			assertEquals("Incorrect team " + i, expectedTeams[i], actualTeams[i]);
 		}
 	}
 
@@ -451,38 +455,56 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures handle no {@link EscalationHandler} configured.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testNoEscalationHandlerConfigured() throws Throwable {
 
-		@SuppressWarnings("rawtypes")
-		ManagedFunctionContext context = this.createMock(ManagedFunctionContext.class);
-		Exception escalation = new Exception("TEST");
+		PrintStream systemErr = System.err;
+		try {
+			ByteArrayOutputStream capture = new ByteArrayOutputStream();
+			System.setErr(new PrintStream(capture));
 
-		// Record no escalation procedure
-		this.record_officeFloorName();
-		this.record_constructTeams();
-		this.record_constructManagedObjectSources("OFFICE");
-		this.recordReturn(this.configuration, this.configuration.getEscalationHandler(), null);
-		this.record_constructOffices();
+			@SuppressWarnings("rawtypes")
+			ManagedFunctionContext context = this.createMock(ManagedFunctionContext.class);
+			Exception escalation = new Exception("TEST");
 
-		// Record escalation
-		this.recordReturn(context, context.getObject(0), escalation);
+			// Record no escalation procedure
+			this.record_officeFloorName();
+			this.record_constructTeams();
+			this.record_constructManagedObjectSources("OFFICE");
+			this.recordReturn(this.configuration, this.configuration.getEscalationHandler(), null);
+			this.record_constructOffices();
 
-		// Attempt to construct office floor
-		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
+			// Record escalation
+			this.recordReturn(context, context.getObject(EscalationKey.EXCEPTION), escalation);
 
-		// Ensure default escalation handler
-		EscalationFlow officeFloorEscalation = metaData.getOfficeFloorEscalation();
-		ManagedFunction<?, ?> function = officeFloorEscalation.getManagedFunctionMetaData().getManagedFunctionFactory()
-				.createManagedFunction();
-		function.execute(context);
+			// Attempt to construct office floor
+			this.replayMockObjects();
+			RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData();
 
-		this.verifyMockObjects();
+			// Ensure default escalation handler
+			EscalationFlow officeFloorEscalation = metaData.getOfficeFloorEscalation();
+			ManagedFunction<?, ?> function = officeFloorEscalation.getManagedFunctionMetaData()
+					.getManagedFunctionFactory().createManagedFunction();
+			function.execute(context);
+			this.verifyMockObjects();
+
+			// Ensure written to system error
+			String errorOutput = new String(capture.toByteArray());
+			StringWriter expectedError = new StringWriter();
+			expectedError.write("FAILURE: Office not handling:\n");
+			escalation.printStackTrace(new PrintWriter(expectedError));
+			expectedError.write("\n");
+			assertEquals("Incorrect error output", expectedError.toString(), errorOutput);
+
+		} finally {
+			System.setErr(systemErr);
+		}
 	}
 
 	/**
 	 * Ensures handle provided a {@link EscalationProcedure}.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testProvideEscalationProcedure() throws Throwable {
 
 		final EscalationHandler escalationHandler = this.createMock(EscalationHandler.class);
@@ -499,7 +521,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.record_constructOffices();
 
 		// Record escalation handlings
-		this.recordReturn(context, context.getObject(0), escalation);
+		this.recordReturn(context, context.getObject(EscalationKey.EXCEPTION), escalation);
 		escalationHandler.handleEscalation(escalation);
 
 		// Attempt to construct office floor

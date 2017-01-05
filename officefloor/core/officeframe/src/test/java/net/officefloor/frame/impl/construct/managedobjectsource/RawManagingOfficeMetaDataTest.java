@@ -31,26 +31,24 @@ import net.officefloor.frame.internal.configuration.InputManagedObjectConfigurat
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ProcessTicker;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
@@ -118,11 +116,6 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	private final OfficeMetaData officeMetaData = this.createMock(OfficeMetaData.class);
 
 	/**
-	 * {@link AssetManagerFactory}.
-	 */
-	private final AssetManagerFactory assetManagerFactory = this.createMock(AssetManagerFactory.class);
-
-	/**
 	 * {@link OfficeFloorIssues}.
 	 */
 	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
@@ -131,35 +124,15 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * Ensure issue if no {@link ManagedFunctionMetaData} for recycle
 	 * {@link ManagedFunction}.
 	 */
-	public void testNoWorkForRecycleFunction() {
+	public void testNoFunctionForRecycleFunction() {
 
 		final String RECYCLE_FUNCTION_NAME = "RECYCLE_FUNCTION";
 
 		// Record no work for recycle function
 		this.record_managedObjectSourceName();
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("RECYCLE_FUNCTION"),
+		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData(RECYCLE_FUNCTION_NAME),
 				null);
-		this.record_issue("Recycle work 'RECYCLE_FUNCTION' not found");
-
-		// Manage by office
-		this.replayMockObjects();
-		this.run_manageByOffice(false, RECYCLE_FUNCTION_NAME, null);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no initial {@link FlowMetaData} for recycle
-	 * {@link ManagedFunction}.
-	 */
-	public void testNoInitialFlowForRecycleFunction() {
-
-		final String RECYCLE_FUNCTION_NAME = "RECYCLE_FUNCTION";
-
-		// Record no initial function
-		this.record_managedObjectSourceName();
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("RECYCLE_FUNCTION"),
-				null);
-		this.record_issue("No initial flow on work RECYCLE_FUNCTION for recycle function");
+		this.record_issue("Recycle function 'RECYCLE_FUNCTION' not found");
 
 		// Manage by office
 		this.replayMockObjects();
@@ -175,19 +148,16 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final String RECYCLE_FUNCTION_NAME = "RECYCLE_FUNCTION";
 
-		final FlowMetaData flowMetaData = this.createMock(FlowMetaData.class);
 		final ManagedFunctionMetaData<?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
 
 		// Record recycle task has incompatible parameter
 		this.record_managedObjectSourceName();
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("RECYCLE_FUNCTION"),
+		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData(RECYCLE_FUNCTION_NAME),
 				taskMetaData);
-		this.recordReturn(flowMetaData, flowMetaData.getInitialFunctionMetaData(), taskMetaData);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), Integer.class);
-		this.recordReturn(taskMetaData, taskMetaData.getFunctionName(), "TASK");
-		this.record_issue("Incompatible parameter type for recycle task (parameter=" + Integer.class.getName()
-				+ ", required type=" + RecycleManagedObjectParameter.class.getName()
-				+ ", work=RECYCLE_WORK, task=TASK)");
+		this.record_issue("Incompatible parameter type for recycle function (parameter=" + Integer.class.getName()
+				+ ", required type=" + RecycleManagedObjectParameter.class.getName() + ", function="
+				+ RECYCLE_FUNCTION_NAME + ")");
 
 		// Manage by office
 		this.replayMockObjects();
@@ -202,22 +172,20 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final String RECYCLE_FUNCTION_NAME = "RECYCLE_FUNCTION";
 
-		final FlowMetaData flowMetaData = this.createMock(FlowMetaData.class);
 		final ManagedFunctionMetaData<?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this.createMock(ManagedObject.class);
-		final ManagedObjectCleanup cleanupSequence = this.createMock(ManagedObjectCleanup.class);
+		final ManagedObjectCleanup cleanup = this.createMock(ManagedObjectCleanup.class);
 
 		// Record manage office
 		this.record_managedObjectSourceName();
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("RECYCLE_FUNCTION"),
+		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData(RECYCLE_FUNCTION_NAME),
 				taskMetaData);
-		this.recordReturn(flowMetaData, flowMetaData.getInitialFunctionMetaData(), taskMetaData);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), RecycleManagedObjectParameter.class);
 		this.record_getFlowConfigurations();
 
 		// Record instigating the recycle flow
-		final FunctionState recycleFunction = this.record_createRecycleFunction(flowMetaData, managedObject);
+		FunctionState recycleFunction = this.record_cleanup(cleanup, taskMetaData, String.class, managedObject, null);
 
 		// Manage by office
 		this.replayMockObjects();
@@ -228,7 +196,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		rawOffice.manageManagedObject(moMetaData);
 
 		rawOffice.manageByOffice(null, this.officeMetaData, this.functionLocator, this.officeTeams, this.issues);
-		FunctionState function = moMetaData.recycle(managedObject, cleanupSequence);
+		FunctionState function = moMetaData.recycle(managedObject, cleanup);
 		this.verifyMockObjects();
 
 		// Ensure correct recycle function
@@ -242,22 +210,21 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final String RECYCLE_FUNCTION_NAME = "RECYCLE_FUNCTION";
 
-		final FlowMetaData flowMetaData = this.createMock(FlowMetaData.class);
 		final ManagedFunctionMetaData<?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this.createMock(ManagedObject.class);
-		final ManagedObjectCleanup cleanupSequence = this.createMock(ManagedObjectCleanup.class);
+		final ManagedObjectCleanup cleanup = this.createMock(ManagedObjectCleanup.class);
 
 		// Record managed office
 		this.record_managedObjectSourceName();
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("RECYCLE_FUNCTION"),
 				taskMetaData);
-		this.recordReturn(flowMetaData, flowMetaData.getInitialFunctionMetaData(), taskMetaData);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), null);
 		this.record_getFlowConfigurations();
 
 		// Record instigating the recycle flow
-		final FunctionState recycleFunction = this.record_createRecycleFunction(flowMetaData, managedObject);
+		final FunctionState recycleFunction = this.record_cleanup(cleanup, taskMetaData, String.class, managedObject,
+				null);
 
 		// Manage by office
 		this.replayMockObjects();
@@ -267,7 +234,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Have managed after managed by office.
 		// This would the be case when used by another office.
 		rawOffice.manageManagedObject(moMetaData);
-		FunctionState function = moMetaData.recycle(managedObject, cleanupSequence);
+		FunctionState function = moMetaData.recycle(managedObject, cleanup);
 		this.verifyMockObjects();
 
 		// Ensure correct recycle function
@@ -286,6 +253,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record no recycle task
 		this.record_managedObjectSourceName();
 		this.record_getFlowConfigurations();
+		FunctionState recycleFunction = this.record_cleanup(cleanup, null, String.class, managedObject, null);
 
 		// Manage by office
 		this.replayMockObjects();
@@ -296,8 +264,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		FunctionState function = moMetaData.recycle(managedObject, cleanup);
 		this.verifyMockObjects();
 
-		// Ensure no recycle function
-		assertNull("Should be no recycle function", function);
+		// Ensure correct recycle function
+		assertEquals("Incorrect recycle function", recycleFunction, function);
 	}
 
 	/**
@@ -428,7 +396,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures issue if no {@link ManagedFunctionMetaData} for the {@link Flow}.
 	 */
-	public void testNoFlowTask() {
+	public void testNoFlowFunction() {
 
 		final ManagedObjectFlowMetaData<?> flowMetaData = this.createMock(ManagedObjectFlowMetaData.class);
 		final ManagedObjectFlowConfiguration<?> flowConfiguration = this
@@ -446,8 +414,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(flowMetaData, flowMetaData.getArgumentType(), null);
 		this.recordReturn(taskReference, taskReference.getFunctionName(), "TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), null);
-		this.record_issue(
-				"Can not find task meta-data (work=WORK, task=TASK) for flow 0 (key=" + Flows.KEY + ", label=FLOW)");
+		this.record_issue("Can not find function meta-data TASK for flow 0 (key=" + Flows.KEY + ", label=FLOW)");
 
 		// Manage by office
 		this.replayMockObjects();
@@ -479,9 +446,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(taskReference, taskReference.getFunctionName(), "TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), taskMetaData);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), String.class);
-		this.record_issue("Argument is not compatible with task parameter (argument=" + Integer.class.getName()
+		this.record_issue("Argument is not compatible with function parameter (argument=" + Integer.class.getName()
 				+ ", parameter=" + String.class.getName()
-				+ ", work=WORK, task=TASK) for flow 0 (key=<indexed>, label=<no label>)");
+				+ ", function=TASK) for flow 0 (key=<indexed>, label=<no label>)");
 
 		// Manage by office
 		this.replayMockObjects();
@@ -499,7 +466,6 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowConfiguration.class);
 		final ManagedFunctionReference taskReference = this.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
-		final AssetManager assetManager = this.createMock(AssetManager.class);
 		final ManagedObjectFlowConfiguration<?> flowConfigurationTwo = this
 				.createMock(ManagedObjectFlowConfiguration.class);
 
@@ -516,10 +482,6 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(taskReference, taskReference.getFunctionName(), "TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), taskMetaData);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), null);
-		this.recordReturn(
-				this.assetManagerFactory, this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						MANAGED_OBJECT_SOURCE_NAME, "flow 0 (key=" + Flows.KEY + ", label=LABEL)", this.issues),
-				assetManager);
 		this.record_issue("Extra flows configured than specified by ManagedObjectSourceMetaData");
 
 		// Manage by office
@@ -538,13 +500,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowConfiguration.class);
 		final ManagedFunctionReference taskReference = this.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
-		final AssetManager assetManager = this.createMock(AssetManager.class);
 		final String parameter = "PARAMETER";
 		final ManagedObject managedObject = this.createMock(ManagedObject.class);
-		final FunctionState function = this.createMock(FunctionState.class);
-		final Flow flow = this.createMock(Flow.class);
-		final ThreadState thread = this.createMock(ThreadState.class);
-		final ProcessState process = this.createMock(ProcessState.class);
+		final ManagedFunctionContainer function = this.createMock(ManagedFunctionContainer.class);
 
 		// Record construct flow
 		this.record_managedObjectSourceName();
@@ -558,10 +516,6 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(taskReference, taskReference.getFunctionName(), "TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), taskMetaData);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), Object.class);
-		this.recordReturn(
-				this.assetManagerFactory, this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						MANAGED_OBJECT_SOURCE_NAME, "flow 0 (key=<indexed>, label=<no label>)", this.issues),
-				assetManager);
 
 		// Record invoking the flow
 		this.recordReturn(this.officeMetaData,
@@ -571,25 +525,21 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 					public boolean matches(Object[] expected, Object[] actual) {
 						FlowMetaData flowMetaData = (FlowMetaData) actual[0];
 						assertEquals("Incorrect parameter", parameter, actual[1]);
-						assertNull("Should not have escalation handler", actual[2]);
-						assertEquals("Incorrect managed object", managedObject, actual[5]);
+						assertEquals("Incorrect managed object", managedObject, actual[4]);
 						assertEquals("Incorrect managed object meta-data",
-								RawManagingOfficeMetaDataTest.this.moMetaData, actual[6]);
-						assertEquals("Incorrect process index", 0, actual[7]);
+								RawManagingOfficeMetaDataTest.this.moMetaData, actual[5]);
+						assertEquals("Incorrect process index", 0, actual[6]);
 
 						// Validate flow meta-data
 						assertEquals("Incorrect task meta-data", taskMetaData,
 								flowMetaData.getInitialFunctionMetaData());
-						assertTrue("Always spawn thread state", flowMetaData.isSpawnThreadState());
+						assertFalse("Within new process so no need to spawn thread state",
+								flowMetaData.isSpawnThreadState());
 
 						// Matches if at this point
 						return true;
 					}
 				});
-
-		// Record obtaining the process state
-		this.recordReturn(flow, flow.getThreadState(), thread);
-		this.recordReturn(thread, thread.getProcessState(), process);
 
 		// Record activating function (and subsequently process)
 		FunctionLoop functionLoop = this.createMock(FunctionLoop.class);
@@ -619,14 +569,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowConfiguration.class);
 		final ManagedFunctionReference functionReference = this.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?> functionMetaData = this.createMock(ManagedFunctionMetaData.class);
-		final AssetManager assetManager = this.createMock(AssetManager.class);
 		final String parameter = "PARAMETER";
 		final ManagedObject managedObject = this.createMock(ManagedObject.class);
-		final FunctionState function = this.createMock(FunctionState.class);
-		final ProcessTicker processTicker = this.createMock(ProcessTicker.class);
-		final Flow flow = this.createMock(Flow.class);
-		final ThreadState thread = this.createMock(ThreadState.class);
-		final ProcessState process = this.createMock(ProcessState.class);
+		final ManagedFunctionContainer function = this.createMock(ManagedFunctionContainer.class);
 
 		// Record construct flow
 		this.record_managedObjectSourceName();
@@ -642,10 +587,6 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"),
 				functionMetaData);
 		this.recordReturn(functionMetaData, functionMetaData.getParameterType(), Object.class);
-		this.recordReturn(
-				this.assetManagerFactory, this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						MANAGED_OBJECT_SOURCE_NAME, "flow 0 (key=<indexed>, label=<no label>)", this.issues),
-				assetManager);
 
 		// Record invoking the flow
 		this.recordReturn(this.officeMetaData, this.officeMetaData.createProcess(null, parameter, null, null,
@@ -655,27 +596,22 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 						FlowMetaData flowMetaData = (FlowMetaData) actual[0];
 						assertEquals("Incorrect parameter", parameter, actual[1]);
 						assertNull("Should not have escalation handler", actual[2]);
-						assertEquals("Incorrect managed object", managedObject, actual[5]);
+						assertEquals("Incorrect managed object", managedObject, actual[4]);
 						assertEquals("Incorrect managed object meta-data",
-								RawManagingOfficeMetaDataTest.this.moMetaData, actual[6]);
-						assertEquals("Incorrect process index", processMoIndex, actual[7]);
+								RawManagingOfficeMetaDataTest.this.moMetaData, actual[5]);
+						assertEquals("Incorrect process index", processMoIndex, actual[6]);
 
 						// Validate flow meta-data
 						assertEquals("Incorrect function meta-data", functionMetaData,
 								flowMetaData.getInitialFunctionMetaData());
-						assertTrue("Always spawn thread state", flowMetaData.isSpawnThreadState());
+						assertFalse("In process, so no need to spawn thread state", flowMetaData.isSpawnThreadState());
 
 						// Matches if at this point
 						return true;
 					}
 				});
 
-		// Record obtaining the process state
-		this.recordReturn(flow, flow.getThreadState(), thread);
-		this.recordReturn(thread, thread.getProcessState(), process);
-
 		// Record activating function (and subsequently process)
-		processTicker.processStarted();
 		FunctionLoop functionLoop = this.createMock(FunctionLoop.class);
 		this.recordReturn(this.officeMetaData, this.officeMetaData.getFunctionLoop(), functionLoop);
 		functionLoop.executeFunction(function);
@@ -704,34 +640,43 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records creating the recycle {@link FunctionState}.
+	 * Records clean up of the {@link ManagedObject}.
 	 * 
-	 * @param recycleFlowMetaData
-	 *            {@link FlowMetaData} for the recycle {@link FunctionState}.
+	 * @param cleanup
+	 *            {@link ManagedObjectCleanup}.
+	 * @param recycleFunctionMetaData
+	 *            {@link ManagedFunctionMetaData} for the recycle
+	 *            {@link FunctionState}.
 	 * @param managedObject
 	 *            {@link ManagedObject} to be recycled.
+	 * @param pool
+	 *            {@link ManagedObjectPool}.
 	 * @return Recycle {@link FunctionState} created.
 	 */
-	private FunctionState record_createRecycleFunction(final FlowMetaData recycleFlowMetaData,
-			final ManagedObject managedObject) {
+	private FunctionState record_cleanup(ManagedObjectCleanup cleanup,
+			final ManagedFunctionMetaData<?, ?> recycleFunctionMetaData, final Class<?> objectType,
+			final ManagedObject managedObject, final ManagedObjectPool pool) {
 
 		final FunctionState recycleFunction = this.createMock(FunctionState.class);
 
-		// Record creating the job node
-		this.recordReturn(this.officeMetaData, this.officeMetaData.createProcess(recycleFlowMetaData, null, null, null),
-				recycleFunction, new AbstractMatcher() {
+		this.recordReturn(cleanup, cleanup.cleanup(null, objectType, managedObject, pool), recycleFunction,
+				new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
 
 						// Ensure correct flow meta-data
-						assertEquals("Incorrect recycle flow meta-data", recycleFlowMetaData, actual[0]);
+						FlowMetaData recycleMetaData = (FlowMetaData) actual[0];
+						if (recycleFunctionMetaData == null) {
+							assertNull("Should not have recycle function", recycleMetaData);
+						} else {
+							assertSame("Incorrect recycle function meta-data", recycleFunctionMetaData,
+									recycleMetaData.getInitialFunctionMetaData());
+						}
 
-						// Ensure correct recycle parameter
-						RecycleManagedObjectParameter<?> parameter = (RecycleManagedObjectParameter<?>) actual[1];
-						assertEquals("Incorrect managed object", managedObject, parameter.getManagedObject());
-
-						// Ensure have recycle flow callback
-						assertEquals("Should have recycle flow callback", recycleFlowMetaData, actual[2]);
+						// Validate remaining arguments
+						assertEquals("Incorrect object type", expected[1], actual[1]);
+						assertEquals("Incorrect managed object", expected[2], actual[2]);
+						assertEquals("Incorrect managed object pool", expected[3], actual[3]);
 						return true;
 					}
 				});
@@ -838,8 +783,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * @return {@link ManagedObjectMetaDataImpl}.
 	 */
 	private ManagedObjectMetaDataImpl<?> createMoMetaData() {
-		return new ManagedObjectMetaDataImpl<None>("BOUND", null, -1, null, null, false, null, false, null, false, null,
-				0, null);
+		return new ManagedObjectMetaDataImpl<None>("BOUND", String.class, -1, null, null, false, null, false, null,
+				false, null, 0, null);
 	}
 
 	/**

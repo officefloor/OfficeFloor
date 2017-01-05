@@ -42,6 +42,6 @@ public interface ManagedFunctionEscalationConfiguration {
 	 * @return {@link ManagedFunctionReference} for the {@link ManagedFunction}
 	 *         handling the {@link Escalation}.
 	 */
-	ManagedFunctionReference getTaskNodeReference();
+	ManagedFunctionReference getManagedFunctionReference();
 
 }

@@ -147,7 +147,7 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 	/**
 	 * Key identifying the {@link Exception} for the {@link EscalationFlow}.
 	 */
-	private enum EscalationKey {
+	public enum EscalationKey {
 		EXCEPTION
 	}
 

@@ -61,7 +61,7 @@ public class ManagedFunctionEscalationConfigurationImpl implements ManagedFuncti
 	}
 
 	@Override
-	public ManagedFunctionReference getTaskNodeReference() {
+	public ManagedFunctionReference getManagedFunctionReference() {
 		return this.taskNodeReference;
 	}
 

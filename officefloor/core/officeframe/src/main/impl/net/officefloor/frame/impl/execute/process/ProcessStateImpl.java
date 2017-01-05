@@ -36,7 +36,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -82,11 +81,6 @@ public class ProcessStateImpl implements ProcessState {
 	private final ProcessContextListener[] processContextListeners;
 
 	/**
-	 * {@link ProcessCompletionListener} instances.
-	 */
-	private final ProcessCompletionListener[] completionListeners;
-
-	/**
 	 * Main {@link ThreadState} for this {@link ProcessState}.
 	 */
 	private final ThreadState mainThreadState;
@@ -122,14 +116,12 @@ public class ProcessStateImpl implements ProcessState {
 	 *            <code>null</code>.
 	 * @param processProfiler
 	 *            Optional {@link ProcessProfiler}. May be <code>null</code>.
-	 * @param completionListeners
-	 *            {@link ProcessCompletionListener} instances.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
 			OfficeMetaData officeMetaData, FlowCallback callback, ThreadState callbackThreadState,
-			ProcessProfiler processProfiler, ProcessCompletionListener[] completionListeners) {
+			ProcessProfiler processProfiler) {
 		this(processMetaData, processContextListeners, officeMetaData, callback, callbackThreadState, processProfiler,
-				completionListeners, null, null, -1);
+				null, null, -1);
 	}
 
 	/**
@@ -148,8 +140,6 @@ public class ProcessStateImpl implements ProcessState {
 	 *            <code>null</code>.
 	 * @param processProfiler
 	 *            Optional {@link ProcessProfiler}. May be <code>null</code>.
-	 * @param completionListeners
-	 *            {@link ProcessCompletionListener} instances.
 	 * @param inputManagedObject
 	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
 	 *            May be <code>null</code>.
@@ -163,14 +153,13 @@ public class ProcessStateImpl implements ProcessState {
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
 			OfficeMetaData officeMetaData, FlowCallback callback, ThreadState callbackThreadState,
-			ProcessProfiler processProfiler, ProcessCompletionListener[] completionListeners,
+			ProcessProfiler processProfiler, 
 			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
 			int inputManagedObjectIndex) {
 		this.processMetaData = processMetaData;
 		this.processContextListeners = processContextListeners;
 		this.officeMetaData = officeMetaData;
 		this.processProfiler = processProfiler;
-		this.completionListeners = completionListeners;
 
 		// Create the main thread state
 		this.mainThreadState = new ThreadStateImpl(this.processMetaData.getThreadMetaData(), callback,
@@ -272,11 +261,6 @@ public class ProcessStateImpl implements ProcessState {
 
 				// Remove thread from active thread listing
 				if (process.activeThreads.removeEntry(thread)) {
-
-					// Notify process complete
-					for (ProcessCompletionListener listener : process.completionListeners) {
-						listener.processComplete();
-					}
 
 					// Clean up process
 					FunctionState cleanUpFunctions = null;
