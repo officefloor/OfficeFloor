@@ -205,7 +205,7 @@ public class ConstructUtil {
 			// Ensure argument may be passed as a parameter to the task
 			if (!parameterType.isAssignableFrom(argumentType)) {
 				issues.addIssue(assetType, assetName,
-						"Argument is not compatible with task parameter (argument=" + argumentType.getName()
+						"Argument is not compatible with function parameter (argument=" + argumentType.getName()
 								+ ", parameter=" + parameterType.getName() + ", function=" + functionName + ") for "
 								+ forItemDescription);
 				return null; // must have compatible argument to parameter

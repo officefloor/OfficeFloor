@@ -517,7 +517,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			String scopeAdminName = duty.getScopeAdministratorName();
 			if (ConstructUtil.isBlank(scopeAdminName)) {
 				issues.addIssue(AssetType.FUNCTION, functionName, "No " + Administrator.class.getSimpleName()
-						+ " name for " + (isPreNotPost ? "pre" : "post") + "-task at index " + taskDuties.size());
+						+ " name for " + (isPreNotPost ? "pre" : "post") + "-function at index " + taskDuties.size());
 				continue; // no administrator name
 			}
 
@@ -773,7 +773,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 		ManagedFunctionMetaData<?, ?> nextFunction = null;
 		if (nextFunctionReference != null) {
 			nextFunction = ConstructUtil.getFunctionMetaData(nextFunctionReference, functionLocator, issues,
-					AssetType.FUNCTION, this.functionName, "next task");
+					AssetType.FUNCTION, this.functionName, "next function");
 		}
 
 		// Create the escalation procedure

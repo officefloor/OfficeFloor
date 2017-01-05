@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -32,6 +34,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
+import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
@@ -39,6 +42,7 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfigura
 import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
@@ -51,6 +55,8 @@ import net.officefloor.frame.internal.construct.RawManagedFunctionMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
+import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
@@ -134,15 +140,20 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	private final TeamManagement responsibleTeam = this.createMock(TeamManagement.class);
 
 	/**
-	 * {@link ManagedFunctionLocator}.
-	 */
-	private final ManagedFunctionLocator inputFunctionLocator = this.createMock(ManagedFunctionLocator.class);
-
-	/**
 	 * {@link ManagedFunctionLocator} to find the
 	 * {@link ManagedFunctionMetaData}.
 	 */
 	private final ManagedFunctionLocator functionLocator = this.createMock(ManagedFunctionLocator.class);
+
+	/**
+	 * {@link Office} scope {@link RawBoundManagedObjectMetaData}.
+	 */
+	private final Map<String, RawBoundManagedObjectMetaData> officeScopeManagedObjects = new HashMap<>();
+
+	/**
+	 * {@link Office} scope {@link RawBoundAdministratorMetaData}.
+	 */
+	private final Map<String, RawBoundAdministratorMetaData<?, ?>> officeScopeAdministrators = new HashMap<>();
 
 	/**
 	 * {@link AssetManagerFactory}.
@@ -154,10 +165,10 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testNoFunctionName() {
 
-		// Record no task name
+		// Record no function name
 		this.recordReturn(this.configuration, this.configuration.getFunctionName(), null);
-
-		this.issues.addIssue(AssetType.OFFICE, "WORK", "Function added without name");
+		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getOfficeName(), "OFFICE");
+		this.issues.addIssue(AssetType.OFFICE, "OFFICE", "ManagedFunction added without name");
 
 		// Attempt to construct function meta-data
 		this.replayMockObjects();
@@ -173,7 +184,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		// Record no task factory
 		this.recordReturn(this.configuration, this.configuration.getFunctionName(), FUNCTION_NAME);
 		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), null);
-		this.record_functionIssue("No FunctionFactory provided");
+		this.record_functionIssue("No ManagedFunctionFactory provided");
 
 		// Attempt to construct function meta-data
 		this.replayMockObjects();
@@ -196,7 +207,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		Map<String, TeamManagement> teams = new HashMap<String, TeamManagement>();
 		teams.put("TEAM", this.responsibleTeam);
 		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getTeams(), teams);
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -217,7 +230,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record with differentiator
 		this.record_nameFactoryTeam(); // no differentiator loaded
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -231,7 +246,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	}
 
 	/**
-	 * Ensure issue if no {@link Team} name.
+	 * Ensure able to not specify a {@link Team}.
 	 */
 	public void testNoTeamName() {
 
@@ -240,12 +255,18 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), this.functionFactory);
 		this.recordReturn(this.configuration, this.configuration.getDifferentiator(), null);
 		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), null);
-		this.record_functionIssue("No team name provided for function");
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
+		this.record_NoAdministration();
+		this.record_NoGovernance();
 
 		// Attempt to construct function meta-data
 		this.replayMockObjects();
-		this.constructRawFunctionMetaData(false);
+		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
 		this.verifyMockObjects();
+
+		assertNull("Should allow any team", metaData.getManagedFunctionMetaData().getResponsibleTeam());
 	}
 
 	/**
@@ -259,7 +280,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getDifferentiator(), null);
 		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), "TEAM");
 		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getTeams(), new HashMap<String, Team>());
-		this.record_functionIssue("Unknown team 'TEAM' responsible for function");
+		this.record_functionIssue("Unknown Team 'TEAM' responsible for ManagedFunction");
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -275,7 +296,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record initial task details
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -296,6 +319,126 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	}
 
 	/**
+	 * Ensure can construct {@link ManagedFunction} with a single
+	 * {@link ManagedFunction} bound {@link ManagedObject}.
+	 */
+	public void testSingleFunctionBoundManagedObject() {
+
+		final RawBoundManagedObjectMetaData rawMoMetaData = this.createMock(RawBoundManagedObjectMetaData.class);
+		final RawBoundManagedObjectInstanceMetaData<?> rawMoInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
+		final ManagedObjectMetaData<?> moMetaData = this.createMock(ManagedObjectMetaData.class);
+
+		// Record single function bound managed object
+		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects("MO", rawMoMetaData);
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
+		this.record_NoAdministration();
+		this.record_NoGovernance();
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getDefaultInstanceIndex(), 0);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData<?>[] { rawMoInstanceMetaData });
+		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData.getManagedObjectMetaData(), moMetaData);
+
+		// Attempt to construct function meta-data
+		this.replayMockObjects();
+		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
+		this.verifyMockObjects();
+
+		// Verify function meta-data
+		ManagedObjectMetaData<?>[] functionMoMetaData = metaData.getManagedFunctionMetaData()
+				.getManagedObjectMetaData();
+		assertEquals("Should have a function bound managed object meta-data", 1, functionMoMetaData.length);
+		assertEquals("Incorrect managed object meta-data", moMetaData, functionMoMetaData[0]);
+	}
+
+	/**
+	 * Ensure can construct {@link ManagedFunction} with a {@link Office} scoped
+	 * {@link ManagedObject}.
+	 */
+	public void testSingleOfficeScopedManagedObject() {
+
+		final RawBoundManagedObjectMetaData rawBoundMoMetaData = this.createMock(RawBoundManagedObjectMetaData.class);
+		this.officeScopeManagedObjects.put("MO", rawBoundMoMetaData);
+
+		final ManagedFunctionObjectConfiguration<?> objectConfiguration = this
+				.createMock(ManagedFunctionObjectConfiguration.class);
+		final RawBoundManagedObjectInstanceMetaData<?> rawMoInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
+		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this.createMock(RawManagedObjectMetaData.class);
+		final ManagedObjectIndex moIndex = this.createMock(ManagedObjectIndex.class);
+
+		// Record single function bound managed object
+		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
+		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
+				new ManagedFunctionObjectConfiguration[] { objectConfiguration });
+		this.recordReturn(objectConfiguration, objectConfiguration.getObjectType(), String.class);
+		this.recordReturn(objectConfiguration, objectConfiguration.isParameter(), false);
+		this.recordReturn(objectConfiguration, objectConfiguration.getScopeManagedObjectName(), "MO");
+		this.recordReturn(rawBoundMoMetaData, rawBoundMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData<?>[] { rawMoInstanceMetaData });
+		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData.getRawManagedObjectMetaData(), rawMoMetaData);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getObjectType(), String.class);
+		this.recordReturn(rawBoundMoMetaData, rawBoundMoMetaData.getManagedObjectIndex(), moIndex);
+		this.recordReturn(rawBoundMoMetaData, rawBoundMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData<?>[] { rawMoInstanceMetaData });
+		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData.getDependencies(),
+				new RawBoundManagedObjectMetaData[0]);
+		this.record_functionBoundAdministrators();
+		this.record_NoAdministration();
+		this.record_NoGovernance();
+		this.recordReturn(rawBoundMoMetaData, rawBoundMoMetaData.getManagedObjectIndex(), moIndex);
+		this.recordReturn(rawBoundMoMetaData, rawBoundMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData<?>[] { rawMoInstanceMetaData });
+		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData.getDependencies(),
+				new RawBoundManagedObjectMetaData[0]);
+
+		// Attempt to construct function meta-data
+		this.replayMockObjects();
+		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
+		this.verifyMockObjects();
+
+		// Verify function meta-data
+		ManagedObjectMetaData<?>[] functionMoMetaData = metaData.getManagedFunctionMetaData()
+				.getManagedObjectMetaData();
+		assertEquals("Should not have managed object meta-data as office scoped", 0, functionMoMetaData.length);
+		ManagedObjectIndex[] indexes = metaData.getManagedFunctionMetaData().getRequiredManagedObjects();
+		assertEquals("Incorrect number of require managed objects", 1, indexes.length);
+		assertSame("Incorrect required managed object index", moIndex, indexes[0]);
+	}
+
+	/**
+	 * Ensure issue if not able to obtain {@link ManagedObjectMetaData}.
+	 */
+	public void testNoManagedObjectMetaData() {
+
+		final RawBoundManagedObjectMetaData rawMoMetaData = this.createMock(RawBoundManagedObjectMetaData.class);
+		final RawBoundManagedObjectInstanceMetaData<?> rawMoInstanceMetaData = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
+
+		// Record single function bound managed object
+		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects("MO", rawMoMetaData);
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
+		this.record_NoAdministration();
+		this.record_NoGovernance();
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getDefaultInstanceIndex(), 2);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData[] { null, null, rawMoInstanceMetaData });
+		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData.getManagedObjectMetaData(), null);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getBoundManagedObjectName(), "MO");
+		this.record_functionIssue("No managed object meta-data for function managed object MO");
+
+		// Attempt to construct function meta-data
+		this.replayMockObjects();
+		this.constructRawFunctionMetaData(true);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure issue if no {@link Object} type.
 	 */
 	public void testNoObjectType() {
@@ -305,10 +448,12 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record no managed object name
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), null);
 		this.record_functionIssue("No type for object at index 0");
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -329,10 +474,12 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record parameter
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), parameterType);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), true);
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -370,12 +517,14 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record parameter used twice
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { paramConfigOne, paramConfigTwo });
 		this.recordReturn(paramConfigOne, paramConfigOne.getObjectType(), paramTypeOne);
 		this.recordReturn(paramConfigOne, paramConfigOne.isParameter(), true);
 		this.recordReturn(paramConfigTwo, paramConfigTwo.getObjectType(), paramTypeTwo);
 		this.recordReturn(paramConfigTwo, paramConfigTwo.isParameter(), true);
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -411,6 +560,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record parameters incompatible
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { paramConfigOne, paramConfigTwo });
 		this.recordReturn(paramConfigOne, paramConfigOne.getObjectType(), paramTypeOne);
@@ -419,6 +569,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(paramConfigTwo, paramConfigTwo.isParameter(), true);
 		this.record_functionIssue(
 				"Incompatible parameter types (" + paramTypeOne.getName() + ", " + paramTypeTwo.getName() + ")");
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -427,313 +578,112 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.constructRawFunctionMetaData(true);
 		this.verifyMockObjects();
 	}
-	
+
 	/**
-	 * Ensure able to construct {@link ManagedFunction} without {@link ManagedObject}
-	 * instances, {@link Administrator} instances or {@link ManagedFunction} instances.
+	 * Ensure can construct {@link ManagedFunction} with a single
+	 * {@link ManagedFunction} bound {@link Administrator}.
 	 */
-	@SuppressWarnings("unchecked")
-	public void testNoManagedObjectsAdministrators() {
-		fail("TODO implement");
-//
-//		// Record no managed objects or administrators
-//		this.record_workNameFactory();
-//		this.record_workBoundManagedObjects();
-//		this.record_workBoundAdministrators();
-//		this.record_tasks();
-//
-//		// Fully construct work
-//		this.replayMockObjects();
-//		RawWorkMetaData<W> metaData = this.fullyConstructRawWorkMetaData();
-//		this.verifyMockObjects();
-//		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
-//
-//		// Ensure no managed objects, administrators or tasks
-//		assertEquals("Should not have managed object meta-data", 0,
-//				workMetaData.getManagedObjectMetaData().length);
-//		assertEquals("Should not have administrator meta-data", 0,
-//				workMetaData.getAdministratorMetaData().length);
-//		assertEquals("Should not have tasks", 0,
-//				workMetaData.getTaskMetaData().length);
+	public void testSingleFunctionBoundAdministrator() {
+
+		final RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = this
+				.createMock(RawBoundAdministratorMetaData.class);
+		final AdministratorMetaData<?, ?> adminMetaData = this.createMock(AdministratorMetaData.class);
+
+		// Record single function bound managed object
+		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators("ADMIN", rawAdminMetaData);
+		this.record_NoAdministration();
+		this.record_NoGovernance();
+		this.recordReturn(rawAdminMetaData, rawAdminMetaData.getAdministratorMetaData(), adminMetaData);
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawManagedFunctionMetaData<O, F> rawMetaData = this.constructRawFunctionMetaData(true);
+		ManagedFunctionMetaData<O, F> metaData = rawMetaData.getManagedFunctionMetaData();
+		this.verifyMockObjects();
+
+		// Verify work meta-data
+		AdministratorMetaData<?, ?>[] workAdminMetaData = metaData.getAdministratorMetaData();
+		assertEquals("Should have a work bound administrator meta-data", 1, workAdminMetaData.length);
+		assertEquals("Incorrect administrator meta-data", adminMetaData, workAdminMetaData[0]);
 	}
 
 	/**
-	 * Ensure can construct {@link ManagedFunction} with a single {@link ManagedFunction} bound
-	 * {@link ManagedObject}.
+	 * Ensure can construct {@link ManagedFunction} with a single {@link Office}
+	 * scoped {@link Administrator}.
 	 */
-	@SuppressWarnings("unchecked")
-	public void testSingleWorkBoundManagedObject() {
-		fail("TODO implement");
-//
-//		final RawBoundManagedObjectMetaData rawMoMetaData = this
-//				.createMock(RawBoundManagedObjectMetaData.class);
-//		final RawBoundManagedObjectInstanceMetaData<?> rawMoInstanceMetaData = this
-//				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-//		final ManagedObjectMetaData<?> moMetaData = this
-//				.createMock(ManagedObjectMetaData.class);
-//
-//		// Task to use the work bound managed object
-//		RecordedTask task = new RecordedTask("TASK", new TaskConstruction() {
-//			@Override
-//			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
-//					OfficeFloorIssues issues) {
-//				assertEquals("Incorrect scope mo", rawMoMetaData,
-//						rawWorkMetaData.getScopeManagedObjectMetaData("MO"));
-//			}
-//		});
-//
-//		// Record single work bound managed object
-//		this.record_workNameFactory();
-//		this.record_workBoundManagedObjects("MO", rawMoMetaData);
-//		this.record_workBoundAdministrators();
-//		this.recordReturn(rawMoMetaData,
-//				rawMoMetaData.getDefaultInstanceIndex(), 0);
-//		this.recordReturn(
-//				rawMoMetaData,
-//				rawMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
-//				new RawBoundManagedObjectInstanceMetaData[] { rawMoInstanceMetaData });
-//		this.recordReturn(rawMoInstanceMetaData,
-//				rawMoInstanceMetaData.getManagedObjectMetaData(), moMetaData);
-//		this.record_tasks(task);
-//
-//		// Construct work with task managed object
-//		this.replayMockObjects();
-//		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
-//		this.verifyMockObjects();
-//		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
-//
-//		// Verify work meta-data
-//		ManagedObjectMetaData<?>[] workMoMetaData = workMetaData
-//				.getManagedObjectMetaData();
-//		assertEquals("Should have a work bound managed object meta-data", 1,
-//				workMoMetaData.length);
-//		assertEquals("Incorrect managed object meta-data", moMetaData,
-//				workMoMetaData[0]);
-	}
-
-	/**
-	 * Ensure can construct {@link ManagedFunction} with a {@link Office} scoped
-	 * {@link ManagedObject}.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testSingleOfficeScopedManagedObject() {
-		fail("TODO implement");
-//
-//		final RawBoundManagedObjectMetaData rawMoMetaData = this
-//				.createMock(RawBoundManagedObjectMetaData.class);
-//		this.officeScopeManagedObjects.put("MO", rawMoMetaData);
-//
-//		// Task to use the work bound managed object
-//		RecordedTask task = new RecordedTask("TASK", new TaskConstruction() {
-//			@Override
-//			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
-//					OfficeFloorIssues issues) {
-//				assertEquals("Incorrect scope mo", rawMoMetaData,
-//						rawWorkMetaData.getScopeManagedObjectMetaData("MO"));
-//			}
-//		});
-//
-//		// Record work linked managed object
-//		this.record_workNameFactory();
-//		this.record_workBoundManagedObjects();
-//		this.record_workBoundAdministrators();
-//		this.record_tasks(task);
-//
-//		// Construct work with task managed object
-//		this.replayMockObjects();
-//		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
-//		this.verifyMockObjects();
-//		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
-//
-//		// Verify work meta-data
-//		ManagedObjectMetaData<?>[] workMoMetaData = workMetaData
-//				.getManagedObjectMetaData();
-//		assertEquals(
-//				"Should not have managed object meta-data as office scoped", 0,
-//				workMoMetaData.length);
-	}
-
-	/**
-	 * Ensure issue if not able to obtain {@link ManagedObjectMetaData}.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testNoManagedObjectMetaData() {
-		fail("TODO implement");
-//
-//		final RawBoundManagedObjectMetaData rawMoMetaData = this
-//				.createMock(RawBoundManagedObjectMetaData.class);
-//		final RawBoundManagedObjectInstanceMetaData<?> rawMoInstanceMetaData = this
-//				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-//
-//		// Record no managed object meta-data (has multiple instances)
-//		this.record_workNameFactory();
-//		this.record_workBoundManagedObjects("MO", rawMoMetaData);
-//		this.record_workBoundAdministrators();
-//		this.record_tasks();
-//		this.recordReturn(rawMoMetaData,
-//				rawMoMetaData.getDefaultInstanceIndex(), 2);
-//		this.recordReturn(rawMoMetaData,
-//				rawMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
-//				new RawBoundManagedObjectInstanceMetaData[] { null, null,
-//						rawMoInstanceMetaData });
-//		this.recordReturn(rawMoInstanceMetaData,
-//				rawMoInstanceMetaData.getManagedObjectMetaData(), null);
-//		this.recordReturn(rawMoMetaData,
-//				rawMoMetaData.getBoundManagedObjectName(), "MO");
-//		this.record_workIssue("No managed object meta-data for work managed object MO");
-//
-//		// Construct work
-//		this.replayMockObjects();
-//		this.fullyConstructRawWorkMetaData();
-//		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure handle no {@link ManagedFunction} scoped {@link ManagedObject}.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testNoTaskScopedManagedObject() {
-		fail("TODO implement");
-//
-//		// Task to attempting to obtain non task scoped managed object
-//		RecordedTask task = new RecordedTask("TASK", new TaskConstruction() {
-//			@Override
-//			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
-//					OfficeFloorIssues issues) {
-//				assertNull("Should not get raw work managed object meta-data",
-//						rawWorkMetaData.getScopeManagedObjectMetaData("MO"));
-//			}
-//		});
-//
-//		// Record no task scoped managed object
-//		this.record_workNameFactory();
-//		this.record_workBoundManagedObjects();
-//		this.record_workBoundAdministrators();
-//		this.record_tasks(task);
-//
-//		// Construct work
-//		this.replayMockObjects();
-//		this.fullyConstructRawWorkMetaData();
-//		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure can construct {@link ManagedFunction} with a single {@link ManagedFunction} bound
-	 * {@link Administrator}.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testSingleWorkBoundAdministrator() {
-		fail("TODO implement");
-//
-//		final RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = this
-//				.createMock(RawBoundAdministratorMetaData.class);
-//		final AdministratorMetaData<?, ?> adminMetaData = this
-//				.createMock(AdministratorMetaData.class);
-//
-//		// Task to use the work bound administrator
-//		RecordedTask task = new RecordedTask("TASK", new TaskConstruction() {
-//			@Override
-//			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
-//					OfficeFloorIssues issues) {
-//				assertEquals("Incorrect administrator", rawAdminMetaData,
-//						rawWorkMetaData.getScopeAdministratorMetaData("ADMIN"));
-//			}
-//		});
-//
-//		// Record single work bound administrator
-//		this.record_workNameFactory();
-//		this.record_workBoundManagedObjects();
-//		this.record_workBoundAdministrators("ADMIN", rawAdminMetaData);
-//		this.recordReturn(rawAdminMetaData,
-//				rawAdminMetaData.getAdministratorMetaData(), adminMetaData);
-//		this.record_tasks(task);
-//
-//		// Construct work with task managed object
-//		this.replayMockObjects();
-//		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
-//		this.verifyMockObjects();
-//		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
-//
-//		// Verify work meta-data
-//		AdministratorMetaData<?, ?>[] workAdminMetaData = workMetaData
-//				.getAdministratorMetaData();
-//		assertEquals("Should have a work bound administrator meta-data", 1,
-//				workAdminMetaData.length);
-//		assertEquals("Incorrect administrator meta-data", adminMetaData,
-//				workAdminMetaData[0]);
-	}
-
-	/**
-	 * Ensure can construct {@link ManagedFunction} with a single {@link Office} scoped
-	 * {@link Administrator}.
-	 */
-	@SuppressWarnings("unchecked")
 	public void testSingleOfficeScopeAdministrator() {
-		fail("TODO implement");
-//
-//		final RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = this
-//				.createMock(RawBoundAdministratorMetaData.class);
-//		this.officeScopeAdministrators.put("ADMIN", rawAdminMetaData);
-//
-//		// Task to use the work bound administrator
-//		RecordedTask task = new RecordedTask("TASK", new TaskConstruction() {
-//			@Override
-//			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
-//					OfficeFloorIssues issues) {
-//				assertEquals("Incorrect administrator", rawAdminMetaData,
-//						rawWorkMetaData.getScopeAdministratorMetaData("ADMIN"));
-//			}
-//		});
-//
-//		// Record work linked administrator
-//		this.record_workNameFactory();
-//		this.record_workBoundManagedObjects();
-//		this.record_workBoundAdministrators();
-//		this.record_tasks(task);
-//
-//		// Construct work with task administrator
-//		this.replayMockObjects();
-//		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
-//		this.verifyMockObjects();
-//		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
-//
-//		// Verify work meta-data
-//		AdministratorMetaData<?, ?>[] workAdminMetaData = workMetaData
-//				.getAdministratorMetaData();
-//		assertEquals(
-//				"Should not have administrator meta-data as office scoped", 0,
-//				workAdminMetaData.length);
+
+		final RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = this
+				.createMock(RawBoundAdministratorMetaData.class);
+		this.officeScopeAdministrators.put("ADMIN", rawAdminMetaData);
+
+		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
+				.createMock(ManagedFunctionDutyConfiguration.class);
+		final AdministratorIndex adminIndex = this.createMock(AdministratorIndex.class);
+		final net.officefloor.frame.spi.administration.DutyKey<?> dutyKey = this
+				.createMock(net.officefloor.frame.spi.administration.DutyKey.class);
+
+		// Record single function bound managed object
+		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
+		this.recordReturn(this.configuration, this.configuration.getPreFunctionAdministratorDutyConfiguration(),
+				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
+		this.recordReturn(dutyConfiguration, dutyConfiguration.getScopeAdministratorName(), "ADMIN");
+		this.recordReturn(rawAdminMetaData, rawAdminMetaData.getAdministratorIndex(), adminIndex);
+		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyKey(), DutyKey.KEY);
+		this.recordReturn(rawAdminMetaData, rawAdminMetaData.getDutyKey(DutyKey.KEY), dutyKey);
+		this.recordReturn(rawAdminMetaData, rawAdminMetaData.getAdministeredRawBoundManagedObjects(),
+				new RawBoundManagedObjectMetaData[0]);
+		this.recordReturn(this.configuration, this.configuration.getPostFunctionAdministratorDutyConfiguration(),
+				new ManagedFunctionDutyConfiguration[0]);
+		this.record_NoGovernance();
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawManagedFunctionMetaData<O, F> rawMetaData = this.constructRawFunctionMetaData(true);
+		ManagedFunctionMetaData<O, F> metaData = rawMetaData.getManagedFunctionMetaData();
+		this.verifyMockObjects();
+
+		// Verify work meta-data
+		AdministratorMetaData<?, ?>[] functionAdminMetaData = metaData.getAdministratorMetaData();
+		assertEquals("Should not have administrator meta-data as office scoped", 0, functionAdminMetaData.length);
+		ManagedFunctionDutyAssociation<?>[] dutyAssociations = metaData.getPreAdministrationMetaData();
+		assertEquals("Should have pre function duty association", 1, dutyAssociations.length);
+		assertEquals("Incorrect admin index for duty", adminIndex, dutyAssociations[0].getAdministratorIndex());
+		assertEquals("Incorrect duty key for duty", dutyKey, dutyAssociations[0].getDutyKey());
 	}
 
 	/**
-	 * Ensure issue if no task scoped {@link Administrator}.
+	 * Ensure issue if no function scoped {@link Administrator}.
 	 */
-	@SuppressWarnings("unchecked")
-	public void testNoTaskScopedAdministrator() {
-		fail("TODO implement");
-//
-//		// Task to attempting to obtain non task scoped administrator
-//		RecordedTask task = new RecordedTask("TASK", new TaskConstruction() {
-//			@Override
-//			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
-//					OfficeFloorIssues issues) {
-//				assertNull("Should not get work administrator index",
-//						rawWorkMetaData.getScopeAdministratorMetaData("ADMIN"));
-//			}
-//		});
-//
-//		// Record no task scoped administrator
-//		this.record_workNameFactory();
-//		this.record_workBoundManagedObjects();
-//		this.record_workBoundAdministrators();
-//		this.record_tasks(task);
-//
-//		// Construct work
-//		this.replayMockObjects();
-//		this.fullyConstructRawWorkMetaData();
-//		this.verifyMockObjects();
-	}
+	public void testNoFunctionScopedAdministrator() {
 
+		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
+				.createMock(ManagedFunctionDutyConfiguration.class);
+
+		// Record no task scoped administrator
+		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
+		this.recordReturn(this.configuration, this.configuration.getPreFunctionAdministratorDutyConfiguration(),
+				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
+		this.recordReturn(dutyConfiguration, dutyConfiguration.getScopeAdministratorName(), "ADMIN");
+		this.record_functionIssue("Can not find scope Administrator 'ADMIN'");
+		this.recordReturn(this.configuration, this.configuration.getPostFunctionAdministratorDutyConfiguration(),
+				new ManagedFunctionDutyConfiguration[0]);
+		this.record_NoGovernance();
+
+		// Construct work
+		this.replayMockObjects();
+		this.constructRawFunctionMetaData(true);
+		this.verifyMockObjects();
+	}
 
 	/**
 	 * Ensure can handle {@link ManagedObject} not configured for dependency.
@@ -742,9 +692,11 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record null managed object configuration
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { null });
 		this.record_functionIssue("No object configuration at index 0");
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -764,12 +716,14 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record no managed object name
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), Object.class);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
 		this.recordReturn(moConfiguration, moConfiguration.getScopeManagedObjectName(), null);
-		this.record_functionIssue("No name for managed object at index 0");
+		this.record_functionIssue("No name for ManagedObject at index 0");
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -789,12 +743,14 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record unknown managed object
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), Object.class);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
 		this.recordReturn(moConfiguration, moConfiguration.getScopeManagedObjectName(), "MO");
 		this.record_functionIssue("Can not find scope managed object 'MO'");
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -814,27 +770,31 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testIncompatibleManagedObject() {
 
+		final RawBoundManagedObjectMetaData rawBoundMo = this.createMock(RawBoundManagedObjectMetaData.class);
+		this.officeScopeManagedObjects.put("MO", rawBoundMo);
+
 		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
 				.createMock(ManagedFunctionObjectConfiguration.class);
-		final RawBoundManagedObjectMetaData rawWorkMo = this.createMock(RawBoundManagedObjectMetaData.class);
 		final RawBoundManagedObjectInstanceMetaData<?> rawWorkMoInstance = this
 				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 		final RawManagedObjectMetaData<?, ?> rawMo = this.createMock(RawManagedObjectMetaData.class);
 
 		// Record incompatible managed object type
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), Connection.class);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
 		this.recordReturn(moConfiguration, moConfiguration.getScopeManagedObjectName(), "MO");
-		this.record_singleInstance_getRawManagedObjectMetaData(rawWorkMo, rawWorkMoInstance, rawMo);
+		this.record_singleInstance_getRawManagedObjectMetaData(rawBoundMo, rawWorkMoInstance, rawMo);
 		this.recordReturn(rawMo, rawMo.getObjectType(), Integer.class);
 		this.recordReturn(rawWorkMoInstance, rawWorkMoInstance.getRawManagedObjectMetaData(), rawMo);
 		this.recordReturn(rawMo, rawMo.getManagedObjectName(), "MANAGED_OBJECT_SOURCE");
-		this.record_functionIssue("Managed object MO is incompatible (require=" + Connection.class.getName()
-				+ ", object of managed object type=" + Integer.class.getName()
+		this.record_functionIssue("ManagedObject MO is incompatible (require=" + Connection.class.getName()
+				+ ", object of ManagedObject type=" + Integer.class.getName()
 				+ ", ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 
@@ -863,9 +823,11 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 		final RawManagedObjectMetaData<?, ?> mo = this.createMock(RawManagedObjectMetaData.class);
 		final ManagedObjectIndex moIndex = new ManagedObjectIndexImpl(ManagedObjectScope.THREAD, 0);
+		final ManagedObjectMetaData<?> moMetaData = this.createMock(ManagedObjectMetaData.class);
 
 		// Record
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects("MO", rawMo);
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), Object.class);
@@ -875,10 +837,14 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(mo, mo.getObjectType(), Connection.class);
 		LoadDependencies moLinked = new LoadDependencies(rawMo, moIndex, rawMoInstance);
 		this.record_loadDependencies(moLinked);
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
-		// Record dependency sorting
 		this.record_dependencySortingForCoordination(moLinked);
 		this.record_NoGovernance();
+		this.recordReturn(rawMo, rawMo.getDefaultInstanceIndex(), 0);
+		this.recordReturn(rawMo, rawMo.getRawBoundManagedObjectInstanceMetaData(),
+				new RawBoundManagedObjectInstanceMetaData<?>[] { rawMoInstance });
+		this.recordReturn(rawMoInstance, rawMoInstance.getManagedObjectMetaData(), moMetaData);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -891,7 +857,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		assertEquals("Incorrect required managed object", moIndex, requiredManagedObjects[0]);
 
 		// Ensure can translate
-		assertEquals("Incorrect task managed object", moIndex,
+		assertEquals("Incorrect function managed object", moIndex,
 				metaData.getManagedFunctionMetaData().getManagedObject(0));
 	}
 
@@ -901,11 +867,13 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testManagedObjectDependencyOrdering() {
 
+		final RawBoundManagedObjectMetaData rawFunctionMo = this.createMock(RawBoundManagedObjectMetaData.class);
+		this.officeScopeManagedObjects.put("MO", rawFunctionMo);
+
 		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
 				.createMock(ManagedFunctionObjectConfiguration.class);
 
 		// Function required Managed Object
-		final RawBoundManagedObjectMetaData rawFunctionMo = this.createMock(RawBoundManagedObjectMetaData.class);
 		final RawBoundManagedObjectInstanceMetaData<?> rawFunctionMoInstance = this
 				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 		final RawManagedObjectMetaData<?, ?> functionMo = this.createMock(RawManagedObjectMetaData.class);
@@ -925,6 +893,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), Object.class);
@@ -940,8 +909,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		LoadDependencies workLinked = new LoadDependencies(rawFunctionMo, functionMoIndex, rawFunctionMoInstance,
 				dependencyLinked);
 		this.record_loadDependencies(workLinked);
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
-		// Record dependency sorting
 		this.record_dependencySortingForCoordination(workLinked, dependencyLinked, dependencyDependencyLinked);
 		this.record_NoGovernance();
 
@@ -968,9 +937,11 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testManagedObjectCyclicDependency() {
 
+		final RawBoundManagedObjectMetaData rawMoA = this.createMock(RawBoundManagedObjectMetaData.class);
+		this.officeScopeManagedObjects.put("MO", rawMoA);
+
 		final ManagedFunctionObjectConfiguration<?> moConfiguration = this
 				.createMock(ManagedFunctionObjectConfiguration.class);
-		final RawBoundManagedObjectMetaData rawMoA = this.createMock(RawBoundManagedObjectMetaData.class);
 		final RawBoundManagedObjectInstanceMetaData<?> rawMoAInstance = this
 				.createMock(RawBoundManagedObjectInstanceMetaData.class);
 		final RawManagedObjectMetaData<?, ?> moA = this.createMock(RawManagedObjectMetaData.class);
@@ -982,6 +953,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record
 		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), Object.class);
@@ -994,6 +966,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		LoadDependencies bLinked = new LoadDependencies(rawMoB, bIndex, rawMoBInstance, aLinked);
 		aLinked.dependencies[0] = bLinked; // create cycle
 		this.record_loadDependencies(aLinked);
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		// Record dependency sorting
 		this.record_dependencySortingForCoordination(aLinked, bLinked);
@@ -1018,11 +991,13 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record no administrator name
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.recordReturn(this.configuration, this.configuration.getPreFunctionAdministratorDutyConfiguration(),
 				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getScopeAdministratorName(), null);
-		this.record_functionIssue("No administrator name for pre-function at index 0");
+		this.record_functionIssue("No Administrator name for pre-function at index 0");
 		this.recordReturn(this.configuration, this.configuration.getPostFunctionAdministratorDutyConfiguration(),
 				new ManagedFunctionDutyConfiguration[0]);
 		this.record_NoGovernance();
@@ -1047,11 +1022,13 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record unknown administrator
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.recordReturn(this.configuration, this.configuration.getPreFunctionAdministratorDutyConfiguration(),
 				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getScopeAdministratorName(), "ADMIN");
-		this.record_functionIssue("Can not find scope administrator 'ADMIN'");
+		this.record_functionIssue("Can not find scope Administrator 'ADMIN'");
 		this.recordReturn(this.configuration, this.configuration.getPostFunctionAdministratorDutyConfiguration(),
 				new ManagedFunctionDutyConfiguration[0]);
 		this.record_NoGovernance();
@@ -1071,21 +1048,25 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testNoDutyName() {
 
+		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this.createMock(RawBoundAdministratorMetaData.class);
+		this.officeScopeAdministrators.put("ADMIN", rawAdmin);
+
 		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
 				.createMock(ManagedFunctionDutyConfiguration.class);
-		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this.createMock(RawBoundAdministratorMetaData.class);
 		final AdministratorIndex adminIndex = this.createMock(AdministratorIndex.class);
 
 		// Record no duty key
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.recordReturn(this.configuration, this.configuration.getPreFunctionAdministratorDutyConfiguration(),
 				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getScopeAdministratorName(), "ADMIN");
 		this.recordReturn(rawAdmin, rawAdmin.getAdministratorIndex(), adminIndex);
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyKey(), null);
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getDutyName(), null);
-		this.record_functionIssue("No duty name/key for pre-task at index 0");
+		this.record_functionIssue("No Duty name/key for pre-ManagedFunction at index 0");
 		this.recordReturn(this.configuration, this.configuration.getPostFunctionAdministratorDutyConfiguration(),
 				new ManagedFunctionDutyConfiguration[0]);
 		this.record_NoGovernance();
@@ -1105,9 +1086,11 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testConstructPreAdministratorDuty() {
 
+		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this.createMock(RawBoundAdministratorMetaData.class);
+		this.officeScopeAdministrators.put("ADMIN", rawAdmin);
+
 		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
 				.createMock(ManagedFunctionDutyConfiguration.class);
-		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this.createMock(RawBoundAdministratorMetaData.class);
 		final AdministratorIndex adminIndex = this.createMock(AdministratorIndex.class);
 		final RawBoundManagedObjectMetaData rawMo = this.createMock(RawBoundManagedObjectMetaData.class);
 		final RawBoundManagedObjectInstanceMetaData<?> rawMoInstance = this
@@ -1117,7 +1100,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct task duty association
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.recordReturn(this.configuration, this.configuration.getPreFunctionAdministratorDutyConfiguration(),
 				new ManagedFunctionDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getScopeAdministratorName(), "ADMIN");
@@ -1156,11 +1141,13 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 * Ensures that dependency of administered {@link ManagedObject} is also
 	 * included in required {@link ManagedObjectIndex} instances.
 	 */
-	public void testPostTaskDutyWithAdministeredManagedObjectDependency() {
+	public void testPostFunctionDutyWithAdministeredManagedObjectDependency() {
+
+		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this.createMock(RawBoundAdministratorMetaData.class);
+		this.officeScopeAdministrators.put("ADMIN", rawAdmin);
 
 		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
 				.createMock(ManagedFunctionDutyConfiguration.class);
-		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this.createMock(RawBoundAdministratorMetaData.class);
 		final AdministratorIndex adminIndex = this.createMock(AdministratorIndex.class);
 		final RawBoundManagedObjectMetaData rawMo = this.createMock(RawBoundManagedObjectMetaData.class);
 		final RawBoundManagedObjectInstanceMetaData<?> rawMoInstance = this
@@ -1174,7 +1161,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct task duty association
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.recordReturn(this.configuration, this.configuration.getPreFunctionAdministratorDutyConfiguration(),
 				new ManagedFunctionDutyConfiguration[0]);
 		this.recordReturn(this.configuration, this.configuration.getPostFunctionAdministratorDutyConfiguration(),
@@ -1214,14 +1203,16 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	/**
 	 * Ensure issue if no {@link Flow} {@link ManagedFunctionReference}.
 	 */
-	public void testNoFlowTaskNodeReference() {
+	public void testNoFlowFunctionReference() {
 
 		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
 				.createMock(ManagedFunctionFlowConfiguration.class);
 
 		// Record no task node reference
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
@@ -1240,7 +1231,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	/**
 	 * Ensure issue if no {@link Flow} {@link ManagedFunction} name.
 	 */
-	public void testNoFlowTaskName() {
+	public void testNoFlowFunctionName() {
 
 		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
 				.createMock(ManagedFunctionFlowConfiguration.class);
@@ -1248,7 +1239,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record no task name
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
@@ -1277,7 +1270,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record unknown work
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
@@ -1287,35 +1282,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("IGNORED TASK NAME"),
 				null);
 		this.record_functionIssue("Can not find function meta-data IGNORED TASK NAME for flow index 0");
-		this.record_NoNextFunction();
-		this.record_NoEscalations();
-
-		// Fully construct task meta-data
-		this.replayMockObjects();
-		this.fullyConstructRawTaskMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if unknown {@link Flow} {@link ManagedFunction}.
-	 */
-	public void testUnknownFlowTask() {
-
-		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
-				.createMock(ManagedFunctionFlowConfiguration.class);
-		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
-
-		// Record unknown task
-		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
-		this.record_NoAdministration();
-		this.record_NoGovernance();
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "TASK");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), null);
-		this.record_functionIssue("Can not find task meta-data (work=WORK, task=TASK) for flow index 0");
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
 
@@ -1337,7 +1303,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record incompatible flow argument
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
@@ -1387,7 +1355,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct flow
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
@@ -1416,13 +1386,15 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	/**
 	 * Ensure issue if no next {@link ManagedFunction} name.
 	 */
-	public void testNoNextTaskName() {
+	public void testNoNextFunctionName() {
 
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 
 		// Record no next task name
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
@@ -1447,7 +1419,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct next task (which is on another work)
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
@@ -1457,8 +1431,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				nextTaskMetaData);
 		this.recordReturn(taskNodeReference, taskNodeReference.getArgumentType(), Integer.class);
 		this.recordReturn(nextTaskMetaData, nextTaskMetaData.getParameterType(), Connection.class);
-		this.record_functionIssue("Argument is not compatible with task parameter (argument=" + Integer.class.getName()
-				+ ", parameter=" + Connection.class.getName() + ", work=ANOTHER_WORK, task=NEXT_TASK) for next task");
+		this.record_functionIssue(
+				"Argument is not compatible with function parameter (argument=" + Integer.class.getName()
+						+ ", parameter=" + Connection.class.getName() + ", function=NEXT_TASK) for next function");
 		this.record_NoEscalations();
 
 		// Fully construct task meta-data
@@ -1477,7 +1452,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct next task (which is on another work)
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
@@ -1509,7 +1486,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record no escalation type
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
@@ -1529,14 +1508,16 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 * Ensure issue if no {@link ManagedFunctionReference} for
 	 * {@link EscalationFlow}.
 	 */
-	public void testNoEscalationTaskNodeReference() {
+	public void testNoEscalationFunctionReference() {
 
 		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
 				.createMock(ManagedFunctionEscalationConfiguration.class);
 
 		// Record no task referenced
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
@@ -1545,7 +1526,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTaskNodeReference(), null);
-		this.record_functionIssue("No task referenced for escalation index 0");
+		this.record_functionIssue("No function referenced for escalation index 0");
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1557,7 +1538,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 * Ensure issue if no {@link ManagedFunction} name for
 	 * {@link EscalationFlow}.
 	 */
-	public void testNoEscalationTaskName() {
+	public void testNoEscalationFunctionName() {
 
 		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
 				.createMock(ManagedFunctionEscalationConfiguration.class);
@@ -1565,7 +1546,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record no escalation task name
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
@@ -1595,7 +1578,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct escalation
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
@@ -1609,9 +1594,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				escalationTaskMetaData);
 		this.recordReturn(taskNodeReference, taskNodeReference.getArgumentType(), NullPointerException.class);
 		this.recordReturn(escalationTaskMetaData, escalationTaskMetaData.getParameterType(), Integer.class);
-		this.record_functionIssue("Argument is not compatible with task parameter (argument="
+		this.record_functionIssue("Argument is not compatible with function parameter (argument="
 				+ NullPointerException.class.getName() + ", parameter=" + Integer.class.getName()
-				+ ", work=WORK, task=ESCALATION_HANDLER) for escalation index 0");
+				+ ", function=ESCALATION_HANDLER) for escalation index 0");
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1631,7 +1616,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct escalation
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
@@ -1670,7 +1657,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct governance
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 
 		// Record configuring governance
@@ -1702,7 +1691,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct governance
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 
 		// Record configuring governance
@@ -1742,7 +1733,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct governance
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 
 		// Record configuring governance
@@ -1783,7 +1776,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct governance
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 
 		// Record configuring governance
@@ -1810,7 +1805,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Record construct governance
 		this.record_nameFactoryTeam();
-		this.record_NoManagedObjects();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_functionBoundAdministrators();
 		this.record_NoAdministration();
 
 		// Record configuring governance
@@ -1847,128 +1844,104 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	}
 
 	/**
-	 * Records no {@link ManagedObject} instances.
+	 * Records bounding {@link ManagedObject} instances to the
+	 * {@link ManagedFunction}.
+	 * 
+	 * @param nameMoPairs
+	 *            Name and {@link RawBoundManagedObjectMetaData} pairs.
 	 */
-	private void record_NoManagedObjects() {
+	private void record_functionBoundManagedObjects(Object... nameMoPairs) {
+
+		// Obtain the listing of work bound names and managed objects
+		int moCount = nameMoPairs.length / 2;
+		String[] boundMoNames = new String[moCount];
+		RawBoundManagedObjectMetaData[] workBoundMo = new RawBoundManagedObjectMetaData[moCount];
+		for (int i = 0; i < nameMoPairs.length; i += 2) {
+			int loadIndex = i / 2;
+			boundMoNames[loadIndex] = (String) nameMoPairs[i];
+			workBoundMo[loadIndex] = (RawBoundManagedObjectMetaData) nameMoPairs[i + 1];
+		}
+
+		// Record bounding managed objects to work
+		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getOfficeScopeManagedObjects(),
+				this.officeScopeManagedObjects);
+		ManagedObjectConfiguration<?>[] moConfiguration = new ManagedObjectConfiguration[moCount];
+		this.recordReturn(this.configuration, this.configuration.getManagedObjectConfiguration(), moConfiguration);
+		if (moConfiguration.length > 0) {
+			Map<String, RawManagedObjectMetaData<?, ?>> officeRegisteredManagedObjects = new HashMap<String, RawManagedObjectMetaData<?, ?>>(
+					0);
+			this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getManagedObjectMetaData(),
+					officeRegisteredManagedObjects);
+			Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData<?, ?>>();
+			this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getGovernanceMetaData(),
+					rawGovernanceMetaData);
+			this.recordReturn(this.rawBoundManagedObjectFactory,
+					this.rawBoundManagedObjectFactory.constructBoundManagedObjectMetaData(moConfiguration, this.issues,
+							ManagedObjectScope.FUNCTION, AssetType.FUNCTION, FUNCTION_NAME, this.assetManagerFactory,
+							officeRegisteredManagedObjects, this.officeScopeManagedObjects, null, null,
+							rawGovernanceMetaData),
+					workBoundMo);
+			for (int i = 0; i < moCount; i++) {
+				this.recordReturn(workBoundMo[i], workBoundMo[i].getBoundManagedObjectName(), boundMoNames[i]);
+			}
+		}
+	}
+
+	/**
+	 * Records no {@link ManagedObject} instances required.
+	 */
+	private void record_NoRequiredManagedObjects() {
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[0]);
 	}
 
 	/**
-	 * Records bounding {@link ManagedObject} instances to the {@link ManagedFunction}.
-	 * 
-	 * @param nameMoPairs
-	 *            Name and {@link RawBoundManagedObjectMetaData} pairs.
-	 */
-	private void record_workBoundManagedObjects(Object... nameMoPairs) {
-		fail("TODO implement");
-//
-//		// Obtain the listing of work bound names and managed objects
-//		int moCount = nameMoPairs.length / 2;
-//		String[] boundMoNames = new String[moCount];
-//		RawBoundManagedObjectMetaData[] workBoundMo = new RawBoundManagedObjectMetaData[moCount];
-//		for (int i = 0; i < nameMoPairs.length; i += 2) {
-//			int loadIndex = i / 2;
-//			boundMoNames[loadIndex] = (String) nameMoPairs[i];
-//			workBoundMo[loadIndex] = (RawBoundManagedObjectMetaData) nameMoPairs[i + 1];
-//		}
-//
-//		// Record bounding managed objects to work
-//		this.recordReturn(this.rawOfficeMetaData,
-//				this.rawOfficeMetaData.getOfficeScopeManagedObjects(),
-//				this.officeScopeManagedObjects);
-//		ManagedObjectConfiguration<?>[] moConfiguration = new ManagedObjectConfiguration[moCount];
-//		this.recordReturn(this.configuration,
-//				this.configuration.getManagedObjectConfiguration(),
-//				moConfiguration);
-//		if (moConfiguration.length > 0) {
-//			Map<String, RawManagedObjectMetaData<?, ?>> officeRegisteredManagedObjects = new HashMap<String, RawManagedObjectMetaData<?, ?>>(
-//					0);
-//			this.recordReturn(this.rawOfficeMetaData,
-//					this.rawOfficeMetaData.getManagedObjectMetaData(),
-//					officeRegisteredManagedObjects);
-//			Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaData = new HashMap<String, RawGovernanceMetaData<?, ?>>();
-//			this.recordReturn(this.rawOfficeMetaData,
-//					this.rawOfficeMetaData.getGovernanceMetaData(),
-//					rawGovernanceMetaData);
-//			this.recordReturn(this.rawBoundManagedObjectFactory,
-//					this.rawBoundManagedObjectFactory
-//							.constructBoundManagedObjectMetaData(
-//									moConfiguration, this.issues,
-//									ManagedObjectScope.WORK, AssetType.WORK,
-//									WORK_NAME, this.assetManagerFactory,
-//									officeRegisteredManagedObjects,
-//									this.officeScopeManagedObjects, null, null,
-//									rawGovernanceMetaData), workBoundMo);
-//			for (int i = 0; i < moCount; i++) {
-//				this.recordReturn(workBoundMo[i],
-//						workBoundMo[i].getBoundManagedObjectName(),
-//						boundMoNames[i]);
-//			}
-//		}
-	}
-
-	/**
-	 * Records bounding {@link Administrator} instances to the {@link ManagedFunction}.
+	 * Records bounding {@link Administrator} instances to the
+	 * {@link ManagedFunction}.
 	 * 
 	 * @param nameAdminPairs
 	 *            Name and {@link RawBoundAdministratorMetaData} pairs.
 	 */
-	private void record_workBoundAdministrators(Object... nameAdminPairs) {
-		fail("TODO implement");
-//
-//		// Obtain the listing of work bound names and administrators
-//		int adminCount = nameAdminPairs.length / 2;
-//		String[] boundAdminNames = new String[adminCount];
-//		RawBoundAdministratorMetaData<?, ?>[] workBoundAdmins = new RawBoundAdministratorMetaData[adminCount];
-//		for (int i = 0; i < nameAdminPairs.length; i += 2) {
-//			int loadIndex = i / 2;
-//			boundAdminNames[loadIndex] = (String) nameAdminPairs[i];
-//			workBoundAdmins[loadIndex] = (RawBoundAdministratorMetaData<?, ?>) nameAdminPairs[i + 1];
-//		}
-//
-//		// Record bounding administrators to work
-//		this.recordReturn(this.rawOfficeMetaData,
-//				this.rawOfficeMetaData.getOfficeScopeAdministrators(),
-//				this.officeScopeAdministrators);
-//		AdministratorConfiguration<?, ?>[] adminConfiguration = new AdministratorConfiguration[adminCount];
-//		this.recordReturn(this.configuration,
-//				this.configuration.getAdministratorConfiguration(),
-//				adminConfiguration);
-//		if (adminConfiguration.length > 0) {
-//			Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>(
-//					0);
-//			this.recordReturn(this.rawOfficeMetaData,
-//					this.rawOfficeMetaData.getTeams(), officeTeams);
-//			this.recordReturn(this.rawOfficeMetaData,
-//					this.rawOfficeMetaData.getContinueTeam(), this.continueTeam);
-//			this.recordReturn(this.rawBoundAdministratorFactory,
-//					this.rawBoundAdministratorFactory
-//							.constructRawBoundAdministratorMetaData(
-//									adminConfiguration, this.sourceContext,
-//									this.issues, AdministratorScope.WORK,
-//									AssetType.WORK, WORK_NAME, officeTeams,
-//									this.continueTeam, null), workBoundAdmins,
-//					new AbstractMatcher() {
-//						@Override
-//						public boolean matches(Object[] expected,
-//								Object[] actual) {
-//							// Ensure first arguments are as expected
-//							for (int i = 0; i < 6; i++) {
-//								assertEquals("Incorrect argument " + i,
-//										expected[i], actual[i]);
-//							}
-//							assertNotNull("Must have scope managed objects",
-//									actual[6]);
-//							return true; // matches if here
-//						}
-//					});
-//			for (int i = 0; i < adminCount; i++) {
-//				this.recordReturn(workBoundAdmins[i],
-//						workBoundAdmins[i].getBoundAdministratorName(),
-//						boundAdminNames[i]);
-//			}
-//		}
+	private void record_functionBoundAdministrators(Object... nameAdminPairs) {
+
+		// Obtain the listing of work bound names and administrators
+		int adminCount = nameAdminPairs.length / 2;
+		String[] boundAdminNames = new String[adminCount];
+		RawBoundAdministratorMetaData<?, ?>[] workBoundAdmins = new RawBoundAdministratorMetaData[adminCount];
+		for (int i = 0; i < nameAdminPairs.length; i += 2) {
+			int loadIndex = i / 2;
+			boundAdminNames[loadIndex] = (String) nameAdminPairs[i];
+			workBoundAdmins[loadIndex] = (RawBoundAdministratorMetaData<?, ?>) nameAdminPairs[i + 1];
+		}
+
+		// Record bounding administrators to work
+		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getOfficeScopeAdministrators(),
+				this.officeScopeAdministrators);
+		AdministratorConfiguration<?, ?>[] adminConfiguration = new AdministratorConfiguration[adminCount];
+		this.recordReturn(this.configuration, this.configuration.getAdministratorConfiguration(), adminConfiguration);
+		if (adminConfiguration.length > 0) {
+			Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>(0);
+			this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getTeams(), officeTeams);
+			this.recordReturn(this.rawBoundAdministratorFactory,
+					this.rawBoundAdministratorFactory.constructRawBoundAdministratorMetaData(adminConfiguration,
+							this.sourceContext, this.issues, AdministratorScope.FUNCTION, AssetType.FUNCTION,
+							FUNCTION_NAME, officeTeams, null, this.functionLoop),
+					workBoundAdmins, new AbstractMatcher() {
+						@Override
+						public boolean matches(Object[] expected, Object[] actual) {
+							// Ensure first arguments are as expected
+							for (int i = 0; i < 6; i++) {
+								assertEquals("Incorrect argument " + i, expected[i], actual[i]);
+							}
+							assertNotNull("Must have scope managed objects", actual[6]);
+							return true; // matches if here
+						}
+					});
+			for (int i = 0; i < adminCount; i++) {
+				this.recordReturn(workBoundAdmins[i], workBoundAdmins[i].getBoundAdministratorName(),
+						boundAdminNames[i]);
+			}
+		}
 	}
 
 	/**
@@ -2176,7 +2149,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		// Other functions expected to be constructed between these steps
 
 		// Link the functions and load remaining state to function meta-data
-		metaData.linkFunctions(this.inputFunctionLocator, this.issues);
+		metaData.linkFunctions(this.functionLocator, this.issues);
 
 		// Return the fully constructed meta-data
 		return metaData;
