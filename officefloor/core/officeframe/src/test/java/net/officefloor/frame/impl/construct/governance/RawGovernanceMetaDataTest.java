@@ -255,7 +255,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if no {@link ManagedFunction} for flow.
 	 */
-	public void testNoFlowTask() {
+	public void testNoFlowFunction() {
 
 		final GovernanceFlowConfiguration<?> flowConfiguration = this.createMock(GovernanceFlowConfiguration.class);
 		final ManagedFunctionReference taskNode = this.createMock(ManagedFunctionReference.class);
@@ -269,7 +269,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNode);
 		this.recordReturn(taskNode, taskNode.getFunctionName(), "TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), null);
-		this.record_issue("Can not find task meta-data (work=WORK, task=TASK) for flow index 0");
+		this.record_issue("Can not find function meta-data TASK for flow index 0");
 
 		// Record no escalations
 		this.record_escalations();
@@ -301,8 +301,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), taskMetaData);
 		this.recordReturn(taskNode, taskNode.getArgumentType(), String.class);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), Integer.class);
-		this.record_issue("Argument is not compatible with task parameter (argument=" + String.class.getName()
-				+ ", parameter=" + Integer.class.getName() + ", work=WORK, task=TASK) for flow index 0");
+		this.record_issue("Argument is not compatible with function parameter (argument=" + String.class.getName()
+				+ ", parameter=" + Integer.class.getName() + ", function=TASK) for flow index 0");
 
 		// Record no escalations
 		this.record_escalations();
@@ -344,7 +344,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		assertNotNull("Should have second flow", flowTwo);
 		assertEquals("Incorrect task meta-data for second flow", taskMetaDatas[1],
 				flowTwo.getInitialFunctionMetaData());
-		assertEquals("Should spawn thread for second flow", flowTwo.isSpawnThreadState());
+		assertTrue("Should spawn thread for second flow", flowTwo.isSpawnThreadState());
 
 		// Should not be a third flow
 		try {
@@ -405,7 +405,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue if no {@link ManagedFunction} for {@link Escalation}.
 	 */
-	public void testNoEscalationTask() {
+	public void testNoEscalationFunction() {
 
 		final GovernanceEscalationConfiguration escalation = this.createMock(GovernanceEscalationConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
@@ -420,7 +420,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(escalation, escalation.getTaskNodeReference(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), TASK_NAME);
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData(TASK_NAME), null);
-		this.record_issue("Can not find task meta-data " + TASK_NAME + " for escalation index 0");
+		this.record_issue("Can not find function meta-data " + TASK_NAME + " for escalation index 0");
 
 		// Attempt to construct governance
 		this.replayMockObjects();
@@ -452,7 +452,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 				taskMetaData);
 		this.recordReturn(taskNodeReference, taskNodeReference.getArgumentType(), SQLException.class);
 		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), RuntimeException.class);
-		this.record_issue("Argument is not compatible with task parameter (argument=" + SQLException.class.getName()
+		this.record_issue("Argument is not compatible with function parameter (argument=" + SQLException.class.getName()
 				+ ", parameter=" + RuntimeException.class.getName() + ", function=" + TASK_NAME
 				+ ") for escalation index 0");
 
