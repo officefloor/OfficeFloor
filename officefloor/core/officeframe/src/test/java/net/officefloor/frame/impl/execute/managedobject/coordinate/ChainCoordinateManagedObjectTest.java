@@ -85,7 +85,7 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 
 			// Provide the chained coordinating managed object
 			ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(identifier,
-					ChainCoordinatingManagedObjectSource.class);
+					ChainCoordinatingManagedObjectSource.class, null);
 			moBuilder.addProperty(ChainCoordinatingManagedObjectSource.PROPERTY_PREFIX, identifier);
 			moBuilder.setManagingOffice(officeName);
 			moBuilder.setTimeout(100000); // 100 seconds (large, not fail test)

@@ -161,7 +161,8 @@ public abstract class AbstractGovernanceStressTestCase extends AbstractOfficeCon
 		officeBuilder.addEscalation(Throwable.class, "handleException");
 
 		// Create and register the managed object
-		ManagedObjectBuilder<GovernanceScenario> mo = this.constructManagedObject("MO", MockManagedObjectSource.class);
+		ManagedObjectBuilder<GovernanceScenario> mo = this.constructManagedObject("MO", MockManagedObjectSource.class,
+				null);
 		mo.addProperty(MockManagedObjectSource.PROPERTY_MANAGED_GOVERNANCE, String.valueOf(isManagedGovernance));
 		mo.addProperty(MockManagedObjectSource.PROPERTY_MAX_INVOCATIONS, String.valueOf(OPERATION_COUNT));
 		mo.setTimeout(MAX_RUN_TIME * 1000 * 2);

@@ -15,19 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.managedobject.fail;
+package net.officefloor.frame.impl.execute.managedobject.escalation;
 
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Ensure failure if time out in sourcing the {@link ManagedObject}.
+ * Ensure failure if <code>null</code> {@link ManagedObject} was sourced.
  *
  * @author Daniel Sagenschneider
  */
-public class TimeoutSourcingManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class NullManagedObjectSourcedTest extends AbstractOfficeConstructTestCase {
 
-	public void testTimeoutSourcingOfManagedObject() {
+	public void testNullManagedObjectProvided() {
 		fail("TODO implement");
 	}
 

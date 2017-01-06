@@ -153,9 +153,8 @@ public class ProcessStateImpl implements ProcessState {
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
 			OfficeMetaData officeMetaData, FlowCallback callback, ThreadState callbackThreadState,
-			ProcessProfiler processProfiler, 
-			ManagedObject inputManagedObject, ManagedObjectMetaData<?> inputManagedObjectMetaData,
-			int inputManagedObjectIndex) {
+			ProcessProfiler processProfiler, ManagedObject inputManagedObject,
+			ManagedObjectMetaData<?> inputManagedObjectMetaData, int inputManagedObjectIndex) {
 		this.processMetaData = processMetaData;
 		this.processContextListeners = processContextListeners;
 		this.officeMetaData = officeMetaData;

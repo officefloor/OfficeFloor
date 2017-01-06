@@ -28,32 +28,6 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public class Promise {
 
 	/**
-	 * Continue with an array of {@link FunctionState} instances.
-	 * 
-	 * @param jobNodes
-	 *            Listing of {@link FunctionState} instances to continue with.
-	 * @return Next {@link FunctionState} to undertake all the
-	 *         {@link FunctionState} instances.
-	 */
-	public static FunctionState all(FunctionState... jobNodes) {
-
-		// Ensure have job nodes
-		if ((jobNodes == null) || (jobNodes.length == 0)) {
-			return null;
-		}
-
-		// Create the listing of continue job nodes
-		// (load in reverse order to execute in order)
-		FunctionState returnJobNode = null;
-		for (int i = jobNodes.length - 1; i >= 0; i--) {
-			returnJobNode = then(jobNodes[i], null);
-		}
-
-		// Return the head job node
-		return returnJobNode;
-	}
-
-	/**
 	 * <p>
 	 * Execute the {@link FunctionState} then the {@link FunctionState}.
 	 * <p>
@@ -63,21 +37,21 @@ public class Promise {
 	 * @param function
 	 *            {@link FunctionState} to execute it and its sequence of
 	 *            {@link FunctionState} instances. May be <code>null</code>.
-	 * @param thenJobNode
+	 * @param thenFunction
 	 *            {@link FunctionState} to then continue after the first input
 	 *            {@link FunctionState} sequence completes. May be
 	 *            <code>null</code>.
 	 * @return Next {@link FunctionState} to undertake the {@link FunctionState}
 	 *         sequence and then continue {@link FunctionState} sequence.
 	 */
-	public static FunctionState then(FunctionState function, FunctionState thenJobNode) {
+	public static FunctionState then(FunctionState function, FunctionState thenFunction) {
 		if (function == null) {
 			// No initial function, so just continue
-			return thenJobNode;
+			return thenFunction;
 
-		} else if (thenJobNode != null) {
+		} else if (thenFunction != null) {
 			// Create continue link
-			return new ThenFunction(function, thenJobNode);
+			return new ThenFunction(function, thenFunction);
 		}
 
 		// Only the initial function

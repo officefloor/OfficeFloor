@@ -81,4 +81,9 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 		return this.delegate.cancel();
 	}
 
+	@Override
+	public FunctionState handleEscalation(Throwable escalation) {
+		return this.delegate.handleEscalation(escalation);
+	}
+
 }

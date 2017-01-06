@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.flow;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
+import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
@@ -311,17 +312,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 	@Override
 	public FunctionState cancel() {
-
-		// Clean up the functions of this flow
-		FunctionState cleanUpFunctions = null;
-		FunctionState flowFunctions = this.activeFunctions.getHead();
-		while (flowFunctions != null) {
-			cleanUpFunctions = Promise.then(cleanUpFunctions, flowFunctions.cancel());
-			flowFunctions = flowFunctions.getNext();
-		}
-
-		// Return clean up of the flow
-		return cleanUpFunctions;
+		return LinkedListSetPromise.all(this.activeFunctions, (function) -> function.cancel());
 	}
 
 	@Override
@@ -335,10 +326,10 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			// Handle by flow completion
 			return Promise.then(cleanUpFunctions, this.completion.complete(escalation));
 
+		} else {
+			// Last flow, so handle by thread state
+			return Promise.then(cleanUpFunctions, this.threadState.handleEscalation(escalation));
 		}
-
-		// No flow completion, so handle by thread state
-		return Promise.then(cleanUpFunctions, this.threadState.handleEscalation(escalation));
 	}
 
 	@Override

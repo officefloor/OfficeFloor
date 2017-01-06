@@ -24,6 +24,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
+import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
@@ -319,15 +320,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	@Override
 	public FunctionState handleEscalation(Throwable escalation) {
 
-		// Clean up functions
-		FunctionState cleanUpFunctions = null;
-
 		// Cancel all flows
-		Flow flow = this.activeFlows.getHead();
-		while (flow != null) {
-			cleanUpFunctions = Promise.then(cleanUpFunctions, flow.cancel());
-			flow = flow.getNext();
-		}
+		FunctionState cleanUpFunctions = LinkedListSetPromise.all(this.activeFlows, (flow) -> flow.cancel());
 
 		// Handle based on escalation level
 		switch (this.escalationLevel) {
@@ -335,7 +329,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			EscalationFlow escalationFlow = this.threadMetaData.getOfficeEscalationProcedure()
 					.getEscalation(escalation);
 			if (escalationFlow != null) {
-				flow = this.createFlow(null);
+				Flow flow = this.createFlow(null);
 
 				// Next escalation will be flow completion
 				this.escalationLevel = EscalationLevel.FLOW_COMPLETION;
@@ -346,19 +340,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		case FLOW_COMPLETION:
 			// Outside normal handling, so clean up thread state
 
-			// Deactivate any active governance
+			// Disregard any active governance
 			for (int i = 0; i < this.governanceContainers.length; i++) {
 				GovernanceContainer<?> container = this.governanceContainers[i];
 				if ((container != null) && (container.isGovernanceActive())) {
 					cleanUpFunctions = Promise.then(cleanUpFunctions, container.disregardGovernance());
-				}
-			}
-
-			// Unload managed objects (some may not have been used)
-			for (int i = 0; i < this.managedObjectContainers.length; i++) {
-				ManagedObjectContainer container = this.managedObjectContainers[i];
-				if (container != null) {
-					cleanUpFunctions = Promise.then(cleanUpFunctions, container.unloadManagedObject());
 				}
 			}
 
@@ -372,7 +358,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		case OFFICE_FLOOR:
 			escalationFlow = this.threadMetaData.getOfficeFloorEscalation();
 			if (escalationFlow != null) {
-				flow = this.createFlow(null);
+				Flow flow = this.createFlow(null);
 
 				// Any further failure, log (not happen most applications)
 				this.escalationLevel = EscalationLevel.LOG;
@@ -397,13 +383,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			// Last flow, so thread state is now complete
 			FunctionState cleanUpFunctions = null;
 
-			// Disregard any active governance
+			// Enforce any active governance
 			for (int i = 0; i < this.governanceContainers.length; i++) {
 				GovernanceContainer<?> container = this.governanceContainers[i];
 				if ((container != null) && (container.isGovernanceActive())) {
-					FunctionState disregard = isCancel ? container.disregardGovernance()
-							: container.enforceGovernance();
-					cleanUpFunctions = Promise.then(cleanUpFunctions, disregard);
+					cleanUpFunctions = Promise.then(cleanUpFunctions, container.enforceGovernance());
 				}
 			}
 

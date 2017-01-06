@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.flow;
+package net.officefloor.frame.impl.execute.function;
 
 import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;

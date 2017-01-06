@@ -18,8 +18,8 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.execute.function.LinkedListSetFunctionState;
-import net.officefloor.frame.impl.execute.function.LinkedListSetFunctionState.Translate;
+import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
+import net.officefloor.frame.impl.execute.function.LinkedListSetPromise.Translate;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
@@ -29,7 +29,6 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
-import net.officefloor.frame.internal.structure.LinkedListSetItem;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -131,15 +130,8 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 
 	@Override
 	public FunctionState execute() throws Throwable {
-
-		// Copy the list of latches
-		LinkedListSetItem<AssetLatchImpl> head = this.latches.copyEntries();
-		if (head == null) {
-			return null; // no latches to check
-		}
-
 		// Undertake checks for each of the latches
-		return new LinkedListSetFunctionState<>(head, LATCH_TO_CHECK);
+		return LinkedListSetPromise.all(this.latches, LATCH_TO_CHECK);
 	}
 
 	/**
@@ -147,8 +139,8 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 	 */
 	private static final Translate<AssetLatchImpl> LATCH_TO_CHECK = new Translate<AssetLatchImpl>() {
 		@Override
-		public FunctionState translate(LinkedListSetItem<AssetLatchImpl> latch) {
-			return latch.getEntry().check();
+		public FunctionState translate(AssetLatchImpl latch) {
+			return latch.check();
 		}
 	};
 

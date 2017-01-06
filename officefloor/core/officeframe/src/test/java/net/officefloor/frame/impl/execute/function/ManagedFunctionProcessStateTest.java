@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.flow;
+package net.officefloor.frame.impl.execute.function;
 
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.execute.ManagedFunction;
@@ -31,7 +31,7 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
+public class ManagedFunctionProcessStateTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Validate {@link ProcessState} is passed between {@link ManagedFunction}

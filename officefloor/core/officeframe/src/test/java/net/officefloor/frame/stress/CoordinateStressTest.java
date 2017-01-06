@@ -94,7 +94,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 	 *            instances.
 	 */
 	private void doTest(Team team) throws Exception {
-		
+
 		fail("TODO handle timeout of stress test");
 
 		boolean isDebugging = false;
@@ -111,11 +111,11 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", team);
 
 		// Construct the direct use managed object
-		this.constructManagedObject("DIRECT_USE", DirectUseManagedObjectSource.class).setManagingOffice(officeName);
+		this.constructManagedObject("DIRECT_USE", DirectUseManagedObjectSource.class, officeName);
 
 		// Construct the dependency managed object
 		ManagedObjectBuilder<Indexed> dependencyBuilder = this.constructManagedObject("DEPENDENCY",
-				DependencyManagedObjectSource.class);
+				DependencyManagedObjectSource.class, null);
 		dependencyBuilder.setManagingOffice(officeName).setInputManagedObjectName("PROCESS_BOUND");
 		dependencyBuilder.setTimeout(MANAGED_OBJECT_WAIT_TIME);
 		this.constructTeam("of-DEPENDENCY.MO_TEAM", new OnePersonTeam("MO_TEAM", 100));

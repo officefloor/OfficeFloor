@@ -15,17 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.flow;
+package net.officefloor.frame.impl.execute.function;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.execute.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
@@ -191,7 +193,22 @@ public class DynamicFlowInvocationTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Mock {@link ManagedObject} for testing.
 	 */
-	public static class MaintainStateManagedObject implements ManagedObject {
+	public static class MaintainStateManagedObject extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			context.setObjectClass(Map.class);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this;
+		}
 
 		/*
 		 * ==================== ManagedObject ========================

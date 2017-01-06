@@ -15,19 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.managedobject.fail;
+package net.officefloor.frame.impl.execute.managedobject.escalation;
 
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Ensure propagate failure on timing out an {@link AsynchronousManagedObject}.
+ * Ensure failure if time out in sourcing the {@link ManagedObject}.
  *
  * @author Daniel Sagenschneider
  */
-public class TimeoutAsynchronousOperationTest extends AbstractOfficeConstructTestCase {
+public class TimeoutSourcingManagedObjectTest extends AbstractOfficeConstructTestCase {
 
-	public void testTimeoutAsynchronousOperation() {
+	public void testTimeoutSourcingOfManagedObject() {
 		fail("TODO implement");
 	}
 

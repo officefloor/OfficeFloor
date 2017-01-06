@@ -74,7 +74,7 @@ public class ManagedObjectSourceInstigateProcessTest extends AbstractOfficeConst
 
 		// Construct the managed object
 		ManagedObjectBuilder<InputManagedObjectSource.Flows> moBuilder = this.constructManagedObject("INPUT",
-				InputManagedObjectSource.class);
+				InputManagedObjectSource.class, null);
 
 		// Provide flow for input managed object
 		ManagingOfficeBuilder<InputManagedObjectSource.Flows> managingOfficeBuilder = moBuilder

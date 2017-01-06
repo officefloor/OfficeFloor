@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.stress;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
@@ -24,6 +25,8 @@ import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
@@ -281,12 +284,31 @@ public class AsynchronousOperationStressTest extends AbstractOfficeConstructTest
 	/**
 	 * Mock {@link AsynchronousManagedObject}.
 	 */
-	public class MockManagedObject implements AsynchronousManagedObject {
+	public class MockManagedObject extends AbstractManagedObjectSource<None, None>
+			implements AsynchronousManagedObject {
 
 		/**
 		 * {@link AsynchronousListener}.
 		 */
 		public AsynchronousListener listener;
+
+		/*
+		 * ================= ManagedObjectSource ======================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			context.setObjectClass(this.getClass());
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this;
+		}
 
 		/*
 		 * ================= AsynchronousManagedObject ======================

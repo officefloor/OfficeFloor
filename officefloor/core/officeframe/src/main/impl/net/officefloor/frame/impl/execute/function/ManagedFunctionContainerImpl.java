@@ -577,7 +577,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 						container.flow.createFunction(spawnFunctionLogic));
 
 			} else if (callback != null) {
-				// Have callback, so execute in parallel in own flow
+				// Have callback, so execute in parallel in new flow
 				Flow parallelFlow = container.flow.getThreadState().createFlow(completion);
 
 				// Create the function
@@ -767,37 +767,13 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	/**
 	 * {@link ManagedFunction} operation.
 	 */
-	private abstract class ManagedFunctionOperation extends AbstractLinkedListSetEntry<FunctionState, Flow>
-			implements FunctionState {
+	private abstract class ManagedFunctionOperation extends AbstractDelegateFunctionState {
 
-		@Override
-		public Flow getLinkedListSetOwner() {
-			return ManagedFunctionContainerImpl.this.getLinkedListSetOwner();
-		}
-
-		@Override
-		public TeamManagement getResponsibleTeam() {
-			return ManagedFunctionContainerImpl.this.getResponsibleTeam();
-		}
-
-		@Override
-		public ThreadState getThreadState() {
-			return ManagedFunctionContainerImpl.this.getThreadState();
-		}
-
-		@Override
-		public boolean isRequireThreadStateSafety() {
-			return ManagedFunctionContainerImpl.this.isRequireThreadStateSafety();
-		}
-
-		@Override
-		public FunctionState cancel() {
-			return ManagedFunctionContainerImpl.this.cancel();
-		}
-
-		@Override
-		public FunctionState handleEscalation(Throwable escalation) {
-			return ManagedFunctionContainerImpl.this.handleEscalation(escalation);
+		/**
+		 * Instantiate.
+		 */
+		public ManagedFunctionOperation() {
+			super(ManagedFunctionContainerImpl.this);
 		}
 	}
 

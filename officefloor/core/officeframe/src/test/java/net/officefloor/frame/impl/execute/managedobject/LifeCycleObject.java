@@ -118,7 +118,7 @@ public class LifeCycleObject implements ManagedObject {
 	 */
 	public LifeCycleObject(String managedObjectName, AbstractOfficeConstructTestCase testCase, boolean isPool) {
 		ManagedObjectBuilder<?> builder = testCase.constructManagedObject(managedObjectName,
-				new LifeCycleManagedObjectSource());
+				new LifeCycleManagedObjectSource(), testCase.getOfficeName());
 		if (isPool) {
 			builder.setManagedObjectPool(new LifeCyclePool());
 		}
