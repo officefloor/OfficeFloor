@@ -51,6 +51,8 @@ public class CleanupManagedObjectEscalationTest extends AbstractOfficeConstructT
 	 */
 	public void testHandleCleanupEscalation() throws Exception {
 
+		fail("TODO fix infinite loop");
+		
 		// Create the escalation
 		final Throwable escalation = new Throwable("TEST");
 
