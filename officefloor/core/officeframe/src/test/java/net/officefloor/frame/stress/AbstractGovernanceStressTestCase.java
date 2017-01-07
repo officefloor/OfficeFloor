@@ -543,7 +543,7 @@ public abstract class AbstractGovernanceStressTestCase extends AbstractOfficeCon
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
+		public void registerAsynchronousListener(AsynchronousListener listener) {
 			this.listener = listener;
 		}
 

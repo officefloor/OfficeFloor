@@ -27,6 +27,7 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionLogic;
+import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.OfficeClock;
@@ -160,14 +161,18 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 
 	@Override
 	public void releaseFunctions(boolean isPermanent) {
-		// Latch released, so proceed with job nodes
-		this.assetManager.getFunctionLoop().delegateFunction(new ReleaseOperation(isPermanent));
+		// Latch released, so proceed with functions
+		ReleaseOperation release = new ReleaseOperation(isPermanent);
+		FunctionLoop loop = this.assetManager.getFunctionLoop();
+		loop.delegateFunction(release);
 	}
 
 	@Override
 	public void failFunctions(Throwable failure, boolean isPermanent) {
-		// Latch failed, so fail the job nodes
-		this.assetManager.getFunctionLoop().delegateFunction(new FailOperation(failure, isPermanent));
+		// Latch failed, so fail the functions
+		FailOperation fail = new FailOperation(failure, isPermanent);
+		FunctionLoop loop = this.assetManager.getFunctionLoop();
+		loop.delegateFunction(fail);
 	}
 
 	/**
@@ -342,10 +347,6 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 			this.failure = failure;
 			this.isPermanent = isPermanent;
 		}
-
-		/*
-		 * ======================== JobNode ============================
-		 */
 
 		@Override
 		public ThreadState getThreadState() {

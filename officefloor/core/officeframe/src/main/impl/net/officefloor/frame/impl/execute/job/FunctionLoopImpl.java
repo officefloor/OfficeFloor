@@ -64,7 +64,8 @@ public class FunctionLoopImpl implements FunctionLoop {
 	@Override
 	public void executeFunction(FunctionState function) {
 		// Run on current thread (will swap to appropriate as necessary)
-		new UnsafeLoop(function, LOOP_TEAM).run();
+		UnsafeLoop loop = new UnsafeLoop(function, LOOP_TEAM);
+		loop.run();
 	}
 
 	@Override

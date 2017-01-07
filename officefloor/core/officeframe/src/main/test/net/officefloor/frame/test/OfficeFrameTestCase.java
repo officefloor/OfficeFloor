@@ -22,6 +22,7 @@ package net.officefloor.frame.test;
 
 import java.awt.GraphicsEnvironment;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -31,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -58,13 +60,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
-
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
+import java.util.logging.Handler;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
+import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 
 /**
  * {@link TestCase} providing additional helper functions.
@@ -1311,19 +1316,72 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Test logic interface.
+	 * 
+	 * @param <R>
+	 *            Return type.
+	 * @param <T>
+	 *            Possible {@link Throwable}.
+	 */
+	protected static interface TestLogic<R, T extends Throwable> {
+		R run() throws T;
+	}
+
+	/**
 	 * Undertakes test wrapping with mock object replay and verify.
 	 * 
-	 * @param <T>
+	 * @param <R>
 	 *            Return type of test logic.
+	 * @param <T>
+	 *            Possible {@link Throwable}.
 	 * @param test
-	 *            {@link Supplier} with test logic to wrap in replay/verify.
+	 *            Test logic to wrap in replay/verify.
 	 * @return Result of test logic.
 	 */
-	protected final <T> T doTest(Supplier<T> test) {
+	protected final <R, T extends Throwable> R doTest(TestLogic<R, T> test) throws T {
 		this.replayMockObjects();
-		T result = test.get();
+		R result = test.run();
 		this.verifyMockObjects();
 		return result;
+	}
+
+	/**
+	 * Test capture interface.
+	 * 
+	 * @param <T>
+	 *            Possible {@link Throwable}.
+	 */
+	protected static interface TestCapture<T extends Throwable> {
+		void run() throws T;
+	}
+
+	/**
+	 * Capture <code>std err</code> of test logic.
+	 * 
+	 * @param test
+	 *            Test logic to capture <code>std err</code>.
+	 * @return <code>std err</code> output.
+	 * @throws T
+	 *             Possible {@link Throwable}.
+	 */
+	protected final <T extends Throwable> String captureError(TestCapture<T> test) throws T {
+
+		ByteArrayOutputStream error = new ByteArrayOutputStream();
+		Handler handler = new StreamHandler(error, new SimpleFormatter());
+		PrintStream stdErr = System.err;
+		try {
+			System.setErr(new PrintStream(error));
+			OfficeFloorImpl.getFrameworkLogger().addHandler(handler);
+
+			// Undertake test
+			test.run();
+
+		} finally {
+			System.setErr(stdErr);
+			OfficeFloorImpl.getFrameworkLogger().removeHandler(handler);
+			handler.flush();
+		}
+		return new String(error.toByteArray());
 	}
 
 	/**

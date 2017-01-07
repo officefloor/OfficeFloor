@@ -18,13 +18,13 @@
 package net.officefloor.frame.impl.execute.managedobject.pool;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.impl.execute.managedobject.LifeCycleObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.TestManagedObject;
 
 /**
  * Ensures the {@link ManagedObject} goes through appropriate life-cycle.
@@ -66,7 +66,7 @@ public class ManagedObjectPoolLifecycleTest extends AbstractOfficeConstructTestC
 	public void doManagedObjectPooledLifeCycleTest(ManagedObjectScope scope) throws Exception {
 
 		// Construct the managed object
-		LifeCycleObject lifeCycle = new LifeCycleObject("MO", this, true);
+		TestManagedObject lifeCycle = new TestManagedObject("MO", this, true);
 
 		// Construct the functionality
 		TestWork work = new TestWork();
@@ -90,9 +90,9 @@ public class ManagedObjectPoolLifecycleTest extends AbstractOfficeConstructTestC
 
 		public boolean isTaskInvoked = false;
 
-		public LifeCycleObject lifeCycle = null;
+		public TestManagedObject lifeCycle = null;
 
-		public void task(LifeCycleObject lifeCycle) {
+		public void task(TestManagedObject lifeCycle) {
 			this.isTaskInvoked = true;
 			this.lifeCycle = lifeCycle;
 		}

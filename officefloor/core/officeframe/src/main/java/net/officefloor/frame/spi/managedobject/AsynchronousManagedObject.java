@@ -38,6 +38,6 @@ public interface AsynchronousManagedObject extends ManagedObject {
 	 * @param listener
 	 *            {@link AsynchronousListener}.
 	 */
-	void registerAsynchronousCompletionListener(AsynchronousListener listener);
+	void registerAsynchronousListener(AsynchronousListener listener);
 
 }

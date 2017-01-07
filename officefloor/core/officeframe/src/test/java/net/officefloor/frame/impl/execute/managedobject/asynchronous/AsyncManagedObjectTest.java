@@ -61,9 +61,6 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		// Obtain the office name
 		String officeName = this.getOfficeName();
 
-		// Flag not to monitor office
-		this.getOfficeBuilder().setMonitorOfficeInterval(0);
-
 		// Construct the managed object
 		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject("MO", TestManagedObjectSource.class,
 				officeName);
@@ -272,7 +269,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
+		public void registerAsynchronousListener(AsynchronousListener listener) {
 			this.listener = listener;
 		}
 

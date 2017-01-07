@@ -17,11 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.managedobject.pool;
 
-import net.officefloor.frame.impl.execute.managedobject.LifeCycleObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.TestManagedObject;
 
 /**
  * Ensure handle lost {@link ManagedObject}.
@@ -31,16 +31,16 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 public class ManagedObjectPoolRecycleTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * {@link LifeCycleObject}.
+	 * {@link TestManagedObject}.
 	 */
-	private LifeCycleObject object;
+	private TestManagedObject object;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
 		// Load the managed object
-		this.object = new LifeCycleObject("MO", this, true);
+		this.object = new TestManagedObject("MO", this, true);
 		this.object.isRecycleFunction = true;
 
 		// Construct the function
@@ -81,7 +81,7 @@ public class ManagedObjectPoolRecycleTest extends AbstractOfficeConstructTestCas
 	 * Test functionality.
 	 */
 	public static class TestWork {
-		public void task(LifeCycleObject object) {
+		public void task(TestManagedObject object) {
 		}
 	}
 

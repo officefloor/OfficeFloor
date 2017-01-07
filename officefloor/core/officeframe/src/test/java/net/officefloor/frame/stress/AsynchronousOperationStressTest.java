@@ -315,7 +315,7 @@ public class AsynchronousOperationStressTest extends AbstractOfficeConstructTest
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
+		public void registerAsynchronousListener(AsynchronousListener listener) {
 			this.listener = listener;
 		}
 

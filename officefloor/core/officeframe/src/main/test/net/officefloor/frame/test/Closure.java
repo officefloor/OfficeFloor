@@ -15,22 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.managedobject;
+package net.officefloor.frame.test;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import java.util.function.Function;
 
 /**
- * Ensure handles {@link ManagedObject} being loaded twice to the
- * {@link ManagedObjectUser}.
+ * Captures a free variable for closure state of a {@link Function}.
  *
  * @author Daniel Sagenschneider
  */
-public class LoadManagedObjectTwiceTest extends AbstractOfficeConstructTestCase {
+public class Closure<T> {
 
-	public void testLoadManagedObjectTwice() {
-		fail("TODO implement");
+	/**
+	 * {@link Closure} free variable value.
+	 */
+	public T value;
+
+	/**
+	 * Initialise with <code>null</code>.
+	 */
+	public Closure() {
+		this(null);
 	}
 
+	/**
+	 * Initialise with initial value.
+	 * 
+	 * @param initialValue
+	 *            Initial value.
+	 */
+	public Closure(T initialValue) {
+		this.value = initialValue;
+	}
 }

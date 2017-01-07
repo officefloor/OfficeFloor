@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.managedobject;
+package net.officefloor.frame.impl.execute.managedobject.input;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -433,7 +433,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
+		public void registerAsynchronousListener(AsynchronousListener listener) {
 			// Do nothing
 		}
 	}

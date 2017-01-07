@@ -19,11 +19,11 @@ package net.officefloor.frame.impl.execute.officefloor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.NameAwareManagedFunctionFactory;
 import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
@@ -38,7 +38,6 @@ import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * Implementation of {@link OfficeFloor}.
@@ -46,6 +45,20 @@ import net.officefloor.frame.spi.team.TeamIdentifier;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorImpl implements OfficeFloor {
+
+	/**
+	 * Obtains the {@link OfficeFloor} framework {@link Logger}.
+	 * 
+	 * @return {@link OfficeFloor} framework {@link Logger}.
+	 */
+	public static Logger getFrameworkLogger() {
+		return logger;
+	}
+
+	/**
+	 * {@link Logger} of the {@link OfficeFloor} framework.
+	 */
+	private static final Logger logger = Logger.getLogger(OfficeFloor.class.getName());
 
 	/**
 	 * {@link OfficeFloorMetaData} for this {@link OfficeFloor}.
@@ -70,12 +83,6 @@ public class OfficeFloorImpl implements OfficeFloor {
 	/*
 	 * ====================== OfficeFloor ================================
 	 */
-
-	/**
-	 * {@link TeamIdentifier} for the startup {@link ManagedFunction} instances.
-	 */
-	public static final TeamIdentifier STARTUP_TEAM = new TeamIdentifier() {
-	};
 
 	@Override
 	public void openOfficeFloor() throws Exception {

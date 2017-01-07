@@ -15,20 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.managedobject.escalation;
+package net.officefloor.frame.test;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Delayed failure to source the {@link ManagedObject}.
+ * Test {@link ManagedObject} that simplifies the {@link TestManagedObject}.
  *
  * @author Daniel Sagenschneider
  */
-public class DelayedFailureToSourceManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class TestObject extends TestManagedObject<None, None> {
 
-	public void testDelayedFailureToSourceManagedObject() {
-		fail("TODO implement");
+	/**
+	 * Instantiate.
+	 * 
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param testCase
+	 *            {@link AbstractOfficeConstructTestCase}.
+	 */
+	public TestObject(String managedObjectName, AbstractOfficeConstructTestCase testCase) {
+		super(managedObjectName, testCase);
 	}
 
 }

@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.execute.managedobject.escalation;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.impl.execute.managedobject.LifeCycleObject;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -28,6 +27,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+import net.officefloor.frame.test.TestManagedObject;
 
 /**
  * Ensure that continues to propagate sourcing failure of {@link ManagedObject}.
@@ -37,9 +37,9 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 public class ManagedObjectFailedSourceHandleTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * {@link LifeCycleObject}.
+	 * {@link TestManagedObject}.
 	 */
-	private LifeCycleObject lifeCycle;
+	private TestManagedObject lifeCycle;
 
 	/**
 	 * Ensure {@link Escalation} kept to scope of {@link ManagedFunction}.
@@ -92,7 +92,7 @@ public class ManagedObjectFailedSourceHandleTest extends AbstractOfficeConstruct
 	public void doEnsureEscalationTest(ManagedObjectScope scope, boolean isSpawnThreadState) throws Exception {
 
 		// Managed object
-		this.lifeCycle = new LifeCycleObject("MO", this);
+		this.lifeCycle = new TestManagedObject("MO", this);
 
 		// Provide the escalation
 		Exception escalation = new Exception("SOURCE_FAILURE");
@@ -165,11 +165,11 @@ public class ManagedObjectFailedSourceHandleTest extends AbstractOfficeConstruct
 
 		public boolean isTaskInvoked = false;
 
-		public LifeCycleObject flowObject = null;
+		public TestManagedObject flowObject = null;
 
 		public Throwable flowEscalation = null;
 
-		public LifeCycleObject nextObject = null;
+		public TestManagedObject nextObject = null;
 
 		public Throwable nextEscalation = null;
 
@@ -178,7 +178,7 @@ public class ManagedObjectFailedSourceHandleTest extends AbstractOfficeConstruct
 			flow.doFlow(null, null);
 		}
 
-		public void flow(LifeCycleObject object) {
+		public void flow(TestManagedObject object) {
 			this.flowObject = object;
 		}
 
@@ -189,7 +189,7 @@ public class ManagedObjectFailedSourceHandleTest extends AbstractOfficeConstruct
 			ManagedObjectFailedSourceHandleTest.this.lifeCycle.sourceFailure = null;
 		}
 
-		public void next(LifeCycleObject object) {
+		public void next(TestManagedObject object) {
 			this.nextObject = object;
 		}
 

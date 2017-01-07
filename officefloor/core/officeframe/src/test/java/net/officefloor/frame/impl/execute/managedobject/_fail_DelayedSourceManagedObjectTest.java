@@ -23,36 +23,37 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.TestObject;
 
 /**
- * Ensure can load the {@link ManagedObject} at later time.
+ * Delayed failure to source the {@link ManagedObject}.
  *
  * @author Daniel Sagenschneider
  */
-public class DelayedSourceManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class _fail_DelayedSourceManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure can delay loading the {@link ManagedObject} that is bound to the
-	 * {@link ProcessState}.
+	 * Ensure can delay failure in sourcing the {@link ManagedObject} that is
+	 * bound to the {@link ProcessState}.
 	 */
-	public void test_DelaySourceManagedObject_BoundTo_ProcessState() throws Exception {
+	public void test_DelaySourceManagedObject_setFailure_ProcessState() throws Exception {
 		this.doDelaySourceManagedObjectTest(ManagedObjectScope.PROCESS);
 	}
 
 	/**
-	 * Ensure can delay loading the {@link ManagedObject} that is bound to the
-	 * {@link ThreadState}.
+	 * Ensure can delay failure in sourcing the {@link ManagedObject} that is
+	 * bound to the {@link ThreadState}.
 	 */
-	public void test_DelaySourceManagedObject_BoundTo_ThreadState() throws Exception {
+	public void test_DelaySourceManagedObject_setFailure_ThreadState() throws Exception {
 		this.doDelaySourceManagedObjectTest(ManagedObjectScope.THREAD);
 	}
 
 	/**
-	 * Ensure can delay loading the {@link ManagedObject} that is bound to the
-	 * {@link ManagedFunction}.
+	 * Ensure can delay failure in sourcing the {@link ManagedObject} that is
+	 * bound to the {@link ManagedFunction}.
 	 */
-	public void test_DelaySourceManagedObject_BoundTo_ManagedFunction() throws Exception {
+	public void test_DelaySourceManagedObject_setFailure_ManagedFunction() throws Exception {
 		this.doDelaySourceManagedObjectTest(ManagedObjectScope.FUNCTION);
 	}
 
@@ -73,17 +74,25 @@ public class DelayedSourceManagedObjectTest extends AbstractOfficeConstructTestC
 		this.constructFunction(work, "task").buildObject("MO", scope);
 
 		// Invoke the function
-		this.triggerFunction("task", null, null);
+		Closure<Boolean> isComplete = new Closure<>(false);
+		Closure<Throwable> failure = new Closure<>();
+		this.triggerFunction("task", null, (escalation) -> {
+			isComplete.value = true;
+			failure.value = escalation;
+		});
 
 		// Should not invoke the task
 		assertFalse("Should be waiting on managed object", work.isTaskInvoked);
+		assertFalse("Process should not be complete", isComplete.value);
 
-		// Provide the managed object
-		object.managedObjectUser.setManagedObject(object);
+		// Provide the failure
+		Exception exception = new Exception("TEST");
+		object.managedObjectUser.setFailure(exception);
 
-		// Task should be triggered with managed object
-		assertTrue("Task should be invoked", work.isTaskInvoked);
-		assertSame("Incorrect managed object", object, work.object);
+		// Should propagate failure
+		assertFalse("Task should not be invoked", work.isTaskInvoked);
+		assertTrue("Process should now be complete", isComplete.value);
+		assertSame("Should propagate the failure", exception, failure.value);
 	}
 
 	/**
@@ -93,11 +102,8 @@ public class DelayedSourceManagedObjectTest extends AbstractOfficeConstructTestC
 
 		public boolean isTaskInvoked = false;
 
-		public TestObject object = null;
-
 		public void task(TestObject object) {
 			this.isTaskInvoked = true;
-			this.object = object;
 		}
 	}
 

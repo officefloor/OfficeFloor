@@ -18,13 +18,17 @@
 package net.officefloor.frame.impl.execute.managedobject;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
@@ -225,7 +229,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			// Provide listener if asynchronous managed object
 			if (this.metaData.isManagedObjectAsynchronous()) {
 				((AsynchronousManagedObject) this.managedObject)
-						.registerAsynchronousCompletionListener(new AsynchronousListenerImpl());
+						.registerAsynchronousListener(new AsynchronousListenerImpl());
 			}
 		} catch (Throwable ex) {
 			// Flag failure to handle later when Job attempts to use it
@@ -380,7 +384,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				}
 
 			case LOADING:
-				// Ensure loaded (another job requiring managed object)
+				// Ensure loaded (another function requiring managed object)
 				if (container.managedObject == null) {
 					return container.sourcingLatch.awaitOnAsset(this);
 				}
@@ -403,7 +407,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					// Provide listener if asynchronous managed object
 					if (container.metaData.isManagedObjectAsynchronous()) {
 						((AsynchronousManagedObject) container.managedObject)
-								.registerAsynchronousCompletionListener(new AsynchronousListenerImpl());
+								.registerAsynchronousListener(new AsynchronousListenerImpl());
 						isCheckReady = true;
 					}
 
@@ -521,6 +525,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				throw new IllegalStateException("Unknown container state " + container.containerState);
 			}
 		}
+
+		@Override
+		public FunctionState handleEscalation(Throwable escalation) {
+
+			// Fail the managed object and escalate to function
+			return new FailManagedObjectOperation(escalation, this.managedFunction);
+		}
 	}
 
 	/**
@@ -536,6 +547,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 					// Easy access to the container
 					ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+					// Determine if still loading or already loaded/failed
+					if ((container.containerState != ManagedObjectContainerState.LOADING)
+							|| (container.managedObject != null) || (container.failure != null)) {
+						// Clean up extra managed object
+						return new CleanupManagedObjectOperation(managedObject);
+					}
 
 					// Load the managed object
 					container.managedObject = managedObject;
@@ -556,8 +574,22 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			ManagedObjectOperation failManagedObject = new ManagedObjectOperation() {
 				@Override
 				public FunctionState execute() {
+
 					// Easy access to the container
 					ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+					// Determine if still loading or already loaded/failed
+					if ((container.containerState != ManagedObjectContainerState.LOADING)
+							|| (container.managedObject != null) || (container.failure != null)) {
+						// Already failure, so log additional failure
+						OfficeFloorImpl.getFrameworkLogger().log(Level.WARNING,
+								"Additional failure in sourcing ManagedObject "
+										+ ManagedObjectContainerImpl.this.metaData.getBoundManagedObjectName()
+										+ " for type "
+										+ ManagedObjectContainerImpl.this.metaData.getObjectType().getName(),
+								cause);
+						return null;
+					}
 
 					// Flag failure of managed object
 					container.failure = cause;
@@ -700,6 +732,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	 * Unloads the {@link ManagedObject}.
 	 */
 	private class UnloadManagedObjectOperation extends ManagedObjectOperation {
+
 		@Override
 		public FunctionState execute() {
 
@@ -736,22 +769,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			case UNLOAD_WAITING_GOVERNANCE:
 			case UNLOADING:
 
-				// Ensure have managed object to unload
-				if (container.managedObject == null) {
-					return null;
-				}
-
 				// Create the recycle function
-				FunctionState recycle = container.metaData.recycle(container.managedObject,
-						container.responsibleThreadState.getProcessState().getManagedObjectCleanup());
-				if (recycle == null) {
-
-					// No recycle, so return directly to pool (if pooled)
-					ManagedObjectPool pool = container.metaData.getManagedObjectPool();
-					if (pool != null) {
-						pool.returnManagedObject(managedObject);
-					}
-				}
+				FunctionState recycle = new CleanupManagedObjectOperation(container.managedObject).execute();
 
 				// Release permanently as managed object no longer being used
 				container.sourcingLatch.releaseFunctions(true);
@@ -772,6 +791,49 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 			// Managed object unloaded
 			return null;
+		}
+	}
+
+	/**
+	 * Cleans up the {@link ManagedObject}.
+	 */
+	private class CleanupManagedObjectOperation extends ManagedObjectOperation {
+
+		/**
+		 * {@link ManagedObject} to clean up.
+		 */
+		private final ManagedObject managedObject;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param managedObject
+		 *            {@link ManagedObject} to clean up.
+		 */
+		public CleanupManagedObjectOperation(ManagedObject managedObject) {
+			this.managedObject = managedObject;
+		}
+
+		@Override
+		public FunctionState execute() {
+
+			// Easy access to the container
+			ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
+
+			// Create the recycle function
+			FunctionState recycle = container.metaData.recycle(this.managedObject,
+					container.responsibleThreadState.getProcessState().getManagedObjectCleanup());
+			if (recycle == null) {
+
+				// No recycle, so return directly to pool (if pooled)
+				ManagedObjectPool pool = container.metaData.getManagedObjectPool();
+				if (pool != null) {
+					pool.returnManagedObject(managedObject);
+				}
+			}
+
+			// Return the recycle function
+			return recycle;
 		}
 	}
 

@@ -231,7 +231,7 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser,
 			// Provide asynchronous listener
 			if (mo instanceof AsynchronousManagedObject) {
 				((AsynchronousManagedObject) mo)
-						.registerAsynchronousCompletionListener(this.asynchronousListener);
+						.registerAsynchronousListener(this.asynchronousListener);
 			}
 
 			// Coordinate if required

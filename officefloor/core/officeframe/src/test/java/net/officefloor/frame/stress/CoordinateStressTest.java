@@ -341,7 +341,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
+		public void registerAsynchronousListener(AsynchronousListener listener) {
 			// Only load the first listener (as second from invoked process)
 			if (this.listener == null) {
 				this.listener = listener;

@@ -125,6 +125,9 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 
 		// Initiate to receive the top level escalation to report back in tests
 		this.officeFloorBuilder.setEscalationHandler(this);
+		
+		// No monitoring by default
+		this.getOfficeBuilder().setMonitorOfficeInterval(0);
 	}
 
 	/*
@@ -650,6 +653,39 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
+	 * Triggers the {@link ManagedFunction} but does not wait for its
+	 * completion.
+	 * 
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction}.
+	 * @param parameter
+	 *            Parameter for the {@link ManagedFunction}.
+	 * @param callback
+	 *            {@link FlowCallback}. May be <code>null</code>.
+	 * @throws Exception
+	 *             If fails to trigger the {@link ManagedFunction}.
+	 */
+	public void triggerFunction(String functionName, Object parameter, FlowCallback callback) throws Exception {
+
+		// Obtain the name of the office being constructed
+		String officeName = this.getOfficeName();
+
+		// Determine if required to construct
+		if (this.officeFloor == null) {
+			// Construct the OfficeFloor
+			this.officeFloor = this.constructOfficeFloor();
+
+			// Open the OfficeFloor
+			this.officeFloor.openOfficeFloor();
+		}
+
+		// Invoke the function
+		Office office = this.officeFloor.getOffice(officeName);
+		FunctionManager functionManager = office.getFunctionManager(functionName);
+		functionManager.invokeProcess(parameter, callback);
+	}
+
+	/**
 	 * Facade method to invoke {@link ManagedFunction} of an {@link Office}. It
 	 * will create the {@link OfficeFloor} if necessary and times out after 3
 	 * seconds if invoked {@link ManagedFunction} is not complete.
@@ -682,51 +718,31 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 */
 	public void invokeFunction(String functionName, Object parameter, int secondsToRun) throws Exception {
 
-		// Obtain the name of the office being constructed
-		String officeName = this.getOfficeName();
-
-		// Determine if required to construct
-		if (this.officeFloor == null) {
-			// Construct the OfficeFloor
-			this.officeFloor = this.constructOfficeFloor();
-
-			// Open the OfficeFloor
-			this.officeFloor.openOfficeFloor();
-		}
-
 		// Wait on this object
-		final boolean[] isComplete = new boolean[] { false };
-		final Throwable[] failure = new Throwable[] { null };
+		Closure<Boolean> isComplete = new Closure<Boolean>(false);
+		Closure<Throwable> failure = new Closure<>();
 
 		// Invoke the function
-		Office office = this.officeFloor.getOffice(officeName);
-		FunctionManager functionManager = office.getFunctionManager(functionName);
 		FlowCallback callback = new FlowCallback() {
 			@Override
 			public void run(Throwable escalation) throws Throwable {
 
 				// Flag complete
 				synchronized (isComplete) {
-					isComplete[0] = true;
-					failure[0] = escalation;
+					isComplete.value = true;
+					failure.value = escalation;
 					isComplete.notify();
 				}
 			}
 		};
-		functionManager.invokeProcess(parameter, callback);
+		this.triggerFunction(functionName, parameter, callback);
 
 		try {
 			// Block until flow is complete (or times out)
 			int iteration = 0;
 			long startBlockTime = System.currentTimeMillis();
 			synchronized (isComplete) {
-				while (!isComplete[0]) {
-
-					// Ensure propagate escalations
-					if (failure[0] != null) {
-						throw failure[0];
-					}
-					this.validateNoTopLevelEscalation();
+				while (!isComplete.value) {
 
 					// Only timeout if positive time to run
 					if (secondsToRun > 0) {
@@ -746,8 +762,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 				}
 
 				// Ensure propagate escalations
-				if (failure[0] != null) {
-					throw failure[0];
+				if (failure.value != null) {
+					throw failure.value;
 				}
 				this.validateNoTopLevelEscalation();
 			}
@@ -761,7 +777,6 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 				throw new Error(ex);
 			}
 		}
-
 	}
 
 }

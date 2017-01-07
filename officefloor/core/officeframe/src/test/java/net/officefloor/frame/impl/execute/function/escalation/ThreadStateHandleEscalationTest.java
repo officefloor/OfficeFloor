@@ -19,12 +19,12 @@ package net.officefloor.frame.impl.execute.function.escalation;
 
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
@@ -48,12 +48,12 @@ public class ThreadStateHandleEscalationTest extends AbstractOfficeConstructTest
 		this.getOfficeBuilder().addEscalation(RuntimeException.class, "officeEscalation");
 
 		// Construct work
-		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
+		EscalationHandlerWork work = new EscalationHandlerWork();
 		this.constructFunction(work, "task").buildParameter();
 		this.constructFunction(work, "officeEscalation").buildParameter();
 
 		// Execute the task to have escalation handled
-		this.invokeFunction("task", null);
+		this.invokeFunction("task", escalation);
 
 		// Ensure escalation is handled by office escalation procedure
 		assertEquals("Incorrect escalation", escalation, work.officeException);
@@ -64,7 +64,39 @@ public class ThreadStateHandleEscalationTest extends AbstractOfficeConstructTest
 	 * by {@link OfficeFloor} {@link EscalationHandler}.
 	 */
 	public void test_OfficeEscalationProcedureFailure_HandledBy_OfficeFloorEscalation() throws Throwable {
-		fail("TODO implement");
+
+		// Obtain the office name
+		String officeName = this.getOfficeName();
+
+		// Create the escalation
+		RuntimeException escalation = new RuntimeException("Escalation");
+
+		// Add office escalation to propagate escalation
+		this.getOfficeBuilder().addEscalation(RuntimeException.class, "task");
+
+		// Construct work
+		EscalationHandlerWork work = new EscalationHandlerWork();
+		this.constructFunction(work, "task").buildParameter();
+
+		// Capture OfficeFloor escalation
+		final Throwable[] failure = new Throwable[1];
+		this.getOfficeFloorBuilder().setEscalationHandler(new EscalationHandler() {
+			@Override
+			public void handleEscalation(Throwable escalation) throws Throwable {
+				failure[0] = escalation;
+			}
+		});
+
+		// Must invoke directly via manager (to not provide callback)
+		OfficeFloor officeFloor = this.constructOfficeFloor();
+		officeFloor.openOfficeFloor();
+		FunctionManager function = officeFloor.getOffice(officeName).getFunctionManager("task");
+
+		// Execute the task to have escalation handled
+		function.invokeProcess(escalation, null);
+
+		// Ensure escalation handled by OfficeFloor escalation handler
+		assertSame("Incorrect escalation", escalation, failure[0]);
 	}
 
 	/**
@@ -80,10 +112,10 @@ public class ThreadStateHandleEscalationTest extends AbstractOfficeConstructTest
 		RuntimeException escalation = new RuntimeException("Escalation");
 
 		// Construct work
-		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
+		EscalationHandlerWork work = new EscalationHandlerWork();
 		this.constructFunction(work, "task").buildParameter();
 
-		// Capture office floor escalation
+		// Capture OfficeFloor escalation
 		final Throwable[] failure = new Throwable[1];
 		this.getOfficeFloorBuilder().setEscalationHandler(new EscalationHandler() {
 			@Override
@@ -98,7 +130,7 @@ public class ThreadStateHandleEscalationTest extends AbstractOfficeConstructTest
 		FunctionManager function = officeFloor.getOffice(officeName).getFunctionManager("task");
 
 		// Execute the task to have escalation handled
-		function.invokeProcess(null, null);
+		function.invokeProcess(escalation, null);
 
 		// Ensure escalation handled by OfficeFloor escalation handler
 		assertSame("Incorrect escalation", escalation, failure[0]);
@@ -109,7 +141,35 @@ public class ThreadStateHandleEscalationTest extends AbstractOfficeConstructTest
 	 * handled by {@link Logger}.
 	 */
 	public void test_OfficeFloorEscalationFailure_HandledBy_Logging() throws Throwable {
-		fail("TODO implement");
+
+		// Obtain the office name
+		String officeName = this.getOfficeName();
+
+		// Create the escalation
+		RuntimeException escalation = new RuntimeException("TEST ESCALATION");
+
+		// Construct work
+		EscalationHandlerWork work = new EscalationHandlerWork();
+		this.constructFunction(work, "task").buildParameter();
+
+		// Propagate OfficeFloor escalation
+		this.getOfficeFloorBuilder().setEscalationHandler(new EscalationHandler() {
+			@Override
+			public void handleEscalation(Throwable escalation) throws Throwable {
+				throw escalation;
+			}
+		});
+
+		// Must invoke directly via manager (to not provide callback)
+		OfficeFloor officeFloor = this.constructOfficeFloor();
+		officeFloor.openOfficeFloor();
+		FunctionManager function = officeFloor.getOffice(officeName).getFunctionManager("task");
+
+		// Execute the task to have escalation logged
+		String log = this.captureError(() -> function.invokeProcess(escalation, null));
+
+		// Ensure escalation handled by OfficeFloor escalation handler
+		assertTrue("Incorrect escalation logging", log.contains(escalation.getMessage()));
 	}
 
 	/**
@@ -118,41 +178,20 @@ public class ThreadStateHandleEscalationTest extends AbstractOfficeConstructTest
 	public static class EscalationHandlerWork {
 
 		/**
-		 * Escalation to be thrown.
-		 */
-		private final Throwable escalation;
-
-		/**
-		 * Parameter on invoking the task method.
-		 */
-		public String taskParameter;
-
-		/**
 		 * Exception handled by the {@link Office}.
 		 */
 		public Exception officeException;
 
 		/**
-		 * Initiate.
-		 *
-		 * @param escalation
-		 *            Escalation to be thrown by the task.
-		 */
-		public EscalationHandlerWork(Throwable escalation) {
-			this.escalation = escalation;
-		}
-
-		/**
 		 * Task causing an escalation.
 		 *
-		 * @param parameter
-		 *            Argument passed from the {@link ManagedObjectSource}.
+		 * @param escalation
+		 *            {@link Escalation}.
 		 * @throws Throwable
-		 *             Escalation.
+		 *             {@link Escalation}.
 		 */
-		public void task(String parameter) throws Throwable {
-			this.taskParameter = parameter;
-			throw this.escalation;
+		public void task(Throwable escalation) throws Throwable {
+			throw escalation;
 		}
 
 		/**

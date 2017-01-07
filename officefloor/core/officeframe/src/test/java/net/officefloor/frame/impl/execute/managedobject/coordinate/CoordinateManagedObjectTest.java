@@ -59,7 +59,6 @@ public class CoordinateManagedObjectTest extends AbstractOfficeConstructTestCase
 		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
-		officeBuilder.setMonitorOfficeInterval(0);
 
 		// Construct the coordinating managed object
 		this.constructManagedObject("coordinate", CoordinatingManagedObjectSource.class, officeName);

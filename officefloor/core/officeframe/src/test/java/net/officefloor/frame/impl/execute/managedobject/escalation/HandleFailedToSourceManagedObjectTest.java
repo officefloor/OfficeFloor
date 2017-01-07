@@ -258,7 +258,7 @@ public class HandleFailedToSourceManagedObjectTest extends AbstractOfficeConstru
 		 */
 
 		@Override
-		public void registerAsynchronousCompletionListener(AsynchronousListener listener) {
+		public void registerAsynchronousListener(AsynchronousListener listener) {
 			// Determine if throw failure
 			if (registerCompletionListenerFailure != null) {
 				throw registerCompletionListenerFailure;
