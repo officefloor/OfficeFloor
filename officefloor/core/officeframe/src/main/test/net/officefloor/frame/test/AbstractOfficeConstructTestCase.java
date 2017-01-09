@@ -125,7 +125,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 
 		// Initiate to receive the top level escalation to report back in tests
 		this.officeFloorBuilder.setEscalationHandler(this);
-		
+
 		// No monitoring by default
 		this.getOfficeBuilder().setMonitorOfficeInterval(0);
 	}
@@ -648,7 +648,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 		OFFICE_INDEX++;
 		this.officeBuilder = this.officeFloorBuilder.addOffice(this.getOfficeName());
 
-		// Return the Office Floor
+		// Return the OfficeFloor
 		return this.officeFloor;
 	}
 
@@ -662,10 +662,11 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 *            Parameter for the {@link ManagedFunction}.
 	 * @param callback
 	 *            {@link FlowCallback}. May be <code>null</code>.
+	 * @return {@link Office} containing the {@link ManagedFunction}.
 	 * @throws Exception
 	 *             If fails to trigger the {@link ManagedFunction}.
 	 */
-	public void triggerFunction(String functionName, Object parameter, FlowCallback callback) throws Exception {
+	public Office triggerFunction(String functionName, Object parameter, FlowCallback callback) throws Exception {
 
 		// Obtain the name of the office being constructed
 		String officeName = this.getOfficeName();
@@ -683,6 +684,9 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 		Office office = this.officeFloor.getOffice(officeName);
 		FunctionManager functionManager = office.getFunctionManager(functionName);
 		functionManager.invokeProcess(parameter, callback);
+
+		// Return the office
+		return office;
 	}
 
 	/**
