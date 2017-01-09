@@ -73,6 +73,7 @@ import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
@@ -214,6 +215,61 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to override the {@link OfficeClock}.
+	 */
+	public void testProvideOfficeClock() {
+
+		final OfficeClock clock = this.createMock(OfficeClock.class);
+
+		// Record providing profiler
+		this.recordReturn(this.configuration, this.configuration.getOfficeName(), OFFICE_NAME);
+		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
+		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(), new OfficeEnhancer[0]);
+		this.record_teams();
+		this.recordReturn(this.configuration, this.configuration.getOfficeClock(), clock);
+		this.record_governance();
+		this.record_noManagedObjectsAndAdministrators();
+		this.record_functions();
+		this.record_noOfficeStartupFunctions();
+		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
+		this.record_noProfiler();
+
+		this.replayMockObjects();
+		RawOfficeMetaData rawOfficeMetaData = this.constructRawOfficeMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure override clock
+		assertSame("Should override office clock", clock, rawOfficeMetaData.getOfficeMetaData().getOfficeClock());
+	}
+
+	/**
+	 * Ensure able to default the {@link OfficeClock}.
+	 */
+	public void testDefaultOfficeClock() {
+
+		// Record providing profiler
+		this.record_enhanceOffice();
+		this.record_teams();
+		this.record_defaultOfficeClock();
+		this.record_governance();
+		this.record_noManagedObjectsAndAdministrators();
+		this.record_functions();
+		this.record_noOfficeStartupFunctions();
+		this.record_noOfficeEscalationHandler();
+		this.record_processContextListeners();
+		this.record_noProfiler();
+
+		this.replayMockObjects();
+		RawOfficeMetaData rawOfficeMetaData = this.constructRawOfficeMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure override clock
+		assertNotNull("Should default office clock", rawOfficeMetaData.getOfficeMetaData().getOfficeClock());
+
+	}
+
+	/**
 	 * Ensure issue if negative monitor {@link Office} interval.
 	 */
 	public void testNegativeMonitorOfficeInterval() {
@@ -246,6 +302,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.control(this.officeEnhancer).setThrowable(failure);
 		this.record_issue("Failure in enhancing office", failure);
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -282,6 +339,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getFlowNodeBuilder(null, "TASK"), null);
 		this.record_issue("ManagedFunction 'TASK' of namespace '[none]' not available for enhancement");
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -319,6 +377,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getFlowNodeBuilder("MANAGED_OBJECT", "TASK"), null);
 		this.record_issue("ManagedFunction 'TASK' of namespace 'MANAGED_OBJECT' not available for enhancement");
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -358,6 +417,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getFlowNodeBuilder("MANAGED_OBJECT", "TASK"),
 				flowNodeBuilder);
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -384,6 +444,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.linkedTeamConfiguration, this.linkedTeamConfiguration.getOfficeTeamName(), null);
 		this.record_issue("Team registered to Office without name");
 		this.recordReturn(this.configuration, this.configuration.getOfficeDefaultTeamName(), null);
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -412,6 +473,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.linkedTeamConfiguration, this.linkedTeamConfiguration.getOfficeFloorTeamName(), "");
 		this.record_issue("No Office Floor Team name for Office Team 'OFFICE_TEAM'");
 		this.recordReturn(this.configuration, this.configuration.getOfficeDefaultTeamName(), null);
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -443,6 +505,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				this.rawOfficeFloorMetaData.getRawTeamMetaData("OFFICE_FLOOR_TEAM"), null);
 		this.record_issue("Unknown Team 'OFFICE_FLOOR_TEAM' not available to register to Office");
 		this.recordReturn(this.configuration, this.configuration.getOfficeDefaultTeamName(), null);
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -468,6 +531,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				new LinkedTeamConfiguration[] {});
 		this.recordReturn(this.configuration, this.configuration.getOfficeDefaultTeamName(), "UNKNOWN");
 		this.record_issue("No default team UNKNOWN linked to Office");
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -490,6 +554,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record attempting to register managed object without name
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.recordReturn(this.configuration, this.configuration.getRegisteredManagedObjectSources(),
 				new LinkedManagedObjectSourceConfiguration[] { this.linkedMosConfiguration });
@@ -519,6 +584,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record attempting to register managed object source without name
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.recordReturn(this.configuration, this.configuration.getRegisteredManagedObjectSources(),
 				new LinkedManagedObjectSourceConfiguration[] { this.linkedMosConfiguration });
@@ -550,6 +616,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record attempting to register unknown managed object source
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.recordReturn(this.configuration, this.configuration.getRegisteredManagedObjectSources(),
 				new LinkedManagedObjectSourceConfiguration[] { this.linkedMosConfiguration });
@@ -586,6 +653,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record no Input Managed Object Name
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_registerManagedObjectSources();
 		this.recordReturn(this.configuration, this.configuration.getBoundInputManagedObjectConfiguration(),
@@ -620,6 +688,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record no bound Managed Object Source name
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_registerManagedObjectSources();
 		this.recordReturn(this.configuration, this.configuration.getBoundInputManagedObjectConfiguration(),
@@ -652,6 +721,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record input Managed Object name registered more than once
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_registerManagedObjectSources();
 		this.record_boundInputManagedObjects("SAME_INPUT", "FIRST", "SAME_INPUT", "SECOND");
@@ -681,6 +751,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record creating a process bound managed object
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
@@ -713,6 +784,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record affixing a process managed object
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_registerManagedObjectSources();
 		this.record_boundInputManagedObjects();
@@ -760,6 +832,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record creating a thread bound managed object
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
@@ -790,6 +863,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record creating a thread bound managed object
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
@@ -823,6 +897,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record creating a thread bound managed object
 		this.record_enhanceOffice();
 		Map<String, TeamManagement> teams = this.record_teams();
+		this.record_defaultOfficeClock();
 
 		// Record management of governance
 		this.recordReturn(this.configuration, this.configuration.isManuallyManageGovernance(), false);
@@ -886,6 +961,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record manual management of governance
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance(true);
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources();
@@ -919,6 +995,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record creating a thread bound managed object
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		GovernanceMetaData<?, ?>[] expectedGovernances = this.record_governance("GOVERNANCE_ONE", "GOVERNANCE_TWO");
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
@@ -968,6 +1045,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record creating a process bound administrator
 		this.record_enhanceOffice();
 		Map<String, TeamManagement> teams = this.record_teams("TEAM");
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
 				.record_registerManagedObjectSources("MO");
@@ -1002,6 +1080,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record constructing function
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions("TEST", (RawManagedFunctionMetaData<?, ?>) null);
@@ -1026,6 +1105,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record constructing work
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		ManagedFunctionMetaData<?, ?> functionMetaData = this.record_functions("TASK", rawFunctionMetaData)[0];
@@ -1059,6 +1139,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record adding startup task
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions("STARTUP", rawFunctionMetaData);
@@ -1094,6 +1175,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record adding startup task
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		ManagedFunctionMetaData<?, ?> taskMetaData = this.record_functions("TASK", rawFunctionMetaData)[0];
@@ -1130,6 +1212,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record providing profiler
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions("TASK", (RawManagedFunctionMetaData<?, ?>) null);
@@ -1158,6 +1241,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record no type of cause
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -1190,6 +1274,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record unknown escalation task
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -1228,6 +1313,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record adding office escalation
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		ManagedFunctionMetaData<?, ?> functionMetaData = this.record_functions("TASK", rawFunctionMetaData)[0];
@@ -1272,6 +1358,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record creating a process
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -1307,6 +1394,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record registering Process Context Listener
 		this.record_enhanceOffice();
 		this.record_teams();
+		this.record_defaultOfficeClock();
 		this.record_governance();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_functions();
@@ -1400,6 +1488,13 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Return the registry of the teams
 		return this.officeTeams;
+	}
+
+	/**
+	 * Record using default {@link OfficeClock}.
+	 */
+	private void record_defaultOfficeClock() {
+		this.recordReturn(this.configuration, this.configuration.getOfficeClock(), null);
 	}
 
 	/**

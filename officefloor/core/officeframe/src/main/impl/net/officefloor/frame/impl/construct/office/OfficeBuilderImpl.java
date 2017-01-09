@@ -33,9 +33,9 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
-import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.function.ManagedFunctionBuilderImpl;
 import net.officefloor.frame.impl.construct.function.ManagedFunctionEscalationConfigurationImpl;
+import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
@@ -50,6 +50,7 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -157,6 +158,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<ManagedFunctionReference> startupFunctions = new LinkedList<ManagedFunctionReference>();
 
 	/**
+	 * {@link OfficeClock}.
+	 */
+	private OfficeClock clock = null;
+
+	/**
 	 * Interval in milli-seconds to monitor the {@link Office}. Default is 1
 	 * second.
 	 */
@@ -180,6 +186,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/*
 	 * ============ OfficeBuilder =========================================
 	 */
+
+	@Override
+	public void setOfficeClock(OfficeClock clock) {
+		this.clock = clock;
+	}
 
 	@Override
 	public void setMonitorOfficeInterval(long monitorOfficeInterval) {
@@ -289,6 +300,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public String getOfficeName() {
 		return this.officeName;
+	}
+
+	@Override
+	public OfficeClock getOfficeClock() {
+		return this.clock;
 	}
 
 	@Override

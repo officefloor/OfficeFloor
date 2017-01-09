@@ -22,6 +22,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.OfficeFrame;
@@ -40,6 +41,7 @@ import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -55,7 +57,8 @@ import net.officefloor.frame.spi.team.source.TeamSource;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCase implements EscalationHandler {
+public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCase
+		implements EscalationHandler, OfficeClock {
 
 	/**
 	 * Index of the current {@link OfficeFloor} being constructed.
@@ -111,6 +114,11 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	private final Object exceptionLock = new Object();
 
 	/**
+	 * Current time for the {@link OfficeClock}.
+	 */
+	private AtomicLong currentTime;
+
+	/**
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor = null;
@@ -126,8 +134,25 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 		// Initiate to receive the top level escalation to report back in tests
 		this.officeFloorBuilder.setEscalationHandler(this);
 
+		// Initiate to control the time to be deterministic
+		this.currentTime = new AtomicLong(System.currentTimeMillis());
+		this.getOfficeBuilder().setOfficeClock(this);
+
 		// No monitoring by default
 		this.getOfficeBuilder().setMonitorOfficeInterval(0);
+	}
+
+	/*
+	 * ====================== OfficeClock ================================
+	 */
+
+	@Override
+	public long currentTimeMillis() {
+		return this.currentTime.get();
+	}
+
+	public void adjustCurrentTimeMillis(long timeInMilliseconds) {
+		this.currentTime.addAndGet(timeInMilliseconds);
 	}
 
 	/*

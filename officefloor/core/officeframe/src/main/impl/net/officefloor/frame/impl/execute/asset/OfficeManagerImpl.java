@@ -98,6 +98,16 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	}
 
 	@Override
+	public void runAssetChecks() {
+
+		// Trigger the monitoring of the office
+		for (int i = 0; i < this.assetManagers.length; i++) {
+			AssetManager assetManager = this.assetManagers[i];
+			this.functionLoop.delegateFunction(assetManager);
+		}
+	}
+
+	@Override
 	public void stopManaging() {
 		this.timer.cancel();
 	}
@@ -110,13 +120,12 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	public void run() {
 
 		// Update the approximate time for the office
-		this.officeClock.updateTime();
-
-		// Trigger the monitoring of the office
-		for (int i = 0; i < this.assetManagers.length; i++) {
-			AssetManager assetManager = this.assetManagers[i];
-			this.functionLoop.delegateFunction(assetManager);
+		if (this.officeClock != null) {
+			this.officeClock.updateTime();
 		}
+
+		// Run checks on the assets
+		this.runAssetChecks();
 	}
 
 }

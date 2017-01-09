@@ -77,6 +77,7 @@ import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
@@ -302,7 +303,13 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		}
 
 		// Create the office details
-		OfficeClockImpl officeClock = new OfficeClockImpl();
+		OfficeClockImpl officeClockImpl = null;
+		OfficeClock officeClock = configuration.getOfficeClock();
+		if (officeClock == null) {
+			// Default the office clock
+			officeClockImpl = new OfficeClockImpl();
+			officeClock = officeClockImpl;
+		}
 		FunctionLoop functionLoop = new FunctionLoopImpl(defaultTeam);
 		Timer timer = new Timer(true);
 
@@ -574,7 +581,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 		// Create the office manager
 		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName, monitorOfficeInterval, assetManagers,
-				officeClock, functionLoop, timer);
+				officeClockImpl, functionLoop, timer);
 
 		// Load the office meta-data
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,

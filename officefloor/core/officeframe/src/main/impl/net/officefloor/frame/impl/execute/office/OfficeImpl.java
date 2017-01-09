@@ -50,6 +50,11 @@ public class OfficeImpl implements Office {
 	 */
 
 	@Override
+	public void runAssetChecks() {
+		this.metaData.getOfficeManager().runAssetChecks();
+	}
+
+	@Override
 	public String[] getFunctionNames() {
 
 		// Obtain the function names

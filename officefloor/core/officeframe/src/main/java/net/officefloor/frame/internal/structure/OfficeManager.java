@@ -33,6 +33,11 @@ public interface OfficeManager {
 	void startManaging();
 
 	/**
+	 * Runs the checks on the {@link Asset} instances within the {@link Office}.
+	 */
+	void runAssetChecks();
+
+	/**
 	 * Stops this {@link OfficeManager} managing the {@link AssetManager}
 	 * instances within the {@link Office}.
 	 */

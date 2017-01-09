@@ -26,6 +26,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -49,6 +50,14 @@ public interface OfficeConfiguration {
 	 * @return Name of this {@link Office}.
 	 */
 	String getOfficeName();
+
+	/**
+	 * Obtains the {@link OfficeClock}.
+	 * 
+	 * @return {@link OfficeClock}. May be <code>null</code> to use a default
+	 *         implementation.
+	 */
+	OfficeClock getOfficeClock();
 
 	/**
 	 * Obtains the interval in milli-seconds between each time the

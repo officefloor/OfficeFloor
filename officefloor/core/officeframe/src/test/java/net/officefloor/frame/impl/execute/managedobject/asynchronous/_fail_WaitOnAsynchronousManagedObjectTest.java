@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
+import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -24,7 +25,6 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -69,9 +69,6 @@ public class _fail_WaitOnAsynchronousManagedObjectTest extends AbstractOfficeCon
 	 */
 	public void doAsynchronousOperationTest(ManagedObjectScope scope) throws Exception {
 
-		// Obtain the office name
-		String officeName = this.getOfficeName();
-
 		// Construct the managed object
 		TestObject object = new TestObject("MO", this);
 		object.isAsynchronousManagedObject = true;
@@ -105,13 +102,15 @@ public class _fail_WaitOnAsynchronousManagedObjectTest extends AbstractOfficeCon
 		assertFalse("Process should not be complete", isComplete.value);
 
 		// Time out the asynchronous operation
-		// TODO consider means to trigger time outs
-		//office.runChecks(Long.MAX_VALUE);
+		this.adjustCurrentTimeMillis(100);
+		office.runAssetChecks();
 
 		// Wait should now complete
 		assertTrue("Await should not be invoked due to time out", work.isNextInvoked);
 		assertTrue("Process should be complete", isComplete.value);
-		assertEquals("Time out failure", "TODO timeout message", failure.value.getMessage());
+		assertTrue("Time out failure", failure.value instanceof ManagedObjectOperationTimedOutEscalation);
+		ManagedObjectOperationTimedOutEscalation escalation = (ManagedObjectOperationTimedOutEscalation) failure.value;
+		assertEquals("Incorrect object timed out", TestObject.class, escalation.getObjectType());
 	}
 
 	/**

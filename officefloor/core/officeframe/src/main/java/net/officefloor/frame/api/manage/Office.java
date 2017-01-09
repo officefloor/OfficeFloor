@@ -18,6 +18,7 @@
 package net.officefloor.frame.api.manage;
 
 import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.internal.structure.Asset;
 
 /**
  * Office within the {@link OfficeFloor}.
@@ -25,6 +26,11 @@ import net.officefloor.frame.api.execute.ManagedFunction;
  * @author Daniel Sagenschneider
  */
 public interface Office {
+
+	/**
+	 * Manually runs the {@link Asset} checks for the {@link Office}.
+	 */
+	void runAssetChecks();
 
 	/**
 	 * <p>

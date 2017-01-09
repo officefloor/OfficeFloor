@@ -22,6 +22,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -38,7 +39,24 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel Sagenschneider
  */
 public interface OfficeBuilder {
-	
+
+	/**
+	 * <p>
+	 * Allows providing an {@link OfficeClock} implementation to obtain the
+	 * current time.
+	 * <p>
+	 * Should no {@link OfficeClock} be provided, a default implementation will
+	 * be used.
+	 * <p>
+	 * Typically this is useful in testing to fix to a deterministic time.
+	 * However, should there be native implementations of keeping time that is
+	 * efficient, this enables overriding the default implementation.
+	 * 
+	 * @param clock
+	 *            {@link OfficeClock}.
+	 */
+	void setOfficeClock(OfficeClock clock);
+
 	/**
 	 * Specifies the interval in milli-seconds between each time the
 	 * {@link OfficeManager} monitors the {@link Office}.
