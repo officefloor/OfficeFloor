@@ -15,19 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.managedobject.check;
+package net.officefloor.frame.impl.execute.managedobject.coordinate;
 
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Ensure can check on an {@link AsynchronousManagedObject}.
+ * Ensure issue if fail to co-ordinate the {@link ManagedObject}.
  *
  * @author Daniel Sagenschneider
  */
-public class CheckOnAsynchronousOperationTest extends AbstractOfficeConstructTestCase {
+public class _fail_CoordinateManagedObjectTest extends AbstractOfficeConstructTestCase {
 
-	public void testCheckOnAsynchronousOperation() {
+	public void test() {
 		fail("TODO implement");
 	}
 

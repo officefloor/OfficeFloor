@@ -25,8 +25,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.manage.FunctionManager;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -99,12 +97,9 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 		ReflectiveFunctionBuilder task = this.constructFunction(coordinate, "service");
 		task.buildObject(identifier);
 
-		// Invoke the work
-		OfficeFloor officeFloor = this.constructOfficeFloor();
-		officeFloor.openOfficeFloor();
-		FunctionManager functionManager = officeFloor.getOffice(officeName).getFunctionManager("service");
+		// Invoke the function
 		boolean[] isComplete = new boolean[] { false };
-		functionManager.invokeProcess(null, (escalation) -> isComplete[0] = true);
+		this.triggerFunction("service", null, (escalation) -> isComplete[0] = true);
 
 		// Allow processing of work
 		while (!isComplete[0]) {

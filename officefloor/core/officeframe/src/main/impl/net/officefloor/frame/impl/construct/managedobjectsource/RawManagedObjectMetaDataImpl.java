@@ -411,17 +411,19 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 	}
 
 	@Override
-	public ManagedObjectMetaData<D> createManagedObjectMetaData(RawBoundManagedObjectMetaData boundMetaData,
-			int instanceIndex, RawBoundManagedObjectInstanceMetaData<D> boundInstanceMetaData,
-			ManagedObjectIndex[] dependencyMappings, ManagedObjectGovernanceMetaData<?>[] governanceMetaData,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
+	public ManagedObjectMetaData<D> createManagedObjectMetaData(AssetType assetType, String assetName,
+			RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
+			RawBoundManagedObjectInstanceMetaData<D> boundInstanceMetaData, ManagedObjectIndex[] dependencyMappings,
+			ManagedObjectGovernanceMetaData<?>[] governanceMetaData, AssetManagerFactory assetManagerFactory,
+			OfficeFloorIssues issues) {
 
 		// Obtain the bound name and scope
 		String boundName = boundMetaData.getBoundManagedObjectName();
 		ManagedObjectScope scope = boundMetaData.getManagedObjectIndex().getManagedObjectScope();
 
 		// Create the bound reference name
-		String boundReferenceName = scope + ":" + instanceIndex + ":" + boundName;
+		String boundReferenceName = scope + ":" + (scope == ManagedObjectScope.FUNCTION ? assetName + ":" : "")
+				+ instanceIndex + ":" + boundName;
 
 		// Create the source managed object asset manager
 		AssetManager sourcingAssetManager = assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
@@ -434,29 +436,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			operationsAssetManager = assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
 					boundReferenceName, "operations", issues);
 		}
-
-		/*
-		 * FIXME ensure all dependencies are required for coordination.
-		 * 
-		 * DETAILS: As coordination uses the dependencyMappings array as the
-		 * required dependencies for coordination, the dependencyMappings should
-		 * be:
-		 * 
-		 * - appended with any dependencies not used directly in coordination.
-		 * This then will allow coordination to not proceed until 'ALL'
-		 * dependencies are available (not just direct dependencies of
-		 * coordination).
-		 * 
-		 * - index into dependencyMappings array identifying where direct
-		 * dependencies stop and indirect dependencies begin. This will allow
-		 * the ObjectRegistry to throw an exception if not requesting direct
-		 * dependency.
-		 * 
-		 * MITIGATION: This is an edge case where a dependency has another
-		 * dependency that is Asynchronous and not usable unless current
-		 * asynchronous operation is not complete. Will fix once have 'real
-		 * world' example requiring this (that can base tests on).
-		 */
 
 		// Create the managed object meta-data
 		ManagedObjectMetaDataImpl<D> moMetaData = new ManagedObjectMetaDataImpl<D>(boundName, this.objectType,

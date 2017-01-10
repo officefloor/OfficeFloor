@@ -18,9 +18,11 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
+import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -101,7 +103,12 @@ public interface RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> 
 
 	/**
 	 * Creates the {@link ManagedObjectMetaData}.
-	 * 
+	 *
+	 * @param assetType
+	 *            {@link AssetType} of the {@link Asset} requiring the
+	 *            {@link ManagedObject}.
+	 * @param assetName
+	 *            Name of the {@link Asset} requiring the {@link ManagedObject}.
 	 * @param boundMetaData
 	 *            {@link RawBoundManagedObjectMetaData}.
 	 * @param instanceIndex
@@ -123,7 +130,8 @@ public interface RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> 
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link ManagedObjectMetaData}.
 	 */
-	ManagedObjectMetaData<O> createManagedObjectMetaData(RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
+	ManagedObjectMetaData<O> createManagedObjectMetaData(AssetType assetType, String assetName,
+			RawBoundManagedObjectMetaData boundMetaData, int instanceIndex,
 			RawBoundManagedObjectInstanceMetaData<O> boundInstanceMetaData, ManagedObjectIndex[] dependencyMappings,
 			ManagedObjectGovernanceMetaData<?>[] governanceMetaData, AssetManagerFactory assetManagerFactory,
 			OfficeFloorIssues issues);

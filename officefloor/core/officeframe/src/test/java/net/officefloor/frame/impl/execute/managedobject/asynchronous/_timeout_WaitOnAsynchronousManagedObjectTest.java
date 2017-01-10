@@ -17,46 +17,47 @@
  */
 package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
+import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestObject;
 
 /**
- * Tests loading the {@link ManagedObject} asynchronously.
+ * Tests {@link AsynchronousManagedObject} timing out.
  * 
  * @author Daniel Sagenschneider
  */
-public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class _timeout_WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure {@link ProcessState} bound {@link AsynchronousManagedObject} stops
-	 * execution until {@link AsynchronousListener} flags completion.
+	 * execution until {@link AsynchronousListener} timed out.
 	 */
-	public void test_AsynchronousOperation_WaitOn_ProcessBound() throws Exception {
+	public void test_AsynchronousOperation_TimeOut_ProcessBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.PROCESS);
 	}
 
 	/**
 	 * Ensure {@link ThreadState} bound {@link AsynchronousManagedObject} stops
-	 * execution until {@link AsynchronousListener} flags completion.
+	 * execution until {@link AsynchronousListener} timed out.
 	 */
-	public void test_AsynchronousOperation_WaitOn_ThreadBound() throws Exception {
+	public void test_AsynchronousOperation_TimeOut_ThreadBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.THREAD);
 	}
 
 	/**
 	 * Ensure {@link ManagedFunction} bound {@link AsynchronousManagedObject}
-	 * stops execution until {@link AsynchronousListener} flags completion.
+	 * stops execution until {@link AsynchronousListener} timed out.
 	 */
-	public void test_AsynchronousOperation_WaitOn_FunctionBound() throws Exception {
+	public void test_AsynchronousOperation_TimeOut_FunctionBound() throws Exception {
 		this.doAsynchronousOperationTest(ManagedObjectScope.FUNCTION);
 	}
 
@@ -88,8 +89,12 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 
 		// Trigger function
 		Closure<Boolean> isComplete = new Closure<>(false);
-		this.triggerFunction("task", null, (escalation) -> isComplete.value = true);
-
+		Closure<Throwable> failure = new Closure<>();
+		Office office = this.triggerFunction("task", null, (escalation) -> {
+			isComplete.value = true;
+			failure.value = escalation;
+		});
+		
 		// Only the task should be invoked
 		assertTrue("Task should be invoked", work.isTaskInvoked);
 		assertTrue("Next should be invoked, as not dependent on managed object", work.isNextInvoked);
@@ -97,6 +102,7 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 		// Different object if bound to function, so not wait
 		if (scope == ManagedObjectScope.FUNCTION) {
 			assertTrue("Should not wait, as different object", isComplete.value);
+			assertNull("Should not have timeout failure", failure.value);
 			return;
 		}
 
@@ -104,12 +110,16 @@ public class WaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstruct
 		assertFalse("Wait should be waiting on asynchronous operation", work.isAwaitInvoked);
 		assertFalse("Process should not be complete", isComplete.value);
 
-		// Complete the asynchronous operation
-		object.asynchronousListener.notifyComplete();
+		// Time out the asynchronous operation
+		this.adjustCurrentTimeMillis(100);
+		office.runAssetChecks();
 
 		// Wait should now complete
-		assertTrue("Wait should now complete", work.isNextInvoked);
+		assertTrue("Await should not be invoked due to time out", work.isNextInvoked);
 		assertTrue("Process should be complete", isComplete.value);
+		assertTrue("Time out failure", failure.value instanceof ManagedObjectOperationTimedOutEscalation);
+		ManagedObjectOperationTimedOutEscalation escalation = (ManagedObjectOperationTimedOutEscalation) failure.value;
+		assertEquals("Incorrect object timed out", TestObject.class, escalation.getObjectType());
 	}
 
 	/**

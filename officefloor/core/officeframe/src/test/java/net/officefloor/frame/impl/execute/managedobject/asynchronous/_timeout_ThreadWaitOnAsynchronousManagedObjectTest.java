@@ -17,6 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -29,16 +34,16 @@ import net.officefloor.frame.test.TestObject;
 
 /**
  * Ensure re-use of {@link ProcessState} bound {@link AsynchronousManagedObject}
- * causes re-use to wait on the asynchronous operation.
+ * causes re-use to wait on the asynchronous operation time out.
  *
  * @author Daniel Sagenschneider
  */
-public class ThreadWaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class _timeout_ThreadWaitOnAsynchronousManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure {@link ThreadState} waits on re-use of
 	 * {@link AsynchronousManagedObject} currently within an asynchronous
-	 * operation.
+	 * operation that times out.
 	 */
 	public void testThreadStateWaitOnProcessBoundAsynchronousOperation() throws Exception {
 
@@ -57,18 +62,30 @@ public class ThreadWaitOnAsynchronousManagedObjectTest extends AbstractOfficeCon
 
 		// Trigger the functionality
 		Closure<Boolean> isComplete = new Closure<>(false);
+		Closure<Throwable> failure = new Closure<>();
 		final int numberOfFlows = 10;
-		this.triggerFunction("trigger", numberOfFlows, (escalation) -> isComplete.value = true);
+		Office office = this.triggerFunction("trigger", numberOfFlows, (escalation) -> {
+			isComplete.value = true;
+			failure.value = escalation;
+		});
 
 		// Ensure triggered flows, by they are waiting on asynchronous operation
 		assertTrue("Trigger should have invoked flows", work.isTriggered);
 		assertEquals("Flows should be waitin on asynchronous operation", 0, work.flowsInvoked);
 
-		// Complete asynchronous operation
-		object.asynchronousListener.notifyComplete();
-		assertEquals("Flows should now be invoked", numberOfFlows, work.flowsInvoked);
-		assertEquals("Flows should also complete", numberOfFlows, work.flowsComplete);
+		// Time out the asynchronous operation
+		this.adjustCurrentTimeMillis(100);
+		office.runAssetChecks();
+
+		// Timed out asynchronous operation
+		assertEquals("Flows should not be invoked", 0, work.flowsInvoked);
+		assertEquals("Incorrect number of failures", numberOfFlows, work.failures.size());
+		for (int i = 0; i < numberOfFlows; i++) {
+			assertTrue("Incorrect flow failure " + i,
+					work.failures.get(i) instanceof ManagedObjectOperationTimedOutEscalation);
+		}
 		assertTrue("Process should also complete", isComplete.value);
+		assertNull("Flow callbacks did not escalate failure", failure.value);
 	}
 
 	/**
@@ -80,12 +97,12 @@ public class ThreadWaitOnAsynchronousManagedObjectTest extends AbstractOfficeCon
 
 		public int flowsInvoked = 0;
 
-		public int flowsComplete = 0;
+		public List<Throwable> failures = new LinkedList<>();
 
 		public void trigger(Integer numberOfFlows, TestObject object, ReflectiveFlow flow) {
 			object.asynchronousListener.notifyStarted();
 			for (int i = 0; i < numberOfFlows; i++) {
-				flow.doFlow(null, (escalation) -> this.flowsComplete++);
+				flow.doFlow(null, (escalation) -> this.failures.add(escalation));
 			}
 			this.isTriggered = true;
 		}

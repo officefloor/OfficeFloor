@@ -111,7 +111,7 @@ public class WaitOnDependentAsynchronousManagedObjectTest extends AbstractOffice
 		this.dependency.asynchronousListener.notifyComplete();
 
 		// Wait should now complete
-		assertTrue("Wait should now complete", work.isNextInvoked);
+		assertTrue("Wait should now complete", work.isAwaitInvoked);
 		assertTrue("Process should be complete", isComplete.value);
 	}
 

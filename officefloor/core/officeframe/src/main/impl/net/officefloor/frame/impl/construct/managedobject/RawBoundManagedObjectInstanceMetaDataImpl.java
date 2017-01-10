@@ -32,6 +32,7 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMet
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -117,10 +118,8 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	 *            Listing of the {@link ManagedObjectGovernanceConfiguration}
 	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
 	 */
-	public RawBoundManagedObjectInstanceMetaDataImpl(
-			String boundManagedObjectName,
-			RawBoundManagedObjectMetaData rawBoundMetaData,
-			int instanceIndex,
+	public RawBoundManagedObjectInstanceMetaDataImpl(String boundManagedObjectName,
+			RawBoundManagedObjectMetaData rawBoundMetaData, int instanceIndex,
 			RawManagedObjectMetaData<D, ?> rawMoMetaData,
 			ManagedObjectDependencyConfiguration<D>[] dependenciesConfiguration,
 			ManagedObjectGovernanceConfiguration[] governanceConfiguration) {
@@ -141,21 +140,18 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	 *            Mapping of {@link RawBoundManagedObjectMetaData} by its scope
 	 *            bound name.
 	 */
-	public void loadDependencies(OfficeFloorIssues issues,
-			Map<String, RawBoundManagedObjectMetaData> boundMo) {
+	public void loadDependencies(OfficeFloorIssues issues, Map<String, RawBoundManagedObjectMetaData> boundMo) {
 
 		// Obtain the dependency meta-data
-		ManagedObjectDependencyMetaData<D>[] dependencyMetaDatas = this.rawMoMetaData
-				.getManagedObjectSourceMetaData().getDependencyMetaData();
+		ManagedObjectDependencyMetaData<D>[] dependencyMetaDatas = this.rawMoMetaData.getManagedObjectSourceMetaData()
+				.getDependencyMetaData();
 
 		// Determine if dependencies for managed object
 		if ((dependencyMetaDatas == null) || (dependencyMetaDatas.length == 0)) {
 
 			// No dependencies but issue if dependencies configured
-			if ((this.dependenciesConfiguration != null)
-					&& (this.dependenciesConfiguration.length > 0)) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.boundManagedObjectName,
+			if ((this.dependenciesConfiguration != null) && (this.dependenciesConfiguration.length > 0)) {
+				issues.addIssue(AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
 						"No dependencies required but dependencies configured");
 			}
 
@@ -193,20 +189,14 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 
 			// Create name to identify dependency
 			String label = dependencyMetaData.getLabel();
-			String dependencyLabel = "dependency "
-					+ index
-					+ " (key="
-					+ (dependencyKey != null ? dependencyKey.toString()
-							: "<indexed>") + ", label="
-					+ (!ConstructUtil.isBlank(label) ? label : "<no label>")
-					+ ")";
+			String dependencyLabel = "dependency " + index + " (key="
+					+ (dependencyKey != null ? dependencyKey.toString() : "<indexed>") + ", label="
+					+ (!ConstructUtil.isBlank(label) ? label : "<no label>") + ")";
 
 			// Obtain the mapping for the dependency
-			ManagedObjectDependencyConfiguration<D> dependencyMapping = dependencyMappings
-					.get(new Integer(index));
+			ManagedObjectDependencyConfiguration<D> dependencyMapping = dependencyMappings.get(new Integer(index));
 			if (dependencyMapping == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.boundManagedObjectName,
+				issues.addIssue(AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
 						"No mapping configured for " + dependencyLabel);
 				return; // no dependency mapping
 			}
@@ -215,22 +205,17 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 			dependencyMappings.remove(new Integer(index));
 
 			// Obtain the dependent managed object
-			String dependentMoName = dependencyMapping
-					.getScopeManagedObjectName();
+			String dependentMoName = dependencyMapping.getScopeManagedObjectName();
 			if (ConstructUtil.isBlank(dependentMoName)) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.boundManagedObjectName,
+				issues.addIssue(AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
 						"No dependency name configured for " + dependencyLabel);
 				return; // no dependency specified
 			}
-			RawBoundManagedObjectMetaData dependency = boundMo
-					.get(dependentMoName);
+			RawBoundManagedObjectMetaData dependency = boundMo.get(dependentMoName);
 			if (dependency == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.boundManagedObjectName, "No dependent "
-								+ ManagedObject.class.getSimpleName()
-								+ " by name '" + dependentMoName + "' for "
-								+ dependencyLabel);
+				issues.addIssue(AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
+						"No dependent " + ManagedObject.class.getSimpleName() + " by name '" + dependentMoName
+								+ "' for " + dependencyLabel);
 				return; // no dependency
 			}
 
@@ -247,18 +232,10 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 				if (!requiredType.isAssignableFrom(dependencyType)) {
 					// incompatible dependency
 					isDependencyIssue = true;
-					issues.addIssue(
-							AssetType.MANAGED_OBJECT,
-							this.boundManagedObjectName,
-							"Incompatible dependency for "
-									+ dependencyLabel
-									+ " (required type="
-									+ requiredType.getName()
-									+ ", dependency type="
-									+ dependencyType.getName()
-									+ ", ManagedObjectSource="
-									+ rawDependencyMetaData
-											.getManagedObjectName() + ")");
+					issues.addIssue(AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
+							"Incompatible dependency for " + dependencyLabel + " (required type="
+									+ requiredType.getName() + ", dependency type=" + dependencyType.getName()
+									+ ", ManagedObjectSource=" + rawDependencyMetaData.getManagedObjectName() + ")");
 				}
 			}
 			if (isDependencyIssue) {
@@ -271,15 +248,13 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 
 		// Ensure there are no additional dependencies configured
 		if (dependencyMappings.size() > 0) {
-			issues.addIssue(AssetType.MANAGED_OBJECT,
-					this.boundManagedObjectName,
+			issues.addIssue(AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
 					"Extra dependencies configured than required by ManagedObjectSourceMetaData");
 			return; // additional dependencies configured
 		}
 
 		// Specify the dependencies on the bound managed object
-		this.dependencies = ConstructUtil.toArray(dependencies,
-				new RawBoundManagedObjectMetaData[0]);
+		this.dependencies = ConstructUtil.toArray(dependencies, new RawBoundManagedObjectMetaData[0]);
 	}
 
 	/**
@@ -292,13 +267,11 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	 *            {@link OfficeFloorIssues}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void loadGovernance(
-			Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas,
+	public void loadGovernance(Map<String, RawGovernanceMetaData<?, ?>> rawGovernanceMetaDatas,
 			OfficeFloorIssues issues) {
 
 		// Determine if governance
-		if ((this.governanceConfiguration == null)
-				|| (this.governanceConfiguration.length == 0)) {
+		if ((this.governanceConfiguration == null) || (this.governanceConfiguration.length == 0)) {
 			this.governanceMetaData = new ManagedObjectGovernanceMetaData<?>[0];
 			return; // No governance
 		}
@@ -310,15 +283,13 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 
 			// Obtain the governance
 			String governanceName = configuration.getGovernanceName();
-			RawGovernanceMetaData rawGovernanceMetaData = rawGovernanceMetaDatas
-					.get(governanceName);
+			RawGovernanceMetaData rawGovernanceMetaData = rawGovernanceMetaDatas.get(governanceName);
 
 			// Ensure have the governance
 			if (rawGovernanceMetaData == null) {
 				// No governance
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.boundManagedObjectName, "Unknown governance '"
-								+ governanceName + "'");
+				issues.addIssue(AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
+						"Unknown governance '" + governanceName + "'");
 				continue NEXT_GOVERNANCE;
 			}
 
@@ -326,40 +297,30 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 			int governanceIndex = rawGovernanceMetaData.getGovernanceIndex();
 
 			// Obtain the Governance extension interface
-			Class<?> governanceExtensionInterface = rawGovernanceMetaData
-					.getExtensionInterfaceType();
+			Class<?> governanceExtensionInterface = rawGovernanceMetaData.getExtensionInterfaceType();
 
 			// Create the extension interface extractor
 			ManagedObjectExtensionInterfaceMetaData<?>[] eiMetaDatas = this.rawMoMetaData
-					.getManagedObjectSourceMetaData()
-					.getExtensionInterfacesMetaData();
+					.getManagedObjectSourceMetaData().getExtensionInterfacesMetaData();
 			for (ManagedObjectExtensionInterfaceMetaData<?> eiMetaData : eiMetaDatas) {
 
 				// Determine if extension interface to use
-				Class<?> extensionInterfaceType = eiMetaData
-						.getExtensionInterfaceType();
-				if (governanceExtensionInterface
-						.isAssignableFrom(extensionInterfaceType)) {
+				Class<?> extensionInterfaceType = eiMetaData.getExtensionInterfaceType();
+				if (governanceExtensionInterface.isAssignableFrom(extensionInterfaceType)) {
 
 					// Found the extension interface, so obtain the factory
-					ExtensionInterfaceFactory<?> factory = eiMetaData
-							.getExtensionInterfaceFactory();
+					ExtensionInterfaceFactory<?> factory = eiMetaData.getExtensionInterfaceFactory();
 
 					// Load the governance meta-data
-					this.governanceMetaData[i] = new ManagedObjectGovernanceMetaDataImpl(
-							governanceIndex, factory);
+					this.governanceMetaData[i] = new ManagedObjectGovernanceMetaDataImpl(governanceIndex, factory);
 				}
 			}
 
 			// Ensure have the governance
 			if (this.governanceMetaData[i] == null) {
-				issues.addIssue(
-						AssetType.MANAGED_OBJECT,
-						this.boundManagedObjectName,
-						"Extension interface of type "
-								+ governanceExtensionInterface.getName()
-								+ " is not available from Managed Object for Governance '"
-								+ governanceName + "'");
+				issues.addIssue(AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
+						"Extension interface of type " + governanceExtensionInterface.getName()
+								+ " is not available from Managed Object for Governance '" + governanceName + "'");
 			}
 		}
 	}
@@ -368,12 +329,16 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 	 * Loads the {@link ManagedObjectMetaData} for the
 	 * {@link RawBoundManagedObjectMetaData}.
 	 * 
+	 * @param assetType
+	 *            {@link AssetType} requiring the {@link ManagedObject}.
+	 * @param assetName
+	 *            Name of the {@link Asset} requiring the {@link ManagedObject}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	public void loadManagedObjectMetaData(
+	public void loadManagedObjectMetaData(AssetType assetType, String assetName,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Determine if already loaded
@@ -400,10 +365,9 @@ public class RawBoundManagedObjectInstanceMetaDataImpl<D extends Enum<D>>
 		}
 
 		// Create and specify the managed object meta-data
-		this.managedObjectMetaData = this.rawMoMetaData
-				.createManagedObjectMetaData(this.rawBoundMetaData,
-						this.instanceIndex, this, dependencyMappings,
-						this.governanceMetaData, assetManagerFactory, issues);
+		this.managedObjectMetaData = this.rawMoMetaData.createManagedObjectMetaData(assetType, assetName,
+				this.rawBoundMetaData, this.instanceIndex, this, dependencyMappings, this.governanceMetaData,
+				assetManagerFactory, issues);
 	}
 
 	/*

@@ -578,15 +578,16 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(moIndex, moIndex.getManagedObjectScope(), ManagedObjectScope.FUNCTION);
 		this.recordReturn(this.assetManagerFactory,
 				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.FUNCTION + ":" + INSTANCE_INDEX + ":" + BOUND_NAME, "source", this.issues),
+						ManagedObjectScope.FUNCTION + ":testFunction:" + INSTANCE_INDEX + ":" + BOUND_NAME, "source",
+						this.issues),
 				assetManager);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
-		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
-				boundInstanceMetaData, new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0],
-				this.assetManagerFactory, this.issues);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
+				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
+				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
 		// Verify the content of the raw meta data
@@ -639,15 +640,16 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(moIndex, moIndex.getManagedObjectScope(), ManagedObjectScope.FUNCTION);
 		this.recordReturn(this.assetManagerFactory,
 				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.FUNCTION + ":" + INSTANCE_INDEX + ":" + BOUND_NAME, "source", this.issues),
+						ManagedObjectScope.FUNCTION + ":testFunction:" + INSTANCE_INDEX + ":" + BOUND_NAME, "source",
+						this.issues),
 				assetManager);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
-		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
-				boundInstanceMetaData, new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0],
-				this.assetManagerFactory, this.issues);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
+				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
+				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
 		// Verify the content of the raw meta data
@@ -696,15 +698,16 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(moIndex, moIndex.getManagedObjectScope(), ManagedObjectScope.FUNCTION);
 		this.recordReturn(this.assetManagerFactory,
 				this.assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT,
-						ManagedObjectScope.FUNCTION + ":" + INSTANCE_INDEX + ":" + BOUND_NAME, "source", this.issues),
+						ManagedObjectScope.FUNCTION + ":testFunction:" + INSTANCE_INDEX + ":" + BOUND_NAME, "source",
+						this.issues),
 				sourceAssetManager);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
-		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
-				boundInstanceMetaData, new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0],
-				this.assetManagerFactory, this.issues);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
+				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
+				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
 		// Verify is name aware
@@ -744,9 +747,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
-		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
-				boundInstanceMetaData, new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0],
-				this.assetManagerFactory, this.issues);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
+				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
+				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
 		// Verify different index
@@ -786,9 +789,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct managed object
 		this.replayMockObjects();
 		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
-		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(boundMetaData, INSTANCE_INDEX,
-				boundInstanceMetaData, new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0],
-				this.assetManagerFactory, this.issues);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
+				"testFunction", boundMetaData, INSTANCE_INDEX, boundInstanceMetaData, new ManagedObjectIndex[0],
+				new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory, this.issues);
 		this.verifyMockObjects();
 
 		// Verify flagged as coordinating
