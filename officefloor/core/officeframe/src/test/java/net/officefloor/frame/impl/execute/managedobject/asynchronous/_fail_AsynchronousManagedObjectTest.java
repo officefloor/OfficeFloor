@@ -15,30 +15,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.managedobject.coordinate;
+package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.TestObject;
 
 /**
- * Ensure issue if fail to co-ordinate the {@link ManagedObject}.
+ * Ensure issue if register {@link AsynchronousListener} fails.
  *
  * @author Daniel Sagenschneider
  */
-public class _fail_CoordinateManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class _fail_AsynchronousManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure handle failure to co-ordinate the {@link ManagedObject}.
+	 * Ensure handle failure to register {@link AsynchronousListener}.
 	 */
-	public void testHandleFailureToCoordinateManagedObject() throws Exception {
+	public void testHandleFailureToRegisterAsynchronousListener() throws Exception {
 
 		// Configure the object
 		TestObject object = new TestObject("MO", this);
-		object.isCoordinatingManagedObject = true;
-		object.loadObjectsFailure = new RuntimeException("TEST");
+		object.isAsynchronousManagedObject = true;
+		object.registerAsynchronousListenerFailure = new RuntimeException("TEST");
+		object.managedObjectBuilder.setTimeout(10);
 
 		// Configure the function
 		this.constructFunction(new TestWork(), "task").buildObject("MO", ManagedObjectScope.FUNCTION);
@@ -47,8 +48,8 @@ public class _fail_CoordinateManagedObjectTest extends AbstractOfficeConstructTe
 		Closure<Throwable> failure = new Closure<>();
 		this.triggerFunction("task", null, (escalation) -> failure.value = escalation);
 
-		// Ensure issue in co-ordination
-		assertSame("Incorrect co-ordination failure", object.loadObjectsFailure, failure.value);
+		// Ensure issue in registering asynchronous listener
+		assertSame("Incorrect co-ordination failure", object.registerAsynchronousListenerFailure, failure.value);
 	}
 
 	/**

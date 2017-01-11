@@ -19,12 +19,10 @@ package net.officefloor.frame.impl.execute.managedobject;
 
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
@@ -326,6 +324,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				}
 
 				// Wait for asynchronous operation to complete
+				container.check = null; // must re-check on release
 				if (container.managedObject == null) {
 					return container.sourcingLatch.awaitOnAsset(this);
 				} else {
@@ -612,7 +611,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 
 		@Override
 		public void notifyStarted() {
-			ManagedObjectContainerImpl.this.doOperation(new ManagedObjectOperation() {
+			ManagedObjectOperation notifyStarted = new ManagedObjectOperation() {
 				@Override
 				public FunctionState execute() {
 
@@ -634,12 +633,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					return null;
 
 				}
-			});
+			};
+			ManagedObjectContainerImpl.this.doOperation(notifyStarted);
 		}
 
 		@Override
 		public void notifyComplete() {
-			ManagedObjectContainerImpl.this.doOperation(new ManagedObjectOperation() {
+			ManagedObjectOperation notifyComplete = new ManagedObjectOperation() {
 				@Override
 				public FunctionState execute() {
 
@@ -658,7 +658,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					container.operationsLatch.releaseFunctions(false);
 					return null;
 				}
-			});
+			};
+			ManagedObjectContainerImpl.this.doOperation(notifyComplete);
 		}
 	}
 

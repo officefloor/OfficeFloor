@@ -19,21 +19,16 @@ package net.officefloor.frame.impl.execute.managedobject.escalation;
 
 import java.util.logging.Logger;
 
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.FlowCallback;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.TestObject;
 
 /**
  * Ensures the {@link ManagedObjectSource} {@link FlowCallback} can handle
@@ -45,10 +40,40 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 
 	/**
 	 * Ensures {@link Escalation} is handled by the {@link Office}
-	 * {@link EscalationProcedure}.
+	 * {@link EscalationProcedure} before the {@link FlowCallback}.
 	 */
 	public void test_Escalation_HandledBy_OfficeEscalationProcedure() throws Throwable {
-		fail("TODO implement");
+
+		// Fail sourcing managed object
+		TestObject object = new TestObject("MO", this);
+		object.enhanceMetaData = (metaData) -> {
+			metaData.addFlow(Exception.class);
+		};
+		object.managingOfficeBuilder.setInputManagedObjectName("MO");
+		object.managingOfficeBuilder.linkProcess(0, "escalate");
+
+		// Construct functions
+		TestWork work = new TestWork();
+		this.constructFunction(work, "escalate").buildParameter();
+		this.constructFunction(work, "handle").buildParameter();
+
+		// Construct escalation procedure
+		this.getOfficeBuilder().addEscalation(Exception.class, "handle");
+
+		// Invoke the task
+		final Exception exception = new Exception("TEST");
+		Closure<Boolean> isComplete = new Closure<>(false);
+		Closure<Throwable> failure = new Closure<>();
+		this.constructOfficeFloor().openOfficeFloor();
+		object.managedObjectExecuteContext.invokeProcess(0, exception, object, 0, (escalation) -> {
+			isComplete.value = true;
+			failure.value = escalation;
+		});
+
+		// Ensure escalation handled by office escalation procedure
+		assertTrue("Process should be complete", isComplete.value);
+		assertNull("Should be no process escalation", failure.value);
+		assertSame("Escalation handled by office escalation procedure", exception, work.escalation);
 	}
 
 	/**
@@ -56,7 +81,48 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 	 * {@link ManagedObjectSource} invoking {@link FlowCallback}.
 	 */
 	public void test_Escalation_HandledBy_FlowCallback() throws Throwable {
-		fail("TODO implement");
+
+		// Fail sourcing managed object
+		TestObject object = new TestObject("MO", this);
+		object.enhanceMetaData = (metaData) -> {
+			metaData.addFlow(Exception.class);
+		};
+		object.managingOfficeBuilder.setInputManagedObjectName("MO");
+		object.managingOfficeBuilder.linkProcess(0, "escalate");
+
+		// Construct functions
+		TestWork work = new TestWork();
+		this.constructFunction(work, "escalate").buildParameter();
+
+		// Invoke the task
+		final Exception exception = new Exception("TEST");
+		Closure<Boolean> isComplete = new Closure<>(false);
+		Closure<Throwable> failure = new Closure<>();
+		this.constructOfficeFloor().openOfficeFloor();
+		object.managedObjectExecuteContext.invokeProcess(0, exception, object, 0, (escalation) -> {
+			isComplete.value = true;
+			failure.value = escalation;
+		});
+
+		// Ensure escalation handled by flow callback
+		assertTrue("Process should be complete", isComplete.value);
+		assertSame("Should escalate to flow callback", exception, failure.value);
+	}
+
+	/**
+	 * Test functionality.
+	 */
+	public class TestWork {
+
+		public Exception escalation = null;
+
+		public void escalate(Exception exception) throws Exception {
+			throw exception;
+		}
+
+		public void handle(Exception escalation) {
+			this.escalation = escalation;
+		}
 	}
 
 	/**
@@ -99,195 +165,6 @@ public class ManagedObjectSourceHandleEscalationTest extends AbstractOfficeConst
 	 */
 	public void test_OfficeFloorEscalationFailure_HandledBy_Logging() throws Throwable {
 		fail("TODO implement");
-	}
-
-	/**
-	 * Ensures the {@link ManagedObjectSource} failure to handle
-	 * {@link Escalation} is handled by managing {@link Office}
-	 * {@link EscalationProcedure}.
-	 */
-	@Deprecated // to tests above
-	public void testEscalationFailureHandledByOfficeEscalationProcedure() throws Throwable {
-
-		// Create the escalation
-		Throwable escalation = new Throwable("TEST");
-
-		// Obtain the name of the office
-		String officeName = this.getOfficeName();
-
-		// Construct the managed object source
-		EscalationManagedObjectSource managedObjectSource = new EscalationManagedObjectSource(escalation);
-		ManagedObjectBuilder<Flows> moBuilder = this.constructManagedObject("MO", managedObjectSource, null);
-		ManagingOfficeBuilder<Flows> managingOfficeBuilder = moBuilder.setManagingOffice(officeName);
-		managingOfficeBuilder.setInputManagedObjectName("MO");
-		managingOfficeBuilder.linkProcess(Flows.FUNCTION_TRIGGERING_ESCALATION, "task");
-
-		// Flag managing office and invocation of flow
-
-		// Construct the work
-		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
-		this.constructFunction(work, "task").buildParameter();
-
-		// Capture office floor escalation (from managed object source)
-		final Throwable[] officeFloorEscalation = new Throwable[1];
-		this.getOfficeFloorBuilder().setEscalationHandler(new EscalationHandler() {
-			@Override
-			public void handleEscalation(Throwable escalation) throws Throwable {
-				officeFloorEscalation[0] = escalation;
-			}
-		});
-
-		// Create and open the office
-		this.constructOfficeFloor().openOfficeFloor();
-
-		final String FLOW_ARGUMENT = "FLOW_ARGUMENT";
-
-		// Invoke processing from the managed object
-		managedObjectSource.invokeProcessing(FLOW_ARGUMENT);
-
-		// Ensure argument passed to task
-		assertEquals("Incorrect parameter value for task", FLOW_ARGUMENT, work.taskParameter);
-
-		// Ensure managed object source escalation handled by OfficeFloor
-		assertEquals("Incorrect handle escalation", escalation, officeFloorEscalation[0]);
-	}
-
-	/**
-	 * Functionality to throw {@link Throwable} for escalation handling.
-	 */
-	public static class EscalationHandlerWork {
-
-		/**
-		 * Escalation to be thrown.
-		 */
-		private final Throwable escalation;
-
-		/**
-		 * Parameter on invoking the task method.
-		 */
-		public String taskParameter;
-
-		/**
-		 * Initiate.
-		 *
-		 * @param escalation
-		 *            Escalation to be thrown by the task.
-		 */
-		public EscalationHandlerWork(Throwable escalation) {
-			this.escalation = escalation;
-		}
-
-		/**
-		 * Task causing an escalation.
-		 *
-		 * @param parameter
-		 *            Argument passed from the {@link ManagedObjectSource}.
-		 * @throws Throwable
-		 *             Escalation.
-		 */
-		public void task(String parameter) throws Throwable {
-			this.taskParameter = parameter;
-			throw this.escalation;
-		}
-	}
-
-	/**
-	 * Flows.
-	 */
-	public static enum Flows {
-		FUNCTION_TRIGGERING_ESCALATION
-	}
-
-	/**
-	 * Invokes flow with an {@link EscalationHandler}.
-	 */
-	@TestSource
-	private class EscalationManagedObjectSource extends AbstractManagedObjectSource<None, Flows>
-			implements ManagedObject, FlowCallback {
-
-		/**
-		 * Failure to be thrown from {@link EscalationHandler} of this
-		 * {@link ManagedObjectSource}.
-		 */
-		private final Throwable escalationHandlerFailure;
-
-		/**
-		 * {@link ManagedObjectExecuteContext}.
-		 */
-		private ManagedObjectExecuteContext<Flows> executeContext;
-
-		/**
-		 * {@link FlowCallback} handled {@link Escalation}.
-		 */
-		private Throwable handledEscalation = null;
-
-		/**
-		 * Resets for use.
-		 * 
-		 * @param escalationHandlerFailure
-		 *            Failure to be thrown from {@link EscalationHandler} of
-		 *            this {@link ManagedObjectSource}.
-		 */
-		public EscalationManagedObjectSource(Throwable escalationHandlerFailure) {
-			this.escalationHandlerFailure = escalationHandlerFailure;
-		}
-
-		/**
-		 * Invokes processing.
-		 * 
-		 * @param argument
-		 *            Argument passed by {@link ManagedObjectSource}.
-		 */
-		public void invokeProcessing(String argument) {
-			this.executeContext.invokeProcess(Flows.FUNCTION_TRIGGERING_ESCALATION, argument, this, 0, this);
-		}
-
-		/*
-		 * ================= ManagedObjectSource =================
-		 */
-
-		@Override
-		protected void loadSpecification(SpecificationContext context) {
-		}
-
-		@Override
-		protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
-			context.setObjectClass(EscalationManagedObjectSource.class);
-			context.addFlow(Flows.FUNCTION_TRIGGERING_ESCALATION, String.class);
-		}
-
-		@Override
-		public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-			this.executeContext = context;
-		}
-
-		@Override
-		protected ManagedObject getManagedObject() throws Throwable {
-			return this;
-		}
-
-		/*
-		 * ================== ManagedObject ==================
-		 */
-
-		@Override
-		public Object getObject() throws Exception {
-			return this;
-		}
-
-		/*
-		 * ================= FlowCompletion ====================================
-		 */
-
-		@Override
-		public void run(Throwable escalation) throws Throwable {
-			this.handledEscalation = escalation;
-
-			// Determine if failure in handling escalation
-			if (escalationHandlerFailure != null) {
-				throw escalationHandlerFailure;
-			}
-		}
 	}
 
 }

@@ -33,7 +33,6 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
  * Ensure can have multiple {@link CoordinatingManagedObject} dependencies that
@@ -63,10 +62,13 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 
 		// Calculate expected coordination
 		String identifier = "0";
-		String expectedCoordination = identifier;
 
 		// Construct the seed value
-		this.constructManagedObject(identifier, identifier, officeName);
+		ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(identifier,
+				ChainCoordinatingManagedObjectSource.class, officeName);
+		moBuilder.addProperty(ChainCoordinatingManagedObjectSource.PROPERTY_IDENTIFIER, identifier);
+		moBuilder.addProperty(ChainCoordinatingManagedObjectSource.PROPERTY_OBTAIN_DEPENDENCY, "false");
+		moBuilder.setTimeout(10);
 		this.getOfficeBuilder().addProcessManagedObject(identifier, identifier);
 
 		// Create chaining of coordination (start identifier after seed)
@@ -78,15 +80,10 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 			// Obtain the identifier for previous in chain
 			final String PREVIOUS = String.valueOf(i - 1);
 
-			// Calculate the expected coordination after this chaining
-			expectedCoordination = identifier + "-" + expectedCoordination;
-
 			// Provide the chained coordinating managed object
-			ManagedObjectBuilder<None> moBuilder = this.constructManagedObject(identifier,
-					ChainCoordinatingManagedObjectSource.class, null);
-			moBuilder.addProperty(ChainCoordinatingManagedObjectSource.PROPERTY_PREFIX, identifier);
-			moBuilder.setManagingOffice(officeName);
-			moBuilder.setTimeout(100000); // 100 seconds (large, not fail test)
+			moBuilder = this.constructManagedObject(identifier, ChainCoordinatingManagedObjectSource.class, officeName);
+			moBuilder.addProperty(ChainCoordinatingManagedObjectSource.PROPERTY_IDENTIFIER, identifier);
+			moBuilder.setTimeout(10);
 			DependencyMappingBuilder dependencies = this.getOfficeBuilder().addProcessManagedObject(identifier,
 					identifier);
 			dependencies.mapDependency(0, PREVIOUS);
@@ -94,8 +91,7 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 
 		// Construct the work
 		ChainCoordinatingWork coordinate = new ChainCoordinatingWork();
-		ReflectiveFunctionBuilder task = this.constructFunction(coordinate, "service");
-		task.buildObject(identifier);
+		this.constructFunction(coordinate, "service").buildObject(identifier);
 
 		// Invoke the function
 		boolean[] isComplete = new boolean[] { false };
@@ -106,17 +102,18 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 
 			// Ensure have completion listener
 			// (otherwise should be complete)
-			assertTrue("Should have completion listener", listeners.size() > 0);
-
-			// Trigger completion of listeners
-			while (listeners.size() > 0) {
-				AsynchronousListener listener = listeners.remove(0);
-				listener.notifyComplete();
-			}
+			assertTrue("Should have completion listener", listeners.size() == 1);
+			AsynchronousListener listener = listeners.remove(0);
+			listener.notifyComplete();
 		}
 
 		// Verify the resulting coordination
-		assertEquals("Incorrect coordination", expectedCoordination, coordinate.coordination);
+		assertNotNull("Should have dependency", coordinate.dependency);
+		ChainCoordinatingManagedObject dependency = coordinate.dependency;
+		for (int i = 99; i >= 0; i--) {
+			assertEquals("Incorrect dependency", String.valueOf(i), dependency.identifier);
+			dependency = dependency.dependency;
+		}
 	}
 
 	/**
@@ -127,16 +124,16 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 		/**
 		 * Result of chained coordination.
 		 */
-		public volatile String coordination = null;
+		public volatile ChainCoordinatingManagedObject dependency = null;
 
 		/**
 		 * {@link ManagedFunction} to receive results of chained coordination.
 		 * 
-		 * @param coordination
+		 * @param dependency
 		 *            Result of chained coordination.
 		 */
-		public void service(String coordination) {
-			this.coordination = coordination;
+		public void service(ChainCoordinatingManagedObject dependency) {
+			this.dependency = dependency;
 		}
 	}
 
@@ -146,14 +143,24 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 	public static class ChainCoordinatingManagedObjectSource extends AbstractManagedObjectSource<Indexed, None> {
 
 		/**
-		 * Name of property to specify the prefix.
+		 * Name of property to specify the identifier.
 		 */
-		public static final String PROPERTY_PREFIX = "prefix";
+		public static final String PROPERTY_IDENTIFIER = "idenifier";
 
 		/**
-		 * Prefix to apply to dependency.
+		 * Name of property to specify whether to obtain dependency.
 		 */
-		private String prefix;
+		public static final String PROPERTY_OBTAIN_DEPENDENCY = "obtain.dependency";
+
+		/**
+		 * Identifier of the dependency.
+		 */
+		private String identifier;
+
+		/**
+		 * Indicates whether to obtain a dependency;
+		 */
+		private boolean isObtainDependency;
 
 		/*
 		 * ====================== ManagedObjectSource =======================
@@ -161,25 +168,31 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
-			context.addProperty(PROPERTY_PREFIX);
+			context.addProperty(PROPERTY_IDENTIFIER);
 		}
 
 		@Override
 		protected void loadMetaData(MetaDataContext<Indexed, None> context) throws Exception {
 			ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
-			// Obtain the prefix
-			this.prefix = mosContext.getProperty(PROPERTY_PREFIX);
+			// Obtain the identifier
+			this.identifier = mosContext.getProperty(PROPERTY_IDENTIFIER);
+
+			// Obtain whether to obtain dependency
+			this.isObtainDependency = Boolean
+					.parseBoolean(mosContext.getProperty(PROPERTY_OBTAIN_DEPENDENCY, Boolean.TRUE.toString()));
 
 			// Specify the meta-data
-			context.setObjectClass(String.class);
+			context.setObjectClass(ChainCoordinatingManagedObject.class);
 			context.setManagedObjectClass(ChainCoordinatingManagedObject.class);
-			context.addDependency(String.class).setLabel("Dependency");
+			if (this.isObtainDependency) {
+				context.addDependency(ChainCoordinatingManagedObject.class).setLabel("Dependency");
+			}
 		}
 
 		@Override
 		protected ManagedObject getManagedObject() throws Throwable {
-			return new ChainCoordinatingManagedObject(this.prefix);
+			return new ChainCoordinatingManagedObject(this.identifier, this.isObtainDependency);
 		}
 	}
 
@@ -190,9 +203,14 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 			implements CoordinatingManagedObject<Indexed>, AsynchronousManagedObject {
 
 		/**
-		 * Prefix to apply to the dependency.
+		 * Identifier of the dependency.
 		 */
-		private final String prefix;
+		public final String identifier;
+
+		/**
+		 * Flags whether to obtain a dependency.
+		 */
+		private final boolean isObtainDependency;
 
 		/**
 		 * {@link AsynchronousListener}.
@@ -200,18 +218,21 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 		private AsynchronousListener listener;
 
 		/**
-		 * Dependency to return as object.
+		 * Dependency.
 		 */
-		private String dependency;
+		public ChainCoordinatingManagedObject dependency;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param prefix
-		 *            Prefix to apply to dependency.
+		 * @param identifier
+		 *            Identifier of the dependency.
+		 * @param isObtainDependency
+		 *            Flags whether to obtain a dependency.
 		 */
-		public ChainCoordinatingManagedObject(String prefix) {
-			this.prefix = prefix;
+		public ChainCoordinatingManagedObject(String identifier, boolean isObtainDependency) {
+			this.identifier = identifier;
+			this.isObtainDependency = isObtainDependency;
 		}
 
 		/*
@@ -225,8 +246,11 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 
 		@Override
 		public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
-			// Obtain the dependency (applying prefix)
-			this.dependency = this.prefix + "-" + ((String) registry.getObject(0));
+
+			// Obtain the dependency
+			if (this.isObtainDependency) {
+				this.dependency = (ChainCoordinatingManagedObject) registry.getObject(0);
+			}
 
 			// Trigger asynchronous operation (so continues coordinating)
 			this.listener.notifyStarted();
@@ -237,8 +261,7 @@ public class ChainCoordinateManagedObjectTest extends AbstractOfficeConstructTes
 
 		@Override
 		public Object getObject() throws Throwable {
-			// Return the dependency
-			return this.dependency;
+			return this;
 		}
 	}
 

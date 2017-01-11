@@ -41,6 +41,7 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
@@ -139,6 +140,11 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 	/*
 	 * =================== Control =========================
 	 */
+
+	/**
+	 * {@link ManagedObjectExecuteContext}.
+	 */
+	public ManagedObjectExecuteContext<F> managedObjectExecuteContext;
 
 	/**
 	 * {@link ManagedObjectUser}.
@@ -321,7 +327,8 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 
 			// Provide the recycle function
 			if (TestManagedObject.this.isRecycleFunction) {
-				ManagedObjectFunctionBuilder<O, F> recycleBuilder = context.getManagedObjectSourceContext().getRecycleFunction(new TestRecycle());
+				ManagedObjectFunctionBuilder<O, F> recycleBuilder = context.getManagedObjectSourceContext()
+						.getRecycleFunction(new TestRecycle());
 				recycleBuilder.linkParameter(0, RecycleManagedObjectParameter.class);
 			}
 
@@ -329,6 +336,11 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 			if (TestManagedObject.this.enhanceMetaData != null) {
 				TestManagedObject.this.enhanceMetaData.accept(context);
 			}
+		}
+
+		@Override
+		public void start(ManagedObjectExecuteContext<F> context) throws Exception {
+			TestManagedObject.this.managedObjectExecuteContext = context;
 		}
 
 		@Override
