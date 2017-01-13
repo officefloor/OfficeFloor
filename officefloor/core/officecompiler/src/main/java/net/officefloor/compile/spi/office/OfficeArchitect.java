@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -24,8 +25,7 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Architect to structure the {@link Office}.

@@ -17,6 +17,9 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Flow;
@@ -29,9 +32,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.RegisteredGovernance;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link GovernanceContainer} implementation.

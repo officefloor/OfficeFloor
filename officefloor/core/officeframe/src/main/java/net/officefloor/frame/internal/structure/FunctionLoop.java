@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Executes the {@link FunctionState} instances.

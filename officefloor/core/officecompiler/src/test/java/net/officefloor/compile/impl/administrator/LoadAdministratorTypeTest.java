@@ -30,17 +30,17 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.administration.source.AdministratorDutyMetaData;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceMetaData;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -597,7 +597,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		public static Init init = null;
 
 		/**
-		 * Failure to obtain the {@link AdministratorMetaData}.
+		 * Failure to obtain the {@link AdministrationMetaData}.
 		 */
 		public static Error metaDataFailure = null;
 
@@ -660,7 +660,7 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public Administrator createAdministrator() {
+		public Administration createAdministrator() {
 			fail("Should not create Administrator");
 			return null;
 		}

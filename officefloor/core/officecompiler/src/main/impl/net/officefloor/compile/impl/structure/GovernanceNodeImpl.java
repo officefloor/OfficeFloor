@@ -35,8 +35,8 @@ import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Implementation of the {@link GovernanceNode}.

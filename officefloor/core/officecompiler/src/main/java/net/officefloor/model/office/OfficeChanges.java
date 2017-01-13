@@ -24,19 +24,19 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeTaskType;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.change.Change;
 
 /**

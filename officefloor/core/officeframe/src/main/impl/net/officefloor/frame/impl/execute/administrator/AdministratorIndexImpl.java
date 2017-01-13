@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.impl.execute.administrator;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorScope;
-import net.officefloor.frame.spi.administration.Administrator;
 
 /**
  * {@link AdministratorIndex} implementation.
@@ -34,7 +34,7 @@ public class AdministratorIndexImpl implements AdministratorIndex {
 	private final AdministratorScope administratorScope;
 
 	/**
-	 * Index of the {@link Administrator} within the {@link AdministratorScope}.
+	 * Index of the {@link Administration} within the {@link AdministratorScope}.
 	 */
 	private final int indexOfAdministratorWithinScope;
 
@@ -44,7 +44,7 @@ public class AdministratorIndexImpl implements AdministratorIndex {
 	 * @param administratorScope
 	 *            {@link AdministratorScope}.
 	 * @param indexOfAdministratorWithinScope
-	 *            Index of the {@link Administrator} within the
+	 *            Index of the {@link Administration} within the
 	 *            {@link AdministratorScope}.
 	 */
 	public AdministratorIndexImpl(AdministratorScope administratorScope,

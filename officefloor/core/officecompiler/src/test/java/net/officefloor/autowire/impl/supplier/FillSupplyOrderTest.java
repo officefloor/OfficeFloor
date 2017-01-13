@@ -39,10 +39,10 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

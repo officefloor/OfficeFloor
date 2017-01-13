@@ -25,13 +25,13 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamIdentifier;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

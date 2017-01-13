@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.startup;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**

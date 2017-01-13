@@ -34,7 +34,7 @@ import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuild
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * Utility class for testing a {@link ManagedFunctionSource}.

@@ -19,10 +19,10 @@ package net.officefloor.compile.administrator;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceProperty;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.api.administration.Administration;
 
 /**
  * Loads the {@link AdministratorType} from the {@link AdministratorSource}.
@@ -39,7 +39,7 @@ public interface AdministratorLoader {
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <A>
-	 *            {@link Administrator} key type.
+	 *            {@link Administration} key type.
 	 * @param <AS>
 	 *            {@link AdministratorSource} type.
 	 * @param administratorSourceClass
@@ -59,7 +59,7 @@ public interface AdministratorLoader {
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <A>
-	 *            {@link Administrator} key type.
+	 *            {@link Administration} key type.
 	 * @param <AS>
 	 *            {@link AdministratorSource} type.
 	 * @param administratorSourceClass

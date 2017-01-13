@@ -17,12 +17,12 @@
  */
 package net.officefloor.compile.governance;
 
-import net.officefloor.frame.api.build.GovernanceFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * <code>Type definition</code> of a {@link Governance}.

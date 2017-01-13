@@ -22,10 +22,10 @@ import java.util.List;
 
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ReflectiveFlow;

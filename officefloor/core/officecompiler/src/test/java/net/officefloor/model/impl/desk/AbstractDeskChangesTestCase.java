@@ -29,8 +29,8 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectT
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.Work;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;

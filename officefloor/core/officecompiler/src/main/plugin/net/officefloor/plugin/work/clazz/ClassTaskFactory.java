@@ -20,8 +20,8 @@ package net.officefloor.plugin.work.clazz;
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * {@link ManagedFunctionFactory} for the {@link ClassTask}.

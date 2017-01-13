@@ -22,7 +22,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * {@link OfficeGovernance} node.

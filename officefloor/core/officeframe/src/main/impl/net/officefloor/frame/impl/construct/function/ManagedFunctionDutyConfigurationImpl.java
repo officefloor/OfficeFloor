@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.impl.construct.function;
 
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorScope;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
 
 /**
  * {@link ManagedFunctionDutyConfiguration} implementation.
@@ -31,17 +31,17 @@ public class ManagedFunctionDutyConfigurationImpl<A extends Enum<A>> implements
 		ManagedFunctionDutyConfiguration<A> {
 
 	/**
-	 * Name of the {@link Administrator} within the {@link AdministratorScope}.
+	 * Name of the {@link Administration} within the {@link AdministratorScope}.
 	 */
 	private final String scopeAdministratorName;
 
 	/**
-	 * Name identifying the {@link Duty} of the {@link Administrator}.
+	 * Name identifying the {@link AdministrationDuty} of the {@link Administration}.
 	 */
 	private final String dutyName;
 
 	/**
-	 * Key identifying the {@link Duty} of the {@link Administrator}.
+	 * Key identifying the {@link AdministrationDuty} of the {@link Administration}.
 	 */
 	private final A dutyKey;
 
@@ -49,10 +49,10 @@ public class ManagedFunctionDutyConfigurationImpl<A extends Enum<A>> implements
 	 * Initiate.
 	 * 
 	 * @param scopeAdministratorName
-	 *            Name of the {@link Administrator} within the
+	 *            Name of the {@link Administration} within the
 	 *            {@link AdministratorScope}.
 	 * @param dutyName
-	 *            Name identifying {@link Duty} of the {@link Administrator}.
+	 *            Name identifying {@link AdministrationDuty} of the {@link Administration}.
 	 */
 	public ManagedFunctionDutyConfigurationImpl(String scopeAdministratorName,
 			String dutyName) {
@@ -65,10 +65,10 @@ public class ManagedFunctionDutyConfigurationImpl<A extends Enum<A>> implements
 	 * Initiate.
 	 * 
 	 * @param scopeAdministratorName
-	 *            Name of the {@link Administrator} within the
+	 *            Name of the {@link Administration} within the
 	 *            {@link AdministratorScope}.
 	 * @param dutyKey
-	 *            Key identifying the {@link Duty} of the {@link Administrator}.
+	 *            Key identifying the {@link AdministrationDuty} of the {@link Administration}.
 	 */
 	public ManagedFunctionDutyConfigurationImpl(String scopeAdministratorName, A dutyKey) {
 		this.scopeAdministratorName = scopeAdministratorName;

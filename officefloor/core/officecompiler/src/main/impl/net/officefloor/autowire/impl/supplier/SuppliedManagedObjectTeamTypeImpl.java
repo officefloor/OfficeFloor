@@ -19,7 +19,7 @@ package net.officefloor.autowire.impl.supplier;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectTeamType;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * {@link SuppliedManagedObjectTeamType} implementation.

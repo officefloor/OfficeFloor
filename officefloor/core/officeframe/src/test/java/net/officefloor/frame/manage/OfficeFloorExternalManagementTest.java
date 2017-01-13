@@ -20,7 +20,7 @@ package net.officefloor.frame.manage;
 import java.sql.Connection;
 import java.util.Arrays;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;

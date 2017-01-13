@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.section;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Provides type qualification for a {@link ManagedObject}.

@@ -24,16 +24,16 @@ import junit.framework.TestCase;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Reflective {@link ManagedFunctionBuilder}.

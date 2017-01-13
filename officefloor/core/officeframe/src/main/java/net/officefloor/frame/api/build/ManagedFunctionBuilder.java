@@ -17,20 +17,17 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Builder of the {@link ManagedFunction}.
@@ -104,56 +101,36 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	void linkManagedObject(int managedObjectIndex, String scopeManagedObjectName, Class<?> objectType);
 
 	/**
-	 * Links in a {@link Duty} to be executed before the
+	 * Adds {@link Administration} to be undertaken before this
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param <A>
-	 *            {@link Administrator} key type.
-	 * @param scopeAdministratorName
-	 *            Name of the {@link Administrator} within the
-	 *            {@link AdministratorScope}.
-	 * @param dutyKey
-	 *            Key identifying the {@link Duty}.
+	 * @param administrationName
+	 *            Name of the {@link Administration}.
+	 * @param extension
+	 *            Extension type for {@link Administration}.
+	 * @param administrationFactory
+	 *            {@link AdministrationFactory}.
+	 * @return {@link AdministrationBuilder} to build the
+	 *         {@link Administration}.
 	 */
-	<A extends Enum<A>> void linkPreFunctionAdministration(String scopeAdministratorName, A dutyKey);
+	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder preAdminister(String administrationName,
+			Class<E> extension, AdministrationFactory<E, f, G> administrationFactory);
 
 	/**
-	 * Links in a {@link Duty} to be executed before the
+	 * Adds {@link Administration} to be undertaken after this
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param scopeAdministratorName
-	 *            Name of the {@link Administrator} within the
-	 *            {@link AdministratorScope}.
-	 * @param dutyName
-	 *            Name identifying the {@link Duty} (as per
-	 *            {@link AdministratorDutyMetaData}).
+	 * @param administrationName
+	 *            Name of the {@link Administration}.
+	 * @param extension
+	 *            Extension type for {@link Administration}.
+	 * @param administrationFactory
+	 *            {@link AdministrationFactory}.
+	 * @return {@link AdministrationBuilder} to build the
+	 *         {@link Administration}.
 	 */
-	void linkPreFunctionAdministration(String scopeAdministratorName, String dutyName);
-
-	/**
-	 * Links in a {@link Duty} to be executed after the {@link ManagedFunction}.
-	 * 
-	 * @param <A>
-	 *            {@link Administrator} key type.
-	 * @param scopeAdministratorName
-	 *            Name of the {@link Administrator} within the
-	 *            {@link AdministratorScope}.
-	 * @param dutyKey
-	 *            Key identifying the {@link Duty}.
-	 */
-	<A extends Enum<A>> void linkPostFunctionAdministration(String scopeAdministratorName, A dutyKey);
-
-	/**
-	 * Links in a {@link Duty} to be executed after the {@link ManagedFunction}.
-	 * 
-	 * @param scopeAdministratorName
-	 *            Name of the {@link Administrator} within the
-	 *            {@link AdministratorScope}.
-	 * @param dutyName
-	 *            Name identifying the {@link Duty} (as per
-	 *            {@link AdministratorDutyMetaData}).
-	 */
-	void linkPostFunctionAdministration(String scopeAdministratorName, String dutyName);
+	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder postAdminister(String administrationName,
+			Class<E> extension, AdministrationFactory<E, f, G> administrationFactory);
 
 	/**
 	 * <p>
@@ -173,7 +150,7 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * not requiring the {@link Governance}. Note that this does allow the
 	 * {@link Governance} to stay active should the {@link Escalation}
 	 * {@link ManagedFunction} require the {@link Governance}.</li>
-	 * <li>Manually managed by an {@link Administrator}</li>
+	 * <li>Manually managed by an {@link Administration}</li>
 	 * </ol>
 	 * 
 	 * @param governanceName
@@ -201,24 +178,5 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * @return {@link DependencyMappingBuilder}.
 	 */
 	DependencyMappingBuilder addManagedObject(String functionManagedObjectName, String officeManagedObjectName);
-
-	/**
-	 * Adds a {@link Administrator} bound to this {@link ManagedFunction}.
-	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link Administrator} type.
-	 * @param <AS>
-	 *            {@link AdministratorSource} type.
-	 * @param functionAdministratorName
-	 *            Name of the {@link Administrator} to be referenced locally by
-	 *            this {@link ManagedFunction}.
-	 * @param adminsistratorSource
-	 *            {@link AdministratorSource} class.
-	 * @return {@link AdministratorBuilder} for the {@link Administrator}.
-	 */
-	<E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministratorBuilder<A> addAdministrator(
-			String functionAdministratorName, Class<AS> adminsistratorSource);
 
 }

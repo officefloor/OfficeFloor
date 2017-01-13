@@ -17,8 +17,8 @@
  */
 package net.officefloor.compile.spi.governance.source;
 
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Describes a {@link Flow} required by the {@link Governance}.

@@ -19,8 +19,8 @@ package net.officefloor.frame.internal.structure;
 
 import java.util.List;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Container managing a {@link ManagedObject}.

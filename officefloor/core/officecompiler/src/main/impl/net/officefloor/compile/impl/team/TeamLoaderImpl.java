@@ -28,15 +28,15 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamIdentifier;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceProperty;
+import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceProperty;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
 
 /**
  * {@link TeamLoader} implementation.

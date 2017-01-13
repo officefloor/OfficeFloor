@@ -20,9 +20,9 @@ package net.officefloor.frame.internal.configuration;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Configuration for an {@link OfficeFloor}.

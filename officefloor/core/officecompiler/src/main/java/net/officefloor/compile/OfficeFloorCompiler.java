@@ -41,6 +41,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.source.OfficeSource;
@@ -48,18 +49,17 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * <p>
@@ -671,7 +671,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <A>
-	 *            {@link Administrator} type keys.
+	 *            {@link Administration} type keys.
 	 * @param <S>
 	 *            {@link AdministratorSource} type.
 	 * @param alias

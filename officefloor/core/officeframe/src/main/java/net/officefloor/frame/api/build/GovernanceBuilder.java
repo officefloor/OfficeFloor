@@ -17,14 +17,14 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Builds the {@link Governance}.

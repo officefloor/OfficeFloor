@@ -20,12 +20,12 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Builder of an {@link OfficeFloor}.

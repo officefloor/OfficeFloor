@@ -17,14 +17,14 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.AdministrationContext;
+import net.officefloor.frame.api.administration.DutyKey;
+import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyContext;
-import net.officefloor.frame.spi.administration.DutyKey;
-import net.officefloor.frame.spi.administration.GovernanceManager;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
 
 /**
  * {@link MockTransaction} by {@link MockTransactionalGovernanceFactory}
@@ -36,7 +36,7 @@ public class MockTransactionalAdministratorSource
 		extends
 		AbstractAdministratorSource<MockTransaction, MockTransactionalAdministratorSource.TransactionDutyKey>
 		implements
-		Administrator<MockTransaction, MockTransactionalAdministratorSource.TransactionDutyKey> {
+		Administration<MockTransaction, MockTransactionalAdministratorSource.TransactionDutyKey> {
 
 	/**
 	 * Key to obtain the {@link GovernanceManager}.
@@ -46,7 +46,7 @@ public class MockTransactionalAdministratorSource
 	}
 
 	/**
-	 * {@link Duty} keys for the {@link MockTransaction}.
+	 * {@link AdministrationDuty} keys for the {@link MockTransaction}.
 	 */
 	public static enum TransactionDutyKey {
 		BEGIN, COMMIT, ROLLBACK
@@ -72,7 +72,7 @@ public class MockTransactionalAdministratorSource
 	}
 
 	@Override
-	public Administrator<MockTransaction, TransactionDutyKey> createAdministrator()
+	public Administration<MockTransaction, TransactionDutyKey> createAdministrator()
 			throws Throwable {
 		return this;
 	}
@@ -82,16 +82,16 @@ public class MockTransactionalAdministratorSource
 	 */
 
 	@Override
-	public Duty<MockTransaction, ?, ?> getDuty(
+	public AdministrationDuty<MockTransaction, ?, ?> getDuty(
 			DutyKey<TransactionDutyKey> dutyKey) {
 		return new MockTransactionalDuty(dutyKey);
 	}
 
 	/**
-	 * Mock transactional {@link Duty}.
+	 * Mock transactional {@link AdministrationDuty}.
 	 */
 	public static class MockTransactionalDuty implements
-			Duty<MockTransaction, None, TransactionGovernanceKey> {
+			AdministrationDuty<MockTransaction, None, TransactionGovernanceKey> {
 
 		/**
 		 * {@link DutyKey}.
@@ -114,7 +114,7 @@ public class MockTransactionalAdministratorSource
 
 		@Override
 		public void doDuty(
-				DutyContext<MockTransaction, None, TransactionGovernanceKey> context)
+				AdministrationContext<MockTransaction, None, TransactionGovernanceKey> context)
 				throws Throwable {
 
 			// Obtain the governance manager

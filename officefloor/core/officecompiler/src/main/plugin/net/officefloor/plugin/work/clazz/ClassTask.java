@@ -22,9 +22,9 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * {@link ManagedFunction} to invoke a method on the {@link Work} object.

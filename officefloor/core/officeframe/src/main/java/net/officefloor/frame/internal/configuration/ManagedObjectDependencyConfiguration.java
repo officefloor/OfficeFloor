@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Configuration of {@link ManagedObject} dependency to another

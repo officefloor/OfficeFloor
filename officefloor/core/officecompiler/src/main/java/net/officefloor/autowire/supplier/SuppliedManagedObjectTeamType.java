@@ -18,8 +18,8 @@
 package net.officefloor.autowire.supplier;
 
 import net.officefloor.autowire.AutoWire;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * <code>Type definition</code> of a {@link Team} required by the Supplied

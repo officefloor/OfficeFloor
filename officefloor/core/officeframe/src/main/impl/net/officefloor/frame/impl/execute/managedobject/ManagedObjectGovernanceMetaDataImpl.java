@@ -17,12 +17,12 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 
 /**
  * {@link ManagedObjectGovernanceMetaData} implementation.

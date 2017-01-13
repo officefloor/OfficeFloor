@@ -24,8 +24,8 @@ import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.type.TypeContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Node representing an instance use of a {@link ManagedObject}.

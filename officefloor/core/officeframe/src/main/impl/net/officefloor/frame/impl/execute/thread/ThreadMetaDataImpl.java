@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
@@ -44,9 +44,9 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	private final GovernanceMetaData<?, ?>[] governanceMetaData;
 
 	/**
-	 * {@link AdministratorMetaData} instances.
+	 * {@link AdministrationMetaData} instances.
 	 */
-	private final AdministratorMetaData<?, ?>[] administratorMetaData;
+	private final AdministrationMetaData<?, ?>[] administratorMetaData;
 
 	/**
 	 * {@link Office} {@link EscalationProcedure}.
@@ -66,14 +66,14 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	 * @param governanceMetaData
 	 *            {@link GovernanceMetaData} instances.
 	 * @param administratorMetaData
-	 *            {@link AdministratorMetaData} instances.
+	 *            {@link AdministrationMetaData} instances.
 	 * @param officeEscalationProcedure
 	 *            {@link Office} {@link EscalationProcedure}.
 	 * @param officeFloorEscalation
 	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 */
 	public ThreadMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
-			GovernanceMetaData<?, ?>[] governanceMetaData, AdministratorMetaData<?, ?>[] administratorMetaData,
+			GovernanceMetaData<?, ?>[] governanceMetaData, AdministrationMetaData<?, ?>[] administratorMetaData,
 			EscalationProcedure officeEscalationProcedure, EscalationFlow officeFloorEscalation) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.governanceMetaData = governanceMetaData;
@@ -97,7 +97,7 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	}
 
 	@Override
-	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
+	public AdministrationMetaData<?, ?>[] getAdministratorMetaData() {
 		return this.administratorMetaData;
 	}
 

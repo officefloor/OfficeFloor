@@ -19,8 +19,8 @@ package net.officefloor.frame.impl.spi.team;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * {@link Team} that uses a specific new worker dedicated to each new

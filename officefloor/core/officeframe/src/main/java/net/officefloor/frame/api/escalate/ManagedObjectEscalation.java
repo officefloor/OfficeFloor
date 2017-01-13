@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.escalate;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * <p>

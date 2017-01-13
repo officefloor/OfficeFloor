@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.managedfunction;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * <code>Type definition</code> of a dependent {@link Object} required by the

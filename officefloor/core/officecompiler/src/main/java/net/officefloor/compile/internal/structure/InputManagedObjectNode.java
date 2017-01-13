@@ -18,8 +18,8 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Node representing an instance use of an Input {@link ManagedObject}.

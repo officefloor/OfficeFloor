@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Context for the execution of a {@link ManagedFunction}.
@@ -50,14 +50,14 @@ public interface ManagedFunctionLogicContext {
 	/**
 	 * Invokes a {@link Flow}.
 	 * 
-	 * @param flowMetaData
-	 *            {@link FlowMetaData}.
+	 * @param flowIndex
+	 *            Index of the {@link Flow}.
 	 * @param parameter
 	 *            Parameter for the initial {@link ManagedFunction} of the
 	 *            {@link Flow}.
 	 * @param callback
 	 *            Optional {@link FlowCallback}. May be <code>null</code>.
 	 */
-	void doFlow(FlowMetaData flowMetaData, Object parameter, FlowCallback callback);
+	void doFlow(int flowIndex, Object parameter, FlowCallback callback);
 
 }

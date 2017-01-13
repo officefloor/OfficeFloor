@@ -25,8 +25,8 @@ import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * {@link SectionTask} node.

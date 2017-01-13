@@ -18,8 +18,8 @@
 package net.officefloor.autowire.supplier;
 
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * Supplied {@link Team} for the {@link SuppliedManagedObject}.

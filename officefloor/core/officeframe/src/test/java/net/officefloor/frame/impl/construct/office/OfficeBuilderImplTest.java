@@ -20,8 +20,8 @@ package net.officefloor.frame.impl.construct.office;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 

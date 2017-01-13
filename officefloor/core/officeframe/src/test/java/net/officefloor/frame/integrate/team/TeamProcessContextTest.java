@@ -17,14 +17,14 @@
  */
 package net.officefloor.frame.integrate.team;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.ProcessContextListener;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.ProcessContextListener;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 

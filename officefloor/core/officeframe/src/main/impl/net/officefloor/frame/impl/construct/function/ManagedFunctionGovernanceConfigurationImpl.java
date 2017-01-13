@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.impl.construct.function;
 
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * {@link ManagedFunctionGovernanceConfiguration} implementation.

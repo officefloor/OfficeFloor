@@ -38,14 +38,14 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeDuty;
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * {@link AdministratorNode} implementation.
@@ -60,7 +60,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	private final String administratorName;
 
 	/**
-	 * {@link PropertyList} to source the {@link Administrator}.
+	 * {@link PropertyList} to source the {@link Administration}.
 	 */
 	private final PropertyList properties;
 
@@ -248,7 +248,7 @@ public class AdministratorNodeImpl implements AdministratorNode {
 		}
 
 		// Build the administrator
-		AdministratorBuilder<?> adminBuilder = officeBuilder
+		AdministrationBuilder<?> adminBuilder = officeBuilder
 				.addThreadAdministrator(this.administratorName,
 						administratorSourceClass);
 		for (Property property : this.properties) {

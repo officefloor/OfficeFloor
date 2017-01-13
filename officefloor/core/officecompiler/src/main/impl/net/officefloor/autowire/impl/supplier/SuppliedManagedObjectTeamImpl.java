@@ -19,8 +19,8 @@ package net.officefloor.autowire.impl.supplier;
 
 import net.officefloor.autowire.supplier.SuppliedManagedObjectTeam;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * {@link SuppliedManagedObjectTeam} implementation.

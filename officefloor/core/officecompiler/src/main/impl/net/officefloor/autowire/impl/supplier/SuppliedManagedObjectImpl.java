@@ -21,7 +21,7 @@ import net.officefloor.autowire.supplier.SuppliedManagedObject;
 import net.officefloor.autowire.supplier.SuppliedManagedObjectTeam;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link SuppliedManagedObject} implementation.

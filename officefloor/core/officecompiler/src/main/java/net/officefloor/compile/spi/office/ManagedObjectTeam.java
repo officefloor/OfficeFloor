@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * {@link Team} required by the {@link OfficeManagedObject}.

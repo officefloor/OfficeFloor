@@ -28,11 +28,19 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.DutyKey;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.duty.ManagedFunctionDutyAssociationImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
@@ -40,7 +48,7 @@ import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
@@ -61,7 +69,7 @@ import net.officefloor.frame.internal.construct.RawManagedFunctionMetaData;
 import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -73,14 +81,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyKey;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for a {@link ManagedFunction}.
@@ -300,7 +300,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 				.getOfficeScopeAdministrators();
 
 		// Obtain the function bound administrators
-		AdministratorConfiguration<?, ?>[] adminConfiguration = configuration.getAdministratorConfiguration();
+		AdministrationConfiguration<?, ?>[] adminConfiguration = configuration.getAdministratorConfiguration();
 		RawBoundAdministratorMetaData<?, ?>[] functionBoundAdmins;
 		if ((adminConfiguration == null) || (adminConfiguration.length == 0)) {
 			functionBoundAdmins = new RawBoundAdministratorMetaData[0];
@@ -428,7 +428,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 		}
 
 		// Create the listing of function bound administrator meta-data
-		AdministratorMetaData<?, ?>[] functionBoundAdminMetaData = new AdministratorMetaData[functionBoundAdmins.length];
+		AdministrationMetaData<?, ?>[] functionBoundAdminMetaData = new AdministrationMetaData[functionBoundAdmins.length];
 		for (int i = 0; i < functionBoundAdminMetaData.length; i++) {
 			functionBoundAdminMetaData[i] = functionBoundAdmins[i].getAdministratorMetaData();
 		}
@@ -516,7 +516,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			// Obtain the scope administrator name
 			String scopeAdminName = duty.getScopeAdministratorName();
 			if (ConstructUtil.isBlank(scopeAdminName)) {
-				issues.addIssue(AssetType.FUNCTION, functionName, "No " + Administrator.class.getSimpleName()
+				issues.addIssue(AssetType.FUNCTION, functionName, "No " + Administration.class.getSimpleName()
 						+ " name for " + (isPreNotPost ? "pre" : "post") + "-function at index " + taskDuties.size());
 				continue; // no administrator name
 			}
@@ -525,7 +525,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			RawBoundAdministratorMetaData<?, ?> scopeAdmin = functionScopeAdmin.get(scopeAdminName);
 			if (scopeAdmin == null) {
 				issues.addIssue(AssetType.FUNCTION, functionName,
-						"Can not find scope " + Administrator.class.getSimpleName() + " '" + scopeAdminName + "'");
+						"Can not find scope " + Administration.class.getSimpleName() + " '" + scopeAdminName + "'");
 				continue; // no administrator
 			}
 
@@ -540,9 +540,9 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 				if (dutyKey == null) {
 					// Must have duty key
 					issues.addIssue(AssetType.FUNCTION, functionName,
-							"No " + Duty.class.getSimpleName() + " for " + (isPreNotPost ? "pre" : "post") + "-"
+							"No " + AdministrationDuty.class.getSimpleName() + " for " + (isPreNotPost ? "pre" : "post") + "-"
 									+ ManagedFunction.class.getSimpleName() + " at index " + taskDuties.size() + " ("
-									+ Duty.class.getSimpleName() + " key=" + key + ")");
+									+ AdministrationDuty.class.getSimpleName() + " key=" + key + ")");
 					continue; // no duty
 				}
 			} else {
@@ -550,7 +550,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 				String dutyName = duty.getDutyName();
 				if (ConstructUtil.isBlank(dutyName)) {
 					issues.addIssue(AssetType.FUNCTION, functionName,
-							"No " + Duty.class.getSimpleName() + " name/key for pre-"
+							"No " + AdministrationDuty.class.getSimpleName() + " name/key for pre-"
 									+ ManagedFunction.class.getSimpleName() + " at index " + taskDuties.size());
 					continue; // must have means to identify duty
 				}
@@ -558,9 +558,9 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 				if (dutyKey == null) {
 					// Must have duty key
 					issues.addIssue(AssetType.FUNCTION, functionName,
-							"No " + Duty.class.getSimpleName() + " for " + (isPreNotPost ? "pre" : "post") + "-"
+							"No " + AdministrationDuty.class.getSimpleName() + " for " + (isPreNotPost ? "pre" : "post") + "-"
 									+ ManagedFunction.class.getSimpleName() + " at index " + taskDuties.size() + " ("
-									+ Duty.class.getSimpleName() + " name=" + dutyName + ")");
+									+ AdministrationDuty.class.getSimpleName() + " name=" + dutyName + ")");
 					continue; // no duty
 				}
 			}

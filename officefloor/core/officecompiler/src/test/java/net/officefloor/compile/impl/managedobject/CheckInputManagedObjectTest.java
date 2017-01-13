@@ -24,9 +24,9 @@ import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

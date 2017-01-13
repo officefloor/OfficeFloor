@@ -17,7 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.administrator;
 
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.DutyKey;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
@@ -25,17 +29,13 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.DutyKey;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.team.Team;
 
 /**
- * Implementation of the {@link AdministratorMetaData}.
+ * Implementation of the {@link AdministrationMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> implements AdministratorMetaData<E, A> {
+public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> implements AdministrationMetaData<E, A> {
 
 	/**
 	 * {@link AdministratorSource}.
@@ -113,7 +113,7 @@ public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> impl
 
 	@Override
 	public String getFunctionName() {
-		return Administrator.class.getSimpleName() + "-" + this.administratorSource.getClass().getName();
+		return Administration.class.getSimpleName() + "-" + this.administratorSource.getClass().getName();
 	}
 
 	@Override

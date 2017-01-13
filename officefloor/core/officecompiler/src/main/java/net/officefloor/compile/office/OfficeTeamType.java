@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.office;
 
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * <code>Type definition</code> of a {@link Team} required by the

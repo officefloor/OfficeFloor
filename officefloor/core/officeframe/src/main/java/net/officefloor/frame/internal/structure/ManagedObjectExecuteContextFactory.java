@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 
 /**
  * Factory for the creation of the {@link ManagedObjectExecuteContext}.

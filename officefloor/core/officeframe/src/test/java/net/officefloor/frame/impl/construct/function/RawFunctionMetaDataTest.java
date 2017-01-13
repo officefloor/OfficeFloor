@@ -26,15 +26,21 @@ import java.util.Set;
 
 import org.easymock.AbstractMatcher;
 
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
@@ -55,7 +61,7 @@ import net.officefloor.frame.internal.construct.RawManagedFunctionMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -69,12 +75,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -581,13 +581,13 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 	/**
 	 * Ensure can construct {@link ManagedFunction} with a single
-	 * {@link ManagedFunction} bound {@link Administrator}.
+	 * {@link ManagedFunction} bound {@link Administration}.
 	 */
 	public void testSingleFunctionBoundAdministrator() {
 
 		final RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = this
 				.createMock(RawBoundAdministratorMetaData.class);
-		final AdministratorMetaData<?, ?> adminMetaData = this.createMock(AdministratorMetaData.class);
+		final AdministrationMetaData<?, ?> adminMetaData = this.createMock(AdministrationMetaData.class);
 
 		// Record single function bound managed object
 		this.record_nameFactoryTeam();
@@ -605,14 +605,14 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.verifyMockObjects();
 
 		// Verify work meta-data
-		AdministratorMetaData<?, ?>[] workAdminMetaData = metaData.getAdministratorMetaData();
+		AdministrationMetaData<?, ?>[] workAdminMetaData = metaData.getAdministratorMetaData();
 		assertEquals("Should have a work bound administrator meta-data", 1, workAdminMetaData.length);
 		assertEquals("Incorrect administrator meta-data", adminMetaData, workAdminMetaData[0]);
 	}
 
 	/**
 	 * Ensure can construct {@link ManagedFunction} with a single {@link Office}
-	 * scoped {@link Administrator}.
+	 * scoped {@link Administration}.
 	 */
 	public void testSingleOfficeScopeAdministrator() {
 
@@ -623,8 +623,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
 				.createMock(ManagedFunctionDutyConfiguration.class);
 		final AdministratorIndex adminIndex = this.createMock(AdministratorIndex.class);
-		final net.officefloor.frame.spi.administration.DutyKey<?> dutyKey = this
-				.createMock(net.officefloor.frame.spi.administration.DutyKey.class);
+		final net.officefloor.frame.api.administration.DutyKey<?> dutyKey = this
+				.createMock(net.officefloor.frame.api.administration.DutyKey.class);
 
 		// Record single function bound managed object
 		this.record_nameFactoryTeam();
@@ -650,7 +650,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.verifyMockObjects();
 
 		// Verify work meta-data
-		AdministratorMetaData<?, ?>[] functionAdminMetaData = metaData.getAdministratorMetaData();
+		AdministrationMetaData<?, ?>[] functionAdminMetaData = metaData.getAdministratorMetaData();
 		assertEquals("Should not have administrator meta-data as office scoped", 0, functionAdminMetaData.length);
 		ManagedFunctionDutyAssociation<?>[] dutyAssociations = metaData.getPreAdministrationMetaData();
 		assertEquals("Should have pre function duty association", 1, dutyAssociations.length);
@@ -659,7 +659,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	}
 
 	/**
-	 * Ensure issue if no function scoped {@link Administrator}.
+	 * Ensure issue if no function scoped {@link Administration}.
 	 */
 	public void testNoFunctionScopedAdministrator() {
 
@@ -982,7 +982,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	}
 
 	/**
-	 * Ensure issue if no {@link Administrator} name.
+	 * Ensure issue if no {@link Administration} name.
 	 */
 	public void testNoAdministratorName() {
 
@@ -1013,7 +1013,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	}
 
 	/**
-	 * Ensure issue if unknown {@link Administrator}.
+	 * Ensure issue if unknown {@link Administration}.
 	 */
 	public void testUnknownAdministrator() {
 
@@ -1044,7 +1044,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	}
 
 	/**
-	 * Ensure issue if no {@link Duty} name.
+	 * Ensure issue if no {@link AdministrationDuty} name.
 	 */
 	public void testNoDutyName() {
 
@@ -1896,7 +1896,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	}
 
 	/**
-	 * Records bounding {@link Administrator} instances to the
+	 * Records bounding {@link Administration} instances to the
 	 * {@link ManagedFunction}.
 	 * 
 	 * @param nameAdminPairs
@@ -1917,7 +1917,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		// Record bounding administrators to work
 		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getOfficeScopeAdministrators(),
 				this.officeScopeAdministrators);
-		AdministratorConfiguration<?, ?>[] adminConfiguration = new AdministratorConfiguration[adminCount];
+		AdministrationConfiguration<?, ?>[] adminConfiguration = new AdministrationConfiguration[adminCount];
 		this.recordReturn(this.configuration, this.configuration.getAdministratorConfiguration(), adminConfiguration);
 		if (adminConfiguration.length > 0) {
 			Map<String, TeamManagement> officeTeams = new HashMap<String, TeamManagement>(0);
@@ -1945,7 +1945,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	}
 
 	/**
-	 * Records no {@link Administrator} {@link Duty} instances for
+	 * Records no {@link Administration} {@link AdministrationDuty} instances for
 	 * {@link ManagedFunction}.
 	 */
 	private void record_NoAdministration() {

@@ -18,10 +18,10 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Represents a sub-graph of the {@link ManagedFunctionContainerImpl} graph

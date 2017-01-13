@@ -20,21 +20,21 @@ package net.officefloor.frame.impl.construct.team;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamIdentifier;
+import net.officefloor.frame.api.team.source.ProcessContextListener;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.ProcessContextListener;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Raw {@link Team} meta-data implementation.

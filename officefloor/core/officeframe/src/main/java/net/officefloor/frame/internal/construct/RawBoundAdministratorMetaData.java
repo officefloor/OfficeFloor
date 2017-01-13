@@ -17,39 +17,29 @@
  */
 package net.officefloor.frame.internal.construct;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.internal.structure.AdministratorIndex;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.AdministrationDuty;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyKey;
-import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 
 /**
- * Raw meta-data of a bound {@link Administrator}.
+ * Raw meta-data of a bound {@link Administration}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface RawBoundAdministratorMetaData<E, A extends Enum<A>> {
+public interface RawBoundAdministratorMetaData<E, F extends Enum<F>, G extends Enum<G>> {
 
 	/**
-	 * Obtains the name the {@link Administrator} is bound under.
+	 * Obtains the name the {@link Administration} is bound under.
 	 * 
-	 * @return Name the {@link Administrator} is bound under.
+	 * @return Name the {@link Administration} is bound under.
 	 */
-	String getBoundAdministratorName();
-
-	/**
-	 * Obtains the {@link AdministratorIndex}.
-	 * 
-	 * @return {@link AdministratorIndex}.
-	 */
-	AdministratorIndex getAdministratorIndex();
+	String getBoundAdministrationName();
 
 	/**
 	 * Obtains the listing of the {@link RawBoundManagedObjectMetaData} of the
@@ -61,33 +51,13 @@ public interface RawBoundAdministratorMetaData<E, A extends Enum<A>> {
 	RawBoundManagedObjectMetaData[] getAdministeredRawBoundManagedObjects();
 
 	/**
-	 * Obtains the {@link AdministratorMetaData} for this {@link Administrator}.
+	 * Obtains the {@link AdministrationMetaData} for this
+	 * {@link AdministrationDuty}.
 	 * 
-	 * @return {@link AdministratorMetaData} for this {@link Administrator}.
+	 * @return {@link AdministrationMetaData} for this
+	 *         {@link AdministrationDuty}.
 	 */
-	AdministratorMetaData<E, A> getAdministratorMetaData();
-
-	/**
-	 * Obtains the {@link DutyKey} for the key identifying a {@link Duty}.
-	 * 
-	 * @param key
-	 *            Key identifying a {@link Duty} as per
-	 *            {@link AdministratorDutyMetaData}.
-	 * @return {@link DutyKey} or <code>null</code> if could not find the
-	 *         {@link Duty}.
-	 */
-	DutyKey<A> getDutyKey(Enum<?> key);
-
-	/**
-	 * Obtains the {@link DutyKey} for the name identifying the {@link Duty}.
-	 * 
-	 * @param dutyName
-	 *            Name identifying a {@link Duty} as per
-	 *            {@link AdministratorDutyMetaData}.
-	 * @return {@link DutyKey} or <code>null</code> if could not find the
-	 *         {@link Duty}.
-	 */
-	DutyKey<A> getDutyKey(String dutyName);
+	AdministrationMetaData<E, F, G> getAdministratorMetaData();
 
 	/**
 	 * Links the {@link ManagedFunctionMetaData} instances to create

@@ -21,10 +21,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamIdentifier;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
 
 /**
  * {@link TeamSource} utilising a fixed {@link ExecutorService}.

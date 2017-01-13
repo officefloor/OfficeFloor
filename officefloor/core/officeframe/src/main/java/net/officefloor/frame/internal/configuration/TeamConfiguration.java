@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * Configuration of a {@link Team}.

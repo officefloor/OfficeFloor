@@ -19,9 +19,12 @@ package net.officefloor.frame.impl.construct.governance;
 
 import java.util.Map;
 
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
@@ -41,9 +44,6 @@ import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data for a {@link Governance}.

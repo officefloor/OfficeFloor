@@ -17,11 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
-import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;

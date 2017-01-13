@@ -33,19 +33,19 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.administration.source.AdministratorDutyMetaData;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceMetaData;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceProperty;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.administrator.AdministratorSourceContextImpl;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link AdministratorLoader} implementation.
@@ -55,7 +55,7 @@ import net.officefloor.frame.spi.source.UnknownResourceError;
 public class AdministratorLoaderImpl implements AdministratorLoader {
 
 	/**
-	 * {@link Node} requiring the {@link Administrator}.
+	 * {@link Node} requiring the {@link Administration}.
 	 */
 	private final Node node;
 
@@ -68,7 +68,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	 * Instantiate.
 	 * 
 	 * @param node
-	 *            {@link Node} requiring the {@link Administrator}.
+	 *            {@link Node} requiring the {@link Administration}.
 	 * @param nodeContext
 	 *            {@link NodeContext}.
 	 */

@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
+import net.officefloor.frame.api.managedobject.AsynchronousListener;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.TestObject;

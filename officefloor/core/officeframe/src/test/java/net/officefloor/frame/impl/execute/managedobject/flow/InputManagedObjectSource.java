@@ -18,11 +18,11 @@
 package net.officefloor.frame.impl.execute.managedobject.flow;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * Invokes flows to input data to Office.

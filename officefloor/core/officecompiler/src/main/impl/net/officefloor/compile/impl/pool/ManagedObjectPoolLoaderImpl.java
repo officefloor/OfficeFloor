@@ -27,7 +27,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceProperty;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceSpecification;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 
 /**
  * {@link ManagedObjectPoolLoader} implementation.

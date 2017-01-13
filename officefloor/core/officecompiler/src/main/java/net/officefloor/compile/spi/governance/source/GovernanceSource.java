@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.spi.governance.source;
 
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * Source to obtain the {@link Governance}.

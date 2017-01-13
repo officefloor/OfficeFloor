@@ -26,13 +26,13 @@ import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 
 /**

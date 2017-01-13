@@ -30,8 +30,8 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Node within the hierarchy of {@link OfficeSection} instances.

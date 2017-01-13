@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Check that the {@link ManagedObject} is ready.

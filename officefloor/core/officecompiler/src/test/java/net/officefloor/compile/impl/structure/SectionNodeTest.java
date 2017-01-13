@@ -49,16 +49,16 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**

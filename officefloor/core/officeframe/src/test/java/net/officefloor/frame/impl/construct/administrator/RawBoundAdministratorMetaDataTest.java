@@ -23,25 +23,42 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.spi.administration.source.AdministratorDutyMetaData;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceMetaData;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
-import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
-import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.DutyMetaData;
+import net.officefloor.frame.internal.structure.AdministrationDuty;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -54,23 +71,6 @@ import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -81,9 +81,9 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link AdministratorConfiguration}.
+	 * {@link AdministrationConfiguration}.
 	 */
-	private final AdministratorConfiguration<?, ?> configuration = this.createMock(AdministratorConfiguration.class);
+	private final AdministrationConfiguration<?, ?> configuration = this.createMock(AdministrationConfiguration.class);
 
 	/**
 	 * {@link SourceContext}.
@@ -206,7 +206,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if not {@link Administrator} name.
+	 * Ensures issue if not {@link Administration} name.
 	 */
 	public void testNoAdministratorName() {
 
@@ -513,7 +513,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no {@link Duty} instances.
+	 * Ensures issue if no {@link AdministrationDuty} instances.
 	 */
 	public void testNoDuties() {
 
@@ -531,7 +531,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no name for {@link Duty}.
+	 * Ensures issue if no name for {@link AdministrationDuty}.
 	 */
 	public void testNoDutyName() {
 
@@ -553,7 +553,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no keys for {@link Duty} instances are not of same type.
+	 * Ensures issue if no keys for {@link AdministrationDuty} instances are not of same type.
 	 */
 	public void testDutyKeysOfDifferentTypes() {
 
@@ -610,7 +610,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		// Construct the administrators
 		RawBoundAdministratorMetaData<?, ?>[] rawAdminMetaDatas = this.constructRawAdministrator(1, this.configuration);
 		RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = rawAdminMetaDatas[0];
-		AdministratorMetaData<?, ?> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
+		AdministrationMetaData<?, ?> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
 
 		// Verify extension interface factory by extracting ei
 		assertEquals("Incorrect number of administered managed objects", 1,
@@ -642,7 +642,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link Duty} name is provided by the
+	 * Ensure issue if no {@link AdministrationDuty} name is provided by the
 	 * {@link DutyConfiguration}.
 	 */
 	public void testNoConfiguredDutyName() {
@@ -672,7 +672,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if {@link Duty} name does not correspond to a {@link Duty}.
+	 * Ensure issue if {@link AdministrationDuty} name does not correspond to a {@link AdministrationDuty}.
 	 */
 	public void testIncorrectDutyName() {
 
@@ -702,7 +702,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link Duty} of the wrong type.
+	 * {@link AdministrationDuty} of the wrong type.
 	 */
 	private enum WrongDutyKeyType {
 		WRONG_DUTY_KEY_TYPE
@@ -710,7 +710,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure issue if no {@link ManagedFunctionReference} instances for
-	 * {@link Duty}.
+	 * {@link AdministrationDuty}.
 	 */
 	public void testNoTaskReferencesForDuty() {
 
@@ -740,7 +740,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link DutyConfiguration} for a {@link Duty}.
+	 * Ensure issue if no {@link DutyConfiguration} for a {@link AdministrationDuty}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testNoDutyConfiguration() {
@@ -771,7 +771,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Test only required {@link DutyConfiguration} for a {@link Duty} if linked
+	 * Test only required {@link DutyConfiguration} for a {@link AdministrationDuty} if linked
 	 * to a {@link ManagedFunction}.
 	 */
 	public void testNotRequireDutyConfiguration() {
@@ -798,7 +798,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link ManagedFunction} is found for the {@link Duty}
+	 * Ensure issue if no {@link ManagedFunction} is found for the {@link AdministrationDuty}
 	 * {@link Flow}.
 	 */
 	public void testNoTaskForDutyFlow() {
@@ -872,17 +872,17 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Record governance for first duty
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration.getGovernanceConfiguration(),
-				new DutyGovernanceConfiguration[0]);
+				new AdministrationGovernanceConfiguration[0]);
 
 		// Record governance for second duty
 		this.recordReturn(this.dutyTwoConfiguration, this.dutyTwoConfiguration.getGovernanceConfiguration(),
-				new DutyGovernanceConfiguration[0]);
+				new AdministrationGovernanceConfiguration[0]);
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
 		RawBoundAdministratorMetaData<?, DutyKey> rawAdminMetaData = this
 				.constructRawAdministratorAndLinkOfficeMetaData();
-		AdministratorMetaData<?, DutyKey> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
+		AdministrationMetaData<?, DutyKey> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
 		this.verifyMockObjects();
 
 		// Verify the duties
@@ -897,14 +897,14 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if unknown {@link Governance} linked to {@link Duty}.
+	 * Ensure issue if unknown {@link Governance} linked to {@link AdministrationDuty}.
 	 */
 	public void testLinkUnkownGovernance() {
 
 		final AdministratorDutyMetaData<?, ?> adminDutyMetaData = this.createMock(AdministratorDutyMetaData.class);
 
-		final DutyGovernanceConfiguration<?> governanceConfiguration = this
-				.createMock(DutyGovernanceConfiguration.class);
+		final AdministrationGovernanceConfiguration<?> governanceConfiguration = this
+				.createMock(AdministrationGovernanceConfiguration.class);
 		final int DUTY_GOVERNANCE_INDEX = 0;
 
 		// Record construction of bound administrator meta-data
@@ -924,7 +924,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		// Record governance configuration
 		GovernanceMetaData<?, ?>[] governanceMetaData = this.record_governanceMetaData(this.officeMetaData, 1);
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration.getGovernanceConfiguration(),
-				new DutyGovernanceConfiguration<?>[] { governanceConfiguration });
+				new AdministrationGovernanceConfiguration<?>[] { governanceConfiguration });
 		this.recordReturn(governanceConfiguration, governanceConfiguration.getIndex(), DUTY_GOVERNANCE_INDEX);
 		this.recordReturn(governanceConfiguration, governanceConfiguration.getGovernanceName(), "GOVERNANCE");
 
@@ -936,7 +936,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		RawBoundAdministratorMetaData<?, DutyKey> rawAdminMetaData = this
 				.constructRawAdministratorAndLinkOfficeMetaData();
-		AdministratorMetaData<?, DutyKey> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
+		AdministrationMetaData<?, DutyKey> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
 		this.verifyMockObjects();
 
 		// Verify the duty
@@ -955,8 +955,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		final AdministratorDutyMetaData<?, ?> adminDutyMetaData = this.createMock(AdministratorDutyMetaData.class);
 
-		final DutyGovernanceConfiguration<?> governanceConfiguration = this
-				.createMock(DutyGovernanceConfiguration.class);
+		final AdministrationGovernanceConfiguration<?> governanceConfiguration = this
+				.createMock(AdministrationGovernanceConfiguration.class);
 		final int DUTY_GOVERNANCE_INDEX = 0;
 
 		// Record construction of bound administrator meta-data
@@ -975,7 +975,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Record governance configuration
 		this.recordReturn(this.dutyOneConfiguration, this.dutyOneConfiguration.getGovernanceConfiguration(),
-				new DutyGovernanceConfiguration<?>[] { governanceConfiguration });
+				new AdministrationGovernanceConfiguration<?>[] { governanceConfiguration });
 		this.recordReturn(governanceConfiguration, governanceConfiguration.getIndex(), DUTY_GOVERNANCE_INDEX);
 		this.recordReturn(governanceConfiguration, governanceConfiguration.getGovernanceName(), "GOVERNANCE");
 
@@ -988,7 +988,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		RawBoundAdministratorMetaData<?, DutyKey> rawAdminMetaData = this
 				.constructRawAdministratorAndLinkOfficeMetaData();
-		AdministratorMetaData<?, DutyKey> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
+		AdministrationMetaData<?, DutyKey> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
 		this.verifyMockObjects();
 
 		// Verify the duty
@@ -1067,7 +1067,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records an issue regarding the {@link Administrator}.
+	 * Records an issue regarding the {@link Administration}.
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
@@ -1182,7 +1182,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public Administrator<Object, DutyKey> createAdministrator() {
+		public Administration<Object, DutyKey> createAdministrator() {
 			fail("Should not be invoked");
 			return null;
 		}
@@ -1194,11 +1194,11 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	 * @param expectedCreateCount
 	 *            Expected number to be created.
 	 * @param configuration
-	 *            {@link AdministratorConfiguration} instances.
+	 *            {@link AdministrationConfiguration} instances.
 	 * @return {@link RawBoundAdministratorMetaData}.
 	 */
 	private RawBoundAdministratorMetaData<?, ?>[] constructRawAdministrator(int expectedCreateCount,
-			AdministratorConfiguration<?, ?>... configuration) {
+			AdministrationConfiguration<?, ?>... configuration) {
 
 		// Construct the meta-data
 		RawBoundAdministratorMetaData<?, ?>[] metaData = RawBoundAdministratorMetaDataImpl.getFactory()

@@ -20,26 +20,26 @@ package net.officefloor.compile.integrate.administrator;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.Work;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.administrator.clazz.ClassAdministratorSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
- * Tests compiling the {@link Administrator}.
+ * Tests compiling the {@link Administration}.
  * 
  * @author Daniel Sagenschneider
  */
 public class CompileAdministratorTest extends AbstractCompileTestCase {
 
 	/**
-	 * Tests compiling a simple {@link Administrator}.
+	 * Tests compiling a simple {@link Administration}.
 	 */
 	public void testSimpleAdministrator() {
 
@@ -59,7 +59,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests {@link Administrator} pre-administering a {@link ManagedFunction}.
+	 * Tests {@link Administration} pre-administering a {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("rawtypes")
 	public void testPreAdministerTask() {
@@ -77,7 +77,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkPreTaskAdministration("ADMIN", "duty");
-		AdministratorBuilder admin = this
+		AdministrationBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
 						"OFFICE_TEAM", ClassAdministratorSource.class,
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
@@ -89,7 +89,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests {@link Administrator} post-administering a {@link ManagedFunction}.
+	 * Tests {@link Administration} post-administering a {@link ManagedFunction}.
 	 */
 	@SuppressWarnings("rawtypes")
 	public void testPostAdministerTask() {
@@ -107,7 +107,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		ManagedFunctionBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkPostTaskAdministration("ADMIN", "duty");
-		AdministratorBuilder admin = this
+		AdministrationBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
 						"OFFICE_TEAM", ClassAdministratorSource.class,
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
@@ -134,7 +134,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 				"MANAGED_OBJECT_SOURCE");
 		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
 				"MANAGED_OBJECT");
-		AdministratorBuilder admin = this
+		AdministrationBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
 						"OFFICE_TEAM", ClassAdministratorSource.class,
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
@@ -169,7 +169,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeBuilder_addThreadManagedObject(
 				"OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT");
-		AdministratorBuilder admin = this
+		AdministrationBuilder admin = this
 				.record_officeBuilder_addThreadAdministrator("ADMIN",
 						"OFFICE_TEAM", ClassAdministratorSource.class,
 						ClassAdministratorSource.CLASS_NAME_PROPERTY_NAME,
@@ -181,7 +181,7 @@ public class CompileAdministratorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Simple {@link Administrator}.
+	 * Simple {@link Administration}.
 	 */
 	public static class SimpleAdmin {
 

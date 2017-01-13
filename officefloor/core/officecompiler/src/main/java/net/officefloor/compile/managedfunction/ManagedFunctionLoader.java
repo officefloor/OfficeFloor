@@ -22,7 +22,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceProperty;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceSpecification;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * Loads the {@link FunctionNamespaceType} from the

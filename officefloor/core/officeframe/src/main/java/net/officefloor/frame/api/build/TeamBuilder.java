@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * Builder of a {@link Team}.

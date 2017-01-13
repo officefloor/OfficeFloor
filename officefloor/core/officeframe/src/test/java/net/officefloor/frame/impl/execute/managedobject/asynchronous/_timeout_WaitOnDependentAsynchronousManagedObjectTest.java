@@ -18,14 +18,14 @@
 package net.officefloor.frame.impl.execute.managedobject.asynchronous;
 
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.managedobject.AsynchronousListener;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;

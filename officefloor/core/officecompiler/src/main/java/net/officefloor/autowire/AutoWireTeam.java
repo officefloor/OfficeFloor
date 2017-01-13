@@ -18,7 +18,7 @@
 package net.officefloor.autowire;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * Team for auto-wiring.

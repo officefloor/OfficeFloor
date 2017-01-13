@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * <p>

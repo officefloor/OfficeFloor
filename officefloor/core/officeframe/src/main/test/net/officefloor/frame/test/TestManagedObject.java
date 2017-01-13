@@ -26,28 +26,28 @@ import java.util.function.Consumer;
 
 import org.junit.Assert;
 
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.managedobject.AsynchronousListener;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPoolContext;
-import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectFunctionBuilder;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.managedobject.AsynchronousListener;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
+import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.source.TestSource;
 
 /**
  * Test {@link ManagedObjectPool}.

@@ -19,18 +19,18 @@ package net.officefloor.plugin.administrator.clazz;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.DutyKey;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyKey;
 
 /**
- * {@link Administrator} that delegates to {@link Method} instances of an
+ * {@link Administration} that delegates to {@link Method} instances of an
  * {@link Object} to do administration.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassAdministrator implements Administrator<Object, Indexed> {
+public class ClassAdministrator implements Administration<Object, Indexed> {
 
 	/**
 	 * {@link Object} providing the administration {@link Method} instances.

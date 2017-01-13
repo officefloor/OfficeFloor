@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.profile;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * Profiled execution of a {@link ManagedFunction}.

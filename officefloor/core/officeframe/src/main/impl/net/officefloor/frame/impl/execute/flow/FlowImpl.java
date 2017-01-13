@@ -17,7 +17,10 @@
  */
 package net.officefloor.frame.impl.execute.flow;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
@@ -26,10 +29,10 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
-import net.officefloor.frame.internal.structure.Administration;
+import net.officefloor.frame.internal.structure.AdministrationDuty;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionLogic;
@@ -44,9 +47,6 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Implementation of the {@link Flow}.
@@ -133,7 +133,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		}
 
 		// Create the administrator containers for this managed function
-		AdministratorMetaData<?, ?>[] adminMetaData = managedFunctionMetaData.getAdministratorMetaData();
+		AdministrationMetaData<?, ?>[] adminMetaData = managedFunctionMetaData.getAdministratorMetaData();
 		AdministratorContainer<?>[] administrators = new AdministratorContainer<?>[adminMetaData.length];
 		for (int i = 0; i < adminMetaData.length; i++) {
 			administrators[i] = new AdministratorContainerImpl<>(adminMetaData[i]);
@@ -192,7 +192,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 * @param parallelOwner
 	 *            Parallel {@link ManagedFunctionContainer} owner.
 	 * @param isUnloadManagedObjects
-	 *            Whether the last {@link Duty} is to unload the
+	 *            Whether the last {@link AdministrationDuty} is to unload the
 	 *            {@link ManagedObject} instances for the
 	 *            {@link ManagedFunction}.
 	 * @return {@link ManagedFunctionContainer} for the {@link ManagedFunction}.
@@ -211,7 +211,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	/**
-	 * Loads the {@link Duty} to this {@link Flow}.
+	 * Loads the {@link AdministrationDuty} to this {@link Flow}.
 	 * 
 	 * @param firstLastFunctions
 	 *            Array of first and last {@link ManagedFunctionContainer}
@@ -232,7 +232,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 * @param parallelOwner
 	 *            Parallel {@link ManagedFunctionContainer} owner.
 	 * @param isUnloadManagedObjects
-	 *            Whether the last {@link Duty} is to unload the
+	 *            Whether the last {@link AdministrationDuty} is to unload the
 	 *            {@link ManagedObject} instances for the
 	 *            {@link ManagedFunction}.
 	 */
@@ -267,7 +267,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 			// Obtain the administration
 			@SuppressWarnings("unchecked")
-			Administration administration = adminContainer.administerManagedObjects(functionDutyAssociation,
+			AdministrationDuty administration = adminContainer.administerManagedObjects(functionDutyAssociation,
 					functionBoundManagedObjects, this.threadState);
 
 			// Determine if unload managed objects (last administration)

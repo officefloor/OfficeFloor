@@ -20,9 +20,9 @@ package net.officefloor.plugin.governance.clazz;
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.plugin.work.clazz.ClassTask;
 
 /**

@@ -18,11 +18,11 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Raw meta-data of the {@link Governance}.

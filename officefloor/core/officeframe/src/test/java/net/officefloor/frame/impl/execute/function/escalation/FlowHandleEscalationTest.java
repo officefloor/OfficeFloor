@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.function.escalation;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;

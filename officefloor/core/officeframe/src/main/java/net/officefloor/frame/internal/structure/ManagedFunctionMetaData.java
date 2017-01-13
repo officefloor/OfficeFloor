@@ -17,13 +17,12 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Meta-data for the {@link ManagedFunction}.
@@ -100,39 +99,21 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> e
 	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
 
 	/**
-	 * Obtains the meta-data of the {@link Administrator} instances for the
-	 * {@link ManagedFunction}.
+	 * Meta-data of the {@link AdministrationDuty} to undertake before executing
+	 * the {@link ManagedFunction}.
 	 * 
-	 * @return Meta-data of the {@link Administrator} instances for the
-	 *         {@link ManagedFunction}.
+	 * @return Listing of the {@link AdministrationDuty} instances to undertake
+	 *         before executing the {@link ManagedFunction}.
 	 */
-	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
+	AdministrationMetaData<?, ?, ?>[] getPreAdministrationMetaData();
 
 	/**
-	 * Obtains the {@link FlowMetaData} of the specified {@link Flow}.
-	 * 
-	 * @param flowIndex
-	 *            Index of the {@link Flow}.
-	 * @return {@link FlowMetaData} of the specified {@link Flow}.
-	 */
-	FlowMetaData getFlow(int flowIndex);
-
-	/**
-	 * Meta-data of the {@link Duty} to undertake before executing the
+	 * Meta-data of the {@link Administration} to undertake after executing the
 	 * {@link ManagedFunction}.
 	 * 
-	 * @return Listing of the {@link Duty} instances to undertake before
-	 *         executing the {@link ManagedFunction}.
+	 * @return Listing the {@link AdministrationDuty} instances to undertake
+	 *         after executing the {@link ManagedFunction}.
 	 */
-	ManagedFunctionDutyAssociation<?>[] getPreAdministrationMetaData();
-
-	/**
-	 * Meta-data of the {@link Administrator} to undertake after executing the
-	 * {@link ManagedFunction}.
-	 * 
-	 * @return Listing the {@link Duty} instances to undertake after executing
-	 *         the {@link ManagedFunction}.
-	 */
-	ManagedFunctionDutyAssociation<?>[] getPostAdministrationMetaData();
+	AdministrationMetaData<?, ?, ?>[] getPostAdministrationMetaData();
 
 }

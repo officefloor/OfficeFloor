@@ -50,12 +50,12 @@ import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.TaskObject;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.Work;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.DependencyLabeller;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.DependencyLabeller;
 
 /**
  * Tests loading the {@link OfficeSectionType}.

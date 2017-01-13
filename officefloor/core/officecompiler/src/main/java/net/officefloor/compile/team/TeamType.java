@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.team;
 
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * <p>

@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.test;
 
-import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**

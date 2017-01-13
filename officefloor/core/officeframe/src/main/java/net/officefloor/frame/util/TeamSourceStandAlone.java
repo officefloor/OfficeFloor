@@ -17,15 +17,15 @@
  */
 package net.officefloor.frame.util;
 
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamIdentifier;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.construct.team.TeamSourceContextImpl;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
 
 /**
  * Loads a {@link TeamSource} for stand-alone use.

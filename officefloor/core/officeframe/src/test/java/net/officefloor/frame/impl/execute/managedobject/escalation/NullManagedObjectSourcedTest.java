@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.managedobject.escalation;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**

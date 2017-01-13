@@ -19,8 +19,8 @@ package net.officefloor.autowire;
 
 import javax.management.ObjectName;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**

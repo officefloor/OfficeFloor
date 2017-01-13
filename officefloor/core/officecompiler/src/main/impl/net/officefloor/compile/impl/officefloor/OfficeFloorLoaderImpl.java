@@ -37,9 +37,9 @@ import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
 
 /**
  * {@link OfficeFloorLoader} implementation.

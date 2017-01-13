@@ -18,7 +18,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.autowire.supplier.SuppliedManagedObject;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Node for the supplied {@link ManagedObject}.

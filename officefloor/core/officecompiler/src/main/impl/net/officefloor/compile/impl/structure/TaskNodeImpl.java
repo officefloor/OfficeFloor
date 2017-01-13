@@ -56,12 +56,12 @@ import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.Work;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * {@link TaskNode} implementation.

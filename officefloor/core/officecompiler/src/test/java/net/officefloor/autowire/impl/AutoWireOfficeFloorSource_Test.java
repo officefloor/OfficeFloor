@@ -19,7 +19,7 @@ package net.officefloor.autowire.impl;
 
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**

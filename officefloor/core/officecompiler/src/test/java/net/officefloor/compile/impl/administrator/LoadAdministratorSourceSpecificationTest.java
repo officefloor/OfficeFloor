@@ -22,16 +22,16 @@ import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceMetaData;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceProperty;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -396,7 +396,7 @@ public class LoadAdministratorSourceSpecificationTest extends
 		}
 
 		@Override
-		public Administrator<None, None> createAdministrator() {
+		public Administration<None, None> createAdministrator() {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}

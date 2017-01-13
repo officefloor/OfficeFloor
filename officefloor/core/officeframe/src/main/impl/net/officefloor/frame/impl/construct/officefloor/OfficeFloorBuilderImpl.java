@@ -28,6 +28,10 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataImpl;
 import net.officefloor.frame.impl.construct.function.RawManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataImpl;
@@ -47,10 +51,6 @@ import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Implementation of {@link OfficeFloorBuilder}.

@@ -19,11 +19,11 @@ package net.officefloor.frame.internal.structure;
 
 import java.util.Timer;
 
-import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Meta-data for the {@link Office}.

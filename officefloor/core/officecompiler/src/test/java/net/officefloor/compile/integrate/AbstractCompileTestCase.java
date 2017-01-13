@@ -24,14 +24,15 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -39,26 +40,25 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.Work;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
@@ -398,22 +398,22 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records adding a {@link ThreadState} bound {@link Administrator}.
+	 * Records adding a {@link ThreadState} bound {@link Administration}.
 	 * 
 	 * @param administratorName
-	 *            Name of the {@link Administrator}.
+	 *            Name of the {@link Administration}.
 	 * @param administratorSourceClass
 	 *            {@link AdministratorSource} class.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value listing.
-	 * @return {@link AdministratorBuilder} for the added {@link Administrator}.
+	 * @return {@link AdministrationBuilder} for the added {@link Administration}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministratorBuilder<A> record_officeBuilder_addThreadAdministrator(
+	protected <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministrationBuilder<A> record_officeBuilder_addThreadAdministrator(
 			String administratorName, Class<S> administratorSourceClass,
 			String... propertyNameValues) {
-		final AdministratorBuilder<A> admin = this
-				.createMock(AdministratorBuilder.class);
+		final AdministrationBuilder<A> admin = this
+				.createMock(AdministrationBuilder.class);
 		this.recordReturn(this.officeBuilder, this.officeBuilder
 				.addThreadAdministrator(administratorName,
 						administratorSourceClass), admin);
@@ -427,11 +427,11 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Convenience method to record adding a {@link ThreadState} bound
-	 * {@link Administrator} and specifying {@link Team} responsible for the
+	 * {@link Administration} and specifying {@link Team} responsible for the
 	 * administration.
 	 * 
 	 * @param administratorName
-	 *            Name of the {@link Administrator}.
+	 *            Name of the {@link Administration}.
 	 * @param officeTeamName
 	 *            {@link Office} {@link Team} name responsible for
 	 *            administration.
@@ -439,12 +439,12 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 *            {@link AdministratorSource} class.
 	 * @param propertyNameValues
 	 *            {@link Property} name/value listing.
-	 * @return {@link AdministratorBuilder} for the added {@link Administrator}.
+	 * @return {@link AdministrationBuilder} for the added {@link Administration}.
 	 */
-	protected <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministratorBuilder<A> record_officeBuilder_addThreadAdministrator(
+	protected <I, A extends Enum<A>, S extends AdministratorSource<I, A>> AdministrationBuilder<A> record_officeBuilder_addThreadAdministrator(
 			String administratorName, String officeTeamName,
 			Class<S> administratorSourceClass, String... propertyNameValues) {
-		AdministratorBuilder<A> builder = this
+		AdministrationBuilder<A> builder = this
 				.record_officeBuilder_addThreadAdministrator(administratorName,
 						administratorSourceClass, propertyNameValues);
 		builder.setTeam(officeTeamName);

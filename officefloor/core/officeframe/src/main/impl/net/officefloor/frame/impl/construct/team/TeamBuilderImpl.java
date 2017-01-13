@@ -18,11 +18,11 @@
 package net.officefloor.frame.impl.construct.team;
 
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Implements the {@link TeamBuilder}.

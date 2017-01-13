@@ -18,7 +18,7 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * {@link SubSection} of an {@link OfficeSection}.

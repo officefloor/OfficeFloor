@@ -28,7 +28,7 @@ import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;

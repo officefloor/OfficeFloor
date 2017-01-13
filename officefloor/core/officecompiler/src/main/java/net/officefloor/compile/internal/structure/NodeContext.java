@@ -31,6 +31,7 @@ import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -39,16 +40,15 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * Context for a {@link Node}.
@@ -621,9 +621,9 @@ public interface NodeContext {
 	 * Creates a {@link AdministratorNode}.
 	 * 
 	 * @param administratorName
-	 *            Name of the {@link Administrator}.
+	 *            Name of the {@link Administration}.
 	 * @param office
-	 *            {@link OfficeNode} containing this {@link Administrator}.
+	 *            {@link OfficeNode} containing this {@link Administration}.
 	 * @return {@link AdministratorNode}.
 	 */
 	AdministratorNode createAdministratorNode(String administratorName, OfficeNode office);

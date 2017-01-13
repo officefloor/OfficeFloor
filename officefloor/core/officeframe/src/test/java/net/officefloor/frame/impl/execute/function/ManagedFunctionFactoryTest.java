@@ -19,10 +19,10 @@ package net.officefloor.frame.impl.execute.function;
 
 import org.easymock.AbstractMatcher;
 
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.build.NameAwareManagedFunctionFactory;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeAwareManagedFunctionFactory;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.NameAwareManagedFunctionFactory;
+import net.officefloor.frame.api.function.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;

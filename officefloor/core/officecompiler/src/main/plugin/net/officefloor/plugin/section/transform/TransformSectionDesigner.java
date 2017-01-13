@@ -38,8 +38,8 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link SectionDesigner} to intercept configuration to provide access to the

@@ -17,11 +17,11 @@
  */
 package net.officefloor.compile.spi.governance.source;
 
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Meta-data of the {@link GovernanceSource}.

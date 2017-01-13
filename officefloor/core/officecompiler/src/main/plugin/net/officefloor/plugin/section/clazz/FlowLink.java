@@ -20,7 +20,7 @@ package net.officefloor.plugin.section.clazz;
 import java.lang.annotation.Documented;
 
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link FlowLink} of a {@link ManagedObjectSource}.

@@ -20,10 +20,10 @@ package net.officefloor.frame.impl.execute.governance;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceContext;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 
 /**
  * {@link GovernanceFactory} for the {@link MockTransaction}.

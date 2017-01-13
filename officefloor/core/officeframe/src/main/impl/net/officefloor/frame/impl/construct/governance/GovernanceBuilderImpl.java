@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.GovernanceBuilder;
-import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
@@ -33,8 +35,6 @@ import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link GovernanceBuilder} implementation.

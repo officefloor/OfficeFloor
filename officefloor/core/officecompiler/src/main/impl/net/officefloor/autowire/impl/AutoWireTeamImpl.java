@@ -22,7 +22,7 @@ import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * Team for auto-wiring.

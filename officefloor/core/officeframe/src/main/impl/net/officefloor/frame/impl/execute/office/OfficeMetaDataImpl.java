@@ -20,11 +20,14 @@ package net.officefloor.frame.impl.execute.office;
 import java.util.Timer;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.internal.structure.Flow;
@@ -42,9 +45,6 @@ import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
  * {@link OfficeMetaData} implementation.

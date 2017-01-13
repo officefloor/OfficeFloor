@@ -18,7 +18,7 @@
 package net.officefloor.autowire;
 
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * {@link Governance} for configuring auto-wiring.

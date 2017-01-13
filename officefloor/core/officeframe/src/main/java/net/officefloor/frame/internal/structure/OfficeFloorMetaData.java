@@ -19,7 +19,7 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Meta-data for the {@link OfficeFloor}.

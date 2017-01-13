@@ -38,16 +38,16 @@ import net.officefloor.compile.spi.governance.source.GovernanceSourceContext;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceMetaData;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceProperty;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecification;
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link GovernanceLoader} implementation.

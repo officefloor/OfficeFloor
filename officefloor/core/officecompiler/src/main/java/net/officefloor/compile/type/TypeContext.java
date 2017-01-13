@@ -28,7 +28,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.team.TeamType;
-import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.api.administration.Duty;
 
 /**
  * Context for loading a type.

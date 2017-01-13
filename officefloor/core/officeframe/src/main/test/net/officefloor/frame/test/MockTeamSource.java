@@ -22,14 +22,14 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamIdentifier;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
 
 /**
  * Mock {@link TeamSource}.

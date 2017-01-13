@@ -17,8 +17,10 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
-import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
@@ -40,8 +42,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link FunctionState} to execute a {@link ManagedFunctionLogic}.
@@ -553,10 +553,13 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		}
 
 		@Override
-		public final void doFlow(FlowMetaData flowMetaData, Object parameter, FlowCallback callback) {
+		public final void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
 
 			// Easy access to container
 			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
+
+			// Obtain the flow meta data
+			FlowMetaData flowMetaData = container.functionLogicMetaData.getFlow(flowIndex);
 
 			// Obtain the task meta-data for instigating the flow
 			@SuppressWarnings("rawtypes")

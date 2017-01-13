@@ -23,8 +23,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.FlowFuture;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**

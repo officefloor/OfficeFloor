@@ -22,7 +22,7 @@ import java.util.List;
 import net.officefloor.autowire.AutoWireOfficeFloor;
 import net.officefloor.autowire.impl.AutoWireOfficeFloorSource;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.profile.ProfiledManagedFunction;
 import net.officefloor.frame.api.profile.ProfiledProcessState;
 import net.officefloor.frame.api.profile.ProfiledThreadState;

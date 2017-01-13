@@ -17,6 +17,9 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamIdentifier;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -25,9 +28,6 @@ import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link FunctionLoop} implementation.

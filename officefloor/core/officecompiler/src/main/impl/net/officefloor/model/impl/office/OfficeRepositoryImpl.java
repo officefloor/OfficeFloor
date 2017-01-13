@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.DoubleKeyMap;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToOfficeTeamModel;
 import net.officefloor.model.office.DutyModel;
@@ -498,7 +498,7 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 	 * @param subSection
 	 *            {@link OfficeSubSectionModel}.
 	 * @param duties
-	 *            Map of {@link DutyModel} instances by {@link Administrator}
+	 *            Map of {@link DutyModel} instances by {@link Administration}
 	 *            then {@link Duty} name.
 	 * @param governances
 	 *            Map of {@link OfficeGovernanceModel} instances by

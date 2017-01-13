@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Meta-data for the {@link Governance} of a {@link ManagedObject}.

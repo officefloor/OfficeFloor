@@ -17,13 +17,13 @@
  */
 package net.officefloor.frame.util;
 
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -63,7 +63,7 @@ public class MetaDataTestInstanceFactory {
 		ManagedFunctionMetaDataImpl<O, F> metaData = new ManagedFunctionMetaDataImpl<O, F>("TEST_FUNCTION",
 				functionFactory, "TEST_DIFFERENTIATOR", Object.class, teamManagement, new ManagedObjectIndex[0],
 				new ManagedObjectMetaData<?>[0], new ManagedObjectIndex[0], new boolean[0],
-				new AdministratorMetaData<?, ?>[0], new ManagedFunctionDutyAssociation<?>[0],
+				new AdministrationMetaData<?, ?>[0], new ManagedFunctionDutyAssociation<?>[0],
 				new ManagedFunctionDutyAssociation<?>[0], null);
 		metaData.loadRemainingState(new FlowMetaData[0], null, new EscalationProcedureImpl());
 

@@ -17,8 +17,8 @@
  */
 package net.officefloor.compile.administrator;
 
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.administration.Duty;
 
 /**
  * <code>Type definition</code> of a {@link Flow} instigated by a {@link Duty}.

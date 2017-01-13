@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.spi.section;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * {@link Object} required by the {@link SectionTask}.

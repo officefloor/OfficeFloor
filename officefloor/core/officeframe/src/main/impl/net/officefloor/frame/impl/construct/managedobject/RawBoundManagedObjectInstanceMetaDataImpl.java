@@ -23,6 +23,10 @@ import java.util.Map;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectGovernanceMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
@@ -36,10 +40,6 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 
 /**
  * {@link RawBoundManagedObjectInstanceMetaData} implementation.

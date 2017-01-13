@@ -17,11 +17,11 @@
  */
 package net.officefloor.compile.managedobject;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * <code>Type definition</code> of a {@link Flow} instigated by the

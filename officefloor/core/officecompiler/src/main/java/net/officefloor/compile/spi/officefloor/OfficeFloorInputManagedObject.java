@@ -18,7 +18,7 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Input {@link ManagedObject} on the {@link OfficeFloor}.

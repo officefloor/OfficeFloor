@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 
 import net.officefloor.compile.spi.section.SectionManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Annotates a {@link Field} for the {@link ClassSectionSource} for

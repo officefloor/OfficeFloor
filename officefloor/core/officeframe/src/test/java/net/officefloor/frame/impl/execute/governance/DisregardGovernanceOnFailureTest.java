@@ -18,7 +18,7 @@
 package net.officefloor.frame.impl.execute.governance;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**

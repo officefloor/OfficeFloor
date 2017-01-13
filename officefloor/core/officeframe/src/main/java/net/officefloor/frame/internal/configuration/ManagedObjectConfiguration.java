@@ -18,9 +18,9 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Configuration of a {@link ProcessState} or {@link ThreadState} bound

@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.spi.managedfunction.source;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * Provides the specification of the {@link Work} to be loaded by the particular

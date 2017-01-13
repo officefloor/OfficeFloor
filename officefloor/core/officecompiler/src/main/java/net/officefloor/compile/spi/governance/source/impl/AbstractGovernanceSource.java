@@ -26,8 +26,8 @@ import net.officefloor.compile.spi.governance.source.GovernanceSourceContext;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceMetaData;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceProperty;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecification;
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.Flow;
 

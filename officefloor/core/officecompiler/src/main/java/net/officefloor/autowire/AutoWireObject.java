@@ -17,8 +17,8 @@
  */
 package net.officefloor.autowire;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Object for configuring auto-wiring.

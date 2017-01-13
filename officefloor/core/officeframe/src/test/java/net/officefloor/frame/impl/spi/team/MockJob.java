@@ -19,8 +19,8 @@ package net.officefloor.frame.impl.spi.team;
 
 import org.junit.Assert;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Mock implementation of the {@link Job} for testing.

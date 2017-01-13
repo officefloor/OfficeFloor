@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.profile;
 
 import java.util.List;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.profile.ProfiledManagedFunction;
 import net.officefloor.frame.api.profile.ProfiledProcessState;
 import net.officefloor.frame.api.profile.ProfiledThreadState;

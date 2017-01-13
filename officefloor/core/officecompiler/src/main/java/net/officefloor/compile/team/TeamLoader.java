@@ -20,10 +20,10 @@ package net.officefloor.compile.team;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceProperty;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceProperty;
+import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 
 /**
  * Loads the {@link TeamType} from the {@link TeamSource}.

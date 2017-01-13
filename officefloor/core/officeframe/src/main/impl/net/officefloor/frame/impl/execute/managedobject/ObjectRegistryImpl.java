@@ -17,11 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 
 /**
  * Implementation of the {@link ObjectRegistry}.

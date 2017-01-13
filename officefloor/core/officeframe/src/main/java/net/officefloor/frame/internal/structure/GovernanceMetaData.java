@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.build.GovernanceFactory;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 
 /**
  * Meta-data of the {@link Governance}.
@@ -61,14 +61,5 @@ public interface GovernanceMetaData<E, F extends Enum<F>> extends ManagedFunctio
 	 * @return {@link ManagedFunctionLogic} for the {@link GovernanceActivity}.
 	 */
 	ManagedFunctionLogic createGovernanceFunctionLogic(GovernanceActivity<F> activity);
-
-	/**
-	 * Obtains the {@link FlowMetaData} for the specified index.
-	 * 
-	 * @param flowIndex
-	 *            Index of the {@link FlowMetaData}.
-	 * @return {@link FlowMetaData} for the specified index.
-	 */
-	FlowMetaData getFlow(int flowIndex);
 
 }

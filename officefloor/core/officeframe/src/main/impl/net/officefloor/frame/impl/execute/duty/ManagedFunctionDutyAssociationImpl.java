@@ -17,11 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.duty;
 
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.DutyKey;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyKey;
 
 /**
  * Implementation of {@link ManagedFunctionDutyAssociation}.
@@ -32,12 +32,12 @@ public class ManagedFunctionDutyAssociationImpl<A extends Enum<A>> implements
 		ManagedFunctionDutyAssociation<A> {
 
 	/**
-	 * {@link AdministratorIndex} identifying the {@link Administrator}.
+	 * {@link AdministratorIndex} identifying the {@link Administration}.
 	 */
 	private final AdministratorIndex adminIndex;
 
 	/**
-	 * {@link DutyKey} identifying the {@link Duty} of the {@link Administrator}
+	 * {@link DutyKey} identifying the {@link AdministrationDuty} of the {@link Administration}
 	 * .
 	 */
 	private final DutyKey<A> dutyKey;
@@ -47,10 +47,10 @@ public class ManagedFunctionDutyAssociationImpl<A extends Enum<A>> implements
 	 * 
 	 * @param adminIndex
 	 *            {@link AdministratorIndex} identifying the
-	 *            {@link Administrator}.
+	 *            {@link Administration}.
 	 * @param dutyKey
-	 *            {@link DutyKey} identifying the {@link Duty} of the
-	 *            {@link Administrator}.
+	 *            {@link DutyKey} identifying the {@link AdministrationDuty} of the
+	 *            {@link Administration}.
 	 */
 	public ManagedFunctionDutyAssociationImpl(AdministratorIndex adminIndex,
 			DutyKey<A> dutyKey) {

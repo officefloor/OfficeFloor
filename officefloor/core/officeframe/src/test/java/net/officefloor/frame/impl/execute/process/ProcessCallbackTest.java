@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.process;
 
-import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ProcessState;

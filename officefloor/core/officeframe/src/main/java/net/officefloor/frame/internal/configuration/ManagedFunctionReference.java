@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * Reference to a {@link ManagedFunction}.

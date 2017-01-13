@@ -18,10 +18,10 @@
 package net.officefloor.compile.spi.managedfunction.source;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**

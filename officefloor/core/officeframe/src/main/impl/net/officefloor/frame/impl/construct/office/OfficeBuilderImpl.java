@@ -20,18 +20,22 @@ package net.officefloor.frame.impl.construct.office;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
 import net.officefloor.frame.impl.construct.function.ManagedFunctionBuilderImpl;
 import net.officefloor.frame.impl.construct.function.ManagedFunctionEscalationConfigurationImpl;
@@ -39,7 +43,7 @@ import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImp
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
@@ -53,10 +57,6 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Implements the {@link OfficeBuilder}.
@@ -117,7 +117,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	/**
 	 * Flags whether to manually manage {@link Governance} via
-	 * {@link Administrator} instances.
+	 * {@link Administration} instances.
 	 */
 	private boolean isManuallyManageGovernance = false;
 
@@ -132,9 +132,9 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<ManagedObjectConfiguration<?>> threadManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
 
 	/**
-	 * Listing of {@link ThreadState} bound {@link Administrator}.
+	 * Listing of {@link ThreadState} bound {@link Administration}.
 	 */
-	private final List<AdministratorConfiguration<?, ?>> administrators = new LinkedList<AdministratorConfiguration<?, ?>>();
+	private final List<AdministrationConfiguration<?, ?>> administrators = new LinkedList<AdministrationConfiguration<?, ?>>();
 
 	/**
 	 * Listing of {@link ManagedFunctionConfiguration}.
@@ -254,7 +254,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addAdministrator(
+	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministrationBuilder<A> addAdministrator(
 			String threadAdministratorName, Class<AS> adminsistratorSource) {
 		AdministratorBuilderImpl<I, A, AS> builder = new AdministratorBuilderImpl<I, A, AS>(threadAdministratorName,
 				adminsistratorSource);
@@ -358,8 +358,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public AdministratorConfiguration<?, ?>[] getAdministratorConfiguration() {
-		return this.administrators.toArray(new AdministratorConfiguration[0]);
+	public AdministrationConfiguration<?, ?>[] getAdministratorConfiguration() {
+		return this.administrators.toArray(new AdministrationConfiguration[0]);
 	}
 
 	@Override

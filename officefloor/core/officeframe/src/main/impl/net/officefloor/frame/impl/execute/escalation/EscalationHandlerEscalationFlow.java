@@ -17,15 +17,18 @@
  */
 package net.officefloor.frame.impl.execute.escalation;
 
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -35,9 +38,6 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link EscalationFlow} for an {@link EscalationHandler}.
@@ -65,10 +65,10 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 	private static final boolean[] NO_GOVERNANCE = null;
 
 	/**
-	 * No {@link Administrator} instances bound to
+	 * No {@link AdministrationDuty} instances bound to
 	 * {@link EscalationHandlerManagedFunction}.
 	 */
-	private static final AdministratorMetaData<?, ?>[] NO_ADMINISTRATOR_META_DATA = new AdministratorMetaData[0];
+	private static final AdministrationMetaData<?, ?>[] NO_ADMINISTRATOR_META_DATA = new AdministrationMetaData[0];
 
 	/**
 	 * NO {@link ManagedFunctionDutyAssociation} instances for

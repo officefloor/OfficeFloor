@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
 
 /**
  * {@link TeamSource} for the {@link PassiveTeam}.

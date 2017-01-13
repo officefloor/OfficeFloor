@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.impl.spi.team.stress;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

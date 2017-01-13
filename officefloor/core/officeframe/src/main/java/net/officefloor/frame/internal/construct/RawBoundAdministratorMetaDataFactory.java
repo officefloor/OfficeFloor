@@ -19,16 +19,14 @@ package net.officefloor.frame.internal.construct;
 
 import java.util.Map;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
-import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Factory to create {@link RawBoundAdministratorMetaData}.
@@ -41,19 +39,14 @@ public interface RawBoundAdministratorMetaDataFactory {
 	 * Creates the {@link RawBoundAdministratorMetaData} instances.
 	 * 
 	 * @param configuration
-	 *            {@link AdministratorConfiguration} instances.
-	 * @param sourceContext
-	 *            {@link SourceContext}.
+	 *            {@link AdministrationConfiguration} instances.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @param administratorScope
-	 *            {@link AdministratorScope} that the {@link Administrator}
-	 *            instances are being bound.
 	 * @param assetType
-	 *            {@link AssetType} constructing {@link Administrator}
+	 *            {@link AssetType} constructing {@link Administration}
 	 *            instances.
 	 * @param assetName
-	 *            Name of {@link Asset} constructing {@link Administrator}
+	 *            Name of {@link Asset} constructing {@link Administration}
 	 *            instances.
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
@@ -64,10 +57,9 @@ public interface RawBoundAdministratorMetaDataFactory {
 	 *            {@link FunctionLoop}.
 	 * @return Constructed {@link RawBoundAdministratorMetaData} instances.
 	 */
-	RawBoundAdministratorMetaData<?, ?>[] constructRawBoundAdministratorMetaData(
-			AdministratorConfiguration<?, ?>[] configuration, SourceContext sourceContext,
-			OfficeFloorIssues issues, AdministratorScope administratorScope, AssetType assetType, String assetName,
-			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
-			FunctionLoop functionLoop);
+	RawBoundAdministratorMetaData<?, ?, ?>[] constructRawBoundAdministratorMetaData(
+			AdministrationConfiguration<?, ?, ?>[] configuration, OfficeFloorIssues issues, AssetType assetType,
+			String assetName, Map<String, TeamManagement> officeTeams,
+			Map<String, RawBoundManagedObjectMetaData> scopeMo, FunctionLoop functionLoop);
 
 }

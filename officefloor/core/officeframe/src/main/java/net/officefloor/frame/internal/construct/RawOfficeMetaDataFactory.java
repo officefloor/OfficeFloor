@@ -18,8 +18,8 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Factory for creating the {@link RawOfficeMetaData}.

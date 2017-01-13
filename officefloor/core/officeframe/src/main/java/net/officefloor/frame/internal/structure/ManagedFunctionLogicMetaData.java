@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Meta-data for a {@link ManagedFunctionContainer}.
@@ -49,6 +49,15 @@ public interface ManagedFunctionLogicMetaData {
 	 * @return {@link FunctionLoop}.
 	 */
 	FunctionLoop getFunctionLoop();
+
+	/**
+	 * Obtains the {@link FlowMetaData} of the specified {@link Flow}.
+	 * 
+	 * @param flowIndex
+	 *            Index of the {@link Flow}.
+	 * @return {@link FlowMetaData} of the specified {@link Flow}.
+	 */
+	FlowMetaData getFlow(int flowIndex);
 
 	/**
 	 * Obtains the {@link ManagedFunctionMetaData} of the next

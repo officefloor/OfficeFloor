@@ -22,16 +22,16 @@ import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * Context for the {@link OfficeSource}.
@@ -105,7 +105,7 @@ public interface OfficeSourceContext extends SourceContext {
 	 * Loads the {@link AdministratorType}.
 	 * <p>
 	 * This is to enable obtaining the type information for the
-	 * {@link Administrator} to allow reflective configuration by the
+	 * {@link Administration} to allow reflective configuration by the
 	 * {@link OfficeSource}.
 	 * 
 	 * @param administratorSourceClassName

@@ -18,10 +18,10 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceProperties;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceProperties;
 
 /**
  * Configuration of a {@link ManagedObjectSource}.

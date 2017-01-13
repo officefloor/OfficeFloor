@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link Enum} indicating the:

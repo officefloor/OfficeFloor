@@ -18,8 +18,8 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * {@link Governance} within the {@link Office}.

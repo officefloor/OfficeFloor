@@ -22,8 +22,8 @@ import java.util.List;
 
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ReflectiveFlow;

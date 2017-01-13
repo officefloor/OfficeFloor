@@ -43,6 +43,8 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.impl.AbstractGovernanceSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -82,31 +84,29 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.frame.api.build.GovernanceFactory;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.Work;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamIdentifier;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -1741,12 +1741,12 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Maker of an {@link Administrator}.
+	 * Maker of an {@link Administration}.
 	 */
 	protected static interface AdministratorMaker {
 
 		/**
-		 * Makes the {@link Administrator}.
+		 * Makes the {@link Administration}.
 		 * 
 		 * @param context
 		 *            {@link AdministratorMakerContext}.
@@ -1768,7 +1768,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		void setExtensionInterface(Class<?> extensionInterface);
 
 		/**
-		 * Adds a {@link Duty} for the {@link Administrator}.
+		 * Adds a {@link Duty} for the {@link Administration}.
 		 * 
 		 * @param dutyKey
 		 *            Key identifying the {@link Duty}.
@@ -1862,7 +1862,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public Administrator<Object, Indexed> createAdministrator() {
+		public Administration<Object, Indexed> createAdministrator() {
 			fail("Should not require creating an administrator");
 			return null;
 		}

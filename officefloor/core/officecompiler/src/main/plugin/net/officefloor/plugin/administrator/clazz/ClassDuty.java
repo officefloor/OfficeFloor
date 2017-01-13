@@ -22,9 +22,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyContext;
 
 /**
  * {@link Duty} that delegates to a {@link Method} of an {@link Object} for
@@ -75,7 +75,7 @@ public class ClassDuty implements Duty<Object, None, None> {
 	 */
 
 	@Override
-	public void doDuty(DutyContext<Object, None, None> context)
+	public void doDuty(AdministrationContext<Object, None, None> context)
 			throws Throwable {
 
 		// Obtain the listing of extension interfaces

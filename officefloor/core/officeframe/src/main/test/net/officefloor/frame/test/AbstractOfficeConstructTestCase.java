@@ -25,10 +25,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -36,21 +39,18 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.OfficeClock;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Abstract {@link TestCase} for construction testing of an Office.
@@ -591,29 +591,45 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Facade method to create a {@link Administrator}.
+	 * Constructs the {@link ReflectiveFunctionBuilder}.
+	 * 
+	 * @param object
+	 *            {@link Object} containing the {@link Method}.
+	 * @param methodName
+	 *            Name of the {@link Method}.
+	 * @return {@link ReflectiveFunctionBuilder}.
+	 */
+	public ReflectiveAdministratorBuilder constructAdministrator(Object object) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		ReflectiveAdministratorBuilder builder = new ReflectiveAdministratorBuilder((Class) object.getClass(), object,
+				this.officeBuilder, this);
+		return builder;
+	}
+
+	/**
+	 * Facade method to create a {@link AdministrationDuty}.
 	 * 
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <A>
-	 *            {@link Administrator} type.
+	 *            {@link AdministrationDuty} type.
 	 * @param adminName
-	 *            Name of the {@link Administrator}.
+	 *            Name of the {@link AdministrationDuty}.
 	 * @param administrator
-	 *            {@link Administrator}.
+	 *            {@link AdministrationDuty}.
 	 * @param administratorMetaData
 	 *            {@link AdministratorSourceMetaData}.
 	 * @param teamName
-	 *            Name of {@link Team} for {@link Administrator} {@link Duty}
+	 *            Name of {@link Team} for {@link AdministrationDuty} {@link AdministrationDuty}
 	 *            instances.
-	 * @return {@link AdministratorBuilder}.
+	 * @return {@link AdministrationBuilder}.
 	 */
-	public <E extends Object, A extends Enum<A>> AdministratorBuilder<A> constructAdministrator(String adminName,
-			Administrator<E, A> administrator, AdministratorSourceMetaData<E, A> administratorMetaData,
+	public <E extends Object, A extends Enum<A>> AdministrationBuilder<A> constructAdministrator(String adminName,
+			Administration<E, A> administrator, AdministratorSourceMetaData<E, A> administratorMetaData,
 			String teamName) {
 
 		// Bind the Administrator
-		AdministratorBuilder<A> adminBuilder = MockAdministratorSource.bindAdministrator(adminName, administrator,
+		AdministrationBuilder<A> adminBuilder = MockAdministratorSource.bindAdministrator(adminName, administrator,
 				administratorMetaData, this.officeBuilder);
 
 		// Configure the administrator
@@ -624,28 +640,28 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
-	 * Facade method to construct an {@link Administrator}.
+	 * Facade method to construct an {@link AdministrationDuty}.
 	 * 
 	 * @param <E>
 	 *            Extension interface type.
 	 * @param <A>
-	 *            {@link Administrator} type.
+	 *            {@link AdministrationDuty} type.
 	 * @param <AS>
 	 *            {@link AdministratorSource} type.
 	 * @param adminName
-	 *            Name of the {@link Administrator}.
+	 *            Name of the {@link AdministrationDuty}.
 	 * @param adminSource
 	 *            {@link AdministratorSource} {@link Class}.
 	 * @param teamName
-	 *            Name of {@link Team} for {@link Administrator} {@link Duty}
+	 *            Name of {@link Team} for {@link AdministrationDuty} {@link AdministrationDuty}
 	 *            instances.
-	 * @return {@link AdministratorBuilder}.
+	 * @return {@link AdministrationBuilder}.
 	 */
-	public <E extends Object, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministratorBuilder<A> constructAdministrator(
+	public <E extends Object, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministrationBuilder<A> constructAdministrator(
 			String adminName, Class<AS> adminSource, String teamName) {
 
 		// Create the Administrator Builder
-		AdministratorBuilder<A> adminBuilder = this.officeBuilder.addAdministrator(adminName, adminSource);
+		AdministrationBuilder<A> adminBuilder = this.officeBuilder.addAdministrator(adminName, adminSource);
 
 		// Configure the administrator
 		adminBuilder.setTeam(teamName);

@@ -18,7 +18,7 @@
 package net.officefloor.compile.spi.managedfunction.source;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * Sources the {@link FunctionNamespaceType}.

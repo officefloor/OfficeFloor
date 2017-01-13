@@ -24,7 +24,7 @@ import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * {@link SectionWork} node.

@@ -18,7 +18,7 @@
 package net.officefloor.compile.managedfunction;
 
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * <code>Type definition</code> of a {@link Work}.

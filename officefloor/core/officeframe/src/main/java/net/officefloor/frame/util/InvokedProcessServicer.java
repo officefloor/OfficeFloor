@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.util;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Services an invoked {@link ProcessState} from the

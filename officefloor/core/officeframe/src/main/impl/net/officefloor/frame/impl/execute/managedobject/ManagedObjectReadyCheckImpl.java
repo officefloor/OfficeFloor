@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.Flow;
@@ -24,7 +25,6 @@ import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link ManagedObjectReadyCheck} implementation.

@@ -19,10 +19,10 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * {@link OfficeAdministrator} node.
@@ -60,7 +60,7 @@ public interface AdministratorNode extends LinkTeamNode, OfficeAdministrator {
 	AdministratorType<?, ?> loadAdministratorType();
 
 	/**
-	 * Builds this {@link Administrator} into the {@link OfficeBuilder}.
+	 * Builds this {@link Administration} into the {@link OfficeBuilder}.
 	 * 
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder}.

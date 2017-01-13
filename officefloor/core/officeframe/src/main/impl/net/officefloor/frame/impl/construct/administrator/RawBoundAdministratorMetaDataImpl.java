@@ -24,10 +24,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.spi.administration.source.AdministratorDutyMetaData;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceMetaData;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.DutyKey;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
 import net.officefloor.frame.impl.execute.administrator.AdministratorMetaDataImpl;
@@ -35,9 +49,9 @@ import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDa
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.impl.execute.duty.DutyMetaDataImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
-import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
-import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
@@ -45,10 +59,10 @@ import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFac
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.DutyMetaData;
+import net.officefloor.frame.internal.structure.AdministrationDuty;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -58,23 +72,9 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyKey;
-import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
- * Raw meta-data for the bound {@link Administrator}.
+ * Raw meta-data for the bound {@link Administration}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -92,7 +92,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	}
 
 	/**
-	 * Name the {@link Administrator} is bound under.
+	 * Name the {@link Administration} is bound under.
 	 */
 	private final String boundAdministratorName;
 
@@ -102,9 +102,9 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	private final AdministratorIndex administratorIndex;
 
 	/**
-	 * {@link AdministratorConfiguration}.
+	 * {@link AdministrationConfiguration}.
 	 */
-	private final AdministratorConfiguration<A, ?> administratorSourceConfiguration;
+	private final AdministrationConfiguration<A, ?> administratorSourceConfiguration;
 
 	/**
 	 * Administered {@link RawBoundManagedObjectMetaData}.
@@ -112,7 +112,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	private final RawBoundManagedObjectMetaData[] administeredRawBoundManagedObjects;
 
 	/**
-	 * {@link AdministratorMetaData}.
+	 * {@link AdministrationMetaData}.
 	 */
 	private final AdministratorMetaDataImpl<I, A> adminMetaData;
 
@@ -127,7 +127,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	private final Map<A, DutyKey<A>> dutyKeysByKey;
 
 	/**
-	 * {@link DutyKey} instances of the {@link Duty} instances linked to a
+	 * {@link DutyKey} instances of the {@link AdministrationDuty} instances linked to a
 	 * {@link ManagedFunction}.
 	 */
 	private final Set<DutyKey<A>> linkedDutyKeys = new HashSet<DutyKey<A>>();
@@ -136,11 +136,11 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 * Initiate.
 	 * 
 	 * @param boundAdministratorName
-	 *            Name the {@link Administrator} is bound under.
+	 *            Name the {@link Administration} is bound under.
 	 * @param administratorIndex
 	 *            {@link AdministratorIndex}.
 	 * @param administratorSourceConfiguration
-	 *            {@link AdministratorConfiguration}.
+	 *            {@link AdministrationConfiguration}.
 	 * @param administeredRawBoundManagedObjects
 	 *            Administered {@link RawBoundManagedObjectMetaData}.
 	 * @param dutyKeysByName
@@ -148,10 +148,10 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 * @param dutyKeysByKey
 	 *            Map of {@link DutyKey} instances by key.
 	 * @param adminMetaData
-	 *            {@link AdministratorMetaData}.
+	 *            {@link AdministrationMetaData}.
 	 */
 	private RawBoundAdministratorMetaDataImpl(String boundAdministratorName, AdministratorIndex administratorIndex,
-			AdministratorConfiguration<A, ?> administratorSourceConfiguration,
+			AdministrationConfiguration<A, ?> administratorSourceConfiguration,
 			RawBoundManagedObjectMetaData[] administeredRawBoundManagedObjects, Map<String, DutyKey<A>> dutyKeysByName,
 			Map<A, DutyKey<A>> dutyKeysByKey, AdministratorMetaDataImpl<I, A> adminMetaData) {
 		this.boundAdministratorName = boundAdministratorName;
@@ -170,7 +170,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public RawBoundAdministratorMetaData<?, ?>[] constructRawBoundAdministratorMetaData(
-			AdministratorConfiguration<?, ?>[] configuration, SourceContext sourceContext, OfficeFloorIssues issues,
+			AdministrationConfiguration<?, ?>[] configuration, SourceContext sourceContext, OfficeFloorIssues issues,
 			AdministratorScope administratorScope, AssetType assetType, String assetName,
 			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
 			FunctionLoop functionLoop) {
@@ -178,7 +178,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 		// Register the bound administrators
 		List<RawBoundAdministratorMetaData<?, ?>> boundAdministrators = new LinkedList<RawBoundAdministratorMetaData<?, ?>>();
 		int boundAdminIndex = 0;
-		for (AdministratorConfiguration config : configuration) {
+		for (AdministrationConfiguration config : configuration) {
 
 			// Create the administrator index
 			AdministratorIndex adminIndex = new AdministratorIndexImpl(administratorScope, boundAdminIndex++);
@@ -199,7 +199,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 * Provides typed construction of a {@link RawBoundAdministratorMetaData}.
 	 * 
 	 * @param configuration
-	 *            {@link AdministratorConfiguration} instances.
+	 *            {@link AdministrationConfiguration} instances.
 	 * @param sourceContext
 	 *            {@link SourceContext}.
 	 * @param issues
@@ -207,10 +207,10 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 * @param administratorIndex
 	 *            {@link AdministratorIndex}.
 	 * @param assetType
-	 *            {@link AssetType} constructing {@link Administrator}
+	 *            {@link AssetType} constructing {@link Administration}
 	 *            instances.
 	 * @param assetName
-	 *            Name of {@link Asset} constructing {@link Administrator}
+	 *            Name of {@link Asset} constructing {@link Administration}
 	 *            instances.
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
@@ -223,7 +223,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	 */
 	@SuppressWarnings("unchecked")
 	private <a extends Enum<a>, i, AS extends AdministratorSource<i, a>> RawBoundAdministratorMetaData<i, a> constructRawBoundAdministratorMetaData(
-			AdministratorConfiguration<a, AS> configuration, SourceContext sourceContext, OfficeFloorIssues issues,
+			AdministrationConfiguration<a, AS> configuration, SourceContext sourceContext, OfficeFloorIssues issues,
 			AdministratorIndex administratorIndex, AssetType assetType, String assetName,
 			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
 			FunctionLoop functionLoop) {
@@ -548,10 +548,10 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 			}
 
 			// Obtain the governance mapping for the duty
-			DutyGovernanceConfiguration<?>[] dutyGovernanceConfigurations = dutyConfiguration
+			AdministrationGovernanceConfiguration<?>[] dutyGovernanceConfigurations = dutyConfiguration
 					.getGovernanceConfiguration();
 			int[] governanceMapping = new int[dutyGovernanceConfigurations.length];
-			for (DutyGovernanceConfiguration<?> dutyGovernanceConfiguration : dutyGovernanceConfigurations) {
+			for (AdministrationGovernanceConfiguration<?> dutyGovernanceConfiguration : dutyGovernanceConfigurations) {
 
 				// Index of governance for the duty
 				int dutyGovernanceIndex = dutyGovernanceConfiguration.getIndex();
@@ -610,7 +610,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	}
 
 	@Override
-	public AdministratorMetaData<I, A> getAdministratorMetaData() {
+	public AdministrationMetaData<I, A> getAdministratorMetaData() {
 		return this.adminMetaData;
 	}
 

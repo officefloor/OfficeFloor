@@ -31,9 +31,9 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**

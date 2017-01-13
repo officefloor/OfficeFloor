@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.stress;
 
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.spi.governance.Governance;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 

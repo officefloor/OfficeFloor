@@ -20,7 +20,7 @@ package net.officefloor.compile.impl.governance;
 import net.officefloor.compile.governance.GovernanceFlowType;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * {@link GovernanceFlowType} implementation.

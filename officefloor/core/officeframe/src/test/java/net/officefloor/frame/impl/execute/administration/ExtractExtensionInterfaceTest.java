@@ -17,8 +17,15 @@
  */
 package net.officefloor.frame.impl.execute.administration;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import java.util.List;
+
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.ReflectiveAdministratorBuilder;
+import net.officefloor.frame.test.ReflectiveAdministratorBuilder.ReflectiveDutyBuilder;
+import net.officefloor.frame.test.TestObject;
 
 /**
  * Ensure extract the extension interface from the {@link ManagedObject}
@@ -28,8 +35,56 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
  */
 public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCase {
 
+	/**
+	 * Ensure able to extract extension interface from {@link ManagedObject}.
+	 */
 	public void testExtractExtensionInterface() {
-		fail("TODO implement");
+
+		// Construct the managed object
+		TestObject object = new TestObject("MO", this);
+		object.enhanceMetaData = (metaData) -> {
+			metaData.addManagedObjectExtensionInterface(ManagedObjectExtension.class, new ManagedObjectExtension(null));
+		};
+
+		// Construct the administrator
+		TestAdministration admin = new TestAdministration();
+		ReflectiveAdministratorBuilder administratorBuilder = this.constructAdministrator(admin);
+		ReflectiveDutyBuilder duty = administratorBuilder.constructDuty("preTask");
+
+	}
+
+	/**
+	 * Test functionality.
+	 */
+	public static class TestWork {
+		public void task(TestObject object) {
+		}
+	}
+
+	/**
+	 * Test {@link Administration}.
+	 */
+	public static class TestAdministration {
+		public void preTask(List<ManagedObjectExtension> extensions) {
+
+		}
+	}
+
+	/**
+	 * Extension for the {@link ManagedObject}.
+	 */
+	public static class ManagedObjectExtension implements ExtensionInterfaceFactory<ManagedObjectExtension> {
+
+		public ManagedObject managedObject;
+
+		public ManagedObjectExtension(ManagedObject managedObject) {
+			this.managedObject = managedObject;
+		}
+
+		@Override
+		public ManagedObjectExtension createExtensionInterface(ManagedObject managedObject) {
+			return new ManagedObjectExtension(managedObject);
+		}
 	}
 
 }

@@ -20,29 +20,29 @@ package net.officefloor.frame.impl.construct.administrator;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DutyBuilder;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
-import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.team.Team;
 
 /**
- * Implementation of the {@link AdministratorBuilder}.
+ * Implementation of the {@link AdministrationBuilder}.
  * 
  * @author Daniel Sagenschneider
  */
 public class AdministratorBuilderImpl<I, A extends Enum<A>, AS extends AdministratorSource<I, A>>
-		implements AdministratorBuilder<A>,
-		AdministratorConfiguration<A, AS> {
+		implements AdministrationBuilder<A>,
+		AdministrationConfiguration<A, AS> {
 
 	/**
-	 * Name of this {@link Administrator}.
+	 * Name of this {@link Administration}.
 	 */
 	private final String administratorName;
 
@@ -57,8 +57,8 @@ public class AdministratorBuilderImpl<I, A extends Enum<A>, AS extends Administr
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
-	 * Name of the {@link Team} responsible for the {@link Duty} instances of
-	 * this {@link Administrator}.
+	 * Name of the {@link Team} responsible for the {@link AdministrationDuty} instances of
+	 * this {@link Administration}.
 	 */
 	private String officeTeamName;
 
@@ -76,7 +76,7 @@ public class AdministratorBuilderImpl<I, A extends Enum<A>, AS extends Administr
 	 * Initiate.
 	 * 
 	 * @param administratorName
-	 *            Name of the {@link Administrator}.
+	 *            Name of the {@link Administration}.
 	 * @param administratorSourceClass
 	 *            {@link Class} of the {@link AdministratorSource}.
 	 */

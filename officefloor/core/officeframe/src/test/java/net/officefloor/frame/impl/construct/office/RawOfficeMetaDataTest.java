@@ -26,17 +26,24 @@ import org.easymock.AbstractMatcher;
 import org.easymock.ArgumentsMatcher;
 import org.easymock.internal.AlwaysMatcher;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.ProcessContextListener;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
@@ -62,7 +69,7 @@ import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -81,13 +88,6 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.ProcessContextListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.frame.util.MetaDataTestInstanceFactory;
@@ -1038,7 +1038,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to construct a {@link ThreadState} bound
-	 * {@link Administrator}.
+	 * {@link Administration}.
 	 */
 	public void testConstructThreadBoundAdministrator() {
 
@@ -1776,7 +1776,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records constructing {@link ThreadState} bound {@link Administrator}
+	 * Records constructing {@link ThreadState} bound {@link Administration}
 	 * instances.
 	 * 
 	 * @param teams
@@ -1795,11 +1795,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			String... threadBoundNames) {
 
 		// Create the mock objects to register the thread bound administrators
-		final AdministratorConfiguration<?, ?>[] adminConfigurations = new AdministratorConfiguration[threadBoundNames.length];
+		final AdministrationConfiguration<?, ?>[] adminConfigurations = new AdministrationConfiguration[threadBoundNames.length];
 		final RawBoundAdministratorMetaData<?, ?>[] rawBoundAdminMetaDatas = new RawBoundAdministratorMetaData[threadBoundNames.length];
 		final Map<String, RawBoundAdministratorMetaData<?, ?>> boundAdministrators = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
 		for (int i = 0; i < threadBoundNames.length; i++) {
-			adminConfigurations[i] = this.createMock(AdministratorConfiguration.class);
+			adminConfigurations[i] = this.createMock(AdministrationConfiguration.class);
 			rawBoundAdminMetaDatas[i] = this.createMock(RawBoundAdministratorMetaData.class);
 			boundAdministrators.put(threadBoundNames[i], rawBoundAdminMetaDatas[i]);
 		}
@@ -1832,7 +1832,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records no {@link ManagedObject} and {@link Administrator} instances.
+	 * Records no {@link ManagedObject} and {@link Administration} instances.
 	 */
 	private void record_noManagedObjectsAndAdministrators() {
 		this.record_registerManagedObjectSources();
@@ -1872,22 +1872,22 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records constructing the {@link AdministratorMetaData}.
+	 * Records constructing the {@link AdministrationMetaData}.
 	 * 
 	 * @param boundAdministrators
 	 *            {@link RawBoundAdministratorMetaData} instances by their bound
 	 *            names.
 	 * @param constructAdministratorNames
 	 *            Names of the {@link RawBoundAdministratorMetaData} to
-	 *            construct the {@link AdministratorMetaData}.
-	 * @return Constructed {@link AdministratorMetaData} instances.
+	 *            construct the {@link AdministrationMetaData}.
+	 * @return Constructed {@link AdministrationMetaData} instances.
 	 */
-	private AdministratorMetaData<?, ?>[] record_constructAdministratorMetaData(
+	private AdministrationMetaData<?, ?>[] record_constructAdministratorMetaData(
 			Map<String, RawBoundAdministratorMetaData<?, ?>> boundAdministrators,
 			String... constructAdministratorNames) {
-		AdministratorMetaData<?, ?>[] adminMetaDatas = new AdministratorMetaData[constructAdministratorNames.length];
+		AdministrationMetaData<?, ?>[] adminMetaDatas = new AdministrationMetaData[constructAdministratorNames.length];
 		for (int i = 0; i < constructAdministratorNames.length; i++) {
-			adminMetaDatas[i] = this.createMock(AdministratorMetaData.class);
+			adminMetaDatas[i] = this.createMock(AdministrationMetaData.class);
 			RawBoundAdministratorMetaData<?, ?> rawBoundAdmin = boundAdministrators.get(constructAdministratorNames[i]);
 			this.recordReturn(rawBoundAdmin, rawBoundAdmin.getAdministratorMetaData(), adminMetaDatas[i]);
 		}
@@ -1895,7 +1895,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Links the {@link ManagedFunction} instances for the {@link Administrator}
+	 * Links the {@link ManagedFunction} instances for the {@link Administration}
 	 * instances.
 	 * 
 	 * @param boundAdministrators

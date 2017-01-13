@@ -18,7 +18,7 @@
 package net.officefloor.plugin.work.clazz;
 
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * {@link WorkFactory} for the {@link ClassWork}.

@@ -20,7 +20,7 @@ package net.officefloor.compile.section;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.office.OfficeSectionTask;
 import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * <code>Type definition</code> of the {@link OfficeSectionTask}.

@@ -24,10 +24,10 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SubSection;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.function.Work;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * Context for loading a {@link SectionType}.

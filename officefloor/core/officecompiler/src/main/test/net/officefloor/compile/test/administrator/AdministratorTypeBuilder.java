@@ -19,10 +19,10 @@ package net.officefloor.compile.test.administrator;
 
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * Builder of the {@link AdministratorType} to validate the loaded

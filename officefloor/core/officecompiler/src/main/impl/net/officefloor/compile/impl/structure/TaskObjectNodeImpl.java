@@ -31,7 +31,7 @@ import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.type.TypeContext;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * {@link TaskObjectNode} implementation.

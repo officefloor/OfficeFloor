@@ -20,15 +20,15 @@ package net.officefloor.frame.impl.construct.administrator;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.build.DutyBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
-import net.officefloor.frame.internal.configuration.DutyGovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * {@link DutyBuilder} implementation.
@@ -38,27 +38,27 @@ import net.officefloor.frame.spi.governance.Governance;
 public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder, DutyConfiguration<A> {
 
 	/**
-	 * Name identifying the {@link Duty}.
+	 * Name identifying the {@link AdministrationDuty}.
 	 */
 	private final String dutyName;
 
 	/**
 	 * Registry of {@link ManagedFunction} instances that may be invoked from
-	 * the {@link Duty}.
+	 * the {@link AdministrationDuty}.
 	 */
 	private final Map<Integer, ManagedFunctionReference> flows = new HashMap<Integer, ManagedFunctionReference>();
 
 	/**
 	 * Registry of {@link Governance} instances that may be invoked from the
-	 * {@link Duty}.
+	 * {@link AdministrationDuty}.
 	 */
-	private final Map<Integer, DutyGovernanceConfiguration<?>> governances = new HashMap<Integer, DutyGovernanceConfiguration<?>>();
+	private final Map<Integer, AdministrationGovernanceConfiguration<?>> governances = new HashMap<Integer, AdministrationGovernanceConfiguration<?>>();
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param dutyName
-	 *            Name identifying the {@link Duty}.
+	 *            Name identifying the {@link AdministrationDuty}.
 	 */
 	public DutyBuilderImpl(String dutyName) {
 		this.dutyName = dutyName;
@@ -92,9 +92,9 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder, DutyConf
 	 * Links the {@link Governance}.
 	 * 
 	 * @param key
-	 *            Key to access the {@link Governance} from the {@link Duty}.
+	 *            Key to access the {@link Governance} from the {@link AdministrationDuty}.
 	 * @param governanceIndex
-	 *            Index of the {@link Governance} from the {@link Duty}.
+	 *            Index of the {@link Governance} from the {@link AdministrationDuty}.
 	 * @param governanceName
 	 *            Name of the {@link Governance} to link.
 	 */
@@ -137,7 +137,7 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder, DutyConf
 	}
 
 	@Override
-	public DutyGovernanceConfiguration<?>[] getGovernanceConfiguration() {
+	public AdministrationGovernanceConfiguration<?>[] getGovernanceConfiguration() {
 
 		// Obtain the array size from maximum index
 		int arraySize = -1;
@@ -150,9 +150,9 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder, DutyConf
 		arraySize += 1; // size is one up of max index
 
 		// Create the listing of governance
-		DutyGovernanceConfiguration<?>[] governanceList = new DutyGovernanceConfiguration[arraySize];
+		AdministrationGovernanceConfiguration<?>[] governanceList = new AdministrationGovernanceConfiguration[arraySize];
 		for (Integer key : this.governances.keySet()) {
-			DutyGovernanceConfiguration<?> governance = this.governances.get(key);
+			AdministrationGovernanceConfiguration<?> governance = this.governances.get(key);
 			governanceList[key.intValue()] = governance;
 		}
 
@@ -161,9 +161,9 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder, DutyConf
 	}
 
 	/**
-	 * {@link DutyGovernanceConfiguration} implementation.
+	 * {@link AdministrationGovernanceConfiguration} implementation.
 	 */
-	private static class DutyGovernanceConfigurationImpl<G extends Enum<G>> implements DutyGovernanceConfiguration<G> {
+	private static class DutyGovernanceConfigurationImpl<G extends Enum<G>> implements AdministrationGovernanceConfiguration<G> {
 
 		/**
 		 * Name of the {@link Governance}.
@@ -171,7 +171,7 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder, DutyConf
 		private final String governanceName;
 
 		/**
-		 * Index of the {@link Governance} for the {@link Duty}.
+		 * Index of the {@link Governance} for the {@link AdministrationDuty}.
 		 */
 		private final int index;
 
@@ -181,7 +181,7 @@ public class DutyBuilderImpl<A extends Enum<A>> implements DutyBuilder, DutyConf
 		 * @param governanceName
 		 *            Name of the {@link Governance}.
 		 * @param index
-		 *            Index of the {@link Governance} for the {@link Duty}.
+		 *            Index of the {@link Governance} for the {@link AdministrationDuty}.
 		 */
 		public DutyGovernanceConfigurationImpl(String governanceName, int index) {
 			this.governanceName = governanceName;

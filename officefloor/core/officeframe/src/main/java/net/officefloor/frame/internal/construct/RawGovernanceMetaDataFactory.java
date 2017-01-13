@@ -20,13 +20,13 @@ package net.officefloor.frame.internal.construct;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Factory for the creation of the {@link RawGovernanceMetaData}.

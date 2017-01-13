@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**

@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.impl.construct.administrator;
 
+import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
 
 /**
  * Implementation of the {@link AdministratorSourceContext}.

@@ -18,8 +18,8 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Configuration of a {@link Flow} instigated by a {@link ManagedObjectSource}.

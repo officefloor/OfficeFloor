@@ -41,9 +41,21 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceProperty;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagingOfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
@@ -54,18 +66,6 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration
 import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
 
 /**
  * {@link ManagedObjectLoader} implementation.

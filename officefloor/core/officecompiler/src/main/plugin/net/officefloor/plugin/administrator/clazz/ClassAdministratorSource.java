@@ -24,13 +24,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.AdministratorSourceService;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.DutyKey;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyKey;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
 
 /**
  * {@link AdministratorSource} that delegates to {@link Object}.
@@ -181,7 +181,7 @@ public class ClassAdministratorSource extends
 	}
 
 	@Override
-	public Administrator<Object, Indexed> createAdministrator()
+	public Administration<Object, Indexed> createAdministrator()
 			throws Exception {
 
 		// Create the administration object

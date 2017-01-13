@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Team having only one {@link Thread}.

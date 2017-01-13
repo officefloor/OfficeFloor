@@ -23,13 +23,13 @@ import java.util.List;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.test.administrator.AdministratorLoaderUtil;
 import net.officefloor.compile.test.administrator.AdministratorTypeBuilder;
+import net.officefloor.compile.util.AdministratorSourceStandAlone;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.util.AdministratorSourceStandAlone;
 
 /**
  * Tests the {@link ClassAdministratorSource}.
@@ -95,8 +95,8 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	private void doInvokeAdministrationTest(int dutyIndex, String methodName)
 			throws Throwable {
 
-		final DutyContext<Object, ?, ?> dutyContext = this
-				.createMock(DutyContext.class);
+		final AdministrationContext<Object, ?, ?> dutyContext = this
+				.createMock(AdministrationContext.class);
 		final MockExtensionInterface extensionInterface = this
 				.createMock(MockExtensionInterface.class);
 		final List<MockExtensionInterface> interfaces = Arrays
@@ -118,7 +118,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 				.loadAdministratorSource(ClassAdministratorSource.class);
 
 		// Obtain the duty to invoke
-		Administrator<Object, Indexed> admin = adminSource
+		Administration<Object, Indexed> admin = adminSource
 				.createAdministrator();
 		Duty duty = standAlone.getDuty(admin, dutyIndex);
 
@@ -130,7 +130,7 @@ public class ClassAdministratorSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Mock {@link Administrator} class.
+	 * Mock {@link Administration} class.
 	 */
 	public static class MockClass {
 

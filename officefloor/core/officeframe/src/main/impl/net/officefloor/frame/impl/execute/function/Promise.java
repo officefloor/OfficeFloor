@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Provides promise like functionality for {@link FunctionState} instances.

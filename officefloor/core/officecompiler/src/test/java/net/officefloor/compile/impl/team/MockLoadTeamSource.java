@@ -22,11 +22,11 @@ import org.junit.Assert;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourcePropertyType;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.Property;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
 
 /**
  * Mock {@link TeamSource} for testing loading.

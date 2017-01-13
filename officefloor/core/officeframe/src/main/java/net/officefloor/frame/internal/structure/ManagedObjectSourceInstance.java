@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Instance of a {@link ManagedObjectSource} and items to support it.

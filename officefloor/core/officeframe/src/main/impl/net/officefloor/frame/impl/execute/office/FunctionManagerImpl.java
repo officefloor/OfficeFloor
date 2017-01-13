@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
-import net.officefloor.frame.api.execute.FlowCallback;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.internal.structure.FlowMetaData;

@@ -17,25 +17,24 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Configuration of an {@link Office}.
@@ -141,20 +140,11 @@ public interface OfficeConfiguration {
 
 	/**
 	 * Indicates if manually managing {@link Governance} via
-	 * {@link Administrator}.
+	 * {@link Administration}.
 	 * 
 	 * @return <code>true</code> to manually managed {@link Governance}.
 	 */
 	boolean isManuallyManageGovernance();
-
-	/**
-	 * Obtains the configuration of the {@link AdministratorSource} instances
-	 * bound to the {@link ThreadState}.
-	 * 
-	 * @return {@link AdministratorSource} configuration of instances bound to
-	 *         the {@link ThreadState}.
-	 */
-	AdministratorConfiguration<?, ?>[] getAdministratorConfiguration();
 
 	/**
 	 * Obtains the configuration for the {@link ManagedFunction} instances.

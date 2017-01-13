@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.work.clazz;
 
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
  * Creates the parameter for the {@link ClassTask}.

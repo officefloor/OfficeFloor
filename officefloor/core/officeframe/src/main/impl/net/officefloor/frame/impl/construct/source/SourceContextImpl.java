@@ -20,12 +20,12 @@ package net.officefloor.frame.impl.construct.source;
 import java.io.InputStream;
 import java.util.Properties;
 
-import net.officefloor.frame.spi.source.ResourceSource;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.source.SourceProperties;
-import net.officefloor.frame.spi.source.UnknownClassError;
-import net.officefloor.frame.spi.source.UnknownPropertyError;
-import net.officefloor.frame.spi.source.UnknownResourceError;
+import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.source.SourceProperties;
+import net.officefloor.frame.api.source.UnknownClassError;
+import net.officefloor.frame.api.source.UnknownPropertyError;
+import net.officefloor.frame.api.source.UnknownResourceError;
 
 /**
  * {@link SourceContext} implementation.

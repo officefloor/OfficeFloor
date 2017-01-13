@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.duty;
 
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyKey;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.DutyKey;
 
 /**
  * @author Daniel Sagenschneider
@@ -27,12 +27,12 @@ import net.officefloor.frame.spi.administration.DutyKey;
 public class DutyKeyImpl<A extends Enum<A>> implements DutyKey<A> {
 
 	/**
-	 * Key identifying the {@link Duty}.
+	 * Key identifying the {@link AdministrationDuty}.
 	 */
 	private final A key;
 
 	/**
-	 * Index identifying the {@link Duty}.
+	 * Index identifying the {@link AdministrationDuty}.
 	 */
 	private final int index;
 
@@ -40,7 +40,7 @@ public class DutyKeyImpl<A extends Enum<A>> implements DutyKey<A> {
 	 * Initiate.
 	 * 
 	 * @param key
-	 *            Key identifying the {@link Duty}.
+	 *            Key identifying the {@link AdministrationDuty}.
 	 */
 	public DutyKeyImpl(A key) {
 		this.key = key;
@@ -51,7 +51,7 @@ public class DutyKeyImpl<A extends Enum<A>> implements DutyKey<A> {
 	 * Initiate.
 	 * 
 	 * @param index
-	 *            Index identifying the {@link Duty}.
+	 *            Index identifying the {@link AdministrationDuty}.
 	 */
 	public DutyKeyImpl(int index) {
 		this.key = null;

@@ -19,8 +19,8 @@ package net.officefloor.autowire.supplier;
 
 import net.officefloor.autowire.AutoWireSection;
 import net.officefloor.compile.spi.section.SectionInput;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * <code>Type definition</code> of a flow instigated by the supplied

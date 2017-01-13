@@ -17,16 +17,16 @@
  */
 package net.officefloor.frame.stress;
 
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.governance.MockTransactionalAdministratorSource;
 import net.officefloor.frame.impl.execute.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
 import net.officefloor.frame.impl.execute.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
@@ -79,7 +79,7 @@ public class AdministratedGovernanceStressTest extends AbstractGovernanceStressT
 		officeBuilder.setManuallyManageGovernance(true);
 
 		// Configure the Administration
-		AdministratorBuilder<TransactionDutyKey> admin = this.constructAdministrator("ADMIN",
+		AdministrationBuilder<TransactionDutyKey> admin = this.constructAdministrator("ADMIN",
 				MockTransactionalAdministratorSource.class, TEAM_NAME);
 		admin.administerManagedObject("MO");
 		admin.addDuty("BEGIN").linkGovernance(TransactionGovernanceKey.TRANSACTION, GOVERNANCE_NAME);

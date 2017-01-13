@@ -35,11 +35,11 @@ import net.officefloor.compile.spi.governance.source.GovernanceSourceContext;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceMetaData;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.spi.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

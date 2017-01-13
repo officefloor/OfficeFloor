@@ -20,7 +20,7 @@ package net.officefloor.autowire.impl;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireApplication;
 import net.officefloor.autowire.AutoWireSection;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;

@@ -23,14 +23,14 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link DependencyMappingBuilder} implementation.

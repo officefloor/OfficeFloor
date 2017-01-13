@@ -19,7 +19,7 @@ package net.officefloor.compile;
 
 import java.util.ServiceLoader;
 
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * <p>

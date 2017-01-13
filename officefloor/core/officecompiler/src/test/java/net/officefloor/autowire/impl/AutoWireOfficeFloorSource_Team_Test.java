@@ -25,9 +25,9 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireTeam;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Tests the {@link OfficeFloorTeam} configuration of the

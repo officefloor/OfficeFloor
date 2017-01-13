@@ -25,9 +25,12 @@ import java.util.Timer;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactoryImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.asset.OfficeClockImpl;
@@ -40,7 +43,7 @@ import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeStartupFunctionImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
-import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
@@ -66,7 +69,7 @@ import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -85,9 +88,6 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.source.ProcessContextListener;
 
 /**
  * {@link RawOfficeMetaData} implementation.
@@ -453,7 +453,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		}
 
 		// Obtain the thread bound administrator instances
-		AdministratorConfiguration<?, ?>[] threadAdministratorConfiguration = configuration
+		AdministrationConfiguration<?, ?>[] threadAdministratorConfiguration = configuration
 				.getAdministratorConfiguration();
 		final RawBoundAdministratorMetaData<?, ?>[] threadBoundAdministrators;
 		if ((threadAdministratorConfiguration == null) || (threadAdministratorConfiguration.length == 0)) {
@@ -641,16 +641,16 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 	}
 
 	/**
-	 * Constructs the {@link AdministratorMetaData} listing from the input
+	 * Constructs the {@link AdministrationMetaData} listing from the input
 	 * {@link RawBoundAdministratorMetaData} instances.
 	 * 
 	 * @param rawBoundAdministratorMetaData
 	 *            {@link RawBoundAdministratorMetaData} instances.
-	 * @return {@link AdministratorMetaData} instances.
+	 * @return {@link AdministrationMetaData} instances.
 	 */
-	private AdministratorMetaData<?, ?>[] constructAdministratorMetaData(
+	private AdministrationMetaData<?, ?>[] constructAdministratorMetaData(
 			RawBoundAdministratorMetaData<?, ?>[] rawBoundAdministratorMetaData) {
-		AdministratorMetaData<?, ?>[] adminMetaData = new AdministratorMetaData[rawBoundAdministratorMetaData.length];
+		AdministrationMetaData<?, ?>[] adminMetaData = new AdministrationMetaData[rawBoundAdministratorMetaData.length];
 		for (int i = 0; i < adminMetaData.length; i++) {
 			adminMetaData[i] = rawBoundAdministratorMetaData[i].getAdministratorMetaData();
 		}

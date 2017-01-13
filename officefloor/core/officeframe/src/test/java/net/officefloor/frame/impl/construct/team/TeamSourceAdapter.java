@@ -18,12 +18,12 @@
 package net.officefloor.frame.impl.construct.team;
 
 import junit.framework.TestCase;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
-import net.officefloor.frame.spi.team.source.TeamSourceContext;
-import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 
 /**
  * Adapter providing empty {@link TeamSource} methods.

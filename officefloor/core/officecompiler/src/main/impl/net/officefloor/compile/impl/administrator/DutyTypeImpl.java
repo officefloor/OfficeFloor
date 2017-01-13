@@ -19,8 +19,8 @@ package net.officefloor.compile.impl.administrator;
 
 import net.officefloor.compile.administrator.DutyFlowType;
 import net.officefloor.compile.administrator.DutyType;
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.administration.Duty;
 
 /**
  * {@link DutyType} implementation.

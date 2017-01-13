@@ -17,7 +17,7 @@
  */
 package net.officefloor.compile.spi.pool.source;
 
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 
 /**
  * Sources a {@link ManagedObjectPool}.

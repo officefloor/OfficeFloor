@@ -18,11 +18,11 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.administration.Administrator;
 
 /**
- * {@link Administrator} within the {@link Office}.
+ * {@link Administration} within the {@link Office}.
  * 
  * @author Daniel Sagenschneider
  */

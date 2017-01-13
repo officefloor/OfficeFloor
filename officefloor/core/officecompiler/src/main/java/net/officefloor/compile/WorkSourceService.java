@@ -20,7 +20,7 @@ package net.officefloor.compile;
 import java.util.ServiceLoader;
 
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * <p>

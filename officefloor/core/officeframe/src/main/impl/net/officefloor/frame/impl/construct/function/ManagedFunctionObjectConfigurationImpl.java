@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.impl.construct.function;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * {@link ManagedFunctionObjectConfiguration} implementation.

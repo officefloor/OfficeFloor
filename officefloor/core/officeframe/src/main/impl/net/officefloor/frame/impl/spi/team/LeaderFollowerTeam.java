@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamIdentifier;
 
 /**
  * {@link Team} implementation of many {@link Thread} instances that follow the

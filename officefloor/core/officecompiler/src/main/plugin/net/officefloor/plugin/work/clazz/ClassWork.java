@@ -17,7 +17,7 @@
  */
 package net.officefloor.plugin.work.clazz;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * {@link Work} for the class.

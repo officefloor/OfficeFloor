@@ -27,9 +27,9 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * {@link FunctionNamespaceType} implementation.

@@ -33,8 +33,8 @@ import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuild
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.ManagedFunctionContext;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.section.work.WorkSectionSource;
 

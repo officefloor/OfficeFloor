@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.impl.spi.team.stress;
 
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Stress tests the {@link ExecutorCachedTeamSource}.

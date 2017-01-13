@@ -17,12 +17,12 @@
  */
 package net.officefloor.frame.impl.execute.administration;
 
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Ensure a {@link Duty} can invoke a {@link Flow}.
+ * Ensure a {@link AdministrationDuty} can invoke a {@link Flow}.
  *
  * @author Daniel Sagenschneider
  */

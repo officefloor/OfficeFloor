@@ -20,9 +20,9 @@ package net.officefloor.frame.impl.spi.team;
 import org.easymock.AbstractMatcher;
 
 import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

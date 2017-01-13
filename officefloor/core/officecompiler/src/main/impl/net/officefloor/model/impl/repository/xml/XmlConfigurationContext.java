@@ -33,7 +33,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.frame.spi.source.ResourceSource;
+import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ReadOnlyConfigurationException;

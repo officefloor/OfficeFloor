@@ -17,8 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPoolContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectPoolContext} implementation.

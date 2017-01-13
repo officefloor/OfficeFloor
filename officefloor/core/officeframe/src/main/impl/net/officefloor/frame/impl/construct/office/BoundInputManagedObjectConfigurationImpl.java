@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.impl.construct.office;
 
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link BoundInputManagedObjectConfiguration} implementation.

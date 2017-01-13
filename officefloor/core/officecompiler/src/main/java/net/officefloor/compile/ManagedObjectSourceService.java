@@ -19,7 +19,7 @@ package net.officefloor.compile;
 
 import java.util.ServiceLoader;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * <p>

@@ -29,14 +29,14 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceSpecification;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
 
 /**
  * Utility class for testing the {@link AdministratorSource}.
@@ -52,7 +52,7 @@ public class AdministratorLoaderUtil {
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <A>
-	 *            {@link Administrator} key type.
+	 *            {@link Administration} key type.
 	 * @param <S>
 	 *            {@link AdministratorSource} type.
 	 * @param administratorSourceClass
@@ -97,7 +97,7 @@ public class AdministratorLoaderUtil {
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <A>
-	 *            {@link Administrator} key type.
+	 *            {@link Administration} key type.
 	 * @param <S>
 	 *            {@link AdministratorSource} type
 	 * @param expectedAdministratorType
@@ -177,7 +177,7 @@ public class AdministratorLoaderUtil {
 	 * @param <I>
 	 *            Extension interface type.
 	 * @param <A>
-	 *            {@link Administrator} key type.
+	 *            {@link Administration} key type.
 	 * @param <S>
 	 *            {@link AdministratorSource} type.
 	 * @param administratorSourceClass

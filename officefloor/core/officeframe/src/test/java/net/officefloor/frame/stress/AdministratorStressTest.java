@@ -18,40 +18,40 @@
 package net.officefloor.frame.stress;
 
 import junit.framework.TestCase;
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.AdministrationContext;
+import net.officefloor.frame.api.administration.DutyKey;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyContext;
-import net.officefloor.frame.spi.administration.DutyKey;
-import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.MockTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
- * Tests the {@link Administrator}.
+ * Tests the {@link Administration}.
  * 
  * @author Daniel Sagenschneider
  */
 public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensures no issues arising in stress {@link Administrator} with a
+	 * Ensures no issues arising in stress {@link Administration} with a
 	 * {@link OnePersonTeam}.
 	 */
 	@StressTest
@@ -60,7 +60,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensures no issues arising in stress {@link Administrator} with a
+	 * Ensures no issues arising in stress {@link Administration} with a
 	 * {@link LeaderFollowerTeam}.
 	 */
 	@StressTest
@@ -69,7 +69,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Ensures no issues arising in stress {@link Administrator} with a
+	 * Ensures no issues arising in stress {@link Administration} with a
 	 * {@link ExecutorFixedTeamSource}.
 	 */
 	@StressTest
@@ -78,7 +78,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Does the {@link Administrator} stress test.
+	 * Does the {@link Administration} stress test.
 	 * 
 	 * @param team
 	 *            {@link Team} to use to run the {@link ManagedFunction}
@@ -102,13 +102,13 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", team);
 
 		// Create the pre administration
-		AdministratorBuilder<Indexed> preTaskAdmin = this.constructAdministrator("PRE", Administration.class, "TEAM");
+		AdministrationBuilder<Indexed> preTaskAdmin = this.constructAdministrator("PRE", Administration.class, "TEAM");
 		preTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME, PRE_TASK_VALUE);
 		preTaskAdmin.addDuty("DUTY");
 		preTaskAdmin.administerManagedObject("MO");
 
 		// Create the post administration
-		AdministratorBuilder<Indexed> postTaskAdmin = this.constructAdministrator("POST", Administration.class, "TEAM");
+		AdministrationBuilder<Indexed> postTaskAdmin = this.constructAdministrator("POST", Administration.class, "TEAM");
 		postTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME, POST_TASK_VALUE);
 		postTaskAdmin.addDuty("DUTY");
 		postTaskAdmin.administerManagedObject("MO");
@@ -242,7 +242,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	public static interface AdministeredExtensionInterface {
 
 		/**
-		 * Invoked to do the administration by the {@link Administrator}.
+		 * Invoked to do the administration by the {@link Administration}.
 		 * 
 		 * @param administeredValue
 		 *            Administered value.
@@ -310,12 +310,12 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * {@link Administrator}.
+	 * {@link Administration}.
 	 */
 	@TestSource
 	public static class Administration extends AbstractAdministratorSource<AdministeredExtensionInterface, Indexed>
-			implements Administrator<AdministeredExtensionInterface, Indexed>,
-			Duty<AdministeredExtensionInterface, None, None> {
+			implements Administration<AdministeredExtensionInterface, Indexed>,
+			AdministrationDuty<AdministeredExtensionInterface, None, None> {
 
 		/**
 		 * Administration value property name.
@@ -349,7 +349,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		public Administrator<AdministeredExtensionInterface, Indexed> createAdministrator() {
+		public Administration<AdministeredExtensionInterface, Indexed> createAdministrator() {
 			return this;
 		}
 
@@ -358,7 +358,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Duty<AdministeredExtensionInterface, ?, ?> getDuty(DutyKey<Indexed> dutyKey) {
+		public AdministrationDuty<AdministeredExtensionInterface, ?, ?> getDuty(DutyKey<Indexed> dutyKey) {
 			return this;
 		}
 
@@ -367,7 +367,7 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public void doDuty(DutyContext<AdministeredExtensionInterface, None, None> context) throws Throwable {
+		public void doDuty(AdministrationContext<AdministeredExtensionInterface, None, None> context) throws Throwable {
 			for (AdministeredExtensionInterface object : context.getExtensionInterfaces()) {
 				object.doAdministration(this.administrationValue);
 			}

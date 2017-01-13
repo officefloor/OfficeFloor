@@ -17,21 +17,22 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Builder of an {@link Office}.
@@ -158,11 +159,11 @@ public interface OfficeBuilder {
 
 	/**
 	 * Flags whether to manually manage {@link Governance} via
-	 * {@link Administrator} instances.
+	 * {@link Administration} instances.
 	 * 
 	 * @param isManuallyManageGovernance
 	 *            <code>true</code> to manually manage {@link Governance} via
-	 *            {@link Administrator} instances.
+	 *            {@link Administration} instances.
 	 */
 	void setManuallyManageGovernance(boolean isManuallyManageGovernance);
 
@@ -186,33 +187,6 @@ public interface OfficeBuilder {
 			GovernanceFactory<? super E, F> governanceFactory);
 
 	/**
-	 * <p>
-	 * Adds a {@link ThreadState} bound {@link AdministratorSource} to this
-	 * {@link OfficeBuilder}.
-	 * <p>
-	 * Dependency scope for administered {@link ManagedObject} instances:
-	 * <ol>
-	 * <li>{@link ThreadState} bound {@link ManagedObject} instances.</li>
-	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
-	 * </ol>
-	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link Administrator} key type.
-	 * @param <AS>
-	 *            {@link AdministratorSource} type.
-	 * @param administratorName
-	 *            Name to link the {@link Administrator} for the
-	 *            {@link ManagedFunction} instances.
-	 * @param adminsistratorSource
-	 *            {@link AdministratorSource} class.
-	 * @return administratorBuilder Builder of the {@link Administrator}.
-	 */
-	<E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministratorBuilder<A> addAdministrator(
-			String administratorName, Class<AS> adminsistratorSource);
-
-	/**
 	 * Adds a {@link ManagedFunction} to be executed within the {@link Office}.
 	 * 
 	 * @param <O>
@@ -228,18 +202,6 @@ public interface OfficeBuilder {
 	 */
 	<O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> addManagedFunction(String functionName,
 			ManagedFunctionFactory<O, F> mangedFunctionFactory);
-
-	/**
-	 * <p>
-	 * Adds {@link OfficeEnhancer} for this {@link Office}.
-	 * <p>
-	 * This enables enhancing the {@link Office} after the
-	 * {@link ManagedObjectSource} instances are registered.
-	 * 
-	 * @param officeEnhancer
-	 *            {@link OfficeEnhancer}.
-	 */
-	void addOfficeEnhancer(OfficeEnhancer officeEnhancer);
 
 	/**
 	 * Adds an {@link EscalationFlow} for issues not handled within the
@@ -261,6 +223,18 @@ public interface OfficeBuilder {
 	 *            Name of {@link ManagedFunction}.
 	 */
 	void addStartupFunction(String functionName);
+
+	/**
+	 * <p>
+	 * Adds {@link OfficeEnhancer} for this {@link Office}.
+	 * <p>
+	 * This enables enhancing the {@link Office} after the
+	 * {@link ManagedObjectSource} instances are registered.
+	 * 
+	 * @param officeEnhancer
+	 *            {@link OfficeEnhancer}.
+	 */
+	void addOfficeEnhancer(OfficeEnhancer officeEnhancer);
 
 	/**
 	 * Allows to optionally specify a {@link Profiler} that listens in on

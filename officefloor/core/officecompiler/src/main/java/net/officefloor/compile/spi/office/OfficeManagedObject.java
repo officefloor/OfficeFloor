@@ -22,8 +22,8 @@ import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * {@link ManagedObject} for the {@link Office}.

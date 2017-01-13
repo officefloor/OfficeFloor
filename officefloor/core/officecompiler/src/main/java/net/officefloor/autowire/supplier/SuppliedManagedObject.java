@@ -19,7 +19,7 @@ package net.officefloor.autowire.supplier;
 
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Supplied {@link ManagedObjectSource}.

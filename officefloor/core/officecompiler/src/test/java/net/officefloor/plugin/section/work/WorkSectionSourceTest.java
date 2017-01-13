@@ -35,7 +35,7 @@ import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.plugin.work.clazz.FlowInterface;

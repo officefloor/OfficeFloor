@@ -19,8 +19,8 @@ package net.officefloor.frame.impl.construct.office;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * {@link LinkedTeamConfiguration} implementation.

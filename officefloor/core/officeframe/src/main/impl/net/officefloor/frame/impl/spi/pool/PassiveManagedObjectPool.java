@@ -20,15 +20,15 @@ package net.officefloor.frame.impl.spi.pool;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPoolContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 
 /**
- * {@link net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool} for
+ * {@link net.officefloor.frame.api.managedobject.pool.ManagedObjectPool} for
  * passive management of
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances.
+ * {@link net.officefloor.frame.api.managedobject.ManagedObject} instances.
  * 
  * @author Daniel Sagenschneider
  */

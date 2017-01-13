@@ -21,8 +21,8 @@ import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.plugin.section.clazz.ManagedObject;
 
 /**

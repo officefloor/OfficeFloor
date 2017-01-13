@@ -21,7 +21,7 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.Work;
 
 /**
  * {@link Work} within the {@link SectionNode}.

@@ -19,7 +19,7 @@ package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * {@link Team} within the {@link OfficeFloor}.

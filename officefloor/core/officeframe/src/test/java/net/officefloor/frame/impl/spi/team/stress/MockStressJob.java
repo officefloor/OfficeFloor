@@ -21,8 +21,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 
 /**
  * Mock {@link Job} used for stress testing.

@@ -32,8 +32,8 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecification;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.api.build.GovernanceFactory;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**

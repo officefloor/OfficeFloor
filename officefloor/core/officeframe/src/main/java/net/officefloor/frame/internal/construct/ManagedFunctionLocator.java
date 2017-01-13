@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.internal.construct;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 

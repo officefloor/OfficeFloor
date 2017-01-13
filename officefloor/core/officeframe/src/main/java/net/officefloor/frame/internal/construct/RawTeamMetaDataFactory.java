@@ -18,9 +18,9 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
-import net.officefloor.frame.spi.source.SourceContext;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * Factory for the construction of {@link RawTeamMetaData}.

@@ -22,16 +22,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.internal.configuration.AdministratorConfiguration;
+import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
@@ -44,12 +50,6 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Implementation of the {@link ManagedFunctionBuilder}.
@@ -119,10 +119,10 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	private final List<ManagedObjectConfiguration<?>> functionManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
 
 	/**
-	 * Listing of {@link ManagedFunction} bound {@link Administrator}
+	 * Listing of {@link ManagedFunction} bound {@link Administration}
 	 * configuration.
 	 */
-	private final List<AdministratorConfiguration<?, ?>> functionAdministrators = new LinkedList<AdministratorConfiguration<?, ?>>();
+	private final List<AdministrationConfiguration<?, ?>> functionAdministrators = new LinkedList<AdministrationConfiguration<?, ?>>();
 
 	/**
 	 * Listing of {@link ManagedFunctionEscalationConfiguration} instances to
@@ -283,7 +283,7 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public <E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministratorBuilder<A> addAdministrator(
+	public <E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministrationBuilder<A> addAdministrator(
 			String functionAdministratorName, Class<AS> adminsistratorSource) {
 		AdministratorBuilderImpl<E, A, AS> builder = new AdministratorBuilderImpl<E, A, AS>(functionAdministratorName,
 				adminsistratorSource);
@@ -356,8 +356,8 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public AdministratorConfiguration<?, ?>[] getAdministratorConfiguration() {
-		return this.functionAdministrators.toArray(new AdministratorConfiguration[0]);
+	public AdministrationConfiguration<?, ?>[] getAdministratorConfiguration() {
+		return this.functionAdministrators.toArray(new AdministrationConfiguration[0]);
 	}
 
 	@Override

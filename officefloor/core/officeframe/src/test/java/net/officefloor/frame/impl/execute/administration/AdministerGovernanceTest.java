@@ -17,12 +17,12 @@
  */
 package net.officefloor.frame.impl.execute.administration;
 
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Ensure {@link Administrator} can manually manage {@link Governance}.
+ * Ensure {@link Administration} can manually manage {@link Governance}.
  *
  * @author Daniel Sagenschneider
  */

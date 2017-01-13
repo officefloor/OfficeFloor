@@ -17,14 +17,14 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Configuration of a {@link ManagedFunction}.
@@ -75,15 +75,6 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	ManagedObjectConfiguration<?>[] getManagedObjectConfiguration();
 
 	/**
-	 * Obtains the configuration of the {@link ManagedFunction} bound
-	 * {@link Administrator} instances.
-	 * 
-	 * @return Listing of {@link Administrator} configuration this
-	 *         {@link ManagedFunction}.
-	 */
-	AdministratorConfiguration<?, ?>[] getAdministratorConfiguration();
-
-	/**
 	 * Obtains the reference to the next {@link ManagedFunction}.
 	 * 
 	 * @return Reference to the next {@link ManagedFunction}.
@@ -118,26 +109,22 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	ManagedFunctionGovernanceConfiguration[] getGovernanceConfiguration();
 
 	/**
-	 * Obtains the listing of the {@link ManagedFunctionDutyConfiguration} for
-	 * the administration to be done before the {@link ManagedFunction} is
-	 * executed.
+	 * Obtains the listing of the {@link Administration} to be done before the
+	 * {@link ManagedFunction} is executed.
 	 * 
-	 * @return Listing of the {@link ManagedFunctionDutyConfiguration} for the
-	 *         administration to be done before the {@link ManagedFunction} is
-	 *         executed.
+	 * @return Listing of the {@link Administration} to be done after the
+	 *         {@link ManagedFunction} is executed.
 	 */
-	ManagedFunctionDutyConfiguration<?>[] getPreFunctionAdministratorDutyConfiguration();
+	AdministrationConfiguration<?, ?, ?>[] getPreAdministration();
 
 	/**
-	 * Obtains the listing of the {@link ManagedFunctionDutyConfiguration} for
-	 * the administration to be done after the {@link ManagedFunction} is
-	 * executed.
+	 * Obtains the listing of the {@link Administration} to be done after the
+	 * {@link ManagedFunction} is executed.
 	 * 
-	 * @return Listing of the {@link ManagedFunctionDutyConfiguration} for the
-	 *         administration to be done after the {@link ManagedFunction} is
-	 *         executed.
+	 * @return Listing of the {@link Administration} to be done after the
+	 *         {@link ManagedFunction} is executed.
 	 */
-	ManagedFunctionDutyConfiguration<?>[] getPostFunctionAdministratorDutyConfiguration();
+	AdministrationConfiguration<?, ?, ?>[] getPostAdministration();
 
 	/**
 	 * Obtains the {@link ManagedFunctionEscalationConfiguration} instances in

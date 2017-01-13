@@ -20,9 +20,9 @@ package net.officefloor.autowire.spi.supplier.source;
 import net.officefloor.autowire.AutoWire;
 import net.officefloor.autowire.AutoWireObject;
 import net.officefloor.autowire.ManagedObjectSourceWirer;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.source.SourceContext;
 
 /**
  * Context for the {@link SupplierSource}.

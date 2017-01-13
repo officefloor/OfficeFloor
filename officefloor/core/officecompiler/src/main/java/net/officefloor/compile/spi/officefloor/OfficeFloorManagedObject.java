@@ -20,7 +20,7 @@ package net.officefloor.compile.spi.officefloor;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * {@link ManagedObject} within the {@link OfficeFloor}.

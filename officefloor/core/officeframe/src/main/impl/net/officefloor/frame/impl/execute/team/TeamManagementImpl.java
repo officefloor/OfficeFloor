@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.impl.execute.team;
 
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.TeamIdentifier;
 import net.officefloor.frame.internal.structure.TeamManagement;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamIdentifier;
 
 /**
  * {@link TeamManagement} implementation.

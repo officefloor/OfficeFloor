@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * Indicates parameter type to {@link ManagedFunction} is invalid.

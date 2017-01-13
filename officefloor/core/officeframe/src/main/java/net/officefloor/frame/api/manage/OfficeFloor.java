@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.manage;
 
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * {@link OfficeFloor} where {@link ManagedFunction} instances are executed

@@ -19,12 +19,12 @@ package net.officefloor.frame.internal.construct;
 
 import java.util.Map;
 
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Raw meta-data of the {@link Office}.
@@ -71,26 +71,6 @@ public interface RawOfficeMetaData {
 	 *         names.
 	 */
 	Map<String, RawGovernanceMetaData<?, ?>> getGovernanceMetaData();
-
-	/**
-	 * Obtains the {@link ThreadState} {@link RawBoundAdministratorMetaData}
-	 * instances.
-	 * 
-	 * @return {@link ThreadState} {@link RawBoundAdministratorMetaData}
-	 *         instances.
-	 */
-	RawBoundAdministratorMetaData<?, ?>[] getBoundAdministrators();
-
-	/**
-	 * Obtains the scope {@link RawBoundAdministratorMetaData} instances of the
-	 * {@link Office} by their {@link ProcessState} and {@link ThreadState}
-	 * bound names.
-	 * 
-	 * @return Scope {@link RawBoundAdministratorMetaData} instances of the
-	 *         {@link Office} by the {@link ProcessState} and
-	 *         {@link ThreadState} bound names.
-	 */
-	Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrators();
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaData} by their {@link Office}

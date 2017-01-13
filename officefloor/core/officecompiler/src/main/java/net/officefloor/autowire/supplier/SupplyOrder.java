@@ -18,8 +18,8 @@
 package net.officefloor.autowire.supplier;
 
 import net.officefloor.autowire.AutoWire;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Order for a {@link SuppliedManagedObject}.

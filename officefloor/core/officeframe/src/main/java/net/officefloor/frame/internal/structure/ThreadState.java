@@ -18,7 +18,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.spi.governance.Governance;
+import net.officefloor.frame.api.governance.Governance;
 
 /**
  * <p>
@@ -99,15 +99,6 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	ManagedObjectContainer getManagedObjectContainer(int index);
 
 	/**
-	 * Obtains the {@link AdministratorContainer} for the input index.
-	 * 
-	 * @param index
-	 *            Index of the {@link AdministratorContainer} to be returned.
-	 * @return {@link AdministratorContainer} for the index.
-	 */
-	AdministratorContainer<?> getAdministratorContainer(int index);
-
-	/**
 	 * Obtains the {@link GovernanceContainer} for the input index.
 	 * 
 	 * @param index
@@ -118,7 +109,11 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	GovernanceContainer<?> getGovernanceContainer(int index);
 
 	/**
+	 * <p>
 	 * Indicates if the {@link Governance} is active.
+	 * <p>
+	 * This provides a quick check and avoids creation of the
+	 * {@link GovernanceContainer}.
 	 * 
 	 * @param index
 	 *            Index of the {@link Governance} to check active.

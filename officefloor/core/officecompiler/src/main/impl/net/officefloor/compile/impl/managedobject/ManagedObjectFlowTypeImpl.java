@@ -19,10 +19,10 @@ package net.officefloor.compile.impl.managedobject;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.Work;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObjectFlowType} implementation.

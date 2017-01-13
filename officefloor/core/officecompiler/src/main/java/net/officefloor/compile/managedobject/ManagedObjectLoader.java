@@ -21,9 +21,9 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceProperty;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
 
 /**
  * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.

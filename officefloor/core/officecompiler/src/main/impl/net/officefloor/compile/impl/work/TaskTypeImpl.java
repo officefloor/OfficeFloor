@@ -31,9 +31,9 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionEscalat
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionFactory;
-import net.officefloor.frame.api.execute.ManagedFunction;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.function.Work;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**

@@ -20,7 +20,7 @@ package net.officefloor.plugin.managedobject.clazz;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
-import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.plugin.work.clazz.Qualifier;
 
 /**

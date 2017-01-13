@@ -25,9 +25,9 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 
 /**
  * Meta-data for a process interface.

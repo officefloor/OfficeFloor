@@ -23,8 +23,8 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.team.TeamType;
 import net.officefloor.compile.type.TypeContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * {@link OfficeFloorTeam} node.

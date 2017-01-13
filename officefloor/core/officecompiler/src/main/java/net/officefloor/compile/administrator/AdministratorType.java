@@ -17,11 +17,11 @@
  */
 package net.officefloor.compile.administrator;
 
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
- * <code>Type definition</code> of an {@link Administrator}.
+ * <code>Type definition</code> of an {@link Administration}.
  * 
  * @author Daniel Sagenschneider
  */

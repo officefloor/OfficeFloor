@@ -20,15 +20,15 @@ package net.officefloor.frame.test;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.compile.spi.administration.source.AdministratorSource;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceMetaData;
+import net.officefloor.compile.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.spi.TestSource;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.api.source.TestSource;
 
 /**
  * Mock implementation of the {@link AdministratorSource} for testing.
@@ -39,38 +39,38 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecif
 public class MockAdministratorSource implements AdministratorSource<Object, Indexed> {
 
 	/**
-	 * Property name to source the {@link Administrator}.
+	 * Property name to source the {@link Administration}.
 	 */
 	private static final String TASK_ADMINISTRATOR_PROPERTY = "net.officefloor.frame.construct.taskadministrator";
 
 	/**
-	 * Registry of the {@link Administrator} instances.
+	 * Registry of the {@link Administration} instances.
 	 */
 	private static final Map<String, TaskAdministratorSourceState> REGISTRY = new HashMap<String, TaskAdministratorSourceState>();
 
 	/**
-	 * Convenience method to bind the {@link Administrator} instance to the
-	 * {@link AdministratorBuilder}.
+	 * Convenience method to bind the {@link AdministrationDuty} instance to the
+	 * {@link AdministrationBuilder}.
 	 * 
 	 * @param <A>
 	 *            Administration key.
 	 * @param name
 	 *            Name to bind under.
 	 * @param administrator
-	 *            {@link Administrator} to bind.
+	 *            {@link AdministrationDuty} to bind.
 	 * @param sourceMetaData
 	 *            {@link AdministratorSourceMetaData} to bind.
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder}.
-	 * @return {@link AdministratorBuilder} for additional configuration.
+	 * @return {@link AdministrationBuilder} for additional configuration.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <A extends Enum<A>> AdministratorBuilder<A> bindAdministrator(String name,
-			Administrator<?, A> administrator, AdministratorSourceMetaData<?, A> sourceMetaData,
+	public static <A extends Enum<A>> AdministrationBuilder<A> bindAdministrator(String name,
+			Administration<?, A> administrator, AdministratorSourceMetaData<?, A> sourceMetaData,
 			OfficeBuilder officeBuilder) {
 
 		// Create the administrator builder
-		AdministratorBuilder<Indexed> builder = officeBuilder.addAdministrator(name, MockAdministratorSource.class);
+		AdministrationBuilder<Indexed> builder = officeBuilder.addAdministrator(name, MockAdministratorSource.class);
 
 		// Provide task administrator link to meta-data
 		builder.addProperty(TASK_ADMINISTRATOR_PROPERTY, name);
@@ -84,7 +84,7 @@ public class MockAdministratorSource implements AdministratorSource<Object, Inde
 		REGISTRY.put(name, state);
 
 		// Return the builder
-		return (AdministratorBuilder<A>) builder;
+		return (AdministrationBuilder<A>) builder;
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class MockAdministratorSource implements AdministratorSource<Object, Inde
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Administrator createAdministrator() {
+	public Administration createAdministrator() {
 		return this.taskAdministratorSourceState.taskAdministrator;
 	}
 
@@ -132,9 +132,9 @@ public class MockAdministratorSource implements AdministratorSource<Object, Inde
 	private static class TaskAdministratorSourceState {
 
 		/**
-		 * {@link Administrator}.
+		 * {@link AdministrationDuty}.
 		 */
-		Administrator<?, ?> taskAdministrator;
+		Administration<?, ?> taskAdministrator;
 
 		/**
 		 * {@link AdministratorSourceMetaData}.

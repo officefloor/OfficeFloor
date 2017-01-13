@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
@@ -30,7 +30,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -274,7 +274,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		this.governanceContainers = new GovernanceContainer[governanceMetaData.length];
 
 		// Create array to reference the administrators
-		AdministratorMetaData<?, ?>[] adminMetaData = this.threadMetaData.getAdministratorMetaData();
+		AdministrationMetaData<?, ?>[] adminMetaData = this.threadMetaData.getAdministratorMetaData();
 		this.administratorContainers = new AdministratorContainer[adminMetaData.length];
 
 		// Create thread profiler

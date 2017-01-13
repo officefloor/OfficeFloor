@@ -18,7 +18,7 @@
 package net.officefloor.frame.test;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Test {@link ManagedObject} that simplifies the {@link TestManagedObject}.

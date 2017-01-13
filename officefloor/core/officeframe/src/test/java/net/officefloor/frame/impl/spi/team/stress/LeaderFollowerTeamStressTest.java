@@ -17,9 +17,9 @@
  */
 package net.officefloor.frame.impl.spi.team.stress;
 
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeamSource;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.TeamSourceStandAlone;
 
 /**

@@ -20,7 +20,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * {@link OfficeDuty} node.

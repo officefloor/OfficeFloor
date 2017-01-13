@@ -23,9 +23,9 @@ import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.test.governance.GovernanceLoaderUtil;
 import net.officefloor.compile.test.governance.GovernanceTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.governance.GovernanceContext;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.governance.GovernanceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

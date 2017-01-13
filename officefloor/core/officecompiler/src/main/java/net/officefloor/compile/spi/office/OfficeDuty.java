@@ -17,8 +17,8 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.administration.Duty;
 
 /**
  * {@link Office} {@link Duty}.

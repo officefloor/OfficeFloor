@@ -21,18 +21,18 @@ import java.sql.SQLException;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import net.officefloor.frame.api.build.AdministratorBuilder;
+import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.execute.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
 import net.officefloor.frame.impl.execute.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
@@ -188,7 +188,7 @@ public class TransactionGovernanceTest extends AbstractGovernanceTestCase {
 		dependencies.mapGovernance("GOVERNANCE");
 
 		// Configure the Administration
-		AdministratorBuilder<TransactionDutyKey> admin = this.constructAdministrator("ADMIN",
+		AdministrationBuilder<TransactionDutyKey> admin = this.constructAdministrator("ADMIN",
 				MockTransactionalAdministratorSource.class, TEAM_ADMINISTRATION);
 		admin.administerManagedObject("MO");
 		admin.addDuty("BEGIN").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");

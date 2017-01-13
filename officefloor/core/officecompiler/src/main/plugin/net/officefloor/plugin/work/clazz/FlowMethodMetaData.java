@@ -19,7 +19,7 @@ package net.officefloor.plugin.work.clazz;
 
 import java.lang.reflect.Method;
 
-import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.function.FlowFuture;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**

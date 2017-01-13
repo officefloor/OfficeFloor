@@ -20,12 +20,18 @@ package net.officefloor.frame.impl.execute.administrator;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.officefloor.frame.api.execute.FlowCallback;
+import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.AdministrationContext;
+import net.officefloor.frame.api.administration.DutyKey;
+import net.officefloor.frame.api.administration.GovernanceManager;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.impl.execute.function.Promise;
-import net.officefloor.frame.internal.structure.Administration;
+import net.officefloor.frame.internal.structure.AdministrationDuty;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.DutyMetaData;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
+import net.officefloor.frame.internal.structure.AdministrationDuty;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -40,12 +46,6 @@ import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.DutyContext;
-import net.officefloor.frame.spi.administration.DutyKey;
-import net.officefloor.frame.spi.administration.GovernanceManager;
-import net.officefloor.frame.spi.governance.Governance;
 
 /**
  * Implementation of an {@link AdministratorContainer}.
@@ -56,23 +56,23 @@ public class AdministratorContainerImpl<E extends Object, A extends Enum<A>, F e
 		implements AdministratorContainer<A> {
 
 	/**
-	 * {@link AdministratorMetaData}.MetaData} for disregarding the
+	 * {@link AdministrationMetaData}.MetaData} for disregarding the
 	 * {@link Governance}.
 	 */
-	private final AdministratorMetaData<E, A> metaData;
+	private final AdministrationMetaData<E, A> metaData;
 
 	/**
-	 * {@link Administrator}.
+	 * {@link AdministrationDuty}.
 	 */
-	private Administrator<E, A> administrator;
+	private Administration<E, A> administrator;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param metaData
-	 *            {@link AdministratorMetaData}.
+	 *            {@link AdministrationMetaData}.
 	 */
-	public AdministratorContainerImpl(AdministratorMetaData<E, A> metaData) {
+	public AdministratorContainerImpl(AdministrationMetaData<E, A> metaData) {
 		this.metaData = metaData;
 	}
 
@@ -149,14 +149,14 @@ public class AdministratorContainerImpl<E extends Object, A extends Enum<A>, F e
 			}
 
 			@Override
-			public AdministratorMetaData<?, ?> getAdministratorMetaData() {
+			public AdministrationMetaData<?, ?> getAdministratorMetaData() {
 				return AdministratorContainerImpl.this.metaData;
 			}
 		};
 	}
 
 	/**
-	 * {@link Duty} {@link ManagedFunctionLogic}.
+	 * {@link AdministrationDuty} {@link ManagedFunctionLogic}.
 	 */
 	public class DutyFunctionLogic implements ManagedFunctionLogic {
 
@@ -212,7 +212,7 @@ public class AdministratorContainerImpl<E extends Object, A extends Enum<A>, F e
 
 			// Obtain the duty
 			@SuppressWarnings("unchecked")
-			Duty<E, F, G> duty = (Duty<E, F, G>) container.administrator.getDuty(key);
+			AdministrationDuty<E, F, G> duty = (AdministrationDuty<E, F, G>) container.administrator.getDuty(key);
 
 			// Obtain the duty meta-data
 			DutyMetaData dutyMetaData = container.metaData.getDutyMetaData(key);
@@ -243,13 +243,13 @@ public class AdministratorContainerImpl<E extends Object, A extends Enum<A>, F e
 
 	/**
 	 * <p>
-	 * Token class given to the {@link Duty}.
+	 * Token class given to the {@link AdministrationDuty}.
 	 * <p>
-	 * As application code will be provided a {@link DutyContext} this exposes
+	 * As application code will be provided a {@link AdministrationContext} this exposes
 	 * just the necessary functionality and prevents access to internals of the
 	 * framework.
 	 */
-	private class DutyContextToken implements DutyContext<E, F, G> {
+	private class DutyContextToken implements AdministrationContext<E, F, G> {
 
 		/**
 		 * {@link ThreadState}.
@@ -275,7 +275,7 @@ public class AdministratorContainerImpl<E extends Object, A extends Enum<A>, F e
 		 * <p>
 		 * {@link FunctionState} instances regarding {@link Governance}.
 		 * <p>
-		 * Typically {@link Duty} will only undertake a single
+		 * Typically {@link AdministrationDuty} will only undertake a single
 		 * {@link GovernanceActivity}.
 		 */
 		private final List<FunctionState> actionedGovernances = new ArrayList<>(1);

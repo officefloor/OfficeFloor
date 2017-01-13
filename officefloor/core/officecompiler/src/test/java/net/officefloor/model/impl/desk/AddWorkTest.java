@@ -21,8 +21,8 @@ import java.sql.Connection;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.frame.api.execute.ManagedFunction;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.WorkModel;

@@ -17,11 +17,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.governance.Governance;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Meta-data for the {@link ThreadState}.
@@ -46,15 +45,6 @@ public interface ThreadMetaData {
 	 * @return {@link GovernanceMetaData} instances.
 	 */
 	GovernanceMetaData<?, ?>[] getGovernanceMetaData();
-
-	/**
-	 * Obtains the {@link AdministratorMetaData} of the {@link Administrator}
-	 * instances bound to the {@link ThreadState}.
-	 * 
-	 * @return {@link AdministratorMetaData} of the {@link Administrator}
-	 *         instances bound to the {@link ThreadState}.
-	 */
-	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for the {@link Office}.

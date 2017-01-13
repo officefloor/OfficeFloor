@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.IssueCapture;
-import net.officefloor.frame.spi.source.SourceContext;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * Utility methods to aid in compiling.

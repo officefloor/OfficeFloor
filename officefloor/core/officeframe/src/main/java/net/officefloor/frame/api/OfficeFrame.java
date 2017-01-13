@@ -58,8 +58,7 @@ public abstract class OfficeFrame {
 	public synchronized static final void setInstance(OfficeFrame singleton) {
 		// Ensure not already specified
 		if (INSTANCE != null) {
-			throw new IllegalStateException(
-					"OfficeFloor instance has already been specified");
+			throw new IllegalStateException("OfficeFloor instance has already been specified");
 		}
 
 		// Specify OfficeFloor implementation
@@ -77,19 +76,14 @@ public abstract class OfficeFrame {
 		if (INSTANCE == null) {
 
 			// Determine if overriding the implementation
-			String implementationClassName = System
-					.getProperty(IMPLEMENTATION_CLASS_PROPERTY_NAME);
-			if ((implementationClassName != null)
-					&& (implementationClassName.trim().length() > 0)) {
+			String implementationClassName = System.getProperty(IMPLEMENTATION_CLASS_PROPERTY_NAME);
+			if ((implementationClassName != null) && (implementationClassName.trim().length() > 0)) {
 				// Have override implementation, so use
 				try {
-					INSTANCE = (OfficeFrame) Class.forName(
-							implementationClassName).newInstance();
+					INSTANCE = (OfficeFrame) Class.forName(implementationClassName).newInstance();
 				} catch (Throwable ex) {
 					throw new IllegalArgumentException(
-							"Can not create instance of "
-									+ implementationClassName
-									+ " from default constructor", ex);
+							"Can not create instance of " + implementationClassName + " from default constructor", ex);
 				}
 
 			} else {
@@ -114,12 +108,11 @@ public abstract class OfficeFrame {
 	 */
 	public static final OfficeFloorBuilder createOfficeFloorBuilder() {
 
-		// Use default name for the office floor
+		// Use default name for the OfficeFloor
 		String officeFloorName = OfficeFloor.class.getSimpleName();
 
-		// Create the office floor builder by the default name
-		return OfficeFrame.getInstance().createOfficeFloorBuilder(
-				officeFloorName);
+		// Create the OfficeFloor builder by the default name
+		return OfficeFrame.getInstance().createOfficeFloorBuilder(officeFloorName);
 	}
 
 	/*
@@ -133,7 +126,6 @@ public abstract class OfficeFrame {
 	 *            Name of the {@link OfficeFloor}.
 	 * @return {@link OfficeFloorBuilder}.
 	 */
-	public abstract OfficeFloorBuilder createOfficeFloorBuilder(
-			String officeFloorName);
+	public abstract OfficeFloorBuilder createOfficeFloorBuilder(String officeFloorName);
 
 }
