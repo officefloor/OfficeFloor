@@ -20,9 +20,7 @@ package net.officefloor.frame.impl.construct.office;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
@@ -36,14 +34,12 @@ import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
 import net.officefloor.frame.impl.construct.function.ManagedFunctionBuilderImpl;
 import net.officefloor.frame.impl.construct.function.ManagedFunctionEscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
@@ -130,11 +126,6 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * Listing of {@link ThreadState} bound {@link ManagedObjectConfiguration}.
 	 */
 	private final List<ManagedObjectConfiguration<?>> threadManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
-
-	/**
-	 * Listing of {@link ThreadState} bound {@link Administration}.
-	 */
-	private final List<AdministrationConfiguration<?, ?>> administrators = new LinkedList<AdministrationConfiguration<?, ?>>();
 
 	/**
 	 * Listing of {@link ManagedFunctionConfiguration}.
@@ -254,15 +245,6 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministrationBuilder<A> addAdministrator(
-			String threadAdministratorName, Class<AS> adminsistratorSource) {
-		AdministratorBuilderImpl<I, A, AS> builder = new AdministratorBuilderImpl<I, A, AS>(threadAdministratorName,
-				adminsistratorSource);
-		this.administrators.add(builder);
-		return builder;
-	}
-
-	@Override
 	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> addManagedFunction(String functionName,
 			ManagedFunctionFactory<O, F> mangedFunctionFactory) {
 		ManagedFunctionBuilderImpl<O, F> functionBuilder = new ManagedFunctionBuilderImpl<>(functionName,
@@ -355,11 +337,6 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public GovernanceConfiguration<?, ?>[] getGovernanceConfiguration() {
 		return this.governances.toArray(new GovernanceConfiguration[this.governances.size()]);
-	}
-
-	@Override
-	public AdministrationConfiguration<?, ?>[] getAdministratorConfiguration() {
-		return this.administrators.toArray(new AdministrationConfiguration[0]);
 	}
 
 	@Override

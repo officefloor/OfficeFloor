@@ -44,7 +44,7 @@ import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
-import net.officefloor.frame.impl.execute.administrator.AdministratorMetaDataImpl;
+import net.officefloor.frame.impl.execute.administrator.AdministrationMetaDataImpl;
 import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDataImpl;
 import net.officefloor.frame.impl.execute.duty.DutyKeyImpl;
 import net.officefloor.frame.impl.execute.duty.DutyMetaDataImpl;
@@ -114,7 +114,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	/**
 	 * {@link AdministrationMetaData}.
 	 */
-	private final AdministratorMetaDataImpl<I, A> adminMetaData;
+	private final AdministrationMetaDataImpl<I, A> adminMetaData;
 
 	/**
 	 * Map of {@link DutyKey} instances by name.
@@ -153,7 +153,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 	private RawBoundAdministratorMetaDataImpl(String boundAdministratorName, AdministratorIndex administratorIndex,
 			AdministrationConfiguration<A, ?> administratorSourceConfiguration,
 			RawBoundManagedObjectMetaData[] administeredRawBoundManagedObjects, Map<String, DutyKey<A>> dutyKeysByName,
-			Map<A, DutyKey<A>> dutyKeysByKey, AdministratorMetaDataImpl<I, A> adminMetaData) {
+			Map<A, DutyKey<A>> dutyKeysByKey, AdministrationMetaDataImpl<I, A> adminMetaData) {
 		this.boundAdministratorName = boundAdministratorName;
 		this.administratorIndex = administratorIndex;
 		this.administratorSourceConfiguration = administratorSourceConfiguration;
@@ -471,7 +471,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>>
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl();
 
 		// Create the administrator meta-data
-		AdministratorMetaDataImpl<i, a> adminMetaData = new AdministratorMetaDataImpl<i, a>(adminSource,
+		AdministrationMetaDataImpl<i, a> adminMetaData = new AdministrationMetaDataImpl<i, a>(adminSource,
 				ConstructUtil.toArray(eiMetaDatas, new ExtensionInterfaceMetaData[0]), responsibleTeam,
 				escalationProcedure, functionLoop);
 

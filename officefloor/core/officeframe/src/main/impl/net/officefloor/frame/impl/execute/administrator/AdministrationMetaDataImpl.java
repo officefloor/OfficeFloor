@@ -17,30 +17,37 @@
  */
 package net.officefloor.frame.impl.execute.administrator;
 
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.administration.DutyKey;
+import net.officefloor.frame.api.administration.AdministrationFactory;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
-import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Implementation of the {@link AdministrationMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> implements AdministrationMetaData<E, A> {
+public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
+		implements AdministrationMetaData<E, F, G> {
 
 	/**
-	 * {@link AdministratorSource}.
+	 * Bound name of this {@link Administration}.
 	 */
-	private final AdministratorSource<E, A> administratorSource;
+	private final String administrationName;
+
+	/**
+	 * {@link AdministrationFactory}.
+	 */
+	private final AdministrationFactory<E, F, G> administrationFactory;
 
 	/**
 	 * {@link ExtensionInterfaceMetaData}.
@@ -64,18 +71,22 @@ public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> impl
 	private final FunctionLoop functionLoop;
 
 	/**
-	 * <p>
-	 * Listing of {@link DutyMetaData} in order of {@link DutyKey} indexes.
-	 * <p>
-	 * This is treated as <code>final</code>.
+	 * {@link FlowMetaData} instances for this {@link Administration}.
 	 */
-	protected DutyMetaData[] dutyMetaData;
+	private FlowMetaData[] flowMetaData;
+
+	/**
+	 * Translates the index to a {@link ThreadState} {@link Governance} index.
+	 */
+	private int[] governanceIndexes;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param administratorSource
-	 *            {@link AdministratorSource}.
+	 * @param administrationName
+	 *            Bound name of this {@link Administration}.
+	 * @param administrationFactory
+	 *            {@link AdministrationFactory}.
 	 * @param eiMetaData
 	 *            {@link ExtensionInterfaceMetaData}.
 	 * @param responsibleTeam
@@ -86,11 +97,12 @@ public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> impl
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
 	 */
-	public AdministratorMetaDataImpl(AdministratorSource<E, A> administratorSource,
+	public AdministrationMetaDataImpl(String administrationName, AdministrationFactory<E, F, G> administrationFactory,
 			ExtensionInterfaceMetaData<E>[] eiMetaData, TeamManagement responsibleTeam,
 			EscalationProcedure escalationProcedure, FunctionLoop functionLoop) {
+		this.administrationName = administrationName;
+		this.administrationFactory = administrationFactory;
 		this.eiMetaData = eiMetaData;
-		this.administratorSource = administratorSource;
 		this.responsibleTeam = responsibleTeam;
 		this.escalationProcedure = escalationProcedure;
 		this.functionLoop = functionLoop;
@@ -99,12 +111,16 @@ public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> impl
 	/**
 	 * Loads the remaining state.
 	 * 
-	 * @param dutyMetaData
-	 *            Listing of {@link DutyMetaData} in order of {@link DutyKey}
-	 *            indexes.
+	 * @param flowMetaData
+	 *            {@link FlowMetaData} instances for this
+	 *            {@link Administration}.
+	 * @param governanceIndexes
+	 *            Translates the index to a {@link ThreadState}
+	 *            {@link Governance} index.
 	 */
-	public void loadRemainingState(DutyMetaData[] dutyMetaData) {
-		this.dutyMetaData = dutyMetaData;
+	public void loadRemainingState(FlowMetaData[] flowMetaData, int[] governanceIndexes) {
+		this.flowMetaData = flowMetaData;
+		this.governanceIndexes = governanceIndexes;
 	}
 
 	/*
@@ -113,7 +129,7 @@ public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> impl
 
 	@Override
 	public String getFunctionName() {
-		return Administration.class.getSimpleName() + "-" + this.administratorSource.getClass().getName();
+		return Administration.class.getSimpleName() + "-" + this.administrationName;
 	}
 
 	@Override
@@ -122,8 +138,8 @@ public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> impl
 	}
 
 	@Override
-	public FunctionLoop getFunctionLoop() {
-		return this.functionLoop;
+	public FlowMetaData getFlow(int flowIndex) {
+		return this.flowMetaData[flowIndex];
 	}
 
 	@Override
@@ -136,14 +152,14 @@ public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> impl
 		return this.escalationProcedure;
 	}
 
+	@Override
+	public FunctionLoop getFunctionLoop() {
+		return this.functionLoop;
+	}
+
 	/*
 	 * ================= AdministratorMetaData ============================
 	 */
-
-	@Override
-	public AdministratorSource<E, A> getAdministratorSource() {
-		return this.administratorSource;
-	}
 
 	@Override
 	public ExtensionInterfaceMetaData<E>[] getExtensionInterfaceMetaData() {
@@ -151,8 +167,18 @@ public class AdministratorMetaDataImpl<E extends Object, A extends Enum<A>> impl
 	}
 
 	@Override
-	public DutyMetaData getDutyMetaData(DutyKey<A> dutyKey) {
-		return this.dutyMetaData[dutyKey.getIndex()];
+	public String getAdministrationName() {
+		return this.administrationName;
+	}
+
+	@Override
+	public AdministrationFactory<E, F, G> getAdministrationFactory() {
+		return this.administrationFactory;
+	}
+
+	@Override
+	public int translateGovernanceIndexToThreadIndex(int governanceIndex) {
+		return this.governanceIndexes[governanceIndex];
 	}
 
 }

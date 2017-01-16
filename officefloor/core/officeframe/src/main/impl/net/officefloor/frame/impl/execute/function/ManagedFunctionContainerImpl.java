@@ -553,13 +553,10 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		}
 
 		@Override
-		public final void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
+		public final void doFlow(FlowMetaData flowMetaData, Object parameter, FlowCallback callback) {
 
 			// Easy access to container
 			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
-
-			// Obtain the flow meta data
-			FlowMetaData flowMetaData = container.functionLogicMetaData.getFlow(flowIndex);
 
 			// Obtain the task meta-data for instigating the flow
 			@SuppressWarnings("rawtypes")

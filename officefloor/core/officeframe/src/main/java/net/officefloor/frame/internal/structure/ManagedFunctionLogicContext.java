@@ -50,14 +50,14 @@ public interface ManagedFunctionLogicContext {
 	/**
 	 * Invokes a {@link Flow}.
 	 * 
-	 * @param flowIndex
-	 *            Index of the {@link Flow}.
+	 * @param flowMetaData
+	 *            {@link FlowMetaData} for the {@link Flow}.
 	 * @param parameter
 	 *            Parameter for the initial {@link ManagedFunction} of the
 	 *            {@link Flow}.
 	 * @param callback
 	 *            Optional {@link FlowCallback}. May be <code>null</code>.
 	 */
-	void doFlow(int flowIndex, Object parameter, FlowCallback callback);
+	void doFlow(FlowMetaData flowMetaData, Object parameter, FlowCallback callback);
 
 }

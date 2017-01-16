@@ -17,11 +17,14 @@
  */
 package net.officefloor.frame.impl.execute.flow;
 
-import net.officefloor.frame.api.administration.Duty;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
+import net.officefloor.frame.impl.execute.administrator.AdministrationFunctionLogic;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
@@ -29,10 +32,8 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
-import net.officefloor.frame.internal.structure.AdministrationDuty;
-import net.officefloor.frame.internal.structure.AdministratorContainer;
-import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
+import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionLogic;
@@ -41,11 +42,12 @@ import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -121,33 +123,25 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		}
 
 		// Obtain the administration meta-data to determine
-		ManagedFunctionDutyAssociation<?>[] preFunctionDuties = managedFunctionMetaData.getPreAdministrationMetaData();
-		ManagedFunctionDutyAssociation<?>[] postFunctionDuties = managedFunctionMetaData
-				.getPostAdministrationMetaData();
+		AdministrationMetaData<?, ?, ?>[] preAdministration = managedFunctionMetaData.getPreAdministrationMetaData();
+		AdministrationMetaData<?, ?, ?>[] postAdministration = managedFunctionMetaData.getPostAdministrationMetaData();
 
-		// Determine if administration duties
-		if ((preFunctionDuties.length == 0) && (postFunctionDuties.length == 0)) {
+		// Determine if administration
+		if ((preAdministration.length == 0) && (postAdministration.length == 0)) {
 			// Just managed function, so load only it
 			return this.loadManagedFunction(parameter, managedFunctionMetaData, managedObjects, isEnforceGovernance,
 					parallelFunctionOwner, true);
 		}
 
-		// Create the administrator containers for this managed function
-		AdministrationMetaData<?, ?>[] adminMetaData = managedFunctionMetaData.getAdministratorMetaData();
-		AdministratorContainer<?>[] administrators = new AdministratorContainer<?>[adminMetaData.length];
-		for (int i = 0; i < adminMetaData.length; i++) {
-			administrators[i] = new AdministratorContainerImpl<>(adminMetaData[i]);
-		}
-
 		// First and last function (to add administration duties)
 		ManagedFunctionContainer[] firstLastFunctions = new ManagedFunctionContainer[2];
 
-		// Load the pre-function administrator duties
-		this.loadDuties(firstLastFunctions, preFunctionDuties, administrators, managedObjects, managedFunctionMetaData,
+		// Load the pre-function administration
+		this.loadAdministration(firstLastFunctions, preAdministration, managedObjects, managedFunctionMetaData,
 				isEnforceGovernance, parallelFunctionOwner, false);
 
 		// Determine which is responsible for unloading
-		boolean isFunctionUnload = (postFunctionDuties.length == 0);
+		boolean isFunctionUnload = (postAdministration.length == 0);
 
 		// Load the managed function
 		ManagedFunctionContainer managedFunctionContainer = this.loadManagedFunction(parameter, managedFunctionMetaData,
@@ -155,7 +149,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		this.loadFunction(firstLastFunctions, managedFunctionContainer);
 
 		// Load the post-function administrator duties
-		this.loadDuties(firstLastFunctions, postFunctionDuties, administrators, managedObjects, managedFunctionMetaData,
+		this.loadAdministration(firstLastFunctions, postAdministration, managedObjects, managedFunctionMetaData,
 				isEnforceGovernance, parallelFunctionOwner, true);
 
 		// Return the starting function
@@ -192,7 +186,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 * @param parallelOwner
 	 *            Parallel {@link ManagedFunctionContainer} owner.
 	 * @param isUnloadManagedObjects
-	 *            Whether the last {@link AdministrationDuty} is to unload the
+	 *            Whether the last {@link Administration} is to unload the
 	 *            {@link ManagedObject} instances for the
 	 *            {@link ManagedFunction}.
 	 * @return {@link ManagedFunctionContainer} for the {@link ManagedFunction}.
@@ -211,16 +205,14 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	/**
-	 * Loads the {@link AdministrationDuty} to this {@link Flow}.
+	 * Loads the {@link Administration} to this {@link Flow}.
 	 * 
 	 * @param firstLastFunctions
 	 *            Array of first and last {@link ManagedFunctionContainer}
 	 *            instances.
-	 * @param functionDutyAssociations
-	 *            {@link ManagedFunctionDutyAssociation} instances.
-	 * @param functionBoundAdministrators
-	 *            {@link ManagedFunction} bound {@link AdministratorContainer}
-	 *            instances.
+	 * @param administrations
+	 *            {@link AdministrationMetaData} instances for the
+	 *            {@link Administration}.
 	 * @param functionBoundManagedObjects
 	 *            {@link ManagedFunction} bound {@link ManagedObjectContainer}
 	 *            instances.
@@ -232,58 +224,80 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 * @param parallelOwner
 	 *            Parallel {@link ManagedFunctionContainer} owner.
 	 * @param isUnloadManagedObjects
-	 *            Whether the last {@link AdministrationDuty} is to unload the
+	 *            Whether the last {@link Administration} is to unload the
 	 *            {@link ManagedObject} instances for the
 	 *            {@link ManagedFunction}.
 	 */
-	private void loadDuties(ManagedFunctionContainer[] firstLastFunctions,
-			ManagedFunctionDutyAssociation<?>[] functionDutyAssociations,
-			AdministratorContainer<?>[] functionBoundAdministrators,
-			ManagedObjectContainer[] functionBoundManagedObjects,
+	private void loadAdministration(ManagedFunctionContainer[] firstLastFunctions,
+			AdministrationMetaData<?, ?, ?>[] administrations, ManagedObjectContainer[] functionBoundManagedObjects,
 			ManagedFunctionMetaData<?, ?> administeringFunctionMetaData, boolean isEnforceGovernance,
 			ManagedFunctionContainer parallelOwner, boolean isUnloadManagedObjects) {
 
-		// Load the duty functions
-		for (int i = 0; i < functionDutyAssociations.length; i++) {
+		// Load the administration
+		for (int i = 0; i < administrations.length; i++) {
+			final AdministrationMetaData<?, ?, ?> administrationMetaData = administrations[i];
+
+			// Obtain the responsible team (ensure all done on same thread)
+			// (this ensures safe to add to extensions list in setup)
+			final TeamManagement responsibleTeam = administrationMetaData.getResponsibleTeam();
+
+			// Obtain the extensions to be managed
+			FunctionState allExtractions = null;
+			ExtensionInterfaceMetaData<?>[] eiMetaDatas = administrationMetaData.getExtensionInterfaceMetaData();
 			@SuppressWarnings("rawtypes")
-			ManagedFunctionDutyAssociation functionDutyAssociation = functionDutyAssociations[i];
+			List extensions = new ArrayList<>(eiMetaDatas.length);
+			for (int e = 0; e < eiMetaDatas.length; e++) {
+				ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[e];
 
-			// Obtain the administrator container
-			AdministratorContainer<?> adminContainer;
-			AdministratorIndex adminIndex = functionDutyAssociation.getAdministratorIndex();
-			int scopeIndex = adminIndex.getIndexOfAdministratorWithinScope();
-			switch (adminIndex.getAdministratorScope()) {
-			case FUNCTION:
-				adminContainer = functionBoundAdministrators[scopeIndex];
-				break;
+				// Obtain the index of managed object to administer
+				ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
 
-			case THREAD:
-				adminContainer = this.threadState.getAdministratorContainer(scopeIndex);
-				break;
+				// Obtain the managed object container
+				ManagedObjectContainer moContainer;
+				int scopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
+				switch (moIndex.getManagedObjectScope()) {
+				case FUNCTION:
+					moContainer = functionBoundManagedObjects[scopeIndex];
+					break;
 
-			default:
-				throw new IllegalStateException("Unknown administrator scope " + adminIndex.getAdministratorScope());
+				case THREAD:
+					moContainer = threadState.getManagedObjectContainer(scopeIndex);
+					break;
+
+				case PROCESS:
+					moContainer = threadState.getProcessState().getManagedObjectContainer(scopeIndex);
+					break;
+
+				default:
+					throw new IllegalStateException("Unknown managed object scope " + moIndex.getManagedObjectScope());
+				}
+
+				// Extract the extension interface
+				@SuppressWarnings("unchecked")
+				FunctionState moExtraction = moContainer.extractExtensionInterface(
+						eiMetaData.getExtensionInterfaceExtractor(), extensions, responsibleTeam);
+				allExtractions = Promise.then(allExtractions, moExtraction);
 			}
 
-			// Obtain the administration
+			// Create the administration function logic
 			@SuppressWarnings("unchecked")
-			AdministrationDuty administration = adminContainer.administerManagedObjects(functionDutyAssociation,
-					functionBoundManagedObjects, this.threadState);
+			AdministrationFunctionLogic<?, ?, ?> administrationLogic = new AdministrationFunctionLogic<>(
+					administrationMetaData, extensions, this.threadState);
 
 			// Determine if unload managed objects (last administration)
-			boolean isUnloadResponsible = isUnloadManagedObjects && (i == (functionDutyAssociations.length - 1));
+			boolean isUnloadResponsible = isUnloadManagedObjects && (i == (administrations.length - 1));
 
 			// Create the managed function container for administration
-			ManagedFunctionContainer dutyFunction = new ManagedFunctionContainerImpl<>(administration.getSetup(),
-					administration.getDutyLogic(), functionBoundManagedObjects,
+			ManagedFunctionContainer dutyFunction = new ManagedFunctionContainerImpl<>(allExtractions,
+					administrationLogic, functionBoundManagedObjects,
 					administeringFunctionMetaData.getRequiredManagedObjects(),
-					administeringFunctionMetaData.getRequiredGovernance(), isEnforceGovernance,
-					administration.getAdministratorMetaData(), parallelOwner, this, isUnloadResponsible);
+					administeringFunctionMetaData.getRequiredGovernance(), isEnforceGovernance, administrationMetaData,
+					parallelOwner, this, isUnloadResponsible);
 
-			// Register the active duty function
+			// Register the active administration function
 			this.activeFunctions.addEntry(dutyFunction);
 
-			// Load the duty function
+			// Load the administration function
 			this.loadFunction(firstLastFunctions, dutyFunction);
 		}
 	}
