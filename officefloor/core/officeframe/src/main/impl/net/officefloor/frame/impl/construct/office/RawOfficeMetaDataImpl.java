@@ -43,7 +43,6 @@ import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeStartupFunctionImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
-import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
@@ -54,8 +53,7 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
-import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
-import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
+import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
@@ -69,8 +67,6 @@ import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
-import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -102,7 +98,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 	 * @return {@link RawOfficeMetaDataFactory}.
 	 */
 	public static RawOfficeMetaDataFactory getFactory() {
-		return new RawOfficeMetaDataImpl(null, null, null, null, null, null, null, false, null, null, null);
+		return new RawOfficeMetaDataImpl(null, null, null, null, null, null, null, false, null);
 	}
 
 	/**
@@ -155,17 +151,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 	private final Map<String, RawGovernanceMetaData<?, ?>> governanceMetaData;
 
 	/**
-	 * {@link ThreadState} {@link RawBoundAdministratorMetaData}.
-	 */
-	private final RawBoundAdministratorMetaData<?, ?>[] boundAdministrators;
-
-	/**
-	 * Scope {@link RawBoundAdministratorMetaData} of the {@link Office} by the
-	 * {@link ProcessState} and {@link ThreadState} bound names.
-	 */
-	private final Map<String, RawBoundAdministratorMetaData<?, ?>> scopeAdmins;
-
-	/**
 	 * {@link OfficeMetaData}.
 	 */
 	private OfficeMetaData officeMetaData;
@@ -198,22 +183,13 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 	 * @param governanceMetaData
 	 *            {@link RawGovernanceMetaData} of the {@link Office} by its
 	 *            {@link Office} registered name.
-	 * @param boundAdministrators
-	 *            {@link ThreadState} {@link RawBoundAdministratorMetaData}
-	 *            instances.
-	 * @param scopeAdmins
-	 *            Scope {@link RawBoundAdministratorMetaData} of the
-	 *            {@link Office} by the {@link ProcessState} and
-	 *            {@link ThreadState} bound names.
 	 */
 	private RawOfficeMetaDataImpl(String officeName, RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			Map<String, TeamManagement> teams, Map<String, RawManagedObjectMetaData<?, ?>> managedObjectMetaData,
 			RawBoundManagedObjectMetaData[] processBoundManagedObjects,
 			RawBoundManagedObjectMetaData[] threadBoundManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo, boolean isManuallyManageGovernance,
-			Map<String, RawGovernanceMetaData<?, ?>> governanceMetaData,
-			RawBoundAdministratorMetaData<?, ?>[] boundAdministrators,
-			Map<String, RawBoundAdministratorMetaData<?, ?>> scopeAdmins) {
+			Map<String, RawGovernanceMetaData<?, ?>> governanceMetaData) {
 		this.officeName = officeName;
 		this.rawOfficeFloorMetaData = rawOfficeFloorMetaData;
 		this.teams = teams;
@@ -223,8 +199,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		this.scopeMo = scopeMo;
 		this.isManuallyManageGovernance = isManuallyManageGovernance;
 		this.governanceMetaData = governanceMetaData;
-		this.boundAdministrators = boundAdministrators;
-		this.scopeAdmins = scopeAdmins;
 	}
 
 	/*
@@ -238,7 +212,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawGovernanceMetaDataFactory rawGovernanceMetaDataFactory,
-			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
+			AdministrationMetaDataFactory rawBoundAdministratorFactory,
 			RawManagedFunctionMetaDataFactory rawFunctionFactory) {
 
 		// Obtain the name of the office
@@ -452,28 +426,10 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			scopeMo.put(mo.getBoundManagedObjectName(), mo);
 		}
 
-		// Obtain the thread bound administrator instances
-		AdministrationConfiguration<?, ?>[] threadAdministratorConfiguration = configuration
-				.getAdministratorConfiguration();
-		final RawBoundAdministratorMetaData<?, ?>[] threadBoundAdministrators;
-		if ((threadAdministratorConfiguration == null) || (threadAdministratorConfiguration.length == 0)) {
-			threadBoundAdministrators = new RawBoundAdministratorMetaData[0];
-		} else {
-			threadBoundAdministrators = rawBoundAdministratorFactory.constructRawBoundAdministratorMetaData(
-					threadAdministratorConfiguration, sourceContext, issues, AdministratorScope.THREAD,
-					AssetType.OFFICE, officeName, officeTeams, scopeMo, functionLoop);
-		}
-
-		// Load the thread bound administrators to scope administrators
-		Map<String, RawBoundAdministratorMetaData<?, ?>> scopeAdmins = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
-		for (RawBoundAdministratorMetaData<?, ?> admin : threadBoundAdministrators) {
-			scopeAdmins.put(admin.getBoundAdministratorName(), admin);
-		}
-
 		// Create the raw office meta-data
 		RawOfficeMetaDataImpl rawOfficeMetaData = new RawOfficeMetaDataImpl(officeName, rawOfficeFloorMetaData,
 				officeTeams, registeredMo, processBoundManagedObjects, threadBoundManagedObjects, scopeMo,
-				isManuallyManageGovernance, rawGovernanceMetaData, threadBoundAdministrators, scopeAdmins);
+				isManuallyManageGovernance, rawGovernanceMetaData);
 
 		// Construct the meta-data of the managed functions within the office
 		List<RawManagedFunctionMetaData<?, ?>> rawFunctionMetaDatas = new LinkedList<>();
@@ -519,8 +475,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		// Create the thread meta-data
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
 				this.constructDefaultManagedObjectMetaData(threadBoundManagedObjects), governanceMetaDatas,
-				this.constructAdministratorMetaData(threadBoundAdministrators), officeEscalationProcedure,
-				officeFloorEscalation);
+				officeEscalationProcedure, officeFloorEscalation);
 
 		// Create the process meta-data
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
@@ -566,8 +521,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 			// Obtain the function meta-data for the escalation
 			ManagedFunctionMetaData<?, ?> escalationFunctionMetaData = ConstructUtil.getFunctionMetaData(
-					officeEscalationConfigurations[i].getManagedFunctionReference(), functionLocator, issues, AssetType.OFFICE,
-					officeName, "Office Escalation " + i);
+					officeEscalationConfigurations[i].getManagedFunctionReference(), functionLocator, issues,
+					AssetType.OFFICE, officeName, "Office Escalation " + i);
 			if (escalationFunctionMetaData == null) {
 				continue; // escalation function not found
 			}
@@ -598,7 +553,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		for (RawManagedFunctionMetaData<?, ?> rawFunctionMetaData : rawFunctionMetaDatas) {
 			rawFunctionMetaData.linkFunctions(functionLocator, issues);
 		}
-		this.linkFunctions(officeMetaData, functionLocator, threadBoundAdministrators, issues);
 
 		// Link functions for Governance
 		for (RawGovernanceMetaData<?, ?> rawGovernance : rawGovernanceMetaDataList) {
@@ -638,43 +592,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			moMetaData[i] = boundMetaDataInstance.getManagedObjectMetaData();
 		}
 		return moMetaData;
-	}
-
-	/**
-	 * Constructs the {@link AdministrationMetaData} listing from the input
-	 * {@link RawBoundAdministratorMetaData} instances.
-	 * 
-	 * @param rawBoundAdministratorMetaData
-	 *            {@link RawBoundAdministratorMetaData} instances.
-	 * @return {@link AdministrationMetaData} instances.
-	 */
-	private AdministrationMetaData<?, ?>[] constructAdministratorMetaData(
-			RawBoundAdministratorMetaData<?, ?>[] rawBoundAdministratorMetaData) {
-		AdministrationMetaData<?, ?>[] adminMetaData = new AdministrationMetaData[rawBoundAdministratorMetaData.length];
-		for (int i = 0; i < adminMetaData.length; i++) {
-			adminMetaData[i] = rawBoundAdministratorMetaData[i].getAdministratorMetaData();
-		}
-		return adminMetaData;
-	}
-
-	/**
-	 * Links the {@link ManagedFunctionMetaData} instances into the
-	 * {@link RawBoundAdministratorMetaData} instances.
-	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param functionLocator
-	 *            {@link ManagedFunctionLocator}.
-	 * @param rawBoundManagedObjects
-	 *            {@link RawBoundAdministratorMetaData} instances.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 */
-	private void linkFunctions(OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
-			RawBoundAdministratorMetaData<?, ?>[] rawBoundAdministrators, OfficeFloorIssues issues) {
-		for (RawBoundAdministratorMetaData<?, ?> rawBoundAdministrator : rawBoundAdministrators) {
-			rawBoundAdministrator.linkOfficeMetaData(officeMetaData, functionLocator, issues);
-		}
 	}
 
 	/*
@@ -724,16 +641,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 	@Override
 	public Map<String, RawBoundManagedObjectMetaData> getOfficeScopeManagedObjects() {
 		return this.scopeMo;
-	}
-
-	@Override
-	public RawBoundAdministratorMetaData<?, ?>[] getBoundAdministrators() {
-		return this.boundAdministrators;
-	}
-
-	@Override
-	public Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrators() {
-		return this.scopeAdmins;
 	}
 
 	@Override

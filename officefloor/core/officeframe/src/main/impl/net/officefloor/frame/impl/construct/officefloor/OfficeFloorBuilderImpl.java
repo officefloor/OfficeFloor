@@ -32,7 +32,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
-import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataImpl;
+import net.officefloor.frame.impl.construct.administrator.AdministrationMetaDataFactoryImpl;
 import net.officefloor.frame.impl.construct.function.RawManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataImpl;
@@ -171,7 +171,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 		RawOfficeFloorMetaData rawMetaData = RawOfficeFloorMetaDataImpl.getFactory().constructRawOfficeFloorMetaData(
 				this, issuesListener, RawTeamMetaDataImpl.getFactory(), RawManagedObjectMetaDataImpl.getFactory(),
 				RawBoundManagedObjectMetaDataImpl.getFactory(), RawGovernanceMetaDataImpl.getFactory(),
-				RawBoundAdministratorMetaDataImpl.getFactory(), RawOfficeMetaDataImpl.getFactory(),
+				AdministrationMetaDataFactoryImpl.getFactory(), RawOfficeMetaDataImpl.getFactory(),
 				RawManagedFunctionMetaDataImpl.getFactory());
 
 		// Obtain the office floor meta-data and return the office floor

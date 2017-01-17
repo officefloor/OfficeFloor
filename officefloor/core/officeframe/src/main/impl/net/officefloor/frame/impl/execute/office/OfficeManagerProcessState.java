@@ -21,7 +21,6 @@ import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -65,7 +64,7 @@ public class OfficeManagerProcessState implements ProcessState {
 
 		// Create the meta-data for the process and its main thread state
 		this.threadMetaData = new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0],
-				new AdministrationMetaData[0], new EscalationProcedureImpl(), null);
+				new EscalationProcedureImpl(), null);
 
 		// Create the main thread state
 		// Note: purpose of this to enable synchronising changes to office

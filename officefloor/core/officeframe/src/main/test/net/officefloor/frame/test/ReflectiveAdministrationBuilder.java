@@ -42,7 +42,7 @@ import net.officefloor.frame.api.function.FlowCallback;
  *
  * @author Daniel Sagenschneider
  */
-public class ReflectiveAdministratorBuilder extends AbstractAdministratorSource<Object, Indexed>
+public class ReflectiveAdministrationBuilder extends AbstractAdministratorSource<Object, Indexed>
 		implements Administration<Object, Indexed> {
 
 	/**
@@ -67,7 +67,7 @@ public class ReflectiveAdministratorBuilder extends AbstractAdministratorSource<
 
 	/**
 	 * {@link AdministrationBuilder} for this
-	 * {@link ReflectiveAdministratorBuilder}.
+	 * {@link ReflectiveAdministrationBuilder}.
 	 */
 	private final AdministrationBuilder<Indexed> administratorBuilder;
 
@@ -94,7 +94,7 @@ public class ReflectiveAdministratorBuilder extends AbstractAdministratorSource<
 	 * @param testCase
 	 *            {@link AbstractOfficeConstructTestCase}.
 	 */
-	public <C> ReflectiveAdministratorBuilder(Class<C> clazz, C object, OfficeBuilder officeBuilder,
+	public <C> ReflectiveAdministrationBuilder(Class<C> clazz, C object, OfficeBuilder officeBuilder,
 			AbstractOfficeConstructTestCase testCase) {
 		this.clazz = clazz;
 		this.object = object;
@@ -213,7 +213,7 @@ public class ReflectiveAdministratorBuilder extends AbstractAdministratorSource<
 			this.method = method;
 
 			// Construct the duty
-			this.dutyBuilder = ReflectiveAdministratorBuilder.this.administratorBuilder.addDuty(this.method.getName());
+			this.dutyBuilder = ReflectiveAdministrationBuilder.this.administratorBuilder.addDuty(this.method.getName());
 
 			// Obtain the parameter types
 			this.parameterTypes = this.method.getParameterTypes();
@@ -248,7 +248,7 @@ public class ReflectiveAdministratorBuilder extends AbstractAdministratorSource<
 
 			// Invoke the method on object for duty logic
 			try {
-				this.method.invoke(ReflectiveAdministratorBuilder.this.object, arguments);
+				this.method.invoke(ReflectiveAdministrationBuilder.this.object, arguments);
 			} catch (InvocationTargetException ex) {
 				// Throw cause of exception
 				throw ex.getCause();

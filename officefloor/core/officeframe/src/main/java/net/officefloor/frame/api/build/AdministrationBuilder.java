@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministrationBuilder {
+public interface AdministrationBuilder<F extends Enum<F>, G extends Enum<G>> {
 
 	/**
 	 * Flags for the {@link Administration} to administer the referenced
@@ -71,7 +71,7 @@ public interface AdministrationBuilder {
 	 *            Type of argument passed to the instigated {@link Flow}. May be
 	 *            <code>null</code> to indicate no argument.
 	 */
-	<F extends Enum<F>> void linkFlow(F key, String functionName, Class<?> argumentType);
+	void linkFlow(F key, String functionName, Class<?> argumentType);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
@@ -97,7 +97,7 @@ public interface AdministrationBuilder {
 	 * @param governanceName
 	 *            Name of the {@link Governance}.
 	 */
-	<G extends Enum<G>> void linkGovernance(G key, String governanceName);
+	void linkGovernance(G key, String governanceName);
 
 	/**
 	 * Links a {@link Governance}.

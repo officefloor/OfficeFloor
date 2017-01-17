@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.execute.managedfunction;
 
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
@@ -29,7 +28,6 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -90,28 +88,10 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final ManagedObjectIndex[] functionIndexedManagedObjects;
 
 	/**
-	 * {@link ManagedFunctionDutyAssociation} specifying the {@link AdministrationDuty}
-	 * instances to be completed before executing the {@link ManagedFunction}.
-	 */
-	private final ManagedFunctionDutyAssociation<?>[] preFunctionDuties;
-
-	/**
-	 * {@link ManagedFunctionDutyAssociation} specifying the {@link AdministrationDuty}
-	 * instances to be completed after executing the {@link ManagedFunction}.
-	 */
-	private final ManagedFunctionDutyAssociation<?>[] postFunctionDuties;
-
-	/**
 	 * {@link ManagedObjectMetaData} for the {@link ManagedObject} instances
 	 * bound to this {@link ManagedFunction}.
 	 */
 	private final ManagedObjectMetaData<?>[] functionBoundManagedObjects;
-
-	/**
-	 * {@link AdministrationMetaData} for the {@link AdministrationDuty} instances
-	 * bound to this {@link ManagedFunction}.
-	 */
-	private final AdministrationMetaData<?, ?>[] functionBoundAdministrators;
 
 	/**
 	 * {@link FunctionLoop}.
@@ -137,6 +117,18 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 * of this {@link ManagedFunctionMetaData}.
 	 */
 	private EscalationProcedure escalationProcedure;
+
+	/**
+	 * {@link AdministrationMetaData} specifying the {@link Administration}
+	 * instances to be completed before executing the {@link ManagedFunction}.
+	 */
+	private AdministrationMetaData<?, ?, ?>[] preAdministration;
+
+	/**
+	 * {@link AdministrationMetaData} specifying the {@link Administration}
+	 * instances to be completed after executing the {@link ManagedFunction}.
+	 */
+	private AdministrationMetaData<?, ?, ?>[] postAdministration;
 
 	/**
 	 * Initiate with details of the meta-data for the {@link ManagedFunction}.
@@ -165,24 +157,13 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            {@link ManagedFunction} may be executed.
 	 * @param requiredGovernance
 	 *            Required {@link Governance}.
-	 * @param preFunctionDuties
-	 *            {@link ManagedFunctionDutyAssociation} specifying the
-	 *            {@link AdministrationDuty} instances to be completed before executing the
-	 *            {@link ManagedFunction}.
-	 * @param postFunctionDuties
-	 *            {@link ManagedFunctionDutyAssociation} specifying the
-	 *            {@link AdministrationDuty} instances to be completed after executing the
-	 *            {@link ManagedFunction}.
 	 * @param functionLoop
 	 *            {@link FunctionLoop}.
 	 */
 	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory,
 			Object differentiator, Class<?> parameterType, TeamManagement responsibleTeam,
 			ManagedObjectIndex[] functionIndexedManagedObjects, ManagedObjectMetaData<?>[] functionBoundManagedObjects,
-			ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance,
-			AdministrationMetaData<?, ?>[] functionBoundAdministrators,
-			ManagedFunctionDutyAssociation<?>[] preFunctionDuties,
-			ManagedFunctionDutyAssociation<?>[] postFunctionDuties, FunctionLoop functionLoop) {
+			ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance, FunctionLoop functionLoop) {
 		this.functionName = functionName;
 		this.functionFactory = functionFactory;
 		this.differentiator = differentiator;
@@ -192,9 +173,6 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 		this.functionBoundManagedObjects = functionBoundManagedObjects;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.requiredGovernance = requiredGovernance;
-		this.functionBoundAdministrators = functionBoundAdministrators;
-		this.preFunctionDuties = preFunctionDuties;
-		this.postFunctionDuties = postFunctionDuties;
 		this.functionLoop = functionLoop;
 	}
 
@@ -211,12 +189,23 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            {@link EscalationProcedure} for exceptions of the
 	 *            {@link ManagedFunction} of this
 	 *            {@link ManagedFunctionMetaData}.
+	 * @param preAdministration
+	 *            {@link AdministrationMetaData} specifying the
+	 *            {@link Administration} instances to be completed before
+	 *            executing the {@link ManagedFunction}.
+	 * @param postAdministration
+	 *            {@link AdministrationMetaData} specifying the
+	 *            {@link Administration} instances to be completed after
+	 *            executing the {@link ManagedFunction}.
 	 */
 	public void loadRemainingState(FlowMetaData[] flowMetaData, ManagedFunctionMetaData<?, ?> nextFunctionMetaData,
-			EscalationProcedure escalationProcedure) {
+			EscalationProcedure escalationProcedure, AdministrationMetaData<?, ?, ?>[] preAdministration,
+			AdministrationMetaData<?, ?, ?>[] postAdministration) {
 		this.flowMetaData = flowMetaData;
 		this.nextFunctionMetaData = nextFunctionMetaData;
 		this.escalationProcedure = escalationProcedure;
+		this.preAdministration = preAdministration;
+		this.postAdministration = postAdministration;
 	}
 
 	/*
@@ -279,23 +268,18 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public ManagedFunctionDutyAssociation<?>[] getPreAdministrationMetaData() {
-		return this.preFunctionDuties;
+	public AdministrationMetaData<?, ?, ?>[] getPreAdministrationMetaData() {
+		return this.preAdministration;
 	}
 
 	@Override
-	public ManagedFunctionDutyAssociation<?>[] getPostAdministrationMetaData() {
-		return this.postFunctionDuties;
+	public AdministrationMetaData<?, ?, ?>[] getPostAdministrationMetaData() {
+		return this.postAdministration;
 	}
 
 	@Override
 	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {
 		return this.functionBoundManagedObjects;
-	}
-
-	@Override
-	public AdministrationMetaData<?, ?>[] getAdministratorMetaData() {
-		return this.functionBoundAdministrators;
 	}
 
 	@Override

@@ -113,7 +113,7 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * @return {@link AdministrationBuilder} to build the
 	 *         {@link Administration}.
 	 */
-	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder preAdminister(String administrationName,
+	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> preAdminister(String administrationName,
 			Class<E> extension, AdministrationFactory<E, f, G> administrationFactory);
 
 	/**
@@ -129,7 +129,7 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * @return {@link AdministrationBuilder} to build the
 	 *         {@link Administration}.
 	 */
-	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder postAdminister(String administrationName,
+	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> postAdminister(String administrationName,
 			Class<E> extension, AdministrationFactory<E, f, G> administrationFactory);
 
 	/**

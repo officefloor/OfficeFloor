@@ -599,9 +599,9 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 *            Name of the {@link Method}.
 	 * @return {@link ReflectiveFunctionBuilder}.
 	 */
-	public ReflectiveAdministratorBuilder constructAdministrator(Object object) {
+	public ReflectiveAdministrationBuilder constructAdministrator(Object object) {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		ReflectiveAdministratorBuilder builder = new ReflectiveAdministratorBuilder((Class) object.getClass(), object,
+		ReflectiveAdministrationBuilder builder = new ReflectiveAdministrationBuilder((Class) object.getClass(), object,
 				this.officeBuilder, this);
 		return builder;
 	}

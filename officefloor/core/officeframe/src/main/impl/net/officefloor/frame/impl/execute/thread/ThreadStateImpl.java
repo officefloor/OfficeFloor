@@ -22,15 +22,12 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
-import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
-import net.officefloor.frame.internal.structure.AdministratorContainer;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -157,11 +154,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private final GovernanceContainer<?>[] governanceContainers;
 
 	/**
-	 * {@link AdministratorContainer} instances for this {@link ThreadState}.
-	 */
-	private final AdministratorContainer<?>[] administratorContainers;
-
-	/**
 	 * {@link ProcessState} for this {@link ThreadState}.
 	 */
 	private final ProcessState processState;
@@ -272,10 +264,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		// Create the array to reference the governances
 		GovernanceMetaData<?, ?>[] governanceMetaData = this.threadMetaData.getGovernanceMetaData();
 		this.governanceContainers = new GovernanceContainer[governanceMetaData.length];
-
-		// Create array to reference the administrators
-		AdministrationMetaData<?, ?>[] adminMetaData = this.threadMetaData.getAdministratorMetaData();
-		this.administratorContainers = new AdministratorContainer[adminMetaData.length];
 
 		// Create thread profiler
 		this.profiler = (processProfiler == null ? null : processProfiler.addThread(this));
@@ -443,17 +431,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	public boolean isGovernanceActive(int index) {
 		GovernanceContainer<?> container = this.governanceContainers[index];
 		return (container != null) ? container.isGovernanceActive() : false;
-	}
-
-	@Override
-	public AdministratorContainer<?> getAdministratorContainer(int index) {
-		// Lazy load the Administrator Container
-		AdministratorContainer<?> container = this.administratorContainers[index];
-		if (container == null) {
-			container = new AdministratorContainerImpl<>(this.threadMetaData.getAdministratorMetaData()[index]);
-			this.administratorContainers[index] = container;
-		}
-		return container;
 	}
 
 	@Override

@@ -19,7 +19,7 @@ package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 
 /**
@@ -37,21 +37,23 @@ public interface RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>
 	String getFunctionName();
 
 	/**
+	 * Loads meta-data regarding the containing {@link Office}.
+	 * 
+	 * @param functionLocator
+	 *            {@link ManagedFunctionLocator}.
+	 * @param administrationMetaDataFactory
+	 *            {@link AdministrationMetaDataFactory}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 */
+	void loadOfficeMetaData(ManagedFunctionLocator functionLocator,
+			AdministrationMetaDataFactory administrationMetaDataFactory, OfficeFloorIssues issues);
+
+	/**
 	 * Obtains the {@link ManagedFunctionMetaData}.
 	 * 
 	 * @return {@link ManagedFunctionMetaData}.
 	 */
 	ManagedFunctionMetaData<O, F> getManagedFunctionMetaData();
-
-	/**
-	 * Links the {@link ManagedFunctionMetaData} instances to create
-	 * {@link Flow} of execution.
-	 * 
-	 * @param functionLocator
-	 *            {@link ManagedFunctionLocator}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 */
-	void linkFunctions(ManagedFunctionLocator functionLocator, OfficeFloorIssues issues);
 
 }

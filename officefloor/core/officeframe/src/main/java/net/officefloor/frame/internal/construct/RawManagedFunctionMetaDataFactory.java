@@ -18,7 +18,6 @@
 package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 
@@ -40,10 +39,6 @@ public interface RawManagedFunctionMetaDataFactory {
 	 *            {@link AssetManagerFactory}.
 	 * @param rawBoundManagedObjectFactory
 	 *            {@link RawBoundManagedObjectMetaDataFactory}.
-	 * @param rawBoundAdministratorFactory
-	 *            {@link RawBoundAdministratorMetaDataFactory}.
-	 * @param sourceContext
-	 *            {@link SourceContext}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @param functionLoop
@@ -53,7 +48,6 @@ public interface RawManagedFunctionMetaDataFactory {
 	RawManagedFunctionMetaData<?, ?> constructRawManagedFunctionMetaData(
 			ManagedFunctionConfiguration<?, ?> configuration, RawOfficeMetaData rawOfficeMetaData,
 			AssetManagerFactory assetManagerFactory, RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory, SourceContext sourceContext,
 			OfficeFloorIssues issues, FunctionLoop functionLoop);
 
 }

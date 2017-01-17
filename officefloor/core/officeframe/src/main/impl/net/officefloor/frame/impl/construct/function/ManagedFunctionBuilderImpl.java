@@ -22,24 +22,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
+import net.officefloor.frame.impl.construct.administrator.AdministrationBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
@@ -101,28 +99,22 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	private ManagedFunctionReference nextFunction;
 
 	/**
-	 * Listing of task administration duties to do before executing the
+	 * Listing of {@link Administration} to do before executing the
 	 * {@link ManagedFunction}.
 	 */
-	private final List<ManagedFunctionDutyConfigurationImpl<?>> preFunctionDuties = new LinkedList<ManagedFunctionDutyConfigurationImpl<?>>();
+	private final List<AdministrationConfiguration<?, ?, ?>> preAdministration = new LinkedList<AdministrationConfiguration<?, ?, ?>>();
 
 	/**
-	 * Listing of task administration duties to do after executing the
+	 * Listing of {@link Administration} to do after executing the
 	 * {@link ManagedFunction}.
 	 */
-	private final List<ManagedFunctionDutyConfigurationImpl<?>> postFunctionDuties = new LinkedList<ManagedFunctionDutyConfigurationImpl<?>>();
+	private final List<AdministrationConfiguration<?, ?, ?>> postAdministration = new LinkedList<AdministrationConfiguration<?, ?, ?>>();
 
 	/**
 	 * Listing of {@link ManagedFunction} bound {@link ManagedObject}
 	 * configuration.
 	 */
 	private final List<ManagedObjectConfiguration<?>> functionManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
-
-	/**
-	 * Listing of {@link ManagedFunction} bound {@link Administration}
-	 * configuration.
-	 */
-	private final List<AdministrationConfiguration<?, ?>> functionAdministrators = new LinkedList<AdministrationConfiguration<?, ?>>();
 
 	/**
 	 * Listing of {@link ManagedFunctionEscalationConfiguration} instances to
@@ -145,7 +137,7 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	/*
-	 * ================ TaskBuilder =======================================
+	 * ======================= ManagedFunctionBuilder =======================
 	 */
 
 	@Override
@@ -207,26 +199,6 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public void linkPreFunctionAdministration(String scopeAdministratorName, String dutyName) {
-		this.preFunctionDuties.add(new ManagedFunctionDutyConfigurationImpl<None>(scopeAdministratorName, dutyName));
-	}
-
-	@Override
-	public <A extends Enum<A>> void linkPreFunctionAdministration(String scopeAdministratorName, A dutyKey) {
-		this.preFunctionDuties.add(new ManagedFunctionDutyConfigurationImpl<A>(scopeAdministratorName, dutyKey));
-	}
-
-	@Override
-	public void linkPostFunctionAdministration(String scopeAdministratorName, String dutyName) {
-		this.postFunctionDuties.add(new ManagedFunctionDutyConfigurationImpl<None>(scopeAdministratorName, dutyName));
-	}
-
-	@Override
-	public <A extends Enum<A>> void linkPostFunctionAdministration(String scopeAdministratorName, A dutyKey) {
-		this.postFunctionDuties.add(new ManagedFunctionDutyConfigurationImpl<A>(scopeAdministratorName, dutyKey));
-	}
-
-	@Override
 	public void linkFlow(F key, String functionName, Class<?> argumentType, boolean isSpawnThreadState) {
 		this.linkFlow(key.ordinal(), key, functionName, argumentType, isSpawnThreadState);
 	}
@@ -261,8 +233,8 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 		ManagedFunctionReference functionReference = new ManagedFunctionReferenceImpl(functionName, argumentType);
 
 		// Create the flow configuration
-		ManagedFunctionFlowConfigurationImpl<F> flow = new ManagedFunctionFlowConfigurationImpl<F>(flowName, functionReference,
-				isSpawnThreadState, flowIndex, flowKey);
+		ManagedFunctionFlowConfigurationImpl<F> flow = new ManagedFunctionFlowConfigurationImpl<F>(flowName,
+				functionReference, isSpawnThreadState, flowIndex, flowKey);
 
 		// Register the flow
 		this.flows.put(new Integer(flowIndex), flow);
@@ -283,11 +255,20 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public <E, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministrationBuilder<A> addAdministrator(
-			String functionAdministratorName, Class<AS> adminsistratorSource) {
-		AdministratorBuilderImpl<E, A, AS> builder = new AdministratorBuilderImpl<E, A, AS>(functionAdministratorName,
-				adminsistratorSource);
-		this.functionAdministrators.add(builder);
+	public <E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> preAdminister(
+			String administrationName, Class<E> extension, AdministrationFactory<E, f, G> administrationFactory) {
+		AdministrationBuilderImpl<E, f, G> builder = new AdministrationBuilderImpl<>(administrationName, extension,
+				administrationFactory);
+		this.preAdministration.add(builder);
+		return builder;
+	}
+
+	@Override
+	public <E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> postAdminister(
+			String administrationName, Class<E> extension, AdministrationFactory<E, f, G> administrationFactory) {
+		AdministrationBuilderImpl<E, f, G> builder = new AdministrationBuilderImpl<>(administrationName, extension,
+				administrationFactory);
+		this.postAdministration.add(builder);
 		return builder;
 	}
 
@@ -341,23 +322,18 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public ManagedFunctionDutyConfiguration<?>[] getPreFunctionAdministratorDutyConfiguration() {
-		return this.preFunctionDuties.toArray(new ManagedFunctionDutyConfiguration[0]);
+	public AdministrationConfiguration<?, ?, ?>[] getPreAdministration() {
+		return ConstructUtil.toArray(this.preAdministration, new AdministrationConfiguration[0]);
 	}
 
 	@Override
-	public ManagedFunctionDutyConfiguration<?>[] getPostFunctionAdministratorDutyConfiguration() {
-		return this.postFunctionDuties.toArray(new ManagedFunctionDutyConfiguration[0]);
+	public AdministrationConfiguration<?, ?, ?>[] getPostAdministration() {
+		return ConstructUtil.toArray(this.postAdministration, new AdministrationConfiguration[0]);
 	}
 
 	@Override
 	public ManagedObjectConfiguration<?>[] getManagedObjectConfiguration() {
 		return this.functionManagedObjects.toArray(new ManagedObjectConfiguration[0]);
-	}
-
-	@Override
-	public AdministrationConfiguration<?, ?>[] getAdministratorConfiguration() {
-		return this.functionAdministrators.toArray(new AdministrationConfiguration[0]);
 	}
 
 	@Override

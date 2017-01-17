@@ -51,8 +51,8 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
-import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
-import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
+import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
@@ -103,10 +103,10 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 			.createMock(RawBoundManagedObjectMetaDataFactory.class);
 
 	/**
-	 * {@link RawBoundAdministratorMetaDataFactory}.
+	 * {@link AdministrationMetaDataFactory}.
 	 */
-	private final RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory = this
-			.createMock(RawBoundAdministratorMetaDataFactory.class);
+	private final AdministrationMetaDataFactory rawBoundAdministratorFactory = this
+			.createMock(AdministrationMetaDataFactory.class);
 
 	/**
 	 * {@link SourceContext}.
@@ -151,9 +151,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	private final Map<String, RawBoundManagedObjectMetaData> officeScopeManagedObjects = new HashMap<>();
 
 	/**
-	 * {@link Office} scope {@link RawBoundAdministratorMetaData}.
+	 * {@link Office} scope {@link RawAdministrationMetaData}.
 	 */
-	private final Map<String, RawBoundAdministratorMetaData<?, ?>> officeScopeAdministrators = new HashMap<>();
+	private final Map<String, RawAdministrationMetaData<?, ?>> officeScopeAdministrators = new HashMap<>();
 
 	/**
 	 * {@link AssetManagerFactory}.
@@ -585,8 +585,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testSingleFunctionBoundAdministrator() {
 
-		final RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = this
-				.createMock(RawBoundAdministratorMetaData.class);
+		final RawAdministrationMetaData<?, ?> rawAdminMetaData = this
+				.createMock(RawAdministrationMetaData.class);
 		final AdministrationMetaData<?, ?> adminMetaData = this.createMock(AdministrationMetaData.class);
 
 		// Record single function bound managed object
@@ -616,8 +616,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testSingleOfficeScopeAdministrator() {
 
-		final RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = this
-				.createMock(RawBoundAdministratorMetaData.class);
+		final RawAdministrationMetaData<?, ?> rawAdminMetaData = this
+				.createMock(RawAdministrationMetaData.class);
 		this.officeScopeAdministrators.put("ADMIN", rawAdminMetaData);
 
 		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
@@ -1048,7 +1048,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testNoDutyName() {
 
-		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this.createMock(RawBoundAdministratorMetaData.class);
+		final RawAdministrationMetaData<?, ?> rawAdmin = this.createMock(RawAdministrationMetaData.class);
 		this.officeScopeAdministrators.put("ADMIN", rawAdmin);
 
 		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
@@ -1086,7 +1086,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testConstructPreAdministratorDuty() {
 
-		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this.createMock(RawBoundAdministratorMetaData.class);
+		final RawAdministrationMetaData<?, ?> rawAdmin = this.createMock(RawAdministrationMetaData.class);
 		this.officeScopeAdministrators.put("ADMIN", rawAdmin);
 
 		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
@@ -1143,7 +1143,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testPostFunctionDutyWithAdministeredManagedObjectDependency() {
 
-		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this.createMock(RawBoundAdministratorMetaData.class);
+		final RawAdministrationMetaData<?, ?> rawAdmin = this.createMock(RawAdministrationMetaData.class);
 		this.officeScopeAdministrators.put("ADMIN", rawAdmin);
 
 		final ManagedFunctionDutyConfiguration<?> dutyConfiguration = this
@@ -1900,18 +1900,18 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 * {@link ManagedFunction}.
 	 * 
 	 * @param nameAdminPairs
-	 *            Name and {@link RawBoundAdministratorMetaData} pairs.
+	 *            Name and {@link RawAdministrationMetaData} pairs.
 	 */
 	private void record_functionBoundAdministrators(Object... nameAdminPairs) {
 
 		// Obtain the listing of work bound names and administrators
 		int adminCount = nameAdminPairs.length / 2;
 		String[] boundAdminNames = new String[adminCount];
-		RawBoundAdministratorMetaData<?, ?>[] workBoundAdmins = new RawBoundAdministratorMetaData[adminCount];
+		RawAdministrationMetaData<?, ?>[] workBoundAdmins = new RawAdministrationMetaData[adminCount];
 		for (int i = 0; i < nameAdminPairs.length; i += 2) {
 			int loadIndex = i / 2;
 			boundAdminNames[loadIndex] = (String) nameAdminPairs[i];
-			workBoundAdmins[loadIndex] = (RawBoundAdministratorMetaData<?, ?>) nameAdminPairs[i + 1];
+			workBoundAdmins[loadIndex] = (RawAdministrationMetaData<?, ?>) nameAdminPairs[i + 1];
 		}
 
 		// Record bounding administrators to work

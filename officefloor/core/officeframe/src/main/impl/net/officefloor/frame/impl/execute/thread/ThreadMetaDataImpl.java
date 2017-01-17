@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
@@ -44,11 +43,6 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	private final GovernanceMetaData<?, ?>[] governanceMetaData;
 
 	/**
-	 * {@link AdministrationMetaData} instances.
-	 */
-	private final AdministrationMetaData<?, ?>[] administratorMetaData;
-
-	/**
 	 * {@link Office} {@link EscalationProcedure}.
 	 */
 	private final EscalationProcedure officeEscalationProcedure;
@@ -65,19 +59,16 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	 *            {@link ManagedObjectMetaData} instances.
 	 * @param governanceMetaData
 	 *            {@link GovernanceMetaData} instances.
-	 * @param administratorMetaData
-	 *            {@link AdministrationMetaData} instances.
 	 * @param officeEscalationProcedure
 	 *            {@link Office} {@link EscalationProcedure}.
 	 * @param officeFloorEscalation
 	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 */
 	public ThreadMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
-			GovernanceMetaData<?, ?>[] governanceMetaData, AdministrationMetaData<?, ?>[] administratorMetaData,
-			EscalationProcedure officeEscalationProcedure, EscalationFlow officeFloorEscalation) {
+			GovernanceMetaData<?, ?>[] governanceMetaData, EscalationProcedure officeEscalationProcedure,
+			EscalationFlow officeFloorEscalation) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.governanceMetaData = governanceMetaData;
-		this.administratorMetaData = administratorMetaData;
 		this.officeEscalationProcedure = officeEscalationProcedure;
 		this.officeFloorEscalation = officeFloorEscalation;
 	}
@@ -94,11 +85,6 @@ public class ThreadMetaDataImpl implements ThreadMetaData {
 	@Override
 	public GovernanceMetaData<?, ?>[] getGovernanceMetaData() {
 		return this.governanceMetaData;
-	}
-
-	@Override
-	public AdministrationMetaData<?, ?>[] getAdministratorMetaData() {
-		return this.administratorMetaData;
 	}
 
 	@Override

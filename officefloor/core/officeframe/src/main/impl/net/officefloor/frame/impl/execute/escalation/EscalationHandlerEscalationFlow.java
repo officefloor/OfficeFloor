@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.impl.execute.escalation;
 
-import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
@@ -33,7 +32,6 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -68,13 +66,7 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 	 * No {@link AdministrationDuty} instances bound to
 	 * {@link EscalationHandlerManagedFunction}.
 	 */
-	private static final AdministrationMetaData<?, ?>[] NO_ADMINISTRATOR_META_DATA = new AdministrationMetaData[0];
-
-	/**
-	 * NO {@link ManagedFunctionDutyAssociation} instances for
-	 * {@link EscalationHandlerManagedFunction}.
-	 */
-	private static final ManagedFunctionDutyAssociation<?>[] NO_FUNCTION_DUTY_ASSOCIATIONS = new ManagedFunctionDutyAssociation[0];
+	private static final AdministrationMetaData<?, ?, ?>[] NO_ADMINISTRATOR_META_DATA = new AdministrationMetaData[0];
 
 	/**
 	 * No {@link FlowMetaData} instances for
@@ -125,7 +117,7 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 		ManagedFunctionMetaDataImpl<EscalationKey, None> functionMetaData = new ManagedFunctionMetaDataImpl<>(
 				EscalationHandler.class.getSimpleName(), functionFactory, null, Throwable.class, anyTeam,
 				MANGED_OBJECT_DEPENDENCIES, NO_MANAGED_OBJECT_META_DATA, NO_MANAGED_OBJECTS, NO_GOVERNANCE,
-				NO_ADMINISTRATOR_META_DATA, NO_FUNCTION_DUTY_ASSOCIATIONS, NO_FUNCTION_DUTY_ASSOCIATIONS, functionLoop);
+				NO_ADMINISTRATOR_META_DATA, NO_ADMINISTRATOR_META_DATA, functionLoop);
 		functionMetaData.loadRemainingState(NO_FLOW_META_DATA, null, FURTHER_ESCALATION_PROCEDURE);
 		this.functionMetaData = functionMetaData;
 	}

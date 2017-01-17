@@ -24,7 +24,6 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.internal.structure.AdministrationDuty;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -39,7 +38,7 @@ public interface AdministrationConfiguration<E, F extends Enum<F>, G extends Enu
 	 * 
 	 * @return Name of the {@link Administration}.
 	 */
-	String getAdministratorName();
+	String getAdministrationName();
 
 	/**
 	 * Obtains the {@link AdministrationFactory}.
@@ -50,13 +49,19 @@ public interface AdministrationConfiguration<E, F extends Enum<F>, G extends Enu
 
 	/**
 	 * Obtains the name of the {@link Team} within the {@link Office}
-	 * responsible for completing the {@link AdministrationDuty} instances of
-	 * this {@link Administration}.
+	 * responsible for completing this {@link Administration}.
 	 * 
 	 * @return {@link Office} name of the {@link Team}. May be <code>null</code>
 	 *         to use any {@link Team}.
 	 */
 	String getOfficeTeamName();
+
+	/**
+	 * Obtains the extension interface.
+	 * 
+	 * @return Extension interface.
+	 */
+	Class<E> getExtensionInterface();
 
 	/**
 	 * Obtains the names of the {@link ManagedObject} instances to be

@@ -46,7 +46,7 @@ import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfigura
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
-import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
+import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
@@ -117,10 +117,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			.createMock(RawGovernanceMetaDataFactory.class);
 
 	/**
-	 * {@link RawBoundAdministratorMetaDataFactory}.
+	 * {@link AdministrationMetaDataFactory}.
 	 */
-	private final RawBoundAdministratorMetaDataFactory rawBoundAdminFactory = this
-			.createMock(RawBoundAdministratorMetaDataFactory.class);
+	private final AdministrationMetaDataFactory rawBoundAdminFactory = this
+			.createMock(AdministrationMetaDataFactory.class);
 
 	/**
 	 * {@link RawOfficeMetaDataFactory}.

@@ -51,7 +51,7 @@ import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
-import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
@@ -74,7 +74,7 @@ import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link RawBoundAdministratorMetaDataImpl}.
+ * Tests the {@link AdministrationMetaDataFactoryImpl}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -581,7 +581,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to construct {@link RawBoundAdministratorMetaData}.
+	 * Ensures able to construct {@link RawAdministrationMetaData}.
 	 */
 	public void testConstructRawBoundAdministratorMetaData() {
 
@@ -608,8 +608,8 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Construct the administrators
-		RawBoundAdministratorMetaData<?, ?>[] rawAdminMetaDatas = this.constructRawAdministrator(1, this.configuration);
-		RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = rawAdminMetaDatas[0];
+		RawAdministrationMetaData<?, ?>[] rawAdminMetaDatas = this.constructRawAdministrator(1, this.configuration);
+		RawAdministrationMetaData<?, ?> rawAdminMetaData = rawAdminMetaDatas[0];
 		AdministrationMetaData<?, ?> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
 
 		// Verify extension interface factory by extracting ei
@@ -764,7 +764,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		RawBoundAdministratorMetaData metaData = this.constructRawAdministrator(1, this.configuration)[0];
+		RawAdministrationMetaData metaData = this.constructRawAdministrator(1, this.configuration)[0];
 		metaData.getDutyKey(DutyKey.ONE); // flags linked to a task
 		metaData.linkOfficeMetaData(this.officeMetaData, this.functionLocator, this.issues);
 		this.verifyMockObjects();
@@ -880,7 +880,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		RawBoundAdministratorMetaData<?, DutyKey> rawAdminMetaData = this
+		RawAdministrationMetaData<?, DutyKey> rawAdminMetaData = this
 				.constructRawAdministratorAndLinkOfficeMetaData();
 		AdministrationMetaData<?, DutyKey> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
 		this.verifyMockObjects();
@@ -934,7 +934,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		RawBoundAdministratorMetaData<?, DutyKey> rawAdminMetaData = this
+		RawAdministrationMetaData<?, DutyKey> rawAdminMetaData = this
 				.constructRawAdministratorAndLinkOfficeMetaData();
 		AdministrationMetaData<?, DutyKey> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
 		this.verifyMockObjects();
@@ -986,7 +986,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		RawBoundAdministratorMetaData<?, DutyKey> rawAdminMetaData = this
+		RawAdministrationMetaData<?, DutyKey> rawAdminMetaData = this
 				.constructRawAdministratorAndLinkOfficeMetaData();
 		AdministrationMetaData<?, DutyKey> adminMetaData = rawAdminMetaData.getAdministratorMetaData();
 		this.verifyMockObjects();
@@ -1189,19 +1189,19 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Constructs the {@link RawBoundAdministratorMetaDataImpl}.
+	 * Constructs the {@link AdministrationMetaDataFactoryImpl}.
 	 * 
 	 * @param expectedCreateCount
 	 *            Expected number to be created.
 	 * @param configuration
 	 *            {@link AdministrationConfiguration} instances.
-	 * @return {@link RawBoundAdministratorMetaData}.
+	 * @return {@link RawAdministrationMetaData}.
 	 */
-	private RawBoundAdministratorMetaData<?, ?>[] constructRawAdministrator(int expectedCreateCount,
+	private RawAdministrationMetaData<?, ?>[] constructRawAdministrator(int expectedCreateCount,
 			AdministrationConfiguration<?, ?>... configuration) {
 
 		// Construct the meta-data
-		RawBoundAdministratorMetaData<?, ?>[] metaData = RawBoundAdministratorMetaDataImpl.getFactory()
+		RawAdministrationMetaData<?, ?>[] metaData = AdministrationMetaDataFactoryImpl.getFactory()
 				.constructRawBoundAdministratorMetaData(configuration, this.sourceContext, this.issues,
 						this.administratorScope, this.assetType, this.assetName, this.officeTeams, this.scopeMo,
 						this.functionLoop);
@@ -1214,21 +1214,21 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Constructs the {@link RawBoundAdministratorMetaData} including linking
+	 * Constructs the {@link RawAdministrationMetaData} including linking
 	 * its {@link ManagedFunction} instances.
 	 * 
-	 * @return Constructed {@link RawBoundAdministratorMetaData}.
+	 * @return Constructed {@link RawAdministrationMetaData}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private RawBoundAdministratorMetaData<?, DutyKey> constructRawAdministratorAndLinkOfficeMetaData() {
+	private RawAdministrationMetaData<?, DutyKey> constructRawAdministratorAndLinkOfficeMetaData() {
 
 		// Construct the raw administrator meta-data
-		RawBoundAdministratorMetaData metaData = this.constructRawAdministrator(1, this.configuration)[0];
+		RawAdministrationMetaData metaData = this.constructRawAdministrator(1, this.configuration)[0];
 
 		// Link the tasks
 		metaData.linkOfficeMetaData(this.officeMetaData, this.functionLocator, this.issues);
 
 		// Return the raw bound administrator meta-data
-		return (RawBoundAdministratorMetaData<?, DutyKey>) metaData;
+		return (RawAdministrationMetaData<?, DutyKey>) metaData;
 	}
 }

@@ -61,6 +61,16 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	private final TeamManagement responsibleTeam;
 
 	/**
+	 * {@link FlowMetaData} instances for this {@link Administration}.
+	 */
+	private final FlowMetaData[] flowMetaData;
+
+	/**
+	 * Translates the index to a {@link ThreadState} {@link Governance} index.
+	 */
+	private final int[] governanceIndexes;
+
+	/**
 	 * {@link EscalationProcedure}.
 	 */
 	private final EscalationProcedure escalationProcedure;
@@ -69,16 +79,6 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 * {@link FunctionLoop}.
 	 */
 	private final FunctionLoop functionLoop;
-
-	/**
-	 * {@link FlowMetaData} instances for this {@link Administration}.
-	 */
-	private FlowMetaData[] flowMetaData;
-
-	/**
-	 * Translates the index to a {@link ThreadState} {@link Governance} index.
-	 */
-	private int[] governanceIndexes;
 
 	/**
 	 * Instantiate.
@@ -92,35 +92,28 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link GovernanceActivity}.
-	 * @param escalationProcedure
-	 *            {@link EscalationProcedure}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
-	 */
-	public AdministrationMetaDataImpl(String administrationName, AdministrationFactory<E, F, G> administrationFactory,
-			ExtensionInterfaceMetaData<E>[] eiMetaData, TeamManagement responsibleTeam,
-			EscalationProcedure escalationProcedure, FunctionLoop functionLoop) {
-		this.administrationName = administrationName;
-		this.administrationFactory = administrationFactory;
-		this.eiMetaData = eiMetaData;
-		this.responsibleTeam = responsibleTeam;
-		this.escalationProcedure = escalationProcedure;
-		this.functionLoop = functionLoop;
-	}
-
-	/**
-	 * Loads the remaining state.
-	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} instances for this
 	 *            {@link Administration}.
 	 * @param governanceIndexes
 	 *            Translates the index to a {@link ThreadState}
 	 *            {@link Governance} index.
+	 * @param escalationProcedure
+	 *            {@link EscalationProcedure}.
+	 * @param functionLoop
+	 *            {@link FunctionLoop}.
 	 */
-	public void loadRemainingState(FlowMetaData[] flowMetaData, int[] governanceIndexes) {
+	public AdministrationMetaDataImpl(String administrationName, AdministrationFactory<E, F, G> administrationFactory,
+			ExtensionInterfaceMetaData<E>[] eiMetaData, TeamManagement responsibleTeam, FlowMetaData[] flowMetaData,
+			int[] governanceIndexes, EscalationProcedure escalationProcedure, FunctionLoop functionLoop) {
+		this.administrationName = administrationName;
+		this.administrationFactory = administrationFactory;
+		this.eiMetaData = eiMetaData;
+		this.responsibleTeam = responsibleTeam;
 		this.flowMetaData = flowMetaData;
 		this.governanceIndexes = governanceIndexes;
+		this.escalationProcedure = escalationProcedure;
+		this.functionLoop = functionLoop;
 	}
 
 	/*
