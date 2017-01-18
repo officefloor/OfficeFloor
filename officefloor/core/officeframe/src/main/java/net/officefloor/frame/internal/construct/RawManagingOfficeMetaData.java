@@ -25,6 +25,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -89,24 +90,21 @@ public interface RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * Sets up the {@link ManagedObjectSource} to be managed by the
 	 * {@link Office} of the input {@link ManagedFunctionLocator}.
 	 * 
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param processBoundManagedObjectMetaData
 	 *            {@link RawBoundManagedObjectMetaData} of the
 	 *            {@link ProcessState} bound {@link ManagedObject} instances of
 	 *            the managing {@link Office}.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param functionLocator
-	 *            {@link ManagedFunctionLocator} for the {@link Office} managing
-	 *            the {@link ManagedObjectSource}.
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            names.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void manageByOffice(RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
-			OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
-			Map<String, TeamManagement> officeTeams, OfficeFloorIssues issues);
+	void manageByOffice(OfficeMetaData officeMetaData,
+			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData, Map<String, TeamManagement> officeTeams,
+			OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link ManagedObjectExecuteContextFactory} for the

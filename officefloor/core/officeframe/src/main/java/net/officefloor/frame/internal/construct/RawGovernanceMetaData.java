@@ -21,8 +21,9 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
  * Raw meta-data of the {@link Governance}.
@@ -58,12 +59,12 @@ public interface RawGovernanceMetaData<E, F extends Enum<F>> {
 	 * Links the {@link ManagedFunctionMetaData} instances to enable
 	 * {@link Flow} of execution.
 	 * 
-	 * @param taskLocator
-	 *            {@link ManagedFunctionLocator}.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkOfficeMetaData(ManagedFunctionLocator taskLocator, OfficeFloorIssues issues);
+	void loadOfficeMetaData(OfficeMetaData officeMetaData, OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link GovernanceMetaData}.

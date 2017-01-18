@@ -33,7 +33,6 @@ import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -41,7 +40,9 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
@@ -198,7 +199,10 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 	}
 
 	@Override
-	public void linkOfficeMetaData(ManagedFunctionLocator functionLocator, OfficeFloorIssues issues) {
+	public void loadOfficeMetaData(OfficeMetaData officeMetaData, OfficeFloorIssues issues) {
+
+		// Obtain the function locator
+		ManagedFunctionLocator functionLocator = officeMetaData.getManagedFunctionLocator();
 
 		// Obtain the listing of flow meta-data
 		GovernanceFlowConfiguration<F>[] flowConfigurations = this.governanceConfiguration.getFlowConfiguration();

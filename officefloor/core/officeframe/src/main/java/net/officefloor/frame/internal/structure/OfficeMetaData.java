@@ -84,6 +84,13 @@ public interface OfficeMetaData {
 	ManagedFunctionMetaData<?, ?>[] getManagedFunctionMetaData();
 
 	/**
+	 * Obtains the {@link ManagedFunctionLocator}.
+	 * 
+	 * @return {@link ManagedFunctionLocator}.
+	 */
+	ManagedFunctionLocator getManagedFunctionLocator();
+
+	/**
 	 * Obtains the {@link OfficeStartupFunction} instances for this
 	 * {@link Office}.
 	 * 

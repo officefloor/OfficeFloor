@@ -52,7 +52,6 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationCon
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
@@ -73,6 +72,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -212,7 +212,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawGovernanceMetaDataFactory rawGovernanceMetaDataFactory,
-			AdministrationMetaDataFactory rawBoundAdministratorFactory,
+			AdministrationMetaDataFactory administrationMetaDataFactory,
 			RawManagedFunctionMetaDataFactory rawFunctionFactory) {
 
 		// Obtain the name of the office
@@ -440,8 +440,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			// Construct the managed function
 			RawManagedFunctionMetaData<?, ?> rawFunctionMetaData = rawFunctionFactory
 					.constructRawManagedFunctionMetaData(functionConfiguration, rawOfficeMetaData,
-							officeAssetManagerFactory, rawBoundManagedObjectFactory, rawBoundAdministratorFactory,
-							sourceContext, issues, functionLoop);
+							officeAssetManagerFactory, rawBoundManagedObjectFactory, issues, functionLoop);
 			if (rawFunctionMetaData == null) {
 				continue; // issue in constructing function
 			}
@@ -540,23 +539,22 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 		// Load the office meta-data
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,
-				functionLoop, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), processMetaData,
-				processContextListeners, startupFunctions, profiler);
+				functionLoop, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), functionLocator,
+				processMetaData, processContextListeners, startupFunctions, profiler);
 
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
-			officeManagingManagedObject.manageByOffice(processBoundManagedObjects, officeMetaData, functionLocator,
-					officeTeams, issues);
+			officeManagingManagedObject.manageByOffice(officeMetaData, processBoundManagedObjects, officeTeams, issues);
 		}
 
 		// Link functions within the meta-data of the office
 		for (RawManagedFunctionMetaData<?, ?> rawFunctionMetaData : rawFunctionMetaDatas) {
-			rawFunctionMetaData.linkFunctions(functionLocator, issues);
+			rawFunctionMetaData.loadOfficeMetaData(officeMetaData, administrationMetaDataFactory, officeTeams, issues);
 		}
 
-		// Link functions for Governance
+		// Link governance within meta-data of the office
 		for (RawGovernanceMetaData<?, ?> rawGovernance : rawGovernanceMetaDataList) {
-			rawGovernance.linkOfficeMetaData(functionLocator, issues);
+			rawGovernance.loadOfficeMetaData(officeMetaData, issues);
 		}
 
 		// Return the raw office meta-data

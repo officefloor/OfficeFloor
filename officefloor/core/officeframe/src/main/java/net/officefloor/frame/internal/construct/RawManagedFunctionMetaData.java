@@ -17,10 +17,15 @@
  */
 package net.officefloor.frame.internal.construct;
 
+import java.util.Map;
+
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
  * Raw meta-data for a {@link ManagedFunction}.
@@ -39,15 +44,17 @@ public interface RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>
 	/**
 	 * Loads meta-data regarding the containing {@link Office}.
 	 * 
-	 * @param functionLocator
-	 *            {@link ManagedFunctionLocator}.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param administrationMetaDataFactory
 	 *            {@link AdministrationMetaDataFactory}.
+	 * @param officeTeams
+	 *            {@link Team} instances within the {@link Office}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void loadOfficeMetaData(ManagedFunctionLocator functionLocator,
-			AdministrationMetaDataFactory administrationMetaDataFactory, OfficeFloorIssues issues);
+	void loadOfficeMetaData(OfficeMetaData officeMetaData, AdministrationMetaDataFactory administrationMetaDataFactory,
+			Map<String, TeamManagement> officeTeams, OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link ManagedFunctionMetaData}.

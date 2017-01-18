@@ -149,7 +149,7 @@ public class ReflectiveFunctionBuilder
 	 */
 	public void buildManagedFunctionContext() {
 
-		// Ensure parameter is TaskContext
+		// Ensure parameter is ManagedFunctionContext
 		Class<?> parameterType = this.parameterTypes[this.parameterIndex];
 		TestCase.assertTrue(
 				"Parameter " + this.parameterIndex + " must be " + ManagedFunctionContext.class.getSimpleName(),

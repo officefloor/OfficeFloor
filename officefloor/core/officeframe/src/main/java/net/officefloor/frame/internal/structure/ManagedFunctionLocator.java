@@ -15,11 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.construct;
+package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 
 /**
  * Locates a {@link ManagedFunctionMetaData} within the {@link Office}.

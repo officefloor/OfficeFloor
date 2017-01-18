@@ -39,13 +39,13 @@ import net.officefloor.frame.internal.configuration.InputManagedObjectConfigurat
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -210,9 +210,9 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 	}
 
 	@Override
-	public void manageByOffice(RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
-			OfficeMetaData officeMetaData, ManagedFunctionLocator functionLocator,
-			Map<String, TeamManagement> officeTeams, OfficeFloorIssues issues) {
+	public void manageByOffice(OfficeMetaData officeMetaData,
+			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData, Map<String, TeamManagement> officeTeams,
+			OfficeFloorIssues issues) {
 
 		// Obtain the name of the managed object source
 		String managedObjectSourceName = this.rawManagedObjectMetaData.getManagedObjectName();
@@ -220,6 +220,9 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements RawMana
 		// -----------------------------------------------------------
 		// Load Remaining State to the Managed Object Meta-Data
 		// -----------------------------------------------------------
+
+		// Obtain the function locator
+		ManagedFunctionLocator functionLocator = officeMetaData.getManagedFunctionLocator();
 
 		// Obtain the recycle task meta-data
 		FlowMetaData recycleFlowMetaData = null;

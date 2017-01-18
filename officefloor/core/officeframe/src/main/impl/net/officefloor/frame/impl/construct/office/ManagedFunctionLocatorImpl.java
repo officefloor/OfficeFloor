@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 
 /**

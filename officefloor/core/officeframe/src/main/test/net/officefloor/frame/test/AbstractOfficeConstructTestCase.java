@@ -25,12 +25,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import junit.framework.TestCase;
-import net.officefloor.compile.spi.administration.source.AdministratorSource;
-import net.officefloor.compile.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.administration.Duty;
-import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -588,86 +583,6 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 
 		// Return the team builder
 		return teamBuilder;
-	}
-
-	/**
-	 * Constructs the {@link ReflectiveFunctionBuilder}.
-	 * 
-	 * @param object
-	 *            {@link Object} containing the {@link Method}.
-	 * @param methodName
-	 *            Name of the {@link Method}.
-	 * @return {@link ReflectiveFunctionBuilder}.
-	 */
-	public ReflectiveAdministrationBuilder constructAdministrator(Object object) {
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		ReflectiveAdministrationBuilder builder = new ReflectiveAdministrationBuilder((Class) object.getClass(), object,
-				this.officeBuilder, this);
-		return builder;
-	}
-
-	/**
-	 * Facade method to create a {@link AdministrationDuty}.
-	 * 
-	 * @param <I>
-	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link AdministrationDuty} type.
-	 * @param adminName
-	 *            Name of the {@link AdministrationDuty}.
-	 * @param administrator
-	 *            {@link AdministrationDuty}.
-	 * @param administratorMetaData
-	 *            {@link AdministratorSourceMetaData}.
-	 * @param teamName
-	 *            Name of {@link Team} for {@link AdministrationDuty} {@link AdministrationDuty}
-	 *            instances.
-	 * @return {@link AdministrationBuilder}.
-	 */
-	public <E extends Object, A extends Enum<A>> AdministrationBuilder<A> constructAdministrator(String adminName,
-			Administration<E, A> administrator, AdministratorSourceMetaData<E, A> administratorMetaData,
-			String teamName) {
-
-		// Bind the Administrator
-		AdministrationBuilder<A> adminBuilder = MockAdministratorSource.bindAdministrator(adminName, administrator,
-				administratorMetaData, this.officeBuilder);
-
-		// Configure the administrator
-		adminBuilder.setTeam(teamName);
-
-		// Return the administrator builder
-		return adminBuilder;
-	}
-
-	/**
-	 * Facade method to construct an {@link AdministrationDuty}.
-	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <A>
-	 *            {@link AdministrationDuty} type.
-	 * @param <AS>
-	 *            {@link AdministratorSource} type.
-	 * @param adminName
-	 *            Name of the {@link AdministrationDuty}.
-	 * @param adminSource
-	 *            {@link AdministratorSource} {@link Class}.
-	 * @param teamName
-	 *            Name of {@link Team} for {@link AdministrationDuty} {@link AdministrationDuty}
-	 *            instances.
-	 * @return {@link AdministrationBuilder}.
-	 */
-	public <E extends Object, A extends Enum<A>, AS extends AdministratorSource<E, A>> AdministrationBuilder<A> constructAdministrator(
-			String adminName, Class<AS> adminSource, String teamName) {
-
-		// Create the Administrator Builder
-		AdministrationBuilder<A> adminBuilder = this.officeBuilder.addAdministrator(adminName, adminSource);
-
-		// Configure the administrator
-		adminBuilder.setTeam(teamName);
-
-		// Return the administrator builder
-		return adminBuilder;
 	}
 
 	/**

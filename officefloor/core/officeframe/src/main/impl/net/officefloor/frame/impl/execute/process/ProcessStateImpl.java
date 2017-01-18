@@ -33,6 +33,7 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -205,12 +206,10 @@ public class ProcessStateImpl implements ProcessState {
 	public ManagedFunctionMetaData<?, ?> getFunctionMetaData(String functionName) throws UnknownFunctionException {
 
 		// Look for function
-		ManagedFunctionMetaData<?, ?>[] functions = this.officeMetaData.getManagedFunctionMetaData();
-		for (int i = 0; i < functions.length; i++) {
-			ManagedFunctionMetaData<?, ?> function = functions[i];
-			if (function.getFunctionName().equals(functionName)) {
-				return function;
-			}
+		ManagedFunctionLocator locator = this.officeMetaData.getManagedFunctionLocator();
+		ManagedFunctionMetaData<?, ?> functionMetaData = locator.getManagedFunctionMetaData(functionName);
+		if (functionMetaData != null) {
+			return functionMetaData;
 		}
 
 		// As here, function not found

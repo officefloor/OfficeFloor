@@ -35,6 +35,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeClock;
@@ -127,6 +128,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final ManagedFunctionMetaData<?, ?>[] functionMetaDatas;
 
 	/**
+	 * {@link ManagedFunctionLocator}.
+	 */
+	private final ManagedFunctionLocator functionLocator;
+
+	/**
 	 * {@link ProcessMetaData} of the {@link ProcessState} instances created
 	 * within this {@link Office}.
 	 */
@@ -167,6 +173,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param functionMetaDatas
 	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction}
 	 *            that can be executed within the {@link Office}.
+	 * @param functionLocator
+	 *            {@link ManagedFunctionLocator}.
 	 * @param processMetaData
 	 *            {@link ProcessMetaData} of the {@link ProcessState} instances
 	 *            created within this {@link Office}.
@@ -179,14 +187,16 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager, OfficeClock officeClock, Timer timer,
 			FunctionLoop functionLoop, ManagedFunctionMetaData<?, ?>[] functionMetaDatas,
-			ProcessMetaData processMetaData, ProcessContextListener[] processContextListeners,
-			OfficeStartupFunction[] startupFunctions, Profiler profiler) {
+			ManagedFunctionLocator functionLocator, ProcessMetaData processMetaData,
+			ProcessContextListener[] processContextListeners, OfficeStartupFunction[] startupFunctions,
+			Profiler profiler) {
 		this.officeName = officeName;
 		this.officeClock = officeClock;
 		this.timer = timer;
 		this.functionLoop = functionLoop;
 		this.officeManager = officeManager;
 		this.functionMetaDatas = functionMetaDatas;
+		this.functionLocator = functionLocator;
 		this.processMetaData = processMetaData;
 		this.processContextListeners = processContextListeners;
 		this.startupFunctions = startupFunctions;
@@ -238,6 +248,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	@Override
 	public ManagedFunctionMetaData<?, ?>[] getManagedFunctionMetaData() {
 		return this.functionMetaDatas;
+	}
+
+	@Override
+	public ManagedFunctionLocator getManagedFunctionLocator() {
+		return this.functionLocator;
 	}
 
 	@Override

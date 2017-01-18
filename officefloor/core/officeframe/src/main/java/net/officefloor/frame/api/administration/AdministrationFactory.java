@@ -42,7 +42,9 @@ public interface AdministrationFactory<E, F extends Enum<F>, G extends Enum<G>> 
 	 * Creates the {@link Administration}.
 	 * 
 	 * @return {@link Administration}.
+	 * @throws Throwable
+	 *             If fails to create {@link Administration}.
 	 */
-	Administration<E, F, G> createAdministration();
+	Administration<E, F, G> createAdministration() throws Throwable;
 
 }

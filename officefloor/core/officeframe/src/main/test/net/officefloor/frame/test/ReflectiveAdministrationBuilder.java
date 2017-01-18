@@ -17,33 +17,31 @@
  */
 package net.officefloor.frame.test;
 
-import java.awt.List;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.junit.Assert;
 
 import junit.framework.TestCase;
-import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.administration.Duty;
 import net.officefloor.frame.api.administration.AdministrationContext;
-import net.officefloor.frame.api.administration.DutyKey;
+import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
-import net.officefloor.frame.api.build.DutyBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Reflective {@link AdministrationBuilder}.
  *
  * @author Daniel Sagenschneider
  */
-public class ReflectiveAdministrationBuilder extends AbstractAdministratorSource<Object, Indexed>
-		implements Administration<Object, Indexed> {
+public class ReflectiveAdministrationBuilder
+		implements AdministrationFactory<Object, Indexed, Indexed>, Administration<Object, Indexed, Indexed> {
 
 	/**
 	 * {@link AbstractOfficeConstructTestCase}.
@@ -51,35 +49,46 @@ public class ReflectiveAdministrationBuilder extends AbstractAdministratorSource
 	private final AbstractOfficeConstructTestCase testCase;
 
 	/**
-	 * {@link OfficeBuilder}.
+	 * {@link ManagedFunctionBuilder}.
 	 */
-	private final OfficeBuilder officeBuilder;
+	private final ManagedFunctionBuilder<?, ?> managedFunctionBuilder;
 
 	/**
-	 * {@link Class} of the object.
-	 */
-	private final Class<?> clazz;
-
-	/**
-	 * Object should the {@link Method} for the {@link AdministrationDuty} not be static.
+	 * Object should the {@link Method} for the {@link AdministrationDuty} not
+	 * be static.
 	 */
 	private final Object object;
+
+	/**
+	 * {@link Method} for this {@link Administration}.
+	 */
+	private final Method method;
+
+	/**
+	 * Types for the parameters of the {@link Method}.
+	 */
+	private final Class<?>[] parameterTypes;
 
 	/**
 	 * {@link AdministrationBuilder} for this
 	 * {@link ReflectiveAdministrationBuilder}.
 	 */
-	private final AdministrationBuilder<Indexed> administratorBuilder;
+	private final AdministrationBuilder<Indexed, Indexed> administrationBuilder;
 
 	/**
-	 * {@link Map} of {@link AdministrationDuty} key to {@link ReflectiveDutyBuilder}.
+	 * {@link ParameterFactory} instances for the method.
 	 */
-	private final Map<Integer, ReflectiveDutyBuilder> duties = new HashMap<>();
+	private final ParameterFactory[] parameterFactories;
 
 	/**
-	 * Index of the next {@link AdministrationDuty}.
+	 * Next index to specify the {@link ParameterFactory}.
 	 */
-	private int nextDutyIndex = 0;
+	private int parameterIndex = 0;
+
+	/**
+	 * Next index to specify flow.
+	 */
+	private int flowIndex = 0;
 
 	/**
 	 * Instantiate.
@@ -89,30 +98,19 @@ public class ReflectiveAdministrationBuilder extends AbstractAdministratorSource
 	 *            the {@link AdministrationDuty} instances.
 	 * @param object
 	 *            Optional {@link Object} for non-static methods.
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder}.
+	 * @param methodName
+	 *            Name of the {@link Method} to invoke.
+	 * @param managedFunctionBuilder
+	 *            {@link ManagedFunctionBuilder}.
 	 * @param testCase
 	 *            {@link AbstractOfficeConstructTestCase}.
 	 */
-	public <C> ReflectiveAdministrationBuilder(Class<C> clazz, C object, OfficeBuilder officeBuilder,
-			AbstractOfficeConstructTestCase testCase) {
-		this.clazz = clazz;
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <C> ReflectiveAdministrationBuilder(Class<C> clazz, C object, String methodName, boolean isPreNotPost,
+			ManagedFunctionBuilder<?, ?> managedFunctionBuilder, AbstractOfficeConstructTestCase testCase) {
 		this.object = object;
-		this.officeBuilder = officeBuilder;
+		this.managedFunctionBuilder = managedFunctionBuilder;
 		this.testCase = testCase;
-
-		// Construct this administrator
-		this.administratorBuilder = this.officeBuilder.addAdministrator(this.clazz.getSimpleName(), this.getClass());
-	}
-
-	/**
-	 * Constructs the {@link AdministrationDuty}.
-	 * 
-	 * @param methodName
-	 *            Name of the {@link Method} for the {@link AdministrationDuty}.
-	 * @return {@link ReflectiveDutyBuilder} to build the {@link AdministrationDuty}.
-	 */
-	public ReflectiveDutyBuilder constructDuty(String methodName) {
 
 		// Obtain the method
 		Method functionMethod = null;
@@ -124,135 +122,82 @@ public class ReflectiveAdministrationBuilder extends AbstractAdministratorSource
 		if (functionMethod == null) {
 			TestCase.fail("No method '" + methodName + "' on class " + clazz.getName());
 		}
+		this.method = functionMethod;
 
-		// Obtain next index
-		int dutyIndex = this.nextDutyIndex++;
+		// Obtain the parameters for the method
+		this.parameterTypes = this.method.getParameterTypes();
 
-		// Create the duty builder
-		ReflectiveDutyBuilder duty = new ReflectiveDutyBuilder(functionMethod);
+		// The first parameter is always the extension array
+		Assert.assertTrue("Should have at least one parameter being the extension array",
+				this.parameterTypes.length >= 1);
+		Class<?> extensionArrayType = this.parameterTypes[0];
+		Assert.assertTrue("First parameter should be extension array", extensionArrayType.isArray());
+		Class extensionInterface = extensionArrayType.getComponentType();
 
-		// Register the duty
-		this.duties.put(dutyIndex, duty);
+		// Load the parameter factory for the extensions
+		this.parameterFactories = new ParameterFactory[this.parameterTypes.length];
+		this.parameterFactories[this.parameterIndex++] = new ExtensionsParameterFactory();
 
-		// Return the duty
-		return duty;
-	}
-
-	/**
-	 * =========================== Administrator =======================
-	 */
-
-	@Override
-	public AdministrationDuty<Object, ?, ?> getDuty(DutyKey<Indexed> dutyKey) {
-		return this.duties.get(dutyKey.getIndex());
-	}
-
-	/**
-	 * ======================== AdministratorSource =====================
-	 */
-
-	@Override
-	protected void loadSpecification(SpecificationContext context) {
-		// No specification required
-	}
-
-	@Override
-	protected void loadMetaData(MetaDataContext<Object, Indexed> context) throws Exception {
-
-		// Load the meta data
-		int dutyIndex = 0;
-		ReflectiveDutyBuilder duty = this.duties.get(dutyIndex++);
-		while (duty != null) {
-			
-			DutyMetaDataContext builder = context.addDuty(duty.method.getName());
-			
-			// Obtain next duty
-			duty = this.duties.get(dutyIndex++);
+		// Construct this administration
+		if (isPreNotPost) {
+			this.administrationBuilder = this.managedFunctionBuilder.preAdminister(methodName, extensionInterface,
+					this);
+		} else {
+			this.administrationBuilder = this.managedFunctionBuilder.postAdminister(methodName, extensionInterface,
+					this);
 		}
-		
 	}
 
+	/**
+	 * Builds the flow.
+	 * 
+	 * @param functionName
+	 *            {@link ManagedFunction} name.
+	 * @param argumentType
+	 *            Type of argument passed to the {@link Flow}.
+	 */
+	public void buildFlow(String functionName, Class<?> argumentType) {
+
+		// Link in the flow and allow for invocation
+		this.administrationBuilder.linkFlow(this.flowIndex, functionName, argumentType);
+		this.parameterFactories[this.parameterIndex] = new ReflectiveFlowParameterFactory(this.flowIndex);
+
+		// Set for next flow and parameter
+		this.flowIndex++;
+		this.parameterIndex++;
+	}
+
+	/*
+	 * ======================== AdmnistrationFactory =========================
+	 */
+
 	@Override
-	public Administration<Object, Indexed> createAdministrator() throws Throwable {
+	public Administration<Object, Indexed, Indexed> createAdministration() throws Throwable {
 		return this;
 	}
 
-	/**
-	 * Reflective builder for a {@link AdministrationDuty} as a {@link Method}.
+	/*
+	 * =========================== Administration =============================
 	 */
-	public class ReflectiveDutyBuilder implements AdministrationDuty<Object, Indexed, Indexed> {
 
-		/**
-		 * {@link Method} for this {@link AdministrationDuty}.
-		 */
-		private final Method method;
+	@Override
+	public void administer(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
 
-		/**
-		 * {@link DutyBuilder} for this {@link ReflectiveDutyBuilder}.
-		 */
-		private final DutyBuilder dutyBuilder;
-
-		/**
-		 * Types for the parameters of the {@link Method}.
-		 */
-		private final Class<?>[] parameterTypes;
-
-		/**
-		 * {@link ParameterFactory} instances for the parameters of the
-		 * {@link Method}.
-		 */
-		private final ParameterFactory[] parameterFactories;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param method
-		 *            {@link Method} for this {@link AdministrationDuty}.
-		 */
-		public ReflectiveDutyBuilder(Method method) {
-			this.method = method;
-
-			// Construct the duty
-			this.dutyBuilder = ReflectiveAdministrationBuilder.this.administratorBuilder.addDuty(this.method.getName());
-
-			// Obtain the parameter types
-			this.parameterTypes = this.method.getParameterTypes();
-
-			// Ensure first parameter is always the extensions
-			Assert.assertTrue("Duty method " + this.method.getName() + " must have at least one parameter (extensions)",
-					this.parameterTypes.length >= 1);
-			Assert.assertEquals("First parameter for method " + this.method.getName() + " must be a List (extensions)",
-					List.class, this.parameterTypes[0]);
-
-			// Create the parameter factories
-			this.parameterFactories = new ParameterFactory[this.parameterTypes.length];
-			this.parameterFactories[0] = new ExtensionsParameterFactory();
+		// Create the parameters
+		Object[] parameters = new Object[this.method.getParameterTypes().length];
+		for (int i = 0; i < parameters.length; i++) {
+			parameters[i] = this.parameterFactories[i].createParamater(context);
 		}
 
-		public void buildFlow(String functionName) {
+		// Record invoking method
+		this.testCase.recordReflectiveFunctionMethodInvoked(this.method.getName());
 
-		}
-
-		/*
-		 * ======================== Duty ==================================
-		 */
-
-		@Override
-		public void doDuty(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
-
-			// Obtain the argument values
-			Object[] arguments = new Object[this.parameterTypes.length];
-			for (int i = 0; i < arguments.length; i++) {
-				arguments[i] = this.parameterFactories[i].createParamater(context);
-			}
-
-			// Invoke the method on object for duty logic
-			try {
-				this.method.invoke(ReflectiveAdministrationBuilder.this.object, arguments);
-			} catch (InvocationTargetException ex) {
-				// Throw cause of exception
-				throw ex.getCause();
-			}
+		// Invoke the method on object
+		try {
+			this.method.invoke(this.object, parameters);
+		} catch (InvocationTargetException ex) {
+			// Throw cause of exception
+			throw ex.getCause();
 		}
 	}
 
@@ -269,7 +214,11 @@ public class ReflectiveAdministrationBuilder extends AbstractAdministratorSource
 	 */
 	private class ExtensionsParameterFactory implements ParameterFactory {
 		public Object createParamater(AdministrationContext<Object, Indexed, Indexed> context) {
-			return context.getExtensionInterfaces();
+			List<?> extensionInterfaces = context.getExtensionInterfaces();
+			Object[] array = (Object[]) Array.newInstance(
+					ReflectiveAdministrationBuilder.this.parameterTypes[0].getComponentType(),
+					extensionInterfaces.size());
+			return extensionInterfaces.toArray(array);
 		}
 	}
 

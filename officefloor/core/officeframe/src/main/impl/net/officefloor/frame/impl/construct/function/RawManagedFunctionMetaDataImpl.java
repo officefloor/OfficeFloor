@@ -21,15 +21,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.administration.DutyKey;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -40,15 +36,12 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.duty.ManagedFunctionDutyAssociationImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionDutyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
@@ -57,8 +50,6 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
-import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
@@ -67,16 +58,17 @@ import net.officefloor.frame.internal.construct.RawManagedFunctionMetaData;
 import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
-import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
+import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
@@ -99,7 +91,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static RawManagedFunctionMetaDataFactory getFactory() {
-		return new RawManagedFunctionMetaDataImpl(null, null, null);
+		return new RawManagedFunctionMetaDataImpl(null, null, null, null);
 	}
 
 	/**
@@ -113,6 +105,11 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 	private final ManagedFunctionConfiguration<O, F> configuration;
 
 	/**
+	 * {@link ManagedFunction} scoped {@link RawBoundManagedObjectMetaData}.
+	 */
+	private final Map<String, RawBoundManagedObjectMetaData> functionScopedManagedObjects;
+
+	/**
 	 * {@link ManagedFunctionMetaDataImpl}.
 	 */
 	private final ManagedFunctionMetaDataImpl<O, F> functionMetaData;
@@ -124,13 +121,18 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 	 *            Name of the {@link ManagedFunction}.
 	 * @param configuration
 	 *            {@link ManagedFunctionConfiguration}.
+	 * @param functionScopedManagedObjects
+	 *            {@link ManagedFunction} scoped
+	 *            {@link RawBoundManagedObjectMetaData}.
 	 * @param taskMetaData
 	 *            {@link ManagedFunctionMetaDataImpl}.
 	 */
 	private RawManagedFunctionMetaDataImpl(String functionName, ManagedFunctionConfiguration<O, F> configuration,
+			Map<String, RawBoundManagedObjectMetaData> functionScopedManagedObjects,
 			ManagedFunctionMetaDataImpl<O, F> functionMetaData) {
 		this.functionName = functionName;
 		this.configuration = configuration;
+		this.functionScopedManagedObjects = functionScopedManagedObjects;
 		this.functionMetaData = functionMetaData;
 	}
 
@@ -401,7 +403,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 		// Return the raw function meta-data
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		RawManagedFunctionMetaData rawFunctionMetaData = new RawManagedFunctionMetaDataImpl(functionName, configuration,
-				functionMetaData);
+				functionScopeMo, functionMetaData);
 		return rawFunctionMetaData;
 	}
 
@@ -589,7 +591,12 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 	}
 
 	@Override
-	public void loadOfficeMetaData(ManagedFunctionLocator functionLocator, OfficeFloorIssues issues) {
+	public void loadOfficeMetaData(OfficeMetaData officeMetaData,
+			AdministrationMetaDataFactory administrationMetaDataFactory, Map<String, TeamManagement> officeTeams,
+			OfficeFloorIssues issues) {
+
+		// Obtain the function locator
+		ManagedFunctionLocator functionLocator = officeMetaData.getManagedFunctionLocator();
 
 		// Obtain the listing of flow meta-data
 		ManagedFunctionFlowConfiguration<F>[] flowConfigurations = this.configuration.getFlowConfiguration();
@@ -691,45 +698,23 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			LOGGER.log(logLevel, log.toString());
 		}
 
+		// Obtain the governance meta-data for the office
+		GovernanceMetaData<?, ?>[] governanceMetaDatas = officeMetaData.getProcessMetaData().getThreadMetaData()
+				.getGovernanceMetaData();
+
+		// Create the administrations
+		AdministrationMetaData<?, ?, ?>[] preAdministrations = administrationMetaDataFactory
+				.constructAdministrationMetaData(configuration.getPreAdministration(), AssetType.FUNCTION, functionName,
+						officeTeams, functionLocator, this.functionScopedManagedObjects, governanceMetaDatas,
+						officeMetaData.getFunctionLoop(), issues);
+		AdministrationMetaData<?, ?, ?>[] postAdministrations = administrationMetaDataFactory
+				.constructAdministrationMetaData(configuration.getPostAdministration(), AssetType.FUNCTION,
+						functionName, officeTeams, functionLocator, this.functionScopedManagedObjects,
+						governanceMetaDatas, officeMetaData.getFunctionLoop(), issues);
+
 		// Load the remaining state for the function meta-data
-		this.functionMetaData.loadRemainingState(flowMetaDatas, nextFunction, escalationProcedure);
-	}
-
-	/**
-	 * Creates the {@link ManagedFunctionDutyAssociation} instances.
-	 * 
-	 * @param configurations
-	 *            {@link ManagedFunctionDutyConfiguration} instances.
-	 * @param functionScopeAdmin
-	 *            {@link ManagedFunction} scoped
-	 *            {@link RawAdministrationMetaData}.
-	 * @param functionName
-	 *            {@link ManagedFunction} name.
-	 * @param requiredManagedObjects
-	 *            Mapping of the required {@link ManagedObjectIndex} instances
-	 *            by the {@link ManagedFunction} to their respective
-	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @return {@link ManagedFunctionDutyAssociation} instances.
-	 */
-	private AdministrationMetaData<?, ?, ?>[] createFunctionAdministration(
-			AdministrationConfiguration<?, ?, ?>[] configurations, String functionName,
-			Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects,
-			AdministrationMetaDataFactory administrationFactory, OfficeFloorIssues issues) {
-
-		// Create the listing of administrations
-		List<AdministrationMetaData<?, ?, ?>> administrations = new LinkedList<AdministrationMetaData<?, ?, ?>>();
-		for (AdministrationConfiguration<?, ?, ?> configuration : configurations) {
-
-			// Create the administration
-			AdministrationMetaData<?, ?, ?> administration = administrationFactory.constructAdministrationMetaData(
-					configuration, AssetType.FUNCTION, functionName, officeTeams, functionLocator, scopeMo,
-					governanceMetaDatas, functionLoop, issues);
-		}
-
-		// Return the administrations
-		return administrations.toArray(new AdministrationMetaData<?, ?, ?>[0]);
+		this.functionMetaData.loadRemainingState(flowMetaDatas, nextFunction, escalationProcedure, preAdministrations,
+				postAdministrations);
 	}
 
 	@Override

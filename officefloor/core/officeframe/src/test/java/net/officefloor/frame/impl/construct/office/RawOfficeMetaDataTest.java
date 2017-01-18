@@ -54,7 +54,6 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.ManagedFunctionLocator;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
 import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
@@ -77,6 +76,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -1576,7 +1576,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			assertNotNull("Missing raw Governance meta-data", rawGovernanceMetaData);
 
 			// Link the Office meta-data
-			rawGovernanceMetaData.linkOfficeMetaData(null, this.issues);
+			rawGovernanceMetaData.loadOfficeMetaData(null, this.issues);
 			this.control(rawGovernanceMetaData)
 					.setMatcher(new TypeMatcher(ManagedFunctionLocator.class, OfficeFloorIssues.class));
 		}
