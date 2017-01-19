@@ -28,12 +28,15 @@ import junit.framework.TestCase;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.AdministrationFactory;
+import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 
 /**
  * Reflective {@link AdministrationBuilder}.
@@ -86,9 +89,14 @@ public class ReflectiveAdministrationBuilder
 	private int parameterIndex = 0;
 
 	/**
-	 * Next index to specify flow.
+	 * Next index to specify {@link Flow}.
 	 */
 	private int flowIndex = 0;
+
+	/**
+	 * Next index to specify {@link Governance}.
+	 */
+	private int governanceIndex = 0;
 
 	/**
 	 * Instantiate.
@@ -149,7 +157,7 @@ public class ReflectiveAdministrationBuilder
 	}
 
 	/**
-	 * Builds the flow.
+	 * Builds the {@link Flow}.
 	 * 
 	 * @param functionName
 	 *            {@link ManagedFunction} name.
@@ -164,6 +172,23 @@ public class ReflectiveAdministrationBuilder
 
 		// Set for next flow and parameter
 		this.flowIndex++;
+		this.parameterIndex++;
+	}
+
+	/**
+	 * Builds the {@link Governance}.
+	 * 
+	 * @param governanceName
+	 *            Name of the {@link Governance}.
+	 */
+	public void buildGovernance(String governanceName) {
+
+		// Link in the governance and allow for invocation
+		this.administrationBuilder.linkGovernance(this.governanceIndex, governanceName);
+		this.parameterFactories[this.parameterIndex] = new ReflectiveGovernanceParameterFactory(this.governanceIndex);
+
+		// Set for next governance and parameter
+		this.governanceIndex++;
 		this.parameterIndex++;
 	}
 
@@ -223,7 +248,7 @@ public class ReflectiveAdministrationBuilder
 	}
 
 	/**
-	 * {@link ParameterFactory} to obtain the flow.
+	 * {@link ParameterFactory} to obtain the {@link ReflectiveFlow}.
 	 */
 	private class ReflectiveFlowParameterFactory implements ParameterFactory {
 
@@ -236,7 +261,7 @@ public class ReflectiveAdministrationBuilder
 		 * Initiate.
 		 * 
 		 * @param index
-		 * 
+		 *            Index of the {@link FlowMetaData}.
 		 */
 		public ReflectiveFlowParameterFactory(int index) {
 			this.index = index;
@@ -250,6 +275,35 @@ public class ReflectiveAdministrationBuilder
 					context.doFlow(ReflectiveFlowParameterFactory.this.index, parameter, callback);
 				}
 			};
+		}
+	}
+
+	/**
+	 * {@link ParameterFactory} to obtain {@link GovernanceManager}.
+	 * 
+	 *
+	 * @author Daniel Sagenschneider
+	 */
+	private class ReflectiveGovernanceParameterFactory implements ParameterFactory {
+
+		/**
+		 * Index of the flow.
+		 */
+		private final int index;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param index
+		 *            Index of the {@link Governance}.
+		 */
+		public ReflectiveGovernanceParameterFactory(int index) {
+			this.index = index;
+		}
+
+		@Override
+		public Object createParamater(AdministrationContext<Object, Indexed, Indexed> context) {
+			return context.getGovernance(this.index);
 		}
 	}
 

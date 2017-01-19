@@ -1055,8 +1055,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.record_threadBoundManagedObjects(registeredManagedObjectSources, "THREAD_MO");
 		Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects = new HashMap<String, RawBoundManagedObjectMetaData>();
 		scopeManagedObjects.putAll(threadManagedObjects);
-		Map<String, RawAdministrationMetaData<?, ?>> threadAdministrators = this
-				.record_threadBoundAdministrators(teams, scopeManagedObjects, "BOUND_ADMIN");
+		Map<String, RawAdministrationMetaData<?, ?>> threadAdministrators = this.record_threadBoundAdministrators(teams,
+				scopeManagedObjects, "BOUND_ADMIN");
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -1776,62 +1776,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records constructing {@link ThreadState} bound {@link Administration}
-	 * instances.
-	 * 
-	 * @param teams
-	 *            {@link TeamManagement} instances by their {@link Office} bound
-	 *            names.
-	 * @param scopeManagedObjects
-	 *            {@link RawBoundManagedObjectMetaData} instances by their
-	 *            {@link ProcessState} or {@link ThreadState} bound names.
-	 * @param threadBoundNames
-	 *            Names of the {@link ProcessState} bound names.
-	 * @return Mapping of {@link RawAdministrationMetaData} by its bound
-	 *         name.
-	 */
-	private Map<String, RawAdministrationMetaData<?, ?>> record_threadBoundAdministrators(
-			Map<String, TeamManagement> teams, Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects,
-			String... threadBoundNames) {
-
-		// Create the mock objects to register the thread bound administrators
-		final AdministrationConfiguration<?, ?>[] adminConfigurations = new AdministrationConfiguration[threadBoundNames.length];
-		final RawAdministrationMetaData<?, ?>[] rawBoundAdminMetaDatas = new RawAdministrationMetaData[threadBoundNames.length];
-		final Map<String, RawAdministrationMetaData<?, ?>> boundAdministrators = new HashMap<String, RawAdministrationMetaData<?, ?>>();
-		for (int i = 0; i < threadBoundNames.length; i++) {
-			adminConfigurations[i] = this.createMock(AdministrationConfiguration.class);
-			rawBoundAdminMetaDatas[i] = this.createMock(RawAdministrationMetaData.class);
-			boundAdministrators.put(threadBoundNames[i], rawBoundAdminMetaDatas[i]);
-		}
-
-		// Record constructing thread bound administrators
-		this.recordReturn(this.configuration, this.configuration.getAdministratorConfiguration(), adminConfigurations);
-		if (threadBoundNames.length > 0) {
-			this.recordReturn(this.rawBoundAdministratorFactory,
-					this.rawBoundAdministratorFactory.constructRawBoundAdministratorMetaData(adminConfigurations,
-							this.sourceContext, this.issues, AdministratorScope.THREAD, AssetType.OFFICE, OFFICE_NAME,
-							teams, scopeManagedObjects, null),
-					rawBoundAdminMetaDatas, new AbstractMatcher() {
-						@Override
-						public boolean matches(Object[] expected, Object[] actual) {
-							for (int i = 0; i < 8; i++) {
-								assertEquals(expected[i], actual[i]);
-							}
-							assertTrue("Should have function loop", actual[8] instanceof FunctionLoop);
-							return true;
-						}
-					});
-		}
-		for (int i = 0; i < threadBoundNames.length; i++) {
-			this.recordReturn(rawBoundAdminMetaDatas[i], rawBoundAdminMetaDatas[i].getBoundAdministratorName(),
-					threadBoundNames[i]);
-		}
-
-		// Return the process administrators
-		return boundAdministrators;
-	}
-
-	/**
 	 * Records no {@link ManagedObject} and {@link Administration} instances.
 	 */
 	private void record_noManagedObjectsAndAdministrators() {
@@ -1839,7 +1783,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_boundInputManagedObjects();
 		this.record_processBoundManagedObjects(null);
 		this.record_threadBoundManagedObjects(null);
-		this.record_threadBoundAdministrators(null, null);
 	}
 
 	/**
@@ -1869,50 +1812,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			this.recordReturn(rawBoundMoInstance, rawBoundMoInstance.getManagedObjectMetaData(), moMetaDatas[i]);
 		}
 		return moMetaDatas;
-	}
-
-	/**
-	 * Records constructing the {@link AdministrationMetaData}.
-	 * 
-	 * @param boundAdministrators
-	 *            {@link RawAdministrationMetaData} instances by their bound
-	 *            names.
-	 * @param constructAdministratorNames
-	 *            Names of the {@link RawAdministrationMetaData} to
-	 *            construct the {@link AdministrationMetaData}.
-	 * @return Constructed {@link AdministrationMetaData} instances.
-	 */
-	private AdministrationMetaData<?, ?>[] record_constructAdministratorMetaData(
-			Map<String, RawAdministrationMetaData<?, ?>> boundAdministrators,
-			String... constructAdministratorNames) {
-		AdministrationMetaData<?, ?>[] adminMetaDatas = new AdministrationMetaData[constructAdministratorNames.length];
-		for (int i = 0; i < constructAdministratorNames.length; i++) {
-			adminMetaDatas[i] = this.createMock(AdministrationMetaData.class);
-			RawAdministrationMetaData<?, ?> rawBoundAdmin = boundAdministrators.get(constructAdministratorNames[i]);
-			this.recordReturn(rawBoundAdmin, rawBoundAdmin.getAdministratorMetaData(), adminMetaDatas[i]);
-		}
-		return adminMetaDatas;
-	}
-
-	/**
-	 * Links the {@link ManagedFunction} instances for the {@link Administration}
-	 * instances.
-	 * 
-	 * @param boundAdministrators
-	 *            {@link RawAdministrationMetaData} instances by their bound
-	 *            names.
-	 * @param administratorNames
-	 *            Names of the {@link RawAdministrationMetaData} to have
-	 *            their {@link ManagedFunction} instances linked.
-	 */
-	private void record_linkFunctionsForAdministrators(
-			Map<String, RawAdministrationMetaData<?, ?>> boundAdministrators, String... administratorNames) {
-		for (int i = 0; i < administratorNames.length; i++) {
-			RawAdministrationMetaData<?, ?> rawBoundAdmin = boundAdministrators.get(administratorNames[i]);
-			rawBoundAdmin.linkOfficeMetaData(null, null, this.issues);
-			this.control(rawBoundAdmin).setMatcher(
-					new TypeMatcher(OfficeMetaData.class, ManagedFunctionLocator.class, OfficeFloorIssues.class));
-		}
 	}
 
 	/**
@@ -2012,7 +1911,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private void record_linkFunctions(RawManagedFunctionMetaData<?, ?>... rawFunctionMetaDatas) {
 		for (int i = 0; i < rawFunctionMetaDatas.length; i++) {
-			rawFunctionMetaDatas[i].linkFunctions(null, this.issues);
+			rawFunctionMetaDatas[i].loadOfficeMetaData(null, null, this.officeTeams, this.issues);
 			this.control(rawFunctionMetaDatas[i])
 					.setMatcher(new TypeMatcher(ManagedFunctionLocator.class, OfficeFloorIssues.class));
 		}

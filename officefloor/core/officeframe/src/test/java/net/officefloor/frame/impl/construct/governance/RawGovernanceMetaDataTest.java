@@ -44,6 +44,7 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -96,6 +97,11 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 * available.
 	 */
 	private TeamManagement responsibleTeam = this.createMock(TeamManagement.class);
+
+	/**
+	 * {@link OfficeMetaData}.
+	 */
+	private final OfficeMetaData officeMetaData = this.createMock(OfficeMetaData.class);
 
 	/**
 	 * {@link ManagedFunctionLocator}.
@@ -213,7 +219,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
 		GovernanceMetaData<?, ?> governanceMetaData = rawMetaData.getGovernanceMetaData();
-		rawMetaData.loadOfficeMetaData(this.functionLocator, this.issues);
+		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 
 		// Verify the content of the raw meta data
@@ -248,7 +254,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct governance
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.functionLocator, this.issues);
+		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 	}
 
@@ -277,7 +283,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct governance
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.functionLocator, this.issues);
+		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 	}
 
@@ -310,7 +316,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct governance
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.functionLocator, this.issues);
+		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 	}
 
@@ -327,7 +333,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct governance
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.functionLocator, this.issues);
+		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 
 		// Verify the flows
@@ -373,7 +379,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct governance
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.functionLocator, this.issues);
+		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 	}
 
@@ -398,7 +404,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct governance
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.functionLocator, this.issues);
+		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 	}
 
@@ -425,7 +431,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct governance
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.functionLocator, this.issues);
+		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 	}
 
@@ -459,7 +465,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct governance
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.functionLocator, this.issues);
+		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 	}
 
@@ -479,7 +485,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Attempt to construct governance
 		this.replayMockObjects();
 		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.functionLocator, this.issues);
+		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 
 		// Verify escalation

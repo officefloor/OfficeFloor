@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
@@ -277,6 +278,45 @@ public class ReflectiveFunctionBuilder
 
 		// Specify the next function
 		this.functionBuilder.setNextFunction(functionName, returnType);
+	}
+
+	/**
+	 * Creates pre {@link Administration}.
+	 * 
+	 * @param methodName
+	 *            Name of {@link Method} for {@link Administration}.
+	 * @return {@link ReflectiveAdministrationBuilder}.
+	 */
+	public ReflectiveAdministrationBuilder preAdminister(String methodName) {
+		return this.addAdminster(methodName, true);
+	}
+
+	/**
+	 * Creates post {@link Administration}.
+	 * 
+	 * @param methodName
+	 *            Name of {@link Method} for {@link Administration}.
+	 * @return {@link ReflectiveAdministrationBuilder}.
+	 */
+	public ReflectiveAdministrationBuilder postAdminister(String methodName) {
+		return this.addAdminster(methodName, false);
+	}
+
+	/**
+	 * Adds {@link Administration}.
+	 * 
+	 * @param methodName
+	 *            Name of the {@link Method}.
+	 * @param isPreNotPost
+	 *            <code>true</code> for pre (otherwise <code>false</code> for
+	 *            post).
+	 * @return {@link ReflectiveAdministrationBuilder}.
+	 */
+	private ReflectiveAdministrationBuilder addAdminster(String methodName, boolean isPreNotPost) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		ReflectiveAdministrationBuilder builder = new ReflectiveAdministrationBuilder((Class) this.object.getClass(),
+				this.object, methodName, true, this.functionBuilder, this.testCase);
+		return builder;
 	}
 
 	/*
