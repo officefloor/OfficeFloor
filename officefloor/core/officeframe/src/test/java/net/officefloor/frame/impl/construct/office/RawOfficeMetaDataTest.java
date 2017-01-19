@@ -43,7 +43,6 @@ import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.ProcessContextListener;
-import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
@@ -53,9 +52,8 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationCon
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
 import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
@@ -68,8 +66,6 @@ import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
-import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -563,7 +559,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_boundInputManagedObjects();
 		this.record_processBoundManagedObjects(null);
 		this.record_threadBoundManagedObjects(null);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -595,7 +590,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_boundInputManagedObjects();
 		this.record_processBoundManagedObjects(null);
 		this.record_threadBoundManagedObjects(null);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -629,7 +623,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_boundInputManagedObjects();
 		this.record_processBoundManagedObjects(null);
 		this.record_threadBoundManagedObjects(null);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -662,7 +655,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_issue("No input Managed Object name for binding");
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this.record_processBoundManagedObjects(null);
 		this.record_threadBoundManagedObjects(null);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -698,7 +690,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_issue("No bound Managed Object Source name for input Managed Object 'INPUT'");
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this.record_processBoundManagedObjects(null);
 		this.record_threadBoundManagedObjects(null);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -728,7 +719,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_issue("Input Managed Object 'SAME_INPUT' bound more than once");
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this.record_processBoundManagedObjects(null);
 		this.record_threadBoundManagedObjects(null);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -759,7 +749,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(registeredManagedObjectSources, "BOUND_MO");
 		this.record_threadBoundManagedObjects(null);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -791,26 +780,23 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		final Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(null);
 		this.record_threadBoundManagedObjects(null);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
 		this.record_linkFunctions();
 		this.record_constructManagedObjectMetaData(processManagedObjects, "OFFICE_MO_0");
-		inputManagedObject.manageByOffice(null, null, null, null, this.issues);
+		inputManagedObject.manageByOffice(null, null, null, this.issues);
 		this.control(inputManagedObject).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
-				RawBoundManagedObjectMetaData[] boundMetaData = (RawBoundManagedObjectMetaData[]) actual[0];
+				OfficeMetaData officeMetaData = (OfficeMetaData) actual[0];
+				assertEquals("Incorrect office", RawOfficeMetaDataTest.OFFICE_NAME, officeMetaData.getOfficeName());
+				RawBoundManagedObjectMetaData[] boundMetaData = (RawBoundManagedObjectMetaData[]) actual[1];
 				assertEquals("Incorrect number of bound meta-data", 1, boundMetaData.length);
 				RawBoundManagedObjectMetaData expectedBoundMetaData = processManagedObjects.get("OFFICE_MO_0");
 				assertEquals("Incorrect bound meta-data", expectedBoundMetaData, boundMetaData[0]);
-				OfficeMetaData officeMetaData = (OfficeMetaData) actual[1];
-				assertEquals("Incorrect office", RawOfficeMetaDataTest.OFFICE_NAME, officeMetaData.getOfficeName());
-				ManagedFunctionLocator functionLocator = (ManagedFunctionLocator) actual[2];
-				assertNotNull("Should have function locator", functionLocator);
-				assertEquals("Incorrect responsible teams", RawOfficeMetaDataTest.this.officeTeams, actual[3]);
-				assertEquals("Incorrect issues", RawOfficeMetaDataTest.this.issues, actual[4]);
+				assertEquals("Incorrect responsible teams", RawOfficeMetaDataTest.this.officeTeams, actual[2]);
+				assertEquals("Incorrect issues", RawOfficeMetaDataTest.this.issues, actual[3]);
 				return true;
 			}
 		});
@@ -840,7 +826,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_processBoundManagedObjects(registeredManagedObjectSources);
 		Map<String, RawBoundManagedObjectMetaData> threadManagedObjects = this
 				.record_threadBoundManagedObjects(registeredManagedObjectSources, "BOUND_MO");
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -872,7 +857,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.record_processBoundManagedObjects(registeredManagedObjectSources, "PROCESS");
 		Map<String, RawBoundManagedObjectMetaData> threadManagedObjects = this
 				.record_threadBoundManagedObjects(registeredManagedObjectSources, "THREAD");
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -929,7 +913,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(registeredManagedObjectSources);
 		this.record_threadBoundManagedObjects(registeredManagedObjectSources);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -969,7 +952,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(registeredManagedObjectSources);
 		this.record_threadBoundManagedObjects(registeredManagedObjectSources);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -1003,7 +985,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		Map<String, RawBoundManagedObjectMetaData> processManagedObjects = this
 				.record_processBoundManagedObjects(registeredManagedObjectSources);
 		this.record_threadBoundManagedObjects(registeredManagedObjectSources);
-		this.record_threadBoundAdministrators(null, null);
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.record_noOfficeEscalationHandler();
@@ -1034,42 +1015,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		for (int i = 0; i < expectedGovernances.length; i++) {
 			assertEquals("Incorrect governance meta-data for " + i, expectedGovernances[i], governanceMetaDatas[i]);
 		}
-	}
-
-	/**
-	 * Ensure able to construct a {@link ThreadState} bound
-	 * {@link Administration}.
-	 */
-	public void testConstructThreadBoundAdministrator() {
-
-		// Record creating a process bound administrator
-		this.record_enhanceOffice();
-		Map<String, TeamManagement> teams = this.record_teams("TEAM");
-		this.record_defaultOfficeClock();
-		this.record_governance();
-		Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjectSources = this
-				.record_registerManagedObjectSources("MO");
-		this.record_boundInputManagedObjects();
-		this.record_processBoundManagedObjects(registeredManagedObjectSources);
-		Map<String, RawBoundManagedObjectMetaData> threadManagedObjects = this
-				.record_threadBoundManagedObjects(registeredManagedObjectSources, "THREAD_MO");
-		Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects = new HashMap<String, RawBoundManagedObjectMetaData>();
-		scopeManagedObjects.putAll(threadManagedObjects);
-		Map<String, RawAdministrationMetaData<?, ?>> threadAdministrators = this.record_threadBoundAdministrators(teams,
-				scopeManagedObjects, "BOUND_ADMIN");
-		this.record_functions();
-		this.record_noOfficeStartupFunctions();
-		this.record_noOfficeEscalationHandler();
-		this.record_constructManagedObjectMetaData(threadManagedObjects, "THREAD_MO");
-		this.record_constructAdministratorMetaData(threadAdministrators, "BOUND_ADMIN");
-		this.record_linkFunctionsForAdministrators(threadAdministrators, "BOUND_ADMIN");
-		this.record_processContextListeners();
-		this.record_noProfiler();
-
-		// Construct the office
-		this.replayMockObjects();
-		this.constructRawOfficeMetaData(true);
-		this.verifyMockObjects();
 	}
 
 	/**
@@ -1353,7 +1298,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final FlowMetaData flowMetaData = this.createMock(FlowMetaData.class);
 		final ManagedFunction<?, ?> task = this.createMock(ManagedFunction.class);
-		final ManagedFunctionMetaData<?, ?> taskMetaData = MetaDataTestInstanceFactory.createTaskMetaData(task);
+		final ManagedFunctionMetaData<?, ?> taskMetaData = MetaDataTestInstanceFactory.createFunctionMetaData(task);
 
 		// Record creating a process
 		this.record_enhanceOffice();
@@ -1389,7 +1334,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		final ProcessContextListener listener = this.createMock(ProcessContextListener.class);
 		final FlowMetaData flowMetaData = this.createMock(FlowMetaData.class);
 		final ManagedFunction<?, ?> task = this.createMock(ManagedFunction.class);
-		final ManagedFunctionMetaData<?, ?> taskMetaData = MetaDataTestInstanceFactory.createTaskMetaData(task);
+		final ManagedFunctionMetaData<?, ?> taskMetaData = MetaDataTestInstanceFactory.createFunctionMetaData(task);
 
 		// Record registering Process Context Listener
 		this.record_enhanceOffice();
@@ -1863,7 +1808,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			// Record constructing the raw managed function
 			this.recordReturn(this.rawTaskMetaDataFactory,
 					this.rawTaskMetaDataFactory.constructRawManagedFunctionMetaData(functionConfiguration, null, null,
-							this.rawBoundManagedObjectFactory, null, this.sourceContext, this.issues, null),
+							this.rawBoundManagedObjectFactory, this.issues, null),
 					rawFunctionMetaData, new AbstractMatcher() {
 						@Override
 						public boolean matches(Object[] e, Object[] a) {
@@ -1872,9 +1817,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 							assertTrue("Should be an asset manager factory", a[2] instanceof AssetManagerFactory);
 							assertEquals("Incorrect bound managed object factory",
 									RawOfficeMetaDataTest.this.rawBoundManagedObjectFactory, a[3]);
-							assertEquals("Incorrect bound administrator factory",
-									RawOfficeMetaDataTest.this.rawBoundAdministratorFactory, a[4]);
-							assertEquals("Incorrect source context", RawOfficeMetaDataTest.this.sourceContext, a[5]);
 							assertEquals("Incorrect issues", RawOfficeMetaDataTest.this.issues, a[6]);
 							assertTrue("Should have function loop", a[7] instanceof FunctionLoop);
 							return true;

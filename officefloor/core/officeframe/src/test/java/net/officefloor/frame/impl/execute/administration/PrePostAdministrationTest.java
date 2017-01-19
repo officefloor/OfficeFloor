@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.administration;
 
-import net.officefloor.frame.stress.AdministratorStressTest.Administration;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**

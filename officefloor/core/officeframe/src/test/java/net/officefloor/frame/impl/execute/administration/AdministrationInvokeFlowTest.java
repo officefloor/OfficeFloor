@@ -17,31 +17,31 @@
  */
 package net.officefloor.frame.impl.execute.administration;
 
-import net.officefloor.frame.api.administration.Duty;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Ensure a {@link AdministrationDuty} can invoke a {@link Flow}.
+ * Ensure a {@link Administration} can invoke a {@link Flow}.
  *
  * @author Daniel Sagenschneider
  */
-public class DutyInvokeFlowTest extends AbstractOfficeConstructTestCase {
+public class AdministrationInvokeFlowTest extends AbstractOfficeConstructTestCase {
 
-	public void testDutyInvokeFlow() {
+	public void testAdministrationInvokeFlow() {
 		fail("TODO implement");
 	}
 
 	public void testPreAdministrationCompletesFlowBeforeFunction() {
 		fail("TODO implement");
 	}
-	
+
 	public void testPostAdministrationCompletesBeforeInvokedFlow() {
 		fail("TODO implement");
 	}
-	
+
 	public void testPostAdministrationCompletesBeforeNextFunction() {
 		fail("TODO implement");
 	}
-	
+
 }

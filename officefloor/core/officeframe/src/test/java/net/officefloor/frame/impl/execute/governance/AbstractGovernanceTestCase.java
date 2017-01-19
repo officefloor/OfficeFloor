@@ -22,12 +22,12 @@ import java.util.Enumeration;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.stress.AdministratorStressTest.Administration;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**

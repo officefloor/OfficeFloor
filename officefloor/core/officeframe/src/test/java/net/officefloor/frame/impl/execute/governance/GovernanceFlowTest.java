@@ -22,7 +22,6 @@ import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -31,8 +30,6 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceContext;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.impl.execute.governance.MockTransactionalAdministratorSource.TransactionDutyKey;
-import net.officefloor.frame.impl.execute.governance.MockTransactionalAdministratorSource.TransactionGovernanceKey;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
@@ -155,13 +152,13 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 		// Configure the Task
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "doTask");
 		task.getBuilder().setTeam(TEAM_TASK);
-		task.getBuilder().linkPreFunctionAdministration("ADMIN", "BEGIN");
-		if (this.isCommit) {
-			task.getBuilder().linkPostFunctionAdministration("ADMIN", "COMMIT");
-		}
-		if (this.isRollback) {
-			task.getBuilder().linkPostFunctionAdministration("ADMIN", "ROLLBACK");
-		}
+//		task.getBuilder().linkPreFunctionAdministration("ADMIN", "BEGIN");
+//		if (this.isCommit) {
+//			task.getBuilder().linkPostFunctionAdministration("ADMIN", "COMMIT");
+//		}
+//		if (this.isRollback) {
+//			task.getBuilder().linkPostFunctionAdministration("ADMIN", "ROLLBACK");
+//		}
 		DependencyMappingBuilder dependencies = task.buildObject("MO", ManagedObjectScope.PROCESS);
 
 		// Configure the governance flow tasks
@@ -194,12 +191,12 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 		dependencies.mapGovernance("GOVERNANCE");
 
 		// Configure the Administration
-		AdministrationBuilder<TransactionDutyKey> admin = this.constructAdministrator("ADMIN",
-				MockTransactionalAdministratorSource.class, TEAM_ADMINISTRATION);
-		admin.administerManagedObject("MO");
-		admin.addDuty("BEGIN").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
-		admin.addDuty("COMMIT").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
-		admin.addDuty("ROLLBACK").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+//		AdministrationBuilder<TransactionDutyKey> admin = this.constructAdministrator("ADMIN",
+//				MockTransactionalAdministratorSource.class, TEAM_ADMINISTRATION);
+//		admin.administerManagedObject("MO");
+//		admin.addDuty("BEGIN").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+//		admin.addDuty("COMMIT").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
+//		admin.addDuty("ROLLBACK").linkGovernance(TransactionGovernanceKey.TRANSACTION, "GOVERNANCE");
 
 		// Execute the function
 		this.invokeFunction("flowBegin", null);

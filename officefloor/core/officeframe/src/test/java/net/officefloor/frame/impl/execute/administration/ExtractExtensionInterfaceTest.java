@@ -19,12 +19,11 @@ package net.officefloor.frame.impl.execute.administration;
 
 import java.util.List;
 
-import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveAdministrationBuilder;
-import net.officefloor.frame.test.ReflectiveAdministrationBuilder.ReflectiveDutyBuilder;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestObject;
 
 /**
@@ -46,10 +45,12 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 			metaData.addManagedObjectExtensionInterface(ManagedObjectExtension.class, new ManagedObjectExtension(null));
 		};
 
+		// Construct the function
+		TestWork work = new TestWork();
+		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
+
 		// Construct the administrator
-		TestAdministration admin = new TestAdministration();
-		ReflectiveAdministrationBuilder administratorBuilder = this.constructAdministrator(admin);
-		ReflectiveDutyBuilder duty = administratorBuilder.constructDuty("preTask");
+		ReflectiveAdministrationBuilder administratorBuilder = task.preAdminister("preTask");
 
 	}
 
@@ -57,16 +58,12 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 	 * Test functionality.
 	 */
 	public static class TestWork {
-		public void task(TestObject object) {
-		}
-	}
-
-	/**
-	 * Test {@link Administration}.
-	 */
-	public static class TestAdministration {
+		
 		public void preTask(List<ManagedObjectExtension> extensions) {
 
+		}
+
+		public void task(TestObject object) {
 		}
 	}
 

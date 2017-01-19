@@ -18,13 +18,7 @@
 package net.officefloor.frame.stress;
 
 import junit.framework.TestCase;
-import net.officefloor.compile.spi.administration.source.impl.AbstractAdministratorSource;
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.administration.Duty;
-import net.officefloor.frame.api.administration.AdministrationContext;
-import net.officefloor.frame.api.administration.DutyKey;
-import net.officefloor.frame.api.build.AdministrationBuilder;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -101,17 +95,17 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		// Construct the team
 		this.constructTeam("TEAM", team);
 
-		// Create the pre administration
-		AdministrationBuilder<Indexed> preTaskAdmin = this.constructAdministrator("PRE", Administration.class, "TEAM");
-		preTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME, PRE_TASK_VALUE);
-		preTaskAdmin.addDuty("DUTY");
-		preTaskAdmin.administerManagedObject("MO");
-
-		// Create the post administration
-		AdministrationBuilder<Indexed> postTaskAdmin = this.constructAdministrator("POST", Administration.class, "TEAM");
-		postTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME, POST_TASK_VALUE);
-		postTaskAdmin.addDuty("DUTY");
-		postTaskAdmin.administerManagedObject("MO");
+//		// Create the pre administration
+//		AdministrationBuilder<Indexed> preTaskAdmin = this.constructAdministrator("PRE", Administration.class, "TEAM");
+//		preTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME, PRE_TASK_VALUE);
+//		preTaskAdmin.addDuty("DUTY");
+//		preTaskAdmin.administerManagedObject("MO");
+//
+//		// Create the post administration
+//		AdministrationBuilder<Indexed> postTaskAdmin = this.constructAdministrator("POST", Administration.class, "TEAM");
+//		postTaskAdmin.addProperty(Administration.ADMINISTRATION_VALUE_PROPERTY_NAME, POST_TASK_VALUE);
+//		postTaskAdmin.addDuty("DUTY");
+//		postTaskAdmin.administerManagedObject("MO");
 
 		// Create the administered managed object
 		this.constructManagedObject("ADMIN_MO", AdministeredObject.class, officeName);
@@ -132,8 +126,8 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		administeredTask.getBuilder().setTeam("TEAM");
 		administeredTask.buildObject("MO");
 		ManagedFunctionBuilder<?, ?> adminTaskBuilder = administeredTask.getBuilder();
-		adminTaskBuilder.linkPreFunctionAdministration("PRE", "DUTY");
-		adminTaskBuilder.linkPostFunctionAdministration("POST", "DUTY");
+//		adminTaskBuilder.linkPreFunctionAdministration("PRE", "DUTY");
+//		adminTaskBuilder.linkPostFunctionAdministration("POST", "DUTY");
 
 		// Run the repeats
 		this.invokeFunction("setupTask", new Integer(1), MAX_RUN_TIME);
@@ -306,71 +300,6 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 		@Override
 		public void doAdministration(String administeredValue) {
 			this.administrationValue = administeredValue;
-		}
-	}
-
-	/**
-	 * {@link Administration}.
-	 */
-	@TestSource
-	public static class Administration extends AbstractAdministratorSource<AdministeredExtensionInterface, Indexed>
-			implements Administration<AdministeredExtensionInterface, Indexed>,
-			AdministrationDuty<AdministeredExtensionInterface, None, None> {
-
-		/**
-		 * Administration value property name.
-		 */
-		public static final String ADMINISTRATION_VALUE_PROPERTY_NAME = "administration.value";
-
-		/**
-		 * Administration value.
-		 */
-		private String administrationValue;
-
-		/*
-		 * ================== AbstractAdministratorSource ======================
-		 */
-
-		@Override
-		protected void loadSpecification(SpecificationContext context) {
-			context.addProperty(ADMINISTRATION_VALUE_PROPERTY_NAME);
-		}
-
-		@Override
-		protected void loadMetaData(MetaDataContext<AdministeredExtensionInterface, Indexed> context) throws Exception {
-
-			// Obtain the administration value
-			this.administrationValue = context.getAdministratorSourceContext()
-					.getProperty(ADMINISTRATION_VALUE_PROPERTY_NAME);
-
-			// Load meta-data
-			context.setExtensionInterface(AdministeredExtensionInterface.class);
-			context.addDuty("DUTY");
-		}
-
-		@Override
-		public Administration<AdministeredExtensionInterface, Indexed> createAdministrator() {
-			return this;
-		}
-
-		/*
-		 * ======================= Administrator =============================
-		 */
-
-		@Override
-		public AdministrationDuty<AdministeredExtensionInterface, ?, ?> getDuty(DutyKey<Indexed> dutyKey) {
-			return this;
-		}
-
-		/*
-		 * ========================== Duty ===================================
-		 */
-
-		@Override
-		public void doDuty(AdministrationContext<AdministeredExtensionInterface, None, None> context) throws Throwable {
-			for (AdministeredExtensionInterface object : context.getExtensionInterfaces()) {
-				object.doAdministration(this.administrationValue);
-			}
 		}
 	}
 

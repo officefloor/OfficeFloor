@@ -25,7 +25,6 @@ import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionDutyAssociation;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -45,7 +44,7 @@ public class MetaDataTestInstanceFactory {
 	 *            {@link ManagedFunction}.
 	 * @return {@link ManagedFunctionMetaData}.
 	 */
-	public static <O extends Enum<O>, F extends Enum<F>> ManagedFunctionMetaData<O, F> createTaskMetaData(
+	public static <O extends Enum<O>, F extends Enum<F>> ManagedFunctionMetaData<O, F> createFunctionMetaData(
 			final ManagedFunction<O, F> task) {
 
 		// Function Factory
@@ -62,10 +61,9 @@ public class MetaDataTestInstanceFactory {
 		// Create and initialise the meta-data
 		ManagedFunctionMetaDataImpl<O, F> metaData = new ManagedFunctionMetaDataImpl<O, F>("TEST_FUNCTION",
 				functionFactory, "TEST_DIFFERENTIATOR", Object.class, teamManagement, new ManagedObjectIndex[0],
-				new ManagedObjectMetaData<?>[0], new ManagedObjectIndex[0], new boolean[0],
-				new AdministrationMetaData<?, ?>[0], new ManagedFunctionDutyAssociation<?>[0],
-				new ManagedFunctionDutyAssociation<?>[0], null);
-		metaData.loadRemainingState(new FlowMetaData[0], null, new EscalationProcedureImpl());
+				new ManagedObjectMetaData<?>[0], new ManagedObjectIndex[0], new boolean[0], null);
+		metaData.loadRemainingState(new FlowMetaData[0], null, new EscalationProcedureImpl(),
+				new AdministrationMetaData<?, ?, ?>[0], new AdministrationMetaData<?, ?, ?>[0]);
 
 		// Return the meta-data
 		return metaData;
