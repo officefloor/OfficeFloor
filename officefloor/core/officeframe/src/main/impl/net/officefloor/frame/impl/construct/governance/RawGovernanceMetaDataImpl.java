@@ -23,7 +23,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
-import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
@@ -38,7 +37,6 @@ import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -120,9 +118,8 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 
 	@Override
 	public <i, f extends Enum<f>> RawGovernanceMetaData<i, f> createRawGovernanceMetaData(
-			GovernanceConfiguration<i, f> configuration, int governanceIndex, SourceContext sourceContext,
-			Map<String, TeamManagement> officeTeams, String officeName, OfficeFloorIssues issues,
-			FunctionLoop functionLoop) {
+			GovernanceConfiguration<i, f> configuration, int governanceIndex, Map<String, TeamManagement> officeTeams,
+			String officeName, OfficeFloorIssues issues) {
 
 		// Obtain the governance name
 		String governanceName = configuration.getGovernanceName();
@@ -164,7 +161,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 
 		// Create the Governance Meta-Data
 		GovernanceMetaDataImpl<i, f> governanceMetaData = new GovernanceMetaDataImpl<i, f>(governanceName,
-				governanceFactory, responsibleTeam, functionLoop);
+				governanceFactory, responsibleTeam);
 
 		// Create the raw Governance meta-data
 		RawGovernanceMetaData<i, f> rawGovernanceMetaData = new RawGovernanceMetaDataImpl<i, f>(governanceName,
@@ -271,7 +268,7 @@ public class RawGovernanceMetaDataImpl<I, F extends Enum<F>>
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalations);
 
 		// Load the remaining state
-		this.governanceMetaData.loadRemainingState(flowMetaDatas, escalationProcedure);
+		this.governanceMetaData.loadOfficeMetaData(officeMetaData, flowMetaDatas, escalationProcedure);
 	}
 
 }

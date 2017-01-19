@@ -57,8 +57,6 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -99,11 +97,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	private final AdministrationMetaDataFactory administrationMetaDataFactory = this
 			.createMock(AdministrationMetaDataFactory.class);
-
-	/**
-	 * {@link FunctionLoop}.
-	 */
-	private final FunctionLoop functionLoop = this.createMock(FunctionLoop.class);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -857,7 +850,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		final AdministrationConfiguration<?, ?, ?>[] preAdministration = new AdministrationConfiguration[] {
 				this.createMock(AdministrationConfiguration.class) };
 		final AdministrationMetaData<?, ?, ?> administrationMetaData = this.createMock(AdministrationMetaData.class);
-		final GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData[0];
 		final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<>();
 
 		// Record construct function with pre-administration
@@ -869,8 +861,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
 		this.recordReturn(this.administrationMetaDataFactory,
 				this.administrationMetaDataFactory.constructAdministrationMetaData(preAdministration,
-						AssetType.FUNCTION, FUNCTION_NAME, this.officeTeams, this.functionLocator, scopeMo,
-						governanceMetaDatas, functionLoop, issues),
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
 				new AdministrationMetaData[] { administrationMetaData });
 		this.recordReturn(this.configuration, this.configuration.getPostAdministration(),
 				new AdministrationConfiguration[0]);
@@ -896,7 +887,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		final AdministrationConfiguration<?, ?, ?>[] postAdministration = new AdministrationConfiguration[] {
 				this.createMock(AdministrationConfiguration.class) };
 		final AdministrationMetaData<?, ?, ?> administrationMetaData = this.createMock(AdministrationMetaData.class);
-		final GovernanceMetaData<?, ?>[] governanceMetaDatas = new GovernanceMetaData[0];
 		final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<>();
 		final ManagedObjectIndex dependencyIndex = this.createMock(ManagedObjectIndex.class);
 		final ManagedObjectIndex moIndex = this.createMock(ManagedObjectIndex.class);
@@ -910,8 +900,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
 		this.recordReturn(this.administrationMetaDataFactory,
 				this.administrationMetaDataFactory.constructAdministrationMetaData(postAdministration,
-						AssetType.FUNCTION, FUNCTION_NAME, this.officeTeams, this.functionLocator, scopeMo,
-						governanceMetaDatas, functionLoop, issues),
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
 				new AdministrationMetaData[] { administrationMetaData });
 		this.record_NoGovernance();
 
@@ -1779,7 +1768,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		// Construct the raw function meta-data
 		RawManagedFunctionMetaData<?, ?> metaData = RawManagedFunctionMetaDataImpl.getFactory()
 				.constructRawManagedFunctionMetaData(this.configuration, this.rawOfficeMetaData,
-						this.assetManagerFactory, this.rawBoundManagedObjectFactory, this.issues, this.functionLoop);
+						this.assetManagerFactory, this.rawBoundManagedObjectFactory, this.issues);
 		if (isExpectConstruct) {
 			assertNotNull("Expected to construct meta-data", metaData);
 		} else {

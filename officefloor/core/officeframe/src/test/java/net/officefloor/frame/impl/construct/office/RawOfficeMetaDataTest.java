@@ -40,7 +40,6 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
@@ -104,11 +103,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * {@link OfficeConfiguration}.
 	 */
 	private final OfficeConfiguration configuration = this.createMock(OfficeConfiguration.class);
-
-	/**
-	 * {@link SourceContext}.
-	 */
-	private final SourceContext sourceContext = this.createMock(SourceContext.class);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -889,10 +883,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record not creating governance meta-data
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
 				new GovernanceConfiguration[] { governanceConfiguration });
-		this.recordReturn(this.rawGovernanceFactory,
-				this.rawGovernanceFactory.createRawGovernanceMetaData(governanceConfiguration, 0, this.sourceContext,
-						teams, OFFICE_NAME, this.issues, null),
-				null, new AbstractMatcher() {
+		this.recordReturn(this.rawGovernanceFactory, this.rawGovernanceFactory.createRawGovernanceMetaData(
+				governanceConfiguration, 0, teams, OFFICE_NAME, this.issues), null, new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
 						// Ensure matching
@@ -1481,10 +1473,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			this.rawGovernanceMetaDatas.put(governanceName, rawGovernanceMetaData);
 
 			// Record creating the governance meta-data
-			this.recordReturn(this.rawGovernanceFactory,
-					this.rawGovernanceFactory.createRawGovernanceMetaData(governanceConfiguration, i,
-							this.sourceContext, this.officeTeams, OFFICE_NAME, this.issues, null),
-					rawGovernanceMetaData);
+			this.recordReturn(this.rawGovernanceFactory, this.rawGovernanceFactory.createRawGovernanceMetaData(
+					governanceConfiguration, i, this.officeTeams, OFFICE_NAME, this.issues), rawGovernanceMetaData);
 			if (i == 0) {
 				this.control(this.rawGovernanceFactory).setMatcher(new AbstractMatcher() {
 					@Override
@@ -1808,7 +1798,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			// Record constructing the raw managed function
 			this.recordReturn(this.rawTaskMetaDataFactory,
 					this.rawTaskMetaDataFactory.constructRawManagedFunctionMetaData(functionConfiguration, null, null,
-							this.rawBoundManagedObjectFactory, this.issues, null),
+							this.rawBoundManagedObjectFactory, this.issues),
 					rawFunctionMetaData, new AbstractMatcher() {
 						@Override
 						public boolean matches(Object[] e, Object[] a) {
@@ -1913,9 +1903,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the meta-data
 		RawOfficeMetaData metaData = RawOfficeMetaDataImpl.getFactory().constructRawOfficeMetaData(this.configuration,
-				this.sourceContext, this.issues, officeMos, this.rawOfficeFloorMetaData,
-				this.rawBoundManagedObjectFactory, this.rawGovernanceFactory, this.rawBoundAdministratorFactory,
-				this.rawTaskMetaDataFactory);
+				this.issues, officeMos, this.rawOfficeFloorMetaData, this.rawBoundManagedObjectFactory,
+				this.rawGovernanceFactory, this.rawBoundAdministratorFactory, this.rawTaskMetaDataFactory);
 		if (isExpectConstruct) {
 			assertNotNull("Meta-data should be constructed", metaData);
 		} else {

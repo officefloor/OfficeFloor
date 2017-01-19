@@ -29,7 +29,6 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
-import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactoryImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
@@ -207,9 +206,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public RawOfficeMetaData constructRawOfficeMetaData(OfficeConfiguration configuration, SourceContext sourceContext,
-			OfficeFloorIssues issues, RawManagingOfficeMetaData<?>[] officeManagingManagedObjects,
-			RawOfficeFloorMetaData rawOfficeFloorMetaData,
+	public RawOfficeMetaData constructRawOfficeMetaData(OfficeConfiguration configuration, OfficeFloorIssues issues,
+			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects, RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawGovernanceMetaDataFactory rawGovernanceMetaDataFactory,
 			AdministrationMetaDataFactory administrationMetaDataFactory,
@@ -306,8 +304,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			GovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
 
 			// Create the raw governance
-			RawGovernanceMetaData<?, ?> rawGovernance = rawGovernanceMetaDataFactory.createRawGovernanceMetaData(
-					governanceConfiguration, i, sourceContext, officeTeams, officeName, issues, functionLoop);
+			RawGovernanceMetaData<?, ?> rawGovernance = rawGovernanceMetaDataFactory
+					.createRawGovernanceMetaData(governanceConfiguration, i, officeTeams, officeName, issues);
 			if (rawGovernance == null) {
 				// Not able to create governance
 				issues.addIssue(AssetType.OFFICE, officeName,
@@ -440,7 +438,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			// Construct the managed function
 			RawManagedFunctionMetaData<?, ?> rawFunctionMetaData = rawFunctionFactory
 					.constructRawManagedFunctionMetaData(functionConfiguration, rawOfficeMetaData,
-							officeAssetManagerFactory, rawBoundManagedObjectFactory, issues, functionLoop);
+							officeAssetManagerFactory, rawBoundManagedObjectFactory, issues);
 			if (rawFunctionMetaData == null) {
 				continue; // issue in constructing function
 			}

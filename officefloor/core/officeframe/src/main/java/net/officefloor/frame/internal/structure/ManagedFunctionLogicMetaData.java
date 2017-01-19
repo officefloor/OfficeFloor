@@ -17,19 +17,21 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.team.Team;
 
 /**
- * Meta-data for a {@link ManagedFunctionContainer}.
+ * Meta-data for a {@link ManagedFunctionLogic} to be executed within a
+ * {@link ManagedFunctionContainer}.
  * 
  * @author Daniel Sagenschneider
  */
 public interface ManagedFunctionLogicMetaData {
 
 	/**
-	 * Obtains the name of the {@link FunctionState}.
+	 * Obtains the name of the {@link ManagedFunctionLogic}.
 	 * 
-	 * @return Name of the {@link FunctionState}.
+	 * @return Name of the {@link ManagedFunctionLogic}.
 	 */
 	String getFunctionName();
 
@@ -44,13 +46,6 @@ public interface ManagedFunctionLogicMetaData {
 	TeamManagement getResponsibleTeam();
 
 	/**
-	 * Obtains the {@link FunctionLoop}.
-	 * 
-	 * @return {@link FunctionLoop}.
-	 */
-	FunctionLoop getFunctionLoop();
-
-	/**
 	 * Obtains the {@link FlowMetaData} of the specified {@link Flow}.
 	 * 
 	 * @param flowIndex
@@ -61,18 +56,25 @@ public interface ManagedFunctionLogicMetaData {
 
 	/**
 	 * Obtains the {@link ManagedFunctionMetaData} of the next
-	 * {@link FunctionState}.
+	 * {@link ManagedFunction}.
 	 * 
-	 * @return {@link ManagedFunctionMetaData} of next {@link FunctionState}.
+	 * @return {@link ManagedFunctionMetaData} of next {@link ManagedFunction}.
 	 */
 	ManagedFunctionMetaData<?, ?> getNextManagedFunctionMetaData();
 
 	/**
-	 * Obtains the {@link EscalationProcedure} for the {@link FunctionState} of
-	 * this {@link ManagedFunctionLogicMetaData}.
+	 * Obtains the {@link EscalationProcedure} for the
+	 * {@link ManagedFunctionLogic}.
 	 * 
 	 * @return {@link EscalationProcedure}.
 	 */
 	EscalationProcedure getEscalationProcedure();
+
+	/**
+	 * Obtains the {@link OfficeMetaData}.
+	 * 
+	 * @return {@link OfficeMetaData}.
+	 */
+	OfficeMetaData getOfficeMetaData();
 
 }

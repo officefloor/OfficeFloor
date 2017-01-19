@@ -26,9 +26,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
@@ -49,25 +47,20 @@ public interface AdministrationMetaDataFactory {
 	 * @param assetName
 	 *            Name of {@link Asset} constructing {@link Administration}
 	 *            instances.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            registered names.
-	 * @param functionLocator
-	 *            {@link ManagedFunctionLocator} for the {@link Office}.
 	 * @param scopeMo
 	 *            {@link RawBoundManagedObjectMetaData} by their scope names.
-	 * @param governanceMetaDatas
-	 *            {@link GovernanceMetaData} instances for the {@link Office}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return {@link AdministrationMetaData} instances.
 	 */
 	AdministrationMetaData<?, ?, ?>[] constructAdministrationMetaData(
 			AdministrationConfiguration<?, ?, ?>[] configuration, AssetType assetType, String assetName,
-			Map<String, TeamManagement> officeTeams, ManagedFunctionLocator functionLocator,
-			Map<String, RawBoundManagedObjectMetaData> scopeMo, GovernanceMetaData<?, ?>[] governanceMetaDatas,
-			FunctionLoop functionLoop, OfficeFloorIssues issues);
+			OfficeMetaData officeMetaData, Map<String, TeamManagement> officeTeams,
+			Map<String, RawBoundManagedObjectMetaData> scopeMo, OfficeFloorIssues issues);
 
 }

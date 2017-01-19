@@ -27,10 +27,10 @@ import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
@@ -94,9 +94,9 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final ManagedObjectMetaData<?>[] functionBoundManagedObjects;
 
 	/**
-	 * {@link FunctionLoop}.
+	 * {@link OfficeMetaData}.
 	 */
-	private final FunctionLoop functionLoop;
+	private OfficeMetaData officeMetaData;
 
 	/**
 	 * <p>
@@ -157,13 +157,11 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            {@link ManagedFunction} may be executed.
 	 * @param requiredGovernance
 	 *            Required {@link Governance}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
 	 */
 	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory,
 			Object differentiator, Class<?> parameterType, TeamManagement responsibleTeam,
 			ManagedObjectIndex[] functionIndexedManagedObjects, ManagedObjectMetaData<?>[] functionBoundManagedObjects,
-			ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance, FunctionLoop functionLoop) {
+			ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance) {
 		this.functionName = functionName;
 		this.functionFactory = functionFactory;
 		this.differentiator = differentiator;
@@ -173,12 +171,13 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 		this.functionBoundManagedObjects = functionBoundManagedObjects;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.requiredGovernance = requiredGovernance;
-		this.functionLoop = functionLoop;
 	}
 
 	/**
 	 * Loads the remaining state of this {@link ManagedFunctionMetaData}.
 	 * 
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param flowMetaData
 	 *            Meta-data of the available {@link Flow} instances from this
 	 *            {@link ManagedFunction}.
@@ -198,9 +197,10 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            {@link Administration} instances to be completed after
 	 *            executing the {@link ManagedFunction}.
 	 */
-	public void loadRemainingState(FlowMetaData[] flowMetaData, ManagedFunctionMetaData<?, ?> nextFunctionMetaData,
-			EscalationProcedure escalationProcedure, AdministrationMetaData<?, ?, ?>[] preAdministration,
-			AdministrationMetaData<?, ?, ?>[] postAdministration) {
+	public void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaData[] flowMetaData,
+			ManagedFunctionMetaData<?, ?> nextFunctionMetaData, EscalationProcedure escalationProcedure,
+			AdministrationMetaData<?, ?, ?>[] preAdministration, AdministrationMetaData<?, ?, ?>[] postAdministration) {
+		this.officeMetaData = officeMetaData;
 		this.flowMetaData = flowMetaData;
 		this.nextFunctionMetaData = nextFunctionMetaData;
 		this.escalationProcedure = escalationProcedure;
@@ -263,6 +263,11 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
+	public OfficeMetaData getOfficeMetaData() {
+		return this.officeMetaData;
+	}
+
+	@Override
 	public ManagedFunctionMetaData<?, ?> getNextManagedFunctionMetaData() {
 		return this.nextFunctionMetaData;
 	}
@@ -280,11 +285,6 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	@Override
 	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {
 		return this.functionBoundManagedObjects;
-	}
-
-	@Override
-	public FunctionLoop getFunctionLoop() {
-		return this.functionLoop;
 	}
 
 }

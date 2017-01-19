@@ -18,7 +18,6 @@
 package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.api.function.FlowCallback;
-import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.impl.execute.function.Promise;
@@ -33,7 +32,6 @@ import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
-import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -200,20 +198,6 @@ public class ProcessStateImpl implements ProcessState {
 	@Override
 	public ManagedObjectCleanup getManagedObjectCleanup() {
 		return this.cleanup;
-	}
-
-	@Override
-	public ManagedFunctionMetaData<?, ?> getFunctionMetaData(String functionName) throws UnknownFunctionException {
-
-		// Look for function
-		ManagedFunctionLocator locator = this.officeMetaData.getManagedFunctionLocator();
-		ManagedFunctionMetaData<?, ?> functionMetaData = locator.getManagedFunctionMetaData(functionName);
-		if (functionMetaData != null) {
-			return functionMetaData;
-		}
-
-		// As here, function not found
-		throw new UnknownFunctionException(functionName);
 	}
 
 	@Override

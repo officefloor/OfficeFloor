@@ -31,10 +31,10 @@ import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
@@ -105,10 +105,10 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 	 * 
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 */
-	public EscalationHandlerEscalationFlow(EscalationHandler escalationHandler, FunctionLoop functionLoop) {
+	public EscalationHandlerEscalationFlow(EscalationHandler escalationHandler, OfficeMetaData officeMetaData) {
 
 		// Create the escalation function meta-data
 		TeamManagement anyTeam = null;
@@ -116,9 +116,8 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 				escalationHandler);
 		ManagedFunctionMetaDataImpl<EscalationKey, None> functionMetaData = new ManagedFunctionMetaDataImpl<EscalationKey, None>(
 				EscalationHandler.class.getSimpleName(), functionFactory, null, Throwable.class, anyTeam,
-				MANGED_OBJECT_DEPENDENCIES, NO_MANAGED_OBJECT_META_DATA, NO_MANAGED_OBJECTS, NO_GOVERNANCE,
-				functionLoop);
-		functionMetaData.loadRemainingState(NO_FLOW_META_DATA, null, FURTHER_ESCALATION_PROCEDURE,
+				MANGED_OBJECT_DEPENDENCIES, NO_MANAGED_OBJECT_META_DATA, NO_MANAGED_OBJECTS, NO_GOVERNANCE);
+		functionMetaData.loadOfficeMetaData(officeMetaData, NO_FLOW_META_DATA, null, FURTHER_ESCALATION_PROCEDURE,
 				NO_ADMINISTRATOR_META_DATA, NO_ADMINISTRATOR_META_DATA);
 		this.functionMetaData = functionMetaData;
 	}

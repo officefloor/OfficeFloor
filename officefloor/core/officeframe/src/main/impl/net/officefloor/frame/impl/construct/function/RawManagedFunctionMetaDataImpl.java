@@ -61,7 +61,6 @@ import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -144,7 +143,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 	public RawManagedFunctionMetaData<?, ?> constructRawManagedFunctionMetaData(
 			ManagedFunctionConfiguration<?, ?> configuration, RawOfficeMetaData rawOfficeMetaData,
 			AssetManagerFactory assetManagerFactory, RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			OfficeFloorIssues issues, FunctionLoop functionLoop) {
+			OfficeFloorIssues issues) {
 
 		// Obtain the function name
 		String functionName = configuration.getFunctionName();
@@ -398,7 +397,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 		// Create the function meta-data
 		ManagedFunctionMetaDataImpl<?, ?> functionMetaData = new ManagedFunctionMetaDataImpl<>(functionName,
 				functionFactory, differentiator, parameterType, responsibleTeam, functionIndexedManagedObjects,
-				functionBoundMoMetaData, requiredManagedObjectIndexes, requiredGovernance, functionLoop);
+				functionBoundMoMetaData, requiredManagedObjectIndexes, requiredGovernance);
 
 		// Return the raw function meta-data
 		@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -705,16 +704,14 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 		// Create the administrations
 		AdministrationMetaData<?, ?, ?>[] preAdministrations = administrationMetaDataFactory
 				.constructAdministrationMetaData(configuration.getPreAdministration(), AssetType.FUNCTION, functionName,
-						officeTeams, functionLocator, this.functionScopedManagedObjects, governanceMetaDatas,
-						officeMetaData.getFunctionLoop(), issues);
+						officeMetaData, officeTeams, this.functionScopedManagedObjects, issues);
 		AdministrationMetaData<?, ?, ?>[] postAdministrations = administrationMetaDataFactory
 				.constructAdministrationMetaData(configuration.getPostAdministration(), AssetType.FUNCTION,
-						functionName, officeTeams, functionLocator, this.functionScopedManagedObjects,
-						governanceMetaDatas, officeMetaData.getFunctionLoop(), issues);
+						functionName, officeMetaData, officeTeams, this.functionScopedManagedObjects, issues);
 
 		// Load the remaining state for the function meta-data
-		this.functionMetaData.loadRemainingState(flowMetaDatas, nextFunction, escalationProcedure, preAdministrations,
-				postAdministrations);
+		this.functionMetaData.loadOfficeMetaData(officeMetaData, flowMetaDatas, nextFunction, escalationProcedure,
+				preAdministrations, postAdministrations);
 	}
 
 	@Override

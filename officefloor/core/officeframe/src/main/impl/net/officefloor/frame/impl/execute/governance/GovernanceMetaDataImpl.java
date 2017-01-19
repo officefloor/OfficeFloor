@@ -26,7 +26,6 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLogic;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
@@ -34,6 +33,7 @@ import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -55,15 +55,15 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	private final GovernanceFactory<? super I, F> governanceFactory;
 
 	/**
-	 * {@link FunctionLoop}.
-	 */
-	private final FunctionLoop functionLoop;
-
-	/**
 	 * {@link TeamManagement} of {@link Team} responsible for the
 	 * {@link GovernanceActivity} instances.
 	 */
 	private final TeamManagement responsibleTeam;
+
+	/**
+	 * {@link OfficeMetaData}.
+	 */
+	private OfficeMetaData officeMetaData;
 
 	/**
 	 * {@link FlowMetaData} instances.
@@ -85,28 +85,29 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link GovernanceActivity} instances.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
 	 */
 	public GovernanceMetaDataImpl(String governanceName, GovernanceFactory<? super I, F> governanceFactory,
-			TeamManagement responsibleTeam, FunctionLoop functionLoop) {
+			TeamManagement responsibleTeam) {
 		this.governanceName = governanceName;
 		this.governanceFactory = governanceFactory;
 		this.responsibleTeam = responsibleTeam;
-		this.functionLoop = functionLoop;
 	}
 
 	/**
 	 * Loads the remaining state.
 	 * 
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} instances.
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure}.
 	 */
-	public void loadRemainingState(FlowMetaData[] flowMetaData, EscalationProcedure escalationProcedure) {
+	public void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaData[] flowMetaData,
+			EscalationProcedure escalationProcedure) {
 		this.flowMetaData = flowMetaData;
 		this.escalationProcedure = escalationProcedure;
+		this.officeMetaData = officeMetaData;
 	}
 
 	/*
@@ -124,12 +125,6 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	}
 
 	@Override
-	public FunctionLoop getFunctionLoop() {
-		return this.functionLoop;
-
-	}
-
-	@Override
 	public ManagedFunctionMetaData<?, ?> getNextManagedFunctionMetaData() {
 		// Never a next task for governance activity
 		return null;
@@ -138,6 +133,11 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	@Override
 	public EscalationProcedure getEscalationProcedure() {
 		return this.escalationProcedure;
+	}
+
+	@Override
+	public OfficeMetaData getOfficeMetaData() {
+		return this.officeMetaData;
 	}
 
 	/*

@@ -45,7 +45,6 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -62,13 +61,18 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
+public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link AdministrationConfiguration}.
 	 */
 	private final AdministrationConfiguration<?, ?, ?> configuration = this
 			.createMock(AdministrationConfiguration.class);
+
+	/**
+	 * {@link AdministrationFactory}.
+	 */
+	private final AdministrationFactory<?, ?, ?> administrationFactory = this.createMock(AdministrationFactory.class);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -101,11 +105,6 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 	 * scope name.
 	 */
 	private final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<String, RawBoundManagedObjectMetaData>();
-
-	/**
-	 * {@link FunctionLoop}.
-	 */
-	private final FunctionLoop functionLoop = this.createMock(FunctionLoop.class);
 
 	/**
 	 * {@link RawBoundManagedObjectMetaData}.
@@ -153,11 +152,6 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 	private final OfficeMetaData officeMetaData = this.createMock(OfficeMetaData.class);
 
 	/**
-	 * {@link GovernanceMetaData} instances.
-	 */
-	private final GovernanceMetaData<?, ?>[] governanceMetaData = new GovernanceMetaData[0];
-
-	/**
 	 * {@link ManagedFunctionLocator}.
 	 */
 	private final ManagedFunctionLocator functionLocator = this.createMock(ManagedFunctionLocator.class);
@@ -199,9 +193,12 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testAnyTeam() {
 
-		// Record no team
+		// Record any team
 		this.record_init();
 		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), null);
+		this.record_managedObject();
+		this.record_noFlows();
+		this.record_governanceMetaData(0);
 
 		// Construct the administrators
 		this.replayMockObjects();
@@ -408,7 +405,7 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_init();
 		this.record_team();
 		this.record_managedObject();
-		this.record_governanceMetaData(this.officeMetaData, 0);
+		this.record_governanceMetaData(0);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), null);
 		this.record_issue("ManagedFunction references not provided");
 
@@ -430,7 +427,7 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_init();
 		this.record_team();
 		this.record_managedObject();
-		this.record_governanceMetaData(this.officeMetaData, 0);
+		this.record_governanceMetaData(0);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionReference[] { functionReference });
 		this.recordReturn(functionReference, functionReference.getFunctionName(), "TASK");
@@ -457,7 +454,7 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_managedObject();
 
 		// Record linking tasks
-		this.record_governanceMetaData(this.officeMetaData, 0);
+		this.record_governanceMetaData(0);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionReference[] { functionReference });
 		this.recordReturn(functionReference, functionReference.getFunctionName(), "TASK");
@@ -498,7 +495,7 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 				new ManagedFunctionReference[0]);
 
 		// Record governance configuration
-		GovernanceMetaData<?, ?>[] governanceMetaData = this.record_governanceMetaData(this.officeMetaData, 1);
+		GovernanceMetaData<?, ?>[] governanceMetaData = this.record_governanceMetaData(1);
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
 				new AdministrationGovernanceConfiguration<?>[] { governanceConfiguration });
 		this.recordReturn(governanceConfiguration, governanceConfiguration.getIndex(), GOVERNANCE_INDEX);
@@ -540,7 +537,7 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.recordReturn(governanceConfiguration, governanceConfiguration.getGovernanceName(), "GOVERNANCE");
 
 		// Record configuring links
-		GovernanceMetaData<?, ?>[] governanceMetaData = this.record_governanceMetaData(this.officeMetaData, 2);
+		GovernanceMetaData<?, ?>[] governanceMetaData = this.record_governanceMetaData(2);
 		this.recordReturn(governanceMetaData[0], governanceMetaData[0].getGovernanceName(), "NOT MATCH");
 		this.recordReturn(governanceMetaData[1], governanceMetaData[1].getGovernanceName(), "GOVERNANCE");
 
@@ -560,6 +557,8 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	private void record_init() {
 		this.recordReturn(this.configuration, this.configuration.getAdministrationName(), "ADMIN");
+		this.recordReturn(this.configuration, this.configuration.getAdministrationFactory(),
+				this.administrationFactory);
 	}
 
 	/**
@@ -597,22 +596,28 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records no flows.
+	 */
+	private void record_noFlows() {
+		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
+				new ManagedFunctionReference[0]);
+	}
+
+	/**
 	 * Records obtaining the {@link GovernanceMetaData}.
 	 * 
-	 * @param officeMetaData
-	 *            Mock {@link OfficeMetaData}.
 	 * @param governanceCount
 	 *            Number of {@link GovernanceMetaData}.
 	 * @return Mock {@link GovernanceMetaData}.
 	 */
-	private GovernanceMetaData<?, ?>[] record_governanceMetaData(OfficeMetaData officeMetaData, int governanceCount) {
+	private GovernanceMetaData<?, ?>[] record_governanceMetaData(int governanceCount) {
 		ProcessMetaData processMetaData = this.createMock(ProcessMetaData.class);
 		ThreadMetaData threadMetaData = this.createMock(ThreadMetaData.class);
 		GovernanceMetaData<?, ?>[] governanceMetaData = new GovernanceMetaData<?, ?>[governanceCount];
 		for (int i = 0; i < governanceCount; i++) {
 			governanceMetaData[i] = this.createMock(GovernanceMetaData.class);
 		}
-		this.recordReturn(officeMetaData, officeMetaData.getProcessMetaData(), processMetaData);
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getProcessMetaData(), processMetaData);
 		this.recordReturn(processMetaData, processMetaData.getThreadMetaData(), threadMetaData);
 		this.recordReturn(threadMetaData, threadMetaData.getGovernanceMetaData(), governanceMetaData);
 		return governanceMetaData;
@@ -642,8 +647,8 @@ public class AdministratorMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the meta-data
 		AdministrationMetaData<?, ?, ?>[] metaData = AdministrationMetaDataFactoryImpl.getFactory()
-				.constructAdministrationMetaData(configuration, this.assetType, this.assetName, this.officeTeams,
-						this.functionLocator, this.scopeMo, this.governanceMetaData, this.functionLoop, this.issues);
+				.constructAdministrationMetaData(configuration, this.assetType, this.assetName, this.officeMetaData,
+						this.officeTeams, this.scopeMo, this.issues);
 
 		// Ensure correct number created
 		assertEquals("Incorrect number of created meta-data", expectedCreateCount, metaData.length);

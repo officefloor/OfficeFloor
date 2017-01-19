@@ -61,19 +61,19 @@ public interface OfficeMetaData {
 	Timer getOfficeTimer();
 
 	/**
-	 * Obtains the {@link FunctionLoop} for the {@link Office}.
-	 * 
-	 * @return {@link FunctionLoop} for the {@link Office}.
-	 */
-	FunctionLoop getFunctionLoop();
-
-	/**
 	 * Obtains the {@link ProcessMetaData} for processes within this
 	 * {@link Office}.
 	 * 
 	 * @return {@link ProcessMetaData} for processes within this {@link Office}.
 	 */
 	ProcessMetaData getProcessMetaData();
+
+	/**
+	 * Obtains the {@link FunctionLoop} for the {@link Office}.
+	 * 
+	 * @return {@link FunctionLoop} for the {@link Office}.
+	 */
+	FunctionLoop getFunctionLoop();
 
 	/**
 	 * Obtains the {@link ManagedFunctionMetaData} of the

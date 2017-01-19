@@ -26,12 +26,12 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicContext;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
  * {@link ManagedFunction} implementation of a {@link Job}.
@@ -67,26 +67,16 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 	private final Object parameter;
 
 	/**
-	 * {@link ProcessState}.
-	 */
-	private final ProcessState processState;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param functionMetaData
 	 *            {@link ManagedFunctionMetaData}.
 	 * @param parameter
 	 *            Parameter for the {@link ManagedFunction}.
-	 * @param processState
-	 *            {@link ProcessState} containing this
-	 *            {@link ManagedFunctionLogic}.
 	 */
-	public ManagedFunctionLogicImpl(ManagedFunctionMetaData<O, F> functionMetaData, Object parameter,
-			ProcessState processState) {
+	public ManagedFunctionLogicImpl(ManagedFunctionMetaData<O, F> functionMetaData, Object parameter) {
 		this.parameter = parameter;
 		this.functionMetaData = functionMetaData;
-		this.processState = processState;
 	}
 
 	/*
@@ -171,8 +161,13 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 				throws UnknownFunctionException, InvalidParameterTypeException {
 
 			// Obtain the function meta-data
-			final ManagedFunctionMetaData<?, ?> functionMetaData = ManagedFunctionLogicImpl.this.processState
-					.getFunctionMetaData(functionName);
+			ManagedFunctionLocator functionLocator = ManagedFunctionLogicImpl.this.functionMetaData.getOfficeMetaData()
+					.getManagedFunctionLocator();
+			final ManagedFunctionMetaData<?, ?> functionMetaData = functionLocator
+					.getManagedFunctionMetaData(functionName);
+			if (functionMetaData == null) {
+				throw new UnknownFunctionException(functionName);
+			}
 
 			// Create dynamic flow meta-data
 			FlowMetaData dynamicFlowMetaData = new FlowMetaData() {

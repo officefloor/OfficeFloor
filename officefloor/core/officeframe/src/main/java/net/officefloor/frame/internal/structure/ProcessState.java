@@ -19,7 +19,6 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.UnknownFunctionException;
 
 /**
  * <p>
@@ -51,20 +50,6 @@ public interface ProcessState {
 	 * @return Main {@link ThreadState} for this {@link ProcessState}.
 	 */
 	ThreadState getMainThreadState();
-
-	/**
-	 * Obtains the {@link ManagedFunctionMetaData} for the
-	 * {@link ManagedFunction} within the {@link Office} containing this
-	 * {@link ProcessState}.
-	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @return {@link ManagedFunctionMetaData} for the {@link ManagedFunction}.
-	 * @throws UnknownFunctionException
-	 *             If no {@link ManagedFunction} by name within the
-	 *             {@link Office}.
-	 */
-	ManagedFunctionMetaData<?, ?> getFunctionMetaData(String functionName) throws UnknownFunctionException;
 
 	/**
 	 * Spawns a new {@link ThreadState} contained in this {@link ProcessState}.

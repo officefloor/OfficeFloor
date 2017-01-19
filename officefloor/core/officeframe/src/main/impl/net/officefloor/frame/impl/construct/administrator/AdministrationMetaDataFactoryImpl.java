@@ -28,7 +28,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.administrator.AdministrationMetaDataImpl;
 import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDataImpl;
@@ -44,11 +43,11 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
@@ -74,18 +73,16 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 	@Override
 	public AdministrationMetaData<?, ?, ?>[] constructAdministrationMetaData(
 			AdministrationConfiguration<?, ?, ?>[] configuration, AssetType assetType, String assetName,
-			Map<String, TeamManagement> officeTeams, ManagedFunctionLocator functionLocator,
-			Map<String, RawBoundManagedObjectMetaData> scopeMo, GovernanceMetaData<?, ?>[] governanceMetaDatas,
-			FunctionLoop functionLoop, OfficeFloorIssues issues) {
+			OfficeMetaData officeMetaData, Map<String, TeamManagement> officeTeams,
+			Map<String, RawBoundManagedObjectMetaData> scopeMo, OfficeFloorIssues issues) {
 
 		// Create the administrators
 		List<AdministrationMetaData<?, ?, ?>> administrations = new LinkedList<AdministrationMetaData<?, ?, ?>>();
 		for (AdministrationConfiguration<?, ?, ?> administrationConfiguration : configuration) {
 
 			// Construct the bound administrator
-			AdministrationMetaData<?, ?, ?> administration = constructAdministrationMetaData(
-					administrationConfiguration, issues, assetType, assetName, officeTeams, functionLocator, scopeMo,
-					governanceMetaDatas, functionLoop);
+			AdministrationMetaData<?, ?, ?> administration = this.constructAdministrationMetaData(
+					administrationConfiguration, assetType, assetName, officeMetaData, officeTeams, scopeMo, issues);
 			if (administration != null) {
 				administrations.add(administration);
 			}
@@ -100,62 +97,51 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 	 * 
 	 * @param configuration
 	 *            {@link AdministrationConfiguration} instances.
-	 * @param sourceContext
-	 *            {@link SourceContext}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
 	 * @param assetType
 	 *            {@link AssetType} constructing {@link Administration}
 	 *            instances.
 	 * @param assetName
 	 *            Name of {@link Asset} constructing {@link Administration}
 	 *            instances.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            registered names.
-	 * @param functionLocator
-	 *            {@link ManagedFunctionLocator} for the {@link Office}.
 	 * @param scopeMo
 	 *            {@link RawBoundManagedObjectMetaData} by their scope names.
-	 * @param governanceMetaDatas
-	 *            {@link GovernanceMetaData} instances.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
 	 * @return Constructed {@link AdministrationMetaData}.
 	 */
 	private <E, F extends Enum<F>, G extends Enum<G>> AdministrationMetaData<E, F, G> constructAdministrationMetaData(
-			AdministrationConfiguration<E, F, G> configuration, OfficeFloorIssues issues, AssetType assetType,
-			String assetName, Map<String, TeamManagement> officeTeams, ManagedFunctionLocator functionLocator,
-			Map<String, RawBoundManagedObjectMetaData> scopeMo, GovernanceMetaData<?, ?>[] governanceMetaDatas,
-			FunctionLoop functionLoop) {
+			AdministrationConfiguration<E, F, G> configuration, AssetType assetType, String assetName,
+			OfficeMetaData officeMetaData, Map<String, TeamManagement> officeTeams,
+			Map<String, RawBoundManagedObjectMetaData> scopeMo, OfficeFloorIssues issues) {
 
 		// Obtain the administration name
 		String adminName = configuration.getAdministrationName();
 		if (ConstructUtil.isBlank(adminName)) {
-			issues.addIssue(assetType, assetName, "Administrator added without a name");
+			issues.addIssue(assetType, assetName, "Administration added without a name");
 			return null; // no name
 		}
 
 		// Obtain the administrator factory
 		AdministrationFactory<E, F, G> adminFactory = configuration.getAdministrationFactory();
 		if (adminFactory == null) {
-			issues.addIssue(assetType, assetName, "Administrator '" + adminName + "' did not provide an "
+			issues.addIssue(assetType, assetName, "Administration '" + adminName + "' did not provide an "
 					+ AdministrationFactory.class.getSimpleName());
 			return null; // no class
 		}
 
 		// Obtain the team responsible for the administration
 		String teamName = configuration.getOfficeTeamName();
-		if (ConstructUtil.isBlank(teamName)) {
+		TeamManagement responsibleTeam = null; // any team
+		if (!ConstructUtil.isBlank(teamName)) {
+			responsibleTeam = officeTeams.get(teamName);
 			issues.addIssue(assetType, assetName,
-					"Administrator " + adminName + " must specify team responsible for duties");
+					"Administration " + adminName + " team '" + teamName + "' can not be found");
 			return null; // must have team specified
-		}
-		TeamManagement responsibleTeam = officeTeams.get(teamName);
-		if (responsibleTeam == null) {
-			issues.addIssue(assetType, assetName,
-					"Administrator " + adminName + " team '" + teamName + "' can not be found");
-			return null; // unknown team
 		}
 
 		// Obtain the extension interface
@@ -261,6 +247,7 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 		}
 
 		// Obtain the flows
+		ManagedFunctionLocator functionLocator = officeMetaData.getManagedFunctionLocator();
 		FlowMetaData[] flows = new FlowMetaData[functionReferences.length];
 		for (int i = 0; i < flows.length; i++) {
 			ManagedFunctionReference functionReference = functionReferences[i];
@@ -275,6 +262,10 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 			// Create and register the flow
 			flows[i] = ConstructUtil.newFlowMetaData(functionMetaData, false);
 		}
+
+		// Obtain the governance meta-data
+		GovernanceMetaData<?, ?>[] governanceMetaDatas = officeMetaData.getProcessMetaData().getThreadMetaData()
+				.getGovernanceMetaData();
 
 		// Obtain the governance mapping
 		AdministrationGovernanceConfiguration<?>[] dutyGovernanceConfigurations = configuration
@@ -306,7 +297,7 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 		// Create and return the administrator meta-data
 		AdministrationMetaDataImpl<E, F, G> adminMetaData = new AdministrationMetaDataImpl<E, F, G>(adminName,
 				adminFactory, ConstructUtil.toArray(eiMetaDatas, new ExtensionInterfaceMetaData[0]), responsibleTeam,
-				flows, governanceMapping, escalationProcedure, functionLoop);
+				flows, governanceMapping, escalationProcedure, officeMetaData);
 		return adminMetaData;
 	}
 

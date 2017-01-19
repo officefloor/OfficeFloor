@@ -22,9 +22,7 @@ import java.util.Map;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
@@ -47,21 +45,16 @@ public interface RawGovernanceMetaDataFactory {
 	 * @param governanceIndex
 	 *            Index of the {@link Governance} within the
 	 *            {@link ProcessState}.
-	 * @param sourceContext
-	 *            {@link SourceContext}.
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office} name.
 	 * @param officeName
 	 *            Name of the {@link Office} having {@link Governance} added.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
 	<E, F extends Enum<F>> RawGovernanceMetaData<E, F> createRawGovernanceMetaData(
-			GovernanceConfiguration<E, F> configuration, int governanceIndex, SourceContext sourceContext,
-			Map<String, TeamManagement> officeTeams, String officeName, OfficeFloorIssues issues,
-			FunctionLoop functionLoop);
+			GovernanceConfiguration<E, F> configuration, int governanceIndex, Map<String, TeamManagement> officeTeams,
+			String officeName, OfficeFloorIssues issues);
 
 }

@@ -25,9 +25,9 @@ import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -76,9 +76,9 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	private final EscalationProcedure escalationProcedure;
 
 	/**
-	 * {@link FunctionLoop}.
+	 * {@link OfficeMetaData}.
 	 */
-	private final FunctionLoop functionLoop;
+	private final OfficeMetaData officeMetaData;
 
 	/**
 	 * Instantiate.
@@ -100,12 +100,12 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 *            {@link Governance} index.
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 */
 	public AdministrationMetaDataImpl(String administrationName, AdministrationFactory<E, F, G> administrationFactory,
 			ExtensionInterfaceMetaData<E>[] eiMetaData, TeamManagement responsibleTeam, FlowMetaData[] flowMetaData,
-			int[] governanceIndexes, EscalationProcedure escalationProcedure, FunctionLoop functionLoop) {
+			int[] governanceIndexes, EscalationProcedure escalationProcedure, OfficeMetaData officeMetaData) {
 		this.administrationName = administrationName;
 		this.administrationFactory = administrationFactory;
 		this.eiMetaData = eiMetaData;
@@ -113,7 +113,7 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 		this.flowMetaData = flowMetaData;
 		this.governanceIndexes = governanceIndexes;
 		this.escalationProcedure = escalationProcedure;
-		this.functionLoop = functionLoop;
+		this.officeMetaData = officeMetaData;
 	}
 
 	/*
@@ -146,8 +146,8 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	}
 
 	@Override
-	public FunctionLoop getFunctionLoop() {
-		return this.functionLoop;
+	public OfficeMetaData getOfficeMetaData() {
+		return this.officeMetaData;
 	}
 
 	/*

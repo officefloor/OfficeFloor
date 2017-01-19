@@ -35,6 +35,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow;
 import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
+import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorMetaDataImpl;
@@ -138,9 +139,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	public RawOfficeFloorMetaData constructRawOfficeFloorMetaData(OfficeFloorConfiguration configuration,
 			OfficeFloorIssues issues, RawTeamMetaDataFactory rawTeamFactory,
 			RawManagedObjectMetaDataFactory rawMosFactory, RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
-			RawGovernanceMetaDataFactory rawGovernanceFactory,
-			AdministrationMetaDataFactory rawBoundAdminFactory, RawOfficeMetaDataFactory rawOfficeFactory,
-			RawManagedFunctionMetaDataFactory rawTaskFactory) {
+			RawGovernanceMetaDataFactory rawGovernanceFactory, AdministrationMetaDataFactory rawBoundAdminFactory,
+			RawOfficeMetaDataFactory rawOfficeFactory, RawManagedFunctionMetaDataFactory rawTaskFactory) {
 
 		// Name of office floor for reporting issues
 		String officeFloorName = configuration.getOfficeFloorName();
@@ -246,6 +246,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 
 		// Undertake OfficeFloor escalation on any team available
 		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(new TeamManagementImpl(new PassiveTeam()));
+		OfficeMetaData officeFloorManagement = new OfficeMetaDataImpl("Management", null, null, null,
+				officeFloorFunctionLoop, null, null, null, null, null, null);
 
 		// Obtain the escalation handler for the OfficeFloor
 		EscalationHandler officeFloorEscalationHandler = configuration.getEscalationHandler();
@@ -254,7 +256,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 			officeFloorEscalationHandler = new DefaultOfficeFloorEscalationHandler();
 		}
 		EscalationFlow officeFloorEscalation = new EscalationHandlerEscalationFlow(officeFloorEscalationHandler,
-				officeFloorFunctionLoop);
+				officeFloorManagement);
 
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(teamRegistry,
@@ -282,8 +284,8 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 
 			// Construct the raw office meta-data
 			RawOfficeMetaData rawOfficeMetaData = rawOfficeFactory.constructRawOfficeMetaData(officeConfiguration,
-					sourceContext, issues, officeManagingManagedObjects, rawMetaData, rawBoundMoFactory,
-					rawGovernanceFactory, rawBoundAdminFactory, rawTaskFactory);
+					issues, officeManagingManagedObjects, rawMetaData, rawBoundMoFactory, rawGovernanceFactory,
+					rawBoundAdminFactory, rawTaskFactory);
 			if (rawOfficeMetaData == null) {
 				continue; // issue with office
 			}

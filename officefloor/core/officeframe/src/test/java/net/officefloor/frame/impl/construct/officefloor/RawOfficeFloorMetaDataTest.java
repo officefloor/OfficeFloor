@@ -40,8 +40,6 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow.EscalationKey;
-import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -571,9 +569,6 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 		final OfficeConfiguration officeConfiguration = this.createMock(OfficeConfiguration.class);
 
-		// Continue team (not this instance as created)
-		final TeamManagement continueTeam = new TeamManagementImpl(new PassiveTeam());
-
 		// Record have escalation procedure
 		this.record_officeFloorName();
 		this.record_constructTeams();
@@ -583,9 +578,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				new OfficeConfiguration[] { officeConfiguration });
 		this.recordReturn(officeConfiguration, officeConfiguration.getOfficeName(), "OFFICE");
 		this.recordReturn(this.rawOfficeFactory,
-				this.rawOfficeFactory.constructRawOfficeMetaData(officeConfiguration, this.sourceContext, this.issues,
-						null, null, this.rawBoundMoFactory, null, this.rawBoundAdminFactory,
-						this.rawFunctionMetaDataFactory),
+				this.rawOfficeFactory.constructRawOfficeMetaData(officeConfiguration, this.issues, null, null,
+						this.rawBoundMoFactory, null, this.rawBoundAdminFactory, this.rawFunctionMetaDataFactory),
 				null, new AlwaysMatcher());
 
 		// Attempt to construct office floor
@@ -759,9 +753,6 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			officeMetaDatas[i] = this.createMock(OfficeMetaData.class);
 		}
 
-		// Continue team (not this instance as created)
-		final TeamManagement continueTeam = new TeamManagementImpl(new PassiveTeam());
-
 		// Record the construction of the offices
 		this.recordReturn(this.configuration, this.configuration.getOfficeConfiguration(), officeConfigurations);
 		for (int i = 0; i < officeCount; i++) {
@@ -775,9 +766,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			// Record construction of the office
 			this.recordReturn(officeConfiguration, officeConfiguration.getOfficeName(), officeName);
 			this.recordReturn(this.rawOfficeFactory,
-					this.rawOfficeFactory.constructRawOfficeMetaData(officeConfiguration, this.sourceContext,
-							this.issues, officeManagingManagedObjects, null, this.rawBoundMoFactory,
-							this.rawGovernanceFactory, this.rawBoundAdminFactory, this.rawFunctionMetaDataFactory),
+					this.rawOfficeFactory.constructRawOfficeMetaData(officeConfiguration, this.issues,
+							officeManagingManagedObjects, null, this.rawBoundMoFactory, this.rawGovernanceFactory,
+							this.rawBoundAdminFactory, this.rawFunctionMetaDataFactory),
 					rawOfficeMetaData, new AbstractMatcher() {
 						@Override
 						public boolean matches(Object[] e, Object[] a) {

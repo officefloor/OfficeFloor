@@ -28,7 +28,6 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
@@ -40,7 +39,6 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -83,11 +81,6 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	private final String OFFICE_NAME = "OFFICE";
 
 	/**
-	 * {@link SourceContext}.
-	 */
-	private final SourceContext sourceContext = this.createMock(SourceContext.class);
-
-	/**
 	 * {@link Team} name.
 	 */
 	private final String TEAM_NAME = "TEAM";
@@ -112,11 +105,6 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 * {@link OfficeFloorIssues}.
 	 */
 	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
-
-	/**
-	 * {@link FunctionLoop}.
-	 */
-	private final FunctionLoop functionLoop = this.createMock(FunctionLoop.class);
 
 	/**
 	 * Ensures issue if no {@link GovernanceSource} name.
@@ -632,7 +620,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Create the raw governance meta-data
 		RawGovernanceMetaData rawGovernanceMetaData = RawGovernanceMetaDataImpl.getFactory()
 				.createRawGovernanceMetaData((GovernanceConfiguration) this.configuration, GOVERNANCE_INDEX,
-						this.sourceContext, officeTeams, OFFICE_NAME, this.issues, this.functionLoop);
+						officeTeams, OFFICE_NAME, this.issues);
 		if (!isCreated) {
 			// Ensure not created
 			assertNull("Should not create the Raw Governance Meta-Data", rawGovernanceMetaData);

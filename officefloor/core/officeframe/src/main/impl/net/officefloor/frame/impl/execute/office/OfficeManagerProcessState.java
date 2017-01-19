@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
-import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
@@ -86,19 +85,14 @@ public class OfficeManagerProcessState implements ProcessState {
 	}
 
 	@Override
-	public ManagedFunctionMetaData<?, ?> getFunctionMetaData(String functionName) throws UnknownFunctionException {
-		throw new IllegalStateException(this.getClass().getSimpleName() + " should be be involved in specific tasks");
-	}
-
-	@Override
 	public FunctionState spawnThreadState(ManagedFunctionMetaData<?, ?> managedFunctionMetaData, Object parameter,
 			FlowCompletion completion) {
-		throw new IllegalStateException(this.getClass().getSimpleName() + " should be be spawning threads");
+		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be be spawning threads");
 	}
 
 	@Override
 	public FunctionState threadComplete(ThreadState thread) {
-		throw new IllegalStateException(this.getClass().getSimpleName() + " should be be completing threads");
+		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be be completing threads");
 	}
 
 	@Override

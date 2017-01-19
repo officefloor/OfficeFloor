@@ -41,13 +41,11 @@ public interface RawManagedFunctionMetaDataFactory {
 	 *            {@link RawBoundManagedObjectMetaDataFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
 	 * @return {@link RawManagedFunctionMetaData}.
 	 */
 	RawManagedFunctionMetaData<?, ?> constructRawManagedFunctionMetaData(
 			ManagedFunctionConfiguration<?, ?> configuration, RawOfficeMetaData rawOfficeMetaData,
 			AssetManagerFactory assetManagerFactory, RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			OfficeFloorIssues issues, FunctionLoop functionLoop);
+			OfficeFloorIssues issues);
 
 }

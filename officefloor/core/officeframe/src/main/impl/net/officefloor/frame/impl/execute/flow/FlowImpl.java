@@ -194,8 +194,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	private <O extends Enum<O>, F extends Enum<F>> ManagedFunctionContainer loadManagedFunction(Object parameter,
 			ManagedFunctionMetaData<O, F> managedFunctionMetaData, ManagedObjectContainer[] functionBoundManagedObjects,
 			boolean isEnforceGovernance, ManagedFunctionContainer parallelOwner, boolean isUnloadManagedObjects) {
-		ManagedFunctionLogic managedFunctionLogic = new ManagedFunctionLogicImpl<>(managedFunctionMetaData, parameter,
-				this.threadState.getProcessState());
+		ManagedFunctionLogic managedFunctionLogic = new ManagedFunctionLogicImpl<>(managedFunctionMetaData, parameter);
 		ManagedFunctionContainer managedFunctionContainer = new ManagedFunctionContainerImpl<ManagedFunctionMetaData<?, ?>>(
 				null, managedFunctionLogic, functionBoundManagedObjects,
 				managedFunctionMetaData.getRequiredManagedObjects(), managedFunctionMetaData.getRequiredGovernance(),
