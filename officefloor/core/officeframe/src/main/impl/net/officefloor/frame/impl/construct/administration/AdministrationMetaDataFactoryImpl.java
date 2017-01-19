@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.construct.administrator;
+package net.officefloor.frame.impl.construct.administration;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -139,16 +139,18 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 		TeamManagement responsibleTeam = null; // any team
 		if (!ConstructUtil.isBlank(teamName)) {
 			responsibleTeam = officeTeams.get(teamName);
-			issues.addIssue(assetType, assetName,
-					"Administration " + adminName + " team '" + teamName + "' can not be found");
-			return null; // must have team specified
+			if (responsibleTeam == null) {
+				issues.addIssue(assetType, assetName,
+						"Administration " + adminName + " team '" + teamName + "' can not be found");
+				return null; // must have team
+			}
 		}
 
 		// Obtain the extension interface
 		Class<E> extensionInterfaceType = configuration.getExtensionInterface();
 		if (extensionInterfaceType == null) {
 			issues.addIssue(assetType, assetName,
-					"Administrator " + adminName + " did not provide extension interface type");
+					"Administration " + adminName + " did not provide extension interface type");
 			return null; // no extension interface
 		}
 
@@ -160,7 +162,7 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 			// Ensure have managed object name
 			if (ConstructUtil.isBlank(moName)) {
 				issues.addIssue(assetType, assetName,
-						"Administrator " + adminName + " specifying no name for managed object");
+						"Administration " + adminName + " specifying no name for managed object");
 				return null; // unspecified managed object name
 			}
 
@@ -168,7 +170,7 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 			RawBoundManagedObjectMetaData mo = scopeMo.get(moName);
 			if (mo == null) {
 				issues.addIssue(assetType, assetName,
-						"Managed Object '" + moName + "' not available to Administrator " + adminName);
+						"Managed Object '" + moName + "' not available to Administration " + adminName);
 				return null; // unknown managed object
 			}
 
@@ -199,7 +201,7 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 								// Managed Object invalid
 								isExtensionInterfaceFactoryIssue = true;
 								issues.addIssue(assetType, assetName, "Managed Object did not provide "
-										+ ExtensionInterfaceFactory.class.getSimpleName() + " for Administrator "
+										+ ExtensionInterfaceFactory.class.getSimpleName() + " for Administration "
 										+ adminName + " (ManagedObjectSource="
 										+ moInstance.getRawManagedObjectMetaData().getManagedObjectName() + ")");
 								continue NEXT_INSTANCE; // invalid
@@ -216,7 +218,7 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 					isExtensionInterfaceFactoryIssue = true;
 					issues.addIssue(assetType, assetName,
 							"Managed Object '" + moName + "' does not support extension interface "
-									+ extensionInterfaceType.getName() + " required by Administrator " + adminName
+									+ extensionInterfaceType.getName() + " required by Administration " + adminName
 									+ " (ManagedObjectSource="
 									+ moInstance.getRawManagedObjectMetaData().getManagedObjectName() + ")");
 					continue NEXT_INSTANCE; // invalid
@@ -236,13 +238,13 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 			eiMetaDatas.add(new ExtensionInterfaceMetaDataImpl<E>(moIndex, extensionInterfaceFactories));
 		}
 
-		// TODO allow configuration of escalation procedure for administrator
+		// TODO allow configuration of escalation procedure for administration
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl();
 
 		// Obtain the function node references
 		ManagedFunctionReference[] functionReferences = configuration.getFlowConfiguration();
 		if (functionReferences == null) {
-			issues.addIssue(AssetType.ADMINISTRATOR, adminName, "Function references not provided");
+			issues.addIssue(AssetType.ADMINISTRATOR, adminName, "ManagedFunction references not provided");
 			return null; // must have function references
 		}
 

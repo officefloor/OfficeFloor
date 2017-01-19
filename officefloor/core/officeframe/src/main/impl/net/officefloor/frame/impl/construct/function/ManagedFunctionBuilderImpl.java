@@ -33,7 +33,7 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.administrator.AdministrationBuilderImpl;
+import net.officefloor.frame.impl.construct.administration.AdministrationBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;

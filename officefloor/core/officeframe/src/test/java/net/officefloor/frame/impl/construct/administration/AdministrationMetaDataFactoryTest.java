@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.construct.administrator;
+package net.officefloor.frame.impl.construct.administration;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -33,6 +33,7 @@ import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFacto
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.construct.administration.AdministrationMetaDataFactoryImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
@@ -199,10 +200,11 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_managedObject();
 		this.record_noFlows();
 		this.record_governanceMetaData(0);
+		this.record_noGovernance();
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructAdministration(1, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -306,7 +308,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.recordReturn(this.rawMoMetaData, this.rawMoMetaData.getManagedObjectName(), "MANAGED_OBJECT_SOURCE");
 		this.issues.addIssue(this.assetType, this.assetName,
 				"Managed Object 'MO' does not support extension interface " + Object.class.getName()
-						+ " required by Administrator ADMIN (ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
+						+ " required by Administration ADMIN (ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
 
 		// Construct the administrators
 		this.replayMockObjects();
@@ -370,6 +372,11 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.recordReturn(this.extensionInterfaceFactory,
 				this.extensionInterfaceFactory.createExtensionInterface(managedObject), extensionInterface);
 
+		// No flows or governance
+		this.record_noFlows();
+		this.record_governanceMetaData(0);
+		this.record_noGovernance();
+
 		// Test
 		this.replayMockObjects();
 
@@ -405,7 +412,6 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_init();
 		this.record_team();
 		this.record_managedObject();
-		this.record_governanceMetaData(0);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), null);
 		this.record_issue("ManagedFunction references not provided");
 
@@ -427,7 +433,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_init();
 		this.record_team();
 		this.record_managedObject();
-		this.record_governanceMetaData(0);
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionReference[] { functionReference });
 		this.recordReturn(functionReference, functionReference.getFunctionName(), "TASK");
@@ -454,7 +460,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_managedObject();
 
 		// Record linking tasks
-		this.record_governanceMetaData(0);
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionReference[] { functionReference });
 		this.recordReturn(functionReference, functionReference.getFunctionName(), "TASK");
@@ -462,6 +468,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.recordReturn(functionMetaData, functionMetaData.getParameterType(), Connection.class);
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"),
 				functionMetaData);
+		this.record_governanceMetaData(0);
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
 				new AdministrationGovernanceConfiguration[0]);
 
@@ -491,8 +498,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_init();
 		this.record_team();
 		this.record_managedObject();
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionReference[0]);
+		this.record_noFlows();
 
 		// Record governance configuration
 		GovernanceMetaData<?, ?>[] governanceMetaData = this.record_governanceMetaData(1);
@@ -529,8 +535,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.record_init();
 		this.record_team();
 		this.record_managedObject();
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionReference[0]);
+		this.record_noFlows();
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
 				new AdministrationGovernanceConfiguration<?>[] { governanceConfiguration });
 		this.recordReturn(governanceConfiguration, governanceConfiguration.getIndex(), GOVERNANCE_INDEX);
@@ -599,6 +604,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 * Records no flows.
 	 */
 	private void record_noFlows() {
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionReference[0]);
 	}
@@ -621,6 +627,14 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.recordReturn(processMetaData, processMetaData.getThreadMetaData(), threadMetaData);
 		this.recordReturn(threadMetaData, threadMetaData.getGovernanceMetaData(), governanceMetaData);
 		return governanceMetaData;
+	}
+
+	/**
+	 * Records no {@link Governance}.
+	 */
+	private void record_noGovernance() {
+		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
+				new AdministrationGovernanceConfiguration[0]);
 	}
 
 	/**

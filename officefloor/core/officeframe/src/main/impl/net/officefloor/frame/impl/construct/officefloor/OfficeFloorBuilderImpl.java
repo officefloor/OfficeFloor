@@ -32,7 +32,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
-import net.officefloor.frame.impl.construct.administrator.AdministrationMetaDataFactoryImpl;
+import net.officefloor.frame.impl.construct.administration.AdministrationMetaDataFactoryImpl;
 import net.officefloor.frame.impl.construct.function.RawManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataImpl;
