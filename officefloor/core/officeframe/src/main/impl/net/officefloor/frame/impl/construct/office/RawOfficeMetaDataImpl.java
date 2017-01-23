@@ -51,7 +51,7 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationCon
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
@@ -210,7 +210,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects, RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawGovernanceMetaDataFactory rawGovernanceMetaDataFactory,
-			AdministrationMetaDataFactory administrationMetaDataFactory,
+			RawAdministrationMetaDataFactory administrationMetaDataFactory,
 			RawManagedFunctionMetaDataFactory rawFunctionFactory) {
 
 		// Obtain the name of the office

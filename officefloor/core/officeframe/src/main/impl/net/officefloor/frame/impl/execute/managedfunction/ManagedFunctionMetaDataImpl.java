@@ -69,13 +69,6 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final TeamManagement responsibleTeam;
 
 	/**
-	 * {@link ManagedObjectIndex} instances identifying the
-	 * {@link ManagedObject} instances that must be loaded before the
-	 * {@link ManagedFunction} may be executed.
-	 */
-	private final ManagedObjectIndex[] requiredManagedObjects;
-
-	/**
 	 * Required {@link Governance}.
 	 */
 	private final boolean[] requiredGovernance;
@@ -131,6 +124,13 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private AdministrationMetaData<?, ?, ?>[] postAdministration;
 
 	/**
+	 * {@link ManagedObjectIndex} instances identifying the
+	 * {@link ManagedObject} instances that must be loaded before the
+	 * {@link ManagedFunction} may be executed.
+	 */
+	private ManagedObjectIndex[] requiredManagedObjects;
+
+	/**
 	 * Initiate with details of the meta-data for the {@link ManagedFunction}.
 	 * 
 	 * @param functionName
@@ -151,17 +151,13 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            Translates the {@link ManagedFunction} index to the
 	 *            {@link ManagedObjectIndex} to obtain the {@link ManagedObject}
 	 *            for the {@link ManagedFunction}.
-	 * @param requiredManagedObjects
-	 *            {@link ManagedObjectIndex} instances identifying the
-	 *            {@link ManagedObject} instances that must be loaded before the
-	 *            {@link ManagedFunction} may be executed.
 	 * @param requiredGovernance
 	 *            Required {@link Governance}.
 	 */
 	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory,
 			Object differentiator, Class<?> parameterType, TeamManagement responsibleTeam,
 			ManagedObjectIndex[] functionIndexedManagedObjects, ManagedObjectMetaData<?>[] functionBoundManagedObjects,
-			ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance) {
+			boolean[] requiredGovernance) {
 		this.functionName = functionName;
 		this.functionFactory = functionFactory;
 		this.differentiator = differentiator;
@@ -169,7 +165,6 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 		this.responsibleTeam = responsibleTeam;
 		this.functionIndexedManagedObjects = functionIndexedManagedObjects;
 		this.functionBoundManagedObjects = functionBoundManagedObjects;
-		this.requiredManagedObjects = requiredManagedObjects;
 		this.requiredGovernance = requiredGovernance;
 	}
 
@@ -196,16 +191,22 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *            {@link AdministrationMetaData} specifying the
 	 *            {@link Administration} instances to be completed after
 	 *            executing the {@link ManagedFunction}.
+	 * @param requiredManagedObjects
+	 *            {@link ManagedObjectIndex} instances identifying the
+	 *            {@link ManagedObject} instances that must be loaded before the
+	 *            {@link ManagedFunction} may be executed.
 	 */
 	public void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaData[] flowMetaData,
 			ManagedFunctionMetaData<?, ?> nextFunctionMetaData, EscalationProcedure escalationProcedure,
-			AdministrationMetaData<?, ?, ?>[] preAdministration, AdministrationMetaData<?, ?, ?>[] postAdministration) {
+			AdministrationMetaData<?, ?, ?>[] preAdministration, AdministrationMetaData<?, ?, ?>[] postAdministration,
+			ManagedObjectIndex[] requiredManagedObjects) {
 		this.officeMetaData = officeMetaData;
 		this.flowMetaData = flowMetaData;
 		this.nextFunctionMetaData = nextFunctionMetaData;
 		this.escalationProcedure = escalationProcedure;
 		this.preAdministration = preAdministration;
 		this.postAdministration = postAdministration;
+		this.requiredManagedObjects = requiredManagedObjects;
 	}
 
 	/*

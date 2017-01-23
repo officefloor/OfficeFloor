@@ -45,7 +45,7 @@ import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfigura
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
-import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedFunctionMetaDataFactory;
@@ -139,7 +139,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData, RawOf
 	public RawOfficeFloorMetaData constructRawOfficeFloorMetaData(OfficeFloorConfiguration configuration,
 			OfficeFloorIssues issues, RawTeamMetaDataFactory rawTeamFactory,
 			RawManagedObjectMetaDataFactory rawMosFactory, RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
-			RawGovernanceMetaDataFactory rawGovernanceFactory, AdministrationMetaDataFactory rawBoundAdminFactory,
+			RawGovernanceMetaDataFactory rawGovernanceFactory, RawAdministrationMetaDataFactory rawBoundAdminFactory,
 			RawOfficeMetaDataFactory rawOfficeFactory, RawManagedFunctionMetaDataFactory rawTaskFactory) {
 
 		// Name of office floor for reporting issues

@@ -43,8 +43,9 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceCon
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
-import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
@@ -93,10 +94,10 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 			.createMock(RawBoundManagedObjectMetaDataFactory.class);
 
 	/**
-	 * {@link AdministrationMetaDataFactory}.
+	 * {@link RawAdministrationMetaDataFactory}.
 	 */
-	private final AdministrationMetaDataFactory administrationMetaDataFactory = this
-			.createMock(AdministrationMetaDataFactory.class);
+	private final RawAdministrationMetaDataFactory administrationMetaDataFactory = this
+			.createMock(RawAdministrationMetaDataFactory.class);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -194,7 +195,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getTeams(), teams);
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
@@ -216,7 +216,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam(); // no differentiator loaded
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
@@ -240,7 +239,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), null);
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 
 		// Attempt to construct function meta-data
@@ -280,7 +278,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
@@ -314,7 +311,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects("MO", rawMoMetaData);
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.recordReturn(rawMoMetaData, rawMoMetaData.getDefaultInstanceIndex(), 0);
 		this.recordReturn(rawMoMetaData, rawMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
@@ -366,8 +362,11 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				new RawBoundManagedObjectInstanceMetaData<?>[] { rawMoInstanceMetaData });
 		this.recordReturn(rawMoInstanceMetaData, rawMoInstanceMetaData.getDependencies(),
 				new RawBoundManagedObjectMetaData[0]);
-		this.record_NoAdministration();
 		this.record_NoGovernance();
+		this.record_NoFlows();
+		this.record_NoNextFunction();
+		this.record_NoEscalations();
+		this.record_NoAdministration();
 		this.recordReturn(rawBoundMoMetaData, rawBoundMoMetaData.getManagedObjectIndex(), moIndex);
 		this.recordReturn(rawBoundMoMetaData, rawBoundMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
 				new RawBoundManagedObjectInstanceMetaData<?>[] { rawMoInstanceMetaData });
@@ -376,7 +375,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Attempt to construct function meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
 		this.verifyMockObjects();
 
 		// Verify function meta-data
@@ -401,7 +400,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects("MO", rawMoMetaData);
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.recordReturn(rawMoMetaData, rawMoMetaData.getDefaultInstanceIndex(), 2);
 		this.recordReturn(rawMoMetaData, rawMoMetaData.getRawBoundManagedObjectInstanceMetaData(),
@@ -431,7 +429,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), null);
 		this.record_functionIssue("No type for object at index 0");
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
@@ -456,12 +453,15 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				new ManagedFunctionObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration.getObjectType(), parameterType);
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), true);
-		this.record_NoAdministration();
 		this.record_NoGovernance();
+		this.record_NoFlows();
+		this.record_NoNextFunction();
+		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> rawMetaData = this.constructRawFunctionMetaData(true);
+		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData();
 		ManagedFunctionMetaData<O, F> metaData = rawMetaData.getManagedFunctionMetaData();
 		this.verifyMockObjects();
 
@@ -500,12 +500,15 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(paramConfigOne, paramConfigOne.isParameter(), true);
 		this.recordReturn(paramConfigTwo, paramConfigTwo.getObjectType(), paramTypeTwo);
 		this.recordReturn(paramConfigTwo, paramConfigTwo.isParameter(), true);
-		this.record_NoAdministration();
 		this.record_NoGovernance();
+		this.record_NoFlows();
+		this.record_NoNextFunction();
+		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> rawMetaData = this.constructRawFunctionMetaData(true);
+		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData();
 		ManagedFunctionMetaData<O, F> metaData = rawMetaData.getManagedFunctionMetaData();
 		this.verifyMockObjects();
 
@@ -544,7 +547,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(paramConfigTwo, paramConfigTwo.isParameter(), true);
 		this.record_functionIssue(
 				"Incompatible parameter types (" + paramTypeOne.getName() + ", " + paramTypeTwo.getName() + ")");
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
@@ -564,7 +566,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getObjectConfiguration(),
 				new ManagedFunctionObjectConfiguration[] { null });
 		this.record_functionIssue("No object configuration at index 0");
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
@@ -590,7 +591,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
 		this.recordReturn(moConfiguration, moConfiguration.getScopeManagedObjectName(), null);
 		this.record_functionIssue("No name for ManagedObject at index 0");
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 
 		// Attempt to construct task meta-data
@@ -616,12 +616,15 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(moConfiguration, moConfiguration.isParameter(), false);
 		this.recordReturn(moConfiguration, moConfiguration.getScopeManagedObjectName(), "MO");
 		this.record_functionIssue("Can not find scope managed object 'MO'");
-		this.record_NoAdministration();
 		this.record_NoGovernance();
+		this.record_NoFlows();
+		this.record_NoNextFunction();
+		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
 		this.verifyMockObjects();
 
 		// Ensure no managed objects
@@ -659,12 +662,15 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_functionIssue("ManagedObject MO is incompatible (require=" + Connection.class.getName()
 				+ ", object of ManagedObject type=" + Integer.class.getName()
 				+ ", ManagedObjectSource=MANAGED_OBJECT_SOURCE)");
-		this.record_NoAdministration();
 		this.record_NoGovernance();
+		this.record_NoFlows();
+		this.record_NoNextFunction();
+		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
 		this.verifyMockObjects();
 
 		// Ensure no managed objects
@@ -689,6 +695,9 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		final ManagedObjectIndex moIndex = new ManagedObjectIndexImpl(ManagedObjectScope.THREAD, 0);
 		final ManagedObjectMetaData<?> moMetaData = this.createMock(ManagedObjectMetaData.class);
 
+		// Register the managed object
+		this.officeScopeManagedObjects.put("MO", rawMo);
+
 		// Record
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects("MO", rawMo);
@@ -701,17 +710,21 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(mo, mo.getObjectType(), Connection.class);
 		LoadDependencies moLinked = new LoadDependencies(rawMo, moIndex, rawMoInstance);
 		this.record_loadDependencies(moLinked);
-		this.record_NoAdministration();
-		this.record_dependencySortingForCoordination(moLinked);
 		this.record_NoGovernance();
 		this.recordReturn(rawMo, rawMo.getDefaultInstanceIndex(), 0);
 		this.recordReturn(rawMo, rawMo.getRawBoundManagedObjectInstanceMetaData(),
 				new RawBoundManagedObjectInstanceMetaData<?>[] { rawMoInstance });
 		this.recordReturn(rawMoInstance, rawMoInstance.getManagedObjectMetaData(), moMetaData);
+		this.record_NoFlows();
+		this.record_NoNextFunction();
+		this.record_NoEscalations();
+		this.record_NoAdministration();
+
+		this.record_dependencySortingForCoordination(moLinked);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have the required managed object
@@ -764,6 +777,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(moConfiguration, moConfiguration.getScopeManagedObjectName(), "MO");
 		this.record_singleInstance_getRawManagedObjectMetaData(rawFunctionMo, rawFunctionMoInstance, functionMo);
 		this.recordReturn(functionMo, functionMo.getObjectType(), Connection.class);
+
 		// Record loading dependencies
 		LoadDependencies dependencyDependencyLinked = new LoadDependencies(dependencyDependency,
 				dependencyDependencyIndex, dependencyDependencyInstance);
@@ -772,13 +786,19 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		LoadDependencies workLinked = new LoadDependencies(rawFunctionMo, functionMoIndex, rawFunctionMoInstance,
 				dependencyLinked);
 		this.record_loadDependencies(workLinked);
-		this.record_NoAdministration();
-		this.record_dependencySortingForCoordination(workLinked, dependencyLinked, dependencyDependencyLinked);
+
 		this.record_NoGovernance();
+		this.record_NoFlows();
+		this.record_NoNextFunction();
+		this.record_NoEscalations();
+		this.record_NoAdministration();
+
+		// Record sorting required dependencies
+		this.record_dependencySortingForCoordination(workLinked, dependencyLinked, dependencyDependencyLinked);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> metaData = this.constructRawFunctionMetaData(true);
+		RawManagedFunctionMetaData<O, F> metaData = this.fullyConstructRawFunctionMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have managed objects with dependency first
@@ -823,12 +843,20 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(moConfiguration, moConfiguration.getScopeManagedObjectName(), "MO");
 		this.record_singleInstance_getRawManagedObjectMetaData(rawMoA, rawMoAInstance, moA);
 		this.recordReturn(moA, moA.getObjectType(), Connection.class);
+
 		// Record cyclic dependency
 		LoadDependencies aLinked = new LoadDependencies(rawMoA, aIndex, rawMoAInstance, (LoadDependencies) null);
 		LoadDependencies bLinked = new LoadDependencies(rawMoB, bIndex, rawMoBInstance, aLinked);
 		aLinked.dependencies[0] = bLinked; // create cycle
 		this.record_loadDependencies(aLinked);
+
+		// Record office meta-data
+		this.record_NoGovernance();
+		this.record_NoFlows();
+		this.record_NoNextFunction();
+		this.record_NoEscalations();
 		this.record_NoAdministration();
+
 		// Record dependency sorting
 		this.record_dependencySortingForCoordination(aLinked, bLinked);
 		// Record reporting of cycle
@@ -838,83 +866,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Should not construct task meta-data as cyclic dependency
 		this.replayMockObjects();
-		this.constructRawFunctionMetaData(false);
+		this.fullyConstructRawFunctionMetaData();
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure able to construct pre {@link Administration}.
-	 */
-	public void testConstructPreAdministration() {
-
-		final AdministrationConfiguration<?, ?, ?>[] preAdministration = new AdministrationConfiguration[] {
-				this.createMock(AdministrationConfiguration.class) };
-		final AdministrationMetaData<?, ?, ?> administrationMetaData = this.createMock(AdministrationMetaData.class);
-		final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<>();
-
-		// Record construct function with pre-administration
-		this.record_nameFactoryTeam();
-		this.record_functionBoundManagedObjects();
-		this.record_NoRequiredManagedObjects();
-		this.record_dependencySortingForCoordination();
-		this.record_NoGovernance();
-		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
-		this.recordReturn(this.administrationMetaDataFactory,
-				this.administrationMetaDataFactory.constructAdministrationMetaData(preAdministration,
-						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
-				new AdministrationMetaData[] { administrationMetaData });
-		this.recordReturn(this.configuration, this.configuration.getPostAdministration(),
-				new AdministrationConfiguration[0]);
-
-		// Attempt to construct task meta-data
-		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData();
-		ManagedFunctionMetaData<O, F> functionMetaData = rawMetaData.getManagedFunctionMetaData();
-		this.verifyMockObjects();
-
-		// Ensure have duty
-		assertEquals("Should have administration", 1, functionMetaData.getPreAdministrationMetaData().length);
-		AdministrationMetaData<?, ?, ?> adminMetaData = functionMetaData.getPreAdministrationMetaData()[0];
-		assertSame("Incorrect administration meta-data", administrationMetaData, adminMetaData);
-	}
-
-	/**
-	 * Ensures that dependency of administered {@link ManagedObject} is also
-	 * included in required {@link ManagedObjectIndex} instances.
-	 */
-	public void testPostAdminstrationWithAdministeredManagedObjectDependency() {
-
-		final AdministrationConfiguration<?, ?, ?>[] postAdministration = new AdministrationConfiguration[] {
-				this.createMock(AdministrationConfiguration.class) };
-		final AdministrationMetaData<?, ?, ?> administrationMetaData = this.createMock(AdministrationMetaData.class);
-		final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<>();
-		final ManagedObjectIndex dependencyIndex = this.createMock(ManagedObjectIndex.class);
-		final ManagedObjectIndex moIndex = this.createMock(ManagedObjectIndex.class);
-
-		// Record construct task duty association
-		this.record_nameFactoryTeam();
-		this.record_functionBoundManagedObjects();
-		this.record_NoRequiredManagedObjects();
-		this.recordReturn(this.configuration, this.configuration.getPreAdministration(),
-				new AdministrationConfiguration[0]);
-		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
-		this.recordReturn(this.administrationMetaDataFactory,
-				this.administrationMetaDataFactory.constructAdministrationMetaData(postAdministration,
-						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
-				new AdministrationMetaData[] { administrationMetaData });
-		this.record_NoGovernance();
-
-		// Attempt to construct task meta-data
-		this.replayMockObjects();
-		RawManagedFunctionMetaData<O, F> rawMetaData = this.constructRawFunctionMetaData(true);
-		ManagedFunctionMetaData<O, F> functionMetaData = rawMetaData.getManagedFunctionMetaData();
-		this.verifyMockObjects();
-
-		// Ensure have administered managed object and dependency as required
-		ManagedObjectIndex[] requiredManagedObjects = functionMetaData.getRequiredManagedObjects();
-		assertEquals("Administered managed objects should be required", 2, requiredManagedObjects.length);
-		assertEquals("Administered dependency must be first", dependencyIndex, requiredManagedObjects[0]);
-		assertEquals("Administered managed object must be after its dependency", moIndex, requiredManagedObjects[1]);
 	}
 
 	/**
@@ -929,14 +882,15 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), null);
 		this.record_functionIssue("No function referenced for flow index 0");
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -957,8 +911,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
@@ -966,6 +920,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_functionIssue("No function name provided for flow index 0");
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -987,8 +942,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
@@ -998,6 +953,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_functionIssue("Can not find function meta-data IGNORED TASK NAME for flow index 0");
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1019,8 +975,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
@@ -1034,6 +990,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 						+ ", parameter=" + Integer.class.getName() + ", function=TASK) for flow index 0");
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1070,8 +1027,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
@@ -1083,6 +1040,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(flowConfiguration, flowConfiguration.isSpawnThreadState(), isSpawnThreadState);
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1106,13 +1064,13 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
 		this.recordReturn(this.configuration, this.configuration.getNextFunction(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), null);
 		this.record_functionIssue("No function name provided for next function");
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1132,7 +1090,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
 		this.recordReturn(this.configuration, this.configuration.getNextFunction(), taskNodeReference);
@@ -1145,6 +1102,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				"Argument is not compatible with function parameter (argument=" + Integer.class.getName()
 						+ ", parameter=" + Connection.class.getName() + ", function=NEXT_TASK) for next function");
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1164,7 +1122,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
 		this.recordReturn(this.configuration, this.configuration.getNextFunction(), taskNodeReference);
@@ -1174,6 +1131,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(taskNodeReference, taskNodeReference.getArgumentType(), null);
 		this.recordReturn(nextTaskMetaData, nextTaskMetaData.getParameterType(), null);
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1197,7 +1155,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
 		this.record_NoNextFunction();
@@ -1205,6 +1162,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), null);
 		this.record_functionIssue("No escalation type for escalation index 0");
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1225,7 +1183,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
 		this.record_NoNextFunction();
@@ -1234,6 +1191,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(), null);
 		this.record_functionIssue("No function referenced for escalation index 0");
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1255,7 +1213,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
 		this.record_NoNextFunction();
@@ -1266,6 +1223,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), null);
 		this.record_functionIssue("No function name provided for escalation index 0");
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1287,7 +1245,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
 		this.record_NoNextFunction();
@@ -1304,6 +1261,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_functionIssue("Argument is not compatible with function parameter (argument="
 				+ NullPointerException.class.getName() + ", parameter=" + Integer.class.getName()
 				+ ", function=ESCALATION_HANDLER) for escalation index 0");
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1325,7 +1283,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 		this.record_NoGovernance();
 		this.record_NoFlows();
 		this.record_NoNextFunction();
@@ -1339,6 +1296,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 				escalationTaskMetaData);
 		this.recordReturn(taskNodeReference, taskNodeReference.getArgumentType(), NullPointerException.class);
 		this.recordReturn(escalationTaskMetaData, escalationTaskMetaData.getParameterType(), RuntimeException.class);
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1366,7 +1324,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 
 		// Record configuring governance
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
@@ -1379,6 +1336,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoFlows();
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1399,7 +1357,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 
 		// Record configuring governance
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
@@ -1412,6 +1369,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoFlows();
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1440,7 +1398,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 
 		// Record configuring governance
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
@@ -1455,6 +1412,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoFlows();
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1482,7 +1440,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 
 		// Record configuring governance
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
@@ -1493,6 +1450,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoFlows();
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1510,7 +1468,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_nameFactoryTeam();
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
-		this.record_NoAdministration();
 
 		// Record configuring governance
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
@@ -1520,6 +1477,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoFlows();
 		this.record_NoNextFunction();
 		this.record_NoEscalations();
+		this.record_NoAdministration();
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1529,6 +1487,135 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		// Ensure manual governance
 		boolean[] requiredGovernance = metaData.getManagedFunctionMetaData().getRequiredGovernance();
 		assertNull("Should not have governance array when manual", requiredGovernance);
+	}
+
+	/**
+	 * Ensure able to construct pre {@link Administration}.
+	 */
+	public void testConstructPreAdministration() {
+
+		final AdministrationConfiguration<?, ?, ?>[] preAdministration = new AdministrationConfiguration[] {
+				this.createMock(AdministrationConfiguration.class) };
+		final AdministrationConfiguration<?, ?, ?>[] postAdministration = new AdministrationConfiguration[0];
+		final RawAdministrationMetaData rawAdministrationMetaData = this.createMock(RawAdministrationMetaData.class);
+		final AdministrationMetaData<?, ?, ?> administrationMetaData = this.createMock(AdministrationMetaData.class);
+		final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<>();
+
+		// Record construct function with pre-administration
+		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_dependencySortingForCoordination();
+		this.record_NoGovernance();
+		this.record_NoFlows();
+		this.record_NoNextFunction();
+		this.record_NoEscalations();
+		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
+		this.recordReturn(this.administrationMetaDataFactory,
+				this.administrationMetaDataFactory.constructRawAdministrationMetaData(preAdministration,
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+				new RawAdministrationMetaData[] { rawAdministrationMetaData });
+		this.recordReturn(rawAdministrationMetaData, rawAdministrationMetaData.getAdministrationMetaData(),
+				administrationMetaData);
+		this.recordReturn(rawAdministrationMetaData, rawAdministrationMetaData.getRawBoundManagedObjectMetaData(),
+				new RawBoundManagedObjectMetaData[0]);
+		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
+		this.recordReturn(this.administrationMetaDataFactory,
+				this.administrationMetaDataFactory.constructRawAdministrationMetaData(postAdministration,
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+				new RawAdministrationMetaData[0]);
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData();
+		ManagedFunctionMetaData<O, F> functionMetaData = rawMetaData.getManagedFunctionMetaData();
+		this.verifyMockObjects();
+
+		// Ensure have administration
+		assertEquals("Should have pre administration", 1, functionMetaData.getPreAdministrationMetaData().length);
+		AdministrationMetaData<?, ?, ?> adminMetaData = functionMetaData.getPreAdministrationMetaData()[0];
+		assertSame("Incorrect administration meta-data", administrationMetaData, adminMetaData);
+		assertEquals("Should have post administration", 0, functionMetaData.getPostAdministrationMetaData().length);
+	}
+
+	/**
+	 * Ensures that dependency of administered {@link ManagedObject} is also
+	 * included in required {@link ManagedObjectIndex} instances.
+	 */
+	public void testPostAdminstrationWithAdministeredManagedObjectDependency() {
+
+		final AdministrationConfiguration<?, ?, ?>[] preAdministration = new AdministrationConfiguration[0];
+		final AdministrationConfiguration<?, ?, ?>[] postAdministration = new AdministrationConfiguration[] {
+				this.createMock(AdministrationConfiguration.class) };
+		final RawAdministrationMetaData rawAdministrationMetaData = this.createMock(RawAdministrationMetaData.class);
+		final AdministrationMetaData<?, ?, ?> administrationMetaData = this.createMock(AdministrationMetaData.class);
+		final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<>(this.officeScopeManagedObjects);
+		final RawBoundManagedObjectMetaData rawBoundManagedObject = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+
+		// Administration required Managed Object
+		final RawBoundManagedObjectInstanceMetaData<?> rawAdministrationMoInstance = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
+		final RawManagedObjectMetaData<?, ?> administrationMo = this.createMock(RawManagedObjectMetaData.class);
+		final ManagedObjectIndex administrationMoIndex = new ManagedObjectIndexImpl(ManagedObjectScope.THREAD, 0);
+
+		// Dependency of the administration required Managed Object
+		final RawBoundManagedObjectMetaData dependencyMo = this.createMock(RawBoundManagedObjectMetaData.class);
+		final RawBoundManagedObjectInstanceMetaData<?> dependencyMoInstance = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
+		final ManagedObjectIndex dependencyMoIndex = new ManagedObjectIndexImpl(ManagedObjectScope.THREAD, 1);
+
+		// Dependency of the dependency Managed Object
+		final RawBoundManagedObjectMetaData dependencyDependency = this.createMock(RawBoundManagedObjectMetaData.class);
+		final RawBoundManagedObjectInstanceMetaData<?> dependencyDependencyInstance = this
+				.createMock(RawBoundManagedObjectInstanceMetaData.class);
+		final ManagedObjectIndex dependencyDependencyIndex = new ManagedObjectIndexImpl(ManagedObjectScope.PROCESS, 0);
+
+		// Record construct task duty association
+		this.record_nameFactoryTeam();
+		this.record_functionBoundManagedObjects();
+		this.record_NoRequiredManagedObjects();
+		this.record_NoGovernance();
+		this.record_NoFlows();
+		this.record_NoNextFunction();
+		this.record_NoEscalations();
+		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
+		this.recordReturn(this.administrationMetaDataFactory,
+				this.administrationMetaDataFactory.constructRawAdministrationMetaData(preAdministration,
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+				new RawAdministrationMetaData[0]);
+		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
+		this.recordReturn(this.administrationMetaDataFactory,
+				this.administrationMetaDataFactory.constructRawAdministrationMetaData(postAdministration,
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+				new RawAdministrationMetaData[] { rawAdministrationMetaData });
+		this.recordReturn(rawAdministrationMetaData, rawAdministrationMetaData.getAdministrationMetaData(),
+				administrationMetaData);
+		this.recordReturn(rawAdministrationMetaData, rawAdministrationMetaData.getRawBoundManagedObjectMetaData(),
+				new RawBoundManagedObjectMetaData[] { rawBoundManagedObject });
+
+		// Record loading dependencies
+		LoadDependencies dependencyDependencyLinked = new LoadDependencies(dependencyDependency,
+				dependencyDependencyIndex, dependencyDependencyInstance);
+		LoadDependencies dependencyLinked = new LoadDependencies(dependencyMo, dependencyMoIndex, dependencyMoInstance,
+				dependencyDependencyLinked);
+		LoadDependencies administrationLinked = new LoadDependencies(rawBoundManagedObject, administrationMoIndex,
+				rawAdministrationMoInstance, dependencyLinked);
+		this.record_loadDependencies(administrationLinked);
+		this.record_dependencySortingForCoordination(administrationLinked);
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawManagedFunctionMetaData<O, F> rawMetaData = this.fullyConstructRawFunctionMetaData();
+		ManagedFunctionMetaData<O, F> functionMetaData = rawMetaData.getManagedFunctionMetaData();
+		this.verifyMockObjects();
+
+		// Ensure have administered managed object and dependency as required
+		ManagedObjectIndex[] requiredManagedObjects = functionMetaData.getRequiredManagedObjects();
+		assertEquals("Administered managed objects should be required", 2, requiredManagedObjects.length);
+		assertEquals("Administered dependency must be first", dependencyMoIndex, requiredManagedObjects[0]);
+		assertEquals("Administered managed object must be after its dependency", administrationMoIndex,
+				requiredManagedObjects[1]);
 	}
 
 	/**
@@ -1602,10 +1689,23 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 * for {@link ManagedFunction}.
 	 */
 	private void record_NoAdministration() {
-		this.recordReturn(this.configuration, this.configuration.getPreAdministration(),
-				new AdministrationConfiguration[0]);
-		this.recordReturn(this.configuration, this.configuration.getPostAdministration(),
-				new AdministrationConfiguration[0]);
+		final Map<String, RawBoundManagedObjectMetaData> scopeMo = new HashMap<>(this.officeScopeManagedObjects);
+
+		// Record no pre administration
+		final AdministrationConfiguration<?, ?, ?>[] preAdministration = new AdministrationConfiguration[0];
+		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
+		this.recordReturn(this.administrationMetaDataFactory,
+				this.administrationMetaDataFactory.constructRawAdministrationMetaData(preAdministration,
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+				new RawAdministrationMetaData[0]);
+
+		// Record no post administration
+		final AdministrationConfiguration<?, ?, ?>[] postAdministration = new AdministrationConfiguration[0];
+		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
+		this.recordReturn(this.administrationMetaDataFactory,
+				this.administrationMetaDataFactory.constructRawAdministrationMetaData(postAdministration,
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+				new RawAdministrationMetaData[0]);
 	}
 
 	/**
@@ -1725,6 +1825,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 * Records no {@link Flow}.
 	 */
 	private void record_NoFlows() {
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new ManagedFunctionFlowConfiguration[0]);
 	}

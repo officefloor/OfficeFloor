@@ -24,7 +24,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -34,7 +33,7 @@ import net.officefloor.frame.internal.structure.TeamManagement;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministrationMetaDataFactory {
+public interface RawAdministrationMetaDataFactory {
 
 	/**
 	 * Creates the {@link RawAdministrationMetaData} instances.
@@ -56,11 +55,11 @@ public interface AdministrationMetaDataFactory {
 	 *            {@link RawBoundManagedObjectMetaData} by their scope names.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @return {@link AdministrationMetaData} instances.
+	 * @return {@link RawAdministrationMetaData} instances.
 	 */
-	AdministrationMetaData<?, ?, ?>[] constructAdministrationMetaData(
-			AdministrationConfiguration<?, ?, ?>[] configuration, AssetType assetType, String assetName,
-			OfficeMetaData officeMetaData, Map<String, TeamManagement> officeTeams,
-			Map<String, RawBoundManagedObjectMetaData> scopeMo, OfficeFloorIssues issues);
+	RawAdministrationMetaData[] constructRawAdministrationMetaData(AdministrationConfiguration<?, ?, ?>[] configuration,
+			AssetType assetType, String assetName, OfficeMetaData officeMetaData,
+			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
+			OfficeFloorIssues issues);
 
 }

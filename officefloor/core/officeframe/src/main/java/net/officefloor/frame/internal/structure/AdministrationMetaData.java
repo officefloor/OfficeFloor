@@ -44,14 +44,24 @@ public interface AdministrationMetaData<E, F extends Enum<F>, G extends Enum<G>>
 	AdministrationFactory<E, F, G> getAdministrationFactory();
 
 	/**
-	 * Obtains the {@link ExtensionInterfaceMetaData} over the
+	 * Obtains the extension interface to administer the {@link ManagedObject}
+	 * instances.
+	 * 
+	 * @return Extension interface to administer the {@link ManagedObject}
+	 *         instances.
+	 */
+	Class<E> getExtensionInterface();
+
+	/**
+	 * Obtains the {@link ManagedObjectExtensionMetaData} over the
 	 * {@link ManagedObject} instances to be administered by this
 	 * {@link Administration}.
 	 * 
-	 * @return {@link ExtensionInterfaceMetaData} over the {@link ManagedObject}
-	 *         instances to be administered by this {@link Administration}.
+	 * @return {@link ManagedObjectExtensionMetaData} over the
+	 *         {@link ManagedObject} instances to be administered by this
+	 *         {@link Administration}.
 	 */
-	ExtensionInterfaceMetaData<E>[] getExtensionInterfaceMetaData();
+	ManagedObjectExtensionMetaData<E>[] getManagedObjectExtensionMetaData();
 
 	/**
 	 * Translates the {@link Administration} {@link Governance} index to the

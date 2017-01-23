@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.administrator;
+package net.officefloor.frame.impl.execute.administration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 	/**
 	 * Extensions.
 	 */
-	private final List<E> extensions;
+	private final E[] extensions;
 
 	/**
 	 * {@link ThreadState}.
@@ -69,7 +69,7 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 	 * @param threadState
 	 *            {@link ThreadState}.
 	 */
-	public AdministrationFunctionLogic(AdministrationMetaData<E, F, G> metaData, List<E> extensions,
+	public AdministrationFunctionLogic(AdministrationMetaData<E, F, G> metaData, E[] extensions,
 			ThreadState threadState) {
 		this.metaData = metaData;
 		this.extensions = extensions;
@@ -148,7 +148,7 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 		 */
 
 		@Override
-		public List<E> getExtensionInterfaces() {
+		public E[] getExtensions() {
 			return AdministrationFunctionLogic.this.extensions;
 		}
 

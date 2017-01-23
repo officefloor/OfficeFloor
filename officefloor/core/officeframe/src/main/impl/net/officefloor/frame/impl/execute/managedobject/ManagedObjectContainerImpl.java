@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
-import java.util.List;
 import java.util.logging.Level;
 
 import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
@@ -40,13 +39,13 @@ import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
-import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -468,9 +467,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					GovernanceContainer governance = managedFunctionThreadState.getGovernanceContainer(governanceIndex);
 
 					// Obtain the extension interface
-					ExtensionInterfaceExtractor extractor = governanceMetaData.getExtensionInterfaceExtractor();
-					Object extensionInterface = extractor.extractExtensionInterface(container.managedObject,
-							container.metaData);
+					ManagedObjectExtensionExtractor extractor = governanceMetaData.getExtensionInterfaceExtractor();
+					Object extensionInterface = extractor.extractExtension(container.managedObject, container.metaData);
 
 					// Register the governance for the managed object
 					registeredGovernance = governance.registerManagedObject(extensionInterface, container);
@@ -706,8 +704,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	}
 
 	@Override
-	public <I> FunctionState extractExtensionInterface(final ExtensionInterfaceExtractor<I> extractor,
-			final List<I> managedObjectExtensions, TeamManagement responsibleTeam) {
+	public <E> FunctionState extractExtension(final ManagedObjectExtensionExtractor<E> extractor,
+			final E[] managedObjectExtensions, final int extensionIndex, TeamManagement responsibleTeam) {
 		return new ManagedObjectOperation() {
 			@Override
 			public FunctionState execute() {
@@ -715,8 +713,11 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				// Easy access to the container
 				ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
-				I extension = extractor.extractExtensionInterface(container.managedObject, container.metaData);
-				managedObjectExtensions.add(extension);
+				// Extract the extension
+				E extension = extractor.extractExtension(container.managedObject, container.metaData);
+
+				// Register the extension
+				managedObjectExtensions[extensionIndex] = extension;
 
 				// Nothing further to administer
 				return null;

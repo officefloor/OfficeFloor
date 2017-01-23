@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.administrator;
+package net.officefloor.frame.impl.execute.administration;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
@@ -23,7 +23,7 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -50,9 +50,14 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	private final AdministrationFactory<E, F, G> administrationFactory;
 
 	/**
-	 * {@link ExtensionInterfaceMetaData}.
+	 * Extension interface.
 	 */
-	private final ExtensionInterfaceMetaData<E>[] eiMetaData;
+	private final Class<E> extensionInterface;
+
+	/**
+	 * {@link ManagedObjectExtensionMetaData}.
+	 */
+	private final ManagedObjectExtensionMetaData<E>[] eiMetaData;
 
 	/**
 	 * {@link TeamManagement} of {@link Team} responsible for the
@@ -87,8 +92,10 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 *            Bound name of this {@link Administration}.
 	 * @param administrationFactory
 	 *            {@link AdministrationFactory}.
+	 * @param extensionInterface
+	 *            Extension interface.
 	 * @param eiMetaData
-	 *            {@link ExtensionInterfaceMetaData}.
+	 *            {@link ManagedObjectExtensionMetaData}.
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} of {@link Team} responsible for the
 	 *            {@link GovernanceActivity}.
@@ -104,10 +111,12 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 *            {@link OfficeMetaData}.
 	 */
 	public AdministrationMetaDataImpl(String administrationName, AdministrationFactory<E, F, G> administrationFactory,
-			ExtensionInterfaceMetaData<E>[] eiMetaData, TeamManagement responsibleTeam, FlowMetaData[] flowMetaData,
-			int[] governanceIndexes, EscalationProcedure escalationProcedure, OfficeMetaData officeMetaData) {
+			Class<E> extensionInterface, ManagedObjectExtensionMetaData<E>[] eiMetaData, TeamManagement responsibleTeam,
+			FlowMetaData[] flowMetaData, int[] governanceIndexes, EscalationProcedure escalationProcedure,
+			OfficeMetaData officeMetaData) {
 		this.administrationName = administrationName;
 		this.administrationFactory = administrationFactory;
+		this.extensionInterface = extensionInterface;
 		this.eiMetaData = eiMetaData;
 		this.responsibleTeam = responsibleTeam;
 		this.flowMetaData = flowMetaData;
@@ -155,7 +164,7 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 */
 
 	@Override
-	public ExtensionInterfaceMetaData<E>[] getExtensionInterfaceMetaData() {
+	public ManagedObjectExtensionMetaData<E>[] getManagedObjectExtensionMetaData() {
 		return this.eiMetaData;
 	}
 
@@ -167,6 +176,12 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	@Override
 	public AdministrationFactory<E, F, G> getAdministrationFactory() {
 		return this.administrationFactory;
+	}
+
+	@Override
+	public Class<E> getExtensionInterface() {
+		// TODO implement AdministrationMetaData<E,F,G>.getExtensionInterface
+		throw new UnsupportedOperationException("TODO implement AdministrationMetaData<E,F,G>.getExtensionInterface");
 	}
 
 	@Override

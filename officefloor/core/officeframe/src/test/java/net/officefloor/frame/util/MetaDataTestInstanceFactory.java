@@ -62,9 +62,10 @@ public class MetaDataTestInstanceFactory {
 		// Create and initialise the meta-data
 		ManagedFunctionMetaDataImpl<O, F> metaData = new ManagedFunctionMetaDataImpl<O, F>("TEST_FUNCTION",
 				functionFactory, "TEST_DIFFERENTIATOR", Object.class, teamManagement, new ManagedObjectIndex[0],
-				new ManagedObjectMetaData<?>[0], new ManagedObjectIndex[0], new boolean[0]);
+				new ManagedObjectMetaData<?>[0], new boolean[0]);
 		metaData.loadOfficeMetaData(null, new FlowMetaData[0], null, new EscalationProcedureImpl(),
-				new AdministrationMetaData<?, ?, ?>[0], new AdministrationMetaData<?, ?, ?>[0]);
+				new AdministrationMetaData<?, ?, ?>[0], new AdministrationMetaData<?, ?, ?>[0],
+				new ManagedObjectIndex[0]);
 
 		// Return the meta-data
 		return metaData;

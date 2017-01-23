@@ -20,7 +20,7 @@ package net.officefloor.frame.impl.execute.managedobject;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 
@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectGovernanceMetaDataImpl<I> implements
-		ManagedObjectGovernanceMetaData<I>, ExtensionInterfaceExtractor<I> {
+		ManagedObjectGovernanceMetaData<I>, ManagedObjectExtensionExtractor<I> {
 
 	/**
 	 * {@link Governance} index.
@@ -66,7 +66,7 @@ public class ManagedObjectGovernanceMetaDataImpl<I> implements
 	}
 
 	@Override
-	public ExtensionInterfaceExtractor<I> getExtensionInterfaceExtractor() {
+	public ManagedObjectExtensionExtractor<I> getExtensionInterfaceExtractor() {
 		return this;
 	}
 
@@ -75,7 +75,7 @@ public class ManagedObjectGovernanceMetaDataImpl<I> implements
 	 */
 
 	@Override
-	public I extractExtensionInterface(ManagedObject managedObject,
+	public I extractExtension(ManagedObject managedObject,
 			ManagedObjectMetaData<?> managedObjectMetaData) {
 		return this.extensionInterfaceFactory
 				.createExtensionInterface(managedObject);

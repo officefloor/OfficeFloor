@@ -17,30 +17,26 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
- * Meta-data for the {@link Governance} of a {@link ManagedObject}.
+ * Extracts the extension interface from the {@link ManagedObject} within the
+ * {@link ManagedObjectContainer}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectGovernanceMetaData<E> {
+public interface ManagedObjectExtensionExtractor<E> {
 
 	/**
-	 * Obtains the index for the {@link Governance} within the
-	 * {@link ThreadState}.
+	 * Extracts the extension from the {@link ManagedObject}.
 	 * 
-	 * @return Index for the {@link Governance} within the {@link ThreadState}.
+	 * @param managedObject
+	 *            {@link ManagedObject} to extract the extension interface from.
+	 * @param managedObjectMetaData
+	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject} to
+	 *            aid in extracting the extension interface.
+	 * @return Extension Interface.
 	 */
-	int getGovernanceIndex();
-
-	/**
-	 * Obtains the {@link ManagedObjectExtensionExtractor} to extract the extension
-	 * interface from the {@link ManagedObject}.
-	 * 
-	 * @return {@link ManagedObjectExtensionExtractor}.
-	 */
-	ManagedObjectExtensionExtractor<E> getExtensionInterfaceExtractor();
+	E extractExtension(ManagedObject managedObject, ManagedObjectMetaData<?> managedObjectMetaData);
 
 }

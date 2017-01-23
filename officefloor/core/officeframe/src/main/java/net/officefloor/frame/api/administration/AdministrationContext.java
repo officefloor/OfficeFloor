@@ -17,8 +17,6 @@
  */
 package net.officefloor.frame.api.administration;
 
-import java.util.List;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -38,7 +36,7 @@ public interface AdministrationContext<E extends Object, F extends Enum<F>, G ex
 	 * @return Extension for the {@link ManagedObject} instances to be
 	 *         administered.
 	 */
-	List<E> getExtensionInterfaces();
+	E[] getExtensions();
 
 	/**
 	 * Instigates a {@link Flow} to be run.

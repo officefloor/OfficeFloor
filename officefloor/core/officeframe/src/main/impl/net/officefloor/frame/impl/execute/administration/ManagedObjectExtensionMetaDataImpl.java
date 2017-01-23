@@ -15,22 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.administrator;
+package net.officefloor.frame.impl.execute.administration;
 
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
-import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 
 /**
- * Implementation of the {@link ExtensionInterfaceMetaData}.
+ * Implementation of the {@link ManagedObjectExtensionMetaData}.
  *
  * @author Daniel Sagenschneider
  */
-public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
-		ExtensionInterfaceMetaData<I>, ExtensionInterfaceExtractor<I> {
+public class ManagedObjectExtensionMetaDataImpl<I extends Object> implements
+		ManagedObjectExtensionMetaData<I>, ManagedObjectExtensionExtractor<I> {
 
 	/**
 	 * {@link ManagedObjectIndex} identifying the {@link ManagedObject}
@@ -56,7 +56,7 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	 *            the {@link ManagedObject} instances for the
 	 *            {@link ManagedObjectIndex}.
 	 */
-	public ExtensionInterfaceMetaDataImpl(
+	public ManagedObjectExtensionMetaDataImpl(
 			ManagedObjectIndex managedObjectIndex,
 			ExtensionInterfaceFactory<I>[] extensionInterfaceFactories) {
 		this.managedObjectIndex = managedObjectIndex;
@@ -73,7 +73,7 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	}
 
 	@Override
-	public ExtensionInterfaceExtractor<I> getExtensionInterfaceExtractor() {
+	public ManagedObjectExtensionExtractor<I> getManagedObjectExtensionExtractor() {
 		return this;
 	}
 
@@ -82,7 +82,7 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	 */
 
 	@Override
-	public I extractExtensionInterface(ManagedObject managedObject,
+	public I extractExtension(ManagedObject managedObject,
 			ManagedObjectMetaData<?> managedObjectMetaData) {
 
 		// Obtain the instance index of the Managed Object

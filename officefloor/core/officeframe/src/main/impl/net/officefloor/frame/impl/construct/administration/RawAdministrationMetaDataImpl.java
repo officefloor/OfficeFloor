@@ -29,23 +29,24 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.administrator.AdministrationMetaDataImpl;
-import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDataImpl;
+import net.officefloor.frame.impl.execute.administration.AdministrationMetaDataImpl;
+import net.officefloor.frame.impl.execute.administration.ManagedObjectExtensionMetaDataImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -55,41 +56,67 @@ import net.officefloor.frame.internal.structure.TeamManagement;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministrationMetaDataFactoryImpl implements AdministrationMetaDataFactory {
+public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataFactory, RawAdministrationMetaData {
 
 	/**
-	 * Obtains the {@link AdministrationMetaDataFactory}.
+	 * Obtains the {@link RawAdministrationMetaDataFactory}.
 	 * 
-	 * @return {@link AdministrationMetaDataFactory}.
+	 * @return {@link RawAdministrationMetaDataFactory}.
 	 */
-	public static AdministrationMetaDataFactory getFactory() {
-		return new AdministrationMetaDataFactoryImpl();
+	public static RawAdministrationMetaDataFactory getFactory() {
+		return new RawAdministrationMetaDataImpl(null, null);
+	}
+
+	/**
+	 * {@link RawBoundManagedObjectMetaData} instances for the
+	 * {@link Administration}.
+	 */
+	private final RawBoundManagedObjectMetaData[] rawBoundManagedObjectMetaData;
+
+	/**
+	 * {@link AdministrationMetaData}.
+	 */
+	private final AdministrationMetaData<?, ?, ?> administrationMetaData;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param rawBoundManagedObjectMetaData
+	 *            {@link RawBoundManagedObjectMetaData} instances for the
+	 *            {@link Administration}.
+	 * @param administrationMetaData
+	 *            {@link AdministrationMetaData}.
+	 */
+	public RawAdministrationMetaDataImpl(RawBoundManagedObjectMetaData[] rawBoundManagedObjectMetaData,
+			AdministrationMetaData<?, ?, ?> administrationMetaData) {
+		this.rawBoundManagedObjectMetaData = rawBoundManagedObjectMetaData;
+		this.administrationMetaData = administrationMetaData;
 	}
 
 	/*
-	 * ====================== AdministrationMetaDataFactory ===================
+	 * =================== RawAdministrationMetaDataFactory ===================
 	 */
 
 	@Override
-	public AdministrationMetaData<?, ?, ?>[] constructAdministrationMetaData(
+	public RawAdministrationMetaData[] constructRawAdministrationMetaData(
 			AdministrationConfiguration<?, ?, ?>[] configuration, AssetType assetType, String assetName,
 			OfficeMetaData officeMetaData, Map<String, TeamManagement> officeTeams,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo, OfficeFloorIssues issues) {
 
 		// Create the administrators
-		List<AdministrationMetaData<?, ?, ?>> administrations = new LinkedList<AdministrationMetaData<?, ?, ?>>();
+		List<RawAdministrationMetaData> rawAdministrations = new LinkedList<RawAdministrationMetaData>();
 		for (AdministrationConfiguration<?, ?, ?> administrationConfiguration : configuration) {
 
-			// Construct the bound administrator
-			AdministrationMetaData<?, ?, ?> administration = this.constructAdministrationMetaData(
+			// Construct the raw administrator
+			RawAdministrationMetaData rawAdministration = this.constructRawAdministrationMetaData(
 					administrationConfiguration, assetType, assetName, officeMetaData, officeTeams, scopeMo, issues);
-			if (administration != null) {
-				administrations.add(administration);
+			if (rawAdministration != null) {
+				rawAdministrations.add(rawAdministration);
 			}
 		}
 
-		// Return the administrations
-		return administrations.toArray(new AdministrationMetaData[0]);
+		// Return the raw administrations
+		return rawAdministrations.toArray(new RawAdministrationMetaData[0]);
 	}
 
 	/**
@@ -112,9 +139,9 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 	 *            {@link RawBoundManagedObjectMetaData} by their scope names.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @return Constructed {@link AdministrationMetaData}.
+	 * @return Constructed {@link RawAdministrationMetaData}.
 	 */
-	private <E, F extends Enum<F>, G extends Enum<G>> AdministrationMetaData<E, F, G> constructAdministrationMetaData(
+	private <E, F extends Enum<F>, G extends Enum<G>> RawAdministrationMetaData constructRawAdministrationMetaData(
 			AdministrationConfiguration<E, F, G> configuration, AssetType assetType, String assetName,
 			OfficeMetaData officeMetaData, Map<String, TeamManagement> officeTeams,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo, OfficeFloorIssues issues) {
@@ -156,7 +183,7 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 
 		// Obtain the managed objects being administered
 		List<RawBoundManagedObjectMetaData> administeredManagedObjects = new LinkedList<RawBoundManagedObjectMetaData>();
-		List<ExtensionInterfaceMetaData<E>> eiMetaDatas = new LinkedList<ExtensionInterfaceMetaData<E>>();
+		List<ManagedObjectExtensionMetaData<E>> eiMetaDatas = new LinkedList<ManagedObjectExtensionMetaData<E>>();
 		for (String moName : configuration.getAdministeredManagedObjectNames()) {
 
 			// Ensure have managed object name
@@ -235,7 +262,7 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 			administeredManagedObjects.add(mo);
 
 			// Add the extension interface meta-data
-			eiMetaDatas.add(new ExtensionInterfaceMetaDataImpl<E>(moIndex, extensionInterfaceFactories));
+			eiMetaDatas.add(new ManagedObjectExtensionMetaDataImpl<E>(moIndex, extensionInterfaceFactories));
 		}
 
 		// TODO allow configuration of escalation procedure for administration
@@ -296,11 +323,32 @@ public class AdministrationMetaDataFactoryImpl implements AdministrationMetaData
 			governanceMapping[administrationGovernanceIndex] = processGovernanceIndex;
 		}
 
-		// Create and return the administrator meta-data
+		// Create the administrator meta-data
 		AdministrationMetaDataImpl<E, F, G> adminMetaData = new AdministrationMetaDataImpl<E, F, G>(adminName,
-				adminFactory, ConstructUtil.toArray(eiMetaDatas, new ExtensionInterfaceMetaData[0]), responsibleTeam,
-				flows, governanceMapping, escalationProcedure, officeMetaData);
-		return adminMetaData;
+				adminFactory, extensionInterfaceType,
+				ConstructUtil.toArray(eiMetaDatas, new ManagedObjectExtensionMetaData[0]), responsibleTeam, flows,
+				governanceMapping, escalationProcedure, officeMetaData);
+
+		// Create the listing of administered managed objects
+		RawBoundManagedObjectMetaData[] rawBoundAdministeredManagedObjects = administeredManagedObjects
+				.toArray(new RawBoundManagedObjectMetaData[0]);
+
+		// Return the raw administration meta-data
+		return new RawAdministrationMetaDataImpl(rawBoundAdministeredManagedObjects, adminMetaData);
+	}
+
+	/*
+	 * =================== RawAdministrationMetaData ===================
+	 */
+
+	@Override
+	public RawBoundManagedObjectMetaData[] getRawBoundManagedObjectMetaData() {
+		return this.rawBoundManagedObjectMetaData;
+	}
+
+	@Override
+	public AdministrationMetaData<?, ?, ?> getAdministrationMetaData() {
+		return this.administrationMetaData;
 	}
 
 }

@@ -77,17 +77,20 @@ public interface ManagedObjectContainer {
 	 * {@link ManagedObject} extension will be loaded.
 	 * 
 	 * @param extractor
-	 *            {@link ExtensionInterfaceExtractor}.
+	 *            {@link ManagedObjectExtensionExtractor}.
 	 * @param managedObjectExtensions
 	 *            {@link List} to load the {@link ManagedObject} extension.
+	 * @param extensionIndex
+	 *            Index within the {@link ManagedObject} extensions array to
+	 *            load the extension.
 	 * @param responsibleTeam
 	 *            {@link TeamManagement} responsible for extracting the
 	 *            extension. May be <code>null</code> to use any {@link Team}.
 	 * @return {@link FunctionState} to load the {@link ManagedObject}
 	 *         extension.
 	 */
-	<E> FunctionState extractExtensionInterface(ExtensionInterfaceExtractor<E> extractor,
-			List<E> managedObjectExtensions, TeamManagement responsibleTeam);
+	<E> FunctionState extractExtension(ManagedObjectExtensionExtractor<E> extractor, E[] managedObjectExtensions,
+			int extensionIndex, TeamManagement responsibleTeam);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.

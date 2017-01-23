@@ -17,14 +17,13 @@
  */
 package net.officefloor.frame.impl.execute.flow;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Array;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.impl.execute.administrator.AdministrationFunctionLogic;
+import net.officefloor.frame.impl.execute.administration.AdministrationFunctionLogic;
 import net.officefloor.frame.impl.execute.function.LinkedListSetPromise;
 import net.officefloor.frame.impl.execute.function.ManagedFunctionContainerImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
@@ -33,7 +32,6 @@ import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
-import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionLogic;
@@ -45,6 +43,8 @@ import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -234,71 +234,110 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 		// Load the administration
 		for (int i = 0; i < administrations.length; i++) {
-			final AdministrationMetaData<?, ?, ?> administrationMetaData = administrations[i];
-
-			// Obtain the responsible team (ensure all done on same thread)
-			// (this ensures safe to add to extensions list in setup)
-			final TeamManagement responsibleTeam = administrationMetaData.getResponsibleTeam();
-
-			// Obtain the extensions to be managed
-			FunctionState allExtractions = null;
-			ExtensionInterfaceMetaData<?>[] eiMetaDatas = administrationMetaData.getExtensionInterfaceMetaData();
-			@SuppressWarnings("rawtypes")
-			List extensions = new ArrayList<>(eiMetaDatas.length);
-			for (int e = 0; e < eiMetaDatas.length; e++) {
-				ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[e];
-
-				// Obtain the index of managed object to administer
-				ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
-
-				// Obtain the managed object container
-				ManagedObjectContainer moContainer;
-				int scopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
-				switch (moIndex.getManagedObjectScope()) {
-				case FUNCTION:
-					moContainer = functionBoundManagedObjects[scopeIndex];
-					break;
-
-				case THREAD:
-					moContainer = threadState.getManagedObjectContainer(scopeIndex);
-					break;
-
-				case PROCESS:
-					moContainer = threadState.getProcessState().getManagedObjectContainer(scopeIndex);
-					break;
-
-				default:
-					throw new IllegalStateException("Unknown managed object scope " + moIndex.getManagedObjectScope());
-				}
-
-				// Extract the extension interface
-				@SuppressWarnings("unchecked")
-				FunctionState moExtraction = moContainer.extractExtensionInterface(
-						eiMetaData.getExtensionInterfaceExtractor(), extensions, responsibleTeam);
-				allExtractions = Promise.then(allExtractions, moExtraction);
-			}
-
-			// Create the administration function logic
-			@SuppressWarnings("unchecked")
-			AdministrationFunctionLogic<?, ?, ?> administrationLogic = new AdministrationFunctionLogic<>(
-					administrationMetaData, extensions, this.threadState);
+			AdministrationMetaData<?, ?, ?> administrationMetaData = administrations[i];
 
 			// Determine if unload managed objects (last administration)
 			boolean isUnloadResponsible = isUnloadManagedObjects && (i == (administrations.length - 1));
 
-			// Create the managed function container for administration
-			ManagedFunctionContainer dutyFunction = new ManagedFunctionContainerImpl<>(allExtractions,
-					administrationLogic, functionBoundManagedObjects,
-					administeringFunctionMetaData.getRequiredManagedObjects(),
-					administeringFunctionMetaData.getRequiredGovernance(), isEnforceGovernance, administrationMetaData,
-					parallelOwner, this, isUnloadResponsible);
+			// Create the administration function container
+			ManagedFunctionContainer adminFunction = this.createAdministrationContainer(administrationMetaData,
+					administeringFunctionMetaData, isEnforceGovernance, parallelOwner, functionBoundManagedObjects,
+					isUnloadResponsible);
 
 			// Register the active administration function
-			this.activeFunctions.addEntry(dutyFunction);
+			this.activeFunctions.addEntry(adminFunction);
 
 			// Load the administration function
-			this.loadFunction(firstLastFunctions, dutyFunction);
+			this.loadFunction(firstLastFunctions, adminFunction);
 		}
+	}
+
+	/**
+	 * Creates the {@link ManagedFunctionContainer} for the
+	 * {@link Administration}.
+	 * 
+	 * @param administrationMetaData
+	 *            {@link AdministrationMetaData}.
+	 * @param administeringFunctionMetaData
+	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction}
+	 *            being administered.
+	 * @param isEnforceGovernance
+	 *            Whether to enforce {@link Governance}.
+	 * @param functionBoundManagedObjects
+	 *            {@link ManagedFunction} bound {@link ManagedObjectContainer}
+	 *            instances.
+	 * @param parallelOwner
+	 *            Parallel {@link ManagedFunctionContainer} owner.
+	 * @param isUnloadManagedObjects
+	 *            Whether the {@link Administration} is to unload the
+	 *            {@link ManagedObject} instances for the
+	 *            {@link ManagedFunction}.
+	 * @return {@link AdministrationFunctionLogic}.
+	 */
+	private <E> ManagedFunctionContainer createAdministrationContainer(
+			AdministrationMetaData<E, ?, ?> administrationMetaData,
+			ManagedFunctionMetaData<?, ?> administeringFunctionMetaData, boolean isEnforceGovernance,
+			ManagedFunctionContainer parallelOwner, ManagedObjectContainer[] functionBoundManagedObjects,
+			boolean isUnloadResponsible) {
+
+		// Obtain the responsible team (ensure all done on same thread)
+		// (this ensures safe to add to extensions list in setup)
+		final TeamManagement responsibleTeam = administrationMetaData.getResponsibleTeam();
+
+		// Obtain the extension meta-data
+		ManagedObjectExtensionMetaData<E>[] eiMetaDatas = administrationMetaData.getManagedObjectExtensionMetaData();
+
+		// Create the array of extensions
+		Class<E> extensionInterface = administrationMetaData.getExtensionInterface();
+		@SuppressWarnings("unchecked")
+		E[] extensions = (E[]) Array.newInstance(extensionInterface, eiMetaDatas.length);
+
+		// Obtain the extensions to be managed
+		FunctionState allExtractions = null;
+		for (int e = 0; e < eiMetaDatas.length; e++) {
+			ManagedObjectExtensionMetaData<E> eiMetaData = eiMetaDatas[e];
+
+			// Obtain the index of managed object to administer
+			ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
+
+			// Obtain the managed object container
+			ManagedObjectContainer moContainer;
+			int scopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
+			switch (moIndex.getManagedObjectScope()) {
+			case FUNCTION:
+				moContainer = functionBoundManagedObjects[scopeIndex];
+				break;
+
+			case THREAD:
+				moContainer = threadState.getManagedObjectContainer(scopeIndex);
+				break;
+
+			case PROCESS:
+				moContainer = threadState.getProcessState().getManagedObjectContainer(scopeIndex);
+				break;
+
+			default:
+				throw new IllegalStateException("Unknown managed object scope " + moIndex.getManagedObjectScope());
+			}
+
+			// Extract the extension interface
+			ManagedObjectExtensionExtractor<E> extractor = eiMetaData.getManagedObjectExtensionExtractor();
+			FunctionState moExtraction = moContainer.extractExtension(extractor, extensions, e, responsibleTeam);
+			allExtractions = Promise.then(allExtractions, moExtraction);
+		}
+
+		// Create the administration function logic
+		AdministrationFunctionLogic<E, ?, ?> administrationLogic = new AdministrationFunctionLogic<>(
+				administrationMetaData, extensions, this.threadState);
+
+		// Create the managed function container for administration
+		ManagedFunctionContainer adminFunction = new ManagedFunctionContainerImpl<>(allExtractions, administrationLogic,
+				functionBoundManagedObjects, administeringFunctionMetaData.getRequiredManagedObjects(),
+				administeringFunctionMetaData.getRequiredGovernance(), isEnforceGovernance, administrationMetaData,
+				parallelOwner, this, isUnloadResponsible);
+
+		// Return the managed function container
+		return adminFunction;
 	}
 
 	/**

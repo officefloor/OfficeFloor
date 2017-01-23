@@ -33,22 +33,22 @@ import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFacto
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.administration.AdministrationMetaDataFactoryImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.construct.AdministrationMetaDataFactory;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -58,11 +58,11 @@ import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link AdministrationMetaDataFactory}.
+ * Tests the {@link RawAdministrationMetaDataFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
+public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link AdministrationConfiguration}.
@@ -168,7 +168,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructRawAdministration(0, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -185,7 +185,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructRawAdministration(0, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -204,7 +204,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructAdministration(1, this.configuration);
+		this.constructRawAdministration(1, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -220,7 +220,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructRawAdministration(0, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -238,7 +238,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructRawAdministration(0, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -258,7 +258,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructRawAdministration(0, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -278,7 +278,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructRawAdministration(0, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -312,7 +312,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructRawAdministration(0, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -349,7 +349,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructRawAdministration(0, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -381,15 +381,16 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Construct the administrators
-		AdministrationMetaData<?, ?, ?>[] adminMetaDatas = this.constructAdministration(1, this.configuration);
-		AdministrationMetaData<?, ?, ?> adminMetaData = adminMetaDatas[0];
+		RawAdministrationMetaData[] rawAdminMetaDatas = this.constructRawAdministration(1, this.configuration);
+		RawAdministrationMetaData rawAdminMetaData = rawAdminMetaDatas[0];
 
 		// Verify extension interface factory by extracting ei
+		AdministrationMetaData<?, ?, ?> adminMetaData = rawAdminMetaData.getAdministrationMetaData();
 		assertEquals("Incorrect number of administered managed objects", 1,
-				adminMetaData.getExtensionInterfaceMetaData().length);
-		ExtensionInterfaceMetaData<?> moEiMetaData = adminMetaData.getExtensionInterfaceMetaData()[0];
+				adminMetaData.getManagedObjectExtensionMetaData().length);
+		ManagedObjectExtensionMetaData<?> moEiMetaData = adminMetaData.getManagedObjectExtensionMetaData()[0];
 		assertEquals("Incorrect extracted extension interface", extensionInterface,
-				moEiMetaData.getExtensionInterfaceExtractor().extractExtensionInterface(managedObject, moMetaData));
+				moEiMetaData.getManagedObjectExtensionExtractor().extractExtension(managedObject, moMetaData));
 
 		// Verify mocks
 		this.verifyMockObjects();
@@ -400,6 +401,13 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect responsible team", this.responsibleTeam, adminMetaData.getResponsibleTeam());
 		assertEquals("Incorrect administered managed object", this.managedObjectIndex,
 				moEiMetaData.getManagedObjectIndex());
+
+		// Ensure also include administered managed object
+		RawBoundManagedObjectMetaData[] administeredManagedObjects = rawAdminMetaData
+				.getRawBoundManagedObjectMetaData();
+		assertEquals("Incorrect number of administered managed objects", 1, administeredManagedObjects.length);
+		assertSame("Incorrect administered managed object", this.rawBoundMoMetaData, administeredManagedObjects[0]);
+
 	}
 
 	/**
@@ -417,7 +425,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administration and link functions
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructRawAdministration(0, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -442,7 +450,7 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administration and link functions
 		this.replayMockObjects();
-		this.constructAdministration(0, this.configuration);
+		this.constructRawAdministration(0, this.configuration);
 		this.verifyMockObjects();
 	}
 
@@ -474,8 +482,8 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administration
 		this.replayMockObjects();
-		AdministrationMetaData<?, ?, ?>[] adminMetaDatas = this.constructAdministration(1, this.configuration);
-		AdministrationMetaData<?, ?, ?> adminMetaData = adminMetaDatas[0];
+		RawAdministrationMetaData[] adminMetaDatas = this.constructRawAdministration(1, this.configuration);
+		AdministrationMetaData<?, ?, ?> adminMetaData = adminMetaDatas[0].getAdministrationMetaData();
 		this.verifyMockObjects();
 
 		// Verify the flow
@@ -513,8 +521,8 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
-		AdministrationMetaData<?, ?, ?>[] adminMetaDatas = this.constructAdministration(1, this.configuration);
-		AdministrationMetaData<?, ?, ?> adminMetaData = adminMetaDatas[0];
+		RawAdministrationMetaData[] adminMetaDatas = this.constructRawAdministration(1, this.configuration);
+		AdministrationMetaData<?, ?, ?> adminMetaData = adminMetaDatas[0].getAdministrationMetaData();
 		this.verifyMockObjects();
 
 		// Verify the governance not mapped
@@ -548,8 +556,8 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Construct the administration
 		this.replayMockObjects();
-		AdministrationMetaData<?, ?, ?>[] adminMetaDatas = this.constructAdministration(1, this.configuration);
-		AdministrationMetaData<?, ?, ?> adminMetaData = adminMetaDatas[0];
+		RawAdministrationMetaData[] adminMetaDatas = this.constructRawAdministration(1, this.configuration);
+		AdministrationMetaData<?, ?, ?> adminMetaData = adminMetaDatas[0].getAdministrationMetaData();
 		this.verifyMockObjects();
 
 		// Verify the governance
@@ -656,19 +664,19 @@ public class AdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 *            {@link AdministrationConfiguration} instances.
 	 * @return {@link AdministrationMetaData}.
 	 */
-	private AdministrationMetaData<?, ?, ?>[] constructAdministration(int expectedCreateCount,
+	private RawAdministrationMetaData[] constructRawAdministration(int expectedCreateCount,
 			AdministrationConfiguration<?, ?, ?>... configuration) {
 
 		// Construct the meta-data
-		AdministrationMetaData<?, ?, ?>[] metaData = AdministrationMetaDataFactoryImpl.getFactory()
-				.constructAdministrationMetaData(configuration, this.assetType, this.assetName, this.officeMetaData,
+		RawAdministrationMetaData[] rawAdministrations = RawAdministrationMetaDataImpl.getFactory()
+				.constructRawAdministrationMetaData(configuration, this.assetType, this.assetName, this.officeMetaData,
 						this.officeTeams, this.scopeMo, this.issues);
 
 		// Ensure correct number created
-		assertEquals("Incorrect number of created meta-data", expectedCreateCount, metaData.length);
+		assertEquals("Incorrect number of created meta-data", expectedCreateCount, rawAdministrations.length);
 
-		// Return the meta-data
-		return metaData;
+		// Return the raw administrations
+		return rawAdministrations;
 	}
 
 }

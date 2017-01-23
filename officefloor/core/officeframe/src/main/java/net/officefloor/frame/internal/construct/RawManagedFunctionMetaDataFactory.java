@@ -19,7 +19,6 @@ package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 
 /**
  * Factory to construct {@link RawManagedFunctionMetaData}.

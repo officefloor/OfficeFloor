@@ -17,10 +17,8 @@
  */
 package net.officefloor.frame.test;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
 
 import org.junit.Assert;
 
@@ -239,11 +237,7 @@ public class ReflectiveAdministrationBuilder
 	 */
 	private class ExtensionsParameterFactory implements ParameterFactory {
 		public Object createParamater(AdministrationContext<Object, Indexed, Indexed> context) {
-			List<?> extensionInterfaces = context.getExtensionInterfaces();
-			Object[] array = (Object[]) Array.newInstance(
-					ReflectiveAdministrationBuilder.this.parameterTypes[0].getComponentType(),
-					extensionInterfaces.size());
-			return extensionInterfaces.toArray(array);
+			return context.getExtensions();
 		}
 	}
 

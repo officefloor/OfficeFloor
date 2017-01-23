@@ -15,28 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.structure;
+package net.officefloor.frame.internal.construct;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.AdministrationMetaData;
 
 /**
- * Extracts the extension interface from the {@link ManagedObject} within the
- * {@link ManagedObjectContainer}.
- * 
+ * Raw {@link AdministrationMetaData}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface ExtensionInterfaceExtractor<E> {
+public interface RawAdministrationMetaData {
 
 	/**
-	 * Extracts the extension interface from the {@link ManagedObject}.
+	 * Obtains the {@link RawBoundManagedObjectMetaData} of the
+	 * {@link ManagedObject} instances involved in the {@link Administration}.
 	 * 
-	 * @param managedObject
-	 *            {@link ManagedObject} to extract the extension interface from.
-	 * @param managedObjectMetaData
-	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject} to
-	 *            aid in extracting the extension interface.
-	 * @return Extension Interface.
+	 * @return {@link RawBoundManagedObjectMetaData} of the
+	 *         {@link ManagedObject} instances involved in the
+	 *         {@link Administration}.
 	 */
-	E extractExtensionInterface(ManagedObject managedObject, ManagedObjectMetaData<?> managedObjectMetaData);
+	RawBoundManagedObjectMetaData[] getRawBoundManagedObjectMetaData();
+
+	/**
+	 * Obtains the {@link AdministrationMetaData}.
+	 * 
+	 * @return {@link AdministrationMetaData}.
+	 */
+	AdministrationMetaData<?, ?, ?> getAdministrationMetaData();
 
 }

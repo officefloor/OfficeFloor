@@ -24,7 +24,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  *
  * @author Daniel Sagenschneider
  */
-public interface ExtensionInterfaceMetaData<E extends Object> {
+public interface ManagedObjectExtensionMetaData<E extends Object> {
 
 	/**
 	 * Obtains the {@link ManagedObjectIndex} to identify the
@@ -36,12 +36,12 @@ public interface ExtensionInterfaceMetaData<E extends Object> {
 	ManagedObjectIndex getManagedObjectIndex();
 
 	/**
-	 * Obtains the {@link ExtensionInterfaceExtractor} to extract the Extension
+	 * Obtains the {@link ManagedObjectExtensionExtractor} to extract the Extension
 	 * Interface from the {@link ManagedObject}.
 	 *
-	 * @return {@link ExtensionInterfaceExtractor} to extract the Extension
+	 * @return {@link ManagedObjectExtensionExtractor} to extract the Extension
 	 *         Interface from the {@link ManagedObject}.
 	 */
-	ExtensionInterfaceExtractor<E> getExtensionInterfaceExtractor();
+	ManagedObjectExtensionExtractor<E> getManagedObjectExtensionExtractor();
 
 }

@@ -47,13 +47,13 @@ public interface RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
 	 * @param administrationMetaDataFactory
-	 *            {@link AdministrationMetaDataFactory}.
+	 *            {@link RawAdministrationMetaDataFactory}.
 	 * @param officeTeams
 	 *            {@link Team} instances within the {@link Office}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void loadOfficeMetaData(OfficeMetaData officeMetaData, AdministrationMetaDataFactory administrationMetaDataFactory,
+	void loadOfficeMetaData(OfficeMetaData officeMetaData, RawAdministrationMetaDataFactory administrationMetaDataFactory,
 			Map<String, TeamManagement> officeTeams, OfficeFloorIssues issues);
 
 	/**

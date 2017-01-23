@@ -45,7 +45,7 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
-import net.officefloor.frame.internal.structure.ExtensionInterfaceExtractor;
+import net.officefloor.frame.internal.structure.ManagedObjectExtensionExtractor;
 import net.officefloor.frame.internal.structure.ManagedObjectGovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -1030,7 +1030,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.constructRawBoundManagedObjectMetaData(1, configuration);
 
 		// Ensure correct extension factory
-		Object ei = governances[0].extensionInterfaceExtractor.extractExtensionInterface(managedObject, moMetaData);
+		Object ei = governances[0].extensionInterfaceExtractor.extractExtension(managedObject, moMetaData);
 		assertEquals("Incorrect extension interface", extensionInterface, ei);
 
 		this.verifyMockObjects();
@@ -1554,9 +1554,9 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public final int governanceIndex;
 
 		/**
-		 * Actual {@link ExtensionInterfaceExtractor}.
+		 * Actual {@link ManagedObjectExtensionExtractor}.
 		 */
-		public ExtensionInterfaceExtractor<?> extensionInterfaceExtractor = null;
+		public ManagedObjectExtensionExtractor<?> extensionInterfaceExtractor = null;
 
 		/**
 		 * Initiate.
