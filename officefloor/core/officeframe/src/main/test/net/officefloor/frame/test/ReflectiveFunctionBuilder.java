@@ -315,7 +315,7 @@ public class ReflectiveFunctionBuilder
 	private ReflectiveAdministrationBuilder addAdminster(String methodName, boolean isPreNotPost) {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		ReflectiveAdministrationBuilder builder = new ReflectiveAdministrationBuilder((Class) this.object.getClass(),
-				this.object, methodName, true, this.functionBuilder, this.testCase);
+				this.object, methodName, isPreNotPost, this.functionBuilder, this.testCase);
 		return builder;
 	}
 

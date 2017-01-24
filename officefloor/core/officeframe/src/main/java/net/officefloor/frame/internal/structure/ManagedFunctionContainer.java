@@ -32,6 +32,16 @@ public interface ManagedFunctionContainer extends FunctionState {
 	Flow getFlow();
 
 	/**
+	 * Specifies a {@link ManagedFunctionContainer} to be executed before this
+	 * {@link ManagedFunctionContainer}.
+	 * 
+	 * @param container
+	 *            {@link ManagedFunctionContainer} to be executed before this
+	 *            {@link ManagedFunctionContainer}.
+	 */
+	void setParallelManagedFunctionContainer(ManagedFunctionContainer container);
+
+	/**
 	 * Specifies a {@link ManagedFunctionContainer} to be sequentially executed
 	 * after this {@link ManagedFunctionContainer}.
 	 * 

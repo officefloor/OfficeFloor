@@ -663,6 +663,28 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	}
 
 	/**
+	 * Facade method to invoke the {@link ManagedFunction} of an {@link Office}
+	 * and validate the {@link ManagedFunction} instances invoked.
+	 * 
+	 * @param functionName
+	 *            Name of the {@link ManagedFunction} to invoke.
+	 * @param parameter
+	 *            Parameter.
+	 * @param expectedFunctions
+	 *            Names of the expected {@link ManagedFunction} instances to be
+	 *            invoked in the order specified.
+	 * @throws Exception
+	 *             If fails to construct {@link Office} or
+	 *             {@link ManagedFunction} invocation failure.
+	 */
+	public void invokeFunctionAndValidate(String functionName, Object parameter, String... expectedFunctions)
+			throws Exception {
+		this.setRecordReflectiveFunctionMethodsInvoked(true);
+		this.invokeFunction(functionName, parameter);
+		this.validateReflectiveMethodOrder(expectedFunctions);
+	}
+
+	/**
 	 * Facade method to invoke {@link ManagedFunction} of an {@link Office}. It
 	 * will create the {@link OfficeFloor} if necessary.
 	 * 

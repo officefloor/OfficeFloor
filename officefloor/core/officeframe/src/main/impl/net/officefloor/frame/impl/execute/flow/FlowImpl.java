@@ -133,27 +133,61 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 					parallelFunctionOwner, true);
 		}
 
-		// First and last function (to add administration duties)
-		ManagedFunctionContainer[] firstLastFunctions = new ManagedFunctionContainer[2];
-
-		// Load the pre-function administration
-		this.loadAdministration(firstLastFunctions, preAdministration, managedObjects, managedFunctionMetaData,
-				isEnforceGovernance, parallelFunctionOwner, false);
-
 		// Determine which is responsible for unloading
 		boolean isFunctionUnload = (postAdministration.length == 0);
 
 		// Load the managed function
 		ManagedFunctionContainer managedFunctionContainer = this.loadManagedFunction(parameter, managedFunctionMetaData,
 				managedObjects, isEnforceGovernance, parallelFunctionOwner, isFunctionUnload);
-		this.loadFunction(firstLastFunctions, managedFunctionContainer);
 
-		// Load the post-function administrator duties
-		this.loadAdministration(firstLastFunctions, postAdministration, managedObjects, managedFunctionMetaData,
-				isEnforceGovernance, parallelFunctionOwner, true);
+		// Load the pre-function administration (as parallel functions)
+		ManagedFunctionContainer parallelAdministration = null;
+		for (int i = 0; i < preAdministration.length; i++) {
+			AdministrationMetaData<?, ?, ?> administrationMetaData = preAdministration[i];
 
-		// Return the starting function
-		return firstLastFunctions[0];
+			// Create the administration function container
+			ManagedFunctionContainer adminFunction = this.createAdministrationContainer(administrationMetaData,
+					managedFunctionMetaData, isEnforceGovernance, parallelFunctionOwner, managedObjects, false);
+
+			// Load the administration function
+			if (i == 0) {
+				// Load administration as first parallel function
+				managedFunctionContainer.setParallelManagedFunctionContainer(adminFunction);
+				parallelAdministration = adminFunction;
+			} else {
+				// Push out administration functions to do this last
+				managedFunctionContainer.setParallelManagedFunctionContainer(adminFunction);
+				adminFunction.setParallelManagedFunctionContainer(parallelAdministration);
+			}
+		}
+
+		// Load the post-function administration (as next functions)
+		ManagedFunctionContainer lastAdministration = null;
+		for (int i = 0; i < postAdministration.length; i++) {
+			AdministrationMetaData<?, ?, ?> administrationMetaData = postAdministration[i];
+
+			// Determine if unload managed objects (last administration)
+			boolean isUnloadResponsible = (i == (postAdministration.length - 1));
+
+			// Create the administration function container
+			ManagedFunctionContainer adminFunction = this.createAdministrationContainer(administrationMetaData,
+					managedFunctionMetaData, isEnforceGovernance, parallelFunctionOwner, managedObjects,
+					isUnloadResponsible);
+
+			// Load the post-administration function
+			if (i == 0) {
+				// Load administration as first next function
+				managedFunctionContainer.setNextManagedFunctionContainer(adminFunction);
+				lastAdministration = adminFunction;
+			} else {
+				// Load subsequent administration
+				lastAdministration.setNextManagedFunctionContainer(adminFunction);
+				lastAdministration = adminFunction;
+			}
+		}
+
+		// Return the function
+		return managedFunctionContainer;
 	}
 
 	@Override
@@ -201,55 +235,6 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 				isEnforceGovernance, managedFunctionMetaData, parallelOwner, this, isUnloadManagedObjects);
 		this.activeFunctions.addEntry(managedFunctionContainer);
 		return managedFunctionContainer;
-	}
-
-	/**
-	 * Loads the {@link Administration} to this {@link Flow}.
-	 * 
-	 * @param firstLastFunctions
-	 *            Array of first and last {@link ManagedFunctionContainer}
-	 *            instances.
-	 * @param administrations
-	 *            {@link AdministrationMetaData} instances for the
-	 *            {@link Administration}.
-	 * @param functionBoundManagedObjects
-	 *            {@link ManagedFunction} bound {@link ManagedObjectContainer}
-	 *            instances.
-	 * @param administeringFunctionMetaData
-	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction}
-	 *            being administered.
-	 * @param isEnforceGovernance
-	 *            Whether to enforce {@link Governance}.
-	 * @param parallelOwner
-	 *            Parallel {@link ManagedFunctionContainer} owner.
-	 * @param isUnloadManagedObjects
-	 *            Whether the last {@link Administration} is to unload the
-	 *            {@link ManagedObject} instances for the
-	 *            {@link ManagedFunction}.
-	 */
-	private void loadAdministration(ManagedFunctionContainer[] firstLastFunctions,
-			AdministrationMetaData<?, ?, ?>[] administrations, ManagedObjectContainer[] functionBoundManagedObjects,
-			ManagedFunctionMetaData<?, ?> administeringFunctionMetaData, boolean isEnforceGovernance,
-			ManagedFunctionContainer parallelOwner, boolean isUnloadManagedObjects) {
-
-		// Load the administration
-		for (int i = 0; i < administrations.length; i++) {
-			AdministrationMetaData<?, ?, ?> administrationMetaData = administrations[i];
-
-			// Determine if unload managed objects (last administration)
-			boolean isUnloadResponsible = isUnloadManagedObjects && (i == (administrations.length - 1));
-
-			// Create the administration function container
-			ManagedFunctionContainer adminFunction = this.createAdministrationContainer(administrationMetaData,
-					administeringFunctionMetaData, isEnforceGovernance, parallelOwner, functionBoundManagedObjects,
-					isUnloadResponsible);
-
-			// Register the active administration function
-			this.activeFunctions.addEntry(adminFunction);
-
-			// Load the administration function
-			this.loadFunction(firstLastFunctions, adminFunction);
-		}
 	}
 
 	/**
@@ -336,30 +321,11 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 				administeringFunctionMetaData.getRequiredGovernance(), isEnforceGovernance, administrationMetaData,
 				parallelOwner, this, isUnloadResponsible);
 
+		// Register the administration function
+		this.activeFunctions.addEntry(adminFunction);
+
 		// Return the managed function container
 		return adminFunction;
-	}
-
-	/**
-	 * Loads the {@link ManagedFunctionContainer} to the listing of
-	 * {@link ManagedFunctionContainer} instances.
-	 * 
-	 * @param firstLastJobs
-	 *            Array containing two elements, first and last
-	 *            {@link ManagedFunctionContainer} instances.
-	 * @param nextFunction
-	 *            Next {@link ManagedFunctionContainer}.
-	 */
-	private void loadFunction(ManagedFunctionContainer[] firstLastJobs, ManagedFunctionContainer nextFunction) {
-		if (firstLastJobs[0] == null) {
-			// First function
-			firstLastJobs[0] = nextFunction;
-			firstLastJobs[1] = nextFunction;
-		} else {
-			// Another function (append for sequential execution)
-			firstLastJobs[1].setNextManagedFunctionContainer(nextFunction);
-			firstLastJobs[1] = nextFunction;
-		}
 	}
 
 	@Override

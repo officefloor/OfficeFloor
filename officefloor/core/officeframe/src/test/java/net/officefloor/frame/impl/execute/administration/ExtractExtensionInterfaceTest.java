@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.administration;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestObject;
@@ -33,9 +34,33 @@ import net.officefloor.frame.test.TestObject;
 public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensure able to extract extension interface from {@link ManagedObject}.
+	 * Ensure extract {@link ProcessState} bound {@link ManagedObject}.
 	 */
-	public void testExtractExtensionInterface() throws Exception {
+	public void testExtractProcessBoundManagedObjectExtension() throws Exception {
+		this.doExtractExtensionTest(ManagedObjectScope.PROCESS);
+	}
+
+	/**
+	 * Ensure extract {@link ThreadState} bound {@link ManagedObject}.
+	 */
+	public void testExtractThreadBoundManagedObjectExtension() throws Exception {
+		this.doExtractExtensionTest(ManagedObjectScope.THREAD);
+	}
+
+	/**
+	 * Ensure extract {@link ManagedFunction} bound {@link ManagedObject}.
+	 */
+	public void testExtractFunctionBoundManagedObjectExtension() throws Exception {
+		this.doExtractExtensionTest(ManagedObjectScope.FUNCTION);
+	}
+
+	/**
+	 * Ensure able to extract extension interface from {@link ManagedObject}.
+	 * 
+	 * @param scope
+	 *            {@link ManagedObjectScope}.
+	 */
+	public void doExtractExtensionTest(ManagedObjectScope scope) throws Exception {
 
 		// Track method invocations
 		this.setRecordReflectiveFunctionMethodsInvoked(true);
@@ -49,7 +74,21 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 		// Construct the function
 		TestWork work = new TestWork();
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		task.buildObject("MO", ManagedObjectScope.FUNCTION);
+
+		// Register the managed object to office
+		switch (scope) {
+		case PROCESS:
+			this.getOfficeBuilder().addProcessManagedObject("MO", "MO");
+			break;
+
+		case THREAD:
+			this.getOfficeBuilder().addThreadManagedObject("MO", "MO");
+			break;
+
+		case FUNCTION:
+			task.getBuilder().addManagedObject("MO", "MO");
+			break;
+		}
 
 		// Construct the administration
 		task.preAdminister("preTask").administerManagedObject("MO");
@@ -76,7 +115,7 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 			this.extensions = extensions;
 		}
 
-		public void task(TestObject object) {
+		public void task() {
 			assertEquals("Should have pre-administration", 1, this.extensions.length);
 		}
 	}

@@ -247,6 +247,12 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	@Override
+	public void setParallelManagedFunctionContainer(ManagedFunctionContainer container) {
+		this.parallelFunction = (ManagedFunctionContainerImpl<?>) container;
+		this.parallelFunction.parallelOwner = this;
+	}
+
+	@Override
 	public void setNextManagedFunctionContainer(ManagedFunctionContainer container) {
 		this.sequentialFunction = (ManagedFunctionContainerImpl<?>) container;
 	}
@@ -277,6 +283,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 	@Override
 	public FunctionState execute() throws Throwable {
+
+		// Ensure no parallel function to execute first
+		if (this.parallelFunction != null) {
+			return this.parallelFunction;
+		}
 
 		// Obtain the thread and process state (as used throughout method)
 		ThreadState threadState = this.flow.getThreadState();
@@ -346,7 +357,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				this.containerState = ManagedFunctionState.SETUP;
 				return Promise.then(this.flow.createFunction(new SynchroniseProcessStateFunctionLogic()), this);
 			}
-			
+
 		case SETUP:
 
 			// Setup
@@ -354,7 +365,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			if (this.setupFunction != null) {
 				return Promise.then(this.setupFunction, this);
 			}
-
 
 		case EXECUTE_FUNCTION:
 
