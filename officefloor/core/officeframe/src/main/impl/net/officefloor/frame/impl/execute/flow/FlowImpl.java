@@ -126,14 +126,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		AdministrationMetaData<?, ?, ?>[] preAdministration = managedFunctionMetaData.getPreAdministrationMetaData();
 		AdministrationMetaData<?, ?, ?>[] postAdministration = managedFunctionMetaData.getPostAdministrationMetaData();
 
-		// Determine if administration
-		if ((preAdministration.length == 0) && (postAdministration.length == 0)) {
-			// Just managed function, so load only it
-			return this.loadManagedFunction(parameter, managedFunctionMetaData, managedObjects, isEnforceGovernance,
-					parallelFunctionOwner, true);
-		}
-
-		// Determine which is responsible for unloading
+		// Post administration unloads managed objects, otherwise function
 		boolean isFunctionUnload = (postAdministration.length == 0);
 
 		// Load the managed function
