@@ -33,6 +33,7 @@ import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 
@@ -41,8 +42,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
  *
  * @author Daniel Sagenschneider
  */
-public class ReflectiveAdministrationBuilder
-		implements AdministrationFactory<Object, Indexed, Indexed>, Administration<Object, Indexed, Indexed> {
+public class ReflectiveAdministrationBuilder {
 
 	/**
 	 * {@link AbstractOfficeConstructTestCase}.
@@ -147,11 +147,21 @@ public class ReflectiveAdministrationBuilder
 		// Construct this administration
 		if (isPreNotPost) {
 			this.administrationBuilder = this.managedFunctionBuilder.preAdminister(methodName, extensionInterface,
-					this);
+					new ReflectiveAdministration());
 		} else {
 			this.administrationBuilder = this.managedFunctionBuilder.postAdminister(methodName, extensionInterface,
-					this);
+					new ReflectiveAdministration());
 		}
+	}
+
+	/**
+	 * Builds the {@link Administration} of the {@link ManagedObject}.
+	 * 
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject} to administer.
+	 */
+	public void administerManagedObject(String managedObjectName) {
+		this.administrationBuilder.administerManagedObject(managedObjectName);
 	}
 
 	/**
@@ -190,38 +200,48 @@ public class ReflectiveAdministrationBuilder
 		this.parameterIndex++;
 	}
 
-	/*
-	 * ======================== AdmnistrationFactory =========================
+	/**
+	 * {@link Administration}.
 	 */
+	private class ReflectiveAdministration
+			implements AdministrationFactory<Object, Indexed, Indexed>, Administration<Object, Indexed, Indexed> {
 
-	@Override
-	public Administration<Object, Indexed, Indexed> createAdministration() throws Throwable {
-		return this;
-	}
+		/*
+		 * =================== AdmnistrationFactory ===================
+		 */
 
-	/*
-	 * =========================== Administration =============================
-	 */
-
-	@Override
-	public void administer(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
-
-		// Create the parameters
-		Object[] parameters = new Object[this.method.getParameterTypes().length];
-		for (int i = 0; i < parameters.length; i++) {
-			parameters[i] = this.parameterFactories[i].createParamater(context);
+		@Override
+		public Administration<Object, Indexed, Indexed> createAdministration() throws Throwable {
+			return this;
 		}
 
-		// Record invoking method
-		this.testCase.recordReflectiveFunctionMethodInvoked(this.method.getName());
+		/*
+		 * ====================== Administration ======================
+		 */
 
-		// Invoke the method on object
-		try {
-			this.method.invoke(this.object, parameters);
-		} catch (InvocationTargetException ex) {
-			// Throw cause of exception
-			throw ex.getCause();
+		@Override
+		public void administer(AdministrationContext<Object, Indexed, Indexed> context) throws Throwable {
+
+			// Create the parameters
+			Object[] parameters = new Object[ReflectiveAdministrationBuilder.this.method.getParameterTypes().length];
+			for (int i = 0; i < parameters.length; i++) {
+				parameters[i] = ReflectiveAdministrationBuilder.this.parameterFactories[i].createParamater(context);
+			}
+
+			// Record invoking method
+			ReflectiveAdministrationBuilder.this.testCase
+					.recordReflectiveFunctionMethodInvoked(ReflectiveAdministrationBuilder.this.method.getName());
+
+			// Invoke the method on object
+			try {
+				ReflectiveAdministrationBuilder.this.method.invoke(ReflectiveAdministrationBuilder.this.object,
+						parameters);
+			} catch (InvocationTargetException ex) {
+				// Throw cause of exception
+				throw ex.getCause();
+			}
 		}
+
 	}
 
 	/**

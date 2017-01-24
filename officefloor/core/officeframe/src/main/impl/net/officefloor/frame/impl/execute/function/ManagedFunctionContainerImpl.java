@@ -128,7 +128,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	/**
 	 * State of this {@link ManagedFunctionContainer}.
 	 */
-	private ManagedFunctionState containerState = ManagedFunctionState.SETUP;
+	private ManagedFunctionState containerState = ManagedFunctionState.LOAD_MANAGED_OBJECTS;
 
 	/**
 	 * Index of the next {@link ManagedObject} to load.
@@ -286,14 +286,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		threadState.profile(this.functionLogicMetaData);
 
 		switch (this.containerState) {
-		case SETUP:
-
-			// Setup
-			this.containerState = ManagedFunctionState.LOAD_MANAGED_OBJECTS;
-			if (this.setupFunction != null) {
-				return Promise.then(this.setupFunction, this);
-			}
-
 		case LOAD_MANAGED_OBJECTS:
 
 			// Load the managed objects
@@ -351,9 +343,18 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Synchronise process state to this thread (if required)
 			if (threadState != processState.getMainThreadState()) {
 				// Must synchronise, so execute function when executing again
-				this.containerState = ManagedFunctionState.EXECUTE_FUNCTION;
+				this.containerState = ManagedFunctionState.SETUP;
 				return Promise.then(this.flow.createFunction(new SynchroniseProcessStateFunctionLogic()), this);
 			}
+			
+		case SETUP:
+
+			// Setup
+			this.containerState = ManagedFunctionState.EXECUTE_FUNCTION;
+			if (this.setupFunction != null) {
+				return Promise.then(this.setupFunction, this);
+			}
+
 
 		case EXECUTE_FUNCTION:
 

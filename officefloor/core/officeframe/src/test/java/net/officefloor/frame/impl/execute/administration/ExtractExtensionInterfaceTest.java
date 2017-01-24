@@ -17,12 +17,10 @@
  */
 package net.officefloor.frame.impl.execute.administration;
 
-import java.util.List;
-
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.ReflectiveAdministrationBuilder;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.TestObject;
 
@@ -37,7 +35,10 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 	/**
 	 * Ensure able to extract extension interface from {@link ManagedObject}.
 	 */
-	public void testExtractExtensionInterface() {
+	public void testExtractExtensionInterface() throws Exception {
+
+		// Track method invocations
+		this.setRecordReflectiveFunctionMethodsInvoked(true);
 
 		// Construct the managed object
 		TestObject object = new TestObject("MO", this);
@@ -48,22 +49,35 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 		// Construct the function
 		TestWork work = new TestWork();
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
+		task.buildObject("MO", ManagedObjectScope.FUNCTION);
 
-		// Construct the administrator
-		ReflectiveAdministrationBuilder administratorBuilder = task.preAdminister("preTask");
+		// Construct the administration
+		task.preAdminister("preTask").administerManagedObject("MO");
 
+		// Invoke function
+		this.invokeFunction("task", null);
+
+		// Ensure correct methods invoked
+		this.validateReflectiveMethodOrder("preTask", "task");
+
+		// Ensure correct extension extracted
+		assertEquals("Incorrect number of extensions administered", 1, work.extensions.length);
+		assertSame("Incorrect extension", object, work.extensions[0].managedObject);
 	}
 
 	/**
 	 * Test functionality.
 	 */
 	public static class TestWork {
-		
-		public void preTask(List<ManagedObjectExtension> extensions) {
 
+		private ManagedObjectExtension[] extensions;
+
+		public void preTask(ManagedObjectExtension[] extensions) {
+			this.extensions = extensions;
 		}
 
 		public void task(TestObject object) {
+			assertEquals("Should have pre-administration", 1, this.extensions.length);
 		}
 	}
 
@@ -80,6 +94,7 @@ public class ExtractExtensionInterfaceTest extends AbstractOfficeConstructTestCa
 
 		@Override
 		public ManagedObjectExtension createExtensionInterface(ManagedObject managedObject) {
+			assertNotNull("Must be provided managed object", managedObject);
 			return new ManagedObjectExtension(managedObject);
 		}
 	}

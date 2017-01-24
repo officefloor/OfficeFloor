@@ -180,8 +180,7 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 
 	@Override
 	public Class<E> getExtensionInterface() {
-		// TODO implement AdministrationMetaData<E,F,G>.getExtensionInterface
-		throw new UnsupportedOperationException("TODO implement AdministrationMetaData<E,F,G>.getExtensionInterface");
+		return this.extensionInterface;
 	}
 
 	@Override

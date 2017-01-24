@@ -713,6 +713,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 				// Easy access to the container
 				ManagedObjectContainerImpl container = ManagedObjectContainerImpl.this;
 
+				// Ensure in appropriate state
+				if (container.containerState != ManagedObjectContainerState.OBJECT_AVAILABLE) {
+					throw new IllegalStateException(
+							"Can not extract managed object extension in managed object container state "
+									+ container.containerState);
+				}
+
 				// Extract the extension
 				E extension = extractor.extractExtension(container.managedObject, container.metaData);
 
