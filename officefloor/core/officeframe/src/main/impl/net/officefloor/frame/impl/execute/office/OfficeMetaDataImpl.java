@@ -19,10 +19,8 @@ package net.officefloor.frame.impl.execute.office;
 
 import java.util.Timer;
 
-import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -33,7 +31,6 @@ import net.officefloor.frame.impl.execute.profile.ProcessProfilerImpl;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -154,12 +151,6 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final Profiler profiler;
 
 	/**
-	 * Required {@link Governance} for the input {@link ManagedObject}
-	 * {@link EscalationHandler}.
-	 */
-	private final boolean[] inputManagedObjectEscalationRequiredGovernance;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param officeName
@@ -201,14 +192,6 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		this.processContextListeners = processContextListeners;
 		this.startupFunctions = startupFunctions;
 		this.profiler = profiler;
-
-		// Always no governance for input managed object escalation handling
-		GovernanceMetaData<?, ?>[] governanceMetaData = this.processMetaData.getThreadMetaData()
-				.getGovernanceMetaData();
-		this.inputManagedObjectEscalationRequiredGovernance = new boolean[governanceMetaData.length];
-		for (int i = 0; i < this.inputManagedObjectEscalationRequiredGovernance.length; i++) {
-			this.inputManagedObjectEscalationRequiredGovernance[i] = false;
-		}
 	}
 
 	/*

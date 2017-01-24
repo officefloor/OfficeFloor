@@ -1383,24 +1383,23 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			final String boundName, final int instanceIndex, final ManagedObjectGovernanceStruct[] governanceMetaData,
 			final ManagedObjectIndex... dependencies) {
 
-		final AssetType assetType = AssetType.FUNCTION;
-		final String assetName = "testFunction";
-
 		// Create the necessary mock objects
 		ManagedObjectMetaData<?> moMetaData = this.createMock(ManagedObjectMetaData.class);
 
 		// Record creating the managed object meta-data
 		this.recordReturn(rawMoMetaData,
-				rawMoMetaData.createManagedObjectMetaData(assetType, assetName, null, instanceIndex, null, dependencies,
-						new ManagedObjectGovernanceMetaData<?>[0], this.assetManagerFactory, this.issues),
+				rawMoMetaData.createManagedObjectMetaData(this.assetType, this.assetName, null, instanceIndex, null,
+						dependencies, new ManagedObjectGovernanceMetaData<?>[0], this.assetManagerFactory, this.issues),
 				moMetaData, new AbstractMatcher() {
 					@Override
 					public boolean matches(Object[] expected, Object[] actual) {
-						
+
 						// Ensure asset type and name are correct
-						assertEquals("Incorrect asset type", assetType, actual[0]);
-						assertEquals("Incorrect asset name", assetName, actual[1]);
-						
+						assertEquals("Incorrect asset type", RawBoundManagedObjectMetaDataTest.this.assetType,
+								actual[0]);
+						assertEquals("Incorrect asset name", RawBoundManagedObjectMetaDataTest.this.assetName,
+								actual[1]);
+
 						// Verify the raw bound managed object
 						RawBoundManagedObjectMetaData boundMo = (RawBoundManagedObjectMetaData) actual[2];
 						assertEquals("Incorrect bound managed object", boundName, boundMo.getBoundManagedObjectName());

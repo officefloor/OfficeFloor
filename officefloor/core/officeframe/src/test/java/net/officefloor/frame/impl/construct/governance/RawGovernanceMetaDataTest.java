@@ -230,6 +230,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.record_initGovernance();
 
 		// Record flow
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNode);
@@ -258,6 +259,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.record_initGovernance();
 
 		// Record flow
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNode);
@@ -288,6 +290,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.record_initGovernance();
 
 		// Record incorrect parameter for flow
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
 				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNode);
@@ -521,6 +524,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		}
 
 		// Record configuration for flows
+		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), flowConfigurations);
 
 		// Record configuring each flow

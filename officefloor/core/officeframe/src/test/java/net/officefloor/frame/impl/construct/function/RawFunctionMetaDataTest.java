@@ -1556,7 +1556,6 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		// Administration required Managed Object
 		final RawBoundManagedObjectInstanceMetaData<?> rawAdministrationMoInstance = this
 				.createMock(RawBoundManagedObjectInstanceMetaData.class);
-		final RawManagedObjectMetaData<?, ?> administrationMo = this.createMock(RawManagedObjectMetaData.class);
 		final ManagedObjectIndex administrationMoIndex = new ManagedObjectIndexImpl(ManagedObjectScope.THREAD, 0);
 
 		// Dependency of the administration required Managed Object
@@ -1602,7 +1601,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		LoadDependencies administrationLinked = new LoadDependencies(rawBoundManagedObject, administrationMoIndex,
 				rawAdministrationMoInstance, dependencyLinked);
 		this.record_loadDependencies(administrationLinked);
-		this.record_dependencySortingForCoordination(administrationLinked);
+		this.record_dependencySortingForCoordination(administrationLinked, dependencyLinked,
+				dependencyDependencyLinked);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -1612,10 +1612,11 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 
 		// Ensure have administered managed object and dependency as required
 		ManagedObjectIndex[] requiredManagedObjects = functionMetaData.getRequiredManagedObjects();
-		assertEquals("Administered managed objects should be required", 2, requiredManagedObjects.length);
-		assertEquals("Administered dependency must be first", dependencyMoIndex, requiredManagedObjects[0]);
+		assertEquals("Administered managed objects should be required", 3, requiredManagedObjects.length);
+		assertEquals("Dependency of dependency must be first", dependencyDependencyIndex, requiredManagedObjects[0]);
+		assertEquals("Administered dependency must be first", dependencyMoIndex, requiredManagedObjects[1]);
 		assertEquals("Administered managed object must be after its dependency", administrationMoIndex,
-				requiredManagedObjects[1]);
+				requiredManagedObjects[2]);
 	}
 
 	/**

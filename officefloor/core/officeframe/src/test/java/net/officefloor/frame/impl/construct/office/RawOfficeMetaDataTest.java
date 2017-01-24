@@ -51,8 +51,8 @@ import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationCon
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
@@ -68,10 +68,8 @@ import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -883,18 +881,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record not creating governance meta-data
 		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
 				new GovernanceConfiguration[] { governanceConfiguration });
-		this.recordReturn(this.rawGovernanceFactory, this.rawGovernanceFactory.createRawGovernanceMetaData(
-				governanceConfiguration, 0, teams, OFFICE_NAME, this.issues), null, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						// Ensure matching
-						for (int i = 0; i < 6; i++) {
-							assertEquals(expected[i], actual[i]);
-						}
-						assertNotNull("Should have function loop", actual[6]);
-						return true;
-					}
-				});
+		this.recordReturn(this.rawGovernanceFactory, this.rawGovernanceFactory
+				.createRawGovernanceMetaData(governanceConfiguration, 0, teams, OFFICE_NAME, this.issues), null);
 		this.recordReturn(governanceConfiguration, governanceConfiguration.getGovernanceName(), "GOVERNANCE");
 		this.record_issue("Unable to configure governance 'GOVERNANCE'");
 
@@ -1475,20 +1463,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			// Record creating the governance meta-data
 			this.recordReturn(this.rawGovernanceFactory, this.rawGovernanceFactory.createRawGovernanceMetaData(
 					governanceConfiguration, i, this.officeTeams, OFFICE_NAME, this.issues), rawGovernanceMetaData);
-			if (i == 0) {
-				this.control(this.rawGovernanceFactory).setMatcher(new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						for (int i = 0; i < 6; i++) {
-							if (!expected[i].equals(actual[i])) {
-								return false;
-							}
-						}
-						assertTrue("Should have function loop", actual[6] instanceof FunctionLoop);
-						return true;
-					}
-				});
-			}
 			this.recordReturn(rawGovernanceMetaData, rawGovernanceMetaData.getGovernanceName(), governanceName);
 			this.recordReturn(rawGovernanceMetaData, rawGovernanceMetaData.getGovernanceMetaData(), governanceMetaData);
 		}
@@ -1513,7 +1487,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			// Link the Office meta-data
 			rawGovernanceMetaData.loadOfficeMetaData(null, this.issues);
 			this.control(rawGovernanceMetaData)
-					.setMatcher(new TypeMatcher(ManagedFunctionLocator.class, OfficeFloorIssues.class));
+					.setMatcher(new TypeMatcher(OfficeMetaData.class, OfficeFloorIssues.class));
 		}
 	}
 
@@ -1807,8 +1781,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 							assertTrue("Should be an asset manager factory", a[2] instanceof AssetManagerFactory);
 							assertEquals("Incorrect bound managed object factory",
 									RawOfficeMetaDataTest.this.rawBoundManagedObjectFactory, a[3]);
-							assertEquals("Incorrect issues", RawOfficeMetaDataTest.this.issues, a[6]);
-							assertTrue("Should have function loop", a[7] instanceof FunctionLoop);
+							assertEquals("Incorrect issues", RawOfficeMetaDataTest.this.issues, a[4]);
 							return true;
 						}
 					});
@@ -1844,8 +1817,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	private void record_linkFunctions(RawManagedFunctionMetaData<?, ?>... rawFunctionMetaDatas) {
 		for (int i = 0; i < rawFunctionMetaDatas.length; i++) {
 			rawFunctionMetaDatas[i].loadOfficeMetaData(null, null, this.officeTeams, this.issues);
-			this.control(rawFunctionMetaDatas[i])
-					.setMatcher(new TypeMatcher(ManagedFunctionLocator.class, OfficeFloorIssues.class));
+			this.control(rawFunctionMetaDatas[i]).setMatcher(new TypeMatcher(OfficeMetaData.class,
+					RawAdministrationMetaDataFactory.class, Map.class, OfficeFloorIssues.class));
 		}
 	}
 

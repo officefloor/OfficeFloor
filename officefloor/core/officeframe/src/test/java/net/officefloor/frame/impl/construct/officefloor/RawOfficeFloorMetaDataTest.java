@@ -773,19 +773,18 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 						@Override
 						public boolean matches(Object[] e, Object[] a) {
 							assertEquals("Incorrect office configuration", e[0], a[0]);
-							assertEquals("Incorrect source context", e[1], a[1]);
-							assertEquals("Incorrect issues", e[2], a[2]);
-							RawManagingOfficeMetaData<?>[] eMos = (RawManagingOfficeMetaData[]) e[3];
-							RawManagingOfficeMetaData<?>[] aMos = (RawManagingOfficeMetaData[]) a[3];
-							assertTrue("Must have raw office floor meta-data", a[4] instanceof RawOfficeFloorMetaData);
+							assertEquals("Incorrect issues", e[1], a[1]);
+							RawManagingOfficeMetaData<?>[] eMos = (RawManagingOfficeMetaData[]) e[2];
+							RawManagingOfficeMetaData<?>[] aMos = (RawManagingOfficeMetaData[]) a[2];
+							assertTrue("Must have raw office floor meta-data", a[3] instanceof RawOfficeFloorMetaData);
 							assertEquals("Incorrect managed object factory",
-									RawOfficeFloorMetaDataTest.this.rawBoundMoFactory, a[5]);
+									RawOfficeFloorMetaDataTest.this.rawBoundMoFactory, a[4]);
 							assertEquals("Incorrect governance factory",
-									RawOfficeFloorMetaDataTest.this.rawGovernanceFactory, a[6]);
+									RawOfficeFloorMetaDataTest.this.rawGovernanceFactory, a[5]);
 							assertEquals("Incorrect administrator factory",
-									RawOfficeFloorMetaDataTest.this.rawBoundAdminFactory, a[7]);
+									RawOfficeFloorMetaDataTest.this.rawBoundAdminFactory, a[6]);
 							assertEquals("Incorrect work factory",
-									RawOfficeFloorMetaDataTest.this.rawFunctionMetaDataFactory, a[8]);
+									RawOfficeFloorMetaDataTest.this.rawFunctionMetaDataFactory, a[7]);
 
 							// Validate the managed objects
 							assertEquals("Incorrect number of managed objects", eMos.length, aMos.length);
