@@ -134,7 +134,6 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 				managedObjects, isEnforceGovernance, parallelFunctionOwner, isFunctionUnload);
 
 		// Load the pre-function administration (as parallel functions)
-		ManagedFunctionContainer parallelAdministration = null;
 		for (int i = 0; i < preAdministration.length; i++) {
 			AdministrationMetaData<?, ?, ?> administrationMetaData = preAdministration[i];
 
@@ -142,16 +141,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			ManagedFunctionContainer adminFunction = this.createAdministrationContainer(administrationMetaData,
 					managedFunctionMetaData, isEnforceGovernance, parallelFunctionOwner, managedObjects, false);
 
-			// Load the administration function
-			if (i == 0) {
-				// Load administration as first parallel function
-				managedFunctionContainer.setParallelManagedFunctionContainer(adminFunction);
-				parallelAdministration = adminFunction;
-			} else {
-				// Push out administration functions to do this last
-				managedFunctionContainer.setParallelManagedFunctionContainer(adminFunction);
-				adminFunction.setParallelManagedFunctionContainer(parallelAdministration);
-			}
+			// Push out previous administration functions to do this last
+			managedFunctionContainer.setParallelManagedFunctionContainer(adminFunction);
 		}
 
 		// Load the post-function administration (as next functions)

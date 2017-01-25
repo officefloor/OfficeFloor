@@ -23,18 +23,17 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
- * Ensure can provide multiple {@link Administration} on a
- * {@link ManagedFunction}.
+ * Ensure executes {@link Administration}.
  *
  * @author Daniel Sagenschneider
  */
-public class MultipleAdministrationTest extends AbstractOfficeConstructTestCase {
+public class AdministrationTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure undertakes {@link Administration} before the
 	 * {@link ManagedFunction}.
 	 */
-	public void testMultiplePreAdministration() throws Exception {
+	public void testPreAdministration() throws Exception {
 
 		// Construct the functions
 		TestWork work = new TestWork();
@@ -43,21 +42,18 @@ public class MultipleAdministrationTest extends AbstractOfficeConstructTestCase 
 		task.setNextFunction("complete");
 		this.constructFunction(work, "complete");
 
-		// Construct the administrations
-		task.preAdminister("preTaskOne");
-		task.preAdminister("preTaskTwo");
-		task.preAdminister("preTaskThree");
+		// Construct the administration
+		task.preAdminister("preTask");
 
 		// Ensure undertakes administration before
-		this.invokeFunctionAndValidate("trigger", null, "trigger", "preTaskOne", "preTaskTwo", "preTaskThree", "task",
-				"complete");
+		this.invokeFunctionAndValidate("trigger", null, "trigger", "preTask", "task", "complete");
 	}
 
 	/**
 	 * Ensure undertakes {@link Administration} after the
 	 * {@link ManagedFunction}.
 	 */
-	public void testMultiplePostAdministration() throws Exception {
+	public void testPostAdministration() throws Exception {
 
 		// Construct the functions
 		TestWork work = new TestWork();
@@ -67,20 +63,17 @@ public class MultipleAdministrationTest extends AbstractOfficeConstructTestCase 
 		this.constructFunction(work, "complete");
 
 		// Construct the administration
-		task.postAdminister("postTaskOne");
-		task.postAdminister("postTaskTwo");
-		task.postAdminister("postTaskThree");
+		task.postAdminister("postTask");
 
 		// Ensure undertakes administration before
-		this.invokeFunctionAndValidate("trigger", null, "trigger", "task", "postTaskOne", "postTaskTwo",
-				"postTaskThree", "complete");
+		this.invokeFunctionAndValidate("trigger", null, "trigger", "task", "postTask", "complete");
 	}
 
 	/**
 	 * Ensure undertakes {@link Administration} before and after the
 	 * {@link ManagedFunction}.
 	 */
-	public void testMultiplePreAndPostAdministration() throws Exception {
+	public void testPreAndPostAdministration() throws Exception {
 
 		// Construct the functions
 		TestWork work = new TestWork();
@@ -90,16 +83,11 @@ public class MultipleAdministrationTest extends AbstractOfficeConstructTestCase 
 		this.constructFunction(work, "complete");
 
 		// Construct the administration
-		task.preAdminister("preTaskOne");
-		task.preAdminister("preTaskTwo");
-		task.preAdminister("preTaskThree");
-		task.postAdminister("postTaskOne");
-		task.postAdminister("postTaskTwo");
-		task.postAdminister("postTaskThree");
+		task.preAdminister("preTask");
+		task.postAdminister("postTask");
 
 		// Ensure undertakes administration before
-		this.invokeFunctionAndValidate("trigger", null, "trigger", "preTaskOne", "preTaskTwo", "preTaskThree", "task",
-				"postTaskOne", "postTaskTwo", "postTaskThree", "complete");
+		this.invokeFunctionAndValidate("trigger", null, "trigger", "preTask", "task", "postTask", "complete");
 	}
 
 	/**
@@ -110,25 +98,13 @@ public class MultipleAdministrationTest extends AbstractOfficeConstructTestCase 
 		public void trigger() {
 		}
 
-		public void preTaskOne(Object[] extensions) {
-		}
-
-		public void preTaskTwo(Object[] extensions) {
-		}
-
-		public void preTaskThree(Object[] extensions) {
+		public void preTask(Object[] extensions) {
 		}
 
 		public void task() {
 		}
 
-		public void postTaskOne(Object[] extensions) {
-		}
-
-		public void postTaskTwo(Object[] extensions) {
-		}
-
-		public void postTaskThree(Object[] extensions) {
+		public void postTask(Object[] extensions) {
 		}
 
 		public void complete() {

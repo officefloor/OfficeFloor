@@ -31,7 +31,7 @@ import net.officefloor.frame.test.TestObject;
  *
  * @author Daniel Sagenschneider
  */
-public class PrePostAdministrationTest extends AbstractOfficeConstructTestCase {
+public class UnloadManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure the {@link ManagedFunction} unloads the {@link ManagedObject}.

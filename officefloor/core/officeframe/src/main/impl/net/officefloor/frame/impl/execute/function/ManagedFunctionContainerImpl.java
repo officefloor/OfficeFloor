@@ -248,13 +248,12 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 	@Override
 	public void setParallelManagedFunctionContainer(ManagedFunctionContainer container) {
-		this.parallelFunction = (ManagedFunctionContainerImpl<?>) container;
-		this.parallelFunction.parallelOwner = this;
+		this.loadParallelFunction((ManagedFunctionContainerImpl<?>) container);
 	}
 
 	@Override
 	public void setNextManagedFunctionContainer(ManagedFunctionContainer container) {
-		this.sequentialFunction = (ManagedFunctionContainerImpl<?>) container;
+		this.loadSequentialFunction((ManagedFunctionContainerImpl<?>) container);
 	}
 
 	@Override
@@ -700,12 +699,29 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		// Move possible next parallel function out
 		if (this.parallelFunction != null) {
 			parallelFunction.parallelFunction = this.parallelFunction;
-			this.parallelFunction.parallelOwner = parallelFunction;
+			this.loadParallelOwner(this.parallelFunction, parallelFunction);
 		}
 
 		// Set next parallel node
 		this.parallelFunction = parallelFunction;
-		parallelFunction.parallelOwner = this;
+		this.loadParallelOwner(parallelFunction, this);
+	}
+
+	/**
+	 * Loads the parallel owner to the parallel
+	 * {@link ManagedFunctionContainer}.
+	 * 
+	 * @param parallelFunction
+	 *            Parallel {@link ManagedFunctionContainer}.
+	 * @param parallelOwner
+	 *            Parallel owner.
+	 */
+	private final void loadParallelOwner(ManagedFunctionContainerImpl<?> parallelFunction,
+			ManagedFunctionContainerImpl<?> parallelOwner) {
+		while (parallelFunction != null) {
+			parallelFunction.parallelOwner = parallelOwner;
+			parallelFunction = parallelFunction.sequentialFunction;
+		}
 	}
 
 	/**
