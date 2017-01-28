@@ -82,11 +82,11 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		// Register the parallel tasks
 		ReflectiveFunctionBuilder trigger = this.constructFunction(functionality, "trigger");
-		trigger.getBuilder().setTeam("TEAM");
+		trigger.getBuilder().setResponsibleTeam("TEAM");
 		trigger.buildFlow("parallel", Integer.class, false);
 		trigger.buildFlow("trigger", null, false);
 		ReflectiveFunctionBuilder parallel = this.constructFunction(functionality, "parallel");
-		parallel.getBuilder().setTeam("TEAM");
+		parallel.getBuilder().setResponsibleTeam("TEAM");
 		parallel.buildParameter();
 		parallel.buildFlow("parallel", Integer.class, false);
 		this.constructTeam("TEAM", team);

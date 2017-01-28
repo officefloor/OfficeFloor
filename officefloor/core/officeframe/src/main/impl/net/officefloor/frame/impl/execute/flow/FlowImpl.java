@@ -130,15 +130,15 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		boolean isFunctionUnload = (postAdministration.length == 0);
 
 		// Load the managed function
-		ManagedFunctionContainer managedFunctionContainer = this.loadManagedFunction(parameter, managedFunctionMetaData,
-				managedObjects, isEnforceGovernance, parallelFunctionOwner, isFunctionUnload);
+		ManagedFunctionContainer managedFunctionContainer = this.createManagedFunction(parameter,
+				managedFunctionMetaData, managedObjects, isEnforceGovernance, parallelFunctionOwner, isFunctionUnload);
 
 		// Load the pre-function administration (as parallel functions)
 		for (int i = 0; i < preAdministration.length; i++) {
 			AdministrationMetaData<?, ?, ?> administrationMetaData = preAdministration[i];
 
 			// Create the administration function container
-			ManagedFunctionContainer adminFunction = this.createAdministrationContainer(administrationMetaData,
+			ManagedFunctionContainer adminFunction = this.createAdministrationFunction(administrationMetaData,
 					managedFunctionMetaData, isEnforceGovernance, parallelFunctionOwner, managedObjects, false);
 
 			// Push out previous administration functions to do this last
@@ -154,7 +154,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			boolean isUnloadResponsible = (i == (postAdministration.length - 1));
 
 			// Create the administration function container
-			ManagedFunctionContainer adminFunction = this.createAdministrationContainer(administrationMetaData,
+			ManagedFunctionContainer adminFunction = this.createAdministrationFunction(administrationMetaData,
 					managedFunctionMetaData, isEnforceGovernance, parallelFunctionOwner, managedObjects,
 					isUnloadResponsible);
 
@@ -189,7 +189,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	/**
-	 * Loads the {@link ManagedFunction} to this {@link Flow}.
+	 * Creates the {@link ManagedFunctionContainer} for the
+	 * {@link ManagedFunction}.
 	 * 
 	 * @param parameter
 	 *            Parameter for the {@link ManagedFunction}.
@@ -209,15 +210,19 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 *            {@link ManagedFunction}.
 	 * @return {@link ManagedFunctionContainer} for the {@link ManagedFunction}.
 	 */
-	private <O extends Enum<O>, F extends Enum<F>> ManagedFunctionContainer loadManagedFunction(Object parameter,
+	private <O extends Enum<O>, F extends Enum<F>> ManagedFunctionContainer createManagedFunction(Object parameter,
 			ManagedFunctionMetaData<O, F> managedFunctionMetaData, ManagedObjectContainer[] functionBoundManagedObjects,
 			boolean isEnforceGovernance, ManagedFunctionContainer parallelOwner, boolean isUnloadManagedObjects) {
+
+		// Create and register the managed function
 		ManagedFunctionLogic managedFunctionLogic = new ManagedFunctionLogicImpl<>(managedFunctionMetaData, parameter);
 		ManagedFunctionContainer managedFunctionContainer = new ManagedFunctionContainerImpl<ManagedFunctionMetaData<?, ?>>(
 				null, managedFunctionLogic, functionBoundManagedObjects,
 				managedFunctionMetaData.getRequiredManagedObjects(), managedFunctionMetaData.getRequiredGovernance(),
 				isEnforceGovernance, managedFunctionMetaData, parallelOwner, this, isUnloadManagedObjects);
 		this.activeFunctions.addEntry(managedFunctionContainer);
+
+		// Return the function
 		return managedFunctionContainer;
 	}
 
@@ -243,7 +248,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 *            {@link ManagedFunction}.
 	 * @return {@link AdministrationFunctionLogic}.
 	 */
-	private <E> ManagedFunctionContainer createAdministrationContainer(
+	private <E> ManagedFunctionContainer createAdministrationFunction(
 			AdministrationMetaData<E, ?, ?> administrationMetaData,
 			ManagedFunctionMetaData<?, ?> administeringFunctionMetaData, boolean isEnforceGovernance,
 			ManagedFunctionContainer parallelOwner, ManagedObjectContainer[] functionBoundManagedObjects,

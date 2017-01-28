@@ -17,19 +17,16 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Configuration for the {@link Governance}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface GovernanceConfiguration<E, F extends Enum<F>> {
+public interface GovernanceConfiguration<E, F extends Enum<F>> extends FunctionConfiguration<F> {
 
 	/**
 	 * Obtains the name of the {@link Governance}.
@@ -53,31 +50,5 @@ public interface GovernanceConfiguration<E, F extends Enum<F>> {
 	 *         enable {@link Governance}.
 	 */
 	Class<E> getExtensionInterface();
-
-	/**
-	 * Obtains the name of the {@link Team} to execute the
-	 * {@link GovernanceActivity} instances for {@link Governance}.
-	 * 
-	 * @return Name of {@link Team}. May be <code>null</code> to use any
-	 *         {@link Team}.
-	 */
-	String getTeamName();
-
-	/**
-	 * Obtains the configuration of the {@link Flow} instances for this
-	 * {@link Governance}.
-	 * 
-	 * @return Configuration of {@link Flow} instances for this
-	 *         {@link Governance}.
-	 */
-	GovernanceFlowConfiguration<F>[] getFlowConfiguration();
-
-	/**
-	 * Obtains the {@link GovernanceEscalationConfiguration} instances in
-	 * escalation order. Index 0 being first, index 1 second and so forth.
-	 * 
-	 * @return {@link GovernanceEscalationConfiguration} instances.
-	 */
-	GovernanceEscalationConfiguration[] getEscalations();
 
 }

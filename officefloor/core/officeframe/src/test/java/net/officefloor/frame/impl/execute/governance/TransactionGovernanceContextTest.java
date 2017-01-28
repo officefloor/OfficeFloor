@@ -344,7 +344,7 @@ public class TransactionGovernanceContextTest extends AbstractGovernanceTestCase
 		// Configure the Governance
 		GovernanceBuilder<None> governance = this.getOfficeBuilder().addGovernance(GOVERNANCE_NAME,
 				MockTransaction.class, new MockTransactionalGovernanceFactory());
-		governance.setTeam(TEAM_GOVERNANCE);
+		governance.setResponsibleTeam(TEAM_GOVERNANCE);
 		dependencies.mapGovernance(GOVERNANCE_NAME);
 
 		// Execute the function
@@ -370,7 +370,7 @@ public class TransactionGovernanceContextTest extends AbstractGovernanceTestCase
 
 		// Construct task one
 		this.taskOne = this.constructFunction(this.work, "taskOne");
-		this.taskOne.getBuilder().setTeam(TEAM_TASK);
+		this.taskOne.getBuilder().setResponsibleTeam(TEAM_TASK);
 		this.taskOne.buildObject(MANAGED_OBJECT_NAME);
 		this.taskOne.buildFlow("taskTwo", null, false);
 		this.taskOne.buildParameter();
@@ -381,12 +381,12 @@ public class TransactionGovernanceContextTest extends AbstractGovernanceTestCase
 
 		// Construct task two
 		this.taskTwo = this.constructFunction(this.work, "taskTwo");
-		this.taskTwo.getBuilder().setTeam(TEAM_TASK);
+		this.taskTwo.getBuilder().setResponsibleTeam(TEAM_TASK);
 		this.taskTwo.buildObject(MANAGED_OBJECT_NAME);
 
 		// Construct escalation handling
 		ReflectiveFunctionBuilder escalationHandler = this.constructFunction(this.work, "handleEscalation");
-		escalationHandler.getBuilder().setTeam(TEAM_TASK);
+		escalationHandler.getBuilder().setResponsibleTeam(TEAM_TASK);
 		escalationHandler.buildParameter();
 		this.getOfficeBuilder().addEscalation(SQLException.class, "handleEscalation");
 	}

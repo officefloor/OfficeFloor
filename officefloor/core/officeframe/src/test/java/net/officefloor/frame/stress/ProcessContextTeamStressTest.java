@@ -65,14 +65,14 @@ public class ProcessContextTeamStressTest extends AbstractOfficeConstructTestCas
 		// Construct the static work
 		StaticWork staticWork = new StaticWork();
 		ReflectiveFunctionBuilder staticTask = this.constructFunction(staticWork, "staticTask");
-		staticTask.getBuilder().setTeam("STATIC_TEAM");
+		staticTask.getBuilder().setResponsibleTeam("STATIC_TEAM");
 		staticTask.buildParameter();
 		staticTask.buildFlow("contextTask", ContextParameter.class, false);
 
 		// Construct the context work
 		ContextWork contextWork = new ContextWork();
 		ReflectiveFunctionBuilder contextTask = this.constructFunction(contextWork, "contextTask");
-		contextTask.getBuilder().setTeam("CONTEXT_TEAM");
+		contextTask.getBuilder().setResponsibleTeam("CONTEXT_TEAM");
 		contextTask.buildParameter();
 		contextTask.buildFlow("staticTask", ContextParameter.class, false);
 

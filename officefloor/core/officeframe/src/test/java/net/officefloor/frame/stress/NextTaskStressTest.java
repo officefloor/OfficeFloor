@@ -105,11 +105,11 @@ public class NextTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		// Register the next tasks
 		ReflectiveFunctionBuilder trigger = this.constructFunction(functionality, "trigger");
-		trigger.getBuilder().setTeam(teamName);
+		trigger.getBuilder().setResponsibleTeam(teamName);
 		trigger.buildParameter();
 		trigger.setNextFunction("nextTask");
 		ReflectiveFunctionBuilder nextTask = this.constructFunction(functionality, "nextTask");
-		nextTask.getBuilder().setTeam(teamName);
+		nextTask.getBuilder().setResponsibleTeam(teamName);
 		nextTask.buildParameter();
 		nextTask.buildFlow("trigger", Integer.class, false);
 

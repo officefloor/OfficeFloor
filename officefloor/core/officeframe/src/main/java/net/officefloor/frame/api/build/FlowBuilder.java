@@ -15,32 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.configuration;
+package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 
 /**
- * Configuration for the {@link EscalationFlow}.
- * 
+ * Builds a {@link Flow} from a {@link ManagedFunctionContainer} or
+ * {@link ManagedObjectSource}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface GovernanceEscalationConfiguration {
+public interface FlowBuilder<F extends Enum<F>> extends FunctionBuilder<F> {
 
 	/**
-	 * Obtains the type of cause handled by this {@link EscalationFlow}.
+	 * Specifies the next {@link ManagedFunction} to be executed.
 	 * 
-	 * @return Type of cause handled by this {@link EscalationFlow}.
+	 * @param functionName
+	 *            Name of the next {@link ManagedFunction}.
+	 * @param argumentType
+	 *            Type of argument passed to the next {@link ManagedFunction}.
+	 *            May be <code>null</code> to indicate no argument.
 	 */
-	Class<? extends Throwable> getTypeOfCause();
+	void setNextFunction(String functionName, Class<?> argumentType);
 
-	/**
-	 * Obtains the {@link ManagedFunctionReference} for the {@link ManagedFunction} handling the
-	 * escalation.
-	 * 
-	 * @return {@link ManagedFunctionReference} for the {@link ManagedFunction} handling the
-	 *         escalation.
-	 */
-	ManagedFunctionReference getTaskNodeReference();
-	
 }

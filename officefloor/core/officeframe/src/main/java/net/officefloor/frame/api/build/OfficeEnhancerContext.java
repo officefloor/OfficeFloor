@@ -28,17 +28,17 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 public interface OfficeEnhancerContext {
 
 	/**
-	 * Obtains the {@link FlowNodeBuilder} registered under the input
+	 * Obtains the {@link FlowBuilder} registered under the input
 	 * {@link ManagedFunction} name.
 	 * 
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
-	 * @return {@link FlowNodeBuilder}.
+	 * @return {@link FlowBuilder} for the {@link ManagedFunction}.
 	 */
-	FlowNodeBuilder<?> getFlowNodeBuilder(String functionName);
+	FlowBuilder<?> getFlowBuilder(String functionName);
 
 	/**
-	 * Obtains the {@link FlowNodeBuilder} registered by the
+	 * Obtains the {@link FlowBuilder} registered by the
 	 * {@link ManagedObjectSource} under the input {@link ManagedFunction} name.
 	 * 
 	 * @param managedObjectSourceName
@@ -46,8 +46,8 @@ public interface OfficeEnhancerContext {
 	 *            {@link OfficeFloorBuilder}.
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
-	 * @return {@link FlowNodeBuilder}.
+	 * @return {@link FlowBuilder} for the {@link ManagedFunction}.
 	 */
-	FlowNodeBuilder<?> getFlowNodeBuilder(String managedObjectSourceName, String functionName);
+	FlowBuilder<?> getFlowBuilder(String managedObjectSourceName, String functionName);
 
 }

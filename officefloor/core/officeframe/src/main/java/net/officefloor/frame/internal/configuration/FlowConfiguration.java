@@ -26,7 +26,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionFlowConfiguration<F extends Enum<F>> {
+public interface FlowConfiguration<F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of this {@link Flow}.

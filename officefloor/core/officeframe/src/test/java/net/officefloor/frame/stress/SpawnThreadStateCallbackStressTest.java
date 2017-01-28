@@ -88,13 +88,13 @@ public class SpawnThreadStateCallbackStressTest extends AbstractOfficeConstructT
 
 		// Construct the invokeAndJoin task
 		ReflectiveFunctionBuilder invokeWithCallback = this.constructFunction(tasks, "invokeWithCallback");
-		invokeWithCallback.getBuilder().setTeam("TEAM");
+		invokeWithCallback.getBuilder().setResponsibleTeam("TEAM");
 		invokeWithCallback.buildFlow("asynchronousTask", null, true);
 		invokeWithCallback.buildFlow("invokeWithCallback", null, false);
 
 		// Construct the asynchronousTask task
 		ReflectiveFunctionBuilder asynchronousTask = this.constructFunction(tasks, "asynchronousTask");
-		asynchronousTask.getBuilder().setTeam("TEAM");
+		asynchronousTask.getBuilder().setResponsibleTeam("TEAM");
 
 		// Invoke the function
 		this.invokeFunction("invokeWithCallback", null, MAX_WAIT_TIME);

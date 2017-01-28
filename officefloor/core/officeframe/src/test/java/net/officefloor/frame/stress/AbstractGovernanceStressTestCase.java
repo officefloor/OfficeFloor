@@ -120,26 +120,26 @@ public abstract class AbstractGovernanceStressTestCase extends AbstractOfficeCon
 
 		// Build tasks
 		ReflectiveFunctionBuilder setupTask = this.constructFunction(workObject, "setupTask");
-		setupTask.getBuilder().setTeam(TEAM_NAME);
+		setupTask.getBuilder().setResponsibleTeam(TEAM_NAME);
 		setupTask.buildObject("MO");
 		setupTask.setNextFunction("completeTask");
 		ReflectiveFunctionBuilder completeTask = this.constructFunction(workObject, "completeTask");
-		completeTask.getBuilder().setTeam(TEAM_NAME);
+		completeTask.getBuilder().setResponsibleTeam(TEAM_NAME);
 		completeTask.buildObject("MO");
 
 		// Build the commit task
 		ReflectiveFunctionBuilder commitTask = this.constructFunction(workObject, "doCommitTask");
-		commitTask.getBuilder().setTeam(TEAM_NAME);
+		commitTask.getBuilder().setResponsibleTeam(TEAM_NAME);
 		commitTask.buildObject("MO");
 
 		// Build the rollback task
 		ReflectiveFunctionBuilder rollbackTask = this.constructFunction(workObject, "doRollbackTask");
-		rollbackTask.getBuilder().setTeam(TEAM_NAME);
+		rollbackTask.getBuilder().setResponsibleTeam(TEAM_NAME);
 		rollbackTask.buildObject("MO");
 
 		// Build the tidy up task
 		ReflectiveFunctionBuilder tidyUpTask = this.constructFunction(workObject, "doTidyUpTask");
-		tidyUpTask.getBuilder().setTeam(TEAM_NAME);
+		tidyUpTask.getBuilder().setResponsibleTeam(TEAM_NAME);
 		tidyUpTask.buildObject("MO");
 
 		// Configure specifics of test
@@ -148,14 +148,14 @@ public abstract class AbstractGovernanceStressTestCase extends AbstractOfficeCon
 		// Build rollback handling
 		if (isManagedGovernance) {
 			ReflectiveFunctionBuilder handleRollback = this.constructFunction(workObject, "handleRollback");
-			handleRollback.getBuilder().setTeam(TEAM_NAME);
+			handleRollback.getBuilder().setResponsibleTeam(TEAM_NAME);
 			handleRollback.buildParameter();
 			officeBuilder.addEscalation(SQLException.class, "handleRollback");
 		}
 
 		// Build escalation handling
 		ReflectiveFunctionBuilder escalationTask = this.constructFunction(workObject, "handleException");
-		escalationTask.getBuilder().setTeam(TEAM_NAME);
+		escalationTask.getBuilder().setResponsibleTeam(TEAM_NAME);
 		escalationTask.buildParameter();
 		escalationTask.buildObject("MO");
 		officeBuilder.addEscalation(Throwable.class, "handleException");
@@ -175,7 +175,7 @@ public abstract class AbstractGovernanceStressTestCase extends AbstractOfficeCon
 		// Configure the Governance
 		GovernanceBuilder<None> governance = this.getOfficeBuilder().addGovernance(GOVERNANCE_NAME,
 				MockTransaction.class, new MockTransactionalGovernanceFactory());
-		governance.setTeam(TEAM_NAME);
+		governance.setResponsibleTeam(TEAM_NAME);
 
 		// Configure governance
 		workObject.isManagedGovernance = isManagedGovernance;

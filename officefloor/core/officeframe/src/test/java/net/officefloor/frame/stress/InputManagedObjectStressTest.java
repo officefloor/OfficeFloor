@@ -115,12 +115,12 @@ public class InputManagedObjectStressTest extends AbstractOfficeConstructTestCas
 		// Create the task for processing input managed object
 		InputWork work = new InputWork(dependency);
 		ReflectiveFunctionBuilder taskBuilder = this.constructFunction(work, "task");
-		taskBuilder.getBuilder().setTeam("TEAM");
+		taskBuilder.getBuilder().setResponsibleTeam("TEAM");
 		taskBuilder.buildObject("INPUT_MO");
 
 		// Create the task for running the test
 		ReflectiveFunctionBuilder run = this.constructFunction(new RunWork(work), "run");
-		run.getBuilder().setTeam("TEAM");
+		run.getBuilder().setResponsibleTeam("TEAM");
 		run.buildFlow("run", null, false);
 
 		// Create and register the dependency

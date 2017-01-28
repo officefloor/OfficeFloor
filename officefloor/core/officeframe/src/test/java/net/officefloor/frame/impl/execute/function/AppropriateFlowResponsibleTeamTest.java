@@ -121,12 +121,12 @@ public class AppropriateFlowResponsibleTeamTest extends AbstractOfficeConstructT
 		// Create the functions
 		TestWork work = new TestWork();
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		task.getBuilder().setTeam("TASK_TEAM");
+		task.getBuilder().setResponsibleTeam("TASK_TEAM");
 		task.buildParameter();
 		task.buildFlow("flow", null, false);
 		ReflectiveFunctionBuilder flow = this.constructFunction(work, "flow");
 		if (isFlowHaveTeam) {
-			flow.getBuilder().setTeam("FLOW_TEAM");
+			flow.getBuilder().setResponsibleTeam("FLOW_TEAM");
 		}
 
 		// Invoke the function

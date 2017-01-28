@@ -116,14 +116,14 @@ public class AdministratorStressTest extends AbstractOfficeConstructTestCase {
 
 		// Create the setup task
 		ReflectiveFunctionBuilder setupTask = this.constructFunction(work, "setupTask");
-		setupTask.getBuilder().setTeam("TEAM");
+		setupTask.getBuilder().setResponsibleTeam("TEAM");
 		setupTask.buildFlow("administeredTask", null, false);
 		setupTask.buildObject("MO");
 		setupTask.buildFlow("setupTask", null, false);
 
 		// Create the administered task
 		ReflectiveFunctionBuilder administeredTask = this.constructFunction(work, "administeredTask");
-		administeredTask.getBuilder().setTeam("TEAM");
+		administeredTask.getBuilder().setResponsibleTeam("TEAM");
 		administeredTask.buildObject("MO");
 		ManagedFunctionBuilder<?, ?> adminTaskBuilder = administeredTask.getBuilder();
 //		adminTaskBuilder.linkPreFunctionAdministration("PRE", "DUTY");

@@ -17,7 +17,6 @@
  */
 package net.officefloor.frame.impl.construct.administration;
 
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +24,6 @@ import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -36,6 +34,8 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.construct.EscalationFlowFactory;
+import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
@@ -43,11 +43,8 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -153,6 +150,16 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	private final OfficeMetaData officeMetaData = this.createMock(OfficeMetaData.class);
 
 	/**
+	 * {@link FlowMetaDataFactory}.
+	 */
+	private final FlowMetaDataFactory flowMetaDataFactory = this.createMock(FlowMetaDataFactory.class);
+
+	/**
+	 * {@link EscalationFlowFactory}.
+	 */
+	private final EscalationFlowFactory escalationFlowFactory = this.createMock(EscalationFlowFactory.class);
+
+	/**
 	 * {@link ManagedFunctionLocator}.
 	 */
 	private final ManagedFunctionLocator functionLocator = this.createMock(ManagedFunctionLocator.class);
@@ -196,7 +203,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Record any team
 		this.record_init();
-		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), null);
+		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), null);
 		this.record_managedObject();
 		this.record_noFlows();
 		this.record_governanceMetaData(0);
@@ -215,7 +222,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 
 		// Record no team
 		this.record_init();
-		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), "TEAM");
+		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), "TEAM");
 		this.issues.addIssue(this.assetType, this.assetName, "Administration ADMIN team 'TEAM' can not be found");
 
 		// Construct the administrators
@@ -411,88 +418,6 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link ManagedFunctionReference} instances for
-	 * {@link Administration}.
-	 */
-	public void testNoFunctionReferences() {
-
-		// Record construction of administration meta-data
-		this.record_init();
-		this.record_team();
-		this.record_managedObject();
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), null);
-		this.record_issue("ManagedFunction references not provided");
-
-		// Construct the administration and link functions
-		this.replayMockObjects();
-		this.constructRawAdministration(0, this.configuration);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no {@link ManagedFunction} is found for the
-	 * {@link Administration} {@link Flow}.
-	 */
-	public void testNoFunctionForFlow() {
-
-		final ManagedFunctionReference functionReference = this.createMock(ManagedFunctionReference.class);
-
-		// Record construction of administration meta-data
-		this.record_init();
-		this.record_team();
-		this.record_managedObject();
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionReference[] { functionReference });
-		this.recordReturn(functionReference, functionReference.getFunctionName(), "TASK");
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), null);
-		this.record_issue("Can not find function meta-data TASK for Flow 0");
-
-		// Construct the administration and link functions
-		this.replayMockObjects();
-		this.constructRawAdministration(0, this.configuration);
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure can link {@link FlowMetaData} to {@link DutyMetaData}.
-	 */
-	public void testLinkFlows() {
-
-		final ManagedFunctionReference functionReference = this.createMock(ManagedFunctionReference.class);
-		final ManagedFunctionMetaData<?, ?> functionMetaData = this.createMock(ManagedFunctionMetaData.class);
-
-		// Record construction of administration meta-data
-		this.record_init();
-		this.record_team();
-		this.record_managedObject();
-
-		// Record linking tasks
-		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionReference[] { functionReference });
-		this.recordReturn(functionReference, functionReference.getFunctionName(), "TASK");
-		this.recordReturn(functionReference, functionReference.getArgumentType(), Connection.class);
-		this.recordReturn(functionMetaData, functionMetaData.getParameterType(), Connection.class);
-		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"),
-				functionMetaData);
-		this.record_governanceMetaData(0);
-		this.recordReturn(this.configuration, this.configuration.getGovernanceConfiguration(),
-				new AdministrationGovernanceConfiguration[0]);
-
-		// Construct the administration
-		this.replayMockObjects();
-		RawAdministrationMetaData[] adminMetaDatas = this.constructRawAdministration(1, this.configuration);
-		AdministrationMetaData<?, ?, ?> adminMetaData = adminMetaDatas[0].getAdministrationMetaData();
-		this.verifyMockObjects();
-
-		// Verify the flow
-		FlowMetaData flow = adminMetaData.getFlow(0);
-		assertFalse("Should not spawn thread state", flow.isSpawnThreadState());
-		assertEquals("Incorrect task meta-data", functionMetaData, flow.getInitialFunctionMetaData());
-	}
-
-	/**
 	 * Ensure issue if unknown {@link Governance} linked to
 	 * {@link Administration}.
 	 */
@@ -579,7 +504,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	 */
 	private void record_team() {
 		final String TEAM_NAME = "TEAM";
-		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), TEAM_NAME);
 		this.officeTeams.put(TEAM_NAME, this.responsibleTeam);
 	}
 
@@ -670,7 +595,8 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		// Construct the meta-data
 		RawAdministrationMetaData[] rawAdministrations = RawAdministrationMetaDataImpl.getFactory()
 				.constructRawAdministrationMetaData(configuration, this.assetType, this.assetName, this.officeMetaData,
-						this.officeTeams, this.scopeMo, this.issues);
+						this.flowMetaDataFactory, this.escalationFlowFactory, this.officeTeams, this.scopeMo,
+						this.issues);
 
 		// Ensure correct number created
 		assertEquals("Incorrect number of created meta-data", expectedCreateCount, rawAdministrations.length);

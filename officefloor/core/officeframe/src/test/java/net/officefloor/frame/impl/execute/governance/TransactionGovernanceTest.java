@@ -164,7 +164,7 @@ public class TransactionGovernanceTest extends AbstractGovernanceTestCase {
 
 		// Configure the Task
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "doTask");
-		task.getBuilder().setTeam(TEAM_TASK);
+		task.getBuilder().setResponsibleTeam(TEAM_TASK);
 //		task.getBuilder().linkPreFunctionAdministration("ADMIN", "BEGIN");
 //		if (this.isCommit) {
 //			task.getBuilder().linkPostFunctionAdministration("ADMIN", "COMMIT");
@@ -176,13 +176,13 @@ public class TransactionGovernanceTest extends AbstractGovernanceTestCase {
 
 		// Configure the Escalation
 		ReflectiveFunctionBuilder escalation = this.constructFunction(work, "handleEscalation");
-		escalation.getBuilder().setTeam(TEAM_TASK);
+		escalation.getBuilder().setResponsibleTeam(TEAM_TASK);
 		escalation.buildParameter();
 
 		// Configure the Governance
 		GovernanceBuilder<None> governance = this.getOfficeBuilder().addGovernance("GOVERNANCE", MockTransaction.class,
 				new MockTransactionalGovernanceFactory());
-		governance.setTeam(TEAM_GOVERNANCE);
+		governance.setResponsibleTeam(TEAM_GOVERNANCE);
 		governance.addEscalation(SQLException.class, "handleEscalation");
 		dependencies.mapGovernance("GOVERNANCE");
 

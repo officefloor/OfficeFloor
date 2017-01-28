@@ -19,19 +19,15 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Configuration of the {@link Administration}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministrationConfiguration<E, F extends Enum<F>, G extends Enum<G>> {
+public interface AdministrationConfiguration<E, F extends Enum<F>, G extends Enum<G>> extends FunctionConfiguration<F> {
 
 	/**
 	 * Obtains the name of the {@link Administration}.
@@ -48,15 +44,6 @@ public interface AdministrationConfiguration<E, F extends Enum<F>, G extends Enu
 	AdministrationFactory<E, F, G> getAdministrationFactory();
 
 	/**
-	 * Obtains the name of the {@link Team} within the {@link Office}
-	 * responsible for completing this {@link Administration}.
-	 * 
-	 * @return {@link Office} name of the {@link Team}. May be <code>null</code>
-	 *         to use any {@link Team}.
-	 */
-	String getOfficeTeamName();
-
-	/**
 	 * Obtains the extension interface.
 	 * 
 	 * @return Extension interface.
@@ -70,15 +57,6 @@ public interface AdministrationConfiguration<E, F extends Enum<F>, G extends Enu
 	 * @return Names of the {@link ManagedObject} instances to be administered.
 	 */
 	String[] getAdministeredManagedObjectNames();
-
-	/**
-	 * Obtains the configuration for the {@link Flow} instances invoked by the
-	 * {@link Administration}.
-	 * 
-	 * @return {@link ManagedFunctionReference} specifying the first
-	 *         {@link ManagedFunction} of the linked {@link Flow}.
-	 */
-	ManagedFunctionReference[] getFlowConfiguration();
 
 	/**
 	 * Obtains the configuration for the linked {@link Governance}.

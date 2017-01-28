@@ -21,17 +21,14 @@ import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Configuration of a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<F>> {
+public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<F>> extends FunctionConfiguration<F> {
 
 	/**
 	 * Obtains the name of this {@link ManagedFunction}.
@@ -57,13 +54,13 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	Object getDifferentiator();
 
 	/**
-	 * Obtains the name of {@link Office} registered {@link Team} responsible
-	 * for completing this {@link ManagedFunction}.
+	 * Obtains the configuration of the dependent {@link Object} instances for
+	 * this {@link ManagedFunction}.
 	 * 
-	 * @return Name of the {@link Office} registered {@link Team}. May be
-	 *         <code>null</code> to use any {@link Team}.
+	 * @return Configuration of the dependent {@link Object} instances for this
+	 *         {@link ManagedFunction}.
 	 */
-	String getOfficeTeamName();
+	ManagedFunctionObjectConfiguration<O>[] getObjectConfiguration();
 
 	/**
 	 * Obtains the configuration of the {@link ManagedFunction} bound
@@ -73,31 +70,6 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	 *         {@link ManagedFunction}.
 	 */
 	ManagedObjectConfiguration<?>[] getManagedObjectConfiguration();
-
-	/**
-	 * Obtains the reference to the next {@link ManagedFunction}.
-	 * 
-	 * @return Reference to the next {@link ManagedFunction}.
-	 */
-	ManagedFunctionReference getNextFunction();
-
-	/**
-	 * Obtains the configuration of the {@link Flow} instances for this
-	 * {@link ManagedFunction}.
-	 * 
-	 * @return Configuration of {@link Flow} instances for this
-	 *         {@link ManagedFunction}.
-	 */
-	ManagedFunctionFlowConfiguration<F>[] getFlowConfiguration();
-
-	/**
-	 * Obtains the configuration of the dependent {@link Object} instances for
-	 * this {@link ManagedFunction}.
-	 * 
-	 * @return Configuration of the dependent {@link Object} instances for this
-	 *         {@link ManagedFunction}.
-	 */
-	ManagedFunctionObjectConfiguration<O>[] getObjectConfiguration();
 
 	/**
 	 * Obtains the configuration of the {@link Governance} instances for this
@@ -127,11 +99,10 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	AdministrationConfiguration<?, ?, ?>[] getPostAdministration();
 
 	/**
-	 * Obtains the {@link ManagedFunctionEscalationConfiguration} instances in
-	 * escalation order. Index 0 being first, index 1 second and so forth.
+	 * Obtains the reference to the next {@link ManagedFunction}.
 	 * 
-	 * @return {@link ManagedFunctionEscalationConfiguration} instances.
+	 * @return Reference to the next {@link ManagedFunction}.
 	 */
-	ManagedFunctionEscalationConfiguration[] getEscalations();
+	ManagedFunctionReference getNextFunction();
 
 }

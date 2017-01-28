@@ -65,8 +65,8 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 		this.getOfficeBuilder().addOfficeEnhancer(new OfficeEnhancer() {
 			@Override
 			public void enhanceOffice(OfficeEnhancerContext context) {
-				context.getFlowNodeBuilder("MOS_A", "#recycle#").setTeam("CLEANUP");
-				context.getFlowNodeBuilder("MOS_B", "#recycle#").setTeam("CLEANUP");
+				context.getFlowBuilder("MOS_A", "#recycle#").setResponsibleTeam("CLEANUP");
+				context.getFlowBuilder("MOS_B", "#recycle#").setResponsibleTeam("CLEANUP");
 			}
 		});
 
@@ -81,7 +81,7 @@ public class CleanupManagedObjectsTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the work
 		ReflectiveFunctionBuilder taskBuilder = this.constructFunction(new MockWork(), "task");
-		taskBuilder.getBuilder().setTeam("TEAM");
+		taskBuilder.getBuilder().setResponsibleTeam("TEAM");
 		taskBuilder.buildObject("MO_A");
 		taskBuilder.buildObject("MO_B");
 

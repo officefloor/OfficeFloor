@@ -91,7 +91,7 @@ public class NameAwareTaskStressTest extends AbstractOfficeConstructTestCase {
 		NameAwareManagedObjectTask nameAwareMoTask = new NameAwareManagedObjectTask(SEQUENTIAL_COUNT, BOUND_NAME);
 		net.officefloor.frame.test.ReflectiveFunctionBuilder task = this.constructFunction(nameAwareMoTask,
 				"nameAware");
-		task.getBuilder().setTeam("TEAM");
+		task.getBuilder().setResponsibleTeam("TEAM");
 		task.buildParameter();
 		task.buildFlow("nameAware", Integer.class, false);
 		task.buildObject(BOUND_NAME, ManagedObjectScope.FUNCTION);

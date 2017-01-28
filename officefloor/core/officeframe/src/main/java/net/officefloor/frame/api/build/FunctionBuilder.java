@@ -24,15 +24,16 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * Builds a node of a {@link Flow} and provides linking to other {@link Flow}
- * instances.
+ * Builds a {@link FunctionState} provides linking to other
+ * {@link FunctionState} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public interface FlowNodeBuilder<F extends Enum<F>> {
+public interface FunctionBuilder<F extends Enum<F>> {
 
 	/**
 	 * <p>
@@ -44,18 +45,7 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * @param officeTeamName
 	 *            Name of the {@link Team} within the {@link Office}.
 	 */
-	void setTeam(String officeTeamName);
-
-	/**
-	 * Specifies the next {@link ManagedFunction} to be executed.
-	 * 
-	 * @param functionName
-	 *            Name of the next {@link ManagedFunction}.
-	 * @param argumentType
-	 *            Type of argument passed to the next {@link ManagedFunction}.
-	 *            May be <code>null</code> to indicate no argument.
-	 */
-	void setNextFunction(String functionName, Class<?> argumentType);
+	void setResponsibleTeam(String officeTeamName);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}

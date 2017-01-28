@@ -34,18 +34,18 @@ import net.officefloor.frame.impl.execute.administration.ManagedObjectExtensionM
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.construct.EscalationFlowFactory;
+import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
-import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
-import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -100,7 +100,8 @@ public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataF
 	@Override
 	public RawAdministrationMetaData[] constructRawAdministrationMetaData(
 			AdministrationConfiguration<?, ?, ?>[] configuration, AssetType assetType, String assetName,
-			OfficeMetaData officeMetaData, Map<String, TeamManagement> officeTeams,
+			OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
+			EscalationFlowFactory escalationFlowFactory, Map<String, TeamManagement> officeTeams,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo, OfficeFloorIssues issues) {
 
 		// Create the administrators
@@ -109,7 +110,8 @@ public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataF
 
 			// Construct the raw administrator
 			RawAdministrationMetaData rawAdministration = this.constructRawAdministrationMetaData(
-					administrationConfiguration, assetType, assetName, officeMetaData, officeTeams, scopeMo, issues);
+					administrationConfiguration, assetType, assetName, officeMetaData, flowMetaDataFactory,
+					escalationFlowFactory, officeTeams, scopeMo, issues);
 			if (rawAdministration != null) {
 				rawAdministrations.add(rawAdministration);
 			}
@@ -132,6 +134,10 @@ public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataF
 	 *            instances.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
+	 * @param flowMetaDataFactory
+	 *            {@link FlowMetaDataFactory}.
+	 * @param escalationFlowFactory
+	 *            {@link EscalationFlowFactory}.
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            registered names.
@@ -143,7 +149,8 @@ public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataF
 	 */
 	private <E, F extends Enum<F>, G extends Enum<G>> RawAdministrationMetaData constructRawAdministrationMetaData(
 			AdministrationConfiguration<E, F, G> configuration, AssetType assetType, String assetName,
-			OfficeMetaData officeMetaData, Map<String, TeamManagement> officeTeams,
+			OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
+			EscalationFlowFactory escalationFlowFactory, Map<String, TeamManagement> officeTeams,
 			Map<String, RawBoundManagedObjectMetaData> scopeMo, OfficeFloorIssues issues) {
 
 		// Obtain the administration name
@@ -162,7 +169,7 @@ public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataF
 		}
 
 		// Obtain the team responsible for the administration
-		String teamName = configuration.getOfficeTeamName();
+		String teamName = configuration.getResponsibleTeamName();
 		TeamManagement responsibleTeam = null; // any team
 		if (!ConstructUtil.isBlank(teamName)) {
 			responsibleTeam = officeTeams.get(teamName);
@@ -265,32 +272,14 @@ public class RawAdministrationMetaDataImpl implements RawAdministrationMetaDataF
 			eiMetaDatas.add(new ManagedObjectExtensionMetaDataImpl<E>(moIndex, extensionInterfaceFactories));
 		}
 
-		// TODO allow configuration of escalation procedure for administration
-		EscalationProcedure escalationProcedure = new EscalationProcedureImpl();
-
-		// Obtain the function node references
-		ManagedFunctionReference[] functionReferences = configuration.getFlowConfiguration();
-		if (functionReferences == null) {
-			issues.addIssue(AssetType.ADMINISTRATOR, adminName, "ManagedFunction references not provided");
-			return null; // must have function references
-		}
-
 		// Obtain the flows
-		ManagedFunctionLocator functionLocator = officeMetaData.getManagedFunctionLocator();
-		FlowMetaData[] flows = new FlowMetaData[functionReferences.length];
-		for (int i = 0; i < flows.length; i++) {
-			ManagedFunctionReference functionReference = functionReferences[i];
+		FlowMetaData[] flows = flowMetaDataFactory.createFlowMetaData(configuration.getFlowConfiguration(),
+				officeMetaData, AssetType.ADMINISTRATOR, adminName, issues);
 
-			// Obtain the function meta-data for the flow
-			ManagedFunctionMetaData<?, ?> functionMetaData = ConstructUtil.getFunctionMetaData(functionReference,
-					functionLocator, issues, AssetType.ADMINISTRATOR, adminName, "Flow " + i);
-			if (functionMetaData == null) {
-				return null; // no function
-			}
-
-			// Create and register the flow
-			flows[i] = ConstructUtil.newFlowMetaData(functionMetaData, false);
-		}
+		// Obtain the escalation procedure
+		EscalationFlow[] escalationFlows = escalationFlowFactory.createEscalationFlows(configuration.getEscalations(),
+				officeMetaData, AssetType.ADMINISTRATOR, adminName, issues);
+		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalationFlows);
 
 		// Obtain the governance meta-data
 		GovernanceMetaData<?, ?>[] governanceMetaDatas = officeMetaData.getProcessMetaData().getThreadMetaData()

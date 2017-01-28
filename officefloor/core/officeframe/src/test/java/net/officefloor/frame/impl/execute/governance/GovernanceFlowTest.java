@@ -151,7 +151,7 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 
 		// Configure the Task
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "doTask");
-		task.getBuilder().setTeam(TEAM_TASK);
+		task.getBuilder().setResponsibleTeam(TEAM_TASK);
 //		task.getBuilder().linkPreFunctionAdministration("ADMIN", "BEGIN");
 //		if (this.isCommit) {
 //			task.getBuilder().linkPostFunctionAdministration("ADMIN", "COMMIT");
@@ -163,28 +163,28 @@ public class GovernanceFlowTest extends AbstractGovernanceTestCase {
 
 		// Configure the governance flow tasks
 		ReflectiveFunctionBuilder beginTask = this.constructFunction(work, "flowBegin");
-		beginTask.getBuilder().setTeam(TEAM_TASK);
+		beginTask.getBuilder().setResponsibleTeam(TEAM_TASK);
 		beginTask.buildObject("MO");
 		beginTask.buildParameter();
 		ReflectiveFunctionBuilder commitTask = this.constructFunction(work, "flowCommit");
-		commitTask.getBuilder().setTeam(TEAM_TASK);
+		commitTask.getBuilder().setResponsibleTeam(TEAM_TASK);
 		commitTask.buildObject("MO");
 		commitTask.buildParameter();
 		ReflectiveFunctionBuilder rollbackTask = this.constructFunction(work, "flowRollback");
-		rollbackTask.getBuilder().setTeam(TEAM_TASK);
+		rollbackTask.getBuilder().setResponsibleTeam(TEAM_TASK);
 		rollbackTask.buildObject("MO");
 		rollbackTask.buildParameter();
 
 		// Configure handling test failures
 		ReflectiveFunctionBuilder handleException = this.constructFunction(work, "handleException");
-		handleException.getBuilder().setTeam(TEAM_TASK);
+		handleException.getBuilder().setResponsibleTeam(TEAM_TASK);
 		handleException.buildParameter();
 		officeBuilder.addEscalation(Throwable.class, "handleException");
 
 		// Configure the Governance
 		GovernanceBuilder<GovernanceFlowKeys> governance = this.getOfficeBuilder().addGovernance("GOVERNANCE",
 				MockTransaction.class, new FlowGovernanceFactory());
-		governance.setTeam(TEAM_GOVERNANCE);
+		governance.setResponsibleTeam(TEAM_GOVERNANCE);
 		governance.linkFlow(GovernanceFlowKeys.BEGIN, "flowBegin", String.class, false);
 		governance.linkFlow(GovernanceFlowKeys.COMMIT, "flowCommit", String.class, false);
 		governance.linkFlow(GovernanceFlowKeys.ROLLBACK, "flowRollback", String.class, true);

@@ -123,7 +123,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 		// Construct the function
 		CoordinateWork work = new CoordinateWork(TASK_INVOKE_COUNT);
 		ReflectiveFunctionBuilder functionBuilder = this.constructFunction(work, "task");
-		functionBuilder.getBuilder().setTeam("TEAM");
+		functionBuilder.getBuilder().setResponsibleTeam("TEAM");
 		functionBuilder.getBuilder().addManagedObject("DIRECT_USE", "DIRECT_USE").mapDependency(0, "DEPENDENCY");
 		functionBuilder.getBuilder().addManagedObject("DEPENDENCY", "DEPENDENCY");
 		functionBuilder.buildObject("DIRECT_USE");
@@ -389,7 +389,7 @@ public class CoordinateStressTest extends AbstractOfficeConstructTestCase {
 			// Register function to active object
 			ManagedObjectFunctionBuilder<Indexed, None> taskBuilder = mosContext.addManagedFunction("TASK", this);
 			taskBuilder.linkParameter(0, DependencyManagedObject.class);
-			taskBuilder.setTeam("MO_TEAM");
+			taskBuilder.setResponsibleTeam("MO_TEAM");
 
 			// Register flow to run task to activate object
 			context.addFlow(DependencyManagedObject.class);

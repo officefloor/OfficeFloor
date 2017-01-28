@@ -99,7 +99,7 @@ public class AsynchronousOperationStressTest extends AbstractOfficeConstructTest
 		// Create and register the setup task
 		SetupWork setupWork = new SetupWork();
 		ReflectiveFunctionBuilder setupTask = this.constructFunction(setupWork, "setup");
-		setupTask.getBuilder().setTeam("TEAM");
+		setupTask.getBuilder().setResponsibleTeam("TEAM");
 		setupTask.buildFlow("task", null, true);
 		setupTask.buildFlow("task", null, true);
 		setupTask.buildFlow("setup", null, false);
@@ -108,12 +108,12 @@ public class AsynchronousOperationStressTest extends AbstractOfficeConstructTest
 		// others asynchronous operations.
 		AsynchronousOperationWork workOne = new AsynchronousOperationWork(moTwo, OPERATION_COUNT, setupWork);
 		ReflectiveFunctionBuilder taskOne = this.constructFunction(workOne, "task");
-		taskOne.getBuilder().setTeam("TEAM");
+		taskOne.getBuilder().setResponsibleTeam("TEAM");
 		taskOne.buildObject("MO_ONE");
 		taskOne.buildManagedFunctionContext();
 		AsynchronousOperationWork workTwo = new AsynchronousOperationWork(moOne, OPERATION_COUNT, null);
 		ReflectiveFunctionBuilder taskTwo = this.constructFunction(workTwo, "task");
-		taskTwo.getBuilder().setTeam("TEAM");
+		taskTwo.getBuilder().setResponsibleTeam("TEAM");
 		taskTwo.buildObject("MO_TWO");
 		taskTwo.buildFlow("task", null, false);
 

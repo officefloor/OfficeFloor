@@ -61,10 +61,15 @@ public interface RawGovernanceMetaData<E, F extends Enum<F>> {
 	 * 
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
+	 * @param flowMetaDataFactory
+	 *            {@link FlowMetaDataFactory}.
+	 * @param escalationFlowFactory
+	 *            {@link EscalationFlowFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void loadOfficeMetaData(OfficeMetaData officeMetaData, OfficeFloorIssues issues);
+	void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
+			EscalationFlowFactory escalationFlowFactory, OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link GovernanceMetaData}.

@@ -29,10 +29,12 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
+import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.GovernanceEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.construct.EscalationFlowFactory;
+import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaData;
 import net.officefloor.frame.internal.construct.RawGovernanceMetaDataFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -95,6 +97,16 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 * {@link OfficeMetaData}.
 	 */
 	private final OfficeMetaData officeMetaData = this.createMock(OfficeMetaData.class);
+
+	/**
+	 * {@link FlowMetaDataFactory}.
+	 */
+	private final FlowMetaDataFactory flowMetaDataFactory = this.createMock(FlowMetaDataFactory.class);
+
+	/**
+	 * {@link EscalationFlowFactory}.
+	 */
+	private final EscalationFlowFactory escalationFlowFactory = this.createMock(EscalationFlowFactory.class);
 
 	/**
 	 * {@link ManagedFunctionLocator}.
@@ -163,7 +175,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
 		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
-		this.recordReturn(this.configuration, this.configuration.getTeamName(), null);
+		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), null);
 		this.record_issue("Must specify Team responsible for Governance activities");
 
 		// Attempt to construct governance
@@ -184,7 +196,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
 		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
-		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), TEAM_NAME);
 		this.record_issue("Can not find Team by name '" + TEAM_NAME + "'");
 
 		// Attempt to construct governance
@@ -205,9 +217,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
+		RawGovernanceMetaData<?, ?> rawMetaData = this.fullyConstructRawGovernanceMetaData();
 		GovernanceMetaData<?, ?> governanceMetaData = rawMetaData.getGovernanceMetaData();
-		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
 		this.verifyMockObjects();
 
 		// Verify the content of the raw meta data
@@ -223,7 +234,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoFlowFunctionName() {
 
-		final GovernanceFlowConfiguration<?> flowConfiguration = this.createMock(GovernanceFlowConfiguration.class);
+		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
 		final ManagedFunctionReference taskNode = this.createMock(ManagedFunctionReference.class);
 
 		// Record initiate
@@ -232,7 +243,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record flow
 		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
+				new FlowConfiguration<?>[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNode);
 		this.recordReturn(taskNode, taskNode.getFunctionName(), null);
 		this.record_issue("No function name provided for flow index 0");
@@ -242,8 +253,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
+		this.fullyConstructRawGovernanceMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -252,7 +262,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoFlowFunction() {
 
-		final GovernanceFlowConfiguration<?> flowConfiguration = this.createMock(GovernanceFlowConfiguration.class);
+		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
 		final ManagedFunctionReference taskNode = this.createMock(ManagedFunctionReference.class);
 
 		// Record initiate
@@ -261,7 +271,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record flow
 		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
+				new FlowConfiguration<?>[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNode);
 		this.recordReturn(taskNode, taskNode.getFunctionName(), "TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), null);
@@ -272,8 +282,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
+		this.fullyConstructRawGovernanceMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -282,7 +291,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testFlowIncorrectParameter() {
 
-		final GovernanceFlowConfiguration<?> flowConfiguration = this.createMock(GovernanceFlowConfiguration.class);
+		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
 		final ManagedFunctionReference taskNode = this.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
 
@@ -292,7 +301,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record incorrect parameter for flow
 		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new GovernanceFlowConfiguration<?>[] { flowConfiguration });
+				new FlowConfiguration<?>[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNode);
 		this.recordReturn(taskNode, taskNode.getFunctionName(), "TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"), taskMetaData);
@@ -306,8 +315,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
+		this.fullyConstructRawGovernanceMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -323,8 +331,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
+		RawGovernanceMetaData<?, ?> rawMetaData = this.fullyConstructRawGovernanceMetaData();
 		this.verifyMockObjects();
 
 		// Verify the flows
@@ -357,20 +364,19 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoEscalationTypeOfCause() {
 
-		final GovernanceEscalationConfiguration escalation = this.createMock(GovernanceEscalationConfiguration.class);
+		final EscalationConfiguration escalation = this.createMock(EscalationConfiguration.class);
 
 		// Record simple governance
 		this.record_initGovernance();
 		this.record_flows();
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new GovernanceEscalationConfiguration[] { escalation });
+				new EscalationConfiguration[] { escalation });
 		this.recordReturn(escalation, escalation.getTypeOfCause(), null);
 		this.record_issue("No escalation type for escalation index 0");
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
+		this.fullyConstructRawGovernanceMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -379,23 +385,22 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoEscalationFunctionName() {
 
-		final GovernanceEscalationConfiguration escalation = this.createMock(GovernanceEscalationConfiguration.class);
+		final EscalationConfiguration escalation = this.createMock(EscalationConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 
 		// Record simple governance
 		this.record_initGovernance();
 		this.record_flows();
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new GovernanceEscalationConfiguration[] { escalation });
+				new EscalationConfiguration[] { escalation });
 		this.recordReturn(escalation, escalation.getTypeOfCause(), SQLException.class);
-		this.recordReturn(escalation, escalation.getTaskNodeReference(), taskNodeReference);
+		this.recordReturn(escalation, escalation.getManagedFunctionReference(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), null);
 		this.record_issue("No function name provided for escalation index 0");
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
+		this.fullyConstructRawGovernanceMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -404,7 +409,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoEscalationFunction() {
 
-		final GovernanceEscalationConfiguration escalation = this.createMock(GovernanceEscalationConfiguration.class);
+		final EscalationConfiguration escalation = this.createMock(EscalationConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 		final String TASK_NAME = "TASK";
 
@@ -412,17 +417,16 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.record_initGovernance();
 		this.record_flows();
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new GovernanceEscalationConfiguration[] { escalation });
+				new EscalationConfiguration[] { escalation });
 		this.recordReturn(escalation, escalation.getTypeOfCause(), SQLException.class);
-		this.recordReturn(escalation, escalation.getTaskNodeReference(), taskNodeReference);
+		this.recordReturn(escalation, escalation.getManagedFunctionReference(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), TASK_NAME);
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData(TASK_NAME), null);
 		this.record_issue("Can not find function meta-data " + TASK_NAME + " for escalation index 0");
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
+		this.fullyConstructRawGovernanceMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -432,7 +436,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testEscalationIncorrectParameter() {
 
-		final GovernanceEscalationConfiguration escalation = this.createMock(GovernanceEscalationConfiguration.class);
+		final EscalationConfiguration escalation = this.createMock(EscalationConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 		final String TASK_NAME = "TASK";
 		final ManagedFunctionMetaData<?, ?> taskMetaData = this.createMock(ManagedFunctionMetaData.class);
@@ -441,9 +445,9 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.record_initGovernance();
 		this.record_flows();
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new GovernanceEscalationConfiguration[] { escalation });
+				new EscalationConfiguration[] { escalation });
 		this.recordReturn(escalation, escalation.getTypeOfCause(), SQLException.class);
-		this.recordReturn(escalation, escalation.getTaskNodeReference(), taskNodeReference);
+		this.recordReturn(escalation, escalation.getManagedFunctionReference(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), TASK_NAME);
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData(TASK_NAME),
 				taskMetaData);
@@ -455,8 +459,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
+		this.fullyConstructRawGovernanceMetaData();
 		this.verifyMockObjects();
 	}
 
@@ -475,8 +478,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct governance
 		this.replayMockObjects();
-		RawGovernanceMetaData<?, ?> rawMetaData = this.constructRawGovernanceMetaData(true);
-		rawMetaData.loadOfficeMetaData(this.officeMetaData, this.issues);
+		RawGovernanceMetaData<?, ?> rawMetaData = this.fullyConstructRawGovernanceMetaData();
 		this.verifyMockObjects();
 
 		// Verify escalation
@@ -500,7 +502,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getGovernanceName(), GOVERNANCE_NAME);
 		this.recordReturn(this.configuration, this.configuration.getGovernanceFactory(), this.governanceFactory);
 		this.recordReturn(this.configuration, this.configuration.getExtensionInterface(), String.class);
-		this.recordReturn(this.configuration, this.configuration.getTeamName(), TEAM_NAME);
+		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), TEAM_NAME);
 	}
 
 	/**
@@ -514,11 +516,11 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	private ManagedFunctionMetaData<?, ?>[] record_flows(Boolean... isSpawnThreadStates) {
 
 		// Create the listing of mocks
-		final GovernanceFlowConfiguration<?>[] flowConfigurations = new GovernanceFlowConfiguration<?>[isSpawnThreadStates.length];
+		final FlowConfiguration<?>[] flowConfigurations = new FlowConfiguration<?>[isSpawnThreadStates.length];
 		final ManagedFunctionReference[] taskNodes = new ManagedFunctionReference[isSpawnThreadStates.length];
 		final ManagedFunctionMetaData<?, ?>[] taskMetaDatas = new ManagedFunctionMetaData<?, ?>[isSpawnThreadStates.length];
 		for (int i = 0; i < isSpawnThreadStates.length; i++) {
-			flowConfigurations[i] = this.createMock(GovernanceFlowConfiguration.class);
+			flowConfigurations[i] = this.createMock(FlowConfiguration.class);
 			taskNodes[i] = this.createMock(ManagedFunctionReference.class);
 			taskMetaDatas[i] = this.createMock(ManagedFunctionMetaData.class);
 		}
@@ -529,7 +531,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Record configuring each flow
 		for (int i = 0; i < isSpawnThreadStates.length; i++) {
-			GovernanceFlowConfiguration<?> flowConfiguration = flowConfigurations[i];
+			FlowConfiguration<?> flowConfiguration = flowConfigurations[i];
 			ManagedFunctionReference taskNode = taskNodes[i];
 			ManagedFunctionMetaData<?, ?> taskMetaData = taskMetaDatas[i];
 			boolean isSpawnThreadState = isSpawnThreadStates[i];
@@ -561,10 +563,10 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	private ManagedFunctionMetaData<?, ?>[] record_escalations(Throwable... exceptions) {
 
 		// Create the mocks for the exceptions
-		GovernanceEscalationConfiguration[] escalations = new GovernanceEscalationConfiguration[exceptions.length];
+		EscalationConfiguration[] escalations = new EscalationConfiguration[exceptions.length];
 		ManagedFunctionMetaData<?, ?>[] taskMetaDatas = new ManagedFunctionMetaData<?, ?>[exceptions.length];
 		for (int i = 0; i < exceptions.length; i++) {
-			escalations[i] = this.createMock(GovernanceEscalationConfiguration.class);
+			escalations[i] = this.createMock(EscalationConfiguration.class);
 			taskMetaDatas[i] = this.createMock(ManagedFunctionMetaData.class);
 		}
 
@@ -574,7 +576,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Record configuring each escalation
 		for (int i = 0; i < exceptions.length; i++) {
 			Throwable exception = exceptions[i];
-			GovernanceEscalationConfiguration escalation = escalations[i];
+			EscalationConfiguration escalation = escalations[i];
 			ManagedFunctionMetaData<?, ?> taskMetaData = taskMetaDatas[i];
 
 			final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
@@ -582,7 +584,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 			// Record configuring the escalation
 			this.recordReturn(escalation, escalation.getTypeOfCause(), exception.getClass());
-			this.recordReturn(escalation, escalation.getTaskNodeReference(), taskNodeReference);
+			this.recordReturn(escalation, escalation.getManagedFunctionReference(), taskNodeReference);
 			this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), TASK_NAME);
 			this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData(TASK_NAME),
 					taskMetaData);
@@ -638,6 +640,19 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Return the raw governance meta-data
 		return rawGovernanceMetaData;
+	}
+
+	/**
+	 * Fully creates the {@link RawGovernanceMetaData}.
+	 * 
+	 * @return {@link RawGovernanceMetaData}.
+	 */
+	@SuppressWarnings("rawtypes")
+	private RawGovernanceMetaData fullyConstructRawGovernanceMetaData() {
+		RawGovernanceMetaData governanceMetaData = this.constructRawGovernanceMetaData(true);
+		governanceMetaData.loadOfficeMetaData(this.officeMetaData, this.flowMetaDataFactory, this.escalationFlowFactory,
+				this.issues);
+		return governanceMetaData;
 	}
 
 }

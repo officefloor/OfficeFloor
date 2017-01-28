@@ -22,7 +22,7 @@ import java.util.List;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
-import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -34,18 +34,18 @@ import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.function.ManagedFunctionBuilderImpl;
-import net.officefloor.frame.impl.construct.function.ManagedFunctionEscalationConfigurationImpl;
-import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
+import net.officefloor.frame.impl.construct.function.EscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
+import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionBuilderImpl;
+import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.BoundInputManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -140,7 +140,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * Listing of the {@link EscalationFlow} instances.
 	 */
-	private final List<ManagedFunctionEscalationConfiguration> escalations = new LinkedList<ManagedFunctionEscalationConfiguration>();
+	private final List<EscalationConfiguration> escalations = new LinkedList<EscalationConfiguration>();
 
 	/**
 	 * List of start up {@link ManagedFunction} instances for the
@@ -260,7 +260,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	@Override
 	public void addEscalation(Class<? extends Throwable> typeOfCause, String functionName) {
-		this.escalations.add(new ManagedFunctionEscalationConfigurationImpl(typeOfCause,
+		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
 				new ManagedFunctionReferenceImpl(functionName, typeOfCause)));
 	}
 
@@ -350,12 +350,12 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public ManagedFunctionEscalationConfiguration[] getEscalationConfiguration() {
-		return this.escalations.toArray(new ManagedFunctionEscalationConfiguration[0]);
+	public EscalationConfiguration[] getEscalationConfiguration() {
+		return this.escalations.toArray(new EscalationConfiguration[0]);
 	}
 
 	@Override
-	public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String functionName) {
+	public FlowBuilder<?> getFlowBuilder(String namespace, String functionName) {
 
 		// Obtain the function builder
 		String namespacedFunctionName = getNamespacedName(namespace, functionName);

@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.api.managedobject.source;
 
-import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
@@ -26,7 +26,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectFunctionBuilder<O extends Enum<O>, F extends Enum<F>> extends FlowNodeBuilder<F> {
+public interface ManagedObjectFunctionBuilder<O extends Enum<O>, F extends Enum<F>> extends FlowBuilder<F> {
 
 	/**
 	 * Links in the parameter for this {@link ManagedFunction}.

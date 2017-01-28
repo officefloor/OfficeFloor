@@ -158,14 +158,14 @@ public class ManagedObjectUnloadGovernanceTest extends AbstractGovernanceTestCas
 
 		// Configure the first task
 		ReflectiveFunctionBuilder taskOne = this.constructFunction(work, "doTaskOne");
-		taskOne.getBuilder().setTeam(TEAM_TASK);
+		taskOne.getBuilder().setResponsibleTeam(TEAM_TASK);
 		DependencyMappingBuilder dependenciesOne = taskOne.buildObject("MO_ONE", ManagedObjectScope.FUNCTION);
 //		taskOne.getBuilder().linkPreFunctionAdministration("ADMIN", "BEGIN");
 		taskOne.getBuilder().setNextFunction("doTaskTwo", null);
 
 		// Configure the second task
 		ReflectiveFunctionBuilder taskTwo = this.constructFunction(work, "doTaskTwo");
-		taskTwo.getBuilder().setTeam(TEAM_TASK);
+		taskTwo.getBuilder().setResponsibleTeam(TEAM_TASK);
 		DependencyMappingBuilder dependenciesTwo = taskTwo.buildObject("MO_TWO", ManagedObjectScope.FUNCTION);
 //		if (this.isCommit) {
 //			taskTwo.getBuilder().linkPostFunctionAdministration("ADMIN", "COMMIT");
@@ -177,7 +177,7 @@ public class ManagedObjectUnloadGovernanceTest extends AbstractGovernanceTestCas
 		// Configure the Governance
 		GovernanceBuilder<None> governance = this.getOfficeBuilder().addGovernance("GOVERNANCE", MockTransaction.class,
 				new MockTransactionalGovernanceFactory());
-		governance.setTeam(TEAM_GOVERNANCE);
+		governance.setResponsibleTeam(TEAM_GOVERNANCE);
 		dependenciesOne.mapGovernance("GOVERNANCE");
 		dependenciesTwo.mapGovernance("GOVERNANCE");
 
@@ -228,7 +228,7 @@ public class ManagedObjectUnloadGovernanceTest extends AbstractGovernanceTestCas
 		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 
 			// Add recycle function
-			context.getManagedObjectSourceContext().getRecycleFunction(this).setTeam("RECYCLE");
+			context.getManagedObjectSourceContext().getRecycleFunction(this).setResponsibleTeam("RECYCLE");
 
 			// Meta-data
 			context.setObjectClass(TransactionalObject.class);

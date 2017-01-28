@@ -48,6 +48,10 @@ public interface RawAdministrationMetaDataFactory {
 	 *            instances.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
+	 * @param flowMetaDataFactory
+	 *            {@link FlowMetaDataFactory}.
+	 * @param escalationFlowFactory
+	 *            {@link EscalationFlowFactory}.
 	 * @param officeTeams
 	 *            {@link TeamManagement} instances by their {@link Office}
 	 *            registered names.
@@ -59,6 +63,7 @@ public interface RawAdministrationMetaDataFactory {
 	 */
 	RawAdministrationMetaData[] constructRawAdministrationMetaData(AdministrationConfiguration<?, ?, ?>[] configuration,
 			AssetType assetType, String assetName, OfficeMetaData officeMetaData,
+			FlowMetaDataFactory flowMetaDataFactory, EscalationFlowFactory escalationFlowFactory,
 			Map<String, TeamManagement> officeTeams, Map<String, RawBoundManagedObjectMetaData> scopeMo,
 			OfficeFloorIssues issues);
 

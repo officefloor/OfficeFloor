@@ -60,7 +60,7 @@ public class TeamProcessContextTest extends AbstractOfficeConstructTestCase {
 		// Register the function
 		MockWork work = new MockWork();
 		ReflectiveFunctionBuilder function = this.constructFunction(work, "task");
-		function.getBuilder().setTeam("TEAM");
+		function.getBuilder().setResponsibleTeam("TEAM");
 
 		// Register the team
 		this.constructTeam("TEAM", MockListenerTeamSource.class);

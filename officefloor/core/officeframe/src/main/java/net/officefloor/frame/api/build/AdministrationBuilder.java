@@ -18,19 +18,15 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Enables building an {@link Administration}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdministrationBuilder<F extends Enum<F>, G extends Enum<G>> {
+public interface AdministrationBuilder<F extends Enum<F>, G extends Enum<G>> extends FunctionBuilder<F> {
 
 	/**
 	 * Flags for the {@link Administration} to administer the referenced
@@ -43,49 +39,6 @@ public interface AdministrationBuilder<F extends Enum<F>, G extends Enum<G>> {
 	 *            {@link Administration} is being added.
 	 */
 	void administerManagedObject(String scopeManagedObjectName);
-
-	/**
-	 * <p>
-	 * Name of the {@link Team} linked to the {@link Office} that is responsible
-	 * for doing to the {@link Administration}.
-	 * <p>
-	 * If not specified, any {@link Team} will be used.
-	 * 
-	 * @param officeTeamName
-	 *            Name of {@link Team} within the {@link Office} for this
-	 *            {@link Administration}.
-	 */
-	void setTeam(String officeTeamName);
-
-	/**
-	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
-	 * of the {@link Flow}.
-	 * 
-	 * @param <F>
-	 *            Flow key type.
-	 * @param key
-	 *            Key identifying the {@link Flow}.
-	 * @param functionName
-	 *            Name of {@link ManagedFunction}.
-	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link Flow}. May be
-	 *            <code>null</code> to indicate no argument.
-	 */
-	void linkFlow(F key, String functionName, Class<?> argumentType);
-
-	/**
-	 * Links in a {@link Flow} by specifying the first {@link ManagedFunction}
-	 * of the {@link Flow}.
-	 * 
-	 * @param flowIndex
-	 *            Index identifying the {@link Flow}.
-	 * @param functionName
-	 *            Name of {@link ManagedFunction}.
-	 * @param argumentType
-	 *            Type of argument passed to the instigated {@link Flow}. May be
-	 *            <code>null</code> to indicate no argument.
-	 */
-	void linkFlow(int flowIndex, String functionName, Class<?> argumentType);
 
 	/**
 	 * Links a {@link Governance}.

@@ -15,33 +15,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.configuration;
+package net.officefloor.frame.impl.construct.managedfunction;
 
-import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
 
 /**
- * Configuration for the {@link EscalationFlow}.
+ * {@link ManagedFunctionGovernanceConfiguration} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionEscalationConfiguration {
+public class ManagedFunctionGovernanceConfigurationImpl implements
+		ManagedFunctionGovernanceConfiguration {
 
 	/**
-	 * Obtains the type of cause handled by this {@link EscalationFlow}.
-	 * 
-	 * @return Type of cause handled by this {@link EscalationFlow}.
+	 * {@link Governance} name.
 	 */
-	Class<? extends Throwable> getTypeOfCause();
+	private final String governanceName;
 
 	/**
-	 * Obtains the {@link ManagedFunctionReference} for the
-	 * {@link ManagedFunction} handling the {@link Escalation}.
+	 * Initiate.
 	 * 
-	 * @return {@link ManagedFunctionReference} for the {@link ManagedFunction}
-	 *         handling the {@link Escalation}.
+	 * @param governanceName
+	 *            {@link Governance} name.
 	 */
-	ManagedFunctionReference getManagedFunctionReference();
+	public ManagedFunctionGovernanceConfigurationImpl(String governanceName) {
+		this.governanceName = governanceName;
+	}
+
+	/*
+	 * ===================== TaskGovernanceConfiguration =================
+	 */
+
+	@Override
+	public String getGovernanceName() {
+		return this.governanceName;
+	}
 
 }

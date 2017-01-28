@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.construct.function;
+package net.officefloor.frame.impl.construct.managedfunction;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -38,20 +38,19 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.EscalationFlowFactory;
+import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
@@ -180,7 +179,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 
 		// Obtain the team responsible for the function
 		TeamManagement responsibleTeam = null;
-		String officeTeamName = configuration.getOfficeTeamName();
+		String officeTeamName = configuration.getResponsibleTeamName();
 		if (!ConstructUtil.isBlank(officeTeamName)) {
 			responsibleTeam = rawOfficeMetaData.getTeams().get(officeTeamName);
 			if (responsibleTeam == null) {
@@ -397,94 +396,40 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 	}
 
 	@Override
-	public void loadOfficeMetaData(OfficeMetaData officeMetaData,
+	public void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
+			EscalationFlowFactory escalationFlowFactory,
 			RawAdministrationMetaDataFactory rawAdministrationMetaDataFactory, Map<String, TeamManagement> officeTeams,
 			OfficeFloorIssues issues) {
+
+		// Obtain the listing of flow meta-data
+		FlowMetaData[] flowMetaDatas = flowMetaDataFactory.createFlowMetaData(this.configuration.getFlowConfiguration(),
+				officeMetaData, AssetType.FUNCTION, this.functionName, issues);
 
 		// Obtain the function locator
 		ManagedFunctionLocator functionLocator = officeMetaData.getManagedFunctionLocator();
 
-		// Obtain the listing of flow meta-data
-		ManagedFunctionFlowConfiguration<F>[] flowConfigurations = this.configuration.getFlowConfiguration();
-		FlowMetaData[] flowMetaDatas = new FlowMetaData[flowConfigurations.length];
-		for (int i = 0; i < flowMetaDatas.length; i++) {
-			ManagedFunctionFlowConfiguration<F> flowConfiguration = flowConfigurations[i];
-
-			// Ensure have flow configuration
-			if (flowConfiguration == null) {
-				continue;
-			}
-
-			// Obtain the function reference
-			ManagedFunctionReference functionReference = flowConfiguration.getInitialFunction();
-			if (functionReference == null) {
-				issues.addIssue(AssetType.FUNCTION, this.functionName, "No function referenced for flow index " + i);
-				continue; // no reference task for flow
-			}
-
-			// Obtain the function meta-data
-			ManagedFunctionMetaData<?, ?> functionMetaData = ConstructUtil.getFunctionMetaData(functionReference,
-					functionLocator, issues, AssetType.FUNCTION, this.functionName, "flow index " + i);
-			if (functionMetaData == null) {
-				continue; // no initial function for flow
-			}
-
-			// Obtain whether to spawn thread state
-			boolean isSpawnThreadState = flowConfiguration.isSpawnThreadState();
-
-			// Create and add the flow meta-data
-			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(functionMetaData, isSpawnThreadState);
-		}
-
 		// Obtain the next function
-		ManagedFunctionReference nextFunctionReference = this.configuration.getNextFunction();
 		ManagedFunctionMetaData<?, ?> nextFunction = null;
+		ManagedFunctionReference nextFunctionReference = this.configuration.getNextFunction();
 		if (nextFunctionReference != null) {
 			nextFunction = ConstructUtil.getFunctionMetaData(nextFunctionReference, functionLocator, issues,
 					AssetType.FUNCTION, this.functionName, "next function");
 		}
 
 		// Create the escalation procedure
-		ManagedFunctionEscalationConfiguration[] escalationConfigurations = this.configuration.getEscalations();
-		EscalationFlow[] escalations = new EscalationFlow[escalationConfigurations.length];
-		for (int i = 0; i < escalations.length; i++) {
-			ManagedFunctionEscalationConfiguration escalationConfiguration = escalationConfigurations[i];
-
-			// Obtain the type of cause
-			Class<? extends Throwable> typeOfCause = escalationConfiguration.getTypeOfCause();
-			if (typeOfCause == null) {
-				issues.addIssue(AssetType.FUNCTION, this.functionName, "No escalation type for escalation index " + i);
-				continue; // no escalation type
-			}
-
-			// Obtain the escalation handler
-			ManagedFunctionReference escalationReference = escalationConfiguration.getManagedFunctionReference();
-			if (escalationReference == null) {
-				issues.addIssue(AssetType.FUNCTION, this.functionName,
-						"No function referenced for escalation index " + i);
-				continue; // no escalation handler referenced
-			}
-			ManagedFunctionMetaData<?, ?> escalationFunctionMetaData = ConstructUtil.getFunctionMetaData(
-					escalationReference, functionLocator, issues, AssetType.FUNCTION, this.functionName,
-					"escalation index " + i);
-			if (escalationFunctionMetaData == null) {
-				continue; // no escalation handler
-			}
-
-			// Create and add the escalation
-			escalations[i] = new EscalationFlowImpl(typeOfCause, escalationFunctionMetaData);
-		}
-		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalations);
+		EscalationFlow[] escalationFlows = escalationFlowFactory.createEscalationFlows(
+				this.configuration.getEscalations(), officeMetaData, AssetType.FUNCTION, this.functionName, issues);
+		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalationFlows);
 
 		// Create the administrations
 		AdministrationMetaData<?, ?, ?>[] preAdministrations = this
 				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
 						configuration.getPreAdministration(), rawAdministrationMetaDataFactory, officeMetaData,
-						officeTeams, issues);
+						flowMetaDataFactory, escalationFlowFactory, officeTeams, issues);
 		AdministrationMetaData<?, ?, ?>[] postAdministrations = this
 				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
 						configuration.getPostAdministration(), rawAdministrationMetaDataFactory, officeMetaData,
-						officeTeams, issues);
+						flowMetaDataFactory, escalationFlowFactory, officeTeams, issues);
 
 		// Create the required managed object indexes
 		ManagedObjectIndex[] requiredManagedObjectIndexes = new ManagedObjectIndex[this.requiredManagedObjects.size()];
@@ -503,8 +448,8 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 			// Log ordering of dependencies for task
 			StringBuilder log = new StringBuilder();
 			Class<?> parameterType = this.functionMetaData.getParameterType();
-			log.append(
-					"FUNCTION: " + functionName + "(" + (parameterType == null ? "" : parameterType.getName()) + ")\n");
+			log.append("FUNCTION: " + this.functionName + "(" + (parameterType == null ? "" : parameterType.getName())
+					+ ")\n");
 			int sequence = 1;
 			log.append("  Continuations:\n");
 			for (FlowMetaData flow : flowMetaDatas) {
@@ -520,7 +465,7 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 				log.append("   next) " + nextFunction.getFunctionName() + "\n");
 			}
 			sequence = 1;
-			for (EscalationFlow flow : escalations) {
+			for (EscalationFlow flow : escalationFlows) {
 				log.append("   " + flow.getTypeOfCause().getName() + ") "
 						+ flow.getManagedFunctionMetaData().getFunctionName());
 			}
@@ -558,6 +503,10 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 	 *            {@link RawAdministrationMetaDataFactory}.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
+	 * @param flowMetaDataFactory
+	 *            {@link FlowMetaDataFactory}.
+	 * @param escalationFlowFactory
+	 *            {@link EscalationFlowFactory}.
 	 * @param officeTeams
 	 *            {@link Map} of {@link TeamManagement} instances within the
 	 *            {@link Office}.
@@ -568,12 +517,14 @@ public class RawManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>
 	private AdministrationMetaData<?, ?, ?>[] constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
 			AdministrationConfiguration<?, ?, ?>[] configuration,
 			RawAdministrationMetaDataFactory rawAdministrationMetaDataFactory, OfficeMetaData officeMetaData,
+			FlowMetaDataFactory flowMetaDataFactory, EscalationFlowFactory escalationFlowFactory,
 			Map<String, TeamManagement> officeTeams, OfficeFloorIssues issues) {
 
 		// Construct the raw administration meta-data
 		RawAdministrationMetaData[] rawAdministrations = rawAdministrationMetaDataFactory
 				.constructRawAdministrationMetaData(configuration, AssetType.FUNCTION, functionName, officeMetaData,
-						officeTeams, this.functionScopedManagedObjects, issues);
+						flowMetaDataFactory, escalationFlowFactory, officeTeams, this.functionScopedManagedObjects,
+						issues);
 
 		// Create array of administration meta-data and register managed objects
 		AdministrationMetaData<?, ?, ?>[] administrations = new AdministrationMetaData[rawAdministrations.length];

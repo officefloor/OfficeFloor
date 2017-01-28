@@ -95,7 +95,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		// Register the sequential function
 		ReflectiveFunctionBuilder function = this.constructFunction(sequential, "sequential");
-		function.getBuilder().setTeam("TEAM");
+		function.getBuilder().setResponsibleTeam("TEAM");
 		function.buildParameter();
 		function.buildFlow("sequential", Integer.class, false);
 		this.constructTeam("TEAM", team);

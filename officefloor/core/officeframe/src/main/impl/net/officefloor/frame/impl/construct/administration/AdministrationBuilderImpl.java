@@ -27,19 +27,16 @@ import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.construct.function.ManagedFunctionReferenceImpl;
+import net.officefloor.frame.impl.construct.function.AbstractFunctionBuilder;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.AdministrationGovernanceConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
-import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Implementation of the {@link AdministrationBuilder}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>>
+public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>> extends AbstractFunctionBuilder<F>
 		implements AdministrationBuilder<F, G>, AdministrationConfiguration<E, F, G> {
 
 	/**
@@ -63,20 +60,10 @@ public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>>
 	private final List<String> administeredManagedObjectNames = new LinkedList<String>();
 
 	/**
-	 * {@link Flow} instances to be linked to this {@link Administration}.
-	 */
-	private final Map<Integer, ManagedFunctionReference> flows = new HashMap<Integer, ManagedFunctionReference>();
-
-	/**
 	 * Registry of {@link Governance} instances that may be invoked from the
 	 * {@link AdministrationDuty}.
 	 */
 	private final Map<Integer, AdministrationGovernanceConfiguration<?>> governances = new HashMap<Integer, AdministrationGovernanceConfiguration<?>>();
-
-	/**
-	 * Name of the {@link Team} responsible for the {@link Administration}.
-	 */
-	private String officeTeamName;
 
 	/**
 	 * Initiate.
@@ -100,23 +87,8 @@ public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 */
 
 	@Override
-	public void setTeam(String officeTeamName) {
-		this.officeTeamName = officeTeamName;
-	}
-
-	@Override
 	public void administerManagedObject(String scopeManagedObjectName) {
 		this.administeredManagedObjectNames.add(scopeManagedObjectName);
-	}
-
-	@Override
-	public void linkFlow(F key, String functionName, Class<?> argumentType) {
-		this.linkFlow(key.ordinal(), functionName, argumentType);
-	}
-
-	@Override
-	public void linkFlow(int flowIndex, String functionName, Class<?> argumentType) {
-		this.flows.put(Integer.valueOf(flowIndex), new ManagedFunctionReferenceImpl(functionName, argumentType));
 	}
 
 	@Override
@@ -166,30 +138,6 @@ public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>>
 	}
 
 	@Override
-	public ManagedFunctionReference[] getFlowConfiguration() {
-
-		// Obtain the array size from maximum index
-		int arraySize = -1;
-		for (Integer key : this.flows.keySet()) {
-			int index = key.intValue();
-			if (index > arraySize) {
-				arraySize = index;
-			}
-		}
-		arraySize += 1; // size is one up of max index
-
-		// Create the listing of function nodes
-		ManagedFunctionReference[] functionNodes = new ManagedFunctionReference[arraySize];
-		for (Integer key : this.flows.keySet()) {
-			ManagedFunctionReference reference = this.flows.get(key);
-			functionNodes[key.intValue()] = reference;
-		}
-
-		// Return the listing
-		return functionNodes;
-	}
-
-	@Override
 	public AdministrationGovernanceConfiguration<?>[] getGovernanceConfiguration() {
 
 		// Obtain the array size from maximum index
@@ -211,11 +159,6 @@ public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>>
 
 		// Return the listing
 		return governanceList;
-	}
-
-	@Override
-	public String getOfficeTeamName() {
-		return this.officeTeamName;
 	}
 
 	@Override

@@ -31,6 +31,8 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.source.ProcessContextListener;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactoryImpl;
+import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactoryImpl;
+import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactoryImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.asset.OfficeClockImpl;
 import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
@@ -47,10 +49,12 @@ import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.construct.EscalationFlowFactory;
+import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
@@ -459,8 +463,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 		OfficeStartupFunction[] startupFunctions = new OfficeStartupFunction[startupFunctionsLength];
 
 		// Create the listing of escalations to later populate
-		ManagedFunctionEscalationConfiguration[] officeEscalationConfigurations = configuration
-				.getEscalationConfiguration();
+		EscalationConfiguration[] officeEscalationConfigurations = configuration.getEscalationConfiguration();
 		int officeEscalationsLength = (officeEscalationConfigurations == null ? 0
 				: officeEscalationConfigurations.length);
 		EscalationFlow[] officeEscalations = new EscalationFlow[officeEscalationsLength];
@@ -507,7 +510,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 		// Load the office escalations
 		for (int i = 0; i < officeEscalationsLength; i++) {
-			ManagedFunctionEscalationConfiguration escalationConfiguration = officeEscalationConfigurations[i];
+			EscalationConfiguration escalationConfiguration = officeEscalationConfigurations[i];
 
 			// Obtain the type of issue being handled by escalation
 			Class<? extends Throwable> typeOfCause = escalationConfiguration.getTypeOfCause();
@@ -540,6 +543,10 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 				functionLoop, functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), functionLocator,
 				processMetaData, processContextListeners, startupFunctions, profiler);
 
+		// Create the factories
+		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactoryImpl();
+		EscalationFlowFactory escalationFlowFactory = new EscalationFlowFactoryImpl();
+
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
 			officeManagingManagedObject.manageByOffice(officeMetaData, processBoundManagedObjects, officeTeams, issues);
@@ -547,12 +554,13 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory, RawOffic
 
 		// Link functions within the meta-data of the office
 		for (RawManagedFunctionMetaData<?, ?> rawFunctionMetaData : rawFunctionMetaDatas) {
-			rawFunctionMetaData.loadOfficeMetaData(officeMetaData, administrationMetaDataFactory, officeTeams, issues);
+			rawFunctionMetaData.loadOfficeMetaData(officeMetaData, flowMetaDataFactory, escalationFlowFactory,
+					administrationMetaDataFactory, officeTeams, issues);
 		}
 
 		// Link governance within meta-data of the office
 		for (RawGovernanceMetaData<?, ?> rawGovernance : rawGovernanceMetaDataList) {
-			rawGovernance.loadOfficeMetaData(officeMetaData, issues);
+			rawGovernance.loadOfficeMetaData(officeMetaData, flowMetaDataFactory, escalationFlowFactory, issues);
 		}
 
 		// Return the raw office meta-data

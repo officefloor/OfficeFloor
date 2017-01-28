@@ -99,7 +99,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 
 		// Register the repeat task
 		ReflectiveFunctionBuilder function = this.constructFunction(repeat, "repeat");
-		function.getBuilder().setTeam("TEAM");
+		function.getBuilder().setResponsibleTeam("TEAM");
 		function.buildFlow("repeat", null, false);
 		this.constructTeam("TEAM", team);
 

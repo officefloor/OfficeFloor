@@ -46,6 +46,10 @@ public interface RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>
 	 * 
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
+	 * @param flowMetaDataFactory
+	 *            {@link FlowMetaDataFactory}.
+	 * @param escalationProcedureFactory
+	 *            {@link EscalationFlowFactory}.
 	 * @param administrationMetaDataFactory
 	 *            {@link RawAdministrationMetaDataFactory}.
 	 * @param officeTeams
@@ -53,8 +57,10 @@ public interface RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void loadOfficeMetaData(OfficeMetaData officeMetaData, RawAdministrationMetaDataFactory administrationMetaDataFactory,
-			Map<String, TeamManagement> officeTeams, OfficeFloorIssues issues);
+	void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
+			EscalationFlowFactory escalationProcedureFactory,
+			RawAdministrationMetaDataFactory administrationMetaDataFactory, Map<String, TeamManagement> officeTeams,
+			OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link ManagedFunctionMetaData}.

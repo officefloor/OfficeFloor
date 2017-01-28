@@ -72,8 +72,8 @@ public class CleanupManagedObjectEscalationTest extends AbstractOfficeConstructT
 		this.getOfficeBuilder().addOfficeEnhancer(new OfficeEnhancer() {
 			@Override
 			public void enhanceOffice(OfficeEnhancerContext context) {
-				context.getFlowNodeBuilder("ESCALATE", "#recycle#").setTeam("TEAM");
-				context.getFlowNodeBuilder("HANDLE", "#recycle#").setTeam("TEAM");
+				context.getFlowBuilder("ESCALATE", "#recycle#").setResponsibleTeam("TEAM");
+				context.getFlowBuilder("HANDLE", "#recycle#").setResponsibleTeam("TEAM");
 			}
 		});
 

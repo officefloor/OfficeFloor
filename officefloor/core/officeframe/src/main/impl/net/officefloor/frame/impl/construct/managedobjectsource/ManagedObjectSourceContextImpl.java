@@ -212,8 +212,8 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 		}
 
 		@Override
-		public void setTeam(String teamName) {
-			this.functionBuilder.setTeam(ManagedObjectSourceContextImpl.this.getNamespacedName(teamName));
+		public void setResponsibleTeam(String teamName) {
+			this.functionBuilder.setResponsibleTeam(ManagedObjectSourceContextImpl.this.getNamespacedName(teamName));
 		}
 
 		@Override

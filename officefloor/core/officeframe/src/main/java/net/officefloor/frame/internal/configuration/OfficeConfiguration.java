@@ -18,8 +18,8 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.build.FlowBuilder;
+import net.officefloor.frame.api.build.FunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -161,17 +161,16 @@ public interface OfficeConfiguration {
 	OfficeEnhancer[] getOfficeEnhancers();
 
 	/**
-	 * Obtains the {@link ManagedFunctionEscalationConfiguration} instances for
-	 * the {@link Office}.
+	 * Obtains the {@link EscalationConfiguration} instances for the
+	 * {@link Office}.
 	 * 
-	 * @return {@link ManagedFunctionEscalationConfiguration} instances for the
-	 *         {@link Office}.
+	 * @return {@link EscalationConfiguration} instances for the {@link Office}.
 	 */
-	ManagedFunctionEscalationConfiguration[] getEscalationConfiguration();
+	EscalationConfiguration[] getEscalationConfiguration();
 
 	/**
 	 * <p>
-	 * Obtains a {@link FlowNodeBuilder} registered with this
+	 * Obtains a {@link FunctionBuilder} registered with this
 	 * {@link OfficeBuilder}.
 	 * <p>
 	 * This enables addition configuration of {@link ManagedFunction} instances
@@ -181,9 +180,9 @@ public interface OfficeConfiguration {
 	 *            Namespace. Likely the {@link ManagedObjectSource} name.
 	 * @param functionName
 	 *            Name of the {@link ManagedFunction}.
-	 * @return {@link ManagedFunctionBuilder}.
+	 * @return {@link FlowBuilder} for the {@link ManagedFunction}.
 	 */
-	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String functionName);
+	FlowBuilder<?> getFlowBuilder(String namespace, String functionName);
 
 	/**
 	 * Obtains the list of {@link ManagedFunctionReference} instances

@@ -15,14 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.build;
+package net.officefloor.frame.impl.construct.flow;
 
-import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Builds the {@link Governance}.
- * 
+ * Tests the {@link FlowMetaDataFactory}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface GovernanceBuilder<F extends Enum<F>> extends FunctionBuilder<F> {
+public class FlowMetaDataFactoryTest extends OfficeFrameTestCase {
+
+	public void testImplement() {
+		fail("TODO implement");
+	}
+
 }

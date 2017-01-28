@@ -27,7 +27,7 @@ import org.easymock.ArgumentsMatcher;
 import org.easymock.internal.AlwaysMatcher;
 
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FunctionBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -47,11 +47,13 @@ import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.EscalationFlowFactory;
+import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
@@ -314,7 +316,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		OfficeEnhancer enhancer = new OfficeEnhancer() {
 			@Override
 			public void enhanceOffice(OfficeEnhancerContext context) {
-				context.getFlowNodeBuilder("TASK");
+				context.getFlowBuilder("TASK");
 				fail("Should not continue on flow node not available");
 			}
 		};
@@ -324,7 +326,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
 		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(),
 				new OfficeEnhancer[] { enhancer });
-		this.recordReturn(this.configuration, this.configuration.getFlowNodeBuilder(null, "TASK"), null);
+		this.recordReturn(this.configuration, this.configuration.getFlowBuilder(null, "TASK"), null);
 		this.record_issue("ManagedFunction 'TASK' of namespace '[none]' not available for enhancement");
 		this.record_teams();
 		this.record_defaultOfficeClock();
@@ -352,7 +354,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		OfficeEnhancer enhancer = new OfficeEnhancer() {
 			@Override
 			public void enhanceOffice(OfficeEnhancerContext context) {
-				context.getFlowNodeBuilder("MANAGED_OBJECT", "TASK");
+				context.getFlowBuilder("MANAGED_OBJECT", "TASK");
 				fail("Should not continue on flow node not available");
 			}
 		};
@@ -362,7 +364,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
 		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(),
 				new OfficeEnhancer[] { enhancer });
-		this.recordReturn(this.configuration, this.configuration.getFlowNodeBuilder("MANAGED_OBJECT", "TASK"), null);
+		this.recordReturn(this.configuration, this.configuration.getFlowBuilder("MANAGED_OBJECT", "TASK"), null);
 		this.record_issue("ManagedFunction 'TASK' of namespace 'MANAGED_OBJECT' not available for enhancement");
 		this.record_teams();
 		this.record_defaultOfficeClock();
@@ -381,19 +383,19 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to obtain {@link FlowNodeBuilder} for an
+	 * Ensure able to obtain {@link FunctionBuilder} for an
 	 * {@link OfficeEnhancer}.
 	 */
 	public void testGetFlowNodeBuilderForOfficeEnhancing() {
 
-		final FlowNodeBuilder<?> flowNodeBuilder = this.createMock(FlowNodeBuilder.class);
+		final FunctionBuilder<?> flowNodeBuilder = this.createMock(FunctionBuilder.class);
 
 		// Office enhancer
 		OfficeEnhancer enhancer = new OfficeEnhancer() {
 			@Override
 			public void enhanceOffice(OfficeEnhancerContext context) {
 				assertEquals("Incorrect flow node builder", flowNodeBuilder,
-						context.getFlowNodeBuilder("MANAGED_OBJECT", "TASK"));
+						context.getFlowBuilder("MANAGED_OBJECT", "TASK"));
 			}
 		};
 
@@ -402,7 +404,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.configuration, this.configuration.getMonitorOfficeInterval(), 1000);
 		this.recordReturn(this.configuration, this.configuration.getOfficeEnhancers(),
 				new OfficeEnhancer[] { enhancer });
-		this.recordReturn(this.configuration, this.configuration.getFlowNodeBuilder("MANAGED_OBJECT", "TASK"),
+		this.recordReturn(this.configuration, this.configuration.getFlowBuilder("MANAGED_OBJECT", "TASK"),
 				flowNodeBuilder);
 		this.record_teams();
 		this.record_defaultOfficeClock();
@@ -1160,8 +1162,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoTypeOfCauseForOfficeEscalation() {
 
-		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
-				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
 
 		// Record no type of cause
 		this.record_enhanceOffice();
@@ -1172,7 +1173,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.recordReturn(this.configuration, this.configuration.getEscalationConfiguration(),
-				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
+				new EscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
 		this.record_processContextListeners();
@@ -1192,8 +1193,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testUnknownFunctionForOfficeEscalation() {
 
-		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
-				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
 		final ManagedFunctionReference taskReference = this.createMock(ManagedFunctionReference.class);
 
 		// Record unknown escalation task
@@ -1205,7 +1205,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_functions();
 		this.record_noOfficeStartupFunctions();
 		this.recordReturn(this.configuration, this.configuration.getEscalationConfiguration(),
-				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
+				new EscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), RuntimeException.class);
@@ -1230,8 +1230,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		final RuntimeException failure = new RuntimeException("Escalation");
 
 		final RawManagedFunctionMetaData<?, ?> rawFunctionMetaData = this.createMock(RawManagedFunctionMetaData.class);
-		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
-				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
 		final ManagedFunctionReference escalationTaskReference = this.createMock(ManagedFunctionReference.class);
 		final Class<?> typeOfCause = failure.getClass();
 
@@ -1244,7 +1243,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		ManagedFunctionMetaData<?, ?> functionMetaData = this.record_functions("TASK", rawFunctionMetaData)[0];
 		this.record_noOfficeStartupFunctions();
 		this.recordReturn(this.configuration, this.configuration.getEscalationConfiguration(),
-				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
+				new EscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
 		this.record_processContextListeners();
@@ -1485,9 +1484,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			assertNotNull("Missing raw Governance meta-data", rawGovernanceMetaData);
 
 			// Link the Office meta-data
-			rawGovernanceMetaData.loadOfficeMetaData(null, this.issues);
-			this.control(rawGovernanceMetaData)
-					.setMatcher(new TypeMatcher(OfficeMetaData.class, OfficeFloorIssues.class));
+			rawGovernanceMetaData.loadOfficeMetaData(null, null, null, this.issues);
+			this.control(rawGovernanceMetaData).setMatcher(new TypeMatcher(OfficeMetaData.class,
+					FlowMetaDataFactory.class, EscalationFlowFactory.class, OfficeFloorIssues.class));
 		}
 	}
 
@@ -1816,9 +1815,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private void record_linkFunctions(RawManagedFunctionMetaData<?, ?>... rawFunctionMetaDatas) {
 		for (int i = 0; i < rawFunctionMetaDatas.length; i++) {
-			rawFunctionMetaDatas[i].loadOfficeMetaData(null, null, this.officeTeams, this.issues);
-			this.control(rawFunctionMetaDatas[i]).setMatcher(new TypeMatcher(OfficeMetaData.class,
-					RawAdministrationMetaDataFactory.class, Map.class, OfficeFloorIssues.class));
+			rawFunctionMetaDatas[i].loadOfficeMetaData(null, null, null, null, this.officeTeams, this.issues);
+			this.control(rawFunctionMetaDatas[i])
+					.setMatcher(new TypeMatcher(OfficeMetaData.class, FlowMetaDataFactory.class,
+							EscalationFlowFactory.class, RawAdministrationMetaDataFactory.class, Map.class,
+							OfficeFloorIssues.class));
 		}
 	}
 
@@ -1834,7 +1835,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private void record_noOfficeEscalationHandler() {
 		this.recordReturn(this.configuration, this.configuration.getEscalationConfiguration(),
-				new ManagedFunctionEscalationConfiguration[0]);
+				new EscalationConfiguration[0]);
 		this.recordReturn(this.rawOfficeFloorMetaData, this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
 	}

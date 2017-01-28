@@ -70,11 +70,11 @@ public class ParallelThenSequentialTest extends AbstractOfficeConstructTestCase 
 		this.constructTeam("team", team);
 		ParallelWorkObject work = new ParallelWorkObject();
 		ReflectiveFunctionBuilder firstFunctionBuilder = this.constructFunction(work, "first");
-		firstFunctionBuilder.getBuilder().setTeam("team");
+		firstFunctionBuilder.getBuilder().setResponsibleTeam("team");
 		firstFunctionBuilder.buildFlow("parallel", Object.class, false);
 		firstFunctionBuilder.setNextFunction("second");
-		this.constructFunction(work, "parallel").getBuilder().setTeam("team");
-		this.constructFunction(work, "second").getBuilder().setTeam("team");
+		this.constructFunction(work, "parallel").getBuilder().setResponsibleTeam("team");
+		this.constructFunction(work, "second").getBuilder().setResponsibleTeam("team");
 
 		// Run
 		this.invokeFunction("first", null);

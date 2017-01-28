@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.construct.office;
 
-import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FunctionBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -49,7 +49,7 @@ public class OfficeBuilderImplTest extends OfficeFrameTestCase {
 	private ManagedFunctionFactory<Indexed, Indexed> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 	/**
-	 * Ensure able to get the {@link FlowNodeBuilder}.
+	 * Ensure able to get the {@link FunctionBuilder}.
 	 */
 	public void testGetFlowNodeBuilder() {
 
@@ -61,7 +61,7 @@ public class OfficeBuilderImplTest extends OfficeFrameTestCase {
 				.addManagedFunction(namespacedFunction, this.functionFactory);
 
 		// Ensure can get function as flow node builder
-		FlowNodeBuilder<?> flowNodeBuilder = this.officeBuilder.getFlowNodeBuilder("namespace", "function");
+		FunctionBuilder<?> flowNodeBuilder = this.officeBuilder.getFlowBuilder("namespace", "function");
 		assertEquals("Incorrect flow node builder", functionBuilder, flowNodeBuilder);
 	}
 

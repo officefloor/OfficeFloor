@@ -17,15 +17,15 @@
  */
 package net.officefloor.frame.impl.construct.function;
 
-import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 
 /**
- * Implementation of the {@link ManagedFunctionEscalationConfiguration}.
+ * Implementation of the {@link EscalationConfiguration}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionEscalationConfigurationImpl implements ManagedFunctionEscalationConfiguration {
+public class EscalationConfigurationImpl implements EscalationConfiguration {
 
 	/**
 	 * Type of cause.
@@ -45,7 +45,7 @@ public class ManagedFunctionEscalationConfigurationImpl implements ManagedFuncti
 	 * @param taskNodeReference
 	 *            {@link ManagedFunctionReference}.
 	 */
-	public ManagedFunctionEscalationConfigurationImpl(Class<? extends Throwable> typeOfCause,
+	public EscalationConfigurationImpl(Class<? extends Throwable> typeOfCause,
 			ManagedFunctionReference taskNodeReference) {
 		this.typeOfCause = typeOfCause;
 		this.taskNodeReference = taskNodeReference;

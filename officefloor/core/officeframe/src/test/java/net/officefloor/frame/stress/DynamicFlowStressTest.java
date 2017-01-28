@@ -86,10 +86,10 @@ public class DynamicFlowStressTest extends AbstractOfficeConstructTestCase {
 		// 2) not have too many linked functions causing OOM
 		DynamicInvokeFlowWork work = new DynamicInvokeFlowWork(MAX_COUNT);
 		ReflectiveFunctionBuilder initialTask = this.constructFunction(work, "initialTask");
-		initialTask.getBuilder().setTeam("TEAM");
+		initialTask.getBuilder().setResponsibleTeam("TEAM");
 		initialTask.buildManagedFunctionContext();
 		ReflectiveFunctionBuilder dynamicTask = this.constructFunction(work, "dynamicTask");
-		dynamicTask.getBuilder().setTeam("TEAM");
+		dynamicTask.getBuilder().setResponsibleTeam("TEAM");
 		dynamicTask.buildFlow("initialTask", null, false);
 		dynamicTask.buildParameter();
 

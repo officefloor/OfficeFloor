@@ -36,6 +36,7 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Reflective {@link AdministrationBuilder}.
@@ -155,6 +156,15 @@ public class ReflectiveAdministrationBuilder {
 	}
 
 	/**
+	 * Obtains the {@link AdministrationBuilder}.
+	 * 
+	 * @return {@link AdministrationBuilder}.
+	 */
+	public AdministrationBuilder<Indexed, Indexed> getBuilder() {
+		return this.administrationBuilder;
+	}
+
+	/**
 	 * Builds the {@link Administration} of the {@link ManagedObject}.
 	 * 
 	 * @param managedObjectName
@@ -171,11 +181,13 @@ public class ReflectiveAdministrationBuilder {
 	 *            {@link ManagedFunction} name.
 	 * @param argumentType
 	 *            Type of argument passed to the {@link Flow}.
+	 * @param isSpawnThreadState
+	 *            Indicates whether to spawn a {@link ThreadState}.
 	 */
-	public void buildFlow(String functionName, Class<?> argumentType) {
+	public void buildFlow(String functionName, Class<?> argumentType, boolean isSpawnThreadState) {
 
 		// Link in the flow and allow for invocation
-		this.administrationBuilder.linkFlow(this.flowIndex, functionName, argumentType);
+		this.administrationBuilder.linkFlow(this.flowIndex, functionName, argumentType, isSpawnThreadState);
 		this.parameterFactories[this.parameterIndex] = new ReflectiveFlowParameterFactory(this.flowIndex);
 
 		// Set for next flow and parameter

@@ -316,13 +316,13 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		if (isManagedObjectOutside) {
 			// Provide the externally executed function from managed object
 			ReflectiveFunctionBuilder functionBuilder = this.constructFunction(this.work, "externalEvent");
-			functionBuilder.getBuilder().setTeam("TEAM");
+			functionBuilder.getBuilder().setResponsibleTeam("TEAM");
 			functionBuilder.buildParameter();
 		}
 		if (isManagedObjectInside) {
 			// Provide the invoked task dependent on managed object
 			ReflectiveFunctionBuilder taskBuilder = this.constructFunction(this.work, "invokedTask");
-			taskBuilder.getBuilder().setTeam("TEAM");
+			taskBuilder.getBuilder().setResponsibleTeam("TEAM");
 			taskBuilder.buildParameter();
 			this.getOfficeBuilder().registerManagedObjectSource("OFFICE_MO", "MO");
 			if (isManagedObjectOutside) {

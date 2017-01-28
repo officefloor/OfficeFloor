@@ -29,7 +29,7 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  *
  * @author Daniel Sagenschneider
  */
-public class AdministrationInvokeFlowTest extends AbstractOfficeConstructTestCase {
+public class _fail_AdministrationInvokeFlowTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure invoked {@link Flow} is completed before the
@@ -37,8 +37,10 @@ public class AdministrationInvokeFlowTest extends AbstractOfficeConstructTestCas
 	 */
 	public void testAdministrationInvokeFlow() throws Exception {
 
+		fail("TODO implement");
+
 		// Build functions
-		TestWork work = new TestWork();
+		TestWork work = new TestWork(new Exception("TEST"));
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
 		task.buildParameter();
 		task.buildFlow("flow", null, false);
@@ -57,8 +59,10 @@ public class AdministrationInvokeFlowTest extends AbstractOfficeConstructTestCas
 	 */
 	public void testPreAdministrationCompletesFlowBeforeFunction() throws Exception {
 
+		fail("TODO implement");
+
 		// Build functions
-		TestWork work = new TestWork();
+		TestWork work = new TestWork(new Exception("TEST"));
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
 		task.buildParameter();
 		task.buildFlow("flow", null, false);
@@ -78,8 +82,10 @@ public class AdministrationInvokeFlowTest extends AbstractOfficeConstructTestCas
 	 */
 	public void testPostAdministrationCompletesBeforeInvokedFlow() throws Exception {
 
+		fail("TODO implement");
+
 		// Build functions
-		TestWork work = new TestWork();
+		TestWork work = new TestWork(new Exception("TEST"));
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
 		task.buildParameter();
 		task.buildFlow("next", null, false);
@@ -100,8 +106,10 @@ public class AdministrationInvokeFlowTest extends AbstractOfficeConstructTestCas
 	 */
 	public void testPostAdministrationCompletesBeforeNextFunction() throws Exception {
 
+		fail("TODO implement");
+
 		// Build functions
-		TestWork work = new TestWork();
+		TestWork work = new TestWork(new Exception("TEST"));
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
 		task.buildParameter();
 		task.buildFlow("next", null, false);
@@ -122,6 +130,12 @@ public class AdministrationInvokeFlowTest extends AbstractOfficeConstructTestCas
 	 */
 	public class TestWork {
 
+		private final Exception exception;
+
+		public TestWork(Exception exception) {
+			this.exception = exception;
+		}
+
 		public void preTask(Object[] extensions, ReflectiveFlow flow) {
 			flow.doFlow(null, null);
 		}
@@ -136,7 +150,8 @@ public class AdministrationInvokeFlowTest extends AbstractOfficeConstructTestCas
 			flow.doFlow(null, null);
 		}
 
-		public void flow() {
+		public void flow() throws Exception {
+			throw this.exception;
 		}
 
 		public void complete() {

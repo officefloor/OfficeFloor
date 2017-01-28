@@ -15,20 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.construct.governance;
+package net.officefloor.frame.impl.construct.function;
 
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.internal.configuration.GovernanceFlowConfiguration;
+import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * {@link GovernanceFlowConfiguration} implementation.
+ * {@link FlowConfiguration} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements GovernanceFlowConfiguration<F> {
+public class FlowConfigurationImpl<F extends Enum<F>> implements FlowConfiguration<F> {
 
 	/**
 	 * Name of the {@link Flow}.
@@ -36,14 +36,14 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements Gover
 	private final String flowName;
 
 	/**
-	 * Indicates whether to spawn a {@link ThreadState}.
-	 */
-	private final boolean isSpawnThreadState;
-
-	/**
 	 * Reference to the initial {@link ManagedFunction} of this {@link Flow}.
 	 */
-	private final ManagedFunctionReference functionRef;
+	private final ManagedFunctionReference functionReference;
+
+	/**
+	 * Indicates whether to spawn the {@link ThreadState}.
+	 */
+	private final boolean isSpawnThreadState;
 
 	/**
 	 * Index of the {@link Flow}.
@@ -60,27 +60,27 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements Gover
 	 * 
 	 * @param flowName
 	 *            Name of this {@link Flow}.
-	 * @param isSpawnThreadState
-	 *            Indicates whether to spawn a {@link ThreadState}.
-	 * @param functionRef
+	 * @param functionReference
 	 *            Reference to the initial {@link ManagedFunction} of this
 	 *            {@link Flow}.
+	 * @param isSpawnThreadState
+	 *            Indicates whether to spawn the {@link ThreadState}.
 	 * @param index
 	 *            Index of this {@link Flow}.
 	 * @param key
 	 *            Key of the {@link Flow}.
 	 */
-	public GovernanceFlowConfigurationImpl(String flowName, boolean isSpawnThreadState,
-			ManagedFunctionReference functionRef, int index, F key) {
+	public FlowConfigurationImpl(String flowName, ManagedFunctionReference functionReference,
+			boolean isSpawnThreadState, int index, F key) {
 		this.flowName = flowName;
+		this.functionReference = functionReference;
 		this.isSpawnThreadState = isSpawnThreadState;
-		this.functionRef = functionRef;
 		this.index = index;
 		this.key = key;
 	}
 
 	/*
-	 * ==================== GovernanceFlowConfiguration =======================
+	 * ======================= FlowConfiguration ==============================
 	 */
 
 	@Override
@@ -89,13 +89,13 @@ public class GovernanceFlowConfigurationImpl<F extends Enum<F>> implements Gover
 	}
 
 	@Override
-	public boolean isSpawnThreadState() {
-		return this.isSpawnThreadState;
+	public ManagedFunctionReference getInitialFunction() {
+		return this.functionReference;
 	}
 
 	@Override
-	public ManagedFunctionReference getInitialFunction() {
-		return this.functionRef;
+	public boolean isSpawnThreadState() {
+		return this.isSpawnThreadState;
 	}
 
 	@Override

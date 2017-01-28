@@ -71,11 +71,11 @@ public class AppropriateNextResponsibleTeamTest extends AbstractOfficeConstructT
 		// Create the functions
 		TestWork work = new TestWork();
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
-		task.getBuilder().setTeam("TASK_TEAM");
+		task.getBuilder().setResponsibleTeam("TASK_TEAM");
 		task.getBuilder().setNextFunction("next", null);
 		ReflectiveFunctionBuilder flow = this.constructFunction(work, "next");
 		if (isNextHaveTeam) {
-			flow.getBuilder().setTeam("NEXT_TEAM");
+			flow.getBuilder().setResponsibleTeam("NEXT_TEAM");
 		}
 
 		// Invoke the function

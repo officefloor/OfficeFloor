@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.construct.function;
+package net.officefloor.frame.impl.construct.managedfunction;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -33,17 +33,20 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.construct.managedfunction.RawManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionEscalationConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedFunctionFlowConfiguration;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
+import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.EscalationFlowFactory;
+import net.officefloor.frame.internal.construct.FlowMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaData;
 import net.officefloor.frame.internal.construct.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectInstanceMetaData;
@@ -73,7 +76,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> extends OfficeFrameTestCase {
+public class RawManagedFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> extends OfficeFrameTestCase {
 
 	/**
 	 * Name of the {@link ManagedFunction}.
@@ -98,6 +101,16 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	private final RawAdministrationMetaDataFactory administrationMetaDataFactory = this
 			.createMock(RawAdministrationMetaDataFactory.class);
+
+	/**
+	 * {@link FlowMetaDataFactory}.
+	 */
+	private final FlowMetaDataFactory flowMetaDataFactory = this.createMock(FlowMetaDataFactory.class);
+
+	/**
+	 * {@link EscalationFlowFactory}.
+	 */
+	private final EscalationFlowFactory escalationFlowFactory = this.createMock(EscalationFlowFactory.class);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -189,7 +202,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getFunctionName(), FUNCTION_NAME);
 		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), this.functionFactory);
 		this.recordReturn(this.configuration, this.configuration.getDifferentiator(), DIFFERENTIATOR);
-		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), "TEAM");
+		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), "TEAM");
 		Map<String, TeamManagement> teams = new HashMap<String, TeamManagement>();
 		teams.put("TEAM", this.responsibleTeam);
 		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getTeams(), teams);
@@ -236,7 +249,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getFunctionName(), FUNCTION_NAME);
 		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), this.functionFactory);
 		this.recordReturn(this.configuration, this.configuration.getDifferentiator(), null);
-		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), null);
+		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), null);
 		this.record_functionBoundManagedObjects();
 		this.record_NoRequiredManagedObjects();
 		this.record_NoGovernance();
@@ -258,7 +271,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getFunctionName(), FUNCTION_NAME);
 		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), this.functionFactory);
 		this.recordReturn(this.configuration, this.configuration.getDifferentiator(), null);
-		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), "TEAM");
+		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), "TEAM");
 		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getTeams(), new HashMap<String, Team>());
 		this.record_functionIssue("Unknown Team 'TEAM' responsible for ManagedFunction");
 
@@ -875,8 +888,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testNoFlowFunctionReference() {
 
-		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
-				.createMock(ManagedFunctionFlowConfiguration.class);
+		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
 
 		// Record no task node reference
 		this.record_nameFactoryTeam();
@@ -885,7 +897,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoGovernance();
 		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
+				new FlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), null);
 		this.record_functionIssue("No function referenced for flow index 0");
 		this.record_NoNextFunction();
@@ -903,8 +915,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testNoFlowFunctionName() {
 
-		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
-				.createMock(ManagedFunctionFlowConfiguration.class);
+		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 
 		// Record no task name
@@ -914,7 +925,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoGovernance();
 		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
+				new FlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), null);
 		this.record_functionIssue("No function name provided for flow index 0");
@@ -934,8 +945,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testUnknownFlowFunction() {
 
-		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
-				.createMock(ManagedFunctionFlowConfiguration.class);
+		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 
 		// Record unknown work
@@ -945,7 +955,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoGovernance();
 		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
+				new FlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "IGNORED TASK NAME");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("IGNORED TASK NAME"),
@@ -966,8 +976,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testIncompatibleFlowArgument() {
 
-		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
-				.createMock(ManagedFunctionFlowConfiguration.class);
+		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?> flowTaskMetaData = this.createMock(ManagedFunctionMetaData.class);
 
@@ -978,7 +987,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoGovernance();
 		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
+				new FlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"),
@@ -1018,8 +1027,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void doConstructFlowTest(boolean isSpawnThreadState) {
 
-		final ManagedFunctionFlowConfiguration<?> flowConfiguration = this
-				.createMock(ManagedFunctionFlowConfiguration.class);
+		final FlowConfiguration<?> flowConfiguration = this.createMock(FlowConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?> flowTaskMetaData = this.createMock(ManagedFunctionMetaData.class);
 
@@ -1030,7 +1038,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoGovernance();
 		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
 		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionFlowConfiguration[] { flowConfiguration });
+				new FlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration, flowConfiguration.getInitialFunction(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getFunctionName(), "TASK");
 		this.recordReturn(this.functionLocator, this.functionLocator.getManagedFunctionMetaData("TASK"),
@@ -1148,8 +1156,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testNoEscalationType() {
 
-		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
-				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
 
 		// Record no escalation type
 		this.record_nameFactoryTeam();
@@ -1159,7 +1166,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoFlows();
 		this.record_NoNextFunction();
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
+				new EscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), null);
 		this.record_functionIssue("No escalation type for escalation index 0");
 		this.record_NoAdministration();
@@ -1176,8 +1183,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testNoEscalationFunctionReference() {
 
-		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
-				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
 
 		// Record no task referenced
 		this.record_nameFactoryTeam();
@@ -1187,7 +1193,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoFlows();
 		this.record_NoNextFunction();
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
+				new EscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(), null);
 		this.record_functionIssue("No function referenced for escalation index 0");
@@ -1205,8 +1211,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testNoEscalationFunctionName() {
 
-		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
-				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 
 		// Record no escalation task name
@@ -1217,7 +1222,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoFlows();
 		this.record_NoNextFunction();
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
+				new EscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(),
 				taskNodeReference);
@@ -1236,8 +1241,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testIncompatibleEscalation() {
 
-		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
-				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?> escalationTaskMetaData = this.createMock(ManagedFunctionMetaData.class);
 
@@ -1249,7 +1253,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoFlows();
 		this.record_NoNextFunction();
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
+				new EscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(),
 				taskNodeReference);
@@ -1274,8 +1278,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	public void testConstructEscalation() {
 
-		final ManagedFunctionEscalationConfiguration escalationConfiguration = this
-				.createMock(ManagedFunctionEscalationConfiguration.class);
+		final EscalationConfiguration escalationConfiguration = this.createMock(EscalationConfiguration.class);
 		final ManagedFunctionReference taskNodeReference = this.createMock(ManagedFunctionReference.class);
 		final ManagedFunctionMetaData<?, ?> escalationTaskMetaData = this.createMock(ManagedFunctionMetaData.class);
 
@@ -1287,7 +1290,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.record_NoFlows();
 		this.record_NoNextFunction();
 		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new ManagedFunctionEscalationConfiguration[] { escalationConfiguration });
+				new EscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration, escalationConfiguration.getManagedFunctionReference(),
 				taskNodeReference);
@@ -1513,7 +1516,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
 		this.recordReturn(this.administrationMetaDataFactory,
 				this.administrationMetaDataFactory.constructRawAdministrationMetaData(preAdministration,
-						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.flowMetaDataFactory,
+						this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
 				new RawAdministrationMetaData[] { rawAdministrationMetaData });
 		this.recordReturn(rawAdministrationMetaData, rawAdministrationMetaData.getAdministrationMetaData(),
 				administrationMetaData);
@@ -1522,7 +1526,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
 		this.recordReturn(this.administrationMetaDataFactory,
 				this.administrationMetaDataFactory.constructRawAdministrationMetaData(postAdministration,
-						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.flowMetaDataFactory,
+						this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
 				new RawAdministrationMetaData[0]);
 
 		// Attempt to construct task meta-data
@@ -1581,12 +1586,14 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
 		this.recordReturn(this.administrationMetaDataFactory,
 				this.administrationMetaDataFactory.constructRawAdministrationMetaData(preAdministration,
-						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.flowMetaDataFactory,
+						this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
 				new RawAdministrationMetaData[0]);
 		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
 		this.recordReturn(this.administrationMetaDataFactory,
 				this.administrationMetaDataFactory.constructRawAdministrationMetaData(postAdministration,
-						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.flowMetaDataFactory,
+						this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
 				new RawAdministrationMetaData[] { rawAdministrationMetaData });
 		this.recordReturn(rawAdministrationMetaData, rawAdministrationMetaData.getAdministrationMetaData(),
 				administrationMetaData);
@@ -1627,7 +1634,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getFunctionName(), FUNCTION_NAME);
 		this.recordReturn(this.configuration, this.configuration.getManagedFunctionFactory(), this.functionFactory);
 		this.recordReturn(this.configuration, this.configuration.getDifferentiator(), null);
-		this.recordReturn(this.configuration, this.configuration.getOfficeTeamName(), "TEAM");
+		this.recordReturn(this.configuration, this.configuration.getResponsibleTeamName(), "TEAM");
 		Map<String, TeamManagement> teams = new HashMap<String, TeamManagement>();
 		teams.put("TEAM", this.responsibleTeam);
 		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData.getTeams(), teams);
@@ -1697,7 +1704,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getPreAdministration(), preAdministration);
 		this.recordReturn(this.administrationMetaDataFactory,
 				this.administrationMetaDataFactory.constructRawAdministrationMetaData(preAdministration,
-						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.flowMetaDataFactory,
+						this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
 				new RawAdministrationMetaData[0]);
 
 		// Record no post administration
@@ -1705,7 +1713,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		this.recordReturn(this.configuration, this.configuration.getPostAdministration(), postAdministration);
 		this.recordReturn(this.administrationMetaDataFactory,
 				this.administrationMetaDataFactory.constructRawAdministrationMetaData(postAdministration,
-						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.officeTeams, scopeMo, issues),
+						AssetType.FUNCTION, FUNCTION_NAME, this.officeMetaData, this.flowMetaDataFactory,
+						this.escalationFlowFactory, this.officeTeams, scopeMo, issues),
 				new RawAdministrationMetaData[0]);
 	}
 
@@ -1827,8 +1836,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 */
 	private void record_NoFlows() {
 		this.recordReturn(this.officeMetaData, this.officeMetaData.getManagedFunctionLocator(), this.functionLocator);
-		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(),
-				new ManagedFunctionFlowConfiguration[0]);
+		this.recordReturn(this.configuration, this.configuration.getFlowConfiguration(), new FlowConfiguration[0]);
 	}
 
 	/**
@@ -1842,8 +1850,7 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 	 * Records no {@link EscalationFlow}.
 	 */
 	private void record_NoEscalations() {
-		this.recordReturn(this.configuration, this.configuration.getEscalations(),
-				new ManagedFunctionEscalationConfiguration[0]);
+		this.recordReturn(this.configuration, this.configuration.getEscalations(), new EscalationConfiguration[0]);
 	}
 
 	/**
@@ -1896,8 +1903,8 @@ public class RawFunctionMetaDataTest<O extends Enum<O>, F extends Enum<F>> exten
 		// Other functions expected to be constructed between these steps
 
 		// Link the functions and load remaining state to function meta-data
-		metaData.loadOfficeMetaData(this.officeMetaData, this.administrationMetaDataFactory, this.officeTeams,
-				this.issues);
+		metaData.loadOfficeMetaData(this.officeMetaData, this.flowMetaDataFactory, this.escalationFlowFactory,
+				this.administrationMetaDataFactory, this.officeTeams, this.issues);
 
 		// Return the fully constructed meta-data
 		return metaData;

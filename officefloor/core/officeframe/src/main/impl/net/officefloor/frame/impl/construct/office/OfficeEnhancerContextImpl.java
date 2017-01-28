@@ -17,7 +17,7 @@
  */
 package net.officefloor.frame.impl.construct.office;
 
-import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -85,13 +85,13 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 	 */
 
 	@Override
-	public FlowNodeBuilder<?> getFlowNodeBuilder(String functionName) {
-		return this.getFlowNodeBuilder(null, functionName);
+	public FlowBuilder<?> getFlowBuilder(String functionName) {
+		return this.getFlowBuilder(null, functionName);
 	}
 
 	@Override
-	public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String functionName) {
-		FlowNodeBuilder<?> flowBuilder = this.officeConfiguration.getFlowNodeBuilder(namespace, functionName);
+	public FlowBuilder<?> getFlowBuilder(String namespace, String functionName) {
+		FlowBuilder<?> flowBuilder = this.officeConfiguration.getFlowBuilder(namespace, functionName);
 		if (flowBuilder == null) {
 			throw new OfficeEnhancerError(
 					ManagedFunction.class.getSimpleName() + " '" + functionName + "' of namespace '"

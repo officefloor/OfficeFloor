@@ -34,7 +34,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> extends FlowNodeBuilder<F> {
+public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> extends FlowBuilder<F> {
 
 	/**
 	 * <p>
